@@ -1,0 +1,239 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: enterprise
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rivic-operator
+  namespace: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: enterprise
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rivic-operator-enterprise
+  labels:
+    app: rivic-q-runtime
+    edition: enterprise
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create", "get", "list", "watch", "update", "patch"]
+- apiGroups: ["quantum.rivic.eu"]
+  resources: ["rivicconfigs", "rivicaudits", "rivicsecrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations", "validatingwebhookconfigurations"]
+  verbs: ["create", "get", "list", "update", "patch"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets", "certificates"]
+  verbs: ["create", "get", "list", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["namespaces", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets", "daemonsets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rivic-operator-enterprise
+  labels:
+    app: rivic-q-runtime
+    edition: enterprise
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rivic-operator-enterprise
+subjects:
+- kind: ServiceAccount
+  name: rivic-operator
+  namespace: rivic-system
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rivic-webhook
+  namespace: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: enterprise
+spec:
+  type: ClusterIP
+  selector:
+    app: rivic-operator
+    edition: enterprise
+  ports:
+  - name: webhook
+    port: 443
+    targetPort: 8443
+    protocol: TCP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rivic-operator
+  namespace: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: enterprise
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: rivic-operator
+      edition: enterprise
+  template:
+    metadata:
+      labels:
+        app: rivic-operator
+        edition: enterprise
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: rivic-operator
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - rivic-operator
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: operator
+        image: rivic/q-runtime:v1.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: RIVIC_ENV
+          value: "production"
+        - name: RIVIC_EDITION
+          value: "enterprise"
+        - name: RIVIC_NAMESPACE
+          value: "rivic-system"
+        - name: RIVIC_WEBHOOK_PORT
+          value: "8443"
+        - name: RIVIC_METRICS_PORT
+          value: "8080"
+        - name: LOG_LEVEL
+          value: "info"
+        ports:
+        - name: webhook
+          containerPort: 8443
+          protocol: TCP
+        - name: metrics
+          containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: webhook-certs
+          mountPath: /etc/webhook/certs
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: webhook-certs
+        secret:
+          secretName: rivic-webhook-certs
+          optional: true
+      - name: tmp
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rivic-metrics
+  namespace: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: enterprise
+spec:
+  type: ClusterIP
+  selector:
+    app: rivic-operator
+    edition: enterprise
+  ports:
+  - name: metrics
+    port: 8080
+    targetPort: 8080
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rivic-operator
+  namespace: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: enterprise
+spec:
+  selector:
+    matchLabels:
+      app: rivic-q-runtime
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics

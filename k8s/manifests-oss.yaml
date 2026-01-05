@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: opensource
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rivic-operator
+  namespace: rivic-system
+  labels:
+    app: rivic-q-runtime
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rivic-operator-oss
+  labels:
+    app: rivic-q-runtime
+    edition: opensource
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create", "get", "list", "watch"]
+- apiGroups: ["quantum.rivic.eu"]
+  resources: ["rivicconfigs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["create", "get", "list", "update"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rivic-operator-oss
+  labels:
+    app: rivic-q-runtime
+    edition: opensource
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rivic-operator-oss
+subjects:
+- kind: ServiceAccount
+  name: rivic-operator
+  namespace: rivic-system
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rivic-operator
+  namespace: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: opensource
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rivic-operator
+      edition: opensource
+  template:
+    metadata:
+      labels:
+        app: rivic-operator
+        edition: opensource
+    spec:
+      serviceAccountName: rivic-operator
+      containers:
+      - name: operator
+        image: rivic/q-runtime-oss:v1.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: RIVIC_ENV
+          value: "production"
+        - name: RIVIC_EDITION
+          value: "opensource"
+        - name: RIVIC_NAMESPACE
+          value: "rivic-system"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rivic-operator
+  namespace: rivic-system
+  labels:
+    app: rivic-q-runtime
+    edition: opensource
+spec:
+  type: ClusterIP
+  selector:
+    app: rivic-operator
+    edition: opensource
+  ports:
+  - name: metrics
+    port: 8080
+    targetPort: 8080

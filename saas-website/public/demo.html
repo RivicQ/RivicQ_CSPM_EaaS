@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Demo - Rivic Q-Runtime</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🔒</span>
+                <span class="logo-text">Rivic Q-Runtime</span>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/pricing" class="nav-link">Pricing</a>
+                <a href="/docs" class="nav-link">Docs</a>
+                <a href="/demo" class="nav-link active">Demo</a>
+                <button class="nav-cta" onclick="startTrial()">Start Free Trial</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Demo Hero -->
+    <section class="demo-hero">
+        <div class="container">
+            <div class="demo-header">
+                <h1>🚀 Interactive Demo</h1>
+                <p>Experience quantum-safe banking infrastructure in action</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Interface -->
+    <section class="demo-interface">
+        <div class="container">
+            <div class="demo-grid">
+                <!-- Live Demo Embed -->
+                <div class="demo-main">
+                    <div class="demo-window">
+                        <div class="demo-titlebar">
+                            <div class="demo-controls">
+                                <span class="control red"></span>
+                                <span class="control yellow"></span>
+                                <span class="control green"></span>
+                            </div>
+                            <div class="demo-title">Rivic Q-Runtime Banking Demo</div>
+                        </div>
+                        <div class="demo-content">
+                            <iframe src="http://localhost:3000" 
+                                    width="100%" 
+                                    height="600" 
+                                    frameborder="0"
+                                    title="Rivic Q-Runtime Demo">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demo Controls -->
+                <div class="demo-sidebar">
+                    <div class="demo-controls-panel">
+                        <h3>🎮 Demo Controls</h3>
+                        
+                        <div class="control-section">
+                            <h4>Quantum Mode</h4>
+                            <div class="control-buttons">
+                                <button class="control-btn active" id="quantumOn" onclick="toggleQuantumMode(true)">
+                                    🔒 Enabled
+                                </button>
+                                <button class="control-btn" id="quantumOff" onclick="toggleQuantumMode(false)">
+                                    ⚠️ Legacy Mode
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="control-section">
+                            <h4>Algorithms</h4>
+                            <select id="keyExchange" class="demo-select">
+                                <option value="kyber-1024">Kyber-1024 (ML-KEM)</option>
+                                <option value="kyber-768">Kyber-768</option>
+                                <option value="kyber-512">Kyber-512</option>
+                            </select>
+                            <select id="signature" class="demo-select">
+                                <option value="dilithium-5">Dilithium-5 (ML-DSA)</option>
+                                <option value="dilithium-3">Dilithium-3</option>
+                                <option value="dilithium-2">Dilithium-2</option>
+                            </select>
+                        </div>
+
+                        <div class="control-section">
+                            <h4>Simulation</h4>
+                            <button class="control-btn primary" onclick="simulateTransaction()">
+                                💰 Process Transaction
+                            </button>
+                            <button class="control-btn primary" onclick="simulateKYC()">
+                                📋 Process KYC
+                            </button>
+                            <button class="control-btn" onclick="generateCBOM()">
+                                📊 Generate CBOM
+                            </button>
+                        </div>
+
+                        <div class="control-section">
+                            <h4>Metrics</h4>
+                            <div class="metric-display">
+                                <div class="metric">
+                                    <span>Transactions:</span>
+                                    <span id="transactionCount">1,247</span>
+                                </div>
+                                <div class="metric">
+                                    <span>Quantum Upgrades:</span>
+                                    <span id="upgradeCount">1,247</span>
+                                </div>
+                                <div class="metric">
+                                    <span>Compliance:</span>
+                                    <span id="complianceRate">95%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="demo-info">
+                        <h3>💡 What You're Seeing</h3>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <span class="info-icon">🔄</span>
+                                <span>Real-time crypto interception</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-icon">📊</span>
+                                <span>Live CBOM generation</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-icon">⚖️</span>
+                                <span>EU compliance monitoring</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-icon">🔒</span>
+                                <span>Quantum-safe upgrades</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>How Rivic Q-Runtime Works</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>🔍 Discover</h3>
+                    <p>Automatically scan and catalog all cryptographic assets in your infrastructure</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>🔄 Intercept</h3>
+                    <p>Transparent interception of crypto calls using LD_PRELOAD technology</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>🔒 Upgrade</h3>
+                    <p>Seamless upgrade from RSA/ECDSA to quantum-safe Kyber/Dilithium</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>📊 Monitor</h3>
+                    <p>Real-time CBOM generation and compliance reporting</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Implement Quantum-Safe Banking?</h2>
+                <p>See how easy it is to protect your financial infrastructure</p>
+                <div class="cta-actions">
+                    <button class="btn-primary large" onclick="startTrial()">🚀 Start Free Trial</button>
+                    <button class="btn-secondary large" onclick="contactSales()">💼 Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="main.js"></script>
+    <script>
+        // Demo-specific functionality
+        const DemoController = {
+            quantumMode: true,
+            metrics: {
+                transactions: 1247,
+                upgrades: 1247,
+                compliance: 95
+            },
+
+            toggleQuantumMode(enabled) {
+                this.quantumMode = enabled;
+                document.getElementById('quantumOn').classList.toggle('active', enabled);
+                document.getElementById('quantumOff').classList.toggle('active', !enabled);
+                
+                // Update metrics
+                if (enabled) {
+                    this.metrics.upgrades = this.metrics.transactions;
+                    this.metrics.compliance = 95;
+                } else {
+                    this.metrics.upgrades = 0;
+                    this.metrics.compliance = 45;
+                }
+                
+                this.updateMetrics();
+            },
+
+            simulateTransaction() {
+                this.metrics.transactions++;
+                if (this.quantumMode) {
+                    this.metrics.upgrades++;
+                }
+                this.updateMetrics();
+                
+                RivicApp.showNotification(
+                    `Transaction processed with ${this.quantumMode ? 'Kyber-1024' : 'RSA-2048'}`,
+                    'success'
+                );
+            },
+
+            simulateKYC() {
+                RivicApp.showNotification(
+                    `KYC data encrypted with ${this.quantumMode ? 'AES-256-GCM (Quantum-Safe)' : 'AES-256-GCM'}`,
+                    'success'
+                );
+            },
+
+            generateCBOM() {
+                RivicApp.showNotification('CBOM report generated successfully!', 'success');
+                setTimeout(() => {
+                    window.open('/api/cbom-sample', '_blank');
+                }, 1000);
+            },
+
+            updateMetrics() {
+                document.getElementById('transactionCount').textContent = this.metrics.transactions.toLocaleString();
+                document.getElementById('upgradeCount').textContent = this.metrics.upgrades.toLocaleString();
+                document.getElementById('complianceRate').textContent = this.metrics.compliance + '%';
+                
+                // Update compliance color
+                const complianceEl = document.getElementById('complianceRate');
+                complianceEl.style.color = this.metrics.compliance >= 80 ? '#10b981' : '#ef4444';
+            }
+        };
+
+        // Global functions for demo controls
+        window.toggleQuantumMode = (enabled) => DemoController.toggleQuantumMode(enabled);
+        window.simulateTransaction = () => DemoController.simulateTransaction();
+        window.simulateKYC = () => DemoController.simulateKYC();
+        window.generateCBOM = () => DemoController.generateCBOM();
+
+        // Initialize demo
+        document.addEventListener('DOMContentLoaded', () => {
+            DemoController.updateMetrics();
+        });
+    </script>
+
+    <style>
+        .demo-hero {
+            padding: 140px 20px 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            text-align: center;
+        }
+
+        .demo-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .demo-interface {
+            padding: 40px 20px 80px;
+            background: var(--bg-secondary);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .demo-window {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+        }
+
+        .demo-titlebar {
+            background: #f1f5f9;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .control.red { background: #ef4444; }
+        .control.yellow { background: #f59e0b; }
+        .control.green { background: #10b981; }
+
+        .demo-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .demo-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .demo-controls-panel, .demo-info {
+            background: white;
+            padding: 24px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+        }
+
+        .demo-controls-panel h3, .demo-info h3 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .control-section {
+            margin-bottom: 24px;
+        }
+
+        .control-section h4 {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            padding: 10px 16px;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .control-btn.active,
+        .control-btn.primary {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .demo-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+        }
+
+        .metric-display {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-icon {
+            font-size: 1.2rem;
+        }
+
+        .how-it-works {
+            padding: var(--section-padding);
+            background: white;
+            text-align: center;
+        }
+
+        .how-it-works h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 60px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .step {
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 20px;
+        }
+
+        .step h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-sidebar {
+                order: -1;
+            }
+        }
+    </style>
+</body>
+</html>

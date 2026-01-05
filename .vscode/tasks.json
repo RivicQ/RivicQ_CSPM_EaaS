@@ -1,0 +1,46 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Banking Demo",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"demo:start"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Simple Demo",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"simple-demo.js"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start SaaS Website",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"saas:start"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Both Servers",
+			"dependsOrder": "parallel",
+			"dependsOn": ["Start Simple Demo", "Start SaaS Website"],
+			"group": "build"
+		}
+	]
+}

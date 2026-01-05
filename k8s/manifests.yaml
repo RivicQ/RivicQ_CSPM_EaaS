@@ -1,0 +1,236 @@
+# Rivic Q-Runtime Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rivic-system
+  labels:
+    quantum.rivic.eu/managed: "true"
+    app.kubernetes.io/name: rivic-q-runtime
+---
+# Rivic Operator Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rivic-operator
+  namespace: rivic-system
+---
+# RBAC for Rivic Operator
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rivic-operator
+rules:
+- apiGroups: [""]
+  resources: ["pods", "configmaps", "secrets", "services", "namespaces"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingadmissionwebhooks"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["quantum.rivic.eu"]
+  resources: ["rivicconfigs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rivic-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rivic-operator
+subjects:
+- kind: ServiceAccount
+  name: rivic-operator
+  namespace: rivic-system
+---
+# Rivic Operator Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rivic-operator
+  namespace: rivic-system
+  labels:
+    app: rivic-operator
+    quantum.rivic.eu/component: operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rivic-operator
+  template:
+    metadata:
+      labels:
+        app: rivic-operator
+        quantum.rivic.eu/component: operator
+    spec:
+      serviceAccountName: rivic-operator
+      containers:
+      - name: operator
+        image: rivic/q-runtime-operator:v1.0.0
+        ports:
+        - containerPort: 8443
+          name: webhook
+          protocol: TCP
+        env:
+        - name: RIVIC_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: RIVIC_LOG_LEVEL
+          value: "info"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+# Webhook Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: rivic-webhook
+  namespace: rivic-system
+  labels:
+    app: rivic-operator
+spec:
+  ports:
+  - name: webhook
+    port: 443
+    targetPort: 8443
+    protocol: TCP
+  selector:
+    app: rivic-operator
+---
+# Sample RivicConfig for quantum-safe namespace
+apiVersion: quantum.rivic.eu/v1
+kind: RivicConfig
+metadata:
+  name: quantum-safe-config
+  namespace: rivic-system
+spec:
+  quantumSafeMode: true
+  cbomEnabled: true
+  algorithms:
+    keyExchange: "kyber-1024"
+    signature: "dilithium-5"
+  compliance:
+    eidas: true
+    dora: true
+  monitoring:
+    enabled: true
+    metricsPort: 9090
+---
+# Banking Demo Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: banking-demo
+  labels:
+    rivic-injection: enabled
+    quantum.rivic.eu/protected: "true"
+---
+# Banking Demo Application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-demo-app
+  namespace: banking-demo
+  labels:
+    app: banking-demo
+    quantum.rivic.eu/target: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: banking-demo
+  template:
+    metadata:
+      labels:
+        app: banking-demo
+        rivic-injection: enabled
+    spec:
+      containers:
+      - name: banking-app
+        image: rivic/banking-demo:v1.0.0
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: RIVIC_MODE
+          value: "quantum-safe"
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+          requests:
+            cpu: 200m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+# Banking Demo Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: banking-demo-service
+  namespace: banking-demo
+  labels:
+    app: banking-demo
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: banking-demo
+---
+# Prometheus ServiceMonitor for metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rivic-metrics
+  namespace: rivic-system
+  labels:
+    app: rivic-operator
+spec:
+  selector:
+    matchLabels:
+      app: rivic-operator
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
