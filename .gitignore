@@ -1,73 +1,115 @@
-node_modules
-dist
-build
-coverage
+# ================================================================
+# BUILD & DEPENDENCIES
+# ================================================================
+node_modules/
+dist/
+build/
+*.log
+coverage/
 
-# ============================================================================
-# ENTERPRISE & PRIVATE DOCUMENTATION (DO NOT PUSH TO OPEN SOURCE)
-# ============================================================================
-
-# Enterprise-specific docs
-docs-enterprise/
-docs/enterprise/
-enterprise/
-**/ENTERPRISE*.md
-**/PRIVATE*.md
-**/*-enterprise*.md
-**/*-private*.md
-GO_TO_MARKET_STRATEGY.md
-GITBOOK_ENTERPRISE.yaml
-gitbook-enterprise.yaml
-GITBOOK_IMPLEMENTATION.md
-GITBOOK_INTEGRATION_STATUS.md
-GITBOOK_SETUP.md
-
-# ============================================================================
-# SENSITIVE ENVIRONMENT & CONFIGURATION
-# ============================================================================
-
+# ================================================================
+# SYSTEM FILES
+# ================================================================
+.DS_Store
 .env
 .env.local
 .env.*.local
-*.env
-.secrets
-secrets.json
-**/keys/**
-**/private/**
-.config
-config.private.js
-config.enterprise.js
-
-# ============================================================================
-# CREDENTIALS & AUTHENTICATION
-# ============================================================================
-
-.aws/
-aws_credentials.json
-ssh/
-*.pem
-*.key
-token.json
-tokens.json
-database.config.json
-
-# ============================================================================
-# IDE & EDITOR FILES
-# ============================================================================
-
-.vscode/
-.idea/
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
-*.tmp
 
-# ============================================================================
-# LOG FILES
-# ============================================================================
+# ================================================================
+# ENTERPRISE-ONLY (DO NOT EXPOSE TO PUBLIC)
+# ================================================================
 
-*.log
-logs/
+# Enterprise documentation
+docs-enterprise/
+k8s/manifests-enterprise.yaml
+k8s/manifests.yaml
+demo-banking-app/
+
+# GitBook enterprise setup
+gitbook-enterprise.yaml
+
+# Internal setup scripts
+setup-gitbook.sh
+deploy-github-pages.sh
+setup-github-pages.sh
+push-to-github.sh
+start-demo.sh
+check-status.sh
+complete-pipeline.sh
+marketing-pipeline.sh
+
+# ================================================================
+# DEPLOYMENT GUIDES (INTERNAL ONLY)
+# ================================================================
+
+# These are internal setup/deployment guides - NOT for public repo
+DEPLOY_NOW.md
+DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_COMPLETE.txt
+FINAL_DEPLOYMENT_COMPLETE.md
+FINAL_WEBSITE_COMPLETE.md
+FINAL_HOMEPAGE_ACCESS.md
+FINAL_STATUS_REPORT.md
+GITHUB_SETUP_FINAL_STEPS.md
+GITHUB_PUSH_AUTHENTICATION.md
+GITHUB_PUSH_GUIDE.md
+GITHUB_REPO_SETUP.md
+GITHUB_PAGES_*.md
+HOMEPAGE_COMPLETE_ACCESS.md
+LIVE_DEPLOYMENT_STATUS.md
+WEBSITE_LIVE_SUMMARY.md
+GITBOOK_*.md
+GITBOOK_*.txt
+
+# ================================================================
+# INTERNAL DOCUMENTATION & PLANNING
+# ================================================================
+
+PROJECT_STATUS.md
+TASK_CHECKLIST.md
+EXECUTION_SUMMARY.md
+GO_LIVE_PLAYBOOK.md
+GITBOOK_CONNECTION_CHECKLIST.md
+GITBOOK_FILE_GUIDE.txt
+GITBOOK_QUICK_START.txt
+GITBOOK_SUMMARY.txt
+GITBOOK_INTEGRATION_STATUS.md
+GITBOOK_IMPLEMENTATION.md
+GITBOOK_SETUP.md
+
+# ================================================================
+# SECRETS & CREDENTIALS (NEVER COMMIT)
+# ================================================================
+
+.git-credentials
+credentials.json
+secrets.json
+api-keys.json
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+
+# ================================================================
+# KEEP THESE PUBLIC FILES
+# ================================================================
+
+# ✅ These should be in the public repo:
+!saas-website/
+!.github/
+!src/
+!tests/
+!docs-oss/
+!package.json
+!tsconfig.json
+!jest.config.js
+!README.md
+!README_OSS.md
+!SAAS-README.md
+!LICENSE
+!k8s/manifests-oss.yaml
+!.gitignore
 

@@ -1,0 +1,117 @@
+---
+# GitBook Configuration for Open Source Documentation
+# Place this file in your GitHub repository root as gitbook.yaml
+---
+
+version: '2'
+
+# Root directory for OSS documentation
+root: ./docs-oss
+
+# Structure configuration
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+  glossary: GLOSSARY.md
+
+# Metadata
+metadata:
+  # Page title (appears in browser tab)
+  title: Rivic Q-Runtime - Open Source Edition
+  
+  # Page description (SEO, social media)
+  description: Quantum-safe banking infrastructure. Post-quantum cryptography for EU banking compliance. MIT License.
+  
+  # Author and contact
+  author: Rivic Team
+  website: https://rivic.eu
+  email: community@rivic.eu
+  
+  # Language
+  language: en
+
+# Site configuration
+site:
+  # Public URL where documentation is hosted
+  url: https://rivic.gitbook.io/open-source
+  
+  # Favicon
+  favicon: /assets/favicon.ico
+  
+  # Logo
+  logo: /assets/logo.png
+
+# GitHub integration
+git:
+  # GitHub repository URL
+  host: github.com
+  owner: rivic
+  repo: q-runtime
+  ref: main
+  
+  # Automatically pull from GitHub
+  auto_pull: true
+  
+  # Only allow publishing from GitHub branch
+  branch_protection: true
+  
+  # Sync frequency (in minutes)
+  auto_pull_interval: 60
+
+# Advanced features
+features:
+  # Enable page comments
+  comments: true
+  
+  # Enable page ratings
+  ratings: true
+  
+  # Enable variants (light/dark mode)
+  variants: true
+  
+  # Enable table of contents
+  table_of_contents: true
+  
+  # Enable search
+  search: true
+
+# Appearance
+appearance:
+  # Theme
+  theme: light
+  
+  # Font
+  font_family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+  
+  # Code block theme
+  code_theme: monokai
+
+# SEO and social
+seo:
+  # Twitter card configuration
+  twitter_card: summary_large_image
+  twitter_handle: '@rivic_io'
+  
+  # Open Graph (Facebook, LinkedIn)
+  og_image: /assets/og-image.png
+  og_image_width: 1200
+  og_image_height: 630
+
+# Redirects (if you're migrating docs)
+redirects:
+  # Map old URLs to new locations
+  # 'old-page.md': 'new-location/page.md'
+
+# Custom styles
+styles: /styles/custom.css
+
+# Permissions and sharing
+sharing:
+  # Allow sharing
+  enabled: true
+  
+  # Share to social media
+  twitter: true
+  facebook: true
+  linkedin: true
+  slack: true

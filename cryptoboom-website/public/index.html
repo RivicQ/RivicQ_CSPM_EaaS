@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptoboom - Real-Time Crypto Market Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">💥</span>
+                <span class="logo-text">Cryptoboom</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="/docs" class="nav-link">Documentation</a>
+                <a href="/api" class="nav-link">API</a>
+                <div class="nav-auth">
+                    <a href="/signin" class="nav-link">Sign In</a>
+                    <button class="btn-signup" onclick="window.location.href='/signup'">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Real-Time Crypto Market Intelligence
+                </h1>
+                <p class="hero-description">
+                    Advanced analytics, AI-powered predictions, and live market data. 
+                    Make smarter crypto trading decisions with Cryptoboom.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn-primary" onclick="window.location.href='/signup'">Start Free Trial</button>
+                    <button class="btn-secondary" onclick="window.location.href='/demo'">View Live Demo</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="crypto-animation">
+                    <div class="crypto-chart"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2>Powerful Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Real-Time Market Data</h3>
+                    <p>Stream live price updates, volume data, and market trends across 5000+ cryptocurrencies.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI-Powered Analysis</h3>
+                    <p>Machine learning models predict market movements and identify trading opportunities.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Alerts</h3>
+                    <p>Custom notifications for price targets, volume spikes, and market anomalies.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>REST & WebSocket API</h3>
+                    <p>Integrate with exchanges, bots, and trading platforms with our powerful APIs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💼</div>
+                    <h3>Portfolio Management</h3>
+                    <p>Track holdings across multiple exchanges and wallets in one dashboard.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Advanced Analytics</h3>
+                    <p>Technical indicators, on-chain metrics, and sentiment analysis tools.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <h2>Simple, Transparent Pricing</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Starter</h3>
+                    <p class="price">Free</p>
+                    <ul>
+                        <li>✓ Real-time prices (5min delay)</li>
+                        <li>✓ 100 API calls/day</li>
+                        <li>✓ Basic alerts</li>
+                        <li>✓ Community support</li>
+                        <li>✗ Advanced analytics</li>
+                    </ul>
+                    <button class="btn-secondary" onclick="window.location.href='/signup'">Get Started</button>
+                </div>
+                <div class="pricing-card featured">
+                    <h3>Pro</h3>
+                    <p class="price">$29<span>/mo</span></p>
+                    <ul>
+                        <li>✓ Live price updates</li>
+                        <li>✓ 10,000 API calls/day</li>
+                        <li>✓ Smart alerts</li>
+                        <li>✓ Email support</li>
+                        <li>✓ Advanced analytics</li>
+                    </ul>
+                    <button class="btn-primary" onclick="window.location.href='/signup'">Start Trial</button>
+                </div>
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <p class="price">Custom</p>
+                    <ul>
+                        <li>✓ Unlimited API calls</li>
+                        <li>✓ Dedicated support</li>
+                        <li>✓ Custom integrations</li>
+                        <li>✓ On-premises option</li>
+                        <li>✓ SLA guarantee</li>
+                    </ul>
+                    <button class="btn-secondary" onclick="window.location.href='/contact'">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>50K+</h3>
+                    <p>Active Users</p>
+                </div>
+                <div class="stat-card">
+                    <h3>$500B+</h3>
+                    <p>Daily Volume Tracked</p>
+                </div>
+                <div class="stat-card">
+                    <h3>5000+</h3>
+                    <p>Cryptocurrencies Supported</p>
+                </div>
+                <div class="stat-card">
+                    <h3>99.9%</h3>
+                    <p>Uptime Guarantee</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Cryptoboom</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/docs">Documentation</a></li>
+                        <li><a href="/demo">Live Demo</a></li>
+                        <li><a href="/pricing">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="/api" target="_blank">API Docs</a></li>
+                        <li><a href="/guides">Trading Guides</a></li>
+                        <li><a href="/blog">Blog</a></li>
+                        <li><a href="/status">Status</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/security">Security</a></li>
+                        <li><a href="/compliance">Compliance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="mailto:support@cryptoboom.io">support@cryptoboom.io</a></li>
+                        <li><a href="mailto:sales@cryptoboom.io">sales@cryptoboom.io</a></li>
+                        <li><a href="https://twitter.com/cryptoboom" target="_blank">Twitter</a></li>
+                        <li><a href="https://discord.gg/cryptoboom" target="_blank">Discord</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Cryptoboom. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
