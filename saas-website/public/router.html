@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // Client-side routing for GitHub Pages
+        (function() {
+            const path = window.location.pathname;
+            const base = '/cryptobom-saas';
+            
+            // Remove base path and route
+            const route = path.replace(base, '') || '/';
+            
+            // Define route handlers
+            const routes = {
+                '/': 'index.html',
+                '/signin': 'signin.html',
+                '/signup': 'signup.html',
+                '/demo': 'demo.html'
+            };
+            
+            const file = routes[route] || 'index.html';
+            
+            // Load the content
+            fetch(`${base}/${file}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                })
+                .catch(() => {
+                    // Fallback to index if file not found
+                    fetch(`${base}/index.html`)
+                        .then(response => response.text())
+                        .then(html => {
+                            document.open();
+                            document.write(html);
+                            document.close();
+                        });
+                });
+        })();
+    </script>
+</head>
+<body>
+    <p>Loading...</p>
+</body>
+</html>

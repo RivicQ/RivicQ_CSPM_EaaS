@@ -1,1 +1,73 @@
 node_modules
+dist
+build
+coverage
+
+# ============================================================================
+# ENTERPRISE & PRIVATE DOCUMENTATION (DO NOT PUSH TO OPEN SOURCE)
+# ============================================================================
+
+# Enterprise-specific docs
+docs-enterprise/
+docs/enterprise/
+enterprise/
+**/ENTERPRISE*.md
+**/PRIVATE*.md
+**/*-enterprise*.md
+**/*-private*.md
+GO_TO_MARKET_STRATEGY.md
+GITBOOK_ENTERPRISE.yaml
+gitbook-enterprise.yaml
+GITBOOK_IMPLEMENTATION.md
+GITBOOK_INTEGRATION_STATUS.md
+GITBOOK_SETUP.md
+
+# ============================================================================
+# SENSITIVE ENVIRONMENT & CONFIGURATION
+# ============================================================================
+
+.env
+.env.local
+.env.*.local
+*.env
+.secrets
+secrets.json
+**/keys/**
+**/private/**
+.config
+config.private.js
+config.enterprise.js
+
+# ============================================================================
+# CREDENTIALS & AUTHENTICATION
+# ============================================================================
+
+.aws/
+aws_credentials.json
+ssh/
+*.pem
+*.key
+token.json
+tokens.json
+database.config.json
+
+# ============================================================================
+# IDE & EDITOR FILES
+# ============================================================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.tmp
+
+# ============================================================================
+# LOG FILES
+# ============================================================================
+
+*.log
+logs/
+

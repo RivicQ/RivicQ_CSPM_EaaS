@@ -47,6 +47,11 @@
   ],
   "author": "Rivic Team",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rivic-q/cryptobom-saas.git"
+  },
+  "homepage": "https://rivic-q.github.io/cryptobom-saas/",
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/jest": "^29.5.11",

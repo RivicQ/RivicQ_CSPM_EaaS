@@ -6,10 +6,9 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use('/components', express.static(path.join(__dirname, 'components')));
 
-// Routes
+// Routes (MUST come before static files)
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -32,6 +31,14 @@ app.get('/enterprise', (req, res) => {
 
 app.get('/github-integration', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'github-integration.html'));
+});
+
+app.get('/signin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'signin.html'));
+});
+
+app.get('/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
 // API Routes
@@ -92,6 +99,9 @@ app.get('/api/github-repos', (req, res) => {
     }
   ]);
 });
+
+// Serve static files AFTER route handlers
+app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

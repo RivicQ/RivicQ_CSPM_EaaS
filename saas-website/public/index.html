@@ -8,25 +8,22 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Christmas Special Notice -->
-    <div class="christmas-special">
-        🎄 Launching Dec 25th! 🎁 Merry Christmas!
-    </div>
-
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
                 <span class="logo-icon">🔒</span>
-                <span class="logo-text">Rivic Q-Runtime</span>
+                <span class="logo-text">Rivic</span>
             </div>
             <div class="nav-menu">
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#pricing" class="nav-link">Pricing</a>
-                <a href="/docs" class="nav-link">Docs</a>
+                <a href="/docs" class="nav-link">Documentation</a>
                 <a href="/demo" class="nav-link">Demo</a>
-                <a href="#github" class="nav-link">GitHub</a>
-                <button class="nav-cta" onclick="startTrial()">Start Free Trial</button>
+                <div class="nav-auth">
+                    <a href="/signin" class="nav-link">Sign In</a>
+                    <button class="btn-signup" onclick="window.location.href='/signup'">Sign Up</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -37,39 +34,19 @@
             <div class="hero-content">
                 <h1 class="hero-title">
                     Quantum-Safe Banking Infrastructure
-                    <span class="hero-highlight">Ready for Tomorrow's Threats</span>
                 </h1>
                 <p class="hero-description">
-                    Rivic Q-Runtime provides transparent post-quantum cryptography for EU banking compliance. 
-                    Zero application changes required. Full eIDAS 2.0 and DORA compliance.
+                    Post-quantum cryptography for EU banking compliance. 
+                    Zero application changes. Full eIDAS 2.0 and DORA compliance.
                 </p>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <div class="stat-number">95%</div>
-                        <div class="stat-label">eIDAS 2.0 Ready</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">100%</div>
-                        <div class="stat-label">Zero Code Changes</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">24/7</div>
-                        <div class="stat-label">Enterprise Support</div>
-                    </div>
-                </div>
                 <div class="hero-actions">
-                    <button class="btn-primary" onclick="startTrial()">🚀 Start Free Trial</button>
-                    <button class="btn-secondary" onclick="viewDemo()">📺 Watch Demo</button>
-                    <a href="#github" class="btn-github">
-                        <span>⭐ Star on GitHub</span>
-                        <span class="github-stars">2.8k</span>
-                    </a>
+                    <button class="btn-primary" onclick="window.location.href='/signup'">Get Started</button>
+                    <button class="btn-secondary" onclick="window.location.href='/demo'">View Demo</button>
                 </div>
             </div>
             <div class="hero-visual">
                 <div class="quantum-animation">
                     <div class="quantum-cube"></div>
-                    <div class="quantum-particles"></div>
                 </div>
             </div>
         </div>
@@ -78,40 +55,27 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <div class="section-header">
-                <h2>Why Choose Rivic Q-Runtime?</h2>
-                <p>The only quantum-safe infrastructure that's ready for production today</p>
-            </div>
+            <h2>Core Features</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">🔐</div>
                     <h3>Post-Quantum Cryptography</h3>
-                    <p>NIST-approved ML-KEM (Kyber) and ML-DSA (Dilithium) algorithms. Protect against quantum computers today.</p>
+                    <p>NIST-approved ML-KEM and ML-DSA algorithms protecting against quantum threats.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔄</div>
                     <h3>Transparent Migration</h3>
-                    <p>Zero application code changes. Automatic RSA → Kyber upgrades using LD_PRELOAD interception.</p>
+                    <p>Zero code changes required. Automatic cryptographic upgrades.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
                     <h3>Cryptographic Observability</h3>
-                    <p>Real-time CBOM generation (CycloneDX 1.6). Know exactly what crypto you're using and where.</p>
+                    <p>Real-time CBOM generation and compliance reporting.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚖️</div>
-                    <h3>EU Banking Compliance</h3>
-                    <p>Built for eIDAS 2.0 and DORA regulations. Automated compliance reporting and audit trails.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">☸️</div>
+                    <div class="feature-icon">☁️</div>
                     <h3>Kubernetes Native</h3>
-                    <p>Cloud-native operators and admission controllers. Scales with your infrastructure.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <h3>Banking Security</h3>
-                    <p>Shadow mode testing, hybrid crypto support, and backward compatibility for safe migration.</p>
+                    <p>Cloud-native deployment with operators and orchestration.</p>
                 </div>
             </div>
         </div>
@@ -120,163 +84,40 @@
     <!-- Pricing Section -->
     <section id="pricing" class="pricing">
         <div class="container">
-            <div class="section-header">
-                <h2>Choose Your Plan</h2>
-                <p>From open source to enterprise-grade quantum security</p>
-            </div>
+            <h2>Pricing Plans</h2>
             <div class="pricing-grid">
-                <!-- Open Source -->
                 <div class="pricing-card">
-                    <div class="plan-header">
-                        <div class="plan-icon">🌟</div>
-                        <h3>Open Source</h3>
-                        <div class="plan-price">Free</div>
-                        <p>Perfect for developers and small projects</p>
-                    </div>
-                    <div class="plan-features">
-                        <div class="feature">✅ Basic Quantum Crypto (Kyber-512)</div>
-                        <div class="feature">✅ CBOM Generation</div>
-                        <div class="feature">✅ Community Support</div>
-                        <div class="feature">✅ GitHub Repository Access</div>
-                        <div class="feature">✅ Docker Images</div>
-                        <div class="feature">❌ Enterprise Support</div>
-                        <div class="feature">❌ Advanced Analytics</div>
-                    </div>
-                    <button class="plan-cta" onclick="selectPlan('opensource')">
-                        <span>📁 Clone Repository</span>
-                    </button>
+                    <h3>Open Source</h3>
+                    <p class="price">Free</p>
+                    <ul>
+                        <li>✓ Community Support</li>
+                        <li>✓ Full PQC Features</li>
+                        <li>✓ CBOM Generation</li>
+                        <li>✗ Enterprise SLA</li>
+                    </ul>
+                    <button class="btn-secondary" onclick="window.location.href='/signup'">Get Started</button>
                 </div>
-
-                <!-- Premium -->
-                <div class="pricing-card premium">
-                    <div class="plan-badge">Most Popular</div>
-                    <div class="plan-header">
-                        <div class="plan-icon">🚀</div>
-                        <h3>Premium</h3>
-                        <div class="plan-price">€299<span>/month</span></div>
-                        <p>For growing teams and production deployments</p>
-                    </div>
-                    <div class="plan-features">
-                        <div class="feature">✅ Full Quantum Suite (Kyber-1024, Dilithium-5)</div>
-                        <div class="feature">✅ Advanced CBOM Analytics</div>
-                        <div class="feature">✅ Priority Support (8x5)</div>
-                        <div class="feature">✅ Compliance Dashboard</div>
-                        <div class="feature">✅ SLA Guarantees</div>
-                        <div class="feature">✅ Cloud Deployment Tools</div>
-                        <div class="feature">✅ Team Collaboration</div>
-                    </div>
-                    <button class="plan-cta primary" onclick="selectPlan('premium')">
-                        <span>🚀 Start 14-Day Trial</span>
-                    </button>
+                <div class="pricing-card featured">
+                    <h3>Professional</h3>
+                    <p class="price">$99<span>/mo</span></p>
+                    <ul>
+                        <li>✓ Email Support</li>
+                        <li>✓ Advanced Features</li>
+                        <li>✓ Compliance Reports</li>
+                        <li>✓ 99.9% SLA</li>
+                    </ul>
+                    <button class="btn-primary" onclick="window.location.href='/signup'">Start Trial</button>
                 </div>
-
-                <!-- Enterprise -->
-                <div class="pricing-card enterprise">
-                    <div class="plan-header">
-                        <div class="plan-icon">🏛️</div>
-                        <h3>Enterprise</h3>
-                        <div class="plan-price">Custom</div>
-                        <p>For banks and large financial institutions</p>
-                    </div>
-                    <div class="plan-features">
-                        <div class="feature">✅ Everything in Premium</div>
-                        <div class="feature">✅ Dedicated Support (24/7)</div>
-                        <div class="feature">✅ On-Premises Deployment</div>
-                        <div class="feature">✅ Custom Integration</div>
-                        <div class="feature">✅ Regulatory Consulting</div>
-                        <div class="feature">✅ White-Label Solutions</div>
-                        <div class="feature">✅ Air-Gapped Deployments</div>
-                    </div>
-                    <button class="plan-cta" onclick="selectPlan('enterprise')">
-                        <span>💼 Contact Sales</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- GitHub Integration Section -->
-    <section id="github" class="github-section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Open Source Ecosystem</h2>
-                <p>Built on open standards, powered by community</p>
-            </div>
-            <div class="github-grid">
-                <div class="github-repo">
-                    <div class="repo-header">
-                        <h3>🔧 rivic-q-runtime</h3>
-                        <div class="repo-stats">
-                            <span class="stat">⭐ 2,847</span>
-                            <span class="stat">🍴 324</span>
-                            <span class="stat">📝 TypeScript</span>
-                        </div>
-                    </div>
-                    <p>Core quantum-safe infrastructure and Kubernetes operator</p>
-                    <div class="repo-actions">
-                        <button onclick="cloneRepo('rivic-q-runtime')">📥 Clone</button>
-                        <button onclick="forkRepo('rivic-q-runtime')">🍴 Fork</button>
-                    </div>
-                </div>
-                <div class="github-repo">
-                    <div class="repo-header">
-                        <h3>📊 rivic-cbom-tools</h3>
-                        <div class="repo-stats">
-                            <span class="stat">⭐ 1,523</span>
-                            <span class="stat">🍴 198</span>
-                            <span class="stat">📝 Go</span>
-                        </div>
-                    </div>
-                    <p>CBOM generation and cryptographic asset discovery tools</p>
-                    <div class="repo-actions">
-                        <button onclick="cloneRepo('rivic-cbom-tools')">📥 Clone</button>
-                        <button onclick="forkRepo('rivic-cbom-tools')">🍴 Fork</button>
-                    </div>
-                </div>
-                <div class="github-repo">
-                    <div class="repo-header">
-                        <h3>☸️ rivic-k8s-operator</h3>
-                        <div class="repo-stats">
-                            <span class="stat">⭐ 892</span>
-                            <span class="stat">🍴 156</span>
-                            <span class="stat">📝 Go</span>
-                        </div>
-                    </div>
-                    <p>Kubernetes operator for automated quantum-safe deployments</p>
-                    <div class="repo-actions">
-                        <button onclick="cloneRepo('rivic-k8s-operator')">📥 Clone</button>
-                        <button onclick="forkRepo('rivic-k8s-operator')">🍴 Fork</button>
-                    </div>
-                </div>
-            </div>
-            <div class="integration-guide">
-                <h3>🚀 Quick Start Integration</h3>
-                <div class="code-block">
-                    <pre><code># Clone the main repository
-git clone https://github.com/rivic/q-runtime.git
-cd q-runtime
-
-# Deploy to Kubernetes
-kubectl apply -f k8s/manifests.yaml
-
-# Enable quantum-safe mode for your namespace
-kubectl label namespace your-app rivic-injection=enabled
-
-# That's it! Your apps are now quantum-safe 🎉</code></pre>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Ready to Secure Your Banking Infrastructure?</h2>
-                <p>Join leading financial institutions using Rivic Q-Runtime for quantum-safe banking</p>
-                <div class="cta-actions">
-                    <button class="btn-primary large" onclick="startTrial()">🚀 Start Free Trial</button>
-                    <button class="btn-secondary large" onclick="contactSales()">💼 Contact Sales</button>
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <p class="price">Custom</p>
+                    <ul>
+                        <li>✓ 24/7 Support</li>
+                        <li>✓ Custom Deployment</li>
+                        <li>✓ Dedicated Team</li>
+                        <li>✓ 99.99% SLA</li>
+                    </ul>
+                    <button class="btn-secondary" onclick="window.location.href='/contact'">Contact Sales</button>
                 </div>
             </div>
         </div>
@@ -284,44 +125,46 @@ kubectl label namespace your-app rivic-injection=enabled
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
+        <div class="footer-container">
+            <div class="footer-content">
                 <div class="footer-section">
-                    <h4>Product</h4>
-                    <a href="#features">Features</a>
-                    <a href="/pricing">Pricing</a>
-                    <a href="/demo">Demo</a>
-                    <a href="/docs">Documentation</a>
-                </div>
-                <div class="footer-section">
-                    <h4>Company</h4>
-                    <a href="/about">About</a>
-                    <a href="/careers">Careers</a>
-                    <a href="/contact">Contact</a>
-                    <a href="/security">Security</a>
+                    <h4>Rivic</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/docs">Documentation</a></li>
+                        <li><a href="/demo">Demo</a></li>
+                        <li><a href="/enterprise">Enterprise</a></li>
+                    </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Resources</h4>
-                    <a href="/blog">Blog</a>
-                    <a href="/whitepaper">Whitepaper</a>
-                    <a href="/compliance">Compliance</a>
-                    <a href="/support">Support</a>
+                    <ul>
+                        <li><a href="https://github.com/rivic/q-runtime" target="_blank">GitHub</a></li>
+                        <li><a href="/docs">API Reference</a></li>
+                        <li><a href="/docs">Guides</a></li>
+                        <li><a href="/docs">FAQ</a></li>
+                    </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Community</h4>
-                    <a href="https://github.com/rivic">GitHub</a>
-                    <a href="/discord">Discord</a>
-                    <a href="/slack">Slack</a>
-                    <a href="/linkedin">LinkedIn</a>
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/security">Security</a></li>
+                        <li><a href="/compliance">Compliance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:support@rivic.xyz">support@rivic.xyz</a></li>
+                        <li><a href="mailto:sales@rivic.xyz">sales@rivic.xyz</a></li>
+                        <li><a href="https://rivic.xyz" target="_blank">rivic.xyz</a></li>
+                    </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Rivic Technologies. All rights reserved.</p>
-                <div class="footer-compliance">
-                    <span class="compliance-badge">🇪🇺 EU Compliant</span>
-                    <span class="compliance-badge">🔒 eIDAS 2.0 Ready</span>
-                    <span class="compliance-badge">🏛️ DORA Certified</span>
-                </div>
+                <p>&copy; 2026 Rivic. All rights reserved.</p>
             </div>
         </div>
     </footer>
