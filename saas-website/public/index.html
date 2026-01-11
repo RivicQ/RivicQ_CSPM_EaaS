@@ -3,11 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rivic Q-Runtime - Quantum-Safe Banking Infrastructure</title>
+    <title>Rivic - Quantum-Safe Cryptography for Banking</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .status-banner {
+            background: linear-gradient(135deg, #FF9500 0%, #FF7500 100%);
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+            font-weight: 600;
+            border-bottom: 2px solid #FF6500;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .status-banner a {
+            color: white;
+            text-decoration: underline;
+            margin: 0 4px;
+        }
+        .roadmap {
+            background: #f8fafc;
+            padding: 60px 20px;
+        }
+        .roadmap h2 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .roadmap-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .roadmap-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        .roadmap-card.current {
+            border-color: #667eea;
+            background: #f5f3ff;
+            border-width: 2px;
+        }
+        .roadmap-card.planned {
+            border-color: #d1d5db;
+            background: #f9fafb;
+        }
+        .roadmap-card h3 {
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .roadmap-card.current h3::before {
+            content: "⚡";
+            font-size: 18px;
+        }
+        .roadmap-card.planned h3::before {
+            content: "📋";
+            font-size: 18px;
+        }
+        .roadmap-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #4b5563;
+        }
+        .roadmap-card li {
+            margin: 4px 0;
+        }
+        .team-section {
+            background: white;
+            padding: 60px 20px;
+        }
+        .team-section h2 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .team-grid {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .team-card {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .team-card h3 {
+            margin: 12px 0 4px 0;
+            color: #1e293b;
+        }
+        .team-card .role {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .team-card p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .cta-section h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .btn-white {
+            background: white;
+            color: #667eea;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 16px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #856404;
+        }
+        .status-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .status-box {
+            background: #f0fdf4;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status-box.current {
+            background: #fef3c7;
+        }
+        .status-box.planned {
+            background: #eff6ff;
+        }
+        .status-box h3 {
+            margin: 0 0 12px 0;
+        }
+        .status-box.current h3 {
+            color: #92400e;
+        }
+        .status-box.planned h3 {
+            color: #1e40af;
+        }
+        .status-box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .status-box li {
+            margin: 4px 0;
+        }
+    </style>
 </head>
 <body>
+    <!-- Status Banner -->
+    <div class="status-banner">
+        🚧 <strong>PROJECT STATUS: ACTIVE DEVELOPMENT</strong><br>
+        Open source tools releasing January 2026 | Enterprise SaaS planned Q3 2026
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -16,13 +209,12 @@
                 <span class="logo-text">Rivic</span>
             </div>
             <div class="nav-menu">
-                <a href="#features" class="nav-link">Features</a>
-                <a href="#pricing" class="nav-link">Pricing</a>
-                <a href="/docs" class="nav-link">Documentation</a>
-                <a href="/demo" class="nav-link">Demo</a>
+                <a href="#roadmap" class="nav-link">Roadmap</a>
+                <a href="#team" class="nav-link">Team</a>
+                <a href="https://github.com/rivic-q" class="nav-link" target="_blank">GitHub</a>
+                <a href="https://discord.gg/rivic" class="nav-link" target="_blank">Community</a>
                 <div class="nav-auth">
-                    <a href="/signin" class="nav-link">Sign In</a>
-                    <button class="btn-signup" onclick="window.location.href='/signup'">Sign Up</button>
+                    <a href="https://github.com/rivic-q" class="nav-link" target="_blank">⭐ Star</a>
                 </div>
             </div>
         </div>
@@ -33,15 +225,15 @@
         <div class="hero-container">
             <div class="hero-content">
                 <h1 class="hero-title">
-                    Quantum-Safe Banking Infrastructure
+                    Quantum-Safe Cryptography for Banking
                 </h1>
                 <p class="hero-description">
-                    Post-quantum cryptography for EU banking compliance. 
-                    Zero application changes. Full eIDAS 2.0 and DORA compliance.
+                    Building open-source tools to protect financial infrastructure against quantum threats.
+                    Starting with CBOM scanning, expanding to enterprise SaaS in 2026.
                 </p>
                 <div class="hero-actions">
-                    <button class="btn-primary" onclick="window.location.href='/signup'">Get Started</button>
-                    <button class="btn-secondary" onclick="window.location.href='/demo'">View Demo</button>
+                    <a href="https://github.com/rivic-q" class="btn-primary" target="_blank">⭐ Star on GitHub</a>
+                    <a href="https://discord.gg/rivic" class="btn-secondary" target="_blank">💬 Join Community</a>
                 </div>
             </div>
             <div class="hero-visual">
@@ -55,70 +247,184 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <h2>Core Features</h2>
+            <h2>What We're Building</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>Post-Quantum Cryptography</h3>
-                    <p>NIST-approved ML-KEM and ML-DSA algorithms protecting against quantum threats.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3>Transparent Migration</h3>
-                    <p>Zero code changes required. Automatic cryptographic upgrades.</p>
-                </div>
-                <div class="feature-card">
                     <div class="feature-icon">📊</div>
-                    <h3>Cryptographic Observability</h3>
-                    <p>Real-time CBOM generation and compliance reporting.</p>
+                    <h3>CBOM Scanner</h3>
+                    <p>Cryptographic Bill of Materials generator. Scan containers, dependencies, and infrastructure for crypto assets.</p>
+                    <span class="status-tag">Launching Jan 2026</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>PQC Toolkit</h3>
+                    <p>Post-quantum cryptography libraries. NIST-approved ML-KEM (Kyber) and ML-DSA (Dilithium) implementations.</p>
+                    <span class="status-tag">Planned Q2 2026</span>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">☁️</div>
-                    <h3>Kubernetes Native</h3>
-                    <p>Cloud-native deployment with operators and orchestration.</p>
+                    <h3>Kubernetes Operator</h3>
+                    <p>Transparent crypto interception in Kubernetes. Deploy quantum-safe cryptography without code changes.</p>
+                    <span class="status-tag">Planned Q2 2026</span>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏦</div>
+                    <h3>Enterprise SaaS</h3>
+                    <p>Managed platform for banks and fintech. Compliance dashboards, audit trails, managed APIs.</p>
+                    <span class="status-tag">Planned Q3 2026</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="pricing">
+    <!-- Technology Stack -->
+    <section class="features" style="background: #f8fafc;">
         <div class="container">
-            <h2>Pricing Plans</h2>
-            <div class="pricing-grid">
-                <div class="pricing-card">
-                    <h3>Open Source</h3>
-                    <p class="price">Free</p>
-                    <ul>
-                        <li>✓ Community Support</li>
-                        <li>✓ Full PQC Features</li>
-                        <li>✓ CBOM Generation</li>
-                        <li>✗ Enterprise SLA</li>
-                    </ul>
-                    <button class="btn-secondary" onclick="window.location.href='/signup'">Get Started</button>
+            <h2>Built With Industry Standards</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>🏛️ Academic Backing</h3>
+                    <p><strong>Prof. Dr. Jean-Pierre Seifert</strong> (TU Berlin)<br>
+                    Advisor on quantum-safe cryptography and post-quantum standards.</p>
                 </div>
-                <div class="pricing-card featured">
-                    <h3>Professional</h3>
-                    <p class="price">$99<span>/mo</span></p>
-                    <ul>
-                        <li>✓ Email Support</li>
-                        <li>✓ Advanced Features</li>
-                        <li>✓ Compliance Reports</li>
-                        <li>✓ 99.9% SLA</li>
-                    </ul>
-                    <button class="btn-primary" onclick="window.location.href='/signup'">Start Trial</button>
+                <div class="feature-card">
+                    <h3>📋 NIST Standards</h3>
+                    <p>Implementing NIST FIPS 203/204/205 post-quantum algorithms. Future-proof against quantum computing threats.</p>
                 </div>
-                <div class="pricing-card">
-                    <h3>Enterprise</h3>
-                    <p class="price">Custom</p>
-                    <ul>
-                        <li>✓ 24/7 Support</li>
-                        <li>✓ Custom Deployment</li>
-                        <li>✓ Dedicated Team</li>
-                        <li>✓ 99.99% SLA</li>
-                    </ul>
-                    <button class="btn-secondary" onclick="window.location.href='/contact'">Contact Sales</button>
+                <div class="feature-card">
+                    <h3>☁️ CNCF Cloud Native</h3>
+                    <p>Built on Kubernetes, Docker, and CNCF ecosystem. Enterprise-ready container orchestration.</p>
                 </div>
+                <div class="feature-card">
+                    <h3>✅ Incubator Support</h3>
+                    <p>Launched from Berlin startup ecosystem. Focused on solving real banking security problems.</p>
+                </div>
+            </div>
+            <div class="disclaimer" style="max-width: 900px; margin: 40px auto 0;">
+                <strong>Important:</strong> We are building FOR regulatory compliance, not yet certified. 
+                Formal certifications (BSI, ISO, NIST) require independent audit and will be pursued during enterprise launch phase.
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section id="roadmap" class="roadmap">
+        <div class="container">
+            <h2>Product Roadmap</h2>
+            <div class="roadmap-grid">
+                <div class="roadmap-card current">
+                    <h3>January 2026</h3>
+                    <ul>
+                        <li>CBOM Scanner CLI (Python)</li>
+                        <li>Container image scanning</li>
+                        <li>CycloneDX 1.6 export</li>
+                        <li>Open source release</li>
+                    </ul>
+                </div>
+                <div class="roadmap-card planned">
+                    <h3>Q2 2026</h3>
+                    <ul>
+                        <li>Kubernetes Operator</li>
+                        <li>CI/CD integrations</li>
+                        <li>PQC toolkit v1.0</li>
+                        <li>Design partner pilots</li>
+                    </ul>
+                </div>
+                <div class="roadmap-card planned">
+                    <h3>Q3 2026</h3>
+                    <ul>
+                        <li>Enterprise SaaS launch</li>
+                        <li>Managed APIs</li>
+                        <li>Compliance dashboards</li>
+                        <li>Commercial availability</li>
+                    </ul>
+                </div>
+                <div class="roadmap-card planned">
+                    <h3>Q4 2026+</h3>
+                    <ul>
+                        <li>Advanced monitoring</li>
+                        <li>Multi-cloud support</li>
+                        <li>Mobile SDKs</li>
+                        <li>Strategic partnerships</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team -->
+    <section id="team" class="team-section">
+        <div class="container">
+            <h2>Building the Team</h2>
+            <div class="team-grid">
+                <div class="team-card">
+                    <h3>Revan Ande</h3>
+                    <div class="role">Founder & CEO</div>
+                    <p>Computer science student at IU Berlin. Building quantum-safe infrastructure for banking.</p>
+                </div>
+                <div class="team-card">
+                    <h3>Prof. Dr. Jean-Pierre Seifert</h3>
+                    <div class="role">Academic Advisor</div>
+                    <p>TU Berlin. Research leader in cryptography and quantum-safe systems.</p>
+                </div>
+                <div class="team-card">
+                    <h3>We're Hiring</h3>
+                    <div class="role">Cofounders Wanted</div>
+                    <p><strong>VP Engineering</strong> - Enterprise SaaS & infrastructure<br>
+                    <strong>VP Business</strong> - Sales & market strategy</p>
+                </div>
+            </div>
+            <div class="disclaimer" style="max-width: 900px; margin: 40px auto 0;">
+                <strong>Transparency:</strong> Rivic is currently a solo founder project. We're actively seeking technical and business cofounders. 
+                Early team members will receive significant equity in a pre-seed stage startup.
+            </div>
+        </div>
+    </section>
+
+    <!-- Current Status -->
+    <section style="background: white; padding: 60px 20px; text-align: center;">
+        <div class="container">
+            <h2>Current Status: What Exists Today</h2>
+            <div style="max-width: 800px; margin: 30px auto; text-align: left;">
+                <div class="status-box">
+                    <h3 style="margin: 0 0 12px 0; color: #15803d;">✅ Ready Now</h3>
+                    <ul>
+                        <li>Research & architecture design</li>
+                        <li>Academic partnerships (TU Berlin)</li>
+                        <li>Early prototype code</li>
+                        <li>Open source foundation</li>
+                    </ul>
+                </div>
+                <div class="status-box current">
+                    <h3 style="margin: 0 0 12px 0;">⚡ In Development (Jan 2026)</h3>
+                    <ul>
+                        <li>CBOM Scanner CLI</li>
+                        <li>Container scanning</li>
+                        <li>Open source release</li>
+                    </ul>
+                </div>
+                <div class="status-box planned">
+                    <h3 style="margin: 0 0 12px 0;">📋 Planned (Q2-Q4 2026)</h3>
+                    <ul>
+                        <li>Enterprise SaaS platform</li>
+                        <li>Kubernetes operator</li>
+                        <li>Managed APIs</li>
+                        <li>Commercial offerings</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Join the Quantum-Safe Revolution</h2>
+            <p>Help us protect financial infrastructure for the quantum era.</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/rivic-q" class="btn-white" target="_blank">⭐ Star on GitHub</a>
+                <a href="https://discord.gg/rivic" class="btn-white" target="_blank">💬 Join Discord</a>
+                <a href="mailto:hello@rivic.io" class="btn-white">📧 Get Updates</a>
             </div>
         </div>
     </section>
@@ -130,41 +436,42 @@
                 <div class="footer-section">
                     <h4>Rivic</h4>
                     <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/docs">Documentation</a></li>
-                        <li><a href="/demo">Demo</a></li>
-                        <li><a href="/enterprise">Enterprise</a></li>
+                        <li><a href="https://github.com/rivic-q" target="_blank">GitHub</a></li>
+                        <li><a href="https://discord.gg/rivic" target="_blank">Community</a></li>
+                        <li><a href="#roadmap">Roadmap</a></li>
+                        <li><a href="#team">Team</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Resources</h4>
                     <ul>
-                        <li><a href="https://github.com/rivic/q-runtime" target="_blank">GitHub</a></li>
-                        <li><a href="/docs">API Reference</a></li>
-                        <li><a href="/docs">Guides</a></li>
-                        <li><a href="/docs">FAQ</a></li>
+                        <li><a href="https://github.com/rivic-q" target="_blank">GitHub Org</a></li>
+                        <li><a href="https://github.com/rivic-q/cbom-scanner" target="_blank">CBOM Scanner</a></li>
+                        <li><a href="https://github.com/rivic-q/pqc-toolkit" target="_blank">PQC Toolkit</a></li>
+                        <li><a href="https://github.com/rivic-q/cryptobom-saas" target="_blank">Docs</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Legal</h4>
                     <ul>
-                        <li><a href="/privacy">Privacy Policy</a></li>
-                        <li><a href="/terms">Terms of Service</a></li>
-                        <li><a href="/security">Security</a></li>
-                        <li><a href="/compliance">Compliance</a></li>
+                        <li><a href="https://github.com/rivic-q/cryptobom-saas/blob/main/LICENSE" target="_blank">License (Apache 2.0)</a></li>
+                        <li><a href="https://github.com/rivic-q/cryptobom-saas" target="_blank">Code of Conduct</a></li>
+                        <li><a href="mailto:legal@rivic.io">Legal Contact</a></li>
+                        <li><a href="mailto:security@rivic.io">Report Security Issue</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Contact</h4>
                     <ul>
-                        <li><a href="mailto:support@rivic.xyz">support@rivic.xyz</a></li>
-                        <li><a href="mailto:sales@rivic.xyz">sales@rivic.xyz</a></li>
-                        <li><a href="https://rivic.xyz" target="_blank">rivic.xyz</a></li>
+                        <li><a href="mailto:hello@rivic.io">hello@rivic.io</a></li>
+                        <li><a href="mailto:careers@rivic.io">careers@rivic.io</a></li>
+                        <li><a href="https://twitter.com/rivic" target="_blank">Twitter</a></li>
+                        <li><a href="https://linkedin.com/company/rivic" target="_blank">LinkedIn</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Rivic. All rights reserved.</p>
+                <p>&copy; 2026 Rivic. All rights reserved. | Solo founder seeking cofounders | <a href="https://github.com/rivic-q" target="_blank" style="color: inherit;">Open Source</a></p>
             </div>
         </div>
     </footer>
