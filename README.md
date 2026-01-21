@@ -110,9 +110,8 @@ This project follows Apache 2.0 licensing. Contributions welcome!
 
 ## Support
 
-- 📧 Email: support@rivic.eu
-- 💬 Discord: [Rivic Community](https://discord.gg/rivic)
-- 📖 Docs: [docs.rivic.eu](https://docs.rivic.eu)
+- 📧 Email: rivic.revan.ande@gmail.com
+
 
 ---
 
