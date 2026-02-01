@@ -1,0 +1,348 @@
+# Enterprise values for cryptobom-enterprise.
+# This includes all IBM Quantum and advanced features.
+
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+  demoMode: false
+  enterpriseMode: true
+
+replicaCount: 3
+
+image:
+  registry: docker.io
+  repository: rivicq/cryptobom-enterprise
+  pullPolicy: IfNotPresent
+  tag: "2.0.0"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: cryptobom-enterprise.rivic-q.io
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: cryptobom-enterprise-tls
+      hosts:
+        - cryptobom-enterprise.rivic-q.io
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - cryptobom-enterprise
+        topologyKey: kubernetes.io/hostname
+
+# Enhanced Database Configuration
+database:
+  enabled: true
+  postgresql:
+    auth:
+      postgresPassword: "enterprise-cryptobom-2025"
+      database: "cryptobom_enterprise"
+      username: "cryptobom_admin"
+    primary:
+      persistence:
+        enabled: true
+        size: 100Gi
+        storageClass: "fast-ssd"
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+        requests:
+          cpu: 1000m
+          memory: 2Gi
+    readReplicas:
+      replicaCount: 2
+      persistence:
+        enabled: true
+        size: 50Gi
+
+# Enhanced Redis Configuration
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "enterprise-redis-2025"
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "fast-ssd"
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+  replica:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: 5Gi
+
+# Elasticsearch for Advanced Logging
+elasticsearch:
+  enabled: true
+  master:
+    replicaCount: 3
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: "fast-ssd"
+  data:
+    replicaCount: 3
+    persistence:
+      enabled: true
+      size: 200Gi
+      storageClass: "fast-ssd"
+  coordinating:
+    replicaCount: 2
+
+# Advanced Monitoring
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: ""
+    labels: {}
+    annotations: {}
+    interval: 30s
+    scrapeTimeout: 10s
+
+# IBM Quantum Integration
+ibmQuantum:
+  enabled: true
+  apiKey: ""  # Set via secret
+  network: "ibm-quantum-network"
+  attestation: true
+  realTimeScoring: true
+  algorithms:
+    - "Kyber"
+    - "Dilithium"
+    - "Falcon"
+  migrationPath: true
+  enterpriseLicense: true
+
+# Advanced Security Features
+security:
+  rbac:
+    create: true
+  podSecurityPolicy:
+    enabled: true
+  networkPolicy:
+    enabled: true
+  hsm:
+    enabled: true
+    provider: "aws"  # aws, azure, gcp, onprem
+    endpoint: ""
+    credentials: {}
+  
+# Enterprise Authentication
+auth:
+  enabled: true
+  sso:
+    enabled: true
+    providers:
+      - "saml"
+      - "oidc"
+      - "ldap"
+    saml:
+      enabled: false
+      idpMetadata: ""
+    oidc:
+      enabled: false
+      issuer: ""
+      clientId: ""
+      clientSecret: ""
+    ldap:
+      enabled: false
+      url: ""
+      baseDn: ""
+      bindDn: ""
+      bindPassword: ""
+
+# ML and Analytics
+ml:
+  enabled: true
+  threatDetection: true
+  anomalyDetection: true
+  predictiveAnalysis: true
+  modelTraining:
+    enabled: true
+    schedule: "0 2 * * *"
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+      nvidia.com/gpu: 1
+    requests:
+      cpu: 2000m
+      memory: 4Gi
+
+# Multi-Cloud Support
+multiCloud:
+  enabled: true
+  providers:
+    aws:
+      enabled: true
+      region: "us-east-1"
+      vpcId: ""
+      subnetIds: []
+    azure:
+      enabled: false
+      subscriptionId: ""
+      resourceGroup: ""
+    gcp:
+      enabled: false
+      projectId: ""
+      region: "us-central1"
+
+# Advanced eBPF Scanner
+ebpf:
+  enabled: true
+  privileged: true
+  hostNetwork: true
+  hostPID: true
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+# Enterprise Observability
+observability:
+  openTelemetry:
+    enabled: true
+    endpoint: "http://jaeger-collector:14268/api/traces"
+    sampling: "1.0"
+  metrics:
+    enabled: true
+    port: 9090
+    exporters:
+      prometheus:
+        enabled: true
+      jaeger:
+        enabled: true
+  logging:
+    enabled: true
+    level: "info"
+    format: "json"
+    output: "elasticsearch"
+
+# Compliance and Reporting
+compliance:
+  enabled: true
+  standards:
+    - "eIDAS-2.0"
+    - "DORA"
+    - "NIST-PQC"
+    - "ISO-27001"
+    - "SOC2-Type2"
+  reporting:
+    enabled: true
+    schedule: "0 6 * * 1"  # Weekly on Monday
+    formats:
+      - "pdf"
+      - "json"
+      - "xml"
+    emailReports:
+      enabled: true
+      recipients: []
+
+# Backup and Disaster Recovery
+backup:
+  enabled: true
+  schedule: "0 1 * * *"  # Daily at 1 AM
+  retention: "30d"
+  storage:
+    type: "s3"  # s3, gcs, azure, local
+    s3:
+      bucket: "cryptobom-backups"
+      region: "us-east-1"
+      endpoint: ""
+      accessKey: ""
+      secretKey: ""
+
+# Enterprise Support
+support:
+  enabled: true
+  telemetry:
+    enabled: true
+    endpoint: "telemetry.rivic-q.io"
+  license:
+    server: "license.rivic-q.io"
+    checkInterval: "1h"
+
+# Feature Flags
+features:
+  quantumAttestation: true
+  advancedThreatDetection: true
+  mlAnalytics: true
+  multiCloudSupport: true
+  enterpriseSSO: true
+  advancedCompliance: true
+  hsmIntegration: true
+  realTimeMonitoring: true

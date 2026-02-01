@@ -1,0 +1,41 @@
+apiVersion: v2
+name: cryptobom-enterprise
+description: CryptoBOM Enterprise - Quantum-Resilient CBOM Platform with IBM Quantum Integration
+type: application
+version: 0.1.0
+appVersion: "2.0.0"
+keywords:
+  - cbom
+  - cryptographic
+  - security
+  - kubernetes
+  - cncf
+  - quantum
+  - enterprise
+  - ibm-quantum
+home: https://rivic-q.io/cryptobom-enterprise
+sources:
+  - https://github.com/rivic-q/cryptobom-saas
+maintainers:
+  - name: RivicQ Team
+    email: enterprise@rivic-q.io
+dependencies:
+  - name: postgresql
+    version: 12.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: database.enabled
+  - name: redis
+    version: 17.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: kube-prometheus-stack
+    version: 45.x.x
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus.enabled
+  - name: elasticsearch
+    version: 19.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: elasticsearch.enabled
+annotations:
+  category: Security
+  licenses: Commercial

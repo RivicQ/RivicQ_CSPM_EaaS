@@ -1,0 +1,35 @@
+apiVersion: v2
+name: cryptobom-oss
+description: CryptoBOM Open Source - CNCF-Compliant CBOM Management Platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - cbom
+  - cryptographic
+  - security
+  - kubernetes
+  - cncf
+  - observability
+home: https://github.com/rivic-q/cryptobom-saas
+sources:
+  - https://github.com/rivic-q/cryptobom-saas
+maintainers:
+  - name: RivicQ Team
+    email: team@rivic-q.io
+dependencies:
+  - name: postgresql
+    version: 12.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: database.enabled
+  - name: redis
+    version: 17.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: kube-prometheus-stack
+    version: 45.x.x
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus.enabled
+annotations:
+  category: Security
+  licenses: Apache-2.0

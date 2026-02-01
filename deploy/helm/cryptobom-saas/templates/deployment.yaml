@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cryptobom-saas.fullname" . }}
+  labels:
+    {{- include "cryptobom-saas.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "cryptobom-saas.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "cryptobom-saas.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cryptobom-saas.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      hostPID: {{ .Values.ebpf.hostPID | default true }}
+      hostNetwork: {{ .Values.ebpf.hostNetwork | default true }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ include "cryptobom-saas.image" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 8889
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: DATABASE_HOST
+              value: {{ if .Values.postgresql.enabled }}{{ printf "%s-postgresql" .Release.Name }}{{ else }}{{ .Values.externalDatabase.host }}{{ end }}
+            - name: DATABASE_PORT
+              value: {{ if .Values.postgresql.enabled }}"5432"{{ else }}"{{ .Values.externalDatabase.port }}"{{ end }}
+            - name: DATABASE_USER
+              value: {{ if .Values.postgresql.enabled }}"{{ .Values.postgresql.auth.postgresUsername }}"{{ else }}"{{ .Values.externalDatabase.user }}"{{ end }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.postgresql.enabled }}{{ printf "%s-postgresql" .Release.Name }}{{ else }}{{ .Values.externalDatabase.secret }}{{ end }}
+                  key: {{ if .Values.postgresql.enabled }}postgresql-password{{ else }}password{{ end }}
+            - name: DATABASE_NAME
+              value: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.auth.database }}{{ else }}{{ .Values.externalDatabase.name }}{{ end }}
+            - name: IBM_QUANTUM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-saas.fullname" . }}-secrets
+                  key: ibm-quantum-api-key
+                  optional: true
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-saas.fullname" . }}-secrets
+                  key: jwt-secret
+            - name: KUBERNETES_IN_CLUSTER
+              value: "true"
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: host-sys
+              mountPath: /host/sys
+              readOnly: true
+      volumes:
+        - name: host-proc
+          hostPath:
+            path: /proc
+        - name: host-sys
+          hostPath:
+            path: /sys
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
