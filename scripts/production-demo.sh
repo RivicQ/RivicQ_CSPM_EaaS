@@ -208,7 +208,7 @@ cleanup() {
 trap cleanup INT TERM
 
 # Check if we're in the right directory
-if [ ! -f "go.mod" ] || [ ! -d "cryptobom-saas" ]; then
+if [ ! -f "go.mod" ]; then
     echo -e "${RED}❌ Please run this script from the project root directory${NC}"
     exit 1
 fi

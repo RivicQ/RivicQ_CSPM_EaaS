@@ -11,8 +11,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/promhttp"
 	"github.com/rivic-q/cryptobom-saas/internal/api"
+	"github.com/rivic-q/cryptobom-saas/internal/cilium"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/rivic-q/cryptobom-saas/internal/observability"
@@ -60,6 +61,16 @@ func main() {
 	router.Use(api.CORS())
 	router.Use(api.Logging(logger))
 	router.Use(api.RequestID())
+
+	// Initialize Cilium scanner (background)
+	go func() {
+		ciliumScanner := cilium.NewCiliumCryptoScanner(logger)
+		if err := ciliumScanner.Start(context.Background()); err != nil {
+			logger.WithError(err).Error("Failed to start Cilium scanner")
+		} else {
+			logger.Info("Cilium crypto scanner started successfully")
+		}
+	}()
 
 	// Health check endpoint
 	router.GET("/healthz", func(c *gin.Context) {

@@ -2,8 +2,10 @@ package api
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -46,17 +48,7 @@ type CiliumMetricsResponse struct {
 // SetupRoutes configures all API routes
 func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger, cfg *config.Config) {
 	// API middleware
-	router.Use(gin.Recovery())
-	router.Use(gin.Logger())
-
-	// Cilium Integration
-	ciliumGroup := router.Group("/cilium")
-	{
-		ciliumGroup.GET("/flows", getCiliumCryptoFlows(db, logger))
-		ciliumGroup.GET("/policies", getCiliumNetworkPolicies(db, logger))
-		ciliumGroup.POST("/policies", createCiliumNetworkPolicy(db, logger))
-		ciliumGroup.GET("/metrics", getCiliumMetrics(db, logger))
-	}
+	router.Use(RequireAuth(cfg))
 
 	// CBOM Management
 	cbom := router.Group("/cbom")
@@ -75,6 +67,15 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		assetsGroup.GET("", listCryptoAssets(db, logger))
 		assetsGroup.GET("/:id", getCryptoAsset(db, logger))
 		assetsGroup.PUT("/:id", updateCryptoAsset(db, logger))
+	}
+
+	// Cilium Integration
+	ciliumGroup := router.Group("/cilium")
+	{
+		ciliumGroup.GET("/flows", getCiliumCryptoFlows(db, logger))
+		ciliumGroup.GET("/policies", getCiliumNetworkPolicies(db, logger))
+		ciliumGroup.POST("/policies", createCiliumNetworkPolicy(db, logger))
+		ciliumGroup.GET("/metrics", getCiliumMetrics(db, logger))
 	}
 
 	// Quantum Attestation
@@ -123,7 +124,8 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 // Cilium Flow Handlers
 func getCiliumCryptoFlows(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Simulate crypto flows from Cilium
+		// In real implementation, this would query Cilium flow logs
+		// For now, return simulated data
 		scanner := cilium.NewCiliumCryptoScanner(logger)
 		flows, err := scanner.GetCryptoFlows(c.Request.Context())
 		if err != nil {
@@ -181,14 +183,15 @@ func createCiliumNetworkPolicy(db *database.DB, logger *logrus.Logger) gin.Handl
 			return
 		}
 
+		// Generate ID
 		policy.Name = policy.Name + "-" + uuid.New().String()
 
-		// Log policy creation
+		// For demo, just log the policy creation
 		logger.WithFields(logrus.Fields{
 			"policy_name": policy.Name,
 			"namespace":   policy.Namespace,
 			"rules":       len(policy.CryptoRules),
-		}).Info("Created Cilium network policy")
+		}).Info("Created Cilium network policy (demo)")
 
 		c.JSON(http.StatusCreated, policy)
 	}
@@ -299,7 +302,7 @@ func createGrafanaDashboard(db *database.DB, logger *logrus.Logger) gin.HandlerF
 	return func(c *gin.Context) {
 		var config struct {
 			Enabled       bool   `json:"enabled"`
-			DataSource    string `json:"datasource"`
+			Datasource    string `json:"datasource"`
 			DashboardPath string `json:"dashboard_path"`
 			Theme         string `json:"theme"`
 			Refresh       string `json:"refresh"`
@@ -313,7 +316,7 @@ func createGrafanaDashboard(db *database.DB, logger *logrus.Logger) gin.HandlerF
 
 		logger.WithFields(logrus.Fields{
 			"enabled":        config.Enabled,
-			"datasource":     config.DataSource,
+			"datasource":     config.Datasource,
 			"dashboard_path": config.DashboardPath,
 			"theme":          config.Theme,
 			"refresh":        config.Refresh,
