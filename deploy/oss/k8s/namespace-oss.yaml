@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cryptobom-oss
+  labels:
+    name: cryptobom-oss
+    edition: oss

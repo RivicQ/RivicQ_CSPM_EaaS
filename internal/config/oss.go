@@ -8,17 +8,17 @@ import (
 
 // OSS Configuration for Open Source edition
 type OSSConfig struct {
-	Server   ServerConfig   `yaml:"server"`
-	Database DatabaseConfig `yaml:"database"`
-	Demo     DemoConfig     `yaml:"demo"`
-	Logging  LoggingConfig  `yaml:"logging"`
-	Cilium   CiliumConfig   `yaml:"cilium"`
+	Server   ServerConfig      `yaml:"server"`
+	Database OSSDatabaseConfig `yaml:"database"`
+	Demo     DemoConfig        `yaml:"demo"`
+	Logging  LoggingConfig     `yaml:"logging"`
+	Cilium   CiliumConfig      `yaml:"cilium"`
 }
 
 // Enterprise Configuration with IBMQ integration
 type EnterpriseConfig struct {
 	Server     ServerConfig             `yaml:"server"`
-	Database   DatabaseConfig           `yaml:"database"`
+	Database   EnterpriseDatabaseConfig `yaml:"database"`
 	Demo       DemoConfig               `yaml:"demo"`
 	Logging    LoggingConfig            `yaml:"logging"`
 	Cilium     CiliumConfig             `yaml:"cilium"`
@@ -122,7 +122,14 @@ type ServerConfig struct {
 	RateLimit int    `yaml:"rate_limit"`
 }
 
-type DatabaseConfig struct {
+type OSSDatabaseConfig struct {
+	URL     string `yaml:"url"`
+	Type    string `yaml:"type"`
+	SSL     bool   `yaml:"ssl"`
+	Timeout int    `yaml:"timeout"`
+}
+
+type EnterpriseDatabaseConfig struct {
 	URL     string `yaml:"url"`
 	Type    string `yaml:"type"`
 	SSL     bool   `yaml:"ssl"`
@@ -157,7 +164,7 @@ func LoadOSS() (*OSSConfig, error) {
 			CORS:      true,
 			RateLimit: 100,
 		},
-		Database: DatabaseConfig{
+		Database: OSSDatabaseConfig{
 			URL:     "sqlite:///tmp/cryptobom-oss.db",
 			Type:    "sqlite",
 			SSL:     false,
@@ -204,7 +211,7 @@ func LoadEnterprise() (*EnterpriseConfig, error) {
 			CORS:      true,
 			RateLimit: 1000,
 		},
-		Database: DatabaseConfig{
+		Database: EnterpriseDatabaseConfig{
 			URL:     "postgresql://user:pass@localhost:5432/cryptobom_enterprise",
 			Type:    "postgresql",
 			SSL:     true,

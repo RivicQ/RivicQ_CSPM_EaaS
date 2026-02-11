@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cryptobom-oss
+  namespace: cryptobom-oss
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cryptobom-oss
+  template:
+    metadata:
+      labels:
+        app: cryptobom-oss
+        edition: oss
+    spec:
+      containers:
+      - name: cryptobom-oss
+        image: rivic-q/cryptobom-oss:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: CRYPTOBOM_EDITION
+          value: "oss"
+        - name: CRYPTOBOM_LOG_LEVEL
+          value: "info"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cryptobom-oss-service
+  namespace: cryptobom-oss
+spec:
+  selector:
+    app: cryptobom-oss
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP

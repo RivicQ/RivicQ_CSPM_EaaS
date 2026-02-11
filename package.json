@@ -4,12 +4,21 @@
   "description": "[![CNCF](https://img.shields.io/badge/CNCF-Compliant-blue)](https://cncf.io) [![Go](https://img.shields.io/badge/Go-1.21+-blue)](https://golang.org) [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.20+-green)](https://kubernetes.io) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)",
   "main": "index.js",
   "directories": {
-    "doc": "docs"
+    "doc": "docs",
+    "test": "tests"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rivic-q/cryptobom-saas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rivic-q/cryptobom-saas/issues"
+  },
+  "homepage": "https://github.com/rivic-q/cryptobom-saas#readme"
 }

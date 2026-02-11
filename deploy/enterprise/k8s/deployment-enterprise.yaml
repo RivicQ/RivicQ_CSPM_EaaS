@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cryptobom-enterprise
+  namespace: cryptobom-enterprise
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cryptobom-enterprise
+  template:
+    metadata:
+      labels:
+        app: cryptobom-enterprise
+        edition: enterprise
+    spec:
+      containers:
+      - name: cryptobom-enterprise
+        image: rivic-q/cryptobom-enterprise:latest
+        ports:
+        - containerPort: 9090
+        env:
+        - name: CRYPTOBOM_EDITION
+          value: "enterprise"
+        - name: IBMQ_ENABLED
+          value: "true"
+        - name: IBMQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ibmq-secrets
+              key: api-key
+        - name: CRYPTOBOM_LOG_LEVEL
+          value: "info"
+        - name: ML_ENABLED
+          value: "true"
+        - name: ANALYTICS_ENABLED
+          value: "true"
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cryptobom-enterprise-service
+  namespace: cryptobom-enterprise
+spec:
+  selector:
+    app: cryptobom-enterprise
+  ports:
+  - port: 9090
+    targetPort: 9090
+  type: LoadBalancer
