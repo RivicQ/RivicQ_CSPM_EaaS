@@ -1,125 +1,149 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/promhttp"
 	"github.com/rivic-q/cryptobom-saas/internal/api"
-	"github.com/rivic-q/cryptobom-saas/internal/cilium"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
-	"github.com/rivic-q/cryptobom-saas/internal/observability"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	// Load configuration
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
-	}
-
 	// Initialize logger
 	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)
-	if cfg.Debug {
-		logger.SetLevel(logrus.DebugLevel)
-	}
 
-	// Initialize observability
-	otelShutdown, err := observability.InitOTEL(cfg.ServiceName, cfg.Version)
+	// Initialize configuration
+	cfg, err := config.Load()
 	if err != nil {
-		logger.Fatalf("Failed to initialize OpenTelemetry: %v", err)
+		log.Fatal("Failed to load configuration:", err)
 	}
-	defer otelShutdown(context.Background())
 
-	// Initialize database
-	db, err := database.NewConnection(cfg.Database)
-	if err != nil {
-		logger.Fatalf("Failed to connect to database: %v", err)
-	}
-	defer db.Close()
-
-	// Run database migrations
-	if err := database.RunMigrations(db, "migrations"); err != nil {
-		logger.Fatalf("Failed to run database migrations: %v", err)
-	}
+	// Initialize database (mock for demo)
+	db := &database.DB{}
 
 	// Initialize Gin router
 	router := gin.Default()
 
-	// Add middleware
-	router.Use(gin.Recovery())
-	router.Use(api.CORS())
-	router.Use(api.Logging(logger))
-	router.Use(api.RequestID())
-
-	// Initialize Cilium scanner (background)
-	go func() {
-		ciliumScanner := cilium.NewCiliumCryptoScanner(logger)
-		if err := ciliumScanner.Start(context.Background()); err != nil {
-			logger.WithError(err).Error("Failed to start Cilium scanner")
-		} else {
-			logger.Info("Cilium crypto scanner started successfully")
-		}
-	}()
-
-	// Health check endpoint
+	// Simple health check
 	router.GET("/healthz", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":    "ok",
-			"service":   cfg.ServiceName,
-			"version":   cfg.Version,
-			"timestamp": time.Now().UTC(),
+		c.JSON(200, gin.H{
+			"status":    "healthy",
+			"service":   "CryptoBOM SaaS",
+			"version":   "1.0.0",
+			"timestamp": time.Now().Format("2006-01-02T15:04:05Z07:00"),
 		})
 	})
 
-	// Metrics endpoint
-	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	// Setup API routes
+	apiGroup := router.Group("/api/v1")
+	api.SetupRoutes(apiGroup, db, logger, cfg)
 
-	// API routes
-	v1 := router.Group("/api/v1")
-	api.SetupRoutes(v1, db, logger, cfg)
+	// Demo dashboard endpoint (for LinkedIn demo)
+	apiGroup.GET("/dashboard/demo", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"cbom": []gin.H{
+				{
+					"id":         "1",
+					"name":       "Demo Production CBOM",
+					"version":    "1.0.0",
+					"status":     "ready",
+					"created_at": "2025-01-30T10:00Z",
+					"assets": []gin.H{
+						{
+							"id":           "1",
+							"name":         "Production TLS Certificate",
+							"algorithm":    "RSA-2048",
+							"key_size":     2048,
+							"risk_level":   "medium",
+							"quantum_safe": false,
+							"last_seen":    "2025-01-30T12:00Z",
+						},
+						{
+							"id":           "2",
+							"name":         "Database Encryption",
+							"algorithm":    "AES-256",
+							"key_size":     256,
+							"risk_level":   "low",
+							"quantum_safe": true,
+							"last_seen":    "2025-01-30T13:00Z",
+						},
+					},
+					"total_assets": 2,
+				},
+			},
+			"assets": []gin.H{
+				{
+					"id":           "1",
+					"name":         "Production TLS Certificate",
+					"algorithm":    "RSA-2048",
+					"key_size":     2048,
+					"location":     "k8s-ingress",
+					"risk_level":   "medium",
+					"quantum_safe": false,
+					"last_seen":    "2025-01-30T12:00Z",
+				},
+				{
+					"id":           "2",
+					"name":         "Database Encryption",
+					"algorithm":    "AES-256",
+					"key_size":     256,
+					"location":     "postgres-primary",
+					"risk_level":   "low",
+					"quantum_safe": true,
+					"last_seen":    "2025-01-30T13:00Z",
+				},
+				{
+					"id":           "3",
+					"name":         "API Keys",
+					"algorithm":    "RSA-3072",
+					"key_size":     3072,
+					"location":     "api-gateway",
+					"risk_level":   "high",
+					"quantum_safe": false,
+					"last_seen":    "2025-01-30T13:00Z",
+				},
+			},
+			"metrics": gin.H{
+				"total_assets":     42,
+				"quantum_safe":     15,
+				"vulnerabilities":  8,
+				"compliance_score": 85.5,
+				"last_scan":        "2025-01-30T00Z",
+			},
+		})
+	})
 
 	// Start server
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
+	port := ":8080"
+	fmt.Printf("🚀 CryptoBOM SaaS v%s\n", "1.0.0")
+	fmt.Printf("📊 Server running on port %s\n", port)
+	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", port)
+	fmt.Printf("🌐 Try: curl http://localhost:%s/api/v1/cbom\n", port)
+	fmt.Printf("🔍 Quantum-ready demo: http://localhost:%s/api/v1/cilium/metrics\n", port)
+	fmt.Printf("🎬 LinkedIn demo ready! 🎯\n")
 
-	logger.Infof("Starting CryptoBOM SaaS server on port %d", cfg.Port)
+	// Graceful shutdown setup
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
-	// Graceful shutdown
+	// Handle shutdown in goroutine
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatalf("Failed to start server: %v", err)
-		}
+		<-quit
+		fmt.Printf("\n🔹 Shutting down CryptoBOM SaaS...\n")
+		time.Sleep(2 * time.Second)
+		os.Exit(0)
 	}()
 
-	// Wait for interrupt signal
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	logger.Info("Shutting down server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		logger.Fatalf("Server forced to shutdown: %v", err)
+	// Start server
+	if err := router.Run(port); err != nil {
+		log.Fatal(err)
 	}
-
-	logger.Info("Server exited")
 }

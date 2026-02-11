@@ -15,11 +15,11 @@ import (
 
 // IBMQuantumClient provides integration with IBM Quantum Network for attestation
 type IBMQuantumClient struct {
-	apiKey    string
-	baseURL   string
-	network   string
-	client    *http.Client
-	logger    *logrus.Logger
+	apiKey  string
+	baseURL string
+	network string
+	client  *http.Client
+	logger  *logrus.Logger
 }
 
 // IBMQuantumConfig holds IBM Quantum connection configuration
@@ -33,46 +33,46 @@ type IBMQuantumConfig struct {
 
 // QuantumAttestationRequest represents a quantum attestation request
 type QuantumAttestationRequest struct {
-	Algorithm    string                 `json:"algorithm"`
-	KeySize      int                    `json:"key_size"`
-	Usage        string                 `json:"usage"`
-	Metadata     map[string]interface{} `json:"metadata"`
-	Timestamp    time.Time              `json:"timestamp"`
-	AttestationType string              `json:"attestation_type"`
+	Algorithm       string                 `json:"algorithm"`
+	KeySize         int                    `json:"key_size"`
+	Usage           string                 `json:"usage"`
+	Metadata        map[string]interface{} `json:"metadata"`
+	Timestamp       time.Time              `json:"timestamp"`
+	AttestationType string                 `json:"attestation_type"`
 }
 
 // QuantumAttestationResponse represents a quantum attestation response
 type QuantumAttestationResponse struct {
-	ID           string                 `json:"id"`
-	Status       string                 `json:"status"`
-	QuantumSafe  bool                   `json:"quantum_safe"`
-	Score        float64                `json:"score"`
-	Confidence   float64                `json:"confidence"`
-	Analysis     map[string]interface{} `json:"analysis"`
-	Recommendations []string           `json:"recommendations"`
-	AttestedAt   time.Time              `json:"attested_at"`
-	ExpiresAt    time.Time              `json:"expires_at"`
+	ID              string                 `json:"id"`
+	Status          string                 `json:"status"`
+	QuantumSafe     bool                   `json:"quantum_safe"`
+	Score           float64                `json:"score"`
+	Confidence      float64                `json:"confidence"`
+	Analysis        map[string]interface{} `json:"analysis"`
+	Recommendations []string               `json:"recommendations"`
+	AttestedAt      time.Time              `json:"attested_at"`
+	ExpiresAt       time.Time              `json:"expires_at"`
 }
 
 // QuantumNetworkInfo represents quantum network information
 type QuantumNetworkInfo struct {
-	Name        string    `json:"name"`
-	Nodes       int       `json:"nodes"`
-	Qubits      int       `json:"qubits"`
-	Fidelity    float64   `json:"fidelity"`
-	Status      string    `json:"status"`
-	LastUpdate  time.Time `json:"last_update"`
+	Name       string    `json:"name"`
+	Nodes      int       `json:"nodes"`
+	Qubits     int       `json:"qubits"`
+	Fidelity   float64   `json:"fidelity"`
+	Status     string    `json:"status"`
+	LastUpdate time.Time `json:"last_update"`
 }
 
 // PostQuantumAlgorithm represents a post-quantum cryptographic algorithm
 type PostQuantumAlgorithm struct {
-	Name         string  `json:"name"`
-	Type         string  `json:"type"` // KEM, Signature, Hybrid
-	KeySize      int     `json:"key_size"`
-	SecurityLevel int    `json:"security_level"`
-	QuantumSafe  bool    `json:"quantum_safe"`
-	Performance  float64 `json:"performance"` // relative to classical
-	Recommended  bool    `json:"recommended"`
+	Name          string  `json:"name"`
+	Type          string  `json:"type"` // KEM, Signature, Hybrid
+	KeySize       int     `json:"key_size"`
+	SecurityLevel int     `json:"security_level"`
+	QuantumSafe   bool    `json:"quantum_safe"`
+	Performance   float64 `json:"performance"` // relative to classical
+	Recommended   bool    `json:"recommended"`
 }
 
 // NewIBMQuantumClient creates a new IBM Quantum client
@@ -111,20 +111,22 @@ func NewIBMQuantumClient(config IBMQuantumConfig) (*IBMQuantumClient, error) {
 }
 
 // AttestAlgorithm performs quantum attestation for a cryptographic algorithm
+
+// AttestAlgorithm performs quantum attestation for a cryptographic algorithm
 func (q *IBMQuantumClient) AttestAlgorithm(ctx context.Context, req QuantumAttestationRequest) (*QuantumAttestationResponse, error) {
 	q.logger.WithFields(logrus.Fields{
 		"algorithm": req.Algorithm,
-		"key_size": req.KeySize,
-		"usage":    req.Usage,
+		"key_size":  req.KeySize,
+		"usage":     req.Usage,
 	}).Info("Performing quantum attestation")
 
 	// Prepare request payload
 	payload := map[string]interface{}{
 		"algorithm":        req.Algorithm,
-		"key_size":        req.KeySize,
-		"usage":           req.Usage,
-		"metadata":        req.Metadata,
-		"timestamp":       req.Timestamp,
+		"key_size":         req.KeySize,
+		"usage":            req.Usage,
+		"metadata":         req.Metadata,
+		"timestamp":        req.Timestamp,
 		"attestation_type": req.AttestationType,
 	}
 
@@ -261,9 +263,9 @@ func (q *IBMQuantumClient) ValidateQuantumSafety(ctx context.Context, algorithm 
 	req := QuantumAttestationRequest{
 		Algorithm:       algorithm,
 		KeySize:         keySize,
-		Usage:          "validation",
-		Metadata:       make(map[string]interface{}),
-		Timestamp:      time.Now(),
+		Usage:           "validation",
+		Metadata:        make(map[string]interface{}),
+		Timestamp:       time.Now(),
 		AttestationType: "quantum_safety_validation",
 	}
 
@@ -313,7 +315,7 @@ func (q *IBMQuantumClient) GetMigrationPath(ctx context.Context, fromAlgorithm s
 	}
 
 	q.logger.WithFields(logrus.Fields{
-		"from_algorithm": fromAlgorithm,
+		"from_algorithm":  fromAlgorithm,
 		"recommendations": len(migrationPath),
 	}).Info("Migration path retrieved")
 
@@ -342,16 +344,16 @@ func (q *IBMQuantumClient) MockAttestation(ctx context.Context, req QuantumAttes
 	}
 
 	return &QuantumAttestationResponse{
-		ID:           fmt.Sprintf("attest_%d", time.Now().Unix()),
-		Status:       "completed",
-		QuantumSafe:  quantumSafe,
-		Score:        score,
-		Confidence:   0.95,
+		ID:          fmt.Sprintf("attest_%d", time.Now().Unix()),
+		Status:      "completed",
+		QuantumSafe: quantumSafe,
+		Score:       score,
+		Confidence:  0.95,
 		Analysis: map[string]interface{}{
-			"algorithm":     req.Algorithm,
+			"algorithm":    req.Algorithm,
 			"key_size":     req.KeySize,
-			"quantum_risk": quantumSafe ? "low" : "high",
-			"nist_level":   quantumSafe ? "post-quantum" : "classical",
+			"quantum_risk": map[bool]string{true: "low", false: "high"}[quantumSafe],
+			"nist_level":   map[bool]string{true: "post-quantum", false: "classical"}[quantumSafe],
 		},
 		Recommendations: recommendations,
 		AttestedAt:      time.Now(),

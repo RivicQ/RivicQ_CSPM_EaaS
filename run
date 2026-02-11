@@ -1,0 +1,61 @@
+#!/bin/bash
+# CryptoBOM SaaS - Simple Commands
+
+# Function to find crypto directory
+find_cryptobom() {
+    if [ -f "go.mod" ] && grep -q "cryptobom-saas" go.mod; then
+        pwd
+    elif [ -d "$HOME/cryptobom-saas" ]; then
+        echo "$HOME/cryptobom-saas"
+    else
+        find $HOME -name "cryptobom-saas" -type d 2>/dev/null | head -1
+    fi
+}
+
+CRYPTOBOM=$(find_cryptobom)
+
+case "$1" in
+    "start")
+        echo "🚀 Starting CryptoBOM..."
+        cd "$CRYPTOBOM"
+        go build -o bin/cryptobom-server ./cmd/server/main.go
+        nohup ./bin/cryptobom-server > server.log 2>&1 &
+        sleep 3
+        echo "✅ Server running at: http://localhost:8080"
+        echo "📱 Dashboard: $CRYPTOBOM/web/demo-dashboard.html"
+        ;;
+    "stop")
+        echo "🛑 Stopping CryptoBOM..."
+        pkill -f cryptobom-server
+        echo "✅ Server stopped"
+        ;;
+    "restart")
+        echo "🔄 Restarting CryptoBOM..."
+        pkill -f cryptobom-server
+        sleep 2
+        cd "$CRYPTOBOM"
+        go build -o bin/cryptobom-server ./cmd/server/main.go
+        nohup ./bin/cryptobom-server > server.log 2>&1 &
+        sleep 3
+        echo "✅ Server restarted at: http://localhost:8080"
+        ;;
+    "status")
+        if curl -s http://localhost:8080/healthz >/dev/null; then
+            echo "✅ Server is running"
+        else
+            echo "❌ Server is not running"
+        fi
+        ;;
+    "open")
+        cd "$CRYPTOBOM"
+        xdg-open web/demo-dashboard.html 2>/dev/null || open web/demo-dashboard.html 2>/dev/null || echo "Open manually: $CRYPTOBOM/web/demo-dashboard.html"
+        ;;
+    *)
+        echo "CryptoBOM SaaS Commands:"
+        echo "  run   start     - Start server"
+        echo "  run   stop      - Stop server" 
+        echo "  run   restart   - Restart server"
+        echo "  run   status    - Check status"
+        echo "  run   open      - Open dashboard"
+        ;;
+esac

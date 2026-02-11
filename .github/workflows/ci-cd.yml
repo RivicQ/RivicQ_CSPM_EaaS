@@ -1,0 +1,452 @@
+name: CryptoBOM SaaS CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  GO_VERSION: '1.21'
+  NODE_VERSION: '18'
+
+jobs:
+  # Security Scanning
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          
+      - name: Gosec Security Scanner
+        uses: securecodewarrior/github-action-gosec@master
+        with:
+          args: '-no-fail -fmt sarif -out gosec.sarif ./...'
+          
+      - name: Golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=5m --out-format=github-actions
+          
+      - name: Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy.sarif'
+          
+      - name: OWASP Dependency Check
+        run: |
+          curl -sL https://dependencyci.org/dependency-check.sh | bash -s -- --project "CryptoBOM-SaaS" --scanPath ./
+          
+      - name: Upload Security Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            gosec.sarif
+            trivy.sarif
+            reports/
+
+  # Build and Test
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: security-scan
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: cryptobom
+          POSTGRES_DB: cryptobom_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+            
+      - name: Download dependencies
+        run: go mod download
+        
+      - name: Run Unit Tests
+        env:
+          DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_test?sslmode=disable
+        run: |
+          go test -v -race -coverprofile=coverage.out ./...
+          go tool cover -html=coverage.out -o coverage.html
+          
+      - name: Test OSS Build
+        run: |
+          ./build.sh oss latest
+          
+      - name: Test Enterprise Build
+        run: |
+          ./build.sh enterprise latest
+          
+      - name: Upload Test Coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-coverage
+          path: |
+            coverage.out
+            coverage.html
+            
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            bin/cryptobom-oss
+            bin/cryptobom-enterprise
+            
+  # Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: cryptobom
+          POSTGRES_DB: cryptobom_integration
+        ports:
+          - 5432:5432
+          
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          
+      - name: Start OSS Server
+        run: |
+          ./run-edition.sh oss start &
+          sleep 5
+          
+      - name: Start Enterprise Server
+        run: |
+          ./run-edition.sh enterprise start &
+          sleep 5
+          
+      - name: Run Integration Tests
+        env:
+          DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_integration?sslmode=disable
+        run: |
+          go test -v -tags=integration ./tests/integration/...
+          
+      - name: Upload Integration Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-results
+          path: tests/integration/results/
+
+  # Performance Tests
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          
+      - name: Run Performance Benchmarks
+        run: |
+          go test -v -bench=. -benchmem ./benchmarks/... > benchmark-results.txt
+          go test -run=TestPerformanceLoadTests ./tests/...
+          
+      - name: Upload Performance Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: |
+            benchmark-results.txt
+            cpu.prof
+            mem.prof
+
+  # Container Security and Build
+  container-build:
+    name: Container Build and Security
+    runs-on: ubuntu-latest
+    needs: [security-scan, build-and-test]
+    
+    strategy:
+      matrix:
+        edition: [oss, enterprise]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Build and Push Container
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deploy/docker/Dockerfile.${{ matrix.edition }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ matrix.edition }}-latest
+            ghcr.io/${{ github.repository }}:${{ matrix.edition }}-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Container Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository }}:${{ matrix.edition }}-latest
+          format: 'sarif'
+          output: 'container-scan.sarif'
+          
+      - name: Upload Container Security Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: container-security-${{ matrix.edition }}
+          path: container-scan.sarif
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [container-build, integration-tests]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.24'
+          
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+          
+      - name: Deploy OSS to Staging
+        run: |
+          helm upgrade --install cryptobom-oss ./deploy/helm/cryptobom-oss \
+            --namespace cryptobom-staging \
+            --set image.tag=latest \
+            --set environment=staging \
+            --wait --timeout=10m
+          
+      - name: Deploy Enterprise to Staging
+        run: |
+          helm upgrade --install cryptobom-enterprise ./deploy/helm/cryptobom-enterprise \
+            --namespace cryptobom-enterprise-staging \
+            --set image.tag=latest \
+            --set environment=staging \
+            --set ibmq.enabled=false \
+            --wait --timeout=10m
+          
+      - name: Run Smoke Tests
+        run: |
+          sleep 30 # Wait for deployment
+          kubectl get pods -n cryptobom-staging
+          kubectl get pods -n cryptobom-enterprise-staging
+          # Health check URLs
+          curl -f https://staging.cryptobom.io/oss/healthz
+          curl -f https://staging.cryptobom.io/enterprise/healthz
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [container-build, performance-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.24'
+          
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+          
+      - name: Deploy OSS to Production
+        run: |
+          helm upgrade --install cryptobom-oss ./deploy/helm/cryptobom-oss \
+            --namespace cryptobom-production \
+            --set image.tag=${{ github.sha }} \
+            --set environment=production \
+            --wait --timeout=15m \
+            --set resources.requests.cpu=500m \
+            --set resources.requests.memory=512Mi \
+            --set resources.limits.cpu=1000m \
+            --set resources.limits.memory=1Gi
+          
+      - name: Deploy Enterprise to Production
+        run: |
+          helm upgrade --install cryptobom-enterprise ./deploy/helm/cryptobom-enterprise \
+            --namespace cryptobom-enterprise-production \
+            --set image.tag=${{ github.sha }} \
+            --set environment=production \
+            --set ibmq.enabled=true \
+            --set ibmq.apiKey="${{ secrets.IBMQ_API_KEY }}" \
+            --wait --timeout=15m \
+            --set resources.requests.cpu=1000m \
+            --set resources.requests.memory=1Gi \
+            --set resources.limits.cpu=2000m \
+            --set resources.limits.memory=2Gi \
+            --set replicaCount=2
+          
+      - name: Production Health Check
+        run: |
+          sleep 60 # Wait for deployment
+          kubectl get pods -n cryptobom-production
+          kubectl get pods -n cryptobom-enterprise-production
+          curl -f https://cryptobom.io/oss/healthz
+          curl -f https://cryptobom.io/enterprise/healthz
+          
+      - name: Notify Deployment
+        run: |
+          curl -X POST "https://api.slack.com/webhooks/SLACK_WEBHOOK" \
+            -H 'Content-type: application/json' \
+            --data '{
+              "text": "🚀 CryptoBOM SaaS deployed to production!\nCommit: ${{ github.sha }}\nOSS: https://cryptobom.io/oss\nEnterprise: https://cryptobom.io/enterprise"
+            }'
+
+  # Benchmark Tests
+  benchmark-tests:
+    name: Benchmark and Dataset Tests
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[benchmark]')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          
+      - name: Generate Benchmark Datasets
+        run: |
+          go run cmd/generate-datasets/main.go \
+            --size=10000 \
+            --output=datasets/benchmark-data.json
+          
+      - name: Run Full Benchmark Suite
+        run: |
+          go test -v -bench=. -benchmem ./benchmarks/... \
+            -run=BenchmarkAPICalls \
+            -run=BenchmarkDatasetGeneration \
+            -cpuprofile=cpu.prof \
+            -memprofile=mem.prof \
+            --timeout=30m
+          
+      - name: Process Benchmark Results
+        run: |
+          go tool pprof cpu.prof > cpu-analysis.txt
+          go tool pprof mem.prof > mem-analysis.txt
+          go test -bench=. -benchmem ./benchmarks/... > benchmark-report.txt
+          
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: |
+            datasets/benchmark-data.json
+            cpu.prof
+            mem.prof
+            cpu-analysis.txt
+            mem-analysis.txt
+            benchmark-report.txt
+
+  # Documentation Build
+  docs-build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install Dependencies
+        run: |
+          cd docs/
+          npm ci
+          
+      - name: Build Documentation
+        run: |
+          cd docs/
+          npm run build
+          
+      - name: Deploy Documentation to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
+          destination_dir: docs

@@ -4,6 +4,29 @@ import (
 	"context"
 	"fmt"
 
+	appsv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	cryptobomv1alpha1 "github.com/rivic-q/cryptobom-saas/api/v1alpha1"
+)
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *CbomReportReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&cryobomv1alpha1.CbomReport{}).
+		Owns(&cryobomv1alpha1.CbomReportList{}).
+		Complete(&r); err != nil {
+		return fmt.Errorf("unable to create controller", "controller", "CbomReport")
+	}
+
+	return nil
+}
+
+import (
+	"context"
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
