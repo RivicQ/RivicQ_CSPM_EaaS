@@ -1,33 +1,67 @@
 # Demo Media
 
-This directory is intended for demo GIFs and videos showcasing CryptoBOM SaaS.
+This directory contains demo GIFs and videos showcasing CryptoBOM SaaS.
 
 ## 📹 Available Demos
 
-Currently, demo media should be added here. You can create or add:
+### 30-Second CBOM Scan Demo
+- **`demo-cbom-scan-30s.mp4`** - Quick 30-second demo of CBOM scanning activities
+- Shows: Asset Discovery → Analysis → Compliance → Report Generation
 
+### Additional Demos
 - `demo-dashboard.gif` - Dashboard walkthrough
-- `demo-quickstart.gif` - Quick start guide
+- `demo-quickstart.gif` - Quick start guide  
 - `demo-compliance.gif` - Compliance scanning demo
-- `demo-quantum.mp4` - Quantum integration demo
+- `demo-quantum.mp4` - Quantum integration demo (Enterprise)
+
+## 🎬 Demo Content (30 seconds)
+
+1. **0-5s**: Start scanner with `python examples/scan.py`
+2. **5-12s**: Kubernetes cluster scan discovers TLS certificates, database encryption
+3. **12-18s**: Algorithm analysis identifies RSA-4096 as quantum vulnerable
+4. **18-24s**: NIST compliance scan shows 85% score
+5. **24-30s**: CBOM report generated with recommendations
 
 ## 🎬 Creating Demos
 
-### Using FFmpeg
+### Using FFmpeg (30-second clip)
 ```bash
-ffmpeg -i input.mp4 -vf "fps=10,scale=800:-1" output.gif
+# Record 30-second screen capture
+ffmpeg -f x11grab -t 30 -r 30 -s 1920x1080 -i :0.0 demo-cbom-scan-30s.mp4
+
+# Or create optimized GIF
+ffmpeg -i demo-cbom-scan-30s.mp4 -vf "fps=15,scale=800:-1" -t 30 demo-cbom-scan-30s.gif
+
+# Compress for web
+ffmpeg -i input.mp4 -c:v libx264 -crf 28 -preset fast demo-optimized.mp4
 ```
 
-### Using OBS
-Record your screen and save to this directory.
+### Using OBS Studio
+1. Install OBS Studio
+2. Configure: Window Capture → Terminal/App
+3. Set recording to 30 seconds
+4. Start recording and run: `python examples/scan.py`
+5. Save as `demo-cbom-scan-30s.mp4`
+
+### Recommended Tools
+- **OBS**: https://obsproject.com
+- **LiceCAP**: https://licecap.en.softonic.com (GIF capture)
+- **asciinema**: https://asciinema.org (terminal recording)
 
 ## 📤 Sharing Demos
 
 Share demos via:
-- GitHub releases
-- Documentation website
-- Social media
+- GitHub Releases: https://github.com/rivic-q/cryptobom-saas/releases
+- Documentation: https://docs.rivicq.xyz
+- YouTube: https://youtube.com/@rivicq
+
+## 🔗 Links
+
+- **Live Demo**: https://demo.rivicq.xyz
+- **Documentation**: https://docs.rivicq.xyz
+- **GitHub**: https://github.com/rivic-q/cryptobom-saas
 
 ---
 
 **© 2026 RivicQ GmbH. All Rights Reserved.**
+*German Engineering Excellence in Quantum-Safe Cryptography*
