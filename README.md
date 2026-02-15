@@ -1,4 +1,6 @@
-# 🚀 CryptoBOM SaaS v1.3 - Multi-Language Quantum-Ready DevSecOps CBOM Platform
+# 🚀 CryptoBOM SaaS v1.3 - Open Source Edition
+
+## 🆓 Open Source Edition
 
 [![CNCF](https://img.shields.io/badge/CNCF-Compliant-blue)](https://cncf.io)
 [![DevSecOps](https://img.shields.io/badge/DevSecOps-Automated-green)](https://devsecops.org)
@@ -108,29 +110,36 @@
 - **Risk Assessment Engine** with quantum threat modeling
 - **Policy Enforcement** with automatic remediation
 
-## 📦 Editions
+## 📦 Edition
 
-### 🆓 Open Source Edition
+### 🆓 Open Source Edition (This Repository)
+This is the **Open Source Edition** of CryptoBOM SaaS. It includes:
 - Core CBOM management with classical discovery
 - Basic quantum integration with mock providers
 - Community support and documentation
 - Standard compliance frameworks
 - DevSecOps integration
+- eBPF-based cryptographic asset discovery
+- Kubernetes integration
+- Prometheus/Grafana monitoring
 
 ### 🏢 Enterprise Edition
+For enterprise features, please contact us:
 - **IBM Q Attestation** with real quantum computer access
 - **Multi-Language SDKs** with full quantum provider support
 - **Advanced DevSecOps** with automated pipeline integration
 - **Enterprise Support** (24/7 German engineering team)
 - **Quantum-Safe Migration** with NIST PQC algorithms
 - **Advanced Analytics** with ML-powered insights
+- **Multi-cloud deployment**
+- **Enterprise SSO (SAML/LDAP/OAuth)**
 
-### 📞 Contact for Enterprise
+## 📞 Contact for Enterprise / Sales
 - **Website**: https://rivic-q.io/enterprise
 - **Email**: enterprise@rivic-q.io
-- **Phone**: +49 (0) 30 12345678
 - **Sales**: sales@rivic-q.io
 - **Support**: support@rivic-q.io
+- **Phone**: +49 (0) 30 12345678
 - **German Headquarters**: RivicQ GmbH, Friedrichstraße 123, 10117 Berlin, Germany
 
 ## 🚀 Quick Start
