@@ -135,12 +135,16 @@ For enterprise features, please contact us:
 - **Enterprise SSO (SAML/LDAP/OAuth)**
 
 ## 📞 Contact for Enterprise / Sales
-- **Website**: https://rivic-q.io/enterprise
-- **Email**: enterprise@rivic-q.io
-- **Sales**: sales@rivic-q.io
-- **Support**: support@rivic-q.io
-- **Phone**: +49 (0) 30 12345678
-- **German Headquarters**: RivicQ GmbH, Friedrichstraße 123, 10117 Berlin, Germany
+
+### RivicQ GmbH
+- **Website**: https://rivicq.xyz/
+- **Founder**: Revan Ande
+- **Address**: Rudower Ch 29/6. Etage, 12489 Berlin, WISTA Innovations- und Gründungszentrum IGZ
+
+### LEAP BERLIN
+- **Address**: LEAP BERLIN, Friedrichstraße 123, 10117 Berlin, Germany
+- **Contact**: revan.ande@rivicq.xyz
+
 
 ## 🚀 Quick Start
 
