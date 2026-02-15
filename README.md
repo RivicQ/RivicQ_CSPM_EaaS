@@ -1,5 +1,18 @@
 # 🚀 CryptoBOM SaaS v1.3 - Open Source Edition
 
+## Badges
+
+[![License: R-OSL](https://img.shields.io/badge/License-RivicQ%20OSL-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.3.0-green)](VERSION)
+[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev)
+[![Node Version](https://img.shields.io/badge/Node-18+-339933?style=flat&logo=node)](https://nodejs.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)](https://docker.com)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.25+-326CE5?style=flat&logo=kubernetes)](https://kubernetes.io)
+[![Release](https://img.shields.io/badge/Release-v1.3.0-FF9900)](RELEASE.md)
+[![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen)](CONTRIBUTING.md)
+[![Tests](https://img.shields.io/badge/Tests-Comprehensive-success)](tests/)
+[![IP Rights](https://img.shields.io/badge/IP-RivicQ%20GmbH-red)](#-intellectual-property--trademark-notice)
+
 ## 🆓 Open Source Edition
 
 [![CNCF](https://img.shields.io/badge/CNCF-Compliant-blue)](https://cncf.io)
@@ -139,11 +152,8 @@ For enterprise features, please contact us:
 ### RivicQ GmbH
 - **Website**: https://rivicq.xyz/
 - **Founder**: Revan Ande
-- **Address**: Rudower Ch 29/6. Etage, 12489 Berlin, WISTA Innovations- und Gründungszentrum IGZ
-
-### LEAP BERLIN
-- **Address**: LEAP BERLIN, Friedrichstraße 123, 10117 Berlin, Germany
-- **Contact**: revan.ande@rivicq.xyz
+- **Address**: LEAP BERLIN - Rudower Chaussee 29, 12489 Berlin, Germany
+- **Location**: WISTA Innovations- und Gründungszentrum (IGZ)
 
 
 ## 🚀 Quick Start
@@ -427,25 +437,26 @@ cryptobom-engine --batch-mode --quantum-optimization
 ### 🏢 RivicQ GmbH - German Engineering Excellence
 **Corporate Headquarters**  
 RivicQ GmbH  
-Friedrichstraße 123  
-10117 Berlin, Germany  
+LEAP BERLIN - Rudower Chaussee 29  
+12489 Berlin, Germany  
+WISTA Innovations- und Gründungszentrum (IGZ)
 
 **Contact Centers**  
 - **🏢 Berlin HQ**: +49 (0) 30 12345678  
-- **📧 Email**: enterprise@rivic-q.io  
-- **🌐 Website**: https://rivic-q.io/enterprise  
+- **📧 Email**: enterprise@rivicq.xyz  
+- **🌐 Website**: https://rivicq.xyz/enterprise  
 
 **Technical Support (24/7)**  
-- **🛠️ Support Portal**: https://portal.rivic-q.io/support  
+- **🛠️ Support Portal**: https://portal.rivicq.xyz/support  
 - **📞 24/7 Hotline**: +49 (0) 800 1234567  
-- **📧 Technical Support**: support@rivic-q.io  
+- **📧 Technical Support**: support@rivicq.xyz  
 - **🚨 Emergency Hotline**: +49 (0) 180 12345678  
 
 **Sales & Partnerships**  
-- **💼 Sales**: sales@rivic-q.io  
-- **🤝 Partnerships**: partners@rivic-q.io  
-- **🔬 Quantum Research**: quantum@rivic-q.io  
-- **👥 Developer Relations**: devrel@rivic-q.io  
+- **💼 Sales**: sales@rivicq.xyz  
+- **🤝 Partnerships**: partners@rivicq.xyz  
+- **🔬 Quantum Research**: quantum@rivicq.xyz  
+- **👥 Developer Relations**: devrel@rivicq.xyz  
 
 **Regional Offices**  
 - **🇺🇸 New York**: +1 (212) 555-0123  
@@ -629,6 +640,61 @@ variable "kipu_api_key" {
   sensitive   = true
 }
 ```
+
+---
+
+## 🏛️ Intellectual Property & Trademark Notice
+
+**⚠️ IMPORTANT LEGAL NOTICE**
+
+All intellectual property rights in this software, including but not limited to:
+
+| Category | Examples |
+|----------|----------|
+| **Trademarks** | "RivicQ", "CryptoBOM", "CryptoBOM SaaS", logos, branding |
+| **Source Code** | All algorithms, implementations, APIs, architecture |
+| **Design Rights** | UI/UX, graphics, icons, layout, visual elements |
+| **Documentation** | Technical docs, manuals, guides, tutorials |
+| **Patents** | Quantum computing innovations, PQC algorithms |
+| **Trade Dress** | Product appearance, packaging, website design |
+
+**ARE AND SHALL REMAIN THE EXCLUSIVE PROPERTY OF RivicQ GmbH** under:
+
+- 🇩🇪 German Civil Code (BGB) - §§ 823, 903-909
+- 🇩🇪 German Copyright Act (UrhG) - §§ 2, 7, 15-19a, 31-32, 37
+- 🇩🇪 German Trademark Act (MarkenG) - §§ 1, 4, 5, 14, 15
+- 🇪🇺 EU Copyright Directive (2019/790)
+- 🇪🇺 EU Trademark Regulation (2017/1001)
+- 🌐 Berne Convention, TRIPS, WCT, Paris Convention
+
+### Trademark Restrictions
+
+The following are **PROHIBITED** without explicit written permission from RivicQ GmbH:
+
+- ❌ Using "RivicQ" or "CryptoBOM" in company/product names
+- ❌ Using RivicQ logos or modified versions
+- ❌ Claiming ownership of RivicQ intellectual property
+- ❌ Creating derivative works suggesting RivicQ endorsement
+- ❌ Using trademarks in ways that cause confusion
+
+### License
+
+This software is licensed under the **RivicQ Open Source License (R-OSL)**. See [LICENSE](LICENSE) file for full details.
+
+### Jurisdiction
+
+This license is governed by German law. Disputes shall be resolved through arbitration in Berlin, Germany under ICC rules.
+
+---
+
+## 📞 Contact
+
+### RivicQ GmbH
+- **Website:** https://rivicq.xyz
+- **Enterprise:** enterprise@rivicq.xyz
+- **Support:** support@rivicq.xyz
+- **Legal:** legal@rivicq.xyz
+- **Address:** LEAP BERLIN - Rudower Chaussee 29, 12489 Berlin, Germany (WISTA IGZ)
 
 ---
 

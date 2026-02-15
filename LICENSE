@@ -1,0 +1,154 @@
+# Open Software License Agreement - CryptoBOM SaaS
+
+**Version**: 1.3.0  
+**Edition**: Open Source  
+**Effective Date**: 2026  
+**Licensor**: RivicQ GmbH  
+
+---
+
+## ⚖️ LICENSE GRANT
+
+This software is licensed under the **RivicQ Open Source License (R-OSL)** - a permissive open source license designed to encourage collaboration while protecting intellectual property.
+
+Copyright (c) 2026 RivicQ GmbH. All rights reserved.
+
+### Permissions
+
+This license grants you the following rights:
+
+- ✅ **Commercial Use** - You may use this software for commercial purposes
+- ✅ **Distribution** - You may distribute this software
+- ✅ **Modification** - You may modify this software
+- ✅ **Private Use** - You may use this software privately
+- ✅ **Sublicensing** - You may sublicense under compatible open source licenses
+
+### Conditions
+
+- You must include this license and copyright notice in all copies or substantial portions
+- You must attribute RivicQ GmbH as the original creator
+- Modified files must carry prominent notices stating you changed the software
+- You must not misrepresent the origin of this software
+
+---
+
+## 🔐 INTELLECTUAL PROPERTY NOTICE
+
+### Ownership
+
+**ALL INTELLECTUAL PROPERTY RIGHTS**, including but not limited to:
+
+- 📐 **Design Rights** - All UI/UX designs, graphics, logos, icons, layout, and visual elements
+- 💻 **Source Code** - All algorithms, implementations, APIs, and software architecture  
+- 📊 **Trademarks** - "RivicQ", "CryptoBOM", "CryptoBOM SaaS", and associated logos
+- 📚 **Documentation** - All technical documentation, manuals, and guides
+- 🎨 **Trade Dress** - Product packaging, website design, and overall appearance
+- 🔬 **Quantum Computing Innovations** - All quantum-related algorithms and implementations
+
+**ARE AND SHALL REMAIN THE EXCLUSIVE PROPERTY OF RivicQ GmbH** under German law (German Civil Code - BGB, Urheberrechtsgesetz - UrhG) and international intellectual property treaties including:
+
+- 🇩🇪 **German Civil Code (BGB)** - §§ 823, 903-909
+- 🇩🇪 **German Copyright Act (UrhG)** - §§ 2, 7, 15, 16, 17, 18, 19a, 31, 32, 32a, 37
+- 🇩🇪 **German Trademark Act (MarkenG)** - §§ 1, 4, 5, 14, 15
+- 🇩🇪 **German Designs Act (GeschmacksmusterG)** - Design protection
+- 🇪🇺 **EU Copyright Directive (2019/790)**
+- 🇪🇺 **EU Trademark Regulation (2017/1001)**
+- 🌐 **Berne Convention** - International copyright protection
+- 🌐 **TRIPS Agreement** - Trade-Related Aspects of IP Rights
+- 🌐 **WIPO Copyright Treaty (WCT)**
+- 🌐 **Paris Convention** - Industrial property protection
+- 🌐 **Agreement on Trade-Related Aspects of IP Rights (TRIPS)**
+
+### RivicQ Trademark Restrictions
+
+The following are **PROHIBITED** without explicit written permission from RivicQ GmbH:
+
+- ❌ Using "RivicQ" or "CryptoBOM" in company/product names
+- ❌ Using RivicQ logos or modified versions
+- ❌ Claiming ownership of RivicQ intellectual property
+- ❌ Creating derivative works that suggest RivicQ endorsement
+- ❌ Using RivicQ trademarks in a way that causes confusion
+
+---
+
+## ⚛️ QUANTUM COMPUTING PATENT NOTICE
+
+This software includes quantum computing implementations that may be subject to:
+
+- **RivicQ Patents** - Pending and granted patents on quantum-safe cryptographic algorithms
+- **IBM Quantum Integration** - Subject to IBM Quantum terms of service
+- **KIPU Q-CTRL Integration** - Subject to Q-CTRL terms of service
+
+---
+
+## 🏢 ENTERPRISE EDITION
+
+The Open Source Edition is limited to:
+
+- Basic CBOM management with classical discovery
+- Mock quantum providers for testing
+- Community support
+- Standard compliance frameworks
+- Basic DevSecOps integration
+
+**For Full Enterprise Features:**
+- Real IBM Quantum computer access
+- Advanced quantum provider support
+- Multi-language SDKs (Python, Java, Rust, C++, C, Ruby)
+- TÜV-certified German engineering
+- 24/7 Enterprise Support
+- SOC 2, PCI DSS, HIPAA, FedRAMP compliance
+- Full NIST PQC algorithm support
+- Advanced analytics and ML features
+- Enterprise SSO (SAML/LDAP/OAuth)
+
+**Contact:** enterprise@rivicq.xyz  
+**Website:** https://rivicq.xyz/enterprise
+
+---
+
+## ⚠️ DISCLAIMER
+
+**THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.**
+
+RIVICQ GMBH DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:
+
+- MERCHANTABILITY
+- FITNESS FOR A PARTICULAR PURPOSE  
+- NON-INFRINGEMENT
+- TITLE
+
+RIVICQ GMBH SHALL NOT BE LIABLE FOR ANY DAMAGES ARISING FROM THE USE OF THIS SOFTWARE.
+
+---
+
+## 📞 CONTACT
+
+**RivicQ GmbH**  
+LEAP BERLIN - Rudower Chaussee 29  
+12489 Berlin, Germany  
+WISTA Innovations- und Gründungszentrum (IGZ)  
+
+**Website:** https://rivicq.xyz  
+**Enterprise:** enterprise@rivicq.xyz  
+**Support:** support@rivicq.xyz
+
+---
+
+## 🏛️ GOVERNING LAW
+
+This license shall be governed by and construed in accordance with:
+
+1. German law (Bundesrepublik Deutschland)
+2. Laws of the European Union
+3. International treaties and conventions
+
+**Jurisdiction:** Berlin, Germany
+
+Any disputes shall be resolved under the rules of arbitration of the International Chamber of Commerce (ICC) by arbitration in Berlin, Germany.
+
+---
+
+**© 2026 RivicQ GmbH. All Rights Reserved.**
+
+*German Engineering Excellence in Quantum-Safe Cryptography*

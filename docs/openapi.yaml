@@ -1,0 +1,639 @@
+openapi: 3.0.3
+info:
+  title: CryptoBOM SaaS API
+  description: |
+    ## Quantum-Safe Cryptographic Bill of Materials Management
+    
+    CryptoBOM SaaS provides comprehensive cryptographic asset discovery, analysis, 
+    and compliance management with quantum computing integration.
+    
+    ### Features
+    - Multi-provider asset discovery
+    - Quantum vulnerability assessment
+    - Compliance framework support (NIST, ISO, BSI, SOX, PCI-DSS)
+    - DevSecOps pipeline integration
+    - Post-quantum migration planning
+    
+    ### Editions
+    - **OSS Edition**: Basic CBOM with mock quantum providers
+    - **Enterprise Edition**: Full IBM Quantum, KIPU Q-CTRL, multi-language SDKs
+    
+    ### IP Notice
+    All intellectual property rights are the exclusive property of **RivicQ GmbH** 
+    under German and international law.
+  version: 1.3.0
+  contact:
+    name: RivicQ GmbH
+    url: https://rivicq.xyz
+    email: enterprise@rivicq.xyz
+  license:
+    name: RivicQ Open Source License (R-OSL)
+    url: https://github.com/rivic-q/cryptobom-saas/blob/main/LICENSE
+  termsOfService: https://rivicq.xyz/terms
+
+servers:
+  - url: http://localhost:9090
+    description: Local development server
+  - url: https://api.cryptobom.oss.rivicq.xyz
+    description: OSS Edition cloud endpoint
+  - url: https://api.cryptobom.enterprise.rivicq.xyz
+    description: Enterprise Edition cloud endpoint
+
+tags:
+  - name: Assets
+    description: Cryptographic asset discovery and management
+  - name: Analysis
+    description: Vulnerability and compliance analysis
+  - name: Quantum
+    description: Quantum computing integration (Enterprise)
+  - name: DevSecOps
+    description: CI/CD pipeline integration
+  - name: Compliance
+    description: Compliance framework management
+  - name: Health
+    description: System health and status
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check endpoint
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/assets:
+    get:
+      tags:
+        - Assets
+      summary: List all cryptographic assets
+      operationId: listAssets
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: filter
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of assets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - Assets
+      summary: Create a new cryptographic asset
+      operationId: createAsset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetInput'
+      responses:
+        '201':
+          description: Asset created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/assets/{assetId}:
+    get:
+      tags:
+        - Assets
+      summary: Get asset by ID
+      operationId: getAsset
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Asset details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Assets
+      summary: Update asset
+      operationId: updateAsset
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetInput'
+      responses:
+        '200':
+          description: Asset updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Assets
+      summary: Delete asset
+      operationId: deleteAsset
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Asset deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/engine/discover:
+    post:
+      tags:
+        - Assets
+      summary: Discover cryptographic assets
+      operationId: discoverAssets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscoveryRequest'
+      responses:
+        '200':
+          description: Discovery completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoveryResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/engine/analyze:
+    post:
+      tags:
+        - Analysis
+      summary: Analyze cryptographic asset
+      operationId: analyzeAsset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisRequest'
+      responses:
+        '200':
+          description: Analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/engine/compliance-scan:
+    post:
+      tags:
+        - Compliance
+      summary: Full compliance scan
+      operationId: complianceScan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplianceScanRequest'
+      responses:
+        '200':
+          description: Compliance scan completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceReport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/engine/devsecops-assess:
+    post:
+      tags:
+        - DevSecOps
+      summary: DevSecOps pipeline assessment
+      operationId: devsecopsAssess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevSecOpsRequest'
+      responses:
+        '200':
+          description: Assessment completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevSecOpsResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/engine/quantum-attest:
+    post:
+      tags:
+        - Quantum
+      summary: IBM Quantum attestation (Enterprise)
+      operationId: quantumAttest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuantumAttestationRequest'
+      responses:
+        '200':
+          description: Attestation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantumAttestationResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/engine/quantum-providers:
+    get:
+      tags:
+        - Quantum
+      summary: List available quantum providers
+      operationId: listQuantumProviders
+      responses:
+        '200':
+          description: List of quantum providers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantumProviders'
+
+  /api/v1/engine/migration-plan:
+    post:
+      tags:
+        - Quantum
+      summary: Generate post-quantum migration plan
+      operationId: migrationPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MigrationPlanRequest'
+      responses:
+        '200':
+          description: Migration plan generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MigrationPlan'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        edition:
+          type: string
+          enum: [oss, enterprise]
+
+    Asset:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        algorithm:
+          type: string
+        keySize:
+          type: integer
+        usage:
+          type: string
+        quantumVulnerable:
+          type: boolean
+        complianceFrameworks:
+          type: array
+          items:
+            type: string
+        discoveredAt:
+          type: string
+          format: date-time
+        lastAnalyzed:
+          type: string
+          format: date-time
+
+    AssetInput:
+      type: object
+      required:
+        - name
+        - algorithm
+      properties:
+        name:
+          type: string
+        algorithm:
+          type: string
+        keySize:
+          type: integer
+        usage:
+          type: string
+        complianceFrameworks:
+          type: array
+          items:
+            type: string
+
+    AssetList:
+      type: object
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    DiscoveryRequest:
+      type: object
+      properties:
+        sources:
+          type: array
+          items:
+            type: string
+            enum: [kubernetes, container, repository, network, ebpf]
+        providers:
+          type: array
+          items:
+            type: string
+
+    DiscoveryResult:
+      type: object
+      properties:
+        discovered:
+          type: integer
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+        duration:
+          type: integer
+
+    AnalysisRequest:
+      type: object
+      properties:
+        assetId:
+          type: string
+        providers:
+          type: array
+          items:
+            type: string
+        complianceFrameworks:
+          type: array
+          items:
+            type: string
+
+    AnalysisResult:
+      type: object
+      properties:
+        assetId:
+          type: string
+        quantumAnalysis:
+          type: object
+        complianceAnalysis:
+          type: object
+        recommendations:
+          type: array
+          items:
+            type: string
+
+    ComplianceScanRequest:
+      type: object
+      properties:
+        frameworks:
+          type: array
+          items:
+            type: string
+        scope:
+          type: string
+
+    ComplianceReport:
+      type: object
+      properties:
+        framework:
+          type: string
+        score:
+          type: integer
+        findings:
+          type: array
+          items:
+            type: object
+
+    DevSecOpsRequest:
+      type: object
+      properties:
+        pipeline:
+          type: string
+        includeQuantum:
+          type: boolean
+        complianceFrameworks:
+          type: array
+          items:
+            type: string
+
+    DevSecOpsResult:
+      type: object
+      properties:
+        pipeline:
+          type: string
+        quantumVulnerabilities:
+          type: integer
+        complianceViolations:
+          type: integer
+
+    QuantumAttestationRequest:
+      type: object
+      required:
+        - assetId
+        - algorithm
+      properties:
+        assetId:
+          type: string
+        algorithm:
+          type: string
+        provider:
+          type: string
+          enum: [ibmq, kipu, mock]
+
+    QuantumAttestationResult:
+      type: object
+      properties:
+        assetId:
+          type: string
+        quantumSafe:
+          type: boolean
+        executionTime:
+          type: integer
+        qiskitCircuit:
+          type: string
+
+    QuantumProviders:
+      type: object
+      properties:
+        providers:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              status:
+                type: string
+              qubits:
+                type: integer
+
+    MigrationPlanRequest:
+      type: object
+      properties:
+        assets:
+          type: array
+          items:
+            type: string
+        targetFramework:
+          type: string
+
+    MigrationPlan:
+      type: object
+      properties:
+        phases:
+          type: array
+          items:
+            type: object
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    Forbidden:
+      description: Forbidden - Enterprise feature
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              enterprise:
+                type: boolean
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+  - OAuth2:
+      - read
+      - write
+
+externalDocs:
+  description: Full documentation
+  url: https://docs.rivicq.xyz
