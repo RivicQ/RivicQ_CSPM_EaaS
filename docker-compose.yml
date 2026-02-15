@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    image: golang:1.25-alpine
+    container_name: cryptobom-saas
+    working_dir: /home/re1/cryptobom-saas
+    volumes:
+      - .:/home/re1/cryptobom-saas
+    ports:
+      - "9090:9090"
+    environment:
+      - EDITION=oss
+      - LOG_LEVEL=info
+    command: |
+      sh -c "go run src/cmd/server/main.go"
+    networks:
+      - cryptobom-net
+
+  web:
+    image: node:18-alpine
+    container_name: cryptobom-web
+    working_dir: /app/web
+    volumes:
+      - ./web:/app/web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:9090
+    command: npm start
+    networks:
+      - cryptobom-net
+    depends_on:
+      - app
+
+  scanner:
+    image: python:3.11-alpine
+    container_name: cryptobom-scanner
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: |
+      sh -c "pip install requests && python examples/scan.py --target all --output /app/cbom.json"
+    networks:
+      - cryptobom-net
+
+networks:
+  cryptobom-net:
+    driver: bridge

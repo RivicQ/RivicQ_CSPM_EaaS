@@ -1,17 +1,26 @@
-# 🚀 CryptoBOM SaaS v1.3 - Open Source Edition
+# 🔐 CryptoBOM SaaS v1.3 - Open Source Edition
 
 ## Badges
 
-[![License: R-OSL](https://img.shields.io/badge/License-RivicQ%20OSL-blue.svg)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/rivic-q/cryptobom-saas?style=social)](https://github.com/rivic-q/cryptobom-saas/stargazers)
+[![Forks](https://img.shields.io/github/forks/rivic-q/cryptobom-saas?style=social)](https://github.com/rivic-q/cryptobom-saas/network)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.3.0-green)](VERSION)
-[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://go.dev)
+[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)](https://go.dev)
 [![Node Version](https://img.shields.io/badge/Node-18+-339933?style=flat&logo=node)](https://nodejs.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)](https://docker.com)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.25+-326CE5?style=flat&logo=kubernetes)](https://kubernetes.io)
-[![Release](https://img.shields.io/badge/Release-v1.3.0-FF9900)](RELEASE.md)
+[![Release](https://img.shields.io/badge/Release-v0.1.0-FF9900)](RELEASE.md)
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen)](CONTRIBUTING.md)
 [![Tests](https://img.shields.io/badge/Tests-Comprehensive-success)](tests/)
 [![IP Rights](https://img.shields.io/badge/IP-RivicQ%20GmbH-red)](#-intellectual-property--trademark-notice)
+
+## ⚡ Quick Start (One-Liner)
+
+```bash
+# Docker Compose - Full CBOM Scanner in 30 seconds!
+docker compose up -d && docker compose exec app python examples/scan.py --target all --output cbom.json
+```
 
 ## 🆓 Open Source Edition
 
