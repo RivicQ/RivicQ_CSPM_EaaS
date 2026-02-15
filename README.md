@@ -356,7 +356,7 @@ POST /api/v1/engine/compliance-roadmap   # Compliance improvement roadmap
 | Provider    | Qubits | Fidelity | Gate Time | Error Correction | Enterprise Support |
 |------------|---------|----------|-----------|-----------------|-------------------|
 | IBM Quantum | 27      | 99.4%    | 200ns     | Surface Codes    | ✅ Full           |
-| KIPU Q-CTRL| 1000    | 99.9%    | 100ns     | Advanced Codes   | ✅ Full           |
+| KIPU/ Q-CTRL| < 1000    | 99.9%    | 100ns     | Advanced Codes   | ✅ Full           |
 | Mock        | ∞      | 100%      | 10ns      | Perfect Codes    | ❌ Testing Only    |
 
 ## 🛡️ Security & Compliance
@@ -454,45 +454,21 @@ LEAP BERLIN - Rudower Chaussee 29
 WISTA Innovations- und Gründungszentrum (IGZ)
 
 **Contact Centers**  
-- **🏢 Berlin HQ**: +49 (0) 30 12345678  
+- **🏢 Berlin HQ**: hello@rivic.xyz
 - **📧 Email**: enterprise@rivicq.xyz  
 - **🌐 Website**: https://rivicq.xyz/enterprise  
 
-**Technical Support (24/7)**  
+**Technical Support (24/7)** coming soon  
 - **🛠️ Support Portal**: https://portal.rivicq.xyz/support  
-- **📞 24/7 Hotline**: +49 (0) 800 1234567  
+- **📞 24/7 Hotline**:
 - **📧 Technical Support**: support@rivicq.xyz  
-- **🚨 Emergency Hotline**: +49 (0) 180 12345678  
+- **🚨 Emergency Hotline**:   
 
 **Sales & Partnerships**  
 - **💼 Sales**: sales@rivicq.xyz  
 - **🤝 Partnerships**: partners@rivicq.xyz  
 - **🔬 Quantum Research**: quantum@rivicq.xyz  
 - **👥 Developer Relations**: devrel@rivicq.xyz  
-
-**Regional Offices**  
-- **🇺🇸 New York**: +1 (212) 555-0123  
-- **🇬🇧 London**: +44 (20) 7123-4567  
-- **🇯🇵 Tokyo**: +81 (3) 5432-1987  
-- **🇸🇬 Sydney**: +61 (2) 9374-5678  
-
-## 🏆 Enterprise Success Stories
-
-### 🏦 Global Financial Services
-*"IBM Q attestation with RivicQ helped us meet ECB quantum safety requirements 6 months ahead of schedule. The German engineering quality gives us confidence for the post-quantum era."*  
-— **Chief Information Security Officer**, European Central Bank
-
-### 🇩🇪 German Automotive
-*"RivicQ's DevSecOps integration reduced our cryptographic compliance reporting time by 90% while improving accuracy. The TÜV certification and quantum-safe migration planning are critical for our industry."*  
-— **Chief Technology Officer**, Premium Automotive Manufacturer
-
-### 🏥 Healthcare & Life Sciences
-*"The multi-language SDK support allowed our diverse development teams to standardize on quantum-safe cryptography. RivicQ's German engineering excellence ensures HIPAA compliance with future-ready quantum resistance."*  
-— **Chief Security Officer**, Leading Healthcare Network
-
-### 🏛️ Government & Defense
-*"RivicQ provides the quantum-safe cryptographic foundation our national security infrastructure requires. The combination of IBM Q integration and German engineering quality meets our most stringent requirements."*  
-— **Director of Cybersecurity**, Federal Cybersecurity Agency
 
 ## 📋 DevSecOps Integration Features
 
@@ -712,7 +688,7 @@ This license is governed by German law. Disputes shall be resolved through arbit
 
 ## 🚀 Start Your Quantum-Ready DevSecOps Journey Today
 
-**[⭐ Try OSS Version](https://github.com/rivic-q/cryptobom-saas)** | **[🏢 Contact Enterprise](https://rivic-q.io/enterprise)** | **[📖 Read Full Documentation](https://docs.rivic-q.io)**
+**[⭐ Try OSS Version](https://github.com/rivic-q/cryptobom-saas)** | **[🏢 Contact Enterprise](https://rivicq.xyz/enterprise)** | **[📖 Read Full Documentation](https://docs.rivicq.xyz)**
 
 ---
 
