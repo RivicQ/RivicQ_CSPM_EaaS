@@ -454,21 +454,18 @@ LEAP BERLIN - Rudower Chaussee 29
 WISTA Innovations- und Gründungszentrum (IGZ)
 
 **Contact Centers**  
-- **🏢 Berlin HQ**: hello@rivic.xyz
+- **🏢 Berlin HQ**: hello@rivicq.xyz
 - **📧 Email**: enterprise@rivicq.xyz  
 - **🌐 Website**: https://rivicq.xyz/enterprise  
 
 **Technical Support (24/7)** coming soon  
 - **🛠️ Support Portal**: https://portal.rivicq.xyz/support  
 - **📞 24/7 Hotline**:
-- **📧 Technical Support**: support@rivicq.xyz  
+- **📧 Technical Support**:
 - **🚨 Emergency Hotline**:   
 
 **Sales & Partnerships**  
-- **💼 Sales**: sales@rivicq.xyz  
-- **🤝 Partnerships**: partners@rivicq.xyz  
-- **🔬 Quantum Research**: quantum@rivicq.xyz  
-- **👥 Developer Relations**: devrel@rivicq.xyz  
+- Coming Soon
 
 ## 📋 DevSecOps Integration Features
 
@@ -679,9 +676,6 @@ This license is governed by German law. Disputes shall be resolved through arbit
 
 ### RivicQ GmbH
 - **Website:** https://rivicq.xyz
-- **Enterprise:** enterprise@rivicq.xyz
-- **Support:** support@rivicq.xyz
-- **Legal:** legal@rivicq.xyz
 - **Address:** LEAP BERLIN - Rudower Chaussee 29, 12489 Berlin, Germany (WISTA IGZ)
 
 ---
