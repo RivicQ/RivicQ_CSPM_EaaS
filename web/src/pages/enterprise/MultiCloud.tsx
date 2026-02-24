@@ -8,12 +8,6 @@ import {
   Chip,
   Button,
   LinearProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -30,8 +24,6 @@ import {
   Cloud,
   Sync,
   Add,
-  Warning,
-  CheckCircle,
   Storage,
   Dns,
   Security,
@@ -44,6 +36,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from 'recharts';
 import { cloudService } from '../../services/api';
 
@@ -55,7 +48,6 @@ const CLOUD_COLORS = {
 };
 
 const MultiCloud: React.FC = () => {
-  const [accounts, setAccounts] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
@@ -67,6 +59,7 @@ const MultiCloud: React.FC = () => {
     regions: [] as string[],
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadCloudData();
   }, []);
@@ -74,12 +67,11 @@ const MultiCloud: React.FC = () => {
   const loadCloudData = async () => {
     setLoading(true);
     try {
-      const [accountsRes, summaryRes] = await Promise.all([
+      const results = await Promise.all([
         cloudService.getCloudAccounts(),
         cloudService.getResourcesSummary(),
       ]);
-      setAccounts(accountsRes.data.accounts || []);
-      setSummary(summaryRes.data);
+      setSummary(results[1].data);
     } catch (error) {
       console.error('Failed to load cloud data:', error);
       setSummary({
@@ -104,7 +96,7 @@ const MultiCloud: React.FC = () => {
     }
   };
 
-  const handleSync = async (accountId: string) => {
+  const handleSync = async (accountId: string) => { // eslint-disable-line @typescript-eslint/no-unused-vars
     try {
       await cloudService.syncCloudAccount(accountId);
     } catch (error) {
@@ -198,8 +190,8 @@ const MultiCloud: React.FC = () => {
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="resources">
-                    {barData.map((entry, index) => (
-                      <Bar key={`bar-${index}`} fill={index === 0 ? CLOUD_COLORS.aws : index === 1 ? CLOUD_COLORS.gcp : CLOUD_COLORS.ibm_cloud} />
+                    {barData.map((_entry, index) => (
+                      <Cell key={`bar-${index}`} fill={index === 0 ? CLOUD_COLORS.aws : index === 1 ? CLOUD_COLORS.gcp : CLOUD_COLORS.ibm_cloud} />
                     ))}
                   </Bar>
                 </BarChart>

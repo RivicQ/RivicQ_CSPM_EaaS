@@ -18,17 +18,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Alert,
-  AlertTitle,
 } from '@mui/material';
 import {
   CheckCircle,
-  Warning,
-  Error as ErrorIcon,
   Refresh,
-  Security,
-  Assessment,
   Sync,
 } from '@mui/icons-material';
 import {
@@ -77,11 +70,12 @@ const ComplianceDashboard: React.FC = () => {
   const [selectedFramework, setSelectedFramework] = useState('');
   const [scanning, setScanning] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadDashboards();
     loadIntegrations();
     loadRisks();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadDashboards = async () => {
     setLoading(true);

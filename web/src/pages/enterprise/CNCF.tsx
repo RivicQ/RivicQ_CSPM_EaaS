@@ -14,19 +14,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   IconButton,
 } from '@mui/material';
 import {
   Sync,
-  Add,
   CheckCircle,
   Warning,
-  Error as ErrorIcon,
   Refresh,
 } from '@mui/icons-material';
 import { cncfService } from '../../services/api';
@@ -43,12 +36,10 @@ const TOOLS = [
 ];
 
 const CNCF: React.FC = () => {
-  const [tools, setTools] = useState<any[]>([]);
   const [dashboard, setDashboard] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [healthDialogOpen, setHealthDialogOpen] = useState(false);
-  const [selectedTool, setSelectedTool] = useState<any>(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadCNCFData();
   }, []);
@@ -56,12 +47,11 @@ const CNCF: React.FC = () => {
   const loadCNCFData = async () => {
     setLoading(true);
     try {
-      const [toolsRes, dashboardRes] = await Promise.all([
+      const results = await Promise.all([
         cncfService.getTools(),
         cncfService.getCNCFDashboard(),
       ]);
-      setTools(toolsRes.data.tools || []);
-      setDashboard(dashboardRes.data);
+      setDashboard(results[1].data);
     } catch (error) {
       console.error('Failed to load CNCF data:', error);
       setDashboard({

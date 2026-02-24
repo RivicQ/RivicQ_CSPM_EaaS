@@ -20,6 +20,10 @@ import MultiCloud from './pages/enterprise/MultiCloud';
 import CNCF from './pages/enterprise/CNCF';
 import TerraformIaC from './pages/enterprise/Terraform';
 
+import IBMCloud from './pages/enterprise/IBMCloud';
+import AWSCloud from './pages/enterprise/AWSCloud';
+import QuantumAttestation from './pages/enterprise/QuantumAttestation';
+
 const App: React.FC = () => {
   // Create a theme for the application
   const theme = createTheme({
@@ -41,7 +45,7 @@ const App: React.FC = () => {
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000, // 1 minute
-        cacheTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 5 * 60 * 1000, // 5 minutes
         retry: 2,
       },
     },
@@ -91,6 +95,9 @@ const App: React.FC = () => {
                 <Route path="enterprise/multicloud" element={<MultiCloud />} />
                 <Route path="enterprise/cncf" element={<CNCF />} />
                 <Route path="enterprise/terraform" element={<TerraformIaC />} />
+                <Route path="enterprise/ibmcloud" element={<IBMCloud />} />
+                <Route path="enterprise/awscloud" element={<AWSCloud />} />
+                <Route path="enterprise/quantum-attestation" element={<QuantumAttestation />} />
               </Route>
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
