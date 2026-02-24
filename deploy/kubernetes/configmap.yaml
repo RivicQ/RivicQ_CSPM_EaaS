@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cryptobom-config
+  namespace: cryptobom-system
+data:
+  PORT: "8080"
+  LOG_LEVEL: "info"
+  DB_HOST: "cryptobom-postgres"
+  DB_PORT: "5432"
+  DB_NAME: "cryptobom"
+  DB_SSL_MODE: "require"
+  QUANTUM_ENABLED: "true"
+  NIST_STANDARD: "FIPS-203"
