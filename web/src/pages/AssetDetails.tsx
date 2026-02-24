@@ -144,7 +144,7 @@ const AssetDetails: React.FC = () => {
                       <ListItemText primary="Migrate to post-quantum algorithm (CRYSTALS-Kyber or Dilithium)" />
                     </ListItem>
                   )}
-                  {algorithm === 'RSA' && parseInt(String(keySize)) < 3072 && (
+                  {algorithm === 'RSA' && typeof keySize === 'number' && keySize < 3072 && (
                     <ListItem>
                       <ListItemText primary="Upgrade RSA key size to at least 3072 bits" />
                     </ListItem>

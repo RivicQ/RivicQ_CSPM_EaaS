@@ -71,9 +71,9 @@ const QuantumReadiness: React.FC = () => {
   const [targetAlgorithm, setTargetAlgorithm] = useState('CRYSTALS-Kyber');
   const [selectedAsset] = useState('');
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadQuantumData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadQuantumData = async () => {

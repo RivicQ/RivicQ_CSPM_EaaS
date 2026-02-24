@@ -41,9 +41,9 @@ const TerraformIaC: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadTerraformData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadTerraformData = async () => {

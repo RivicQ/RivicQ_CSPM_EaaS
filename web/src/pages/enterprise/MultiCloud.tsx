@@ -59,9 +59,9 @@ const MultiCloud: React.FC = () => {
     regions: [] as string[],
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadCloudData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadCloudData = async () => {
@@ -93,14 +93,6 @@ const MultiCloud: React.FC = () => {
       loadCloudData();
     } catch (error) {
       console.error('Failed to create account:', error);
-    }
-  };
-
-  const handleSync = async (accountId: string) => { // eslint-disable-line @typescript-eslint/no-unused-vars
-    try {
-      await cloudService.syncCloudAccount(accountId);
-    } catch (error) {
-      console.error('Sync failed:', error);
     }
   };
 

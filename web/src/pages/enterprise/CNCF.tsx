@@ -39,9 +39,9 @@ const CNCF: React.FC = () => {
   const [dashboard, setDashboard] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadCNCFData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadCNCFData = async () => {

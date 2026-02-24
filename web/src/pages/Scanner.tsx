@@ -75,7 +75,8 @@ const Scanner: React.FC = () => {
           return prev + 10;
         });
       }, 500);
-    } catch {
+    } catch (error) {
+      console.error('Scan failed:', error);
       setError('Scan failed. Make sure the backend is running.');
       setIsScanning(false);
       setScanJobs(jobs =>

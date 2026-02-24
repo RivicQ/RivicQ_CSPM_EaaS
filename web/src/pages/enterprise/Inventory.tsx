@@ -83,11 +83,11 @@ const Inventory: React.FC = () => {
     region: '',
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadAssets();
     loadSummary();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadAssets = async () => {
     setLoading(true);
