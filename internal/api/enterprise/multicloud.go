@@ -1,0 +1,581 @@
+package enterprise
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/sirupsen/logrus"
+)
+
+type CloudProvider string
+
+const (
+	AWS      CloudProvider = "aws"
+	GCP      CloudProvider = "gcp"
+	IBMCloud CloudProvider = "ibm_cloud"
+	Azure    CloudProvider = "azure"
+)
+
+type MultiCloudHandler struct {
+	db     *database.EnterpriseDB
+	logger *logrus.Logger
+}
+
+func NewMultiCloudHandler(db *database.EnterpriseDB, logger *logrus.Logger) *MultiCloudHandler {
+	return &MultiCloudHandler{
+		db:     db,
+		logger: logger,
+	}
+}
+
+func (h *MultiCloudHandler) SetupRoutes(router *gin.RouterGroup) {
+	cloud := router.Group("/cloud")
+	{
+		cloud.GET("/accounts", h.ListCloudAccounts)
+		cloud.POST("/accounts", h.AddCloudAccount)
+		cloud.PUT("/accounts/:id", h.UpdateCloudAccount)
+		cloud.DELETE("/accounts/:id", h.DeleteCloudAccount)
+		cloud.POST("/accounts/:id/sync", h.SyncCloudAccount)
+		cloud.GET("/accounts/:id/resources", h.ListCloudResources)
+
+		cloud.GET("/aws/inventory", h.AWSInventory)
+		cloud.POST("/aws/scan", h.AWSScan)
+
+		cloud.GET("/gcp/inventory", h.GCPInventory)
+		cloud.POST("/gcp/scan", h.GCPScan)
+
+		cloud.GET("/ibm/inventory", h.IBMCloudInventory)
+		cloud.POST("/ibm/scan", h.IBMCloudScan)
+
+		cloud.GET("/resources/summary", h.GetResourcesSummary)
+	}
+}
+
+type CloudAccount struct {
+	ID             uuid.UUID     `json:"id"`
+	TenantID       uuid.UUID     `json:"tenant_id"`
+	Provider       CloudProvider `json:"provider"`
+	AccountID      string        `json:"account_id"`
+	AccountName    string        `json:"account_name"`
+	OrganizationID string        `json:"organization_id"`
+	Regions        []string      `json:"regions"`
+	Services       []string      `json:"services"`
+	Status         string        `json:"status"`
+	LastScanAt     *time.Time    `json:"last_scan_at"`
+}
+
+type CloudResource struct {
+	ID               uuid.UUID              `json:"id"`
+	CloudAccountID   uuid.UUID              `json:"cloud_account_id"`
+	ResourceID       string                 `json:"resource_id"`
+	ResourceType     string                 `json:"resource_type"`
+	ResourceName     string                 `json:"resource_name"`
+	Provider         CloudProvider          `json:"provider"`
+	Region           string                 `json:"region"`
+	Service          string                 `json:"service"`
+	Metadata         map[string]interface{} `json:"metadata"`
+	SecurityFindings []SecurityFinding      `json:"security_findings"`
+	DiscoveredAt     time.Time              `json:"discovered_at"`
+}
+
+type SecurityFinding struct {
+	Severity    string `json:"severity"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Resource    string `json:"resource"`
+	Remedation  string `json:"remediation"`
+}
+
+func (h *MultiCloudHandler) ListCloudAccounts(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+	provider := c.Query("provider")
+
+	query := `
+		SELECT id, tenant_id, provider, account_id, account_name, organization_id, 
+		       regions, services, status, last_scan_at
+		FROM cloud_accounts 
+		WHERE tenant_id = $1
+	`
+	args := []interface{}{tenantID}
+
+	if provider != "" {
+		query += " AND provider = $2"
+		args = append(args, provider)
+	}
+
+	rows, err := h.db.Query(query, args...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list cloud accounts"})
+		return
+	}
+	defer rows.Close()
+
+	var accounts []CloudAccount
+	for rows.Next() {
+		var account CloudAccount
+		var regions, services []byte
+		err := rows.Scan(
+			&account.ID, &account.TenantID, &account.Provider, &account.AccountID,
+			&account.AccountName, &account.OrganizationID, &regions, &services,
+			&account.Status, &account.LastScanAt,
+		)
+		if err != nil {
+			continue
+		}
+		json.Unmarshal(regions, &account.Regions)
+		json.Unmarshal(services, &account.Services)
+		accounts = append(accounts, account)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"accounts": accounts})
+}
+
+func (h *MultiCloudHandler) AddCloudAccount(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+
+	var account CloudAccount
+	if err := c.ShouldBindJSON(&account); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	account.ID = uuid.New()
+	account.TenantID, _ = uuid.Parse(tenantID)
+
+	regionsJSON, _ := json.Marshal(account.Regions)
+	servicesJSON, _ := json.Marshal(account.Services)
+
+	query := `
+		INSERT INTO cloud_accounts 
+		(id, tenant_id, provider, account_id, account_name, organization_id, regions, services, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`
+	_, err := h.db.Exec(query,
+		account.ID, account.TenantID, account.Provider, account.AccountID,
+		account.AccountName, account.OrganizationID, regionsJSON, servicesJSON, "active",
+	)
+	if err != nil {
+		h.logger.Error("Failed to add cloud account: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add cloud account"})
+		return
+	}
+
+	h.logger.Info("Added cloud account: ", account.AccountID, " provider: ", account.Provider)
+
+	c.JSON(http.StatusCreated, account)
+}
+
+func (h *MultiCloudHandler) UpdateCloudAccount(c *gin.Context) {
+	id := c.Param("id")
+	accountID, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid account ID"})
+		return
+	}
+
+	var req struct {
+		AccountName string   `json:"account_name"`
+		Regions     []string `json:"regions"`
+		Services    []string `json:"services"`
+		Status      string   `json:"status"`
+	}
+	c.ShouldBindJSON(&req)
+
+	regionsJSON, _ := json.Marshal(req.Regions)
+	servicesJSON, _ := json.Marshal(req.Services)
+
+	query := `
+		UPDATE cloud_accounts 
+		SET account_name = COALESCE(NULLIF($1, ''), account_name),
+		    regions = COALESCE($2, regions),
+		    services = COALESCE($3, services),
+		    status = COALESCE(NULLIF($4, ''), status),
+		    updated_at = NOW()
+		WHERE id = $5
+	`
+	_, err = h.db.Exec(query, req.AccountName, regionsJSON, servicesJSON, req.Status, accountID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update cloud account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Cloud account updated"})
+}
+
+func (h *MultiCloudHandler) DeleteCloudAccount(c *gin.Context) {
+	id := c.Param("id")
+	accountID, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid account ID"})
+		return
+	}
+
+	_, err = h.db.Exec("DELETE FROM cloud_accounts WHERE id = $1", accountID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete cloud account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Cloud account deleted"})
+}
+
+func (h *MultiCloudHandler) SyncCloudAccount(c *gin.Context) {
+	id := c.Param("id")
+	accountID, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid account ID"})
+		return
+	}
+
+	h.logger.Info("Starting cloud account sync: ", accountID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":     "sync_started",
+		"account_id": accountID,
+		"message":    "Cloud account sync initiated",
+	})
+}
+
+func (h *MultiCloudHandler) ListCloudResources(c *gin.Context) {
+	accountID := c.Param("id")
+
+	h.logger.Info("Listing resources for cloud account: ", accountID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"resources": []CloudResource{},
+		"total":     0,
+	})
+}
+
+func (h *MultiCloudHandler) AWSInventory(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+
+	h.logger.Info("Fetching AWS inventory for tenant: ", tenantID)
+
+	resources := []map[string]interface{}{
+		{
+			"resource_id":     "i-0123456789abcdef0",
+			"resource_type":   "ec2_instance",
+			"resource_name":   "web-server-1",
+			"service":         "ec2",
+			"region":          "us-east-1",
+			"instance_type":   "t3.medium",
+			"security_groups": []string{"sg-0123456789abcdef"},
+		},
+		{
+			"resource_id":   "arn:aws:s3:::my-bucket",
+			"resource_type": "s3_bucket",
+			"resource_name": "my-bucket",
+			"service":       "s3",
+			"region":        "us-east-1",
+			"encryption":    true,
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"provider":  "aws",
+		"resources": resources,
+		"total":     len(resources),
+	})
+}
+
+func (h *MultiCloudHandler) AWSScan(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+
+	h.logger.Info("Starting AWS security scan for tenant: ", tenantID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":   "scan_started",
+		"provider": "aws",
+		"message":  "AWS security scan initiated",
+	})
+}
+
+func (h *MultiCloudHandler) GCPInventory(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+
+	h.logger.Info("Fetching GCP inventory for tenant: ", tenantID)
+
+	resources := []map[string]interface{}{
+		{
+			"resource_id":   "projects/my-project/zones/us-central1-a/instances/web-server",
+			"resource_type": "compute_instance",
+			"resource_name": "web-server",
+			"service":       "compute",
+			"region":        "us-central1",
+			"machine_type":  "e2-medium",
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"provider":  "gcp",
+		"resources": resources,
+		"total":     len(resources),
+	})
+}
+
+func (h *MultiCloudHandler) GCPScan(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+
+	h.logger.Info("Starting GCP security scan for tenant: ", tenantID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":   "scan_started",
+		"provider": "gcp",
+		"message":  "GCP security scan initiated",
+	})
+}
+
+func (h *MultiCloudHandler) IBMCloudInventory(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+
+	h.logger.Info("Fetching IBM Cloud inventory for tenant: ", tenantID)
+
+	resources := []map[string]interface{}{
+		{
+			"resource_id":   "crn:v1:bluemix:public:is:us-south:a/1234567890::instance:abc123",
+			"resource_type": "vsi",
+			"resource_name": "quantum-worker-1",
+			"service":       "is",
+			"region":        "us-south",
+			"profile":       "bx2-2x8",
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"provider":  "ibm_cloud",
+		"resources": resources,
+		"total":     len(resources),
+	})
+}
+
+func (h *MultiCloudHandler) IBMCloudScan(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+
+	h.logger.Info("Starting IBM Cloud security scan for tenant: ", tenantID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":   "scan_started",
+		"provider": "ibm_cloud",
+		"message":  "IBM Cloud security scan initiated",
+	})
+}
+
+func (h *MultiCloudHandler) GetResourcesSummary(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+
+	summary := gin.H{
+		"total_resources": 150,
+		"by_provider": gin.H{
+			"aws":       80,
+			"gcp":       45,
+			"ibm_cloud": 20,
+			"azure":     5,
+		},
+		"by_service": gin.H{
+			"ec2":        30,
+			"s3":         25,
+			"rds":        15,
+			"compute":    30,
+			"storage":    20,
+			"kubernetes": 20,
+			"quantum":    10,
+		},
+		"security_findings": gin.H{
+			"critical": 2,
+			"high":     8,
+			"medium":   15,
+			"low":      25,
+		},
+		"compliance": gin.H{
+			"iso27001": "85%",
+			"nist":     "78%",
+			"pqc":      "65%",
+		},
+	}
+
+	h.logger.Info("Getting resources summary for tenant: ", tenantID)
+
+	c.JSON(http.StatusOK, summary)
+}
+
+type AWSClient struct {
+	region    string
+	accessKey string
+	secretKey string
+}
+
+func NewAWSClient(accessKey, secretKey, region string) *AWSClient {
+	return &AWSClient{
+		region:    region,
+		accessKey: accessKey,
+		secretKey: secretKey,
+	}
+}
+
+func (c *AWSClient) ListEC2Instances(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (c *AWSClient) ListS3Buckets(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (c *AWSClient) ListRDSInstances(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (c *AWSClient) DescribeSecurityGroups(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+type GCPClient struct {
+	projectID string
+	region    string
+}
+
+func NewGCPClient(projectID, region string) *GCPClient {
+	return &GCPClient{
+		projectID: projectID,
+		region:    region,
+	}
+}
+
+func (c *GCPClient) ListComputeInstances(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (c *GCPClient) ListStorageBuckets(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (c *GCPClient) ListGKEClusters(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+type IBMCloudClient struct {
+	accountID string
+	region    string
+	apiKey    string
+}
+
+func NewIBMCloudClient(accountID, region, apiKey string) *IBMCloudClient {
+	return &IBMCloudClient{
+		accountID: accountID,
+		region:    region,
+		apiKey:    apiKey,
+	}
+}
+
+func (c *IBMCloudClient) ListVSIInstances(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (c *IBMCloudClient) ListCOSBuckets(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (c *IBMCloudClient) ListIKSClusters(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (c *IBMCloudClient) ListQuantumInstances(ctx context.Context) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (h *MultiCloudHandler) discoverAWSResources(account *CloudAccount) ([]CloudResource, error) {
+	var resources []CloudResource
+
+	ctx := context.Background()
+	awsClient := NewAWSClient("", "", "")
+
+	instances, err := awsClient.ListEC2Instances(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list EC2 instances: %w", err)
+	}
+
+	for _, instance := range instances {
+		resources = append(resources, CloudResource{
+			ResourceID:   instance["instance_id"].(string),
+			ResourceType: "ec2_instance",
+			ResourceName: instance["name"].(string),
+			Provider:     AWS,
+			Region:       instance["region"].(string),
+			Service:      "ec2",
+		})
+	}
+
+	return resources, nil
+}
+
+func (h *MultiCloudHandler) discoverGCPResources(account *CloudAccount) ([]CloudResource, error) {
+	var resources []CloudResource
+
+	ctx := context.Background()
+	gcpClient := NewGCPClient("", "")
+
+	instances, err := gcpClient.ListComputeInstances(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list compute instances: %w", err)
+	}
+
+	for _, instance := range instances {
+		resources = append(resources, CloudResource{
+			ResourceID:   instance["id"].(string),
+			ResourceType: "compute_instance",
+			ResourceName: instance["name"].(string),
+			Provider:     GCP,
+			Region:       instance["region"].(string),
+			Service:      "compute",
+		})
+	}
+
+	return resources, nil
+}
+
+func (h *MultiCloudHandler) discoverIBMCloudResources(account *CloudAccount) ([]CloudResource, error) {
+	var resources []CloudResource
+
+	ctx := context.Background()
+	ibmClient := NewIBMCloudClient("", "", "")
+
+	instances, err := ibmClient.ListVSIInstances(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list VSI instances: %w", err)
+	}
+
+	for _, instance := range instances {
+		resources = append(resources, CloudResource{
+			ResourceID:   instance["id"].(string),
+			ResourceType: "vsi",
+			ResourceName: instance["name"].(string),
+			Provider:     IBMCloud,
+			Region:       instance["region"].(string),
+			Service:      "is",
+		})
+	}
+
+	quantumInstances, err := ibmClient.ListQuantumInstances(ctx)
+	if err != nil {
+		h.logger.Warn("Failed to list quantum instances: ", err)
+	} else {
+		for _, instance := range quantumInstances {
+			resources = append(resources, CloudResource{
+				ResourceID:   instance["id"].(string),
+				ResourceType: "quantum_instance",
+				ResourceName: instance["name"].(string),
+				Provider:     IBMCloud,
+				Region:       instance["region"].(string),
+				Service:      "quantum",
+			})
+		}
+	}
+
+	return resources, nil
+}

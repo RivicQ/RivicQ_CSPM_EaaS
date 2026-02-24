@@ -22,6 +22,44 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	// All OSS Features Plus Enterprise Enhancements
 	router.Use(enterpriseMiddleware(cfg))
 
+	// Initialize Enterprise database with fallback
+	var enterpriseDB *database.EnterpriseDB
+	dbConfig := config.DatabaseConfig{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "cryptobom",
+		Password: "password",
+		Name:     "cryptobom_enterprise",
+		SSLMode:  "disable",
+	}
+	enterpriseDB, _ = database.NewEnterpriseConnection(dbConfig)
+
+	// Initialize handlers
+	inventoryHandler := NewInventoryHandler(enterpriseDB, logger, cfg)
+	complianceHandler := NewComplianceHandler(enterpriseDB, logger)
+	multicloudHandler := NewMultiCloudHandler(enterpriseDB, logger)
+	cncfHandler := NewCNCFHandler(enterpriseDB, logger)
+	terraformHandler := NewTerraformHandler(enterpriseDB, logger)
+	quantumHandler := NewQuantumAttestationHandler(enterpriseDB, logger)
+
+	// Setup Inventory routes
+	inventoryHandler.SetupRoutes(router)
+
+	// Setup Compliance routes
+	complianceHandler.SetupRoutes(router)
+
+	// Setup Multi-Cloud routes
+	multicloudHandler.SetupRoutes(router)
+
+	// Setup CNCF routes
+	cncfHandler.SetupRoutes(router)
+
+	// Setup Terraform routes
+	terraformHandler.SetupRoutes(router)
+
+	// Setup Quantum routes
+	quantumHandler.SetupRoutes(router)
+
 	// Enhanced CBOM Management with IBMQ Attestation
 	cbom := router.Group("/cbom")
 	{

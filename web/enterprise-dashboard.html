@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Cryptobom SaaS - Compliance & Inventory Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background: var(--light);
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+        
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s;
+            color: var(--dark);
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: var(--light);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .card-change {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .card-change.positive {
+            color: var(--success);
+        }
+        
+        .card-change.negative {
+            color: var(--danger);
+        }
+        
+        .compliance-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+        
+        .compliance-card {
+            border-left: 4px solid var(--success);
+        }
+        
+        .compliance-card.warning {
+            border-left-color: var(--warning);
+        }
+        
+        .compliance-card.danger {
+            border-left-color: var(--danger);
+        }
+        
+        .compliance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .compliance-score {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .compliance-score.high {
+            color: var(--success);
+        }
+        
+        .compliance-score.medium {
+            color: var(--warning);
+        }
+        
+        .compliance-score.low {
+            color: var(--danger);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        .progress-fill.high {
+            background: var(--success);
+        }
+        
+        .progress-fill.medium {
+            background: var(--warning);
+        }
+        
+        .progress-fill.low {
+            background: var(--danger);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: var(--light);
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .tab-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .tab {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .metric-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .metric-icon.crypto {
+            background: #dbeafe;
+        }
+        
+        .metric-icon.ai {
+            background: #ede9fe;
+        }
+        
+        .metric-icon.hardware {
+            background: #d1fae5;
+        }
+        
+        .metric-icon.software {
+            background: #fef3c7;
+        }
+        
+        .metric-icon.infra {
+            background: #fee2e2;
+        }
+        
+        .quantum-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            color: white;
+            border-radius: 2rem;
+            font-weight: 600;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #64748b;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Enterprise Cryptobom SaaS</h1>
+            <p style="opacity: 0.8; font-size: 0.875rem;">Compliance & Inventory Management Platform</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="refreshData()">
+                <span>Refresh</span>
+            </button>
+            <div class="quantum-badge">
+                <span>Quantum Ready</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="sidebar">
+        <div class="nav-item active" onclick="showSection('overview')">
+            <span>📊</span> Overview
+        </div>
+        <div class="nav-item" onclick="showSection('inventory')">
+            <span>📦</span> Inventory
+        </div>
+        <div class="nav-item" onclick="showSection('compliance')">
+            <span>🛡️</span> Compliance
+        </div>
+        <div class="nav-item" onclick="showSection('quantum')">
+            <span>⚛️</span> Quantum
+        </div>
+        <div class="nav-item" onclick="showSection('cloud')">
+            <span>☁️</span> Multi-Cloud
+        </div>
+        <div class="nav-item" onclick="showSection('cncf')">
+            <span>🔧</span> CNCF Tools
+        </div>
+        <div class="nav-item" onclick="showSection('terraform')">
+            <span>🏗️</span> Terraform
+        </div>
+        <div class="nav-item" onclick="showSection('risks')">
+            <span>⚠️</span> Risk Assessment
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div id="overview" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-title">Total Assets</div>
+                    <div class="card-value">2,847</div>
+                    <div class="card-change positive">+12% from last month</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Compliance Score</div>
+                    <div class="card-value">78%</div>
+                    <div class="card-change positive">+5% from last month</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Quantum Ready</div>
+                    <div class="card-value">35%</div>
+                    <div class="card-change">65% at risk</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Active Risks</div>
+                    <div class="card-value" style="color: var(--danger);">23</div>
+                    <div class="card-change negative">3 critical</div>
+                </div>
+            </div>
+            
+            <div class="compliance-grid">
+                <div class="card">
+                    <div class="section-title">Asset Distribution</div>
+                    <div class="chart-container">
+                        <canvas id="assetChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="section-title">Compliance by Framework</div>
+                    <div class="chart-container">
+                        <canvas id="complianceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="section-title">Compliance Dashboard</div>
+                <div class="grid-3" style="margin-top: 1.5rem;">
+                    <div class="card compliance-card">
+                        <div class="compliance-header">
+                            <h3>ISO 27001</h3>
+                            <span class="compliance-score high">85%</span>
+                        </div>
+                        <p style="color: #64748b; font-size: 0.875rem;">Information Security</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill high" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                    <div class="card compliance-card">
+                        <div class="compliance-header">
+                            <h3>GDPR</h3>
+                            <span class="compliance-score high">92%</span>
+                        </div>
+                        <p style="color: #64748b; font-size: 0.875rem;">Data Protection</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill high" style="width: 92%;"></div>
+                        </div>
+                    </div>
+                    <div class="card compliance-card warning">
+                        <div class="compliance-header">
+                            <h3>NIST</h3>
+                            <span class="compliance-score medium">78%</span>
+                        </div>
+                        <p style="color: #64748b; font-size: 0.875rem;">Cybersecurity</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 78%;"></div>
+                        </div>
+                    </div>
+                    <div class="card compliance-card warning">
+                        <div class="compliance-header">
+                            <h3>DORA</h3>
+                            <span class="compliance-score medium">72%</span>
+                        </div>
+                        <p style="color: #64748b; font-size: 0.875rem;">Digital Resilience</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 72%;"></div>
+                        </div>
+                    </div>
+                    <div class="card compliance-card danger">
+                        <div class="compliance-header">
+                            <h3>PQC</h3>
+                            <span class="compliance-score low">35%</span>
+                        </div>
+                        <p style="color: #64748b; font-size: 0.875rem;">Post-Quantum</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill low" style="width: 35%;"></div>
+                        </div>
+                    </div>
+                    <div class="card compliance-card warning">
+                        <div class="compliance-header">
+                            <h3>EU AI Act</h3>
+                            <span class="compliance-score medium">68%</span>
+                        </div>
+                        <p style="color: #64748b; font-size: 0.875rem;">AI Regulation</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill medium" style="width: 68%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="inventory" class="tab-content">
+            <div class="card">
+                <div class="section-title">Asset Inventory</div>
+                <div class="tab-container">
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchTab(this, 'crypto-assets')">Cryptographic</div>
+                        <div class="tab" onclick="switchTab(this, 'ai-assets')">AI Models</div>
+                        <div class="tab" onclick="switchTab(this, 'hardware-assets')">Hardware</div>
+                        <div class="tab" onclick="switchTab(this, 'software-assets')">Software</div>
+                        <div class="tab" onclick="switchTab(this, 'infra-assets')">Infrastructure</div>
+                    </div>
+                </div>
+                
+                <div id="crypto-assets" class="tab-content active">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Algorithm</th>
+                                    <th>Key Size</th>
+                                    <th>Usage</th>
+                                    <th>Location</th>
+                                    <th>Quantum Safe</th>
+                                    <th>Vulnerability</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crypto-table">
+                                <tr>
+                                    <td>RSA-2048</td>
+                                    <td>2048</td>
+                                    <td>Key Exchange</td>
+                                    <td>Production API</td>
+                                    <td><span class="badge badge-danger">At Risk</span></td>
+                                    <td><span class="badge badge-danger">High</span></td>
+                                    <td><button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Migrate</button></td>
+                                </tr>
+                                <tr>
+                                    <td>ECDSA P-256</td>
+                                    <td>256</td>
+                                    <td>Digital Signature</td>
+                                    <td>Auth Service</td>
+                                    <td><span class="badge badge-danger">At Risk</span></td>
+                                    <td><span class="badge badge-warning">Medium</span></td>
+                                    <td><button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Migrate</button></td>
+                                </tr>
+                                <tr>
+                                    <td>CRYSTALS-Kyber</td>
+                                    <td>1568</td>
+                                    <td>Key Exchange</td>
+                                    <td>New Service</td>
+                                    <td><span class="badge badge-success">Safe</span></td>
+                                    <td><span class="badge badge-success">Low</span></td>
+                                    <td><button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>AES-256-GCM</td>
+                                    <td>256</td>
+                                    <td>Encryption</td>
+                                    <td>Database</td>
+                                    <td><span class="badge badge-success">Safe</span></td>
+                                    <td><span class="badge badge-success">Low</span></td>
+                                    <td><button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="compliance" class="tab-content">
+            <div class="card">
+                <div class="section-title">Compliance Frameworks</div>
+                <div class="grid-2">
+                    <div>
+                        <h3 style="margin-bottom: 1rem;">Delve Integration</h3>
+                        <div class="metric-card" style="margin-bottom: 1rem;">
+                            <div class="metric-icon" style="background: #dbeafe;">
+                                <span>✓</span>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">Connected</div>
+                                <div style="color: #64748b; font-size: 0.875rem;">Last sync: 30 minutes ago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 1rem;">Kertos Integration</h3>
+                        <div class="metric-card" style="margin-bottom: 1rem;">
+                            <div class="metric-icon" style="background: #dbeafe;">
+                                <span>✓</span>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">Connected</div>
+                                <div style="color: #64748b; font-size: 0.875rem;">Last sync: 45 minutes ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 1.5rem;">
+                <div class="section-title">Risk Assessment</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Risk ID</th>
+                                <th>Category</th>
+                                <th>Severity</th>
+                                <th>Affected Assets</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>RISK-001</td>
+                                <td>Cryptographic</td>
+                                <td><span class="badge badge-danger">Critical</span></td>
+                                <td>127</td>
+                                <td><span class="badge badge-warning">Open</span></td>
+                                <td><button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Mitigate</button></td>
+                            </tr>
+                            <tr>
+                                <td>RISK-002</td>
+                                <td>AI Governance</td>
+                                <td><span class="badge badge-warning">High</span></td>
+                                <td>45</td>
+                                <td><span class="badge badge-warning">Open</span></td>
+                                <td><button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Mitigate</button></td>
+                            </tr>
+                            <tr>
+                                <td>RISK-003</td>
+                                <td>Data Privacy</td>
+                                <td><span class="badge badge-warning">High</span></td>
+                                <td>23</td>
+                                <td><span class="badge badge-success">Mitigated</span></td>
+                                <td><button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div id="quantum" class="tab-content">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-title">Overall Quantum Readiness</div>
+                    <div class="card-value">35%</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">At Risk Assets</div>
+                    <div class="card-value" style="color: var(--danger);">65%</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Quantum Networks</div>
+                    <div class="card-value">3</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Active Attestations</div>
+                    <div class="card-value">12</div>
+                </div>
+            </div>
+            
+            <div class="compliance-grid">
+                <div class="card">
+                    <div class="section-title">NIST PQC Algorithms</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Algorithm</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>CRYSTALS-Kyber</td>
+                                    <td>KEM</td>
+                                    <td><span class="badge badge-success">Standardized</span></td>
+                                </tr>
+                                <tr>
+                                    <td>CRYSTALS-Dilithium</td>
+                                    <td>Signature</td>
+                                    <td><span class="badge badge-success">Standardized</span></td>
+                                </tr>
+                                <tr>
+                                    <td>FALCON</td>
+                                    <td>Signature</td>
+                                    <td><span class="badge badge-success">Standardized</span></td>
+                                </tr>
+                                <tr>
+                                    <td>SPHINCS+</td>
+                                    <td>Signature</td>
+                                    <td><span class="badge badge-success">Standardized</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="section-title">Migration Progress</div>
+                    <div class="chart-container">
+                        <canvas id="migrationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="cloud" class="tab-content">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-title">AWS Resources</div>
+                    <div class="card-value">847</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">GCP Resources</div>
+                    <div class="card-value">523</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">IBM Cloud Resources</div>
+                    <div class="card-value">234</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Security Findings</div>
+                    <div class="card-value" style="color: var(--danger);">47</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="section-title">Multi-Cloud Inventory</div>
+                <div class="grid-3">
+                    <div class="card" style="border: 1px solid #ff9900; border-radius: 0.5rem;">
+                        <h3 style="color: #ff9900; margin-bottom: 1rem;">AWS</h3>
+                        <p>EC2: 120 instances</p>
+                        <p>S3: 85 buckets</p>
+                        <p>RDS: 45 instances</p>
+                        <p>EKS: 8 clusters</p>
+                    </div>
+                    <div class="card" style="border: 1px solid #4285f4; border-radius: 0.5rem;">
+                        <h3 style="color: #4285f4; margin-bottom: 1rem;">GCP</h3>
+                        <p>Compute: 95 instances</p>
+                        <p>Storage: 65 buckets</p>
+                        <p>Cloud SQL: 30 instances</p>
+                        <p>GKE: 6 clusters</p>
+                    </div>
+                    <div class="card" style="border: 1px solid #052FAD; border-radius: 0.5rem;">
+                        <h3 style="color: #052FAD; margin-bottom: 1rem;">IBM Cloud</h3>
+                        <p>VSI: 45 instances</p>
+                        <p>COS: 25 buckets</p>
+                        <p>DB2: 15 instances</p>
+                        <p>IKS: 4 clusters</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="cncf" class="tab-content">
+            <div class="card">
+                <div class="section-title">CNCF Tools Integration</div>
+                <div class="grid-3">
+                    <div class="card" style="border-left: 4px solid #e74c3c;">
+                        <h3>Prometheus</h3>
+                        <p style="color: #64748b;">Monitoring</p>
+                        <p style="color: var(--success);">● Connected</p>
+                    </div>
+                    <div class="card" style="border-left: 4px solid #f39c12;">
+                        <h3>Grafana</h3>
+                        <p style="color: #64748b;">Visualization</p>
+                        <p style="color: var(--success);">● Connected</p>
+                    </div>
+                    <div class="card" style="border-left: 4px solid #3498db;">
+                        <h3>ArgoCD</h3>
+                        <p style="color: #64748b;">GitOps</p>
+                        <p style="color: var(--success);">● Connected</p>
+                    </div>
+                    <div class="card" style="border-left: 4px solid #9b59b6;">
+                        <h3>Flux</h3>
+                        <p style="color: #64748b;">GitOps</p>
+                        <p style="color: var(--success);">● Connected</p>
+                    </div>
+                    <div class="card" style="border-left: 4px solid #1abc9c;">
+                        <h3>Istio</h3>
+                        <p style="color: #64748b;">Service Mesh</p>
+                        <p style="color: var(--success);">● Connected</p>
+                    </div>
+                    <div class="card" style="border-left: 4px solid #2ecc71;">
+                        <h3>Cilium</h3>
+                        <p style="color: #64748b;">Networking</p>
+                        <p style="color: var(--success);">● Connected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="terraform" class="tab-content">
+            <div class="card">
+                <div class="section-title">Terraform IaC Security</div>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-title">Total Resources</div>
+                        <div class="card-value">1,247</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Security Findings</div>
+                        <div class="card-value" style="color: var(--danger);">28</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Compliance Violations</div>
+                        <div class="card-value" style="color: var(--warning);">15</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Drifted Resources</div>
+                        <div class="card-value" style="color: var(--danger);">7</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="risks" class="tab-content">
+            <div class="card">
+                <div class="section-title">Risk Assessment Matrix</div>
+                <div class="grid-2">
+                    <div>
+                        <h3 style="margin-bottom: 1rem;">Risk Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="riskChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 1rem;">Risk by Category</h3>
+                        <div style="padding: 1rem;">
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>Cryptographic</span>
+                                    <span style="color: var(--danger);">12</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill low" style="width: 60%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>AI Governance</span>
+                                    <span style="color: var(--warning);">8</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill medium" style="width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>Data Privacy</span>
+                                    <span style="color: var(--warning);">5</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill medium" style="width: 25%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>Infrastructure</span>
+                                    <span style="color: var(--success);">3</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill high" style="width: 15%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let assetChart, complianceChart, migrationChart, riskChart;
+        
+        function initCharts() {
+            const assetCtx = document.getElementById('assetChart').getContext('2d');
+            assetChart = new Chart(assetCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cryptographic', 'AI', 'Hardware', 'Software', 'Infrastructure'],
+                    datasets: [{
+                        data: [450, 180, 320, 890, 1007],
+                        backgroundColor: ['#2563eb', '#7c3aed', '#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            const complianceCtx = document.getElementById('complianceChart').getContext('2d');
+            complianceChart = new Chart(complianceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['ISO27001', 'GDPR', 'NIST', 'DORA', 'PQC', 'EU AI Act', 'SOC2'],
+                    datasets: [{
+                        label: 'Compliance Score',
+                        data: [85, 92, 78, 72, 35, 68, 80],
+                        backgroundColor: ['#10b981', '#10b981', '#f59e0b', '#f59e0b', '#ef4444', '#f59e0b', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+            
+            const migrationCtx = document.getElementById('migrationChart').getContext('2d');
+            migrationChart = new Chart(migrationCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Quantum Safe',
+                        data: [10, 15, 20, 28, 32, 35],
+                        borderColor: '#10b981',
+                        fill: false
+                    }, {
+                        label: 'At Risk',
+                        data: [90, 85, 80, 72, 68, 65],
+                        borderColor: '#ef4444',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            riskChart = new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Critical', 'High', 'Medium', 'Low'],
+                    datasets: [{
+                        data: [3, 12, 15, 20],
+                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        function showSection(sectionId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.closest('.nav-item')?.classList.add('active');
+        }
+        
+        function switchTab(tab, contentId) {
+            const parent = tab.closest('.tab-content');
+            parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            tab.classList.add('active');
+            document.getElementById(contentId).classList.add('active');
+        }
+        
+        async function refreshData() {
+            console.log('Refreshing data...');
+        }
+        
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
+</body>
+</html>

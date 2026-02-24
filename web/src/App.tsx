@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
-import { toast } from 'react-toastify';
 
 import Layout from './layouts/Layout';
 import Dashboard from './pages/Dashboard';
@@ -13,6 +12,13 @@ import Scanner from './pages/Scanner';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import { ErrorBoundary } from './components/ErrorBoundary';
+
+import Inventory from './pages/enterprise/Inventory';
+import Compliance from './pages/enterprise/Compliance';
+import Quantum from './pages/enterprise/Quantum';
+import MultiCloud from './pages/enterprise/MultiCloud';
+import CNCF from './pages/enterprise/CNCF';
+import TerraformIaC from './pages/enterprise/Terraform';
 
 const App: React.FC = () => {
   // Create a theme for the application
@@ -77,6 +83,14 @@ const App: React.FC = () => {
                 <Route path="scanner" element={<Scanner />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="settings" element={<Settings />} />
+                
+                {/* Enterprise Routes */}
+                <Route path="enterprise/inventory" element={<Inventory />} />
+                <Route path="enterprise/compliance" element={<Compliance />} />
+                <Route path="enterprise/quantum" element={<Quantum />} />
+                <Route path="enterprise/multicloud" element={<MultiCloud />} />
+                <Route path="enterprise/cncf" element={<CNCF />} />
+                <Route path="enterprise/terraform" element={<TerraformIaC />} />
               </Route>
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
