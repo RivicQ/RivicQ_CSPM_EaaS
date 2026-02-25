@@ -22,15 +22,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Assemble static site
-        run: |
-          mkdir -p _site
-          # Landing page
-          cp docs/index.html _site/index.html
-          # Dashboard previews (self-contained HTML, no build step required)
-          cp web/enterprise-dashboard.html _site/enterprise.html
-          cp web/demo-dashboard.html       _site/demo.html
-          cp demo-complete.html            _site/demo-complete.html
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Build React SaaS app
+        working-directory: web
+        run: npm run build
+        env:
+          REACT_APP_EDITION: enterprise
+
+      - name: Add SPA redirect
+        run: cp web/build/index.html web/build/404.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -38,7 +48,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: web/build
 
   deploy:
     name: Deploy to GitHub Pages
