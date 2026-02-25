@@ -372,9 +372,11 @@ jobs:
           curl -f https://cryptobom.io/enterprise/healthz
 
       - name: Notify Deployment
-        if: secrets.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: env.SLACK_WEBHOOK_URL != ''
         run: |
-          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          curl -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-type: application/json' \
             --data '{
               "text": "🚀 CryptoBOM SaaS deployed to production!\nCommit: ${{ github.sha }}\nOSS: https://cryptobom.io/oss\nEnterprise: https://cryptobom.io/enterprise"

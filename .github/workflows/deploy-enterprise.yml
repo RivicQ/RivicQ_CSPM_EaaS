@@ -84,6 +84,8 @@ jobs:
             -n cryptobom-system --dry-run=client -o yaml | kubectl apply -f -
           kubectl set env deployment/cryptobom-server \
             CRYPTOBOM_EDITION=enterprise \
+            -n cryptobom-system
+          kubectl set env deployment/cryptobom-server \
             --from=secret/cryptobom-enterprise-secrets \
             -n cryptobom-system
           kubectl rollout status deployment/cryptobom-server \
