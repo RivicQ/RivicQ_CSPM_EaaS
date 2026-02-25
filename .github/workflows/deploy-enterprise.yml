@@ -27,6 +27,7 @@ jobs:
   check-secrets:
     name: Check cloud credentials
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       gcp_configured: ${{ steps.gcp.outputs.configured }}
       aws_configured: ${{ steps.aws.outputs.configured }}

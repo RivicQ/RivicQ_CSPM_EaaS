@@ -23,6 +23,7 @@ jobs:
   check-gcp:
     name: Check GCP configuration
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       configured: ${{ steps.check.outputs.configured }}
     steps:

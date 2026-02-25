@@ -480,7 +480,7 @@ Deploy workflows skip gracefully when cloud credentials are absent:
 
 | Workflow | Required secrets | Behavior when absent |
 |---|---|---|
-| `deploy-gcp.yml` | `GCP_WORKLOAD_IDENTITY_PROVIDER` | entire workflow skipped |
+| `deploy-gcp.yml` | `GCP_WORKLOAD_IDENTITY_PROVIDER` | build and deploy jobs skipped |
 | `deploy-enterprise.yml` | `GCP_WORKLOAD_IDENTITY_PROVIDER`, `AWS_ACCESS_KEY_ID` | individual deploy jobs skipped |
 | `deploy-oss.yml` | none (uses `GITHUB_TOKEN` for GHCR) | always runs when dispatched |
 
@@ -488,7 +488,7 @@ Deploy workflows skip gracefully when cloud credentials are absent:
 
 ```bash
 # Unit + integration tests (excluding flaky perf tests and enterprise-only tests)
-go test -v -race $(go list ./... | grep -v /tests/enterprise | grep -v 'cryptobom-saas/tests$')
+go test -v -race $(go list ./... | grep -v /tests/enterprise | grep -v '/tests$')
 
 # Unit tests only
 go test -v -race ./tests/unit/...
