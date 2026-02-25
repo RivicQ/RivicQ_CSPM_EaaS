@@ -4,7 +4,7 @@
 # Regions: europe-west3 (Frankfurt) primary — BSI/DORA jurisdiction
 # ============================================================
 
-tf_version {
+terraform {
   required_version = ">= 1.6.0"
 
   required_providers {
@@ -24,11 +24,15 @@ tf_version {
       source  = "hashicorp/helm"
       version = "~> 2.12"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 
   backend "gcs" {
-    bucket = "cryptobom-terraform-state-eu"
-    prefix = "cryptobom/gcp/terraform.tfstate"
+    # bucket and prefix are supplied via -backend-config at init time
+    # e.g. terraform init -backend-config=environments/prod.backend.hcl
   }
 }
 
@@ -220,7 +224,7 @@ resource "google_container_node_pool" "enterprise" {
   }
 
   node_config {
-    machine_type = var.enterprise_machine_type  # n2-standard-4
+    machine_type = var.enterprise_machine_type # n2-standard-4
     disk_size_gb = 100
     disk_type    = "pd-ssd"
     image_type   = "COS_CONTAINERD"
@@ -271,7 +275,7 @@ resource "google_container_node_pool" "oss" {
   }
 
   node_config {
-    machine_type = var.oss_machine_type  # e2-standard-2
+    machine_type = var.oss_machine_type # e2-standard-2
     disk_size_gb = 50
     disk_type    = "pd-balanced"
     image_type   = "COS_CONTAINERD"
@@ -348,7 +352,7 @@ resource "google_sql_database_instance" "cryptobom_db" {
   encryption_key_name = google_kms_crypto_key.db_encryption_key.id
 
   settings {
-    tier              = var.db_tier  # db-custom-4-16384
+    tier              = var.db_tier # db-custom-4-16384
     availability_type = var.environment == "production" ? "REGIONAL" : "ZONAL"
     disk_size         = 100
     disk_type         = "PD_SSD"
@@ -473,11 +477,11 @@ resource "google_kms_crypto_key" "db_encryption_key" {
   name            = "cryptobom-db-encryption-key"
   key_ring        = google_kms_key_ring.cryptobom_keyring.id
   purpose         = "ENCRYPT_DECRYPT"
-  rotation_period = "7776000s"  # 90 days
+  rotation_period = "7776000s" # 90 days
 
   version_template {
     algorithm        = "GOOGLE_SYMMETRIC_ENCRYPTION"
-    protection_level = "HSM"   # Hardware Security Module
+    protection_level = "HSM" # Hardware Security Module
   }
 
   labels = {
@@ -516,8 +520,8 @@ resource "google_kms_crypto_key" "pqc_key" {
   }
 
   labels = {
-    purpose      = "post-quantum"
-    pqc_ready    = "true"
+    purpose   = "post-quantum"
+    pqc_ready = "true"
   }
 }
 
@@ -534,9 +538,9 @@ resource "google_redis_instance" "cryptobom_cache" {
 
   authorized_network = google_compute_network.cryptobom_vpc.id
 
-  redis_version     = "REDIS_7_0"
-  display_name      = "CryptoBOM Cache ${var.environment}"
-  auth_enabled      = true
+  redis_version           = "REDIS_7_0"
+  display_name            = "CryptoBOM Cache ${var.environment}"
+  auth_enabled            = true
   transit_encryption_mode = "SERVER_AUTHENTICATION"
 
   maintenance_policy {
@@ -555,12 +559,12 @@ resource "google_redis_instance" "cryptobom_cache" {
 # ============================================================
 locals {
   secrets = {
-    "cryptobom-jwt-secret"         = "MANAGED_BY_HSM"
-    "cryptobom-ibm-quantum-key"    = var.ibm_quantum_api_key
-    "cryptobom-ibm-cloud-key"      = var.ibm_cloud_api_key
-    "cryptobom-slack-webhook"      = var.slack_webhook_url
-    "cryptobom-stripe-secret"      = var.stripe_secret_key
-    "cryptobom-stripe-webhook"     = var.stripe_webhook_secret
+    "cryptobom-jwt-secret"      = "MANAGED_BY_HSM"
+    "cryptobom-ibm-quantum-key" = var.ibm_quantum_api_key
+    "cryptobom-ibm-cloud-key"   = var.ibm_cloud_api_key
+    "cryptobom-slack-webhook"   = var.slack_webhook_url
+    "cryptobom-stripe-secret"   = var.stripe_secret_key
+    "cryptobom-stripe-webhook"  = var.stripe_webhook_secret
   }
 }
 

@@ -1,0 +1,65 @@
+name: SBOM Generation
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  sbom:
+    name: Generate SBOM (CycloneDX)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install cyclonedx-gomod
+        run: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+
+      - name: Generate Go SBOM
+        run: |
+          cyclonedx-gomod app \
+            -output cryptobom-sbom.cdx.json \
+            -json \
+            -licenses \
+            -assert-licenses \
+            .
+
+      - name: Install cdxgen (for multi-ecosystem)
+        run: npm install -g @cyclonedx/cdxgen
+
+      - name: Generate full-repo SBOM
+        run: |
+          cdxgen \
+            --type golang \
+            --output cryptobom-full-sbom.cdx.json \
+            --spec-version 1.5 \
+            .
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: |
+            cryptobom-sbom.cdx.json
+            cryptobom-full-sbom.cdx.json
+          retention-days: 90
+
+      - name: Attach SBOM to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            cryptobom-sbom.cdx.json
+            cryptobom-full-sbom.cdx.json

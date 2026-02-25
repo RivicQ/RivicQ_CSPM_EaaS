@@ -69,3 +69,10 @@ kind-cluster/
 minikube/
 # Frontend build artifacts
 web/build/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+.terraform.lock.hcl

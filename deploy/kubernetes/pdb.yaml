@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cryptobom-pdb
+  namespace: cryptobom-system
+  labels:
+    app: cryptobom-server
+    app.kubernetes.io/name: cryptobom
+    app.kubernetes.io/component: server
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cryptobom-server

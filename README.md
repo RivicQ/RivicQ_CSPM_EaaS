@@ -679,6 +679,55 @@ This license is governed by German law. Disputes shall be resolved through arbit
 
 ---
 
+## 🏗️ Infrastructure & Deployment
+
+### GCP Enterprise Deployment (Terraform + GKE)
+
+| Component | Location | Description |
+|---|---|---|
+| GCP Terraform | [`deploy/terraform/gcp/`](deploy/terraform/gcp/) | GKE, VPC, Cloud SQL, KMS, Secret Manager |
+| AWS CloudHSM | [`deploy/terraform/aws/`](deploy/terraform/aws/) | CloudHSM v2, KMS, RDS, CloudTrail |
+| IBM Cloud | [`deploy/terraform/ibm/`](deploy/terraform/ibm/) | HPCS, Key Protect, Cloud Object Storage |
+| Kubernetes manifests | [`deploy/kubernetes/`](deploy/kubernetes/) | Deployment, HPA, PDB, NetworkPolicy, Ingress |
+| Helm chart | [`deploy/helm/cryptobom-saas/`](deploy/helm/cryptobom-saas/) | Helm-based GKE deployment |
+| DB migrations | [`deploy/migrations/`](deploy/migrations/) | PostgreSQL schema migrations |
+
+**Quick start:**
+
+```bash
+# 1. Provision GCP infrastructure
+terraform -chdir=deploy/terraform/gcp init -backend-config=environments/prod.backend.hcl
+terraform -chdir=deploy/terraform/gcp apply -var-file=environments/prod.tfvars
+
+# 2. Get GKE credentials and deploy
+gcloud container clusters get-credentials cryptobom-production --region europe-west3
+kubectl apply -f deploy/kubernetes/
+```
+
+📖 Full deployment guide: [`deploy/README.md`](deploy/README.md)
+
+### Cross-Cloud Integrations
+
+| Integration | Docs |
+|---|---|
+| AWS CloudHSM | [`deploy/terraform/aws/README.md`](deploy/terraform/aws/README.md) |
+| IBM Cloud / HPCS | [`docs/ibm-integration.md`](docs/ibm-integration.md) |
+| Quantum Attestation | [`docs/quantum-attestation.md`](docs/quantum-attestation.md) |
+
+### Compliance
+
+| Document | Description |
+|---|---|
+| [`docs/compliance/soc2-iso27001-controls.md`](docs/compliance/soc2-iso27001-controls.md) | SOC 2 / ISO 27001 control mapping |
+| [`docs/compliance/data-retention-policy.md`](docs/compliance/data-retention-policy.md) | Data retention schedules |
+| [`docs/compliance/access-control-policy.md`](docs/compliance/access-control-policy.md) | IAM and access control |
+| [`docs/compliance/secure-sdlc.md`](docs/compliance/secure-sdlc.md) | Secure SDLC |
+| [`docs/compliance/vulnerability-management.md`](docs/compliance/vulnerability-management.md) | Vulnerability SLAs |
+| [`docs/compliance/incident-response.md`](docs/compliance/incident-response.md) | Incident response plan |
+| [`SECURITY.md`](SECURITY.md) | Vulnerability disclosure policy |
+
+---
+
 ## 📞 Contact
 
 ### RivicQ GmbH

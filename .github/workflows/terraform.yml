@@ -1,0 +1,112 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/terraform/**'
+      - '.github/workflows/terraform.yml'
+  push:
+    branches: [main, master]
+    paths:
+      - 'deploy/terraform/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  TF_VERSION: '1.6.6'
+
+jobs:
+  terraform-gcp:
+    name: GCP Terraform Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        id: fmt
+        working-directory: deploy/terraform/gcp
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init (no backend)
+        working-directory: deploy/terraform/gcp
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: deploy/terraform/gcp
+        run: terraform validate
+
+      - name: Post fmt result
+        if: github.event_name == 'pull_request' && steps.fmt.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ `terraform fmt` failed in `deploy/terraform/gcp`. Run `terraform fmt -recursive` to fix.'
+            })
+
+  terraform-aws:
+    name: AWS Terraform Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        id: fmt
+        working-directory: deploy/terraform/aws
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init (no backend)
+        working-directory: deploy/terraform/aws
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: deploy/terraform/aws
+        run: terraform validate
+
+  terraform-ibm:
+    name: IBM Terraform Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        id: fmt
+        working-directory: deploy/terraform/ibm
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init (no backend)
+        working-directory: deploy/terraform/ibm
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: deploy/terraform/ibm
+        run: terraform validate
