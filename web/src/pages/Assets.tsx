@@ -28,6 +28,7 @@ import {
   AccordionDetails,
   Alert,
   AlertTitle,
+  Checkbox,
 } from '@mui/material';
 import {
   Search,
@@ -161,7 +162,7 @@ const Assets: React.FC = () => {
         providers: ['ibmq', 'kipu'],
       });
       
-      if (response.success) {
+      if (response.status >= 200 && response.status < 300) {
         toast.success(`Quantum assessment completed for ${assetIds.length} assets`);
       }
     } catch (error) {

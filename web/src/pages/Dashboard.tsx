@@ -47,7 +47,7 @@ import { toast } from 'react-toastify';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useApi } from '../hooks/useApi';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { DevSecOpsLayout } from '../layouts/DevSecOpsLayout';
+import DevSecOpsLayout from '../layouts/DevSecOpsLayout';
 import { LoadingScreen } from '../components/LoadingScreen';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 
@@ -253,7 +253,7 @@ const Dashboard: React.FC = () => {
         quantumAssessment: true,
       });
       
-      if (response.success) {
+      if (response.status >= 200 && response.status < 300) {
         toast.success('Manual scan initiated successfully');
       }
     } catch (error) {
@@ -272,7 +272,7 @@ const Dashboard: React.FC = () => {
         providers: ['ibmq', 'kipu'],
       });
       
-      if (response.success) {
+      if (response.status >= 200 && response.status < 300) {
         toast.success(`Quantum assessment completed for ${assetId}`);
       }
     } catch (error) {
@@ -513,7 +513,6 @@ const Dashboard: React.FC = () => {
                       </Box>
                     ))}
                   </Box>
-                )}
 
                   <Box sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0' }}>
                     <Typography variant="h6" gutterBottom>
@@ -671,30 +670,14 @@ const Dashboard: React.FC = () => {
                       transition={{ duration: 0.3, delay: index * 0.02 }}
                     >
                       <Box sx={{ p: 2, borderRadius: 1, border: '1px solid #f0f0f0', mb: 2, display: 'flex', alignItems: 'flex' }}>
-                        <Timeline>
-                          <TimelineItem>
-                            <TimelineOppositeContent>
-                              <TimelineDot
-                                color={
-                                  event.severity === 'critical' ? 'error' :
-                                  event.severity === 'error' ? 'warning' :
-                                  event.severity === 'warning' ? 'info' : 'grey'
-                                }
-                              />
-                            </TimelineOppositeContent>
-                            <TimelineContent>
-                              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                {event.message}
-                              </Typography>
-                              <Typography variant="caption" color="textSecondary">
-                                {event.timestamp}
-                              </Typography>
-                              <Typography variant="caption" color="textSecondary">
-                                {event.namespace}
-                              </Typography>
-                            </TimelineContent>
-                          </TimelineItem>
-                        </Timeline>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            {event.message}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            {event.timestamp} · {event.namespace}
+                          </Typography>
+                        </Box>
                       </Box>
                       <Box sx={{ ml: 2, flex: 1 }}>
                         <Box sx={{ flex: 1 }}>
@@ -716,6 +699,7 @@ const Dashboard: React.FC = () => {
                 </Box>
               </motion.div>
             )}
+          </Box>
           </Container>
       </ErrorBoundary>
     </DevSecOpsLayout>

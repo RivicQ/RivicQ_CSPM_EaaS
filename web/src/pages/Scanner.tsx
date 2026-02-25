@@ -100,8 +100,8 @@ const Scanner: React.FC = () => {
     setIsScanning(true);
     try {
       const response = await api.post('/api/v1/engine/scan', scanConfig);
-      if (response.success) {
-        setActiveScan(response.data.scanId);
+      if (response.status >= 200 && response.status < 300) {
+        setActiveScan((response.data as any).scanId);
         toast.success(`Scan initiated: ${scanConfig.scanType} scan`);
       }
     } catch (error) {
@@ -115,7 +115,7 @@ const Scanner: React.FC = () => {
   const stopScan = async (scanId: string) => {
     try {
       const response = await api.post(`/api/v1/engine/scan/${scanId}/stop`);
-      if (response.success) {
+      if (response.status >= 200 && response.status < 300) {
         toast.info('Scan stopped');
         setActiveScan(null);
       }
@@ -369,7 +369,6 @@ const Scanner: React.FC = () => {
                           Status: {pod.duration ? `${Math.floor(pod.duration / 60)}s` : 'N/A'}
                           </Typography>
                         </Box>
-                      </Box>
                     </CardContent>
                     {pod.findings > 0 && (
                       <CardContent>
@@ -425,7 +424,6 @@ const Scanner: React.FC = () => {
                           {pod.complianceScore.toFixed(1)}%
                         </Typography>
                       </CardContent>
-                    </CardContent>
                   </Card>
                 </Grid>
               </motion.div>

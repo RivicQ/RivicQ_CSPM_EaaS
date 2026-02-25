@@ -24,6 +24,8 @@ import {
   Divider,
   IconButton,
   Tooltip,
+  CircularProgress,
+  Container,
 } from '@mui/material';
 import {
   Security,
@@ -42,6 +44,7 @@ import {
   PlayArrow,
   Pause,
   Stop,
+  Visibility,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -112,13 +115,16 @@ const AssetDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
+  // Alias for complianceFrameworks used in tabs
+  const complianceData = complianceFrameworks;
+
   useEffect(() => {
     const fetchAssetDetails = async () => {
       setIsLoading(true);
       try {
         const response = await api.get(`/api/v1/assets/${id}`);
-        if (response.success) {
-          setAsset(response.data);
+        if (response.status >= 200 && response.status < 300) {
+          setAsset(response.data as any);
         }
       } catch (error) {
         console.error('Failed to fetch asset details:', error);
@@ -132,15 +138,15 @@ const AssetDetails: React.FC = () => {
   }, [id, api]);
 
   useEffect(() => {
-    if (wsData && wsData.type === 'asset_update' && wsData.data?.id === id) {
-      setAsset(wsData.data);
+    if (wsData && wsData.type === 'asset_update' && (wsData.data as any)?.id === id) {
+      setAsset(wsData.data as any);
       toast.info('Asset details updated');
     }
   }, [wsData, id]);
 
   useEffect(() => {
-    if (wsData && wsData.type === 'quantum_assessment' && wsData.data?.assetId === id) {
-      setQuantumAssessment(prev => [...prev, wsData.data]);
+    if (wsData && wsData.type === 'quantum_assessment' && (wsData.data as any)?.assetId === id) {
+      setQuantumAssessment(prev => [...prev, wsData.data as any]);
       toast.success('New quantum assessment completed');
     }
   }, [wsData, id]);
@@ -157,8 +163,8 @@ const AssetDetails: React.FC = () => {
         assetId: asset.id,
       });
       
-      if (response.success) {
-        setQuantumAssessment(response.data);
+      if (response.status >= 200 && response.status < 300) {
+        setQuantumAssessment(response.data as any);
         toast.success('Quantum vulnerability assessment completed');
       }
     } catch (error) {
@@ -180,12 +186,28 @@ const AssetDetails: React.FC = () => {
         scope: 'full',
       });
       
-      if (response.success) {
-        setComplianceFrameworks(response.data.frameworks);
+      if (response.status >= 200 && response.status < 300) {
+        setComplianceFrameworks((response.data as any).frameworks);
         toast.success('Compliance validation completed');
       }
     } catch (error) {
       console.error('Failed to validate compliance:', error);
+      toast.error('Compliance validation failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleComplianceValidation = async () => {
+    if (!asset) return;
+    setIsLoading(true);
+    try {
+      const response = await api.get(`/api/v1/assets/${asset.id}/compliance`);
+      if (response.status >= 200 && response.status < 300) {
+        setComplianceFrameworks((response.data as any).frameworks || []);
+        toast.success('Compliance validation completed');
+      }
+    } catch (error) {
       toast.error('Compliance validation failed');
     } finally {
       setIsLoading(false);
@@ -203,7 +225,7 @@ const AssetDetails: React.FC = () => {
         targetFramework: 'NIST-PQC',
       });
       
-      if (response.success) {
+      if (response.status >= 200 && response.status < 300) {
         toast.success('Migration plan generated');
       }
     } catch (error) {
@@ -472,7 +494,7 @@ const AssetDetails: React.FC = () => {
                         <Card variant="outlined" sx={{ borderColor: framework.compliant ? '#10b981' : '#ff9800' }}>
                           <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Typography variant="h6">{framework.framework}</Typography>
+                              <Typography variant="h6">{framework.name}</Typography>
                               <Chip
                                 label={framework.version}
                                 size="small"

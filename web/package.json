@@ -86,21 +86,8 @@
   "eslintConfig": {
     "extends": [
       "react-app",
-      "@typescript-eslint/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint/eslint-plugin",
-      "react-hooks",
-      "react-refresh"
-    ],
-    "rules": {
-      "react-hooks/exhaustive-deps": "warn",
-      "react-refresh/only-export-components": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
-      "prefer-const": "error",
-      "no-console": "warn"
-    }
+      "react-app/jest"
+    ]
   },
   "prettier": {
     "semi": false,
