@@ -1,0 +1,72 @@
+name: 🛡️ OSS Leakage Guard
+
+on:
+  push:
+    branches: ["main", "develop", "staging"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  oss-guard:
+    name: Check for enterprise / private leakage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      # ── Rule 1: No enterprise/ directory ──────────────────────────────────
+      - name: No enterprise/ directory
+        run: |
+          if [ -d enterprise ]; then
+            echo "❌ BLOCKED: 'enterprise/' directory must not be committed to the public OSS repo."
+            exit 1
+          fi
+          echo "✅ No enterprise/ directory found."
+
+      # ── Rule 2: No CBOM/ directory (private submodule content) ────────────
+      - name: No CBOM/ directory
+        run: |
+          if [ -d CBOM ]; then
+            echo "❌ BLOCKED: 'CBOM/' directory must not be committed to the public OSS repo."
+            exit 1
+          fi
+          echo "✅ No CBOM/ directory found."
+
+      # ── Rule 3: No .gitmodules pointing to non-public URLs ────────────────
+      - name: No private .gitmodules entries
+        run: |
+          if [ -f .gitmodules ]; then
+            # Fail if any submodule URL is NOT a public https://github.com URL
+            # (i.e. SSH git@ URLs or private registry URLs are forbidden).
+            if grep -E 'url\s*=' .gitmodules | grep -Ev 'https://github\.com/[^/]+/[^/]+'; then
+              echo "❌ BLOCKED: .gitmodules contains non-public submodule URL(s)."
+              exit 1
+            fi
+            # Fail if any entry references the private CBOM submodule path
+            if grep -q 'path\s*=\s*CBOM' .gitmodules; then
+              echo "❌ BLOCKED: .gitmodules references the private CBOM submodule."
+              exit 1
+            fi
+            echo "✅ .gitmodules contains only public URLs."
+          else
+            echo "✅ No .gitmodules file — nothing to check."
+          fi
+
+      # ── Rule 4: No secrets / credentials accidentally committed ───────────
+      - name: No credentials files
+        run: |
+          FOUND=0
+          for f in credentials.json secrets.json api-keys.json .git-credentials; do
+            if [ -f "$f" ]; then
+              echo "❌ BLOCKED: '$f' must not be committed."
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" -eq 1 ]; then exit 1; fi
+          echo "✅ No credential files found."
+
+      - name: OSS Guard passed
+        run: echo "🎉 All OSS leakage checks passed."
