@@ -3,6 +3,7 @@
   "version": "1.3.0",
   "description": "RivicQ CryptoBOM SaaS Frontend - DevSecOps Quantum-Ready Interface",
   "private": true,
+  "homepage": "https://rivic-q.github.io/cryptobom-saas",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
