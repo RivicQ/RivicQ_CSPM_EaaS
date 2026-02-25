@@ -18,8 +18,6 @@ import {
   AlertTitle,
 } from '@mui/material';
 import {
-  Warning,
-  Error as ErrorIcon,
   CheckCircle,
   Sync,
   Security,
@@ -32,11 +30,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from 'recharts';
 import { terraformService } from '../../services/api';
 
 const TerraformIaC: React.FC = () => {
-  const [resources, setResources] = useState<any[]>([]);
+  const [, setResources] = useState<any[]>([]);
   const [findings, setFindings] = useState<any[]>([]);
   const [violations, setViolations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,6 +43,7 @@ const TerraformIaC: React.FC = () => {
 
   useEffect(() => {
     loadTerraformData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadTerraformData = async () => {
@@ -177,8 +177,8 @@ const TerraformIaC: React.FC = () => {
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="count" fill="#ef4444">
-                    {severityData.map((entry, index) => (
-                      <Bar key={`bar-${index}`} fill={index === 0 ? '#ef4444' : index === 1 ? '#f59e0b' : '#3b82f6'} />
+                    {severityData.map((_entry, index) => (
+                      <Cell key={`bar-${index}`} fill={index === 0 ? '#ef4444' : index === 1 ? '#f59e0b' : '#3b82f6'} />
                     ))}
                   </Bar>
                 </BarChart>

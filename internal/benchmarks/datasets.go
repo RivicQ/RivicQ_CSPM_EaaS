@@ -444,7 +444,7 @@ func getFIPSApproval(algorithm string) bool {
 
 // SaveDataset saves dataset to JSON file
 func (ds *RealWorldDataset) SaveDataset(filename string) error {
-	data, err := json.MarshalIndent(ds, "", "  ")
+	_, err := json.MarshalIndent(ds, "", "  ")
 	if err != nil {
 		return err
 	}

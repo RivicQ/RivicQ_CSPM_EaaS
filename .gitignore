@@ -67,3 +67,5 @@ coverage.html
 local-dev/
 kind-cluster/
 minikube/
+# Frontend build artifacts
+web/build/

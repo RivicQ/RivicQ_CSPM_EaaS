@@ -28,6 +28,15 @@ type Config struct {
 
 	// Headlamp Configuration
 	Headlamp HeadlampConfig `mapstructure:"headlamp"`
+
+	// IBM Cloud Configuration
+	IBMCloud IBMCloudConfig `mapstructure:"ibm_cloud"`
+
+	// AWS Configuration
+	AWS AWSConfig `mapstructure:"aws"`
+
+	// Quantum Safety Configuration
+	Quantum QuantumConfig `mapstructure:"quantum"`
 }
 
 type DatabaseConfig struct {
@@ -75,6 +84,20 @@ type HeadlampConfig struct {
 	URL       string `mapstructure:"url"`
 	Namespace string `mapstructure:"namespace"`
 	Plugin    string `mapstructure:"plugin"`
+}
+
+type IBMCloudConfig struct {
+	APIKey        string `mapstructure:"api_key"`
+	Region        string `mapstructure:"region"`
+	ResourceGroup string `mapstructure:"resource_group"`
+	HPCSEnabled   bool   `mapstructure:"hpcs_enabled"`
+	HPCSInstance  string `mapstructure:"hpcs_instance"`
+}
+
+type QuantumConfig struct {
+	Enabled         bool   `mapstructure:"enabled"`
+	NISTStandard    string `mapstructure:"nist_standard"`
+	AttestationMode string `mapstructure:"attestation_mode"`
 }
 
 func Load() (*Config, error) {

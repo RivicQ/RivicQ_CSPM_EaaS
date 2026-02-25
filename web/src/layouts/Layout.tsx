@@ -28,10 +28,8 @@ import {
   Assessment,
   Analytics,
   Settings,
-  Home,
   Refresh,
   Notifications,
-  Visibility,
   Cloud,
   Psychology,
   GitHub,
@@ -52,7 +50,7 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const [notifications, setNotifications] = React.useState(5);
+  const [notifications] = React.useState(5);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const navigationItems: NavItem[] = [

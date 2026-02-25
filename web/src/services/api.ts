@@ -357,3 +357,34 @@ export const securityService = {
 };
 
 export default api;
+
+// IBM Cloud HPCS
+export const ibmCloudService = {
+  getHPCSStatus: () => api.get('/enterprise/ibm/hpcs/status'),
+  getKeyInventory: () => api.get('/enterprise/ibm/hpcs/keys'),
+  getObjectStorageBuckets: () => api.get('/enterprise/ibm/cos/buckets'),
+  attestKey: (keyId: string) => api.post(`/enterprise/ibm/hpcs/keys/${keyId}/attest`),
+};
+
+// AWS HSM
+export const awsCloudService = {
+  getCloudHSMStatus: () => api.get('/enterprise/aws/cloudhsm/status'),
+  getKMSKeys: () => api.get('/enterprise/aws/kms/keys'),
+  getCloudTrailAudit: () => api.get('/enterprise/aws/cloudtrail/crypto-events'),
+};
+
+// Quantum Attestation (enterprise extended)
+export const quantumAttestationService = {
+  getQuantumRiskAssessment: () => api.get('/enterprise/quantum/assessment'),
+  scanForPQCAlgorithms: (assetIds: string[]) => api.post('/enterprise/quantum/scan', { asset_ids: assetIds }),
+  getAttestationReport: (assetId: string) => api.get(`/enterprise/quantum/attest/${assetId}`),
+  getMigrationRoadmap: () => api.get('/enterprise/quantum/migration-roadmap'),
+  exportQuantumSafeBOM: (assetId: string) => api.get(`/enterprise/quantum/bom/${assetId}/export`),
+};
+
+// GCP Cloud
+export const gcpService = {
+  getCloudKMSKeys: () => api.get('/enterprise/gcp/kms/keys'),
+  getGKEWorkloads: () => api.get('/enterprise/gcp/gke/workloads'),
+  getHSMKeyRings: () => api.get('/enterprise/gcp/hsm/keyrings'),
+};

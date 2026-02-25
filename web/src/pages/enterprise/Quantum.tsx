@@ -23,15 +23,13 @@ import {
   FormControl,
   InputLabel,
   Alert,
+  AlertTitle,
 } from '@mui/material';
 import {
-  Psychology,
   Security,
   Warning,
   CheckCircle,
-  Schedule,
   Sync,
-  Storage,
 } from '@mui/icons-material';
 import {
   LineChart,
@@ -65,33 +63,31 @@ const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 
 const QuantumReadiness: React.FC = () => {
   const [readiness, setReadiness] = useState<any>(null);
-  const [migrationPlan, setMigrationPlan] = useState<any>(null);
   const [networks, setNetworks] = useState<any[]>([]);
   const [algorithms, setAlgorithms] = useState<any[]>([]);
-  const [attestations, setAttestations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [migrateDialogOpen, setMigrateDialogOpen] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState('');
   const [sourceAlgorithm, setSourceAlgorithm] = useState('RSA-2048');
   const [targetAlgorithm, setTargetAlgorithm] = useState('CRYSTALS-Kyber');
+  const [selectedAsset] = useState('');
 
   useEffect(() => {
     loadQuantumData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadQuantumData = async () => {
     setLoading(true);
     try {
-      const [readinessRes, networksRes, algorithmsRes, attestationsRes] = await Promise.all([
+      const results = await Promise.all([
         quantumService.getQuantumReadiness(),
         quantumService.getQuantumNetworks(),
         quantumService.getPQCAlgorithms(),
         quantumService.getAttestations(),
       ]);
-      setReadiness(readinessRes.data);
-      setNetworks(networksRes.data.networks || []);
-      setAlgorithms(algorithmsRes.data.algorithms || []);
-      setAttestations(attestationsRes.data.attestations || []);
+      setReadiness(results[0].data);
+      setNetworks(results[1].data.networks || []);
+      setAlgorithms(results[2].data.algorithms || []);
     } catch (error) {
       console.error('Failed to load quantum data:', error);
       setReadiness({
