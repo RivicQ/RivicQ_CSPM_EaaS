@@ -1,0 +1,33 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cryptobom-server-policy
+  namespace: cryptobom-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app: cryptobom-server
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: ingress-nginx
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toFQDNs:
+        - matchPattern: "*.googleapis.com"
+        - matchPattern: "*.ibm.com"
+        - matchPattern: "*.amazonaws.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

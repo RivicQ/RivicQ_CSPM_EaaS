@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cryptobom-config
+  namespace: cryptobom-system
+data:
+  edition: "enterprise"
+  gcp-project-id: "cryptobom-prod"
+  log-level: "info"
+  api-port: "8080"
+  scan-concurrency: "4"
+  quantum-nist-standard: "FIPS-203"
+  quantum-attestation-mode: "hardware"

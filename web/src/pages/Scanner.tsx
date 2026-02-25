@@ -83,14 +83,14 @@ const Scanner: React.FC = () => {
 
   useEffect(() => {
     if (wsData && wsData.type === 'scan_pods') {
-      setScanPods(wsData.data);
+      setScanPods(wsData.data as any);
     }
   }, [wsData]);
 
   useEffect(() => {
     if (wsData && wsData.type === 'scan_progress' && wsData.data) {
       const updatedPods = scanPods.map(pod =>
-        pod.id === wsData.data.podId ? { ...pod, ...wsData.data } : pod
+        pod.id === (wsData.data as any).podId ? { ...pod, ...(wsData.data as any) } : pod
       );
       setScanPods(updatedPods);
     }
@@ -135,13 +135,13 @@ const Scanner: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): 'default' | 'success' | 'error' | 'warning' | 'primary' => {
     switch (status) {
-      case 'idle': return 'grey.500';
-      case 'running': return '#4caf50';
-      case 'completed': return '#4caf50';
-      case 'failed': return '#f44336';
-      default: return 'grey.500';
+      case 'idle': return 'default';
+      case 'running': return 'success';
+      case 'completed': return 'primary';
+      case 'failed': return 'error';
+      default: return 'default';
     }
   };
 

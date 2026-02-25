@@ -197,11 +197,7 @@ const MultiCloud: React.FC = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="resources">
-                    {barData.map((entry, index) => (
-                      <Bar key={`bar-${index}`} fill={index === 0 ? CLOUD_COLORS.aws : index === 1 ? CLOUD_COLORS.gcp : CLOUD_COLORS.ibm_cloud} />
-                    ))}
-                  </Bar>
+                  <Bar dataKey="resources" fill="#667eea" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

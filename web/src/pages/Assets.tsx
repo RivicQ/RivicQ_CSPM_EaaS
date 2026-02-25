@@ -97,14 +97,14 @@ const Assets: React.FC = () => {
   // Fetch assets from WebSocket
   React.useEffect(() => {
     if (wsData && wsData.type === 'crypto_assets') {
-      setAssets(wsData.data);
+      setAssets(wsData.data as any);
     }
   }, [wsData]);
 
   // Fetch scan results
   React.useEffect(() => {
     if (wsData && wsData.type === 'scan_results') {
-      setScanResults(wsData.data);
+      setScanResults(wsData.data as any);
     }
   }, [wsData]);
 

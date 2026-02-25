@@ -114,14 +114,14 @@ const Dashboard: React.FC = () => {
     if (wsData) {
       switch (wsData.type) {
         case 'crypto_assets':
-          setAssets(wsData.data);
-          toast.success(`Updated ${wsData.data.length} crypto assets`);
+          setAssets(wsData.data as any);
+          toast.success(`Updated ${(wsData.data as any).length} crypto assets`);
           break;
         case 'scan_pods':
-          setScanPods(wsData.data);
+          setScanPods(wsData.data as any);
           break;
         case 'security_events':
-          setSecurityEvents(wsData.data);
+          setSecurityEvents(wsData.data as any);
           break;
         case 'quantum_assessment':
           toast.success('Quantum vulnerability assessment completed');
@@ -139,20 +139,20 @@ const Dashboard: React.FC = () => {
     try {
       // Fetch crypto assets
       const assetsResponse = await api.get('/api/v1/assets');
-      if (assetsResponse.success) {
-        setAssets(assetsResponse.data);
+      if (assetsResponse.status >= 200 && assetsResponse.status < 300) {
+        setAssets(assetsResponse.data as any);
       }
 
       // Fetch scan pods
       const podsResponse = await api.get('/api/v1/engine/scanner/pods');
-      if (podsResponse.success) {
-        setScanPods(podsResponse.data);
+      if (podsResponse.status >= 200 && podsResponse.status < 300) {
+        setScanPods(podsResponse.data as any);
       }
 
       // Fetch security events
       const eventsResponse = await api.get('/api/v1/security/events');
-      if (eventsResponse.success) {
-        setSecurityEvents(eventsResponse.data);
+      if (eventsResponse.status >= 200 && eventsResponse.status < 300) {
+        setSecurityEvents(eventsResponse.data as any);
       }
 
     } catch (error) {
@@ -324,7 +324,7 @@ const Dashboard: React.FC = () => {
                 </Tooltip>
                 
                 <Tooltip title="Settings">
-                  <IconButton onClick={() => setSelectedView('settings')}>
+                  <IconButton onClick={() => void('settings')}>
                     <Settings />
                   </IconButton>
                 </Tooltip>
@@ -452,32 +452,30 @@ const Dashboard: React.FC = () => {
             <Box sx={{ mb: 3 }}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider', pb: 1 }}>
                 {['overview', 'assets', 'scans', 'security'].map((view) => (
-                  <motion.button
+                  <motion.div
                     key={view}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedView(view)}
-                    sx={{
-                      background: selectedView === view ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
-                      border: 'none',
-                      borderRadius: 2,
-                      px: 3,
-                      py: 2,
-                      mx: 1,
-                      cursor: 'pointer',
-                      textTransform: 'none',
-                    }}
+                    style={{ display: 'inline-block' }}
                   >
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: selectedView === view ? 'white' : 'text.primary',
+                    <button
+                      onClick={() => setSelectedView(view as any)}
+                      style={{
+                        background: selectedView === view ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '8px 24px',
+                        margin: '0 4px',
+                        cursor: 'pointer',
+                        color: selectedView === view ? 'white' : 'inherit',
                         fontWeight: selectedView === view ? 'bold' : 'normal',
+                        fontSize: '1rem',
+                        textTransform: 'capitalize',
                       }}
                     >
                       {view.charAt(0).toUpperCase() + view.slice(1)}
-                    </Typography>
-                  </motion.button>
+                    </button>
+                  </motion.div>
                 ))}
               </Box>
             </Box>

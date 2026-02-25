@@ -1,0 +1,264 @@
+name: Deploy to GCP (Production)
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: 'Edition to deploy'
+        required: true
+        default: 'enterprise'
+        type: choice
+        options: [oss, enterprise]
+
+env:
+  GO_VERSION: '1.21'
+  NODE_VERSION: '18'
+  GCP_REGION: europe-west3
+  GKE_CLUSTER: cryptobom-prod
+  IMAGE_REGISTRY: europe-west3-docker.pkg.dev
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+jobs:
+  # ── Build Go backend ────────────────────────────────────────────────────────
+  build-go:
+    name: Build Go Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Verify Go build
+        run: go build ./...
+
+      - name: Run Go tests
+        run: go test -race -count=1 ./...
+
+  # ── Build React frontend ─────────────────────────────────────────────────────
+  build-frontend:
+    name: Build React Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: cd web && npm ci --legacy-peer-deps
+
+      - name: Build production bundle
+        env:
+          REACT_APP_API_URL: https://api.cryptobom.io/api/v1
+          REACT_APP_EDITION: enterprise
+          CI: false
+        run: cd web && npm run build
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: web/build/
+          retention-days: 1
+
+  # ── Build & push Docker image ─────────────────────────────────────────────
+  docker-build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [build-go, build-frontend]
+    permissions:
+      contents: read
+      id-token: write   # for Workload Identity Federation
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: web/build/
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.IMAGE_REGISTRY }} --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_REGISTRY }}/${{ env.PROJECT_ID }}/cryptobom/server
+          tags: |
+            type=sha,prefix=,suffix=,format=long
+            type=ref,event=branch
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deploy/enterprise/docker/Dockerfile.enterprise
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ github.sha }}
+            EDITION=enterprise
+
+  # ── Run DB migrations ─────────────────────────────────────────────────────
+  db-migrate:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    needs: docker-build
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run migrations via Cloud SQL proxy
+        run: |
+          wget -q https://dl.google.com/cloudsql/cloud_sql_proxy_x64.linux -O /tmp/cloud_sql_proxy
+          chmod +x /tmp/cloud_sql_proxy
+          /tmp/cloud_sql_proxy -instances=${{ secrets.CLOUD_SQL_INSTANCE }}=tcp:5432 &
+          sleep 3
+          PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+            -h 127.0.0.1 -U cryptobom -d cryptobom \
+            -f deploy/migrations/001_initial_schema.sql || true
+          PGPASSWORD="${{ secrets.DB_PASSWORD }}" psql \
+            -h 127.0.0.1 -U cryptobom -d cryptobom \
+            -f deploy/migrations/002_enterprise_features.sql || true
+
+  # ── Deploy to GKE ─────────────────────────────────────────────────────────
+  deploy-gke:
+    name: Deploy to GKE
+    runs-on: ubuntu-latest
+    needs: [docker-build, db-migrate]
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GCP_REGION }}
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f deploy/kubernetes/namespace.yaml
+          kubectl apply -f deploy/kubernetes/configmap.yaml
+          kubectl apply -f deploy/kubernetes/service.yaml
+          kubectl apply -f deploy/kubernetes/networkpolicy.yaml
+          kubectl apply -f deploy/kubernetes/hpa.yaml
+          kubectl apply -f deploy/kubernetes/ingress.yaml
+
+      - name: Deploy new image
+        env:
+          IMAGE: ${{ needs.docker-build.outputs.image }}
+        run: |
+          kubectl set image deployment/cryptobom-server \
+            cryptobom-server=${{ env.IMAGE_REGISTRY }}/${{ env.PROJECT_ID }}/cryptobom/server:${{ github.sha }} \
+            -n cryptobom-system
+          kubectl rollout status deployment/cryptobom-server \
+            -n cryptobom-system --timeout=10m
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n cryptobom-system
+          kubectl get svc -n cryptobom-system
+
+  # ── Deploy frontend to GitHub Pages ──────────────────────────────────────
+  deploy-pages:
+    name: Deploy Frontend to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: cd web && npm ci --legacy-peer-deps
+
+      - name: Build for GitHub Pages
+        env:
+          REACT_APP_API_URL: https://api.cryptobom.io/api/v1
+          REACT_APP_EDITION: enterprise
+          PUBLIC_URL: /${{ github.event.repository.name }}
+          CI: false
+        run: cd web && npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/build/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ── Post-deploy health check ──────────────────────────────────────────────
+  health-check:
+    name: Post-Deploy Health Check
+    runs-on: ubuntu-latest
+    needs: deploy-gke
+    if: always() && needs.deploy-gke.result == 'success'
+    steps:
+      - name: Wait for pods to stabilize
+        run: sleep 30
+
+      - name: Health check
+        run: |
+          curl -f --retry 5 --retry-delay 10 \
+            https://api.cryptobom.io/healthz || exit 1
+          echo "✅ Deployment healthy"
