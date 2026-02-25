@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CryptoBOM SaaS — Platform Preview</title>
+  <meta name="description" content="CryptoBOM SaaS — Enterprise Cryptographic Bill of Materials platform with IBM Quantum, AWS CloudHSM, GCP and post-quantum migration support." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #667eea;
+      --primary2:  #764ba2;
+      --accent:    #10b981;
+      --warn:      #f59e0b;
+      --danger:    #ef4444;
+      --dark:      #0f172a;
+      --card-bg:   rgba(255,255,255,0.07);
+      --card-border: rgba(255,255,255,0.15);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    header {
+      background: rgba(15,23,42,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: sticky; top: 0; z-index: 100;
+      padding: 0.9rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.15rem; }
+    .logo-icon { font-size: 1.6rem; }
+    .logo-badge {
+      background: linear-gradient(90deg, var(--primary), var(--primary2));
+      color: #fff; font-size: 0.7rem; font-weight: 600;
+      padding: 0.15rem 0.5rem; border-radius: 20px; letter-spacing: 0.04em;
+    }
+    .header-links { display: flex; gap: 1rem; }
+    .header-links a {
+      color: #94a3b8; text-decoration: none; font-size: 0.875rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .header-links a:hover { color: #fff; }
+
+    /* ── Hero ─────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      background: rgba(102,126,234,0.2);
+      border: 1px solid rgba(102,126,234,0.4);
+      color: var(--primary);
+      font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 20px;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800; line-height: 1.15;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.25rem;
+    }
+    .hero p {
+      max-width: 640px; margin: 0 auto 2.5rem;
+      font-size: 1.1rem; color: #94a3b8; line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.75rem 1.75rem; border-radius: 0.5rem;
+      font-weight: 600; font-size: 0.95rem; text-decoration: none;
+      transition: all 0.2s; cursor: pointer; border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: #fff; box-shadow: 0 4px 20px rgba(102,126,234,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(102,126,234,0.5); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #e2e8f0;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.08); }
+
+    /* ── Stats row ────────────────────────────────────────────── */
+    .stats {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 2.5rem; padding: 0 2rem 4rem;
+    }
+    .stat { text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+    .stat-label { font-size: 0.8rem; color: #64748b; margin-top: 0.2rem; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* ── Section ──────────────────────────────────────────────── */
+    section { max-width: 1200px; margin: 0 auto; padding: 0 2rem 5rem; }
+    .section-title {
+      font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 0.75rem;
+    }
+    .section-sub {
+      text-align: center; color: #64748b; margin-bottom: 3rem; font-size: 0.95rem;
+    }
+
+    /* ── Preview cards ────────────────────────────────────────── */
+    .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .preview-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem; overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .preview-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+    .preview-thumb {
+      height: 180px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+      position: relative; overflow: hidden;
+    }
+    .preview-thumb::before {
+      content: ''; position: absolute; inset: 0;
+    }
+    .thumb-enterprise { background: linear-gradient(135deg, #1e3a5f, #2d1b69); }
+    .thumb-oss        { background: linear-gradient(135deg, #064e3b, #065f46); }
+    .thumb-demo       { background: linear-gradient(135deg, #431407, #7c2d12); }
+    .preview-body { padding: 1.25rem 1.5rem 1.5rem; }
+    .preview-edition {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 0.4rem;
+    }
+    .edition-enterprise { color: #818cf8; }
+    .edition-oss        { color: var(--accent); }
+    .edition-demo       { color: var(--warn); }
+    .preview-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .preview-desc  { font-size: 0.875rem; color: #64748b; line-height: 1.6; margin-bottom: 1.25rem; }
+    .preview-link {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      color: var(--primary); font-weight: 600; font-size: 0.875rem;
+      text-decoration: none; transition: gap 0.2s;
+    }
+    .preview-link:hover { gap: 0.7rem; }
+
+    /* ── Features ─────────────────────────────────────────────── */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+    .feature-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 0.75rem; padding: 1.25rem 1.5rem;
+    }
+    .feature-icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+    .feature-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .feature-desc  { font-size: 0.825rem; color: #64748b; line-height: 1.5; }
+
+    /* ── Cloud integrations ───────────────────────────────────── */
+    .cloud-row {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 2rem;
+    }
+    .cloud-badge {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 0.5rem; padding: 0.6rem 1.2rem;
+      font-size: 0.85rem; font-weight: 500;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    footer {
+      text-align: center; padding: 2.5rem 2rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      color: #475569; font-size: 0.825rem;
+    }
+    footer a { color: #64748b; text-decoration: none; }
+    footer a:hover { color: #94a3b8; }
+
+    @media (max-width: 600px) {
+      .header-links { display: none; }
+      .stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">
+    <span class="logo-icon">🔐</span>
+    <span>CryptoBOM SaaS</span>
+    <span class="logo-badge">v1.3.0</span>
+  </div>
+  <nav class="header-links">
+    <a href="https://github.com/rivic-q/cryptobom-saas">GitHub</a>
+    <a href="https://github.com/rivic-q/cryptobom-saas/blob/master/README.md">Docs</a>
+    <a href="https://github.com/rivic-q/cryptobom-saas/blob/master/docs/openapi.yaml">API</a>
+    <a href="https://github.com/rivic-q/cryptobom-saas/blob/master/CHANGELOG.md">Changelog</a>
+  </nav>
+</header>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <span class="hero-eyebrow">🚀 Platform Preview</span>
+  <h1>Quantum-Safe Cryptographic<br/>Bill of Materials</h1>
+  <p>
+    Discover, inventory and migrate every cryptographic asset across your
+    enterprise — with real-time IBM Quantum attestation, AWS CloudHSM,
+    GCP GKE and post-quantum compliance built in.
+  </p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="enterprise.html">
+      ⚡ Enterprise Dashboard
+    </a>
+    <a class="btn btn-outline" href="demo.html">
+      🔍 OSS Demo
+    </a>
+  </div>
+</div>
+
+<!-- ── Stats ── -->
+<div class="stats">
+  <div class="stat"><div class="stat-value">50+</div><div class="stat-label">API Endpoints</div></div>
+  <div class="stat"><div class="stat-value">85%+</div><div class="stat-label">Test Coverage</div></div>
+  <div class="stat"><div class="stat-value">10K+</div><div class="stat-label">Concurrent Users</div></div>
+  <div class="stat"><div class="stat-value">&lt;100ms</div><div class="stat-label">API Response (p95)</div></div>
+  <div class="stat"><div class="stat-value">99.9%</div><div class="stat-label">Uptime SLA</div></div>
+</div>
+
+<!-- ── Preview Cards ── -->
+<section>
+  <h2 class="section-title">Live Previews</h2>
+  <p class="section-sub">Click any card to open the interactive dashboard preview</p>
+  <div class="preview-grid">
+
+    <div class="preview-card">
+      <div class="preview-thumb thumb-enterprise">🏢</div>
+      <div class="preview-body">
+        <div class="preview-edition edition-enterprise">Enterprise Edition</div>
+        <div class="preview-title">Enterprise Compliance Dashboard</div>
+        <div class="preview-desc">
+          Full-featured dashboard with quantum readiness scores, multi-cloud
+          asset inventory, PQC migration tracker, compliance heatmaps and
+          IBM HPCS / AWS CloudHSM HSM status.
+        </div>
+        <a class="preview-link" href="enterprise.html">Open preview →</a>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-thumb thumb-oss">🔓</div>
+      <div class="preview-body">
+        <div class="preview-edition edition-oss">OSS Edition</div>
+        <div class="preview-title">OSS CBOM Dashboard</div>
+        <div class="preview-desc">
+          Real-time cryptographic asset scanning, algorithm risk scores,
+          Kubernetes integration, vulnerability timeline and post-quantum
+          migration planning — all open source.
+        </div>
+        <a class="preview-link" href="demo.html">Open preview →</a>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-thumb thumb-demo">🔬</div>
+      <div class="preview-body">
+        <div class="preview-edition edition-demo">Full Feature Demo</div>
+        <div class="preview-title">Complete Platform Demo</div>
+        <div class="preview-desc">
+          End-to-end walkthrough combining OSS and Enterprise features:
+          asset discovery, quantum attestation, compliance reporting and
+          automated migration planning.
+        </div>
+        <a class="preview-link" href="demo-complete.html">Open preview →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section>
+  <h2 class="section-title">Platform Capabilities</h2>
+  <p class="section-sub">Everything you need to stay ahead of the quantum threat</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚛️</div>
+      <div class="feature-title">IBM Quantum Attestation</div>
+      <div class="feature-desc">Live quantum-safety scoring per cryptographic asset via IBM Quantum Network API with harvest-now-decrypt-later risk flagging.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔑</div>
+      <div class="feature-title">AWS CloudHSM / KMS</div>
+      <div class="feature-desc">FIPS 140-3 Level 3 key management. CloudTrail audit events, multi-region KMS keys, HSM-backed key inventory.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">☁️</div>
+      <div class="feature-title">IBM Cloud HPCS</div>
+      <div class="feature-desc">Keep-Your-Own-Key (KYOK) with Hyper Protect Crypto Services. Per-key attestation reports and COS bucket encryption status.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-title">GCP / GKE Deployment</div>
+      <div class="feature-desc">One-click deploy to Google Kubernetes Engine via GitHub Actions. Terraform-managed Cloud SQL and Cloud Storage encryption.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">CBOM Generation</div>
+      <div class="feature-desc">Automated Cryptographic Bill of Materials across Kubernetes clusters, containers, repositories and CI/CD pipelines.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-title">PQC Migration Planner</div>
+      <div class="feature-desc">NIST FIPS 203/204/205 (ML-KEM, ML-DSA, SLH-DSA) migration roadmap with effort estimates and BSI/DORA/eIDAS 2.0 compliance.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">Real-time Scanning</div>
+      <div class="feature-desc">eBPF-based asset discovery. Continuous scanning for RSA, AES, ECDSA and post-quantum algorithms across your stack.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Compliance Reporting</div>
+      <div class="feature-desc">Automated reports for NIST CSF, ISO 27001, SOC 2 Type II, PCI DSS Level 1, GDPR and Zero Trust architecture audits.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Cloud Integrations ── -->
+<section>
+  <h2 class="section-title">Cloud Integrations</h2>
+  <p class="section-sub">Production-ready connectors for every major enterprise cloud</p>
+  <div class="cloud-row">
+    <div class="cloud-badge"><span class="dot"></span> AWS CloudHSM &amp; KMS</div>
+    <div class="cloud-badge"><span class="dot"></span> IBM Cloud HPCS</div>
+    <div class="cloud-badge"><span class="dot"></span> GCP / GKE</div>
+    <div class="cloud-badge"><span class="dot"></span> IBM Quantum Network</div>
+    <div class="cloud-badge"><span class="dot"></span> Azure Key Vault</div>
+    <div class="cloud-badge"><span class="dot"></span> Kubernetes / Helm</div>
+    <div class="cloud-badge"><span class="dot"></span> Prometheus / Jaeger</div>
+    <div class="cloud-badge"><span class="dot"></span> GitHub Actions CI/CD</div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <p>
+    <strong>CryptoBOM SaaS</strong> &nbsp;|&nbsp;
+    © 2026 RivicQ GmbH, Berlin &nbsp;|&nbsp;
+    <a href="https://github.com/rivic-q/cryptobom-saas/blob/master/LICENSE">Apache 2.0</a> &nbsp;|&nbsp;
+    <a href="https://github.com/rivic-q/cryptobom-saas">GitHub</a> &nbsp;|&nbsp;
+    <a href="https://rivic-q.github.io/cryptobom-saas/">rivic-q.github.io/cryptobom-saas</a>
+  </p>
+  <p style="margin-top:0.5rem; color:#334155;">
+    German Engineering Excellence in Quantum-Safe Cryptography &nbsp;·&nbsp; LEAP Berlin · Rudower Chaussee 29, 12489 Berlin
+  </p>
+</footer>
+
+</body>
+</html>
