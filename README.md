@@ -18,12 +18,19 @@
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)](https://github.com/rivic-q/cryptobom-saas)
 [![Language](https://img.shields.io/github/languages/top/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas)
 
-## ⚡ Quick Start (One-Liner)
+## ⚡ Quick Start (OSS)
 
 ```bash
-# Docker Compose - Full CBOM Scanner in 30 seconds!
-docker compose up -d && docker compose exec app python examples/scan.py --target all --output cbom.json
+# Clone, copy env template, start all services with Docker Compose
+git clone https://github.com/rivic-q/cryptobom-saas.git
+cd cryptobom-saas
+cp .env.example .env          # edit JWT_SECRET before production use
+docker compose up -d
+curl http://localhost:8080/healthz
 ```
+
+> **Full deployment guide →** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+> Covers local binary, Docker Compose, Kubernetes, CI/CD workflows, and all required secrets.
 
 ## 🆓 Open Source Edition
 
