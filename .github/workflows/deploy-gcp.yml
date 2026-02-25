@@ -11,8 +11,6 @@ on:
         options: [production, staging]
 
 env:
-  GO_VERSION: '1.21'
-  NODE_VERSION: '18'
   GCP_REGION: 'europe-west3'
   GKE_CLUSTER: 'cryptobom-gke'
   IMAGE_NAME: 'cryptobom'
@@ -47,7 +45,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build & push OSS image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./deploy/docker/Dockerfile.oss

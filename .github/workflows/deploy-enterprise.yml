@@ -12,10 +12,6 @@ on:
         required: true
         default: 'production'
 
-env:
-  GO_VERSION: '1.21'
-  NODE_VERSION: '18'
-
 jobs:
   build-enterprise:
     name: Build Enterprise Image
@@ -39,7 +35,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & push Enterprise image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./deploy/docker/Dockerfile.enterprise
@@ -80,12 +76,17 @@ jobs:
         run: |
           kubectl apply -f deploy/kubernetes/namespace.yaml
           kubectl apply -f deploy/kubernetes/ -n cryptobom-system
+          kubectl create secret generic cryptobom-enterprise-secrets \
+            --from-literal=IBM_CLOUD_API_KEY="${{ secrets.IBM_CLOUD_API_KEY }}" \
+            --from-literal=IBM_HPCS_INSTANCE="${{ secrets.IBM_HPCS_INSTANCE }}" \
+            --from-literal=AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            --from-literal=AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -n cryptobom-system --dry-run=client -o yaml | kubectl apply -f -
           kubectl set env deployment/cryptobom-server \
             CRYPTOBOM_EDITION=enterprise \
-            IBM_CLOUD_API_KEY="${{ secrets.IBM_CLOUD_API_KEY }}" \
-            IBM_HPCS_INSTANCE="${{ secrets.IBM_HPCS_INSTANCE }}" \
-            AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
-            AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -n cryptobom-system
+          kubectl set env deployment/cryptobom-server \
+            --from=secret/cryptobom-enterprise-secrets \
             -n cryptobom-system
           kubectl rollout status deployment/cryptobom-server \
             -n cryptobom-system --timeout=15m
