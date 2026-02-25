@@ -2,18 +2,18 @@ version: '3.8'
 
 services:
   app:
-    image: golang:1.25-alpine
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.oss
     container_name: cryptobom-saas
-    working_dir: /home/re1/cryptobom-saas
-    volumes:
-      - .:/home/re1/cryptobom-saas
     ports:
-      - "9090:9090"
+      - "8080:8080"
     environment:
-      - EDITION=oss
-      - LOG_LEVEL=info
-    command: |
-      sh -c "go run src/cmd/server/main.go"
+      - CRYPTOBOM_PORT=8080
+      - CRYPTOBOM_LOG_LEVEL=info
+    env_file:
+      - path: .env
+        required: false
     networks:
       - cryptobom-net
 
@@ -27,7 +27,9 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - REACT_APP_API_URL=http://localhost:9090
+      # REACT_APP_API_URL is used by the browser, not the container.
+      # Keep this as localhost:<host-port> so the browser can reach the API.
+      - REACT_APP_API_URL=http://localhost:8080
     command: npm start
     networks:
       - cryptobom-net
