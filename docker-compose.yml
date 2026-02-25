@@ -1,6 +1,41 @@
-version: '3.8'
-
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: cryptobom-db
+    environment:
+      POSTGRES_USER: cryptobom
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cryptobom_dev}
+      POSTGRES_DB: cryptobom
+    volumes:
+      - cryptobom-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cryptobom"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - cryptobom-net
+
+  migrate:
+    image: postgres:15-alpine
+    container_name: cryptobom-migrate
+    volumes:
+      - ./deploy/migrations:/migrations:ro
+    environment:
+      PGPASSWORD: ${DB_PASSWORD:-cryptobom_dev}
+    command: >
+      sh -c "set -e; for f in $(ls /migrations/*.sql | sort); do
+               echo \"Applying $$f ...\";
+               psql -h db -U cryptobom -d cryptobom -f $$f;
+             done"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - cryptobom-net
+
   app:
     build:
       context: .
@@ -11,9 +46,15 @@ services:
     environment:
       - CRYPTOBOM_PORT=8080
       - CRYPTOBOM_LOG_LEVEL=info
+      - DATABASE_URL=postgres://cryptobom:${DB_PASSWORD:-cryptobom_dev}@db:5432/cryptobom?sslmode=disable
     env_file:
       - path: .env
         required: false
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - cryptobom-net
 
@@ -23,6 +64,7 @@ services:
     working_dir: /app/web
     volumes:
       - ./web:/app/web
+      - cryptobom-web-node-modules:/app/web/node_modules
     ports:
       - "3000:3000"
     environment:
@@ -30,7 +72,7 @@ services:
       # REACT_APP_API_URL is used by the browser, not the container.
       # Keep this as localhost:<host-port> so the browser can reach the API.
       - REACT_APP_API_URL=http://localhost:8080
-    command: npm start
+    command: sh -c "npm install --silent && npm run dev"
     networks:
       - cryptobom-net
     depends_on:
@@ -50,3 +92,7 @@ services:
 networks:
   cryptobom-net:
     driver: bridge
+
+volumes:
+  cryptobom-db-data:
+  cryptobom-web-node-modules:

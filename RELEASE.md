@@ -81,7 +81,87 @@ cat VERSION
 
 ---
 
-## ⬆️ Upgrade Guide
+## ✅ Production Release Checklist
+
+Use this checklist every time you cut a production release.
+
+### Pre-release
+
+- [ ] All CI checks pass on the release branch (`ci-oss.yml`, `ci-cd.yml`)
+- [ ] No critical/high open security advisories (`trivy`, `gosec`)
+- [ ] `go mod tidy` run; `go.sum` committed
+- [ ] All database migrations tested against a clean PostgreSQL 15 instance
+  ```bash
+  psql "$DATABASE_URL" -f deploy/migrations/001_initial_schema.sql
+  ```
+- [ ] Version bumped in `VERSION` file and `web/package.json`
+- [ ] `RELEASE.md` and `CHANGELOG.md` updated
+- [ ] Docker images build successfully for both editions:
+  ```bash
+  docker build -f deploy/docker/Dockerfile.oss -t cryptobom-oss:$VERSION .
+  docker build -f deploy/docker/Dockerfile.enterprise -t cryptobom-enterprise:$VERSION .
+  ```
+- [ ] Smoke test via Docker Compose:
+  ```bash
+  VERSION=$VERSION docker compose up -d && curl http://localhost:8080/healthz
+  ```
+
+### Secrets & Configuration
+
+- [ ] `JWT_SECRET` is a random 32+ character value (not the default)
+- [ ] `DATABASE_URL` points to production Cloud SQL (never a dev DB)
+- [ ] All GCP Secret Manager secrets populated:
+  - `cryptobom-jwt-secret-production`
+  - `cryptobom-db-password-production`
+  - `cryptobom-ibm-quantum-key-production` (Enterprise)
+  - `cryptobom-ibm-cloud-key-production` (Enterprise)
+  - `cryptobom-stripe-secret-production` (if billing enabled)
+- [ ] Terraform state backend (`gcs` bucket) exists and is accessible
+- [ ] GCP Workload Identity binding verified for `cryptobom-app-{env}` SA
+
+### Infrastructure (GCP)
+
+- [ ] `terraform plan` reviewed and approved:
+  ```bash
+  cd deploy/terraform/gcp
+  terraform plan -var-file=production.tfvars
+  ```
+- [ ] Cloud SQL deletion protection enabled (`deletion_protection = true`)
+- [ ] GKE cluster in `STABLE` release channel
+- [ ] Cloud KMS / Cloud HSM keys provisioned
+- [ ] VPC Flow Logs enabled
+- [ ] Binary Authorization policy enforced
+
+### Deployment
+
+- [ ] Database migrations applied to production (manual step):
+  ```bash
+  psql "$PROD_DATABASE_URL" -f deploy/migrations/001_initial_schema.sql
+  psql "$PROD_DATABASE_URL" -f deploy/migrations/002_enterprise_features.sql
+  ```
+- [ ] Helm / GKE deploy workflow triggered with the correct image tag:
+  ```bash
+  # via GitHub Actions – Actions → Deploy to GCP → Run workflow
+  ```
+- [ ] Post-deploy health check passes:
+  ```bash
+  curl https://<your-domain>/healthz
+  ```
+- [ ] Rollback plan noted (previous image tag ready)
+
+### Post-release
+
+- [ ] Git release tag created and pushed:
+  ```bash
+  git tag -a v$VERSION -m "Release v$VERSION"
+  git push origin v$VERSION
+  ```
+- [ ] GitHub Release published with changelog excerpt
+- [ ] Docker Hub / GHCR images tagged with version
+- [ ] Monitoring dashboard reviewed (Prometheus / Grafana)
+- [ ] Stakeholders notified
+
+---
 
 ### From v1.2.x to v1.3.0
 
