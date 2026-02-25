@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
 
@@ -13,6 +13,7 @@ import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
+import ProjectPreview from './pages/ProjectPreview';
 import Inventory from './pages/enterprise/Inventory';
 import Compliance from './pages/enterprise/Compliance';
 import Quantum from './pages/enterprise/Quantum';
@@ -77,8 +78,7 @@ const App: React.FC = () => {
               },
             }}
           />
-          <BrowserRouter>
-            <Routes>
+          <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
@@ -87,6 +87,7 @@ const App: React.FC = () => {
                 <Route path="scanner" element={<Scanner />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="settings" element={<Settings />} />
+                <Route path="preview" element={<ProjectPreview />} />
                 
                 {/* Enterprise Routes */}
                 <Route path="enterprise/inventory" element={<Inventory />} />
@@ -101,7 +102,6 @@ const App: React.FC = () => {
               </Route>
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
-          </BrowserRouter>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>

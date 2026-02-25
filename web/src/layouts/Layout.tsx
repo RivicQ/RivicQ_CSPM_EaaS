@@ -34,6 +34,7 @@ import {
   Psychology,
   GitHub,
   CloudQueue,
+  Explore,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -58,6 +59,7 @@ const Layout: React.FC = () => {
     { text: 'Assets', icon: <Storage />, path: '/assets' },
     { text: 'Scanner', icon: <Security />, path: '/scanner' },
     { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
+    { text: 'Project Preview', icon: <Explore />, path: '/preview' },
     { text: 'Settings', icon: <Settings />, path: '/settings' },
   ];
 
