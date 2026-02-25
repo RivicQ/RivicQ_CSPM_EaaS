@@ -20,9 +20,29 @@ env:
   IMAGE_NAME: 'cryptobom'
 
 jobs:
+  check-gcp:
+    name: Check GCP configuration
+    runs-on: ubuntu-latest
+    outputs:
+      configured: ${{ steps.check.outputs.configured }}
+    steps:
+      - name: Detect GCP credentials
+        id: check
+        env:
+          GCP_WIDP: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        run: |
+          if [ -n "$GCP_WIDP" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::GCP_WORKLOAD_IDENTITY_PROVIDER is not configured – GCP deploy jobs will be skipped."
+          fi
+
   build:
     name: Build & Push to Artifact Registry
     runs-on: ubuntu-latest
+    needs: check-gcp
+    if: needs.check-gcp.outputs.configured == 'true'
     permissions:
       contents: read
       id-token: write
@@ -63,7 +83,8 @@ jobs:
   deploy:
     name: Deploy to GKE
     runs-on: ubuntu-latest
-    needs: build
+    needs: [check-gcp, build]
+    if: needs.check-gcp.outputs.configured == 'true'
     environment: ${{ github.event.inputs.environment || 'production' }}
     permissions:
       contents: read

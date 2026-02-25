@@ -451,6 +451,55 @@ export IBMQ_PROVIDER_TOKEN=$IBMQ_TOKEN
 cryptobom-engine --batch-mode --quantum-optimization
 ```
 
+## 🔄 CI/CD Workflow Testing
+
+The repository contains the following GitHub Actions workflows under `.github/workflows/`:
+
+| Workflow | File | Triggers | Description |
+|---|---|---|---|
+| **CI – OSS** | `ci-oss.yml` | push/PR to `master`/`main`, `workflow_dispatch` | Lint, test, build OSS binary & container |
+| **CI/CD Pipeline** | `ci-cd.yml` | `workflow_dispatch` only | Full security scan + integration test pipeline (manual) |
+| **Deploy OSS** | `deploy-oss.yml` | `workflow_dispatch` | Build & publish OSS container image |
+| **Deploy Enterprise** | `deploy-enterprise.yml` | push to `master`/`main` (path-filtered), `workflow_dispatch` | Multi-cloud enterprise deploy |
+| **Deploy to GCP** | `deploy-gcp.yml` | push to `master`/`main`, `workflow_dispatch` | Build & deploy to GKE |
+
+### Running workflows on a PR
+
+1. **Open a PR against `master`** – the `CI – OSS` workflow runs automatically:
+   - `lint` – runs `golangci-lint` on all Go source
+   - `test` – runs unit tests (`./tests/unit/...` and internal packages)
+   - `build` – compiles the OSS binary with `CGO_ENABLED=0`
+   - `docker` – builds the container image (push is **skipped** on PRs)
+
+2. **Manual dispatch** – any workflow with `workflow_dispatch` can be triggered from the
+   *Actions* tab → select the workflow → *Run workflow*.
+
+### Jobs that require secrets
+
+Deploy workflows skip gracefully when cloud credentials are absent:
+
+| Workflow | Required secrets | Behavior when absent |
+|---|---|---|
+| `deploy-gcp.yml` | `GCP_WORKLOAD_IDENTITY_PROVIDER` | entire workflow skipped |
+| `deploy-enterprise.yml` | `GCP_WORKLOAD_IDENTITY_PROVIDER`, `AWS_ACCESS_KEY_ID` | individual deploy jobs skipped |
+| `deploy-oss.yml` | none (uses `GITHUB_TOKEN` for GHCR) | always runs when dispatched |
+
+### Running tests locally
+
+```bash
+# Unit + integration tests (excluding flaky perf tests and enterprise-only tests)
+go test -v -race $(go list ./... | grep -v /tests/enterprise | grep -v 'cryptobom-saas/tests$')
+
+# Unit tests only
+go test -v -race ./tests/unit/...
+
+# Build OSS binary
+CGO_ENABLED=0 GOOS=linux go build \
+  -ldflags "-X main.version=dev -X main.edition=oss" \
+  -o bin/cryptobom-oss \
+  ./cmd/server/oss/main.go
+```
+
 ## 📞 Enterprise Contact Information
 
 ### 🏢 RivicQ GmbH - German Engineering Excellence

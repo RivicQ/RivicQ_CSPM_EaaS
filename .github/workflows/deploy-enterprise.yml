@@ -24,6 +24,37 @@ env:
   NODE_VERSION: '18'
 
 jobs:
+  check-secrets:
+    name: Check cloud credentials
+    runs-on: ubuntu-latest
+    outputs:
+      gcp_configured: ${{ steps.gcp.outputs.configured }}
+      aws_configured: ${{ steps.aws.outputs.configured }}
+    steps:
+      - name: Detect GCP credentials
+        id: gcp
+        env:
+          GCP_WIDP: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        run: |
+          if [ -n "$GCP_WIDP" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::GCP_WORKLOAD_IDENTITY_PROVIDER not set – GCP enterprise deploy will be skipped."
+          fi
+
+      - name: Detect AWS credentials
+        id: aws
+        env:
+          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          if [ -n "$AWS_KEY" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::AWS_ACCESS_KEY_ID not set – AWS enterprise deploy will be skipped."
+          fi
+
   build-enterprise:
     name: Build Enterprise Image
     runs-on: ubuntu-latest
@@ -60,7 +91,8 @@ jobs:
   deploy-gcp-enterprise:
     name: Deploy Enterprise → GCP
     runs-on: ubuntu-latest
-    needs: build-enterprise
+    needs: [check-secrets, build-enterprise]
+    if: needs.check-secrets.outputs.gcp_configured == 'true'
     environment: enterprise-production
     permissions:
       contents: read
@@ -100,7 +132,8 @@ jobs:
   deploy-aws-enterprise:
     name: Deploy Enterprise → AWS
     runs-on: ubuntu-latest
-    needs: build-enterprise
+    needs: [check-secrets, build-enterprise]
+    if: needs.check-secrets.outputs.aws_configured == 'true'
     environment: enterprise-production
 
     steps:

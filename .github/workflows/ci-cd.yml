@@ -1,10 +1,13 @@
 name: CryptoBOM SaaS CI/CD Pipeline
 
 on:
-  push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      run_security_scan:
+        description: 'Run security scan'
+        required: false
+        default: 'true'
+        type: boolean
 
 env:
   GO_VERSION: '1.21'

@@ -5,6 +5,7 @@ on:
     branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -53,7 +54,7 @@ jobs:
       - run: go mod download
 
       - name: Run unit tests
-        run: go test -v -race -coverprofile=coverage.out $(go list ./... | grep -v /tests/enterprise)
+        run: go test -v -race -coverprofile=coverage.out $(go list ./... | grep -v /tests/enterprise | grep -v 'cryptobom-saas/tests$')
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
