@@ -67,3 +67,4 @@ coverage.html
 local-dev/
 kind-cluster/
 minikube/
+web/build/
