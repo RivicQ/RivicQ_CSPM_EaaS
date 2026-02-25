@@ -96,7 +96,7 @@ database:
   enabled: true
   postgresql:
     auth:
-      postgresPassword: "enterprise-cryptobom-2025"
+      postgresPassword: ""  # Set via --set or external secret
       database: "cryptobom_enterprise"
       username: "cryptobom_admin"
     primary:
@@ -122,7 +122,7 @@ redis:
   enabled: true
   auth:
     enabled: true
-    password: "enterprise-redis-2025"
+    password: ""  # Set via --set or external secret
   master:
     persistence:
       enabled: true
