@@ -44,8 +44,28 @@ variable "oss_max_nodes"           { default = 5 }
 variable "db_tier"        { default = "db-custom-4-16384" }
 variable "redis_memory_gb" { default = 4 }
 
-variable "ibm_quantum_api_key" { type = string; sensitive = true; default = "" }
-variable "ibm_cloud_api_key"   { type = string; sensitive = true; default = "" }
-variable "slack_webhook_url"   { type = string; sensitive = true; default = "" }
-variable "stripe_secret_key"   { type = string; sensitive = true; default = "" }
-variable "stripe_webhook_secret" { type = string; sensitive = true; default = "" }
+variable "ibm_quantum_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+variable "ibm_cloud_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+variable "slack_webhook_url" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+variable "stripe_secret_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+variable "stripe_webhook_secret" {
+  type      = string
+  sensitive = true
+  default   = ""
+}

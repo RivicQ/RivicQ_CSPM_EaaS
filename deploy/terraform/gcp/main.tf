@@ -583,3 +583,123 @@ resource "google_secret_manager_secret_version" "app_secrets" {
   secret      = google_secret_manager_secret.app_secrets[each.key].id
   secret_data = each.value
 }
+
+# ============================================================
+# Artifact Registry — container image repository
+# ============================================================
+resource "google_artifact_registry_repository" "cryptobom" {
+  provider = google-beta
+
+  location      = var.gcp_region
+  repository_id = "cryptobom"
+  description   = "CryptoBOM SaaS container images"
+  format        = "DOCKER"
+
+  labels = {
+    environment = var.environment
+    managed_by  = "terraform"
+  }
+}
+
+resource "google_artifact_registry_repository_iam_member" "gke_reader" {
+  provider   = google-beta
+  location   = google_artifact_registry_repository.cryptobom.location
+  repository = google_artifact_registry_repository.cryptobom.name
+  role       = "roles/artifactregistry.reader"
+  member     = "serviceAccount:${google_service_account.gke_node_sa.email}"
+}
+
+# ============================================================
+# Cloud Armor WAF — enterprise DDoS and web application firewall
+# ============================================================
+resource "google_compute_security_policy" "cryptobom_waf" {
+  name        = "cryptobom-waf-${var.environment}"
+  description = "CryptoBOM WAF policy — OWASP Top 10 + DDoS protection"
+
+  # OWASP CRS rules (pre-configured managed rule set)
+  rule {
+    action   = "deny(403)"
+    priority = 1000
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
+      }
+    }
+    description = "Block XSS attacks"
+  }
+
+  rule {
+    action   = "deny(403)"
+    priority = 1001
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
+      }
+    }
+    description = "Block SQL injection attacks"
+  }
+
+  rule {
+    action   = "deny(403)"
+    priority = 1002
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('rce-v33-stable')"
+      }
+    }
+    description = "Block remote code execution attacks"
+  }
+
+  rule {
+    action   = "deny(403)"
+    priority = 1003
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('lfi-v33-stable')"
+      }
+    }
+    description = "Block local file inclusion attacks"
+  }
+
+  # Rate limiting — 1 000 req/min per IP for API endpoints
+  rule {
+    action   = "throttle"
+    priority = 2000
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "API rate limiting"
+    rate_limit_options {
+      conform_action = "allow"
+      exceed_action  = "deny(429)"
+      enforce_on_key = "IP"
+      rate_limit_threshold {
+        count        = 1000
+        interval_sec = 60
+      }
+    }
+  }
+
+  # Allow all other traffic (default allow)
+  rule {
+    action   = "allow"
+    priority = 2147483647
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "Default allow rule"
+  }
+
+  adaptive_protection_config {
+    layer_7_ddos_defense_config {
+      enable          = true
+      rule_visibility = "STANDARD"
+    }
+  }
+}
