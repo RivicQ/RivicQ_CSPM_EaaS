@@ -345,7 +345,8 @@ const AssetDetails: React.FC = () => {
                 </Box>
               </Box>
               
-              <Box>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                <Box>
                 <Typography variant="subtitle2" color="textSecondary">
                     Risk Level
                   </Typography>
@@ -390,93 +391,50 @@ const AssetDetails: React.FC = () => {
 
           {activeTab === 0 && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Quantum Vulnerability Assessment
-              </Typography>
-              
               {quantumAssessment.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <Button
-                    variant="contained"
-                    onClick={handleQuantumAssessment}
-                    startIcon={<Assessment />}
-                    disabled={isLoading}
-                    size="large"
-                  >
-                    Run Quantum Assessment
-                  </Button>
-                </Box>
+                <Typography variant="body1" color="textSecondary">
+                  No quantum assessments yet. Click "Run Quantum Assessment" to start.
+                </Typography>
               ) : (
                 <Grid container spacing={2}>
                   {quantumAssessment.map((assessment, index) => (
-                    <Grid item xs={12} md={6} key={`${assessment.provider}-${index}`}>
-                      <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                      >
-                        <Card>
+                    <Grid item xs={12} md={6} key={index}>
+                      <motion.div whileHover={{ scale: 1.02 }}>
+                        <Card variant="outlined">
                           <CardContent>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                              <Typography variant="h6" component="div">
-                                {assessment.provider.toUpperCase()} Assessment
-                              </Typography>
-                              <Chip
-                                label={new Date(assessment.timestamp).toLocaleString()}
-                                size="small"
-                                color="primary"
-                              />
-                            </Box>
-                            </CardContent>
-                          <CardContent sx={{ borderTop: 1, borderTopColor: getQuantumProviderColor(assessment.provider) }}>
-                              <Typography variant="subtitle2">
-                                Algorithm: {assessment.algorithm}
-                              </Typography>
-                              <Typography variant="subtitle2">
-                                Key Size: {assessment.keySize}
-                              </Typography>
-                              <Typography variant="subtitle2">
-                                Risk Level: {assessment.riskLevel}
-                              </Typography>
-                              <Typography variant="subtitle2">
-                                Quantum Safe: {assessment.quantumSafe ? 'Yes' : 'No'}
-                              </Typography>
-                            </CardContent>
-                            <CardContent sx={{ pt: 2 }}>
-                              <Typography variant="h6" gutterBottom>
-                                Vulnerability Analysis
-                              </Typography>
-                              <Typography variant="body2" paragraph>
-                                {assessment.attackComplexity}
-                              </Typography>
-                              <Typography variant="body2" paragraph>
-                                Vulnerable to: {assessment.vulnerableTo.join(', ')}
-                              </Typography>
-                              <Typography variant="h6" gutterBottom>
-                                Quantum Advantage: {assessment.quantumAdvantage}x
-                              </Typography>
-                              <LinearProgress
-                                variant="determinate"
-                                value={Math.min(assessment.quantumAdvantage / 10, 1) * 100}
-                                sx={{ mt: 1 }}
-                                color={getQuantumProviderColor(assessment.provider)}
-                              />
-                            </CardContent>
-                            <CardContent sx={{ pt: 2 }}>
-                              <Typography variant="h6" gutterBottom>
-                                Recommended Actions
-                              </Typography>
-                              <List dense>
-                                {assessment.recommendedActions.map((action, idx) => (
-                                  <ListItem key={idx}>
-                                    <ListItemIcon>
-                                      <Warning />
-                                    </ListItemIcon>
-                                    <ListItemText primary={action} />
-                                  </ListItem>
-                                ))}
-                              </List>
-                            </CardContent>
+                            <Typography variant="h6" gutterBottom>
+                              {assessment.algorithm}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" gutterBottom>
+                              Provider: {assessment.provider}
+                            </Typography>
+                            <Typography variant="body2">
+                              Risk Level: {assessment.riskLevel}
+                            </Typography>
+                            <Typography variant="body2">
+                              Quantum Safe: {assessment.quantumSafe ? 'Yes' : 'No'}
+                            </Typography>
+                            <Typography variant="body2">
+                              Quantum Advantage: {assessment.quantumAdvantage}x
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={Math.min(assessment.quantumAdvantage / 10, 1) * 100}
+                              sx={{ mt: 1 }}
+                            />
+                          </CardContent>
+                          <CardContent sx={{ pt: 0 }}>
+                            <Typography variant="subtitle2" gutterBottom>
+                              Recommended Actions:
+                            </Typography>
+                            <List dense>
+                              {assessment.recommendedActions.map((action: string, idx: number) => (
+                                <ListItem key={idx}>
+                                  <ListItemIcon><Warning /></ListItemIcon>
+                                  <ListItemText primary={action} />
+                                </ListItem>
+                              ))}
+                            </List>
                           </CardContent>
                         </Card>
                       </motion.div>
@@ -494,97 +452,63 @@ const AssetDetails: React.FC = () => {
                   Compliance Validation
                 </Typography>
                 <Button
-                  variant="contained"
-                  onClick={handleComplianceCheck}
-                  startIcon={<CheckCircle />}
+                  variant="outlined"
+                  startIcon={<Refresh />}
+                  onClick={handleComplianceValidation}
                   disabled={isLoading}
                 >
-                  Run Compliance Check
+                  Validate Now
                 </Button>
               </Box>
-              
-              {complianceFrameworks.length > 0 && (
+              {complianceData.length === 0 ? (
+                <Typography variant="body1" color="textSecondary">
+                  No compliance data. Click "Validate Now" to check compliance.
+                </Typography>
+              ) : (
                 <Grid container spacing={2}>
-                  {complianceFrameworks.map((framework, index) => (
-                    <Grid item xs={12} md={6} key={`${framework.name}-${index}`}>
-                      <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                      >
-                        <Card>
+                  {complianceData.map((framework, index) => (
+                    <Grid item xs={12} md={6} key={index}>
+                      <motion.div whileHover={{ scale: 1.02 }}>
+                        <Card variant="outlined" sx={{ borderColor: framework.compliant ? '#10b981' : '#ff9800' }}>
                           <CardContent>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                              <Typography variant="h6" component="div">
-                                {framework.name}
-                              </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Typography variant="h6">{framework.framework}</Typography>
                               <Chip
                                 label={framework.version}
                                 size="small"
                                 color={framework.compliant ? 'success' : 'warning'}
                               />
                             </Box>
-                            </CardContent>
-                            <CardContent sx={{ borderTop: 1, borderTopColor: framework.compliant ? '#10b981' : '#ff9800' }}>
-                              <Typography variant="subtitle2" color={framework.compliant ? 'textPrimary' : 'textSecondary'}>
-                                Status: {framework.compliant ? 'Compliant' : 'Non-Compliant'}
-                              </Typography>
-                              <Typography variant="subtitle2">
-                                Overall Score: {framework.compliant ? '100%' : '65%'}
-                              </Typography>
-                            </CardContent>
-                            {framework.requirements.length > 0 && (
-                              <CardContent sx={{ pt: 2 }}>
-                                <Typography variant="h6" gutterBottom>
-                                  Requirements
-                                </Typography>
-                                <List dense>
-                                  {framework.requirements.map((req, idx) => (
-                                    <ListItem key={idx}>
-                                      <ListItemIcon>
-                                        <CheckCircle />
-                                      </ListItemIcon>
-                                      <ListItemText primary={req} />
-                                    </ListItem>
-                                  ))}
-                                </List>
-                              </CardContent>
-                            )}
-                            {framework.gaps.length > 0 && (
-                              <CardContent sx={{ pt: 2 }}>
-                                <Typography variant="h6" gutterBottom>
-                                  Compliance Gaps
-                                </Typography>
-                                <List dense>
-                                  {framework.gaps.map((gap, idx) => (
-                                    <ListItem key={idx}>
-                                      <ListItemIcon>
-                                        <Error />
-                                      </ListItemIcon>
-                                      <ListItemText primary={gap} />
-                                    </ListItem>
-                                  ))}
-                                </List>
-                              </CardContent>
-                            )}
-                            {framework.mitigations.length > 0 && (
-                              <CardContent sx={{ pt: 2 }}>
-                                <Typography variant="h6" gutterBottom>
-                                  Mitigations
-                                </Typography>
-                                <List dense>
-                                  {framework.mitigations.map((mitigation, idx) => (
-                                    <ListItem key={idx}>
-                                      <ListItemIcon>
-                                        <TrendingUp />
-                                      </ListItemIcon>
-                                      <ListItemText primary={mitigation} />
-                                    </ListItem>
-                                  ))}
-                                </List>
-                              </CardContent>
-                            )}
+                            <Typography variant="body2" color={framework.compliant ? 'textPrimary' : 'textSecondary'} sx={{ mt: 1 }}>
+                              Status: {framework.compliant ? 'Compliant' : 'Non-Compliant'}
+                            </Typography>
                           </CardContent>
+                          {framework.requirements.length > 0 && (
+                            <CardContent sx={{ pt: 0 }}>
+                              <Typography variant="subtitle2" gutterBottom>Requirements</Typography>
+                              <List dense>
+                                {framework.requirements.map((req: string, idx: number) => (
+                                  <ListItem key={idx}>
+                                    <ListItemIcon><CheckCircle /></ListItemIcon>
+                                    <ListItemText primary={req} />
+                                  </ListItem>
+                                ))}
+                              </List>
+                            </CardContent>
+                          )}
+                          {framework.mitigations.length > 0 && (
+                            <CardContent sx={{ pt: 0 }}>
+                              <Typography variant="subtitle2" gutterBottom>Mitigations</Typography>
+                              <List dense>
+                                {framework.mitigations.map((mitigation: string, idx: number) => (
+                                  <ListItem key={idx}>
+                                    <ListItemIcon><TrendingUp /></ListItemIcon>
+                                    <ListItemText primary={mitigation} />
+                                  </ListItem>
+                                ))}
+                              </List>
+                            </CardContent>
+                          )}
                         </Card>
                       </motion.div>
                     </Grid>
@@ -596,19 +520,10 @@ const AssetDetails: React.FC = () => {
 
           {activeTab === 2 && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Historical Analysis
-              </Typography>
-              
-              <Button
-                variant="contained"
-                onClick={() => navigate(`/assets/${id}/history`)}
-                startIcon={<Timeline />}
-                sx={{ mb: 2 }}
-              >
-                View Full History
-              </Button>
-              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">Historical Analysis</Typography>
+                <Button variant="outlined" startIcon={<Visibility />}>View Full History</Button>
+              </Box>
               {historicalAnalysis.length > 0 && (
                 <List>
                   {historicalAnalysis.slice(0, 10).map((analysis, index) => (
@@ -638,7 +553,6 @@ const AssetDetails: React.FC = () => {
               )}
             </Box>
           )}
-        </Box>
       </motion.div>
 
         {/* Action Buttons */}

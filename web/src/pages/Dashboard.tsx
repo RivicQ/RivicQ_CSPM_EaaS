@@ -47,9 +47,9 @@ import { toast } from 'react-toastify';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useApi } from '../hooks/useApi';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { DevSecOpsLayout } from './layouts/DevSecOpsLayout';
-import { LoadingScreen } from './components/LoadingScreen';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { DevSecOpsLayout } from '../layouts/DevSecOpsLayout';
+import { LoadingScreen } from '../components/LoadingScreen';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 
 // TypeScript interfaces
 interface CryptoAsset {
@@ -581,7 +581,6 @@ const Dashboard: React.FC = () => {
                           </Box>
                         </Box>
                       </Box>
-                      </Box>
                     </motion.div>
                   ))}
                 </Box>
@@ -648,7 +647,6 @@ const Dashboard: React.FC = () => {
                           {pod.findings.length} findings detected
                         </Typography>
                       )}
-                    </Box>
                   </motion.div>
                   ))}
                 </Box>
@@ -713,15 +711,14 @@ const Dashboard: React.FC = () => {
                           </Typography>
                         )}
                       </Box>
-                      </Box>
                     </motion.div>
                   ))}
                 </Box>
               </motion.div>
             )}
           </Container>
-        </Box>
       </ErrorBoundary>
+    </DevSecOpsLayout>
     );
 };
 

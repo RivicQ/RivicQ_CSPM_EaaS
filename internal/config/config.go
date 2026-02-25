@@ -28,6 +28,15 @@ type Config struct {
 
 	// Headlamp Configuration
 	Headlamp HeadlampConfig `mapstructure:"headlamp"`
+
+	// IBM Cloud Configuration
+	IBMCloud IBMCloudConfig `mapstructure:"ibm_cloud"`
+
+	// AWS Configuration
+	AWSCloud AWSCloudConfig `mapstructure:"aws_cloud"`
+
+	// Quantum scanning configuration
+	Quantum QuantumScanConfig `mapstructure:"quantum"`
 }
 
 type DatabaseConfig struct {
@@ -122,4 +131,28 @@ func Load() (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+// IBMCloudConfig holds IBM Cloud integration settings.
+type IBMCloudConfig struct {
+	APIKey       string `mapstructure:"api_key"`
+	Region       string `mapstructure:"region"`
+	HPCSInstance string `mapstructure:"hpcs_instance"`
+	COSInstance  string `mapstructure:"cos_instance"`
+}
+
+// AWSCloudConfig holds AWS Cloud integration settings.
+type AWSCloudConfig struct {
+	AccessKey         string `mapstructure:"access_key"`
+	SecretKey         string `mapstructure:"secret_key"`
+	Region            string `mapstructure:"region"`
+	CloudHSMClusterID string `mapstructure:"cloudhsm_cluster_id"`
+	KMSKeyARN         string `mapstructure:"kms_key_arn"`
+}
+
+// QuantumScanConfig holds quantum scanning settings.
+type QuantumScanConfig struct {
+	ScanEnabled     bool   `mapstructure:"scan_enabled"`
+	NISTStandard    string `mapstructure:"nist_standard"`
+	AttestationMode string `mapstructure:"attestation_mode"`
 }

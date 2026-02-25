@@ -572,8 +572,9 @@ const Assets: React.FC = () => {
                     ))}
                   </AnimatePresence>
                 </TableBody>
-              </TableContainer>
-            </Paper>
+              </Table>
+            </TableContainer>
+          </Paper>
 
             {/* Pagination */}
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
@@ -595,7 +596,6 @@ const Assets: React.FC = () => {
                 Next
               </Button>
             </Box>
-          </Paper>
 
           {/* Scan Results Section */}
           <Paper sx={{ mt: 3 }}>
@@ -650,10 +650,12 @@ const Assets: React.FC = () => {
                         </CardContent>
                       </Card>
                     </motion.div>
+                  </Grid>
                   ))}
                 </Grid>
-              )}
-            </Box>
+            ) : (
+              <Typography variant="body1" color="textSecondary">No scan results yet.</Typography>
+            )}
           </Paper>
         </motion.div>
       </Container>
