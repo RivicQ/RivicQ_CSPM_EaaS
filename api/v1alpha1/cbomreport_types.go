@@ -74,14 +74,80 @@ metav1.ListMeta `json:"metadata,omitempty"`
 
 // DeepCopyObject implements runtime.Object for CbomReport.
 func (in *CbomReport) DeepCopyObject() runtime.Object {
-	out := *in
-	return &out
+	if in == nil {
+		return nil
+	}
+	out := new(CbomReport)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto copies all properties of CbomReport into another CbomReport.
+func (in *CbomReport) DeepCopyInto(out *CbomReport) {
+	*out = *in
+	out.TypeMeta = in.TypeMeta
+	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
+	in.Spec.DeepCopyInto(&out.Spec)
+	in.Status.DeepCopyInto(&out.Status)
+}
+
+// DeepCopyInto copies CbomReportSpec into another CbomReportSpec.
+func (in *CbomReportSpec) DeepCopyInto(out *CbomReportSpec) {
+	*out = *in
+	if in.Scopes != nil {
+		in, out := &in.Scopes, &out.Scopes
+		*out = make([]Scope, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+	if in.LastScanTime != nil {
+		x := *in.LastScanTime
+		out.LastScanTime = &x
+	}
+	if in.ComplianceDeadline != nil {
+		x := *in.ComplianceDeadline
+		out.ComplianceDeadline = &x
+	}
+}
+
+// DeepCopyInto copies Scope into another Scope.
+func (in *Scope) DeepCopyInto(out *Scope) {
+	*out = *in
+	if in.Clusters != nil {
+		out.Clusters = make([]string, len(in.Clusters))
+		copy(out.Clusters, in.Clusters)
+	}
+	if in.Namespaces != nil {
+		out.Namespaces = make([]string, len(in.Namespaces))
+		copy(out.Namespaces, in.Namespaces)
+	}
+}
+
+// DeepCopyInto copies CbomReportStatus into another CbomReportStatus.
+func (in *CbomReportStatus) DeepCopyInto(out *CbomReportStatus) {
+	*out = *in
+	if in.Conditions != nil {
+		out.Conditions = make([]metav1.Condition, len(in.Conditions))
+		copy(out.Conditions, in.Conditions)
+	}
 }
 
 // DeepCopyObject implements runtime.Object for CbomReportList.
 func (in *CbomReportList) DeepCopyObject() runtime.Object {
-	out := *in
-	return &out
+	if in == nil {
+		return nil
+	}
+	out := new(CbomReportList)
+	out.TypeMeta = in.TypeMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	if in.Items != nil {
+		out.Items = make([]CbomReport, len(in.Items))
+		for i := range in.Items {
+			in.Items[i].DeepCopyInto(&out.Items[i])
+		}
+	}
+	return out
 }
 
 func init() {

@@ -176,9 +176,9 @@ const QuantumAttestation: React.FC = () => {
         <Button
           variant="contained"
           sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)', mr: 2 }}
-          onClick={() => quantumAttestationService.scanForPQCAlgorithms([])}
+          onClick={() => quantumAttestationService.scanForPQCAlgorithms(['all'])}
         >
-          Start PQC Scan
+          Start PQC Scan (All Assets)
         </Button>
         <Button variant="outlined">
           Export Quantum BOM
