@@ -4,7 +4,7 @@
 # Regions: europe-west3 (Frankfurt) primary — BSI/DORA jurisdiction
 # ============================================================
 
-tf_version {
+terraform {
   required_version = ">= 1.6.0"
 
   required_providers {

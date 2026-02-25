@@ -1,64 +1,109 @@
-# CryptoBOM SaaS Quick Commands
+# CryptoBOM SaaS – Quick Commands
 
-## From Any Directory:
+## Prerequisites
+
+| Tool | Minimum version |
+|------|----------------|
+| Go   | 1.25 |
+| Docker + Compose | v2 |
+| Node.js | 18+ (for frontend only) |
+| make | any |
+
+---
+
+## Full Stack (recommended – Docker Compose)
+
 ```bash
-# Start CryptoBOM and open dashboard
-~/start-cryptobom.sh
+# Clone and enter the repo
+git clone https://github.com/rivic-q/cryptobom-saas.git
+cd cryptobom-saas
 
-# Check status  
-~/start-cryptobom.sh status
+# Copy env template (edit JWT_SECRET before production use)
+cp .env.example .env
 
-# Stop server
-~/start-cryptobom.sh stop
+# Start: PostgreSQL, run migrations, backend API, React frontend
+make dev          # runs docker compose up --build
 
-# Restart server
-~/start-cryptobom.sh restart
-
-# Test APIs
-~/start-cryptobom.sh test
-
-# Show logs
-~/start-cryptobom.sh logs
+# Health check
+curl http://localhost:8080/healthz
 ```
 
-## From CryptoBOM Directory:
+Open the dashboard: http://localhost:3000
+
+---
+
+## Backend Only (Go binary, no database)
+
 ```bash
-# Go to CryptoBOM directory first
-cd ~/cryptobom-saas
-
-# Start server
-./run start
-
-# Stop server
-./run stop  
-
-# Check status
-./run status
-
-# Open dashboard
-./run open
-
-# Restart server
-./run restart
+# Build and start the OSS server in demo mode (in-memory, no DB)
+make dev-backend
 ```
 
-## One-Liner Commands:
+Server runs at http://localhost:8080
+
+---
+
+## Frontend Only (requires backend running on :8080)
+
 ```bash
-# Start from anywhere
-cd ~/cryptobom-saas && go build -o bin/cryptobom-server ./cmd/server/main.go && nohup ./bin/cryptobom-server > server.log 2>&1 &
-
-# Stop from anywhere
-pkill -f cryptobom-server
-
-# Check if running
-curl -s http://localhost:8080/healthz
-
-# Open dashboard
-xdg-open ~/cryptobom-saas/web/demo-dashboard.html
+make dev-frontend
+# or
+cd web && npm install && npm run dev
 ```
 
-## URLs:
-- **Server**: http://localhost:8080
-- **Dashboard**: file:///home/re1/cryptobom-saas/web/demo-dashboard.html
-- **Health Check**: http://localhost:8080/healthz
-- **API Base**: http://localhost:8080/api/v1
+Dashboard runs at http://localhost:3000
+
+---
+
+## Build Binaries
+
+```bash
+make build             # builds bin/cryptobom-oss and bin/cryptobom-enterprise
+make build-oss         # OSS binary only
+make build-enterprise  # Enterprise binary only
+```
+
+---
+
+## Database Migrations
+
+```bash
+# Apply migrations against DATABASE_URL set in .env
+make migrate
+
+# or manually
+psql "$DATABASE_URL" -f deploy/migrations/001_initial_schema.sql
+```
+
+---
+
+## Tests & Linting
+
+```bash
+make test        # go test -race ./...
+make test-unit   # short/fast unit tests only
+make vet         # go vet
+make lint        # golangci-lint (must be installed)
+```
+
+---
+
+## Docker Compose Helpers
+
+```bash
+make docker-up    # start all services (detached)
+make docker-down  # stop all services
+make docker-logs  # tail logs
+```
+
+---
+
+## Endpoints
+
+| URL | Description |
+|-----|-------------|
+| http://localhost:8080/healthz | Backend health check |
+| http://localhost:8080/api/v1/assets | Cryptographic asset list |
+| http://localhost:8080/api/v1/dashboard/demo | Demo CBOM data |
+| http://localhost:3000 | React dashboard |
+| http://localhost:5432 | PostgreSQL (dev only) |
