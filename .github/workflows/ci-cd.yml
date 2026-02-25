@@ -2,9 +2,9 @@ name: CryptoBOM SaaS CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 env:
   GO_VERSION: '1.21'

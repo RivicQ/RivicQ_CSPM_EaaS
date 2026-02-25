@@ -1,0 +1,11 @@
+{
+  "name": "cryptobom-saas-docs",
+  "version": "1.0.0",
+  "description": "CryptoBOM SaaS documentation",
+  "scripts": {
+    "build": "echo 'Documentation build: no-op (markdown only)' && mkdir -p build && cp *.md build/ 2>/dev/null || true",
+    "start": "echo 'No dev server for markdown docs'",
+    "test": "echo 'No tests for docs'"
+  },
+  "private": true
+}
