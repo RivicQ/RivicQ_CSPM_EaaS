@@ -1,13 +1,6 @@
 name: Deploy Enterprise (Multi-Cloud)
 
 on:
-  push:
-    branches: [ main, master ]
-    paths:
-      - 'internal/**'
-      - 'cmd/server/enterprise/**'
-      - 'deploy/kubernetes/**'
-      - 'deploy/terraform/**'
   workflow_dispatch:
     inputs:
       clouds:

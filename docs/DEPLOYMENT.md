@@ -135,10 +135,24 @@ and change the `image:` field before applying.
 
 ## CI/CD workflows
 
-| File | Trigger | Purpose |
-|------|---------|---------|
-| `.github/workflows/ci-oss.yml` | Push / PR to `master` or `main` | Lint, test, build binary, build & push container image |
-| `.github/workflows/deploy-oss.yml` | **Manual** (`workflow_dispatch`) | Publish OSS container image to a configurable registry |
+All **deploy** workflows are **manual-only** (`workflow_dispatch`).  They
+never run automatically on push so there is no risk of an accidental
+production deployment.  CI checks (lint, test, build) still run on every
+push and pull request.
+
+| File | Trigger | Purpose | Secrets required |
+|------|---------|---------|-----------------|
+| `.github/workflows/ci-oss.yml` | Push / PR to `master` or `main`, or manual | Lint, unit tests, build OSS binary, build container image | None (uses `GITHUB_TOKEN`) |
+| `.github/workflows/ci-cd.yml` | Push / PR to `master`, `main`, `develop`, or manual | Full CI pipeline (security scan, tests, container build) | None for CI; deploy steps need `KUBE_CONFIG_*` / `IBMQ_API_KEY` |
+| `.github/workflows/deploy-oss.yml` | **Manual only** | Publish OSS container image to a configurable OCI registry | Optional – see [Required secrets](#required-secrets--variables) |
+| `.github/workflows/deploy-gcp.yml` | **Manual only** | Build and deploy OSS image to GCP / GKE | `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT`, `GCP_PROJECT_ID` |
+| `.github/workflows/deploy-enterprise.yml` | **Manual only** | Build and deploy Enterprise image to GCP, AWS, and IBM Cloud | `GCP_*`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `IBM_CLOUD_API_KEY` |
+| `.github/workflows/google.yml` | **Manual only** | GKE deploy using Kustomize (template stub) | `WORKLOAD_IDENTITY_PROVIDER` and GKE cluster configured |
+
+### Running the CI workflow manually
+
+1. Go to **Actions → CI – OSS** in the GitHub UI.
+2. Click **Run workflow**, choose the branch, then **Run workflow**.
 
 ### Running the deploy workflow
 
@@ -150,6 +164,22 @@ and change the `image:` field before applying.
      the `REGISTRY` secret or `ghcr.io`).
 4. Click **Run workflow** again to start the job.
 
+### Running the GCP deploy workflow
+
+1. Go to **Actions → Deploy to GCP**.
+2. Click **Run workflow**.
+3. Choose the target `environment` (`production` or `staging`).
+4. Ensure `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT`, and
+   `GCP_PROJECT_ID` secrets are configured (see
+   [Required secrets](#required-secrets--variables)).
+
+### Running the Enterprise deploy workflow
+
+1. Go to **Actions → Deploy Enterprise (Multi-Cloud)**.
+2. Click **Run workflow**.
+3. Specify the target `clouds` (e.g. `gcp,aws,ibm`) and `environment`.
+4. All cloud credentials must be configured as repository secrets.
+
 ---
 
 ## Required secrets & variables
@@ -157,6 +187,20 @@ and change the `image:` field before applying.
 Configure these under **Settings → Secrets and variables → Actions**.
 
 ### Secrets
+
+#### Full CI/CD pipeline deploy steps (`ci-cd.yml`)
+
+These secrets are only needed when the `deploy-staging` and
+`deploy-production` jobs run (they are guarded by branch conditions and
+`environment` protection rules):
+
+| Name | Required | Description |
+|------|----------|-------------|
+| `KUBE_CONFIG_STAGING` | For staging deploy | Base64-encoded kubeconfig for staging cluster |
+| `KUBE_CONFIG_PROD` | For production deploy | Base64-encoded kubeconfig for production cluster |
+| `IBMQ_API_KEY` | For production deploy | IBM Quantum API key used by the Enterprise server |
+
+#### OSS deploy (`deploy-oss.yml`)
 
 | Name | Required | Description |
 |------|----------|-------------|
@@ -168,6 +212,28 @@ Configure these under **Settings → Secrets and variables → Actions**.
 > `GITHUB_TOKEN` is used automatically – no extra secrets are required.
 > Only set `REGISTRY_*` secrets when pushing to a different registry
 > (Docker Hub, AWS ECR, GCP Artifact Registry, etc.).
+
+#### GCP deploy (`deploy-gcp.yml`, `deploy-enterprise.yml`)
+
+| Name | Required | Description |
+|------|----------|-------------|
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | Yes | Workload Identity Provider resource name |
+| `GCP_SERVICE_ACCOUNT` | Yes | GCP service account email |
+| `GCP_PROJECT_ID` | Yes | GCP project ID |
+
+#### AWS deploy (`deploy-enterprise.yml`)
+
+| Name | Required | Description |
+|------|----------|-------------|
+| `AWS_ACCESS_KEY_ID` | Yes | AWS access key |
+| `AWS_SECRET_ACCESS_KEY` | Yes | AWS secret key |
+
+#### IBM Cloud deploy (`deploy-enterprise.yml`)
+
+| Name | Required | Description |
+|------|----------|-------------|
+| `IBM_CLOUD_API_KEY` | Yes | IBM Cloud API key |
+| `IBM_HPCS_INSTANCE` | Yes | IBM Hyper Protect Crypto Services instance ID |
 
 ### Environment variables (`.env` / Docker)
 
