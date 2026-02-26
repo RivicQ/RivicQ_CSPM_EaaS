@@ -65,5 +65,5 @@ type ScanSummary struct {
 	Medium         int `json:"medium"`
 	Low            int `json:"low"`
 	QuantumUnsafe  int `json:"quantum_unsafe"`
-	BSICompliant   int `json:"bsi_compliant"`
+	BSIReferenced  int `json:"bsi_referenced"`
 }

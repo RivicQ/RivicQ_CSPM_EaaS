@@ -10,6 +10,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"math/big"
 	"net"
 	"net/http"
@@ -246,7 +247,7 @@ func parsePort(s string, port *int) (int, error) {
 	n := 0
 	for _, c := range s {
 		if c < '0' || c > '9' {
-			return 0, nil
+			return 0, fmt.Errorf("invalid port: %s", s)
 		}
 		n = n*10 + int(c-'0')
 	}

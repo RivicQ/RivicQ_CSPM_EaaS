@@ -71,7 +71,7 @@ func TestScanAll_SummaryCounts(t *testing.T) {
 	assert.Equal(t, 1, summary.Medium)
 	assert.Equal(t, 1, summary.Low)
 	assert.Equal(t, 4, summary.QuantumUnsafe)
-	assert.Equal(t, 4, summary.BSICompliant)
+	assert.Equal(t, 4, summary.BSIReferenced)
 }
 
 func TestScanAll_ConcurrentNoRace(t *testing.T) {

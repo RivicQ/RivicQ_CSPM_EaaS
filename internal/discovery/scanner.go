@@ -96,7 +96,7 @@ func computeSummary(targets []Target, scanned int, findings []Finding) ScanSumma
 			s.QuantumUnsafe++
 		}
 		if f.BSIRef != "" {
-			s.BSICompliant++
+			s.BSIReferenced++
 		}
 	}
 
