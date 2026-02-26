@@ -3,6 +3,7 @@ package auth
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	"github.com/google/uuid"
 )
@@ -17,9 +18,19 @@ type DatabaseUserStore struct {
 	db *sql.DB
 }
 
-// NewMockUserStore creates a mock user store for testing
-func NewMockUserStore() *MockUserStore {
-	hashedPassword, _ := hashPassword("admin123")
+// NewMockUserStore creates a mock user store for testing/bootstrap.
+// It requires the CRYPTOBOM_BOOTSTRAP_PASSWORD environment variable to be set;
+// if it is not set, an error is returned to prevent use of hardcoded credentials.
+func NewMockUserStore() (*MockUserStore, error) {
+	bootstrapPassword := os.Getenv("CRYPTOBOM_BOOTSTRAP_PASSWORD")
+	if bootstrapPassword == "" {
+		return nil, fmt.Errorf("CRYPTOBOM_BOOTSTRAP_PASSWORD environment variable must be set")
+	}
+
+	hashedPassword, err := hashPassword(bootstrapPassword)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash bootstrap password: %w", err)
+	}
 
 	users := map[string]*User{
 		"admin@cryptobom.io": {
@@ -56,7 +67,7 @@ func NewMockUserStore() *MockUserStore {
 		},
 	}
 
-	return &MockUserStore{users: users}
+	return &MockUserStore{users: users}, nil
 }
 
 // NewDatabaseUserStore creates a database user store
@@ -146,8 +157,14 @@ func (d *DatabaseUserStore) UpdateUser(user *User) error {
 	return err
 }
 
-// Create default users for demo
+// CreateDefaultUsers creates bootstrap users from environment variable.
+// Requires CRYPTOBOM_BOOTSTRAP_PASSWORD to be set; returns an error otherwise.
 func CreateDefaultUsers(db *sql.DB) error {
+	bootstrapPassword := os.Getenv("CRYPTOBOM_BOOTSTRAP_PASSWORD")
+	if bootstrapPassword == "" {
+		return fmt.Errorf("CRYPTOBOM_BOOTSTRAP_PASSWORD environment variable must be set")
+	}
+
 	users := []User{
 		{
 			ID:       "user-admin",
@@ -155,7 +172,7 @@ func CreateDefaultUsers(db *sql.DB) error {
 			Email:    "admin@cryptobom.io",
 			Name:     "Administrator",
 			Role:     "admin",
-			Password: "admin123", // Will be hashed
+			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-operator",
@@ -163,7 +180,7 @@ func CreateDefaultUsers(db *sql.DB) error {
 			Email:    "operator@cryptobom.io",
 			Name:     "Security Operator",
 			Role:     "operator",
-			Password: "operator123",
+			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-analyst",
@@ -171,7 +188,7 @@ func CreateDefaultUsers(db *sql.DB) error {
 			Email:    "analyst@cryptobom.io",
 			Name:     "Security Analyst",
 			Role:     "analyst",
-			Password: "analyst123",
+			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-viewer",
@@ -179,7 +196,7 @@ func CreateDefaultUsers(db *sql.DB) error {
 			Email:    "viewer@cryptobom.io",
 			Name:     "Security Viewer",
 			Role:     "viewer",
-			Password: "viewer123",
+			Password: bootstrapPassword,
 		},
 	}
 
