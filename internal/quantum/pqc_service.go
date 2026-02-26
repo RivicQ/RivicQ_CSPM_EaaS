@@ -112,17 +112,18 @@ type MigrationRecommendation struct {
 
 // PQCService provides post-quantum cryptographic operations for CryptoBOM.
 type PQCService struct {
-	logger    *logrus.Logger
-	hsmClient *AWSHSMClient // optional; nil = software-only mode
-	ibmClient *IBMQuantumClient
+	logger       *logrus.Logger
+	hsmClient    *AWSHSMClient             // optional; nil = software-only mode
+	attestProvider QuantumAttestationProvider // optional; nil = no attestation
 }
 
 // NewPQCService creates a PQC service instance.
-func NewPQCService(logger *logrus.Logger, hsm *AWSHSMClient, ibm *IBMQuantumClient) *PQCService {
+// attestProvider may be nil; if nil, attestation calls are skipped.
+func NewPQCService(logger *logrus.Logger, hsm *AWSHSMClient, attestProvider QuantumAttestationProvider) *PQCService {
 	return &PQCService{
-		logger:    logger,
-		hsmClient: hsm,
-		ibmClient: ibm,
+		logger:         logger,
+		hsmClient:      hsm,
+		attestProvider: attestProvider,
 	}
 }
 

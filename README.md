@@ -36,7 +36,7 @@ curl http://localhost:8080/healthz
 
 [![CNCF](https://img.shields.io/badge/CNCF-Compliant-blue)](https://cncf.io)
 [![DevSecOps](https://img.shields.io/badge/DevSecOps-Automated-green)](https://devsecops.org)
-[![IBM Quantum](https://img.shields.io/badge/IBM%20Quantum-Integrated-purple)](https://quantum-computing.ibm.com)
+[![IBM Quantum](https://img.shields.io/badge/IBM%20Quantum-Enterprise-purple)](https://quantum-computing.ibm.com)
 [![KIPU Q-CTRL](https://img.shields.io/badge/KIPU%20Q%2DCTRL-Advanced%20Control-orange)](https://q-ctrl.com)
 [![Multi-Language](https://img.shields.io/badge/Multi%2DLanguage-Python%20%7C%20Java%20%7C%20Rust%20%7C%20C%2B%2B%20%7C%20C%20%7C%20Ruby-brightgreen)](https://github.com/rivic-q/cryptobom-saas)
 [![Quantum-Safe](https://img.shields.io/badge/Quantum%2DSafe-NIST%20PQC-blue)](https://nist.gov/pqc/)
@@ -128,10 +128,9 @@ curl http://localhost:8080/healthz
 - **C SDK** for low-level system integration
 - **Ruby SDK** for web application and Rails integration
 
-### 🔒 Enterprise IBM Q Attestation
-- **Real IBM Quantum Integration** with production access
-- **Quantum Circuit Execution** on IBM Q hardware
-- **Quantum Vulnerability Assessment** with real quantum computers
+### 🔒 Quantum Attestation (OSS)
+- **Local PQC risk scoring** using NIST FIPS 203/204/205 algorithm tables
+- **Quantum Vulnerability Assessment** without external API calls
 - **Post-Quantum Migration Planning** with NIST standards
 - **German Engineering Quality** with TÜV certification
 
@@ -690,6 +689,26 @@ This license is governed by German law. Disputes shall be resolved through arbit
 ## 🚀 Start Your Quantum-Ready DevSecOps Journey Today
 
 **[⭐ Try OSS Version](https://github.com/rivic-q/cryptobom-saas)** | **[🏢 Contact Enterprise](https://rivicq.xyz/enterprise)** | **[📖 Read Full Documentation](https://docs.rivicq.xyz)**
+
+---
+
+## 🏢 Enterprise Features
+
+The following features are available in the **CryptoBOM Enterprise** commercial edition.
+They are **not included** in this open-source repository.
+
+| Feature | Description |
+|---|---|
+| IBM Quantum Attestation | Real IBM Quantum Runtime integration for hardware-attested PQC verification |
+| Multi-tenancy | Tenant isolation via validated JWT + DB tenant resolution |
+| Premium Dashboards | `IBMCloud`, `AWSCloud`, `QuantumAttestation`, `MultiCloud`, `Terraform`, `Inventory`, `Compliance` UI pages |
+| Multi-cloud Integrations | AWS CloudHSM, IBM HPCS, Azure Key Vault, GCP KMS |
+| Enterprise SSO | SAML, LDAP, and OAuth2 identity provider integration |
+| Advanced Analytics | ML-powered threat forecasting and quantum risk scoring |
+| Enterprise Helm Chart | Production-grade Helm chart with HA, autoscaling, and HSM support |
+| Priority Support | 24/7 German engineering team support |
+
+To learn more, visit [https://rivicq.xyz/enterprise](https://rivicq.xyz/enterprise).
 
 ---
 

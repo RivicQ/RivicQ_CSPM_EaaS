@@ -1,3 +1,5 @@
+//go:build enterprise
+
 package quantum
 
 import (
@@ -92,7 +94,7 @@ func NewIBMQuantumClient(config IBMQuantumConfig) (*IBMQuantumClient, error) {
 
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: !config.EnableTLS,
+			InsecureSkipVerify: false,
 		},
 	}
 

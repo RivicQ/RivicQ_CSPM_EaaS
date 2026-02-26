@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
@@ -34,8 +35,10 @@ func (suite *TestSuite) SetupSuite() {
 	// Initialize mock database
 	suite.db = &database.DB{}
 
-	// Initialize auth service
-	mockStore := auth.NewMockUserStore()
+	// Initialize auth service — use a test-only bootstrap password
+	suite.T().Setenv("CRYPTOBOM_BOOTSTRAP_PASSWORD", "test-bootstrap-password")
+	mockStore, err := auth.NewMockUserStore()
+	require.NoError(suite.T(), err, "NewMockUserStore must succeed when CRYPTOBOM_BOOTSTRAP_PASSWORD is set")
 	suite.auth = auth.NewAuthService("test-secret", mockStore)
 }
 
@@ -160,10 +163,12 @@ func (suite *TestSuite) TestCryptoAssetsList() {
 
 // TestAuthentication tests JWT authentication
 func (suite *TestSuite) TestAuthentication() {
+	bootstrapPwd := os.Getenv("CRYPTOBOM_BOOTSTRAP_PASSWORD")
+
 	// Test successful login
 	loginData := map[string]string{
 		"email":    "admin@cryptobom.io",
-		"password": "admin123",
+		"password": bootstrapPwd,
 	}
 
 	jsonData, _ := json.Marshal(loginData)
@@ -179,12 +184,12 @@ func (suite *TestSuite) TestAuthentication() {
 		}
 
 		// Mock authentication
-		if login["email"] == "admin@cryptobom.io" && login["password"] == "admin123" {
+		if login["email"] == "admin@cryptobom.io" && login["password"] == bootstrapPwd {
 			token, _ := suite.auth.Login(login["email"], login["password"])
 			c.JSON(200, gin.H{
 				"token":   token,
 				"user":    gin.H{"id": "user-1", "email": login["email"], "role": "admin"},
-				"edition": "enterprise",
+				"edition": "oss",
 			})
 		} else {
 			c.JSON(401, gin.H{"error": "Invalid credentials"})
