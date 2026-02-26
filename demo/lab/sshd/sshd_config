@@ -1,0 +1,24 @@
+# Intentionally weak sshd_config for CryptoBOM Demo Lab
+# DO NOT use in production
+
+Port 2222
+ListenAddress 0.0.0.0
+
+# Weak host keys — DSA (deprecated)
+HostKey /etc/ssh/ssh_host_dsa_key
+
+# Intentionally weak KEX algorithms (Logjam-vulnerable)
+KexAlgorithms diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group14-sha256
+
+# Weak MACs
+MACs hmac-md5,hmac-sha1,umac-64@openssh.com
+
+# Allow password auth for demo connectivity
+PasswordAuthentication yes
+PermitEmptyPasswords yes
+PermitRootLogin yes
+
+# Disable strict modes for demo
+StrictModes no
+
+LogLevel QUIET

@@ -108,6 +108,38 @@ clean:
 	rm -rf $(BIN_DIR)
 	cd web && rm -rf build node_modules/.cache
 
+## Demo targets
+.PHONY: demo demo-lab demo-scan demo-stop demo-clean build-scanner
+
+demo: demo-lab ## Start demo lab + run scan + open UI
+	@echo "🚀 Starting CryptoBOM Infrastructure Discovery Demo..."
+	@sleep 5
+	@$(MAKE) demo-scan
+	@echo "✅ Demo ready! Open http://localhost:3000/demo/infrastructure"
+
+demo-lab: ## Start intentionally vulnerable lab targets
+	@echo "🔧 Generating demo lab certificates..."
+	@cd demo/lab && bash certs/gen-certs.sh
+	@echo "🐳 Starting vulnerable lab services..."
+	docker compose -f demo/lab/docker-compose.yml up -d
+	@echo "✅ Lab running: TLS 1.0 (4431), TLS 1.2-weak (4432), TLS 1.3-good (4433), SSH-weak (2222), MD5-API (5001), Java-legacy (8443)"
+
+demo-scan: ## Run the infrastructure discovery scanner against the demo lab
+	@echo "🔍 Running CryptoBOM weak crypto discovery scan..."
+	go run ./cmd/demo-scanner/... --output cbom-findings.json --format table
+	@echo "📄 Full findings written to cbom-findings.json"
+
+demo-stop: ## Stop the demo lab
+	docker compose -f demo/lab/docker-compose.yml down
+
+demo-clean: demo-stop ## Stop and remove demo lab volumes + certs
+	docker compose -f demo/lab/docker-compose.yml down -v
+	rm -rf demo/lab/certs/*.pem demo/lab/certs/*.key demo/lab/certs/*.crt cbom-findings.json
+
+build-scanner: ## Build the demo scanner binary
+	@mkdir -p $(BIN_DIR)
+	go build -o $(BIN_DIR)/cryptobom-scanner ./cmd/demo-scanner/...
+
 # ── Help ──────────────────────────────────────────────────────────────────────
 ## Print this help
 help:

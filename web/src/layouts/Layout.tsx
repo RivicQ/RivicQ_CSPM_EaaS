@@ -68,6 +68,7 @@ const Layout: React.FC = () => {
     { text: 'Multi-Cloud', icon: <Cloud />, path: '/enterprise/multicloud', section: 'Enterprise' },
     { text: 'CNCF Tools', icon: <CloudQueue />, path: '/enterprise/cncf', section: 'Enterprise' },
     { text: 'Terraform', icon: <GitHub />, path: '/enterprise/terraform', section: 'Enterprise' },
+    { text: '🔍 Infra Discovery', icon: <Security />, path: '/demo/infrastructure', section: 'Enterprise' },
   ];
 
   const handleNavigation = (path: string) => {
