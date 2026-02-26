@@ -100,6 +100,9 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		securityGroup.PUT("/events/:id/resolve", resolveSecurityEvent(db, logger))
 	}
 
+	// Infrastructure Discovery Demo
+	RegisterDemoRoutes(router, logger)
+
 	// Metrics Overview (for dashboard)
 	router.GET("/metrics/overview", getMetricsOverview(db, logger))
 
