@@ -23,6 +23,7 @@ import TerraformIaC from './pages/enterprise/Terraform';
 import IBMCloud from './pages/enterprise/IBMCloud';
 import AWSCloud from './pages/enterprise/AWSCloud';
 import QuantumAttestation from './pages/enterprise/QuantumAttestation';
+import InfraDiscovery from './pages/InfraDiscovery';
 
 const App: React.FC = () => {
   // Create a theme for the application
@@ -98,6 +99,7 @@ const App: React.FC = () => {
                 <Route path="enterprise/ibmcloud" element={<IBMCloud />} />
                 <Route path="enterprise/awscloud" element={<AWSCloud />} />
                 <Route path="enterprise/quantum-attestation" element={<QuantumAttestation />} />
+                <Route path="demo/infrastructure" element={<InfraDiscovery />} />
               </Route>
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>

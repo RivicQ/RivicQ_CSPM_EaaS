@@ -165,7 +165,7 @@
       "host": "localhost",
       "port": 4433,
       "protocol": "tls",
-      "finding_type": "RSA_2048_SUBOPTIMAL",
+      "finding_type": "TLS12_BEST_PRACTICE",
       "title": "TLS 1.2 Best Practice: Prefer TLS 1.3",
       "description": "While TLS 1.2 is acceptable, TLS 1.3 provides improved security and performance with mandatory forward secrecy.",
       "evidence": "TLS 1.2 negotiated",

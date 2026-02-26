@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cryptobom.rivicq.com/schemas/cbom-findings-v1.json",
+  "title": "CryptoBOM Findings — CycloneDX CBOM Mapping",
+  "description": "JSON Schema for CryptoBOM scan findings, aligned with CycloneDX CBOM cryptoProperties specification.",
+  "type": "object",
+  "required": ["scan_id", "started_at", "completed_at", "targets", "findings", "summary"],
+  "properties": {
+    "scan_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this scan run (maps to CycloneDX BOM serialNumber)"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when the scan started"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when the scan completed"
+    },
+    "targets": {
+      "type": "array",
+      "description": "List of scanned network endpoints",
+      "items": {
+        "type": "object",
+        "required": ["id", "host", "port", "protocol", "label"],
+        "properties": {
+          "id":       { "type": "string" },
+          "host":     { "type": "string" },
+          "port":     { "type": "integer", "minimum": 1, "maximum": 65535 },
+          "protocol": { "type": "string", "enum": ["tls", "ssh", "http"] },
+          "label":    { "type": "string" }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "description": "Cryptographic weakness findings — maps to CycloneDX component.cryptoProperties",
+      "items": {
+        "type": "object",
+        "required": ["id", "target_id", "severity", "finding_type", "title", "quantum_safe", "scanned_at"],
+        "properties": {
+          "id":           { "type": "string", "description": "Unique finding ID (CycloneDX bom-ref)" },
+          "target_id":    { "type": "string", "description": "Reference to scanned target" },
+          "target_label": { "type": "string" },
+          "host":         { "type": "string" },
+          "port":         { "type": "integer" },
+          "protocol":     { "type": "string", "enum": ["tls", "ssh", "http"] },
+          "finding_type": {
+            "type": "string",
+            "description": "Machine-readable finding category (maps to cryptoProperties.assetType)",
+            "examples": [
+              "WEAK_TLS_VERSION", "WEAK_CIPHER_RC4", "WEAK_CIPHER_3DES",
+              "WEAK_KEY_RSA", "WEAK_KEY_EC", "WEAK_SIG_MD5", "WEAK_SIG_SHA1",
+              "NO_FORWARD_SECRECY", "WEAK_SSH_KEX", "WEAK_HOST_KEY_DSA",
+              "MD5_HASH_USAGE", "MISSING_HSTS", "MISSING_XCTO", "MISSING_XFO",
+              "CERT_EXPIRED"
+            ]
+          },
+          "title":       { "type": "string" },
+          "description": { "type": "string" },
+          "evidence":    { "type": "string", "description": "Raw evidence observed (cipher name, version string, etc.)" },
+          "severity": {
+            "type": "string",
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"],
+            "description": "Maps to CycloneDX vulnerability.ratings.severity"
+          },
+          "algorithm": {
+            "type": "string",
+            "description": "Affected algorithm name (maps to cryptoProperties.algorithm.name)"
+          },
+          "key_length": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Key length in bits (maps to cryptoProperties.algorithm.cryptoRefArray.keyLength)"
+          },
+          "remediation": {
+            "type": "string",
+            "description": "Recommended remediation action"
+          },
+          "bsi_ref": {
+            "type": "string",
+            "description": "BSI TR-02102 reference clause (e.g. 'BSI TR-02102-2, Section 3.2')"
+          },
+          "dora_ref": {
+            "type": "string",
+            "description": "DORA regulation reference (e.g. 'DORA Art. 9(2)')"
+          },
+          "eidas_ref": {
+            "type": "string",
+            "description": "eIDAS 2.0 / ETSI reference"
+          },
+          "quantum_safe": {
+            "type": "boolean",
+            "description": "Whether the affected algorithm is considered post-quantum safe. Maps to cryptoProperties.oid for PQC algorithms."
+          },
+          "scanned_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total_targets", "scanned_targets", "total_findings", "critical", "high", "medium", "low"],
+      "properties": {
+        "total_targets":   { "type": "integer" },
+        "scanned_targets": { "type": "integer" },
+        "total_findings":  { "type": "integer" },
+        "critical":        { "type": "integer" },
+        "high":            { "type": "integer" },
+        "medium":          { "type": "integer" },
+        "low":             { "type": "integer" },
+        "quantum_unsafe":  { "type": "integer" },
+        "bsi_compliant":   { "type": "integer" }
+      }
+    }
+  }
+}
