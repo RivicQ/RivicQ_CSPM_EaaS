@@ -18,6 +18,21 @@
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)](https://github.com/rivic-q/cryptobom-saas)
 [![Language](https://img.shields.io/github/languages/top/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas)
 
+## 🎬 Platform Animation
+
+The animation below illustrates the CryptoBOM SaaS platform workflow — from cryptographic asset discovery through PQC compliance validation, IBM Quantum attestation, and final Cloud HSM vault storage.
+
+[▶ View Full Animation](media/cryptobom-animation.html)
+
+| Phase | Name                    | Duration | Key Visual                        |
+|-------|-------------------------|----------|-----------------------------------|
+| 1     | Inventory Discovery     | 0–2 s    | Radar pulse · asset highlighting  |
+| 2     | PQC Compliance          | 2–4 s    | Checklist · red→green shields     |
+| 3     | IBM Quantum Attestation | 4–6 s    | Q-logo pulse · certificate ribbon |
+| 4     | Cloud HSM Vault Lock    | 6–8 s    | Data packets → vault seal         |
+
+Open `media/cryptobom-animation.html` in any modern browser — no build step required.
+
 ## ⚡ Quick Start (OSS)
 
 ```bash

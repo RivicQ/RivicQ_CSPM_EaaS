@@ -1,0 +1,134 @@
+name: Animation CI
+
+on:
+  push:
+    paths:
+      - 'media/cryptobom-animation.html'
+      - '.github/workflows/animation-ci.yml'
+  pull_request:
+    paths:
+      - 'media/cryptobom-animation.html'
+      - '.github/workflows/animation-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-animation:
+    name: Validate Animation File
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: File existence check
+        run: test -f media/cryptobom-animation.html
+
+      - name: Version marker check
+        run: grep -q "CRYPTOBOM-ANIMATION" media/cryptobom-animation.html
+
+      - name: HTML structure check
+        run: |
+          grep -q "<canvas" media/cryptobom-animation.html
+          grep -q "requestAnimationFrame" media/cryptobom-animation.html
+          grep -q "</html>" media/cryptobom-animation.html
+
+      - name: File size check
+        run: |
+          SIZE=$(wc -c < media/cryptobom-animation.html)
+          echo "File size: ${SIZE} bytes"
+          [ "$SIZE" -gt 10240 ] || { echo "❌ File is smaller than 10 KB"; exit 1; }
+
+      - name: Summary
+        run: echo "✅ Animation file validated successfully"
+
+  lint-html:
+    name: Lint HTML
+    runs-on: ubuntu-latest
+    needs: validate-animation
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install html-validate
+        run: npm install -g html-validate
+
+      - name: Write html-validate config
+        run: |
+          echo '{
+            "rules": {
+              "require-sri": "off",
+              "no-inline-style": "off",
+              "script-type": "off",
+              "no-trailing-whitespace": "off",
+              "void-style": "off",
+              "attr-quotes": "off",
+              "no-raw-characters": "off"
+            },
+            "elements": ["html5"]
+          }' > .htmlvalidate.json
+
+      - name: Run html-validate
+        run: html-validate media/cryptobom-animation.html
+
+      - name: Summary
+        run: echo "✅ HTML linting passed"
+
+  deploy-animation-preview:
+    name: Deploy Animation Preview
+    runs-on: ubuntu-latest
+    needs: [validate-animation, lint-html]
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage animation
+        run: |
+          mkdir -p _site
+          cp media/cryptobom-animation.html _site/animation.html
+
+      - name: Write redirect index
+        run: |
+          cat > _site/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta http-equiv="refresh" content="0; url=animation.html" />
+            <title>CryptoBOM SaaS — Platform Animation</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="animation.html">animation.html</a>…</p>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: animation-preview
+          path: _site/
+
+      - name: Summary
+        run: echo "📦 Animation preview artifact uploaded"
+
+  notify-status:
+    name: Notify Pipeline Status
+    runs-on: ubuntu-latest
+    needs: [validate-animation, lint-html, deploy-animation-preview]
+    if: always()
+    permissions: {}
+    steps:
+      - name: Print pipeline summary
+        run: |
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║       CryptoBOM Animation CI — Summary       ║"
+          echo "╠══════════════════════════════════════════════╣"
+          echo "║  Job                     │ Result            ║"
+          echo "╠══════════════════════════════════════════════╣"
+          echo "║  validate-animation      │ ${{ needs.validate-animation.result == 'success' && '✅ passed' || needs.validate-animation.result == 'skipped' && '⏭ skipped' || '❌ failed ' }} ║"
+          echo "║  lint-html               │ ${{ needs.lint-html.result == 'success' && '✅ passed' || needs.lint-html.result == 'skipped' && '⏭ skipped' || '❌ failed ' }} ║"
+          echo "║  deploy-animation-preview│ ${{ needs.deploy-animation-preview.result == 'success' && '✅ passed' || needs.deploy-animation-preview.result == 'skipped' && '⏭ skipped' || '❌ failed ' }} ║"
+          echo "╚══════════════════════════════════════════════╝"
