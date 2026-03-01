@@ -42,6 +42,11 @@ jobs:
       - name: Add SPA redirect
         run: cp web/build/index.html web/build/404.html
 
+      - name: Copy media folder (animation + assets) into build
+        run: |
+          mkdir -p web/build/media
+          cp -r media/. web/build/media/
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
