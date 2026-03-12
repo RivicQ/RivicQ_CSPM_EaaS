@@ -56,6 +56,9 @@ curl http://localhost:8080/healthz
 > **Full deployment guide →** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 > Covers local binary, Docker Compose, Kubernetes, CI/CD workflows, and all required secrets.
 
+> **Preparing a live demo for a CISO or enterprise stakeholder? →** [DEMO_ENVIRONMENT.md](DEMO_ENVIRONMENT.md)
+> Recommended environment, 10-minute demo script, and security posture summary.
+
 ## 🆓 Open Source Edition
 
 [![CNCF](https://img.shields.io/badge/CNCF-Compliant-blue)](https://cncf.io)
