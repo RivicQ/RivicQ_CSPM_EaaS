@@ -186,7 +186,7 @@ For enterprise features, please contact us:
 ## 📞 Contact for Enterprise / Sales
 
 ### RivicQ GmbH
-- **Website**: https://rivicq.xyz/
+- **Website**: https://rivicq.de
 - **Founder**: Revan Ande
 - **Address**: LEAP BERLIN - Rudower Chaussee 29, 12489 Berlin, Germany
 - **Location**: WISTA Innovations- und Gründungszentrum (IGZ)
@@ -370,9 +370,9 @@ docker run -p 9090:9090 \
 RivicQ GmbH · LEAP BERLIN - Rudower Chaussee 29 · 12489 Berlin, Germany
 WISTA Innovations- und Gründungszentrum (IGZ)
 
-- **🏢 Berlin HQ**: hello@rivicq.xyz
-- **📧 Email**: enterprise@rivicq.xyz
-- **🌐 Website**: https://rivicq.xyz/enterprise
+- **🏢 Berlin HQ**: hello@rivicq.de
+- **📧 Email**: enterprise@rivicq.de
+- **🌐 Website**: https://rivicq.de/enterprise
 
 ---
 
@@ -400,14 +400,14 @@ This software is licensed under the **Apache License 2.0**. See [LICENSE](LICENS
 ## 📞 Contact
 
 ### RivicQ GmbH
-- **Website:** https://rivicq.xyz
+- **Website:** https://rivicq.de
 - **Address:** LEAP BERLIN - Rudower Chaussee 29, 12489 Berlin, Germany (WISTA IGZ)
 
 ---
 
 ## 🚀 Start Your Quantum-Ready DevSecOps Journey Today
 
-**[⭐ Try OSS Version](https://github.com/rivic-q/cryptobom-saas)** | **[🏢 Contact Enterprise](https://rivicq.xyz/enterprise)** | **[🎬 View Animation](https://rivic-q.github.io/cryptobom-saas/)** | **[📖 Docs](https://docs.rivicq.xyz)**
+**[⭐ Try OSS Version](https://github.com/rivic-q/cryptobom-saas)** | **[🏢 Contact Enterprise](https://rivicq.de/enterprise)** | **[🎬 View Animation](https://rivic-q.github.io/cryptobom-saas/)** | **[📖 Docs](https://docs.rivicq.de)**
 
 ---
 
