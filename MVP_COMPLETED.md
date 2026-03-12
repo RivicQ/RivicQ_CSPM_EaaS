@@ -1,8 +1,19 @@
 # 🚀 CryptoBOM SaaS - MVP IMPLEMENTATION COMPLETED
 
-## 📊 **MVP Status: 100% Enterprise Ready**
+## 📊 **Enterprise MVP Status: v1.0.0-beta1 – Feature-Complete for Beta**
+
+> **Enterprise MVP is complete and ready for client beta testing as of 2026-03-12.**
+> See [BETA_PROGRAM.md](BETA_PROGRAM.md) to enroll and [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md)
+> for the headleap developer CBOM scan flow.
 
 ### ✅ **IMPLEMENTED MVP FEATURES**
+
+#### **🔐 CBOM Scanning End-to-End** *(New in v1.0.0-beta1)*
+- ✅ **`POST /api/v1/scans`** – Headleap CBOM scan trigger for any target
+- ✅ **`GET /api/v1/scans/{id}`** – Scan status and result polling
+- ✅ **`GET /api/v1/assets/{id}/bom`** – Per-asset CBOM retrieval with risk flags and PQC status
+- ✅ **`scripts/scan-cbom.sh`** – CLI entrypoint for developer CBOM flow
+- ✅ **`QUICKSTART_CBOM.md`** – Comprehensive 5-minute developer quickstart
 
 #### **🔐 Authentication & Security**
 - ✅ **JWT Authentication System** with RBAC

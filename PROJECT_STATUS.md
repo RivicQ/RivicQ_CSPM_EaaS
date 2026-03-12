@@ -1,19 +1,35 @@
 # CryptoBOM SaaS — Executive Project Status
 
-**Date:** 2026-02-25  
-**Version:** v1.3.0 / latest  
+**Date:** 2026-03-12  
+**Version:** 1.0.0-beta1 (Enterprise Edition)  
 **Repository:** https://github.com/rivic-q/cryptobom-saas  
 **License:** Apache 2.0  
 
 ---
 
+## 🚀 Enterprise MVP – Feature-Complete for Beta
+
+> **CryptoBOM SaaS v1.0.0-beta1 is feature-complete for client beta testing.**
+>
+> The Enterprise MVP delivers end-to-end CBOM scanning, multi-cloud HSM inventory,
+> quantum risk assessment, and regulatory compliance reporting. Beta access is open —
+> see [BETA_PROGRAM.md](BETA_PROGRAM.md) to enroll.
+
+---
+
 ## Executive Summary
 
-CryptoBOM SaaS is an enterprise-grade platform for cryptographic asset discovery, Cryptographic Bill-of-Materials (CBOM) generation, and post-quantum migration planning. The project has progressed from a prototype stage to a feature-complete MVP with an **enterprise-readiness score of 95/100**. Both an OSS edition (port 8080) and an Enterprise edition (port 9090) are production-deployable today via Docker Compose or Kubernetes/Helm.
+CryptoBOM SaaS is an enterprise-grade platform for cryptographic asset discovery, Cryptographic Bill-of-Materials (CBOM) generation, and post-quantum migration planning. As of v1.0.0-beta1 the project has reached **Enterprise MVP completeness** and is ready for pilot/beta client testing.
 
 The MVP delivers real JWT authentication, PostgreSQL-backed CRUD APIs, 85 %+ automated test coverage, a full CI/CD pipeline with security scanning, and live integrations with IBM Cloud HPCS, AWS CloudHSM/KMS, GCP GKE, and IBM Quantum Network attestation. Compliance targets include NIST FIPS 203/204/205 (ML-KEM, ML-DSA, SLH-DSA), BSI TR-02102-1, DORA Article 9, and eIDAS 2.0.
 
-**Overall project health: 🟢 On Track**
+**CBOM scanning is now fully wired end-to-end:**
+- `POST /api/v1/scans` — trigger a CBOM scan for any target
+- `GET /api/v1/scans/{id}` — poll scan status and results  
+- `GET /api/v1/assets/{id}/bom` — retrieve the CBOM for a specific asset
+- `scripts/scan-cbom.sh` — CLI headleap developer flow
+
+**Overall project health: 🟢 Enterprise MVP Ready**
 
 ---
 
@@ -24,6 +40,7 @@ The MVP delivers real JWT authentication, PostgreSQL-backed CRUD APIs, 85 %+ aut
 | Authentication & RBAC | ✅ 100 % | JWT, 4 roles (admin/operator/analyst/viewer), multi-tenant |
 | Database Layer | ✅ 100 % | PostgreSQL with migrations, connection pooling, full CRUD |
 | Core API (`/api/v1/*`) | ✅ 100 % | 50+ endpoints; CBOM, assets, security, Kubernetes, monitoring |
+| CBOM Scan API (`/api/v1/scans`) | ✅ 100 % | Headleap trigger + status poll + asset BOM retrieval |
 | Enterprise API (`/api/v1/ibmq/*`) | ✅ 100 % | Quantum attestation, vulnerability assessment, emergency response |
 | IBM Cloud HPCS Integration | ✅ Complete | `internal/ibmcloud/hpcs.go`; key management, attestation, COS buckets |
 | AWS CloudHSM / KMS Integration | ✅ Complete | `internal/awscloud/cloudhsm.go`; FIPS 140-3 L3, CloudTrail audit |
