@@ -50,7 +50,7 @@ Key achievements:
 • Kubernetes-native architecture
 • Open source with enterprise path
 
-Try the live demo: rivic-q.io/cryptobom-demo
+Try the live demo: rivicq.de/cryptobom-demo
 Join our community: discord.gg/cryptobom
 
 #CBOM #CryptoBOM #Kubernetes #CloudNative #Cybersecurity #QuantumComputing #CNCF #OpenSource #EnterpriseSoftware #DevOps #Security #Innovation #Startup #TechLaunch
@@ -83,7 +83,7 @@ What is CryptoBOM?
 
 Think SBOM for cryptography, but with quantum safety!
 
-Live demo: rivic-q.io/cryptobom-demo
+Live demo: rivicq.de/cryptobom-demo
 
 #SBOM #DevSecOps #Kubernetes #eBPF
 ```
@@ -119,7 +119,7 @@ Join us in securing the quantum future!
 
 Try now: github.com/rivic-q/cryptobom-saas
 Community: discord.gg/cryptobom
-Demo: rivic-q.io/cryptobom-demo
+Demo: rivicq.de/cryptobom-demo
 
 #QuantumComputing #CNCF #OpenSource #Startup
 ```
@@ -136,7 +136,7 @@ The problem: Most organizations don't know what cryptographic assets they have, 
 Our solution: Real-time eBPF-based discovery + Kubernetes-native deployment + IBM Quantum integration.
 
 Open source and ready to deploy: github.com/rivic-q/cryptobom-saas
-Live demo: rivic-q.io/cryptobom-demo
+Live demo: rivicq.de/cryptobom-demo
 
 The tech stack is Go, eBPF, Kubernetes, Prometheus, and includes IBM Quantum Network integration for quantum vulnerability assessment.
 
@@ -167,7 +167,7 @@ This helps with:
 • Automated CBOM generation
 
 Try it: github.com/rivic-q/cryptobom-saas
-Demo: rivic-q.io/cryptobom-demo
+Demo: rivicq.de/cryptobom-demo
 
 #Kubernetes #CloudNative #DevSecOps #CBOM
 ```
@@ -209,7 +209,7 @@ Key features:
 • Enterprise SSO and HSM support (Enterprise version)
 
 GitHub: github.com/rivic-q/cryptobom-saas
-Demo: rivic-q.io/cryptobom-demo
+Demo: rivicq.de/cryptobom-demo
 
 #Cybersecurity #InfoSec #Compliance #QuantumSecurity
 ```

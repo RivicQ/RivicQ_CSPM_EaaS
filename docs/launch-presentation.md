@@ -193,9 +193,9 @@ graph TB
 4. **Schedule Enterprise Demo**: Q2 2025 preview
 
 ### 📞 Contact Information
-- **Website**: rivic-q.io/cryptobom
+- **Website**: rivicq.de
 - **GitHub**: github.com/rivic-q/cryptobom-saas
-- **Email**: team@rivic-q.io
+- **Email**: hello@rivicq.de
 - **LinkedIn**: @rivic-q
 
 ---

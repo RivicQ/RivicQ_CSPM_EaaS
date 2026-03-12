@@ -293,10 +293,10 @@ assignees: ''
 
 **IMPORTANT: Please do not report security vulnerabilities through public GitHub issues.**
 
-For security vulnerabilities, please email us at: security@rivic-q.io
+For security vulnerabilities, please email us at: hello@rivicq.de
 
 **Security Policy**
-Please read our security policy at: https://rivic-q.io/security
+Please read our security policy at: https://rivicq.de/security
 
 **What to include in your report:**
 - Type of issue (e.g., buffer overflow, SQL injection, cross-site scripting, etc.)
@@ -453,7 +453,7 @@ The open-source version provides core CBOM functionality. For advanced features:
 - 👥 **Enterprise SSO** - SAML, LDAP, OIDC support
 - 🔧 **HSM Integration** - Hardware security module support
 
-[Enterprise Version - Q2 2025](https://rivic-q.io/cryptobom-enterprise)
+[Enterprise Version - Q2 2025](https://rivicq.de/cryptobom-enterprise)
 
 ## 🤝 Contributing
 
@@ -488,7 +488,7 @@ Licensed under the Apache License 2.0 - see [LICENSE](LICENSE) file for details.
 
 **⭐ Give us a star if you find this useful!**
 
-[🚀 Try the Demo](https://rivic-q.io/cryptobom-demo) | [📖 Read Docs](https://docs.cryptobom.rivic-q.io) | [💬 Join Community](https://discord.gg/cryptobom)
+[🚀 Try the Demo](https://rivicq.de/cryptobom-demo) | [📖 Read Docs](https://docs.cryptobom.rivicq.de) | [💬 Join Community](https://discord.gg/cryptobom)
 ```
 
 ---

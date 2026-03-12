@@ -18,8 +18,8 @@ sources:
   - https://github.com/rivic-q/cryptobom-saas
 
 maintainers:
-  - name: Rivic-Q
-    email: rivic.revan.ande@gmail.com
+  - name: Revan Ande
+    email: revan.ande@rivicq.de
 
 dependencies:
   - name: postgresql

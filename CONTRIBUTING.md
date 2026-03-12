@@ -28,7 +28,7 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
 **Trademark Usage:**
 - Do not use "RivicQ" or "CryptoBOM" in your own products without permission
 - Do not create confusion about the relationship with RivicQ GmbH
-- Report any IP violations to legal@rivicq.xyz
+- Report any IP violations to legal@rivicq.de
 
 ---
 
@@ -177,7 +177,7 @@ This is the **Open Source Edition**. Enterprise features include:
 - Full NIST PQC algorithm support
 - Advanced analytics and ML features
 
-**For Enterprise Edition:** https://rivicq.xyz/enterprise
+**For Enterprise Edition:** https://rivicq.de/enterprise
 
 ---
 
@@ -185,7 +185,7 @@ This is the **Open Source Edition**. Enterprise features include:
 
 - **Issues:** https://github.com/rivic-q/cryptobom-saas/issues
 - **Discussions:** https://github.com/rivic-q/cryptobom-saas/discussions
-- **Enterprise Support:** enterprise@rivicq.xyz
+- **Enterprise Support:** enterprise@rivicq.de
 
 ---
 

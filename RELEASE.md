@@ -257,7 +257,7 @@ git clone -b v1.3.0 --depth 1 https://github.com/rivic-q/cryptobom-saas.git
 
 ```bash
 # Helm deployment
-helm repo add rivicq https://rivicq.xyz/charts
+helm repo add rivicq https://rivicq.de/charts
 helm install cryptobom-oss rivicq/cryptobom-oss --version v1.3.0
 ```
 
@@ -290,7 +290,7 @@ services:
 
 **Do NOT** open public issues for security vulnerabilities.
 
-Email: security@rivicq.xyz  
+Email: hello@rivicq.de  
 PGP Key: Available on request
 
 ---
@@ -311,8 +311,8 @@ The Open Source Edition is free to use. For enterprise features:
 | 24/7 Support | ❌ | ✅ |
 | SOC 2 / PCI DSS | ❌ | ✅ |
 
-**Contact:** enterprise@rivicq.xyz  
-**Website:** https://rivicq.xyz/enterprise
+**Contact:** enterprise@rivicq.de  
+**Website:** https://rivicq.de/enterprise
 
 ---
 
@@ -323,8 +323,8 @@ The Open Source Edition is free to use. For enterprise features:
 - Issue Tracker: https://github.com/rivic-q/cryptobom-saas/issues
 
 ### Enterprise Support
-- Email: enterprise@rivicq.xyz
-- Portal: https://portal.rivicq.xyz/support
+- Email: enterprise@rivicq.de
+- Portal: https://portal.rivicq.de/support
 
 ---
 
