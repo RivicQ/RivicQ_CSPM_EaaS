@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -623,7 +624,7 @@ func triggerCBOMScan(db *database.DB, logger *logrus.Logger, cfg *config.Config)
 			Status:    "accepted",
 			Target:    req.Target,
 			ScanType:  req.ScanType,
-			CreatedAt: "now",
+			CreatedAt: time.Now().UTC().Format(time.RFC3339),
 			ResultURL: "/api/v1/scans/" + scanID,
 		}
 		c.JSON(http.StatusAccepted, resp)
@@ -708,7 +709,7 @@ func getAssetBOM(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{
 			"asset_id":    id,
 			"bom_version": "1.0",
-			"generated":   "now",
+			"generated":   time.Now().UTC().Format(time.RFC3339),
 			"components":  bom,
 			"summary": gin.H{
 				"total":        len(bom),

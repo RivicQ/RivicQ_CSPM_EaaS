@@ -1,6 +1,6 @@
 CryptoBOM SaaS
-Edition: enterprise
-Version: 1.0.0-beta1
-Build Time: Thu Mar 12 00:00:00 UTC 2026
-Git Commit: HEAD
-Go Version: go1.25.0
+Edition: oss
+Version: latest
+Build Time: Thu Mar 12 15:13:57 UTC 2026
+Git Commit: 08b0b00
+Go Version: go version go1.25.0 linux/amd64

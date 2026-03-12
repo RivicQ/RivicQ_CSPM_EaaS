@@ -75,7 +75,7 @@ echo ""
 # ── Health check ─────────────────────────────────────────────────────────────
 HEALTH_URL="${API_URL%/api/v1}/healthz"
 echo "⏳  Checking backend at $HEALTH_URL …"
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "$HEALTH_URL" 2>/dev/null || echo "000")
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "$HEALTH_URL" 2>/dev/null) || HTTP_CODE="000"
 if [[ "$HTTP_CODE" != "200" ]]; then
   echo "⚠️  Backend not reachable (HTTP $HTTP_CODE). Falling back to demo mode."
   echo "    To start the backend: go run ./cmd/server/oss/main.go"

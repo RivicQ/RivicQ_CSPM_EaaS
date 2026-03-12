@@ -59,9 +59,10 @@ const BetaBanner: React.FC = () => {
         }
       >
         <AlertTitle>🚀 CryptoBOM Enterprise Beta is Open</AlertTitle>
-        You are running the <strong>OSS Edition</strong>. Upgrade to Enterprise to unlock CBOM scanning
-        for multi-cloud assets, IBM Quantum attestation, DORA/BSI compliance reports, and post-quantum
-        migration planning. <strong>Beta access is free for qualified organisations.</strong>
+        You are running the <strong>OSS Edition</strong>, which includes core CBOM scanning.
+        Upgrade to <strong>Enterprise</strong> to unlock multi-cloud HSM inventory (AWS CloudHSM,
+        IBM HPCS, GCP KMS), IBM Quantum attestation, DORA/BSI compliance reports, and eBPF live
+        scanning. <strong>Beta access is free for qualified organisations.</strong>
       </Alert>
     </Collapse>
   );
