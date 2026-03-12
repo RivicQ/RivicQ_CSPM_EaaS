@@ -67,7 +67,7 @@ const ProjectPreview: React.FC = () => {
             CryptoBOM SaaS
           </Typography>
           <Typography variant="h5" sx={{ color: 'rgba(255,255,255,0.85)', mb: 3 }}>
-            Cryptographic Bill of Materials for Banking &amp; Financial Services
+            Cryptographic Bill of Materials for Banking & Financial Services
           </Typography>
           <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.75)', maxWidth: 720, mx: 'auto', mb: 4 }}>
             Discover, inventory, and govern every cryptographic asset across your hybrid cloud.
@@ -138,7 +138,7 @@ const ProjectPreview: React.FC = () => {
                   <Chip label="MVP" size="small" color="secondary" sx={{ ml: 'auto' }} />
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Production-ready for regulated banking &amp; financial services environments.
+                  Production-ready for regulated banking & financial services environments.
                 </Typography>
                 <List dense>
                   {enterpriseFeatures.map((f) => (

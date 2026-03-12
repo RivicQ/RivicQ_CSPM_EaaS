@@ -73,6 +73,12 @@ SKIPPED=0
 for migration_file in $(ls "${MIGRATIONS_DIR}"/*.sql | sort); do
   version="$(basename "${migration_file}" .sql)"
 
+  # Validate version contains only safe characters (alphanumeric, underscore, dash)
+  if ! [[ "${version}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    echo "  [skip]  ${version} — unsafe filename, skipping" >&2
+    continue
+  fi
+
   # Check if already applied
   already_applied=$(psql "${DATABASE_URL}" -tAc \
     "SELECT COUNT(*) FROM schema_migrations WHERE version='${version}';" 2>/dev/null || echo "0")

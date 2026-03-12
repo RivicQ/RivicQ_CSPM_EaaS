@@ -4,10 +4,11 @@
     <meta charset="utf-8" />
     <title>CryptoBOM SaaS</title>
     <script>
-      // GitHub Pages SPA redirect: redirect to index with hash routing
-      window.location.replace(
-        window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '') + '/'
-      );
+      // GitHub Pages SPA redirect for HashRouter.
+      // Since the app uses HashRouter, simply redirect to the repo root
+      // and let the hash-based routing take over.
+      var repoPath = '/cryptobom-saas/';
+      window.location.replace(window.location.origin + repoPath);
     </script>
   </head>
   <body>

@@ -406,7 +406,7 @@ jobs:
             -n cryptobom-enterprise-production || echo "Deployment not found — skipping"
 
       - name: Notify Deployment
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        if: secrets.SLACK_WEBHOOK_URL != ''
         run: |
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
             -H 'Content-type: application/json' \

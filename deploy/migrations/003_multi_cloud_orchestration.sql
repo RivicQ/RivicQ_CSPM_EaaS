@@ -7,7 +7,7 @@
 CREATE TABLE IF NOT EXISTS cloud_accounts (
     id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     org_id       UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    provider     TEXT NOT NULL,                         -- 'gcp' | 'aws' | 'ibm'
+    provider     TEXT NOT NULL CHECK (provider IN ('gcp', 'aws', 'ibm')),  -- 'gcp' | 'aws' | 'ibm'
     account_id   TEXT NOT NULL,                         -- GCP project ID / AWS account ID / IBM account ID
     display_name TEXT NOT NULL,
     region       TEXT,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS cloud_scan_jobs (
     id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     org_id           UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     account_id       UUID REFERENCES cloud_accounts(id) ON DELETE SET NULL,
-    provider         TEXT NOT NULL,
+    provider         TEXT NOT NULL CHECK (provider IN ('gcp', 'aws', 'ibm')),
     scan_type        TEXT NOT NULL DEFAULT 'full',      -- 'full' | 'incremental' | 'targeted'
     status           TEXT NOT NULL DEFAULT 'pending',   -- 'pending' | 'running' | 'completed' | 'failed'
     started_at       TIMESTAMPTZ,
