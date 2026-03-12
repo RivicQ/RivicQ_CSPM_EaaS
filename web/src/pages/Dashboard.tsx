@@ -32,6 +32,7 @@ import {
   Legend,
 } from 'recharts';
 import { inventoryService } from '../services/api';
+import BetaBanner from '../components/BetaBanner';
 
 const COLORS = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444'];
 
@@ -125,6 +126,8 @@ const Dashboard: React.FC = () => {
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Real-time cryptographic asset overview
       </Typography>
+
+      <BetaBanner />
 
       {error && (
         <Alert severity="info" sx={{ mb: 3 }}>

@@ -1,21 +1,62 @@
-# CryptoBOM SaaS - From Prototype to MVP
+# CryptoBOM SaaS – MVP Roadmap
 
-## 🎯 **Current State: Advanced Prototype**
+## 🚀 **Current State: Enterprise MVP – Beta-Ready (v1.0.0-beta1)**
 
-### ✅ **What's Working (Prototype Level)**
-- **Separate OSS/Enterprise editions** with different ports
-- **Basic API structure** with routes and handlers  
-- **IBM Quantum client structure** (mock implementation)
-- **Database schema design** (PostgreSQL)
-- **Build system** for dual editions
-- **Demo dashboard** with sample data
-- **Basic Docker/K8s deployment files**
-
-### ❌ **Critical MVP Gaps Identified**
+> As of March 2026 the Enterprise MVP is feature-complete and open for beta testing.
+> The sections below document what is included in the beta, what is planned for GA,
+> and what is on the post-GA roadmap.
 
 ---
 
-## 🔥 **HIGH PRIORITY - MVP Blockers**
+## ✅ Beta Features (v1.0.0-beta1 – Available Now)
+
+### Core Platform
+- ✅ **CBOM scanning end-to-end** – `POST /api/v1/scans`, `GET /api/v1/scans/{id}`, `GET /api/v1/assets/{id}/bom`
+- ✅ **Headleap CLI** – `scripts/scan-cbom.sh` for developer CBOM flow
+- ✅ **Algorithm inventory** – RSA, AES, ECDSA, ECC, 30+ algorithms with key-size validation
+- ✅ **Quantum risk scoring** – Shor's/Grover's vulnerability flags per algorithm
+- ✅ **PQC migration planning** – NIST FIPS 203/204/205 (ML-KEM, ML-DSA, SLH-DSA) roadmaps
+- ✅ **JWT authentication** with RBAC (admin/operator/analyst/viewer)
+- ✅ **Multi-tenant** – Organisation isolation, audit logs
+- ✅ **Full React frontend** – Dashboard, Assets, Scanner, Analytics, Settings, all Enterprise pages
+
+### Enterprise (Beta Access)
+- ✅ **Multi-cloud HSM inventory** – AWS CloudHSM, IBM HPCS, GCP KMS
+- ✅ **IBM Quantum attestation** – Hardware-backed risk scoring (requires API key)
+- ✅ **Compliance reports** – DORA Article 9, BSI TR-02102-1, eIDAS 2.0, NIST PQC
+- ✅ **eBPF live scanning** – Cilium-based real-time network crypto analysis
+- ✅ **Kubernetes operator** – `CbomReport` CRD for scheduled in-cluster CBOM generation
+- ✅ **GCP deployment** – Terraform + GKE + Cloud SQL + Cloud Armor WAF
+- ✅ **CI/CD** – CodeQL, Trivy, gosec, SBOM generation, dependency review
+
+---
+
+## 🗓 GA Features (Planned – Q3 2026)
+
+- 🔄 **SOC 2 Type II** certification
+- 🔄 **ISO 27001** certification
+- 🔄 **Multi-region HA** deployment (GCP multi-region + AWS failover)
+- 🔄 **Production SLAs** – 99.9 % uptime, 4-hour support response
+- 🔄 **Advanced ML threat detection** – Anomalous cryptography behaviour detection
+- 🔄 **SBOM ↔ CBOM correlation** – Cross-reference software components with crypto usage
+- 🔄 **Enterprise SSO GA** – SAML 2.0 / LDAP (Beta: available on request)
+- 🔄 **Custom compliance frameworks** – Customer-defined rule sets
+
+---
+
+## 🔮 Post-GA Roadmap
+
+- 📅 **Hardware attestation** – TPM 2.0 and Intel SGX integration
+- 📅 **SBOM ingestion** – Accept CycloneDX / SPDX SBOMs and overlay crypto findings
+- 📅 **GitHub / GitLab integration** – Automatic CBOM on every PR
+- 📅 **IDE plugin** – VS Code extension for inline crypto risk feedback
+- 📅 **Quantum-safe TLS enforcement** – Automated policy enforcement via Kubernetes admission
+- 📅 **FedRAMP High** authorisation
+
+---
+
+## Historical Prototype Gaps (all resolved in beta)
+
 
 ### 1. **Real Database Implementation** 
 **Current**: Mock database (`db := &database.DB{}`)

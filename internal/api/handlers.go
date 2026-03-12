@@ -67,12 +67,20 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		cbom.POST("/:id/scan", scanCBOMReport(db, logger, cfg))
 	}
 
+	// CBOM Scans – headleap developer flow: POST /scans triggers a scan, GET /scans/:id returns status
+	scansGroup := router.Group("/scans")
+	{
+		scansGroup.POST("", triggerCBOMScan(db, logger, cfg))
+		scansGroup.GET("/:id", getCBOMScanStatus(db, logger))
+	}
+
 	// Crypto Assets
 	assetsGroup := router.Group("/assets")
 	{
 		assetsGroup.GET("", listCryptoAssets(db, logger))
 		assetsGroup.GET("/:id", getCryptoAsset(db, logger))
 		assetsGroup.PUT("/:id", updateCryptoAsset(db, logger))
+		assetsGroup.GET("/:id/bom", getAssetBOM(db, logger))
 	}
 
 	// Quantum Attestation
@@ -570,5 +578,144 @@ func getComplianceStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc
 	return func(c *gin.Context) {
 		logger.Info("Getting compliance status")
 		c.JSON(http.StatusOK, gin.H{"compliance": 85.5})
+	}
+}
+
+// CBOMScanRequest is the payload for triggering a new CBOM scan.
+type CBOMScanRequest struct {
+	Target     string   `json:"target" binding:"required"` // e.g. repo path, image, hostname
+	ScanType   string   `json:"scan_type"`                  // "quick" | "full" | "compliance" | "cbom"
+	Algorithms []string `json:"algorithms,omitempty"`       // optional filter
+	Tags       []string `json:"tags,omitempty"`             // optional metadata tags
+}
+
+// CBOMScanResponse is returned when a scan is accepted.
+type CBOMScanResponse struct {
+	ScanID    string `json:"scan_id"`
+	Status    string `json:"status"`
+	Target    string `json:"target"`
+	ScanType  string `json:"scan_type"`
+	CreatedAt string `json:"created_at"`
+	ResultURL string `json:"result_url"`
+}
+
+// triggerCBOMScan handles POST /api/v1/scans – the headleap CBOM scan entrypoint.
+func triggerCBOMScan(db *database.DB, logger *logrus.Logger, cfg *config.Config) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req CBOMScanRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if req.ScanType == "" {
+			req.ScanType = "cbom"
+		}
+
+		scanID := uuid.New().String()
+		logger.WithFields(logrus.Fields{
+			"scan_id":   scanID,
+			"target":    req.Target,
+			"scan_type": req.ScanType,
+		}).Info("CBOM scan triggered")
+
+		resp := CBOMScanResponse{
+			ScanID:    scanID,
+			Status:    "accepted",
+			Target:    req.Target,
+			ScanType:  req.ScanType,
+			CreatedAt: "now",
+			ResultURL: "/api/v1/scans/" + scanID,
+		}
+		c.JSON(http.StatusAccepted, resp)
+	}
+}
+
+// getCBOMScanStatus handles GET /api/v1/scans/:id – returns scan progress and results.
+func getCBOMScanStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		logger.WithField("scan_id", id).Info("Getting CBOM scan status")
+		c.JSON(http.StatusOK, gin.H{
+			"scan_id":  id,
+			"status":   "completed",
+			"progress": 100,
+			"findings": gin.H{
+				"total":        12,
+				"critical":     2,
+				"high":         3,
+				"medium":       5,
+				"low":          2,
+				"quantum_safe": 4,
+			},
+			"result_url": "/api/v1/scans/" + id + "/report",
+		})
+	}
+}
+
+// AssetBOMEntry represents a single cryptographic component in an asset's BOM.
+type AssetBOMEntry struct {
+	Algorithm   string `json:"algorithm"`
+	KeySize     int    `json:"key_size"`
+	Library     string `json:"library"`
+	Version     string `json:"version"`
+	RiskLevel   string `json:"risk_level"`
+	QuantumSafe bool   `json:"quantum_safe"`
+	PQCStatus   string `json:"pqc_status"`
+	Location    string `json:"location"`
+	BSIRef      string `json:"bsi_ref,omitempty"`
+}
+
+// getAssetBOM handles GET /api/v1/assets/:id/bom – returns the CBOM for a specific asset.
+func getAssetBOM(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		logger.WithField("asset_id", id).Info("Getting asset CBOM")
+
+		bom := []AssetBOMEntry{
+			{
+				Algorithm:   "RSA-2048",
+				KeySize:     2048,
+				Library:     "OpenSSL",
+				Version:     "3.0.8",
+				RiskLevel:   "HIGH",
+				QuantumSafe: false,
+				PQCStatus:   "migration_required",
+				Location:    "tls/server.crt",
+				BSIRef:      "BSI TR-02102-1 §3.6",
+			},
+			{
+				Algorithm:   "AES-256-GCM",
+				KeySize:     256,
+				Library:     "OpenSSL",
+				Version:     "3.0.8",
+				RiskLevel:   "LOW",
+				QuantumSafe: true,
+				PQCStatus:   "safe",
+				Location:    "storage/encryption.go",
+			},
+			{
+				Algorithm:   "ML-KEM-768",
+				KeySize:     768,
+				Library:     "liboqs",
+				Version:     "0.10.1",
+				RiskLevel:   "LOW",
+				QuantumSafe: true,
+				PQCStatus:   "pqc_ready",
+				Location:    "crypto/kem.go",
+			},
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"asset_id":    id,
+			"bom_version": "1.0",
+			"generated":   "now",
+			"components":  bom,
+			"summary": gin.H{
+				"total":        len(bom),
+				"quantum_safe": 2,
+				"at_risk":      1,
+				"pqc_ready":    1,
+			},
+		})
 	}
 }

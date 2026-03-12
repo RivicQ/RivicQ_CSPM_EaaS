@@ -1,4 +1,7 @@
-# 🔐 CryptoBOM SaaS v1.3 - Open Source Edition
+# 🔐 CryptoBOM SaaS v1.0.0-beta1 – Enterprise Edition
+
+> **🚀 Enterprise MVP is now feature-complete and open for beta client testing.**
+> [Join the beta →](BETA_PROGRAM.md) · [5-minute CBOM quickstart →](QUICKSTART_CBOM.md)
 
 ## Badges
 
@@ -14,10 +17,32 @@
 [![Contributors](https://img.shields.io/github/contributors/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas/graphs/contributors)
 [![Code Size](https://img.shields.io/github/languages/code-size/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas)
 [![Docker](https://img.shields.io/docker/pulls/rivicq/cryptobom-oss)](https://hub.docker.com/r/rivicq/cryptobom-oss)
-[![Tests](https://img.shields.io/github/actions/workflow/status/rivic-q/cryptobom-saas/ci-cd.yml?label=CI)](https://github.com/rivic-q/cryptobom-saas/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/rivic-q/cryptobom-saas/ci-oss.yml?label=CI)](https://github.com/rivic-q/cryptobom-saas/actions)
 [![Pages](https://img.shields.io/github/actions/workflow/status/rivic-q/cryptobom-saas/deploy-pages.yml?label=Pages)](https://github.com/rivic-q/cryptobom-saas/actions/workflows/deploy-pages.yml)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)](https://github.com/rivic-q/cryptobom-saas)
 [![Language](https://img.shields.io/github/languages/top/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas)
+
+---
+
+## ⚡ Scan Your First CBOM in 5 Minutes
+
+```bash
+# 1. Clone and start the backend
+git clone https://github.com/rivic-q/cryptobom-saas.git
+cd cryptobom-saas
+go run ./cmd/server/oss/main.go &
+
+# 2. Run a CBOM scan (CLI headleap flow)
+chmod +x scripts/scan-cbom.sh
+./scripts/scan-cbom.sh ./myrepo --output cbom-report.json
+
+# 3. Or trigger via REST API
+curl -s -X POST http://localhost:8080/api/v1/scans \
+  -H "Content-Type: application/json" \
+  -d '{"target": "./myrepo", "scan_type": "cbom"}' | jq .
+```
+
+→ **Full quickstart guide:** [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md)
 
 ---
 

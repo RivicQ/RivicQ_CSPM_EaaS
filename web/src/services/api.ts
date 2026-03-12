@@ -337,6 +337,18 @@ export const cbomService = {
   
   attestReport: (id: string) =>
     api.post(`/cbom/${id}/attest`),
+
+  // Headleap CBOM scan: POST /scans triggers a new scan for any target
+  triggerScan: (target: string, scanType: string = 'cbom', options: any = {}) =>
+    api.post('/scans', { target, scan_type: scanType, ...options }),
+
+  // Get status and results of a running or completed scan
+  getScanStatus: (scanId: string) =>
+    api.get(`/scans/${scanId}`),
+
+  // Get CBOM for a specific asset
+  getAssetBOM: (assetId: string) =>
+    api.get(`/assets/${assetId}/bom`),
 };
 
 export const securityService = {
