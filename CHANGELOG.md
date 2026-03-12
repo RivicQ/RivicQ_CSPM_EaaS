@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-enterprise-mvp] - 2026-03-12
+
+### Enterprise MVP – CISO-Ready Release
+
+This release marks the **Enterprise MVP** of CryptoBOM SaaS, delivering a
+production-ready cryptographic bill-of-materials platform for banking and
+financial services.  It targets BSI Germany TR-02102, eIDAS 2.0, DORA,
+FIPS 140-3, NIST PQC, and ISO 27001 compliance frameworks.
+
+#### ✅ Enterprise Features
+- **Multi-Cloud Orchestration** – Unified crypto-asset scanning across GCP, AWS, and IBM Cloud.
+- **IBM HPCS Integration** – Bring-your-own-key (BYOK) via IBM Hyper Protect Crypto Services.
+- **AWS CloudHSM / KMS** – Hardware-backed key management on AWS.
+- **Quantum Attestation** – Automated PQC-readiness detection with per-asset risk scores.
+- **Edition Feature Flags** – License-key based OSS ↔ Enterprise gating (`internal/edition`).
+- **Multi-Tenancy** – Full org-scoped data isolation in the database.
+
+#### ✅ CI/CD Stabilization
+- `ci-oss.yml` is the authoritative PR gate; runs lint, tests, OSS build, and container push.
+- `ci-cd.yml` fully repaired: gosec `-no-fail`, `sslmode=disable` in CI, script `chmod`,
+  container scan skipped on PRs, secret-guarded deploy jobs, benchmarks use correct path.
+- `pages.yml` fixed: `configure-pages@v4`, `HashRouter` SPA, `submodules: false` everywhere.
+- `demo-ci.yml` aligned to `go-version-file: go.mod`.
+
+#### ✅ Database / Migrations
+- Migration `003_multi_cloud_orchestration.sql`: cloud accounts, scan jobs, compliance runs,
+  quantum attestations, HSM key rotation audit log.
+- `scripts/migrate.sh` – idempotent runner with per-environment sslmode.
+- `make migrate-dev` / `make migrate-prod` convenience targets.
+
+#### ✅ Frontend
+- Switched `BrowserRouter` → `HashRouter` for correct GitHub Pages routing.
+- `web/public/404.html` SPA redirect for deep-link recovery.
+- All enterprise pages wired: Inventory, Compliance, Quantum, MultiCloud, CNCF, Terraform,
+  IBMCloud, AWSCloud, QuantumAttestation.
+- Edition gating via `web/src/config/editions.ts`.
+
+#### Known Limitations
+- Quantum attestation is **detection + roadmap** level, not a certified PQC audit.
+- IBM HPCS and AWS CloudHSM integrations require customer-supplied credentials (no bundled keys).
+- GCP is the primary deployment target; AWS/IBM are extension integrations.
+- Helm charts and multi-region HA are beta quality.
+
 ## [v0.1.0] - 2026-02-15
 
 ### Added

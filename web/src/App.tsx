@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
 
@@ -24,6 +24,7 @@ import IBMCloud from './pages/enterprise/IBMCloud';
 import AWSCloud from './pages/enterprise/AWSCloud';
 import QuantumAttestation from './pages/enterprise/QuantumAttestation';
 import InfraDiscovery from './pages/InfraDiscovery';
+import ProjectPreview from './pages/ProjectPreview';
 
 const App: React.FC = () => {
   // Create a theme for the application
@@ -78,7 +79,7 @@ const App: React.FC = () => {
               },
             }}
           />
-          <BrowserRouter basename={process.env.PUBLIC_URL}>
+          <HashRouter>
             <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
@@ -101,9 +102,11 @@ const App: React.FC = () => {
                 <Route path="enterprise/quantum-attestation" element={<QuantumAttestation />} />
                 <Route path="demo/infrastructure" element={<InfraDiscovery />} />
               </Route>
+              {/* Project preview - marketing overview (outside Layout) */}
+              <Route path="preview" element={<ProjectPreview />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
-          </BrowserRouter>
+          </HashRouter>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>

@@ -68,17 +68,18 @@ vet:
 	$(GO) vet ./...
 
 # ── Database ─────────────────────────────────────────────────────────────────
-## Apply database migrations (requires DATABASE_URL in environment or .env)
+## Apply database migrations (idempotent – skips already-applied versions)
 migrate: $(ENV_FILE)
 	@set -a && . ./$(ENV_FILE) && set +a; \
-	if [ -z "$$DATABASE_URL" ]; then \
-		echo "DATABASE_URL is not set – skipping migration."; \
-	else \
-		for f in $$(ls deploy/migrations/*.sql | sort); do \
-			echo "Applying $$f ..."; \
-			psql "$$DATABASE_URL" -f "$$f" || exit 1; \
-		done; \
-	fi
+	bash scripts/migrate.sh dev
+
+## Apply migrations against local dev database (sslmode=disable)
+migrate-dev:
+	@bash scripts/migrate.sh dev
+
+## Apply migrations against staging/production database (sslmode=require)
+migrate-prod:
+	@bash scripts/migrate.sh prod
 
 ## Load demo seed data (development only)
 seed: $(ENV_FILE)

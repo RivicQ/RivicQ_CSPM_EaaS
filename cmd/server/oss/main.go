@@ -1,3 +1,5 @@
+//go:build oss
+
 package main
 
 import (

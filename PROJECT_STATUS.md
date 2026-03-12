@@ -1,7 +1,7 @@
 # CryptoBOM SaaS — Executive Project Status
 
-**Date:** 2026-02-25  
-**Version:** v1.3.0 / latest  
+**Date:** 2026-03-12  
+**Version:** 1.0.0-enterprise-mvp  
 **Repository:** https://github.com/rivic-q/cryptobom-saas  
 **License:** Apache 2.0  
 
