@@ -31,8 +31,8 @@ func (suite *EnterpriseTestSuite) TestEnterpriseSSOAuthentication() {
 
 	ssoConfig := map[string]interface{}{
 		"provider":    "saml",
-		"entityId":    "https://enterprise.rivicq.xyz/saml/metadata",
-		"ssoUrl":      "https://sso.rivicq.xyz/saml/login",
+		"entityId":    "https://enterprise.rivicq.de/saml/metadata",
+		"ssoUrl":      "https://sso.rivicq.de/saml/login",
 		"certificate": "MIICXT... (SAML certificate)",
 		"attributeMapping": map[string]string{
 			"email":      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",

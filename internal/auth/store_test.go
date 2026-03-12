@@ -42,7 +42,7 @@ func TestNewMockUserStore_AdminUserExists(t *testing.T) {
 		t.Fatalf("NewMockUserStore returned error: %v", err)
 	}
 
-	user, err := store.GetUserByEmail("admin@cryptobom.io")
+	user, err := store.GetUserByEmail("danush.m@rivicq.de")
 	if err != nil {
 		t.Fatalf("GetUserByEmail returned error: %v", err)
 	}

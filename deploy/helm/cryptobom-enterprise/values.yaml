@@ -50,14 +50,14 @@ ingress:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - host: cryptobom-enterprise.rivic-q.io
+    - host: cryptobom-enterprise.rivicq.de
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
     - secretName: cryptobom-enterprise-tls
       hosts:
-        - cryptobom-enterprise.rivic-q.io
+        - cryptobom-enterprise.rivicq.de
 
 resources:
   limits:
@@ -331,9 +331,9 @@ support:
   enabled: true
   telemetry:
     enabled: true
-    endpoint: "telemetry.rivic-q.io"
+    endpoint: "telemetry.rivicq.de"
   license:
-    server: "license.rivic-q.io"
+    server: "license.rivicq.de"
     checkInterval: "1h"
 
 # Feature Flags

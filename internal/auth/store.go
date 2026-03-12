@@ -33,35 +33,35 @@ func NewMockUserStore() (*MockUserStore, error) {
 	}
 
 	users := map[string]*User{
-		"admin@cryptobom.io": {
+		"danush.m@rivicq.de": {
 			ID:       "user-1",
 			TenantID: "tenant-1",
-			Email:    "admin@cryptobom.io",
-			Name:     "Admin User",
+			Email:    "danush.m@rivicq.de",
+			Name:     "Danush M",
 			Role:     "admin",
 			Password: hashedPassword,
 		},
-		"operator@cryptobom.io": {
+		"pratik.rughe@rivicq.de": {
 			ID:       "user-2",
 			TenantID: "tenant-1",
-			Email:    "operator@cryptobom.io",
-			Name:     "Operator User",
+			Email:    "pratik.rughe@rivicq.de",
+			Name:     "Pratik Rughe",
 			Role:     "operator",
 			Password: hashedPassword,
 		},
-		"analyst@cryptobom.io": {
+		"revan.ande@rivicq.de": {
 			ID:       "user-3",
 			TenantID: "tenant-1",
-			Email:    "analyst@cryptobom.io",
-			Name:     "Security Analyst",
+			Email:    "revan.ande@rivicq.de",
+			Name:     "Revan Ande",
 			Role:     "analyst",
 			Password: hashedPassword,
 		},
-		"viewer@cryptobom.io": {
+		"sales@rivicq.de": {
 			ID:       "user-4",
 			TenantID: "tenant-1",
-			Email:    "viewer@cryptobom.io",
-			Name:     "Viewer User",
+			Email:    "sales@rivicq.de",
+			Name:     "Sales Team",
 			Role:     "viewer",
 			Password: hashedPassword,
 		},
@@ -169,32 +169,32 @@ func CreateDefaultUsers(db *sql.DB) error {
 		{
 			ID:       "user-admin",
 			TenantID: "tenant-1",
-			Email:    "admin@cryptobom.io",
-			Name:     "Administrator",
+			Email:    "danush.m@rivicq.de",
+			Name:     "Danush M",
 			Role:     "admin",
 			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-operator",
 			TenantID: "tenant-1",
-			Email:    "operator@cryptobom.io",
-			Name:     "Security Operator",
+			Email:    "pratik.rughe@rivicq.de",
+			Name:     "Pratik Rughe",
 			Role:     "operator",
 			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-analyst",
 			TenantID: "tenant-1",
-			Email:    "analyst@cryptobom.io",
-			Name:     "Security Analyst",
+			Email:    "revan.ande@rivicq.de",
+			Name:     "Revan Ande",
 			Role:     "analyst",
 			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-viewer",
 			TenantID: "tenant-1",
-			Email:    "viewer@cryptobom.io",
-			Name:     "Security Viewer",
+			Email:    "sales@rivicq.de",
+			Name:     "Sales Team",
 			Role:     "viewer",
 			Password: bootstrapPassword,
 		},

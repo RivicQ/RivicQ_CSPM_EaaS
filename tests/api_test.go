@@ -167,7 +167,7 @@ func (suite *TestSuite) TestAuthentication() {
 
 	// Test successful login
 	loginData := map[string]string{
-		"email":    "admin@cryptobom.io",
+		"email":    "danush.m@rivicq.de",
 		"password": bootstrapPwd,
 	}
 
@@ -184,7 +184,7 @@ func (suite *TestSuite) TestAuthentication() {
 		}
 
 		// Mock authentication
-		if login["email"] == "admin@cryptobom.io" && login["password"] == bootstrapPwd {
+		if login["email"] == "danush.m@rivicq.de" && login["password"] == bootstrapPwd {
 			token, _ := suite.auth.Login(login["email"], login["password"])
 			c.JSON(200, gin.H{
 				"token":   token,

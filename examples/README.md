@@ -44,8 +44,8 @@ curl -X POST http://localhost:9090/api/v1/engine/compliance-scan \
 ## 📖 More Information
 
 - [API Documentation](../docs/openapi.yaml)
-- [Full Documentation](https://docs.rivicq.xyz)
-- [Enterprise Edition](https://rivicq.xyz/enterprise)
+- [Full Documentation](https://docs.rivicq.de)
+- [Enterprise Edition](https://rivicq.de/enterprise)
 
 ---
 

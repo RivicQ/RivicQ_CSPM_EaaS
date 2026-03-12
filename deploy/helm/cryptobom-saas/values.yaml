@@ -52,14 +52,14 @@ ingress:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - host: cryptobom.rivic-q.io
+    - host: cryptobom.rivicq.de
       paths:
         - path: /
           pathType: Prefix
   tls: 
     - secretName: cryptobom-tls
       hosts:
-        - cryptobom.rivic-q.io
+        - cryptobom.rivicq.de
 
 resources:
   limits:

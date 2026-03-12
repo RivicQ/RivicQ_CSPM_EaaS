@@ -39,20 +39,20 @@ const Settings: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                 <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main' }}>A</Avatar>
                 <Box>
-                  <Typography variant="body1" fontWeight="medium">Admin User</Typography>
-                  <Typography variant="body2" color="text.secondary">admin@rivicq.com</Typography>
+                  <Typography variant="body1" fontWeight="medium">Danush M</Typography>
+                  <Typography variant="body2" color="text.secondary">danush.m@rivicq.de</Typography>
                 </Box>
               </Box>
               <TextField
                 fullWidth
                 label="Display Name"
-                defaultValue="Admin User"
+                defaultValue="Danush M"
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
                 label="Email"
-                defaultValue="admin@rivicq.com"
+                defaultValue="danush.m@rivicq.de"
                 sx={{ mb: 2 }}
               />
               <Button variant="contained" startIcon={<Save />}>

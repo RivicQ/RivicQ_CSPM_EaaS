@@ -52,13 +52,13 @@ ffmpeg -i input.mp4 -c:v libx264 -crf 28 -preset fast demo-optimized.mp4
 
 Share demos via:
 - GitHub Releases: https://github.com/rivic-q/cryptobom-saas/releases
-- Documentation: https://docs.rivicq.xyz
+- Documentation: https://docs.rivicq.de
 - YouTube: https://youtube.com/@rivicq
 
 ## 🔗 Links
 
-- **Live Demo**: https://demo.rivicq.xyz
-- **Documentation**: https://docs.rivicq.xyz
+- **Live Demo**: https://demo.rivicq.de
+- **Documentation**: https://docs.rivicq.de
 - **GitHub**: https://github.com/rivic-q/cryptobom-saas
 
 ---
