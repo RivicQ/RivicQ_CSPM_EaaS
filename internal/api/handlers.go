@@ -2,13 +2,17 @@ package api
 
 import (
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/cilium"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	sharedapi "github.com/rivic-q/cryptobom-saas/internal/api/shared"
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,6 +51,18 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	// API middleware
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
+
+	jwtSecret := strings.TrimSpace(cfg.Security.JWTSecret)
+	if jwtSecret == "" {
+		jwtSecret = strings.TrimSpace(os.Getenv("JWT_SECRET"))
+	}
+	if jwtSecret != "" {
+		if store, err := auth.NewWorkDomainUserStore(); err == nil {
+			sharedapi.SetupAuthRoutes(router, logger, auth.NewAuthService(jwtSecret, store), allowedDomainsFromEnv())
+		} else {
+			logger.WithError(err).Warn("auth routes disabled")
+		}
+	}
 
 	// Cilium Integration
 	ciliumGroup := router.Group("/cilium")
@@ -131,6 +147,22 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		monitoringGroup.POST("/grafana", createGrafanaDashboard(db, logger))
 		monitoringGroup.GET("/jaeger", getJaegerTracing(db, logger))
 	}
+}
+
+func allowedDomainsFromEnv() []string {
+	raw := strings.TrimSpace(os.Getenv("AUTH_ALLOWED_DOMAINS"))
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	domains := make([]string, 0, len(parts))
+	for _, part := range parts {
+		domain := strings.ToLower(strings.TrimSpace(part))
+		if domain != "" {
+			domains = append(domains, domain)
+		}
+	}
+	return domains
 }
 
 // Cilium Flow Handlers
@@ -606,6 +638,10 @@ func triggerCBOMScan(db *database.DB, logger *logrus.Logger, cfg *config.Config)
 		var req CBOMScanRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if strings.TrimSpace(req.Target) == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "target is required"})
 			return
 		}
 		if req.ScanType == "" {

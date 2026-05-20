@@ -1,0 +1,31 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "cryptobom-saas.fullname" . }}
+  labels:
+    {{- include "cryptobom-saas.labels" . | nindent 4 }}
+    release: {{ .Release.Name }}
+spec:
+  groups:
+    - name: cryptobom-saas.rules
+      rules:
+        - alert: CryptoBOMSaaSDeploymentUnavailable
+          expr: kube_deployment_status_replicas_available{namespace="{{ .Release.Namespace }}", deployment="{{ include "cryptobom-saas.fullname" . }}"} < kube_deployment_spec_replicas{namespace="{{ .Release.Namespace }}", deployment="{{ include "cryptobom-saas.fullname" . }}"}
+          for: 5m
+          labels:
+            severity: critical
+            edition: saas
+          annotations:
+            summary: "CryptoBOM SaaS deployment is not fully available"
+            description: "The {{ include "cryptobom-saas.fullname" . }} deployment in namespace {{ .Release.Namespace }} is reporting fewer available replicas than desired."
+        - alert: CryptoBOMSaaSPodRestartsHigh
+          expr: 'sum(increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}", pod=~"{{ include "cryptobom-saas.fullname" . }}-.*"}[15m])) > 3'
+          for: 10m
+          labels:
+            severity: warning
+            edition: saas
+          annotations:
+            summary: "CryptoBOM SaaS pods are restarting frequently"
+            description: "Repeated restarts in the {{ .Release.Namespace }} namespace should be investigated before rollout or rollback."
+{{- end }}

@@ -1,0 +1,81 @@
+{
+  "baseline_source": "tests/benchmark-baseline.json",
+  "benchmarks": {
+    "BenchmarkAPICalls": {
+      "baseline": {
+        "allocs_per_op": 16,
+        "b_per_op": 1464,
+        "ns_per_op": 4081
+      },
+      "current": {
+        "allocs_per_op": 16.0,
+        "b_per_op": 1464.0,
+        "ns_per_op": 4081.0
+      },
+      "metrics": {
+        "allocs_per_op": {
+          "baseline": 16,
+          "current": 16.0,
+          "delta_percent": 0.0
+        },
+        "b_per_op": {
+          "baseline": 1464,
+          "current": 1464.0,
+          "delta_percent": 0.0
+        },
+        "ns_per_op": {
+          "baseline": 4081,
+          "current": 4081.0,
+          "delta_percent": 0.0
+        }
+      },
+      "status": "pass"
+    },
+    "BenchmarkDatasetGeneration": {
+      "baseline": {
+        "allocs_per_op": 27711,
+        "b_per_op": 2813547,
+        "ns_per_op": 7156516
+      },
+      "current": {
+        "allocs_per_op": 27711.0,
+        "b_per_op": 2813547.0,
+        "ns_per_op": 7156516.0
+      },
+      "metrics": {
+        "allocs_per_op": {
+          "baseline": 27711,
+          "current": 27711.0,
+          "delta_percent": 0.0
+        },
+        "b_per_op": {
+          "baseline": 2813547,
+          "current": 2813547.0,
+          "delta_percent": 0.0
+        },
+        "ns_per_op": {
+          "baseline": 7156516,
+          "current": 7156516.0,
+          "delta_percent": 0.0
+        }
+      },
+      "status": "pass"
+    }
+  },
+  "current_benchmarks": {
+    "BenchmarkAPICalls": {
+      "allocs_per_op": 16.0,
+      "b_per_op": 1464.0,
+      "ns_per_op": 4081.0
+    },
+    "BenchmarkDatasetGeneration": {
+      "allocs_per_op": 27711.0,
+      "b_per_op": 2813547.0,
+      "ns_per_op": 7156516.0
+    }
+  },
+  "input_source": "temp_bench.txt",
+  "passed": true,
+  "regressions": [],
+  "threshold_percent": 20.0
+}

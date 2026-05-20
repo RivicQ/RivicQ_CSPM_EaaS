@@ -13,18 +13,18 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
 }) => (
   <Box
     sx={{
-      background: 'linear-gradient(135deg, #667eea20, #764ba220)',
-      border: '1px solid #667eea40',
+      background: 'linear-gradient(135deg, rgba(212,175,55,0.16), rgba(0,194,255,0.14))',
+      border: '1px solid rgba(212,175,55,0.28)',
       borderRadius: 2,
       p: 3,
       textAlign: 'center',
     }}
   >
-    <Lock sx={{ fontSize: 48, color: '#667eea', mb: 1 }} />
+    <Lock sx={{ fontSize: 48, color: '#d4af37', mb: 1 }} />
     <Typography variant="h6" fontWeight="bold" gutterBottom>
       {featureName}
     </Typography>
-    <Chip label="Enterprise Feature" color="primary" size="small" sx={{ mb: 2 }} />
+    <Chip label="Enterprise Feature" color="secondary" size="small" sx={{ mb: 2 }} />
     {description && (
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {description}
@@ -33,7 +33,7 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
     <Button
       variant="contained"
       startIcon={<Upgrade />}
-      sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)' }}
+      sx={{ background: 'linear-gradient(45deg, #d4af37, #00c2ff)' }}
       href="https://cryptobom.io/enterprise"
       target="_blank"
       rel="noopener noreferrer"

@@ -167,8 +167,18 @@ func NewAuthService(secretKey string, userStore UserStore) *AuthService {
 	}
 }
 
+// GetUserByEmail exposes the underlying lookup for API handlers.
+func (as *AuthService) GetUserByEmail(email string) (*User, error) {
+	return as.userStore.GetUserByEmail(email)
+}
+
 // Login authenticates a user and returns a JWT token
 func (as *AuthService) Login(email, password string) (string, error) {
+	return as.LoginWithEdition(email, password, "")
+}
+
+// LoginWithEdition authenticates a user and returns a JWT token for a requested edition.
+func (as *AuthService) LoginWithEdition(email, password, edition string) (string, error) {
 	user, err := as.userStore.GetUserByEmail(email)
 	if err != nil {
 		return "", errors.New("user not found")
@@ -178,10 +188,11 @@ func (as *AuthService) Login(email, password string) (string, error) {
 		return "", errors.New("invalid credentials")
 	}
 
-	// Determine edition based on user role (mock logic)
-	edition := "oss"
-	if user.Role == "admin" || user.Role == "operator" {
-		edition = "enterprise"
+	if edition == "" {
+		edition = "oss"
+		if user.Role == "admin" || user.Role == "operator" {
+			edition = "enterprise"
+		}
 	}
 
 	return as.tokenManager.GenerateToken(user, edition)

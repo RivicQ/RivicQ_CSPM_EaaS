@@ -110,6 +110,19 @@ Use this checklist every time you cut a production release.
 
 - [ ] `JWT_SECRET` is a random 32+ character value (not the default)
 - [ ] `DATABASE_URL` points to production Cloud SQL (never a dev DB)
+- [ ] Production deploy secrets are populated in GitHub Actions and secret managers:
+  - `KUBE_CONFIG_STAGING`
+  - `KUBE_CONFIG_PROD`
+  - `IBMQ_API_KEY`
+  - `DATABASE_URL`
+  - `JWT_SECRET`
+  - `GCP_WORKLOAD_IDENTITY_PROVIDER`
+  - `GCP_SERVICE_ACCOUNT`
+  - `GCP_PROJECT_ID`
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+  - `IBM_CLOUD_API_KEY`
+  - `IBM_HPCS_INSTANCE`
 - [ ] All GCP Secret Manager secrets populated:
   - `cryptobom-jwt-secret-production`
   - `cryptobom-db-password-production`
@@ -139,6 +152,15 @@ Use this checklist every time you cut a production release.
   psql "$PROD_DATABASE_URL" -f deploy/migrations/001_initial_schema.sql
   psql "$PROD_DATABASE_URL" -f deploy/migrations/002_enterprise_features.sql
   ```
+- [ ] Production bootstrap check passed:
+  ```bash
+  API_URL=https://<your-api>/api/v1 \
+  DATABASE_URL=... JWT_SECRET=... KUBE_CONFIG_STAGING=... KUBE_CONFIG_PROD=... \
+  IBMQ_API_KEY=... GCP_WORKLOAD_IDENTITY_PROVIDER=... GCP_SERVICE_ACCOUNT=... \
+  GCP_PROJECT_ID=... AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... \
+  IBM_CLOUD_API_KEY=... IBM_HPCS_INSTANCE=... \
+  ./scripts/production-readiness.sh --strict
+  ```
 - [ ] Helm / GKE deploy workflow triggered with the correct image tag:
   ```bash
   # via GitHub Actions – Actions → Deploy to GCP → Run workflow
@@ -146,6 +168,12 @@ Use this checklist every time you cut a production release.
 - [ ] Post-deploy health check passes:
   ```bash
   curl https://<your-domain>/healthz
+  ```
+- [ ] Post-deploy smoke and rollback helper passes:
+  ```bash
+  SERVICE_URL=https://<your-domain> \
+  PREVIOUS_IMAGE_TAG=<previous-tag> \
+  ./scripts/post_deploy_smoke.sh --service-url https://<your-domain>
   ```
 - [ ] Rollback plan noted (previous image tag ready)
 

@@ -57,6 +57,10 @@ resource "google_compute_network" "cryptobom_vpc" {
   auto_create_subnetworks = false
   routing_mode            = "REGIONAL"
   description             = "CryptoBOM SaaS VPC - ${var.environment}"
+
+  lifecycle {
+    prevent_destroy = var.environment == "production"
+  }
 }
 
 resource "google_compute_subnetwork" "gke_subnet" {
@@ -80,6 +84,10 @@ resource "google_compute_subnetwork" "gke_subnet" {
     flow_sampling        = 0.5
     metadata             = "INCLUDE_ALL_METADATA"
   }
+
+  lifecycle {
+    prevent_destroy = var.environment == "production"
+  }
 }
 
 resource "google_compute_subnetwork" "db_subnet" {
@@ -87,6 +95,10 @@ resource "google_compute_subnetwork" "db_subnet" {
   ip_cidr_range = var.db_subnet_cidr
   region        = var.gcp_region
   network       = google_compute_network.cryptobom_vpc.id
+
+  lifecycle {
+    prevent_destroy = var.environment == "production"
+  }
 }
 
 # Cloud NAT for private GKE nodes
@@ -94,6 +106,10 @@ resource "google_compute_router" "router" {
   name    = "cryptobom-router-${var.environment}"
   region  = var.gcp_region
   network = google_compute_network.cryptobom_vpc.id
+
+  lifecycle {
+    prevent_destroy = var.environment == "production"
+  }
 }
 
 resource "google_compute_router_nat" "nat" {
@@ -111,6 +127,10 @@ resource "google_compute_router_nat" "nat" {
   log_config {
     enable = true
     filter = "ERRORS_ONLY"
+  }
+
+  lifecycle {
+    prevent_destroy = var.environment == "production"
   }
 }
 
@@ -193,6 +213,10 @@ resource "google_container_cluster" "cryptobom" {
   resource_labels = {
     environment = var.environment
     product     = "cryptobom"
+  }
+
+  lifecycle {
+    prevent_destroy = var.environment == "production"
   }
 }
 

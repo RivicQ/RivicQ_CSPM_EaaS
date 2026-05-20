@@ -23,13 +23,14 @@ services:
     container_name: cryptobom-migrate
     volumes:
       - ./deploy/migrations:/migrations:ro
+      - migrate-status:/migrate-status
     environment:
       PGPASSWORD: ${DB_PASSWORD:-cryptobom_dev}
     command: >
       sh -c "set -e; for f in $(ls /migrations/*.sql | sort); do
                echo \"Applying $$f ...\";
                psql -h db -U cryptobom -d cryptobom -f $$f;
-             done"
+             done; mkdir -p /migrate-status && touch /migrate-status/done"
     depends_on:
       db:
         condition: service_healthy
@@ -53,8 +54,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
+      - migrate
+    volumes:
+      - migrate-status:/migrate-status
     networks:
       - cryptobom-net
 
@@ -96,3 +98,4 @@ networks:
 volumes:
   cryptobom-db-data:
   cryptobom-web-node-modules:
+  migrate-status:

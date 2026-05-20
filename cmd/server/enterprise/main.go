@@ -46,6 +46,13 @@ func main() {
 		})
 	})
 
+	router.GET("/readyz", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "ready",
+			"service": "CryptoBOM Enterprise",
+		})
+	})
+
 	// Setup Enterprise API routes
 	apiGroup := router.Group("/api/v1")
 	enterprise.SetupRoutes(apiGroup, db, logger, cfg)

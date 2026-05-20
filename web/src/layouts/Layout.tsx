@@ -34,9 +34,12 @@ import {
   Psychology,
   GitHub,
   CloudQueue,
+  Category,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { getEditionConfig } from '../config/editions';
 
 interface NavItem {
   text: string;
@@ -49,9 +52,11 @@ interface NavItem {
 const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, edition, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [notifications] = React.useState(5);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const editionConfig = getEditionConfig();
 
   const navigationItems: NavItem[] = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
@@ -59,6 +64,7 @@ const Layout: React.FC = () => {
     { text: 'Scanner', icon: <Security />, path: '/scanner' },
     { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
     { text: 'Settings', icon: <Settings />, path: '/settings' },
+    { text: 'DevSecOps Tools', icon: <Category />, path: '/tools' },
   ];
 
   const enterpriseItems: NavItem[] = [
@@ -68,6 +74,11 @@ const Layout: React.FC = () => {
     { text: 'Multi-Cloud', icon: <Cloud />, path: '/enterprise/multicloud', section: 'Enterprise' },
     { text: 'CNCF Tools', icon: <CloudQueue />, path: '/enterprise/cncf', section: 'Enterprise' },
     { text: 'Terraform', icon: <GitHub />, path: '/enterprise/terraform', section: 'Enterprise' },
+    { text: '🔍 Infra Discovery', icon: <Security />, path: '/demo/infrastructure', section: 'Enterprise' },
+  ];
+
+  const visibleEnterpriseItems = editionConfig.features.enterprise ? enterpriseItems : [
+    { text: 'Inventory', icon: <Storage />, path: '/enterprise/inventory', section: 'Enterprise' },
     { text: '🔍 Infra Discovery', icon: <Security />, path: '/demo/infrastructure', section: 'Enterprise' },
   ];
 
@@ -81,8 +92,8 @@ const Layout: React.FC = () => {
   const drawer = (
     <Box sx={{ width: 280, pt: 2 }}>
       <Box sx={{ px: 2, pb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Security sx={{ color: '#667eea', fontSize: 32 }} />
-        <Typography variant="h6" fontWeight="bold" sx={{ background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        <Security sx={{ color: '#d4af37', fontSize: 32 }} />
+        <Typography variant="h6" fontWeight="bold" sx={{ background: 'linear-gradient(45deg, #d4af37 30%, #00c2ff 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           CryptoBOM
         </Typography>
       </Box>
@@ -118,7 +129,7 @@ const Layout: React.FC = () => {
         <Typography variant="caption" color="text.secondary" sx={{ px: 2, fontWeight: 600, textTransform: 'uppercase' }}>
           Enterprise
         </Typography>
-        {enterpriseItems.map((item) => (
+        {visibleEnterpriseItems.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
               onClick={() => handleNavigation(item.path)}
@@ -152,15 +163,15 @@ const Layout: React.FC = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f5f5f5' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'white', color: 'text.primary', boxShadow: 1 }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'rgba(16,26,45,0.88)', color: 'text.primary', boxShadow: 1, backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(212,175,55,0.18)' }}>
         <Toolbar>
           <IconButton edge="start" onClick={() => setDrawerOpen(true)} sx={{ mr: 2 }}>
             <MenuIcon />
           </IconButton>
           
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, mr: 4 }}>
-            <Box component="span" sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <Box component="span" sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #d4af37 30%, #00c2ff 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               RivicQ
             </Box>
             <Box component="span" sx={{ color: 'text.secondary', fontWeight: 400, ml: 1 }}>
@@ -187,8 +198,15 @@ const Layout: React.FC = () => {
 
             <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 
+            <Chip
+              size="small"
+              label={edition.toUpperCase()}
+              color={edition === 'enterprise' ? 'secondary' : 'primary'}
+              sx={{ mr: 1 }}
+            />
+
             <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-              <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>A</Avatar>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', color: '#08111f' }}>{user?.name?.charAt(0) || 'A'}</Avatar>
             </IconButton>
             <Menu
               anchorEl={anchorEl}
@@ -198,7 +216,7 @@ const Layout: React.FC = () => {
               <MenuItem onClick={() => setAnchorEl(null)}>Profile</MenuItem>
               <MenuItem onClick={() => setAnchorEl(null)}>Account Settings</MenuItem>
               <Divider />
-              <MenuItem onClick={() => setAnchorEl(null)}>Logout</MenuItem>
+              <MenuItem onClick={() => { setAnchorEl(null); logout(); navigate('/login'); }}>Logout</MenuItem>
             </Menu>
           </Box>
         </Toolbar>
@@ -222,6 +240,10 @@ const Layout: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
+          <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Chip size="small" label={user?.email || 'unknown-user'} variant="outlined" />
+            <Chip size="small" label={editionConfig.name} color="default" />
+          </Box>
           <Outlet />
         </motion.div>
       </Box>

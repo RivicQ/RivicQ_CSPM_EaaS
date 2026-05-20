@@ -42,6 +42,13 @@ func main() {
 		})
 	})
 
+	router.GET("/readyz", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "ready",
+			"service": "CryptoBOM SaaS",
+		})
+	})
+
 	// Setup API routes
 	apiGroup := router.Group("/api/v1")
 	api.SetupRoutes(apiGroup, db, logger, cfg)

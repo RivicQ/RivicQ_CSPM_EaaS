@@ -1,0 +1,37 @@
+name: Update Benchmark Baseline
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-baseline:
+    name: Refresh Benchmark Baseline
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run Benchmarks
+        run: |
+          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem ./tests/... | tee benchmark-results.txt
+
+      - name: Generate Updated Baseline
+        run: |
+          python3 scripts/compare_benchmarks.py \
+            --input benchmark-results.txt \
+            --write-baseline benchmark-baseline.json
+
+      - name: Upload Updated Baseline Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-baseline
+          path: benchmark-baseline.json

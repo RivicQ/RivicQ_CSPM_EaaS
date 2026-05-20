@@ -1,0 +1,13 @@
+name-template: "${version} - ${name}"
+tag-template: "v$NEXT_PATCH_VERSION"
+categories:
+  - title: "🚀 Features"
+    labels:
+      - enhancement
+  - title: "🐛 Fixes"
+    labels:
+      - bug
+change-template: "- ${title} (#${number}) by @${author}"
+template: |
+  ## What's Changed
+  $CHANGES

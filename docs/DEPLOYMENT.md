@@ -77,6 +77,8 @@ docker compose up -d
 curl http://localhost:8080/healthz
 ```
 
+Note: The compose stack now ensures database migrations complete before the API server starts by using a shared migration-status volume. If migrations fail, the `app` container will not start — check the `migrate` container logs for errors.
+
 Services started:
 
 | Service | Port | Description |
@@ -164,6 +166,37 @@ push and pull request.
      the `REGISTRY` secret or `ghcr.io`).
 4. Click **Run workflow** again to start the job.
 
+### SBOM and Security Scans
+
+The CI pipeline now generates an SBOM for built container images (via `syft`) and runs static analysis (CodeQL, `gosec`, `golangci-lint`) and container scanning (`trivy`). SBOM files and SARIF results are uploaded as workflow artifacts for review.
+
+### Deployment Smoke Tests and Automatic Rollback
+
+Staging and production deployments now include comprehensive smoke tests:
+- **Health check** (`/healthz` and `/ready` endpoints) with retry logic
+- **API endpoints** (`/api/v1/assets`) validation
+- **Dashboard accessibility** check
+- **Rollout status** verification using `kubectl rollout status`
+
+If any smoke test fails, the deployment automatically rolls back to the previous Helm release revision using `helm rollback`.
+
+**Automatic rollback steps:**
+1. Helm detects health check failure
+2. Current deployment revision is captured before deploy
+3. On any failure, `helm rollback` is triggered
+4. Post-rollback verification runs the same smoke tests
+5. Slack notification sent (if webhook configured)
+
+### Manual Rollback
+
+For emergencies, rollback can be triggered manually via GitHub Actions or kubectl. See [ROLLBACK_RUNBOOK.md](ROLLBACK_RUNBOOK.md) for detailed procedures.
+
+**Quick rollback via GitHub Actions:**
+1. Go to **Actions → Rollback Deployment**
+2. Run workflow with target environment (staging/production) and edition (oss/enterprise/both)
+3. Optionally specify revision number, or leave blank to rollback to previous
+4. Monitor logs and verify smoke tests pass
+
 ### Running the GCP deploy workflow
 
 1. Go to **Actions → Deploy to GCP**.
@@ -199,6 +232,8 @@ These secrets are only needed when the `deploy-staging` and
 | `KUBE_CONFIG_STAGING` | For staging deploy | Base64-encoded kubeconfig for staging cluster |
 | `KUBE_CONFIG_PROD` | For production deploy | Base64-encoded kubeconfig for production cluster |
 | `IBMQ_API_KEY` | For production deploy | IBM Quantum API key used by the Enterprise server |
+| `DATABASE_URL` | For production deploy | Production PostgreSQL connection string used by deploy checks and migrations |
+| `JWT_SECRET` | For production deploy | Signed JWT secret used by the API server |
 
 #### OSS deploy (`deploy-oss.yml`)
 
@@ -246,6 +281,20 @@ Key variables:
 | `CRYPTOBOM_LOG_LEVEL` | `info` | Log verbosity |
 | `DATABASE_URL` | _(empty)_ | PostgreSQL connection URL; leave blank for demo mode |
 | `JWT_SECRET` | `change-me-in-production` | **Must** be changed before production use |
+
+Before promoting to production, verify the deploy-time secrets above are present in GitHub Actions and the corresponding cloud secret stores.
+
+### Production Terraform inputs
+
+Copy the matching example file before running `terraform plan` or `terraform apply`:
+
+- [deploy/terraform/gcp/production.tfvars.example](../deploy/terraform/gcp/production.tfvars.example)
+- [deploy/terraform/aws/production.tfvars.example](../deploy/terraform/aws/production.tfvars.example)
+- [deploy/terraform/ibm/production.tfvars.example](../deploy/terraform/ibm/production.tfvars.example)
+
+### Monitoring and rollback
+
+Production Helm charts now ship Prometheus alert rules for deployment availability and pod restart spikes. Use the rollback workflow in `.github/workflows/rollback.yml` together with `scripts/post_deploy_smoke.sh` when a deployment fails health checks.
 
 ---
 

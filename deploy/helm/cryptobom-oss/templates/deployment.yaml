@@ -40,16 +40,19 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /readyz
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /readyz
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
+          envFrom:
+            - configMapRef:
+                name: {{ include "cryptobom-oss.fullname" . }}-config
           env:
             - name: PORT
               value: "8080"

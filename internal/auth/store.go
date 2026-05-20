@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -16,6 +17,12 @@ type MockUserStore struct {
 // DatabaseUserStore implements UserStore with database
 type DatabaseUserStore struct {
 	db *sql.DB
+}
+
+// WorkDomainUserStore implements UserStore for production-only, domain-restricted auth.
+type WorkDomainUserStore struct {
+	users          map[string]*User
+	allowedDomains []string
 }
 
 // NewMockUserStore creates a mock user store for testing/bootstrap.
@@ -73,6 +80,50 @@ func NewMockUserStore() (*MockUserStore, error) {
 // NewDatabaseUserStore creates a database user store
 func NewDatabaseUserStore(db *sql.DB) *DatabaseUserStore {
 	return &DatabaseUserStore{db: db}
+}
+
+// NewWorkDomainUserStore creates a seeded in-memory store for approved work domains.
+func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
+	allowedDomains := parseAllowedDomains(os.Getenv("AUTH_ALLOWED_DOMAINS"))
+	if len(allowedDomains) == 0 {
+		return nil, fmt.Errorf("AUTH_ALLOWED_DOMAINS environment variable must be set")
+	}
+
+	bootstrapEmail := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_EMAIL"))
+	bootstrapPassword := os.Getenv("AUTH_BOOTSTRAP_PASSWORD")
+	if bootstrapEmail == "" || bootstrapPassword == "" {
+		return nil, fmt.Errorf("AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD environment variables must be set")
+	}
+	if !emailAllowed(bootstrapEmail, allowedDomains) {
+		return nil, fmt.Errorf("bootstrap email domain is not allowed")
+	}
+
+	bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
+	if bootstrapName == "" {
+		bootstrapName = "Workspace Admin"
+	}
+	bootstrapRole := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_ROLE"))
+	if bootstrapRole == "" {
+		bootstrapRole = "admin"
+	}
+
+	hashedPassword, err := hashPassword(bootstrapPassword)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash bootstrap password: %w", err)
+	}
+
+	users := map[string]*User{
+		strings.ToLower(bootstrapEmail): {
+			ID:       "bootstrap-user",
+			TenantID: "tenant-1",
+			Email:    bootstrapEmail,
+			Name:     bootstrapName,
+			Role:     bootstrapRole,
+			Password: hashedPassword,
+		},
+	}
+
+	return &WorkDomainUserStore{users: users, allowedDomains: allowedDomains}, nil
 }
 
 // MockUserStore methods
@@ -157,6 +208,36 @@ func (d *DatabaseUserStore) UpdateUser(user *User) error {
 	return err
 }
 
+func (w *WorkDomainUserStore) GetUserByEmail(email string) (*User, error) {
+	if !emailAllowed(email, w.allowedDomains) {
+		return nil, fmt.Errorf("email domain not allowed")
+	}
+	if user, exists := w.users[strings.ToLower(email)]; exists {
+		return user, nil
+	}
+	return nil, fmt.Errorf("user not found")
+}
+
+func (w *WorkDomainUserStore) CreateUser(user *User) error {
+	if !emailAllowed(user.Email, w.allowedDomains) {
+		return fmt.Errorf("email domain not allowed")
+	}
+	user.ID = uuid.New().String()
+	user.TenantID = "tenant-1"
+	hashedPassword, err := hashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+	user.Password = hashedPassword
+	w.users[strings.ToLower(user.Email)] = user
+	return nil
+}
+
+func (w *WorkDomainUserStore) UpdateUser(user *User) error {
+	w.users[strings.ToLower(user.Email)] = user
+	return nil
+}
+
 // CreateDefaultUsers creates bootstrap users from environment variable.
 // Requires CRYPTOBOM_BOOTSTRAP_PASSWORD to be set; returns an error otherwise.
 func CreateDefaultUsers(db *sql.DB) error {
@@ -208,4 +289,32 @@ func CreateDefaultUsers(db *sql.DB) error {
 	}
 
 	return nil
+}
+
+func parseAllowedDomains(raw string) []string {
+	parts := strings.Split(raw, ",")
+	domains := make([]string, 0, len(parts))
+	for _, part := range parts {
+		domain := strings.ToLower(strings.TrimSpace(part))
+		if domain != "" {
+			domains = append(domains, domain)
+		}
+	}
+	return domains
+}
+
+func emailAllowed(email string, allowedDomains []string) bool {
+	if len(allowedDomains) == 0 {
+		return true
+	}
+	parts := strings.Split(strings.ToLower(strings.TrimSpace(email)), "@")
+	if len(parts) != 2 {
+		return false
+	}
+	for _, domain := range allowedDomains {
+		if parts[1] == strings.ToLower(strings.TrimSpace(domain)) {
+			return true
+		}
+	}
+	return false
 }

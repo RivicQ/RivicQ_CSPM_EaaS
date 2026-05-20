@@ -16,19 +16,15 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
 
 ---
 
-## 🏛️ Intellectual Property Notice
+## 🏛️ License & Intellectual Property
 
-**IMPORTANT:** All contributions become part of this project, but:
+CryptoBOM SaaS is licensed under the Apache License, Version 2.0. By contributing,
+you agree that your contributions will be made available under the project's
+license. See the root `LICENSE` file for full terms.
 
-- **ALL INTELLECTUAL PROPERTY** remains the exclusive property of **RivicQ GmbH**
-- This includes all source code, designs, documentation, trademarks, and innovations
-- RivicQ GmbH reserves all rights under German law (BGB, UrhG, MarkenG) and international treaties
-- By contributing, you acknowledge that RivicQ GmbH owns all IP rights
-
-**Trademark Usage:**
-- Do not use "RivicQ" or "CryptoBOM" in your own products without permission
-- Do not create confusion about the relationship with RivicQ GmbH
-- Report any IP violations to legal@rivicq.de
+If you are contributing on behalf of an employer, ensure you have the right to
+contribute under the project's license and follow your employer's contribution
+policy.
 
 ---
 
@@ -189,14 +185,6 @@ This is the **Open Source Edition**. Enterprise features include:
 
 ---
 
-## ⚖️ License
-
-By contributing, you agree that your contributions will be licensed under the **RivicQ Open Source License (R-OSL)**.
-
-All IP remains the property of **RivicQ GmbH** under German and international law.
-
----
-
 **Thank you for contributing to CryptoBOM SaaS!**
 
-*Made with ❤️ in Berlin, Germany*
+_Made with ❤️ in Berlin, Germany_

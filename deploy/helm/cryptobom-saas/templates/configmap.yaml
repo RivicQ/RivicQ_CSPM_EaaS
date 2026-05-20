@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cryptobom-saas.fullname" . }}-config
+  labels:
+    {{- include "cryptobom-saas.labels" . | nindent 4 }}
+data:
+  SERVICE_NAME: "cryptobom-saas"
+  VERSION: {{ .Chart.AppVersion | quote }}
+  PORT: "8080"
+  DEBUG: "false"
+  DATABASE_SSLMODE: "require"
+  OBSERVABILITY_METRICS_ENABLED: "true"
+  KUBERNETES_IN_CLUSTER: "true"
+  KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}

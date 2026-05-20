@@ -43,6 +43,13 @@ func main() {
 		})
 	})
 
+	router.GET("/readyz", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "ready",
+			"service": "CryptoBOM OSS",
+		})
+	})
+
 	// Setup OSS API routes
 	apiGroup := router.Group("/api/v1")
 	oss.SetupRoutes(apiGroup, db, logger, cfg)

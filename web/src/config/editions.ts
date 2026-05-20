@@ -43,6 +43,21 @@ export const ENTERPRISE_CONFIG = {
 export type EditionConfig = typeof OSS_CONFIG;
 
 export const getEditionConfig = (): EditionConfig => {
-  const edition = process.env.REACT_APP_EDITION || 'oss';
+  const edition = (() => {
+    try {
+      return localStorage.getItem('app_edition') || process.env.REACT_APP_EDITION || 'oss';
+    } catch {
+      return process.env.REACT_APP_EDITION || 'oss';
+    }
+  })();
+
   return edition === 'enterprise' ? ENTERPRISE_CONFIG : OSS_CONFIG;
+};
+
+export const setEditionPreference = (edition: 'oss' | 'enterprise') => {
+  try {
+    localStorage.setItem('app_edition', edition);
+  } catch {
+    // ignore storage failures in restricted environments
+  }
 };

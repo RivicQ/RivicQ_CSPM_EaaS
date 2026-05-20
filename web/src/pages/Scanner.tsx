@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Card,
@@ -28,6 +28,7 @@ import { cbomService } from '../services/api';
 
 interface ScanJob {
   id: string;
+  scanId?: string;
   status: 'idle' | 'running' | 'completed' | 'failed';
   type: string;
   target: string;
@@ -35,7 +36,11 @@ interface ScanJob {
   completedAt?: string;
   findings: number;
   progress: number;
+  resultUrl?: string;
 }
+
+const POLL_INTERVAL_MS = 1500;
+const MAX_POLL_ATTEMPTS = 40;
 
 const Scanner: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -44,12 +49,93 @@ const Scanner: React.FC = () => {
   const [scanJobs, setScanJobs] = useState<ScanJob[]>([]);
   const [scanProgress, setScanProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const pollTimerRef = useRef<number | null>(null);
+  const pollAttemptsRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (pollTimerRef.current !== null) {
+        window.clearInterval(pollTimerRef.current);
+      }
+    };
+  }, []);
+
+  const clearPolling = () => {
+    if (pollTimerRef.current !== null) {
+      window.clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  };
+
+  const updateJob = (jobId: string, updater: (job: ScanJob) => ScanJob) => {
+    setScanJobs(prev => prev.map(job => (job.id === jobId ? updater(job) : job)));
+  };
+
+  const normalizeFindings = (findings: any) => {
+    if (!findings || typeof findings !== 'object') {
+      return 0;
+    }
+
+    return findings.total
+      ?? findings.total_findings
+      ?? findings.count
+      ?? findings.totalCount
+      ?? 0;
+  };
+
+  const pollScanStatus = (jobId: string, scanId: string) => {
+    clearPolling();
+    pollAttemptsRef.current = 0;
+
+    pollTimerRef.current = window.setInterval(async () => {
+      pollAttemptsRef.current += 1;
+
+      try {
+        const response = await cbomService.getScanStatus(scanId);
+        const data = response.data ?? response;
+        const status = data.status ?? 'running';
+        const progress = typeof data.progress === 'number'
+          ? data.progress
+          : status === 'completed'
+            ? 100
+            : Math.min(pollAttemptsRef.current * 10, 95);
+
+        setScanProgress(progress);
+        updateJob(jobId, job => ({
+          ...job,
+          status: status === 'failed' ? 'failed' : status === 'completed' ? 'completed' : 'running',
+          progress,
+          findings: normalizeFindings(data.findings),
+          completedAt: status === 'completed' ? new Date().toISOString() : job.completedAt,
+          resultUrl: data.result_url ?? data.resultUrl ?? job.resultUrl,
+        }));
+
+        if (status === 'completed' || status === 'failed') {
+          clearPolling();
+          setIsScanning(false);
+        }
+      } catch (pollError) {
+        console.error('Polling scan status failed:', pollError);
+
+        if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
+          clearPolling();
+          setIsScanning(false);
+          updateJob(jobId, job => ({ ...job, status: 'failed' }));
+          setError('Scan status polling timed out. Check the backend and try again.');
+        }
+      }
+    }, POLL_INTERVAL_MS);
+  };
 
   const startScan = async () => {
-    if (!scanTarget.trim()) {
+    const target = scanTarget.trim();
+
+    if (!target) {
       setError('Please specify a scan target (e.g. hostname, repo path, or container image).');
       return;
     }
+
+    clearPolling();
     setIsScanning(true);
     setError(null);
     setScanProgress(0);
@@ -58,7 +144,7 @@ const Scanner: React.FC = () => {
       id: `scan-${Date.now()}`,
       status: 'running',
       type: scanType,
-      target: scanTarget.trim(),
+      target,
       startedAt: new Date().toISOString(),
       findings: 0,
       progress: 0,
@@ -66,25 +152,20 @@ const Scanner: React.FC = () => {
     setScanJobs(prev => [newJob, ...prev]);
 
     try {
-      await cbomService.triggerScan(scanTarget.trim(), scanType);
-      const interval = setInterval(() => {
-        setScanProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setIsScanning(false);
-            setScanJobs(jobs =>
-              jobs.map(j => j.id === newJob.id
-                ? { ...j, status: 'completed', completedAt: new Date().toISOString(), findings: Math.floor(Math.random() * 10) + 1, progress: 100 }
-                : j
-              )
-            );
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 500);
+      const response = await cbomService.triggerScan(target, scanType);
+      const data = response.data ?? response;
+      const scanId = data.scan_id ?? data.scanId ?? newJob.id;
+
+      updateJob(newJob.id, job => ({
+        ...job,
+        scanId,
+        status: 'running',
+      }));
+
+      pollScanStatus(newJob.id, scanId);
     } catch (err) {
       console.error('Scan failed:', err);
+      clearPolling();
       setError('Scan failed. Make sure the backend is running.');
       setIsScanning(false);
       setScanJobs(jobs =>
@@ -210,9 +291,13 @@ const Scanner: React.FC = () => {
                             {job.type === 'cbom' ? 'CBOM' : job.type.charAt(0).toUpperCase() + job.type.slice(1)} Scan
                           </Typography>
                           <Chip label={job.target} size="small" variant="outlined" />
+                          {job.scanId && <Chip label={job.scanId.slice(0, 8)} size="small" variant="outlined" />}
                           <Chip label={job.status} size="small" color={getStatusColor(job.status)} />
                           {job.status === 'completed' && (
                             <Chip label={`${job.findings} findings`} size="small" color={job.findings > 0 ? 'warning' : 'success'} />
+                          )}
+                          {job.resultUrl && (
+                            <Chip label="Report ready" size="small" color="primary" variant="outlined" />
                           )}
                         </Box>
                       }

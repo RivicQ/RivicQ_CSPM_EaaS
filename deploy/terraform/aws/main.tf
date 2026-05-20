@@ -122,6 +122,7 @@ resource "aws_db_instance" "cryptobom" {
   storage_encrypted      = true
   kms_key_id             = aws_kms_key.cryptobom_master.arn
   backup_retention_period = 7
+  deletion_protection    = var.environment == "production"
   skip_final_snapshot    = false
   final_snapshot_identifier = "${var.project}-db-final-${var.environment}"
 
@@ -129,6 +130,10 @@ resource "aws_db_instance" "cryptobom" {
     Name        = "${var.project}-db-${var.environment}"
     Environment = var.environment
     ManagedBy   = "terraform"
+  }
+
+  lifecycle {
+    prevent_destroy = var.environment == "production"
   }
 }
 

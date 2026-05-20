@@ -1,0 +1,31 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "cryptobom-oss.fullname" . }}
+  labels:
+    {{- include "cryptobom-oss.labels" . | nindent 4 }}
+    release: {{ .Release.Name }}
+spec:
+  groups:
+    - name: cryptobom-oss.rules
+      rules:
+        - alert: CryptoBOMOSSDeploymentUnavailable
+          expr: kube_deployment_status_replicas_available{namespace="{{ .Release.Namespace }}", deployment="{{ include "cryptobom-oss.fullname" . }}"} < kube_deployment_spec_replicas{namespace="{{ .Release.Namespace }}", deployment="{{ include "cryptobom-oss.fullname" . }}"}
+          for: 5m
+          labels:
+            severity: critical
+            edition: oss
+          annotations:
+            summary: "CryptoBOM OSS deployment is not fully available"
+            description: "The {{ include "cryptobom-oss.fullname" . }} deployment in namespace {{ .Release.Namespace }} is reporting fewer available replicas than desired."
+        - alert: CryptoBOMOSSPodRestartsHigh
+          expr: 'sum(increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}", pod=~"{{ include "cryptobom-oss.fullname" . }}-.*"}[15m])) > 3'
+          for: 10m
+          labels:
+            severity: warning
+            edition: oss
+          annotations:
+            summary: "CryptoBOM OSS pods are restarting frequently"
+            description: "Repeated restarts in the {{ .Release.Namespace }} namespace should be investigated before rollout or rollback."
+{{- end }}

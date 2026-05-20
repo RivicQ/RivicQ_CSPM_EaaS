@@ -39,6 +39,12 @@ jobs:
         env:
           REACT_APP_EDITION: enterprise
 
+      - name: Generate API docs (ReDoc)
+        run: |
+          # Build ReDoc HTML from the OpenAPI spec into the site's build
+          npx redoc-cli@latest bundle docs/openapi.yaml -o web/build/api/index.html || true
+        shell: bash
+
       - name: Add SPA redirect
         run: cp web/build/index.html web/build/404.html
 

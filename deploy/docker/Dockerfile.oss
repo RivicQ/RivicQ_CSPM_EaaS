@@ -17,10 +17,12 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
 
 COPY --from=builder /app/cryptobom-oss /app/cryptobom-server
+COPY deploy/docker/wait-for-migrate.sh /app/wait-for-migrate.sh
+RUN chmod +x /app/wait-for-migrate.sh
 
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
     CMD wget -qO- http://localhost:8080/healthz || exit 1
 
-CMD ["/app/cryptobom-server"]
+CMD ["/app/wait-for-migrate.sh"]

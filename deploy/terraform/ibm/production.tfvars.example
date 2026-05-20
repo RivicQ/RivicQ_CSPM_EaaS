@@ -1,0 +1,3 @@
+ibm_region   = "eu-de"
+environment  = "production"
+resource_group = "cryptobom"

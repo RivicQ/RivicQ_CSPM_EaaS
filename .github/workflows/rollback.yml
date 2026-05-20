@@ -1,0 +1,179 @@
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback (staging or production)'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      edition:
+        description: 'Edition to rollback (oss, enterprise, or both)'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - oss
+          - enterprise
+          - both
+      revision:
+        description: 'Helm release revision to rollback to (leave blank for previous revision)'
+        required: false
+
+jobs:
+  rollback:
+    name: Rollback ${{ matrix.edition }} to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      matrix:
+        edition: ${{ fromJson(inputs.edition == 'both' ? '["oss", "enterprise"]' : format('["{0}"]', inputs.edition)) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.28'
+
+      - name: Configure kubectl for Staging
+        if: inputs.environment == 'staging'
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+
+      - name: Configure kubectl for Production
+        if: inputs.environment == 'production'
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+
+      - name: Determine Namespace
+        id: namespace
+        run: |
+          if [ "${{ inputs.environment }}" == "staging" ]; then
+            if [ "${{ matrix.edition }}" == "oss" ]; then
+              NS="cryptobom-staging"
+            else
+              NS="cryptobom-enterprise-staging"
+            fi
+          else
+            if [ "${{ matrix.edition }}" == "oss" ]; then
+              NS="cryptobom-production"
+            else
+              NS="cryptobom-enterprise-production"
+            fi
+          fi
+          echo "namespace=$NS" >> $GITHUB_OUTPUT
+
+      - name: Get Current Release Info
+        id: current-release
+        run: |
+          RELEASE="cryptobom-${{ matrix.edition }}"
+          NS="${{ steps.namespace.outputs.namespace }}"
+          CURRENT_REVISION=$(helm status "$RELEASE" -n "$NS" | grep REVISION | awk '{print $2}')
+          echo "current-revision=$CURRENT_REVISION" >> $GITHUB_OUTPUT
+          echo "Current revision: $CURRENT_REVISION"
+
+      - name: List Available Revisions
+        run: |
+          RELEASE="cryptobom-${{ matrix.edition }}"
+          NS="${{ steps.namespace.outputs.namespace }}"
+          echo "Available revisions for $RELEASE:"
+          helm history "$RELEASE" -n "$NS" || echo "No revision history found"
+
+      - name: Rollback to Specified Revision
+        if: inputs.revision != ''
+        run: |
+          RELEASE="cryptobom-${{ matrix.edition }}"
+          NS="${{ steps.namespace.outputs.namespace }}"
+          echo "Rolling back $RELEASE in namespace $NS to revision ${{ inputs.revision }}..."
+          helm rollback "$RELEASE" ${{ inputs.revision }} -n "$NS" --wait --timeout=10m
+          kubectl rollout status deployment/cryptobom-server -n "$NS" --timeout=10m
+
+      - name: Rollback to Previous Revision
+        if: inputs.revision == ''
+        run: |
+          RELEASE="cryptobom-${{ matrix.edition }}"
+          NS="${{ steps.namespace.outputs.namespace }}"
+          echo "Rolling back $RELEASE in namespace $NS to previous revision..."
+          helm rollback "$RELEASE" -n "$NS" --wait --timeout=10m
+          kubectl rollout status deployment/cryptobom-server -n "$NS" --timeout=10m
+
+      - name: Verify Rollback
+        run: |
+          RELEASE="cryptobom-${{ matrix.edition }}"
+          NS="${{ steps.namespace.outputs.namespace }}"
+          echo "Verifying rollback of $RELEASE in namespace $NS..."
+          
+          # Wait for pods to be ready
+          sleep 20
+          kubectl get pods -n "$NS"
+          
+          # Check deployment status
+          kubectl describe deployment/cryptobom-server -n "$NS" | tail -10
+
+      - name: Post-Rollback Smoke Tests
+        timeout-minutes: 5
+        run: |
+          NS="${{ steps.namespace.outputs.namespace }}"
+          ENV="${{ inputs.environment }}"
+          EDITION="${{ matrix.edition }}"
+          
+          if [ "$ENV" == "staging" ]; then
+            URL="https://staging.cryptobom.io"
+          else
+            URL="https://cryptobom.io"
+          fi
+          
+          echo "Running post-rollback smoke tests for $EDITION..."
+          
+          for i in {1..10}; do
+            if curl -sf "$URL/$EDITION/healthz" > /dev/null; then
+              echo "✓ $EDITION health check passed"
+              exit 0
+            fi
+            if [ $i -eq 10 ]; then
+              echo "✗ $EDITION health check failed after rollback"
+              exit 1
+            fi
+            echo "Health check attempt $i/10, retrying..."
+            sleep 5
+          done
+
+      - name: Notify Rollback
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ ! -z "${{ env.SLACK_WEBHOOK_URL }}" ]; then
+            if [ "${{ job.status }}" == "success" ]; then
+              STATUS=":white_check_mark: Rollback Successful"
+            else
+              STATUS=":x: Rollback Failed"
+            fi
+            
+            curl -X POST "${{ env.SLACK_WEBHOOK_URL }}" \
+              -H 'Content-type: application/json' \
+              --data "{
+                \"text\": \"$STATUS\",
+                \"blocks\": [
+                  {
+                    \"type\": \"section\",
+                    \"text\": {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"$STATUS\n*Environment:* ${{ inputs.environment }}\n*Edition:* ${{ matrix.edition }}\n*Revision:* ${{ inputs.revision || 'Previous' }}\n*Action:* Rollback\"
+                    }
+                  }
+                ]
+              }"
+          fi

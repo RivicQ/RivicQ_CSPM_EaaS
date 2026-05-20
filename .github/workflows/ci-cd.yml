@@ -11,6 +11,30 @@ env:
   NODE_VERSION: '18'
 
 jobs:
+  # CodeQL Analysis
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: go
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  
   # Security Scanning
   security-scan:
     name: Security Scanning
@@ -53,6 +77,7 @@ jobs:
           path: |
             gosec.sarif
             trivy.sarif
+            codeql.sarif
 
   # OSS Gate — verify no enterprise import paths are reachable from the OSS binary
   oss-gate:
@@ -208,6 +233,83 @@ jobs:
           name: integration-test-results
           path: tests/integration/results/
 
+  # Production Validation
+  production-validation:
+    name: Production Validation
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    permissions:
+      contents: read
+
+    env:
+      DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_validation?sslmode=require
+      JWT_SECRET: production-validation-secret-please-replace
+      KUBE_CONFIG_STAGING: dummy
+      KUBE_CONFIG_PROD: dummy
+      IBMQ_API_KEY: dummy
+      GCP_WORKLOAD_IDENTITY_PROVIDER: dummy
+      GCP_SERVICE_ACCOUNT: dummy@example.com
+      GCP_PROJECT_ID: dummy-project
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_SECRET_ACCESS_KEY: dummy
+      IBM_CLOUD_API_KEY: dummy
+      IBM_HPCS_INSTANCE: dummy
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint Helm charts
+        run: |
+          helm lint deploy/helm/cryptobom-oss
+          helm lint deploy/helm/cryptobom-saas
+
+      - name: Start OSS server
+        run: |
+          go run ./cmd/server/oss/main.go > /tmp/cryptobom-oss.log 2>&1 &
+          echo $! > /tmp/cryptobom-oss.pid
+          for _ in $(seq 1 30); do
+            if curl -sf http://localhost:8080/healthz >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/cryptobom-oss.log
+          exit 1
+
+      - name: Validate OSS production readiness
+        run: API_URL=http://localhost:8080/api/v1 ./scripts/production-readiness.sh --strict
+
+      - name: Start Enterprise server
+        run: |
+          go run -tags enterprise ./cmd/server/enterprise/main.go > /tmp/cryptobom-enterprise.log 2>&1 &
+          echo $! > /tmp/cryptobom-enterprise.pid
+          for _ in $(seq 1 30); do
+            if curl -sf http://localhost:9090/healthz >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/cryptobom-enterprise.log
+          exit 1
+
+      - name: Validate Enterprise production readiness
+        run: API_URL=http://localhost:9090/api/v1 ./scripts/production-readiness.sh --strict
+
+      - name: Stop validation servers
+        if: always()
+        run: |
+          kill "$(cat /tmp/cryptobom-oss.pid)" 2>/dev/null || true
+          kill "$(cat /tmp/cryptobom-enterprise.pid)" 2>/dev/null || true
+
   # Performance Tests
   performance-tests:
     name: Performance Tests
@@ -228,15 +330,30 @@ jobs:
 
       - name: Run Performance Benchmarks
         run: |
-          go test -v -bench=. -benchmem ./benchmarks/... > benchmark-results.txt
-          go test -run=TestPerformanceLoadTests ./tests/...
+          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem -cpuprofile=cpu.prof -memprofile=mem.prof ./tests/... | tee benchmark-results.txt
+
+      - name: Compare Against Benchmark Baseline
+        env:
+          BENCHMARK_REGRESSION_THRESHOLD_PERCENT: '20'
+        run: |
+          python3 scripts/compare_benchmarks.py \
+            --input benchmark-results.txt \
+            --baseline tests/benchmark-baseline.json \
+            --output benchmark-results.json \
+            --threshold-percent "$BENCHMARK_REGRESSION_THRESHOLD_PERCENT" \
+            --fail-on-regression
+
+      - name: Run Performance Load Tests
+        run: go test -run=TestPerformanceLoadTests ./tests/...
 
       - name: Upload Performance Results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: performance-results
           path: |
             benchmark-results.txt
+            benchmark-results.json
             cpu.prof
             mem.prof
 
@@ -279,6 +396,18 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Generate SBOM (Syft)
+        uses: anchore/syft-action@v0.11.0
+        with:
+          image: ghcr.io/${{ github.repository }}:${{ matrix.edition }}-${{ github.sha }}
+          output: sbom.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.edition }}
+          path: sbom.json
+
       - name: Container Security Scan
         uses: aquasecurity/trivy-action@0.28.0
         with:
@@ -316,11 +445,19 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > kubeconfig
           export KUBECONFIG=kubeconfig
 
+      - name: Get current revision (for rollback)
+        id: current-revision
+        run: |
+          REVISION=$(helm status cryptobom-oss -n cryptobom-staging 2>/dev/null | grep REVISION | awk '{print $2}' || echo '0')
+          echo "oss-revision=$REVISION" >> $GITHUB_OUTPUT
+          REVISION=$(helm status cryptobom-enterprise -n cryptobom-enterprise-staging 2>/dev/null | grep REVISION | awk '{print $2}' || echo '0')
+          echo "enterprise-revision=$REVISION" >> $GITHUB_OUTPUT
+
       - name: Deploy OSS to Staging
         run: |
           helm upgrade --install cryptobom-oss ./deploy/helm/cryptobom-oss \
             --namespace cryptobom-staging \
-            --set image.tag=latest \
+            --set image.tag=${{ github.sha }} \
             --set environment=staging \
             --wait --timeout=10m
 
@@ -328,18 +465,74 @@ jobs:
         run: |
           helm upgrade --install cryptobom-enterprise ./deploy/helm/cryptobom-enterprise \
             --namespace cryptobom-enterprise-staging \
-            --set image.tag=latest \
+            --set image.tag=${{ github.sha }} \
             --set environment=staging \
             --wait --timeout=10m
 
-      - name: Run Smoke Tests
+      - name: Verify Rollout Status
         run: |
-          sleep 30 # Wait for deployment
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-staging --timeout=10m
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-enterprise-staging --timeout=10m
+
+      - name: Run Comprehensive Smoke Tests
+        timeout-minutes: 5
+        run: |
+          set -e
+          echo "Waiting for deployments to be ready..."
+          sleep 30
+          
+          echo "Checking pod health..."
           kubectl get pods -n cryptobom-staging
           kubectl get pods -n cryptobom-enterprise-staging
-          # Health check URLs
-          curl -f https://staging.cryptobom.io/oss/healthz
-          curl -f https://staging.cryptobom.io/enterprise/healthz
+          
+          # Health check with retries
+          echo "Running health checks..."
+          for i in {1..10}; do
+            if curl -sf https://staging.cryptobom.io/oss/healthz > /dev/null; then
+              echo "✓ OSS health check passed"
+              break
+            fi
+            if [ $i -eq 10 ]; then
+              echo "✗ OSS health check failed after 10 retries"
+              exit 1
+            fi
+            echo "Health check attempt $i/10, retrying..."
+            sleep 5
+          done
+          
+          for i in {1..10}; do
+            if curl -sf https://staging.cryptobom.io/enterprise/healthz > /dev/null; then
+              echo "✓ Enterprise health check passed"
+              break
+            fi
+            if [ $i -eq 10 ]; then
+              echo "✗ Enterprise health check failed after 10 retries"
+              exit 1
+            fi
+            echo "Health check attempt $i/10, retrying..."
+            sleep 5
+          done
+          
+          # API endpoint tests
+          echo "Testing API endpoints..."
+          curl -sf https://staging.cryptobom.io/oss/api/v1/assets -H "Accept: application/json" > /dev/null && echo "✓ OSS assets endpoint working"
+          curl -sf https://staging.cryptobom.io/enterprise/api/v1/assets -H "Accept: application/json" > /dev/null && echo "✓ Enterprise assets endpoint working"
+          
+          # Dashboard check
+          curl -sf https://staging.cryptobom.io/ > /dev/null && echo "✓ Dashboard accessible"
+          
+          echo "✓ All smoke tests passed!"
+
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          echo "Deployment failed. Rolling back..."
+          helm rollback cryptobom-oss ${{ steps.current-revision.outputs.oss-revision }} -n cryptobom-staging --wait || true
+          helm rollback cryptobom-enterprise ${{ steps.current-revision.outputs.enterprise-revision }} -n cryptobom-enterprise-staging --wait || true
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-staging --timeout=5m || true
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-enterprise-staging --timeout=5m || true
+          echo "Rollback complete"
+          exit 1
 
   # Deploy to Production
   deploy-production:
@@ -364,6 +557,14 @@ jobs:
         run: |
           echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > kubeconfig
           export KUBECONFIG=kubeconfig
+
+      - name: Get current revision (for rollback)
+        id: current-revision
+        run: |
+          REVISION=$(helm status cryptobom-oss -n cryptobom-production 2>/dev/null | grep REVISION | awk '{print $2}' || echo '0')
+          echo "oss-revision=$REVISION" >> $GITHUB_OUTPUT
+          REVISION=$(helm status cryptobom-enterprise -n cryptobom-enterprise-production 2>/dev/null | grep REVISION | awk '{print $2}' || echo '0')
+          echo "enterprise-revision=$REVISION" >> $GITHUB_OUTPUT
 
       - name: Deploy OSS to Production
         run: |
@@ -390,13 +591,70 @@ jobs:
             --set resources.limits.memory=2Gi \
             --set replicaCount=2
 
-      - name: Production Health Check
+      - name: Verify Rollout Status
         run: |
-          sleep 60 # Wait for deployment
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-production --timeout=15m
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-enterprise-production --timeout=15m
+
+      - name: Run Production Smoke Tests
+        timeout-minutes: 10
+        run: |
+          set -e
+          echo "Waiting for production deployments to stabilize..."
+          sleep 60
+          
+          echo "Checking pod health in production..."
           kubectl get pods -n cryptobom-production
           kubectl get pods -n cryptobom-enterprise-production
-          curl -f https://cryptobom.io/oss/healthz
-          curl -f https://cryptobom.io/enterprise/healthz
+          
+          # Production health checks with retries
+          echo "Running production health checks..."
+          for i in {1..15}; do
+            if curl -sf https://cryptobom.io/oss/healthz > /dev/null; then
+              echo "✓ OSS health check passed"
+              break
+            fi
+            if [ $i -eq 15 ]; then
+              echo "✗ OSS health check failed after 15 retries"
+              exit 1
+            fi
+            echo "Health check attempt $i/15, retrying..."
+            sleep 10
+          done
+          
+          for i in {1..15}; do
+            if curl -sf https://cryptobom.io/enterprise/healthz > /dev/null; then
+              echo "✓ Enterprise health check passed"
+              break
+            fi
+            if [ $i -eq 15 ]; then
+              echo "✗ Enterprise health check failed after 15 retries"
+              exit 1
+            fi
+            echo "Health check attempt $i/15, retrying..."
+            sleep 10
+          done
+          
+          # Production API tests
+          echo "Testing production API endpoints..."
+          curl -sf https://cryptobom.io/oss/api/v1/assets -H "Accept: application/json" > /dev/null && echo "✓ OSS assets endpoint working"
+          curl -sf https://cryptobom.io/enterprise/api/v1/assets -H "Accept: application/json" > /dev/null && echo "✓ Enterprise assets endpoint working"
+          
+          # Production dashboard check
+          curl -sf https://cryptobom.io/ > /dev/null && echo "✓ Production dashboard accessible"
+          
+          echo "✓ All production smoke tests passed!"
+
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          echo "Production deployment failed. Rolling back..."
+          helm rollback cryptobom-oss ${{ steps.current-revision.outputs.oss-revision }} -n cryptobom-production --wait || true
+          helm rollback cryptobom-enterprise ${{ steps.current-revision.outputs.enterprise-revision }} -n cryptobom-enterprise-production --wait || true
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-production --timeout=10m || true
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-enterprise-production --timeout=10m || true
+          echo "Production rollback complete"
+          exit 1
 
       - name: Notify Deployment
         env:
@@ -435,30 +693,36 @@ jobs:
 
       - name: Run Full Benchmark Suite
         run: |
-          go test -v -bench=. -benchmem ./benchmarks/... \
-            -run=BenchmarkAPICalls \
-            -run=BenchmarkDatasetGeneration \
-            -cpuprofile=cpu.prof \
-            -memprofile=mem.prof \
-            --timeout=30m
+          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem -cpuprofile=cpu.prof -memprofile=mem.prof ./tests/... | tee benchmark-results.txt
 
       - name: Process Benchmark Results
         run: |
+          python3 scripts/compare_benchmarks.py \
+            --input benchmark-results.txt \
+            --baseline tests/benchmark-baseline.json \
+            --output benchmark-results.json \
+            --threshold-percent 20 \
+            --fail-on-regression
+
+      - name: Profile Analysis
+        if: always()
+        run: |
           go tool pprof cpu.prof > cpu-analysis.txt
           go tool pprof mem.prof > mem-analysis.txt
-          go test -bench=. -benchmem ./benchmarks/... > benchmark-report.txt
 
       - name: Upload Benchmark Results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
           path: |
             datasets/benchmark-data.json
+            benchmark-results.txt
+            benchmark-results.json
             cpu.prof
             mem.prof
             cpu-analysis.txt
             mem-analysis.txt
-            benchmark-report.txt
 
   # Documentation Build
   docs-build:

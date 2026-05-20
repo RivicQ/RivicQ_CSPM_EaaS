@@ -316,7 +316,8 @@ Status Page: https://cryptobom.io/status
 - **Benchmark Datasets**: 100% ✅
 - **CI/CD Pipeline**: 100% ✅
 
-### **🚀 Production Readiness Score: 95/100**
+### **🚀 Archived Production Readiness Score: 95/100**
+> Historical readiness snapshot retained for audit context. Use `PROJECT_STATUS.md` for the current status.
 - ✅ Code Quality & Security: 95%
 - ✅ Scalability & Performance: 95%
 - ✅ Testing & Documentation: 90%

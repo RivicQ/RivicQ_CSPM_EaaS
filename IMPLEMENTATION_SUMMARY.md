@@ -149,7 +149,8 @@
 - **Security Score**: 95/100 (production grade)
 - **Performance**: Optimized for 10K+ concurrent users
 
-### **Enterprise Readiness Score: 95/100**
+### **Archived Historical Score: 95/100**
+> Legacy beta-era readiness claim kept for reference only. Current launch status is tracked in `PROJECT_STATUS.md` and the backlog.
 - **Authentication & Security**: ✅ 100%
 - **Database & Persistence**: ✅ 100%
 - **API Implementation**: ✅ 100%

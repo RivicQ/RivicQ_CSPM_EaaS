@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "threshold_percent": 20,
+  "benchmarks": {
+    "BenchmarkAPICalls": {
+      "ns_per_op": 4081,
+      "b_per_op": 1464,
+      "allocs_per_op": 16
+    },
+    "BenchmarkDatasetGeneration": {
+      "ns_per_op": 7156516,
+      "b_per_op": 2813547,
+      "allocs_per_op": 27711
+    }
+  }
+}

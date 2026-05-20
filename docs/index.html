@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CryptoBOM SaaS — Platform Preview</title>
-  <meta name="description" content="CryptoBOM SaaS — Enterprise Cryptographic Bill of Materials platform with IBM Quantum, AWS CloudHSM, GCP and post-quantum migration support." />
+  <title>CryptoBOM SaaS — OSS & Enterprise Hub</title>
+  <meta name="description" content="CryptoBOM SaaS GitHub Pages hub for the OSS and Enterprise editions, with live app routes, API docs, and launch resources." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -96,6 +96,13 @@
       color: #e2e8f0;
     }
     .btn-outline:hover { background: rgba(255,255,255,0.08); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: #e2e8f0;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
 
     /* ── Stats row ────────────────────────────────────────────── */
     .stats {
@@ -209,19 +216,22 @@
 
 <!-- ── Hero ── -->
 <div class="hero">
-  <span class="hero-eyebrow">🚀 Platform Preview</span>
-  <h1>Quantum-Safe Cryptographic<br/>Bill of Materials</h1>
+  <span class="hero-eyebrow">🚀 Live OSS + Enterprise</span>
+  <h1>CryptoBOM SaaS<br/>Open Source and Enterprise</h1>
   <p>
-    Discover, inventory and migrate every cryptographic asset across your
-    enterprise — with real-time IBM Quantum attestation, AWS CloudHSM,
-    GCP GKE and post-quantum compliance built in.
+    Explore the live CryptoBOM SaaS app, switch between OSS and Enterprise,
+    review API docs, and jump straight into scanning, dashboards, and
+    enterprise controls.
   </p>
   <div class="hero-actions">
-    <a class="btn btn-primary" href="enterprise.html">
-      ⚡ Enterprise Dashboard
+    <a class="btn btn-primary" href="/cryptobom-saas/switcher">
+      🔀 Choose Edition
     </a>
-    <a class="btn btn-outline" href="demo.html">
-      🔍 OSS Demo
+    <a class="btn btn-outline" href="/cryptobom-saas/login">
+      🔐 Open App Login
+    </a>
+    <a class="btn btn-secondary" href="/cryptobom-saas/api/">
+      📘 API Docs
     </a>
   </div>
 </div>
@@ -237,21 +247,20 @@
 
 <!-- ── Preview Cards ── -->
 <section>
-  <h2 class="section-title">Live Previews</h2>
-  <p class="section-sub">Click any card to open the interactive dashboard preview</p>
+  <h2 class="section-title">Launch Paths</h2>
+  <p class="section-sub">Use these entry points to reach the live OSS and Enterprise flows</p>
   <div class="preview-grid">
 
     <div class="preview-card">
       <div class="preview-thumb thumb-enterprise">🏢</div>
       <div class="preview-body">
         <div class="preview-edition edition-enterprise">Enterprise Edition</div>
-        <div class="preview-title">Enterprise Compliance Dashboard</div>
+        <div class="preview-title">Enterprise Experience</div>
         <div class="preview-desc">
-          Full-featured dashboard with quantum readiness scores, multi-cloud
-          asset inventory, PQC migration tracker, compliance heatmaps and
-          IBM HPCS / AWS CloudHSM HSM status.
+          Multi-cloud inventory, compliance, quantum readiness, and enterprise
+          governance workflows built into the SPA.
         </div>
-        <a class="preview-link" href="enterprise.html">Open preview →</a>
+        <a class="preview-link" href="/cryptobom-saas/enterprise/compliance">Open enterprise route →</a>
       </div>
     </div>
 
@@ -259,13 +268,12 @@
       <div class="preview-thumb thumb-oss">🔓</div>
       <div class="preview-body">
         <div class="preview-edition edition-oss">OSS Edition</div>
-        <div class="preview-title">OSS CBOM Dashboard</div>
+        <div class="preview-title">OSS Experience</div>
         <div class="preview-desc">
-          Real-time cryptographic asset scanning, algorithm risk scores,
-          Kubernetes integration, vulnerability timeline and post-quantum
-          migration planning — all open source.
+          Core CBOM scanning, dashboard access, asset inventory, and local
+          demo tooling for the open source edition.
         </div>
-        <a class="preview-link" href="demo.html">Open preview →</a>
+        <a class="preview-link" href="/cryptobom-saas/scanner">Open scanner route →</a>
       </div>
     </div>
 
@@ -273,13 +281,11 @@
       <div class="preview-thumb thumb-demo">🔬</div>
       <div class="preview-body">
         <div class="preview-edition edition-demo">Full Feature Demo</div>
-        <div class="preview-title">Complete Platform Demo</div>
+        <div class="preview-title">Edition Switcher</div>
         <div class="preview-desc">
-          End-to-end walkthrough combining OSS and Enterprise features:
-          asset discovery, quantum attestation, compliance reporting and
-          automated migration planning.
+          Start here to choose OSS or Enterprise before authentication.
         </div>
-        <a class="preview-link" href="demo-complete.html">Open preview →</a>
+        <a class="preview-link" href="/cryptobom-saas/switcher">Open switcher →</a>
       </div>
     </div>
 
@@ -288,8 +294,8 @@
 
 <!-- ── Features ── -->
 <section>
-  <h2 class="section-title">Platform Capabilities</h2>
-  <p class="section-sub">Everything you need to stay ahead of the quantum threat</p>
+  <h2 class="section-title">What’s live</h2>
+  <p class="section-sub">The Pages site now maps to the actual application flow</p>
   <div class="features-grid">
     <div class="feature-card">
       <div class="feature-icon">⚛️</div>
@@ -339,14 +345,14 @@
   <h2 class="section-title">Cloud Integrations</h2>
   <p class="section-sub">Production-ready connectors for every major enterprise cloud</p>
   <div class="cloud-row">
-    <div class="cloud-badge"><span class="dot"></span> AWS CloudHSM &amp; KMS</div>
-    <div class="cloud-badge"><span class="dot"></span> IBM Cloud HPCS</div>
-    <div class="cloud-badge"><span class="dot"></span> GCP / GKE</div>
-    <div class="cloud-badge"><span class="dot"></span> IBM Quantum Network</div>
-    <div class="cloud-badge"><span class="dot"></span> Azure Key Vault</div>
-    <div class="cloud-badge"><span class="dot"></span> Kubernetes / Helm</div>
-    <div class="cloud-badge"><span class="dot"></span> Prometheus / Jaeger</div>
-    <div class="cloud-badge"><span class="dot"></span> GitHub Actions CI/CD</div>
+    <div class="cloud-badge"><span class="dot"></span> /switcher</div>
+    <div class="cloud-badge"><span class="dot"></span> /login</div>
+    <div class="cloud-badge"><span class="dot"></span> /dashboard</div>
+    <div class="cloud-badge"><span class="dot"></span> /scanner</div>
+    <div class="cloud-badge"><span class="dot"></span> /enterprise/compliance</div>
+    <div class="cloud-badge"><span class="dot"></span> /enterprise/quantum</div>
+    <div class="cloud-badge"><span class="dot"></span> /api</div>
+    <div class="cloud-badge"><span class="dot"></span> GitHub Actions Pages</div>
   </div>
 </section>
 
@@ -357,10 +363,10 @@
     © 2026 RivicQ GmbH, Berlin &nbsp;|&nbsp;
     <a href="https://github.com/rivic-q/cryptobom-saas/blob/master/LICENSE">Apache 2.0</a> &nbsp;|&nbsp;
     <a href="https://github.com/rivic-q/cryptobom-saas">GitHub</a> &nbsp;|&nbsp;
-    <a href="https://rivic-q.github.io/cryptobom-saas/">rivic-q.github.io/cryptobom-saas</a>
+    <a href="/cryptobom-saas/switcher">Open app</a>
   </p>
   <p style="margin-top:0.5rem; color:#334155;">
-    German Engineering Excellence in Quantum-Safe Cryptography &nbsp;·&nbsp; LEAP Berlin · Rudower Chaussee 29, 12489 Berlin
+    OSS and Enterprise routes are live on GitHub Pages; use the edition switcher to enter the right flow.
   </p>
 </footer>
 

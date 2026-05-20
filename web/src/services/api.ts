@@ -87,6 +87,15 @@ export const inventoryService = {
     api.get('/inventory/export', { params: { format } }),
 };
 
+export const authService = {
+  login: (data: { email: string; password: string; edition?: 'oss' | 'enterprise' }) =>
+    api.post('/auth/login', data),
+
+  me: () => api.get('/auth/me'),
+
+  editions: () => api.get('/auth/editions'),
+};
+
 export const complianceService = {
   getFrameworks: () =>
     api.get('/compliance/frameworks'),
@@ -349,6 +358,10 @@ export const cbomService = {
   // Get CBOM for a specific asset
   getAssetBOM: (assetId: string) =>
     api.get(`/assets/${assetId}/bom`),
+};
+
+export const benchmarkService = {
+  getSummary: () => api.get('/benchmarks'),
 };
 
 export const securityService = {
