@@ -51,7 +51,7 @@ echo -e "${YELLOW}1. Start the server:${NC}"
 echo "   ./bin/cryptobom-server"
 echo ""
 echo -e "${YELLOW}2. Open demo dashboard:${NC}"
-echo "   Open web/demo-dashboard.html in your browser"
+echo "   Open docs/archive/demo-fixtures in your browser (demo UI archived)"
 echo ""
 echo -e "${YELLOW}3. Try API endpoints:${NC}"
 echo "   curl http://localhost:8080/healthz"
@@ -80,7 +80,7 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "${YELLOW}🚀 Starting CryptoBOM server...${NC}"
     echo -e "${GREEN}Server running at: http://localhost:8080${NC}"
-    echo -e "${GREEN}Dashboard: web/demo-dashboard.html${NC}"
+    echo -e "${GREEN}Dashboard: docs/archive/demo-fixtures (archived)${NC}"
     echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
     echo ""
     ./bin/cryptobom-server

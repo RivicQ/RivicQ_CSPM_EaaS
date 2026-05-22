@@ -75,7 +75,7 @@ ${NC}"
     
     demo_step "Open the Interactive Dashboard"
     echo -e "${YELLOW}🌐 Opening the CryptoBOM dashboard...${NC}"
-    echo -e "${BLUE}Open: web/demo-dashboard.html in your browser${NC}"
+    echo -e "${BLUE}Open: docs/archive/demo-fixtures in your browser (demo UI archived)${NC}"
     echo -e "${GREEN}The dashboard shows:${NC}"
     echo -e "${CYAN}• Real-time cryptographic assets${NC}"
     echo -e "${CYAN}• Algorithm distribution charts${NC}"
