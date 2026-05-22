@@ -16,11 +16,12 @@ import (
 
 // RegisterDemoRoutes registers the infrastructure discovery demo routes
 func RegisterDemoRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
+	// Demo routes are deprecated and intentionally disabled in live builds.
 	demoGroup := router.Group("/demo")
 	{
-		demoGroup.GET("/scan", runDemoScan(logger))
-		demoGroup.GET("/findings", getDemoFindings(logger))
-		demoGroup.GET("/targets", getDemoTargets(logger))
+		demoGroup.GET("/scan", func(c *gin.Context) { c.JSON(404, gin.H{"error": "demo endpoints disabled"}) })
+		demoGroup.GET("/findings", func(c *gin.Context) { c.JSON(404, gin.H{"error": "demo endpoints disabled"}) })
+		demoGroup.GET("/targets", func(c *gin.Context) { c.JSON(404, gin.H{"error": "demo endpoints disabled"}) })
 	}
 }
 
@@ -51,6 +52,11 @@ func runDemoScan(logger *logrus.Logger) gin.HandlerFunc {
 // getDemoFindings handles GET /api/v1/demo/findings — returns seeded findings from fixtures
 func getDemoFindings(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Demo fixtures were archived; return empty findings to avoid accidental usage
+		c.JSON(http.StatusOK, gin.H{"findings": []interface{}{}})
+		return
+
+		// Legacy: code to load fixtures (archived) is preserved below for reference and is not executed.
 		// Try to load fixtures file relative to project root
 		fixturesPath := findFixturesPath()
 

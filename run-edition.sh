@@ -109,15 +109,15 @@ open_dashboard() {
     
     # Try different browsers
     if command -v xdg-open >/dev/null; then
-        xdg-open "$CRYPTOBOM/web/demo-dashboard.html"
+        xdg-open "http://localhost:${port}"
     elif command -v open >/dev/null; then
-        open "$CRYPTOBOM/web/demo-dashboard.html"
+        open "http://localhost:${port}"
     elif command -v google-chrome >/dev/null; then
-        google-chrome "$CRYPTOBOM/web/demo-dashboard.html"
+        google-chrome "http://localhost:${port}"
     elif command -v firefox >/dev/null; then
-        firefox "$CRYPTOBOM/web/demo-dashboard.html"
+        firefox "http://localhost:${port}"
     else
-        echo -e "${YELLOW}📁 Please open manually: $CRYPTOBOM/web/demo-dashboard.html${NC}"
+        echo -e "${YELLOW}📁 Please open manually: http://localhost:${port}${NC}"
     fi
 }
 
@@ -320,7 +320,7 @@ if [[ "$ACTION" == "start" ]]; then
     
     if [[ "$EDITION" == "oss" ]]; then
         echo -e "${BLUE}📊 OSS Server:    http://localhost:8080${NC}"
-        echo -e "${BLUE}📱 Dashboard:     $CRYPTOBOM/web/demo-dashboard.html${NC}"
+        echo -e "${BLUE}📱 Dashboard:     http://localhost:8080${NC}"
         echo -e "${BLUE}🔗 API Base:     http://localhost:8080/api/v1${NC}"
         echo ""
         echo -e "${YELLOW}🔓 OSS Features:${NC}"
@@ -330,7 +330,7 @@ if [[ "$ACTION" == "start" ]]; then
         echo -e "  • Kubernetes integration"
     else
         echo -e "${BLUE}📊 Enterprise Server: http://localhost:9090${NC}"
-        echo -e "${BLUE}📱 Dashboard:         $CRYPTOBOM/web/demo-dashboard.html${NC}"
+        echo -e "${BLUE}📱 Dashboard:         http://localhost:9090${NC}"
         echo -e "${BLUE}🔗 API Base:          http://localhost:9090/api/v1${NC}"
         echo -e "${BLUE}⚛️  IBMQ Integration:  http://localhost:9090/api/v1/ibmq${NC}"
         echo ""

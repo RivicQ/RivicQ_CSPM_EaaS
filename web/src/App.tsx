@@ -29,7 +29,7 @@ import TerraformIaC from './pages/enterprise/Terraform';
 import IBMCloud from './pages/enterprise/IBMCloud';
 import AWSCloud from './pages/enterprise/AWSCloud';
 import QuantumAttestation from './pages/enterprise/QuantumAttestation';
-import InfraDiscovery from './pages/InfraDiscovery';
+import CSPM from './pages/CSPM';
 
 const RootRedirect: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -139,7 +139,7 @@ const App: React.FC = () => {
                   <Route path="enterprise/ibmcloud" element={<RequireEnterprise><IBMCloud /></RequireEnterprise>} />
                   <Route path="enterprise/awscloud" element={<RequireEnterprise><AWSCloud /></RequireEnterprise>} />
                   <Route path="enterprise/quantum-attestation" element={<RequireEnterprise><QuantumAttestation /></RequireEnterprise>} />
-                  <Route path="demo/infrastructure" element={<InfraDiscovery />} />
+                  <Route path="enterprise/cspm" element={<RequireEnterprise><CSPM /></RequireEnterprise>} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

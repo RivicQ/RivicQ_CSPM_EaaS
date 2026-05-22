@@ -5,7 +5,6 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
 
 COPY bin/cryptobom-oss /app/cryptobom-server
-COPY web/demo-dashboard.html /app/dashboard.html
 
 EXPOSE 8080
 

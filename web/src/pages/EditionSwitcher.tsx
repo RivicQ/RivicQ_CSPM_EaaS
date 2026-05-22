@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, Divider } from '@mui/material';
 import { ArrowForward, Lock, Security, WorkspacePremium, CloudQueue, Psychology, Storage } from '@mui/icons-material';
 import { setEditionPreference } from '../config/editions';
 
@@ -15,10 +15,10 @@ const EditionSwitcher: React.FC = () => {
   const cards = [
     {
       title: 'CryptoBOM OSS',
-      subtitle: 'Core CBOM scanning, dashboard, auth, and local demo tooling.',
+      subtitle: 'Core CBOM scanning, dashboard, auth, and local operations.',
       icon: <Security sx={{ fontSize: 34 }} />,
       edition: 'oss' as const,
-      highlights: ['CBOM scan basics', 'Dashboard & auth', 'Local demo stack'],
+      highlights: ['CBOM scan basics', 'Dashboard & auth', 'Local workflows'],
       action: 'Continue with OSS',
     },
     {
@@ -37,10 +37,10 @@ const EditionSwitcher: React.FC = () => {
         <Stack spacing={2} sx={{ mb: 4, textAlign: 'center' }}>
           <Chip icon={<Lock />} label="Edition Selection" color="primary" sx={{ alignSelf: 'center' }} />
           <Typography variant="h3" fontWeight={900} sx={{ color: '#f8fafc' }}>
-            Choose your CryptoBOM experience
+            Choose your CryptoBOM workspace
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 900, mx: 'auto' }}>
-            Pick OSS for a focused open source security workflow or Enterprise for the full DevSecOps command center with CISO, CSPM, PQC, and multi-cloud controls.
+            Pick OSS for the open source workflow and switch to Enterprise when you need compliance, IBM, HSM, PQC, and multi-cloud controls.
           </Typography>
         </Stack>
 
@@ -79,6 +79,8 @@ const EditionSwitcher: React.FC = () => {
           ))}
         </Grid>
 
+        <Divider sx={{ my: 4, borderColor: 'rgba(255,255,255,0.12)' }} />
+
         <Grid container spacing={2} sx={{ mt: 4 }}>
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%', bgcolor: 'rgba(212,175,55,0.08)' }}>
@@ -108,6 +110,15 @@ const EditionSwitcher: React.FC = () => {
             </Card>
           </Grid>
         </Grid>
+
+        <Box sx={{ mt: 4, p: 3, borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)', bgcolor: 'rgba(255,255,255,0.03)' }}>
+          <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
+            What gets locked in OSS
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Compliance, quantum attestation, IBM Cloud, AWS HSM, Terraform automation, and multi-cloud executive reporting are available in Enterprise.
+          </Typography>
+        </Box>
       </Container>
     </Box>
   );

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-05-22
+- Remove runtime demo endpoints and seeded fallback data (frontend and backend).
+- Add CSPM Control Center scaffold and UX updates for edition gating.
+- Neutralize demo dashboard and remove file-coupling from build/run scripts.
+- Fix enterprise build issue (sharedapi -> shared) and other build/test fixes.
+- Archive demo fixtures to `docs/archive/demo-fixtures` and update demo docs.
+- Add deployment env docs (`docs/DEPLOY_ENV.md`).
+- Make demo smoke CI job manual to avoid accidental demo runs during PRs.
+- Add lightweight IBMQ mock server for local CI/dev use (demo/mock-ibmq).
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 

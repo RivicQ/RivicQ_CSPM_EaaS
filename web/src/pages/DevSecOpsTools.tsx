@@ -17,7 +17,6 @@ import {
   Code,
   GitHub,
   Security,
-  Storage,
   Visibility,
   Science,
 } from '@mui/icons-material';

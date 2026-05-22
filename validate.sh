@@ -12,9 +12,22 @@ NC='\033[0m' # No Color
 BASE_URL="http://localhost:8080"
 FAILED_TESTS=0
 TOTAL_TESTS=0
+SERVER_EDITION="unknown"
 
 echo -e "${BLUE}🔍 CryptoBOM SaaS Validation Script${NC}"
 echo "====================================="
+
+if health_response=$(curl -s "$BASE_URL/healthz" 2>/dev/null); then
+    if echo "$health_response" | grep -q '"edition":"Open Source"'; then
+        SERVER_EDITION="oss"
+    elif echo "$health_response" | grep -q '"edition":"Enterprise"'; then
+        SERVER_EDITION="enterprise"
+    else
+        SERVER_EDITION="default"
+    fi
+fi
+
+echo -e "${BLUE}Detected server edition: ${SERVER_EDITION}${NC}"
 
 # Test function
 test_endpoint() {
@@ -42,6 +55,12 @@ test_endpoint() {
         echo -e "${RED}❌ FAIL${NC} (Connection failed)"
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
+}
+
+skip_test() {
+    local name="$1"
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+    echo -e "Testing $name... ${YELLOW}⚠️ SKIP${NC} (Not available for ${SERVER_EDITION} edition)"
 }
 
 # Test data creation
@@ -85,8 +104,13 @@ test_endpoint "Cilium Policies" "/api/v1/cilium/policies" "200"
 test_endpoint "Cilium Metrics" "/api/v1/cilium/metrics" "200"
 
 echo -e "\n${YELLOW}⚛️ Testing Quantum Integration${NC}"
-test_endpoint "Quantum Attestations" "/api/v1/quantum/attestations" "200"
-test_endpoint "Quantum Networks" "/api/v1/quantum/networks" "200"
+if [ "$SERVER_EDITION" = "oss" ]; then
+    skip_test "Quantum Attestations"
+    skip_test "Quantum Networks"
+else
+    test_endpoint "Quantum Attestations" "/api/v1/quantum/attestations" "200"
+    test_endpoint "Quantum Networks" "/api/v1/quantum/networks" "200"
+fi
 
 echo -e "\n${YELLOW}☸️ Testing Kubernetes Integration${NC}"
 test_endpoint "Kubernetes Clusters" "/api/v1/kubernetes/clusters" "200"

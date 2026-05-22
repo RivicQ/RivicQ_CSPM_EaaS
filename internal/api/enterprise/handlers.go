@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/api/shared"
+	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/rivic-q/cryptobom-saas/internal/quantum"
@@ -29,7 +29,7 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 
 	if jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET")); jwtSecret != "" {
 		if store, err := auth.NewWorkDomainUserStore(); err == nil {
-			sharedapi.SetupAuthRoutes(router, logger, auth.NewAuthService(jwtSecret, store), allowedDomainsFromEnv())
+			shared.SetupAuthRoutes(router, logger, auth.NewAuthService(jwtSecret, store), allowedDomainsFromEnv())
 		} else {
 			logger.WithError(err).Warn("enterprise auth routes disabled")
 		}

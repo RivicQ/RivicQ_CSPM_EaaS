@@ -84,7 +84,7 @@ const ComplianceDashboard: React.FC = () => {
       setDashboards(response.data.dashboards || []);
     } catch (error) {
       console.error('Failed to load dashboards:', error);
-      setDashboards(getMockDashboards());
+      setDashboards([]);
     } finally {
       setLoading(false);
     }
@@ -95,13 +95,13 @@ const ComplianceDashboard: React.FC = () => {
       const delve = await complianceService.getDelveStatus();
       setDelveStatus(delve.data);
     } catch (error) {
-      setDelveStatus({ status: 'connected', provider: 'delve', version: '2.1.0' });
+      setDelveStatus({ status: 'disconnected', provider: 'delve', version: null });
     }
     try {
       const kertos = await complianceService.getKertosStatus();
       setKertosStatus(kertos.data);
     } catch (error) {
-      setKertosStatus({ status: 'connected', provider: 'kertos', version: '1.8.0' });
+      setKertosStatus({ status: 'disconnected', provider: 'kertos', version: null });
     }
   };
 
@@ -110,25 +110,9 @@ const ComplianceDashboard: React.FC = () => {
       const response = await complianceService.getRisks();
       setRisks(response.data.risks || []);
     } catch (error) {
-      setRisks(getMockRisks());
+      setRisks([]);
     }
   };
-
-  const getMockDashboards = (): Dashboard[] => [
-    { framework: 'iso27001', status: 'active', score: 85, total_controls: 114, passed_controls: 97, failed_controls: 8, pending_controls: 9 },
-    { framework: 'dora', status: 'active', score: 72, total_controls: 65, passed_controls: 47, failed_controls: 10, pending_controls: 8 },
-    { framework: 'gdpr', status: 'active', score: 92, total_controls: 42, passed_controls: 39, failed_controls: 1, pending_controls: 2 },
-    { framework: 'eu_ai_act', status: 'active', score: 68, total_controls: 55, passed_controls: 37, failed_controls: 12, pending_controls: 6 },
-    { framework: 'soc2', status: 'active', score: 80, total_controls: 64, passed_controls: 51, failed_controls: 7, pending_controls: 6 },
-    { framework: 'nist', status: 'active', score: 78, total_controls: 98, passed_controls: 76, failed_controls: 12, pending_controls: 10 },
-    { framework: 'pqc', status: 'active', score: 35, total_controls: 25, passed_controls: 9, failed_controls: 12, pending_controls: 4 },
-  ];
-
-  const getMockRisks = () => [
-    { id: 'RISK-001', risk_type: 'Cryptographic', severity: 'critical', affected_assets: 127, status: 'open' },
-    { id: 'RISK-002', risk_type: 'AI Governance', severity: 'high', affected_assets: 45, status: 'open' },
-    { id: 'RISK-003', risk_type: 'Data Privacy', severity: 'high', affected_assets: 23, status: 'mitigated' },
-  ];
 
   const handleScan = async () => {
     setScanning(true);

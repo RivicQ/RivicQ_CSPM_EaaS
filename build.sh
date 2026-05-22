@@ -62,7 +62,6 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
 
 COPY bin/cryptobom-oss /app/cryptobom-server
-COPY web/demo-dashboard.html /app/dashboard.html
 
 EXPOSE 8080
 
@@ -151,7 +150,6 @@ RUN apk --no-cache add ca-certificates tzdata curl
 WORKDIR /app
 
 COPY bin/cryptobom-enterprise /app/cryptobom-enterprise
-COPY web/demo-dashboard.html /app/dashboard.html
 COPY configs/enterprise.yaml /app/config.yaml
 
 EXPOSE 9090

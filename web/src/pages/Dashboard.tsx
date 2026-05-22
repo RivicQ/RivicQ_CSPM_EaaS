@@ -314,20 +314,20 @@ const Dashboard: React.FC = () => {
 
       {alertNeeded && (
         <Alert severity="info" sx={{ mt: 2, mb: 3 }}>
-          Live backend data is partially unavailable. The dashboard is showing seeded fallback values for the affected panels.
+          Live backend data is partially unavailable. The affected panels are waiting on API responses.
         </Alert>
       )}
 
       <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 3 }}>
         <CloudConnectionStatus provider="aws" />
         <CloudConnectionStatus provider="gcp" />
-        <CloudConnectionStatus provider="ibm" />
+        {enterpriseUnlocked && <CloudConnectionStatus provider="ibm" />}
         <HSMStatusBadge provider="aws" keyCount={Math.max(1, Math.round(cloudResources / 18))} />
-        <HSMStatusBadge provider="ibm" keyCount={Math.max(1, Math.round(cloudResources / 24))} />
+        {enterpriseUnlocked && <HSMStatusBadge provider="ibm" keyCount={Math.max(1, Math.round(cloudResources / 24))} />}
         <Chip icon={<Security />} label="CISO" color="primary" variant="outlined" />
         <Chip icon={<CloudQueue />} label="CSPM" color="secondary" variant="outlined" />
         <Chip icon={<Storage />} label="CBOM" color="default" variant="outlined" />
-        <Chip icon={<Psychology />} label="PQC Migration" color="warning" variant="outlined" />
+        <Chip icon={<Psychology />} label={enterpriseUnlocked ? 'PQC Migration' : 'Enterprise locked'} color={enterpriseUnlocked ? 'warning' : 'default'} variant="outlined" />
       </Stack>
 
       <Grid container spacing={3} sx={{ mb: 3 }}>

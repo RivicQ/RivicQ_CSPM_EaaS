@@ -98,7 +98,7 @@ const Inventory: React.FC = () => {
       setAssets(response.data.assets || []);
     } catch (error) {
       console.error('Failed to load assets:', error);
-      setAssets(getMockAssets());
+      setAssets([]);
     } finally {
       setLoading(false);
     }
@@ -110,27 +110,9 @@ const Inventory: React.FC = () => {
       setSummary(response.data);
     } catch (error) {
       console.error('Failed to load summary:', error);
-      setSummary(getMockSummary());
+      setSummary(null);
     }
   };
-
-  const getMockAssets = (): Asset[] => [
-    { id: '1', asset_id: 'crypto-001', name: 'RSA-2048 Key', category: 'cryptographic', cloud_provider: 'aws', region: 'us-east-1', quantum_safe: false, vulnerability_score: 8 },
-    { id: '2', asset_id: 'crypto-002', name: 'Kyber-1024 Key', category: 'cryptographic', cloud_provider: 'gcp', region: 'us-central1', quantum_safe: true, vulnerability_score: 1 },
-    { id: '3', asset_id: 'ai-001', name: 'GPT-4 Model', category: 'ai', sub_category: 'LLM', cloud_provider: 'azure', region: 'eastus', quantum_safe: true },
-    { id: '4', asset_id: 'hw-001', name: 'Quantum Computer', category: 'hardware', sub_category: 'Quantum', quantum_safe: true },
-    { id: '5', asset_id: 'sw-001', name: 'PostgreSQL 15', category: 'software', cloud_provider: 'ibm_cloud', region: 'us-south' },
-    { id: '6', asset_id: 'infra-001', name: 'VPC Network', category: 'infrastructure', cloud_provider: 'aws', region: 'us-east-1' },
-  ];
-
-  const getMockSummary = () => ({
-    total_assets: 2847,
-    by_category: { cryptographic: 450, ai: 180, hardware: 320, software: 890, infrastructure: 1007 },
-    by_cloud_provider: { aws: 847, gcp: 523, ibm_cloud: 234, azure: 143 },
-    quantum_safe_count: 35,
-    non_quantum_safe: 65,
-    vulnerable_assets: 127,
-  });
 
   const filteredAssets = assets.filter(asset =>
     asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -138,11 +120,11 @@ const Inventory: React.FC = () => {
   );
 
   const categoryData = summary?.by_category ? Object.entries(summary.by_category).map(([name, value]) => ({ name, value })) : [
-    { name: 'Cryptographic', value: 450 },
-    { name: 'AI', value: 180 },
-    { name: 'Hardware', value: 320 },
-    { name: 'Software', value: 890 },
-    { name: 'Infrastructure', value: 1007 },
+    { name: 'Cryptographic', value: 0 },
+    { name: 'AI', value: 0 },
+    { name: 'Hardware', value: 0 },
+    { name: 'Software', value: 0 },
+    { name: 'Infrastructure', value: 0 },
   ];
 
   const getCategoryIcon = (category: string) => {
@@ -197,7 +179,7 @@ const Inventory: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Total Assets</Typography>
-              <Typography variant="h4">{summary?.total_assets || '2,847'}</Typography>
+              <Typography variant="h4">{summary?.total_assets ?? 0}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -205,7 +187,7 @@ const Inventory: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Quantum Safe</Typography>
-              <Typography variant="h4" color="success.main">{summary?.quantum_safe_count || '35'}%</Typography>
+              <Typography variant="h4" color="success.main">{summary?.quantum_safe_count ?? 0}%</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -213,7 +195,7 @@ const Inventory: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>At Risk</Typography>
-              <Typography variant="h4" color="error.main">{summary?.vulnerable_assets || '127'}</Typography>
+              <Typography variant="h4" color="error.main">{summary?.vulnerable_assets ?? 0}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -252,10 +234,10 @@ const Inventory: React.FC = () => {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'AWS', value: summary?.by_cloud_provider?.aws || 847 },
-                      { name: 'GCP', value: summary?.by_cloud_provider?.gcp || 523 },
-                      { name: 'IBM Cloud', value: summary?.by_cloud_provider?.ibm_cloud || 234 },
-                      { name: 'Azure', value: summary?.by_cloud_provider?.azure || 143 },
+                      { name: 'AWS', value: summary?.by_cloud_provider?.aws || 0 },
+                      { name: 'GCP', value: summary?.by_cloud_provider?.gcp || 0 },
+                      { name: 'IBM Cloud', value: summary?.by_cloud_provider?.ibm_cloud || 0 },
+                      { name: 'Azure', value: summary?.by_cloud_provider?.azure || 0 },
                     ]}
                     cx="50%"
                     cy="50%"

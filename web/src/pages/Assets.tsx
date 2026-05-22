@@ -90,7 +90,7 @@ const Assets: React.FC = () => {
 
       {error && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          Using demo data – connect backend to see live assets.
+          Live asset data is unavailable. Connect the backend to populate this view.
         </Alert>
       )}
 

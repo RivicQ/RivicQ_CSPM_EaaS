@@ -115,7 +115,7 @@ demo: demo-lab ## Start demo lab + run scan + open UI
 	@echo "🚀 Starting CryptoBOM Infrastructure Discovery Demo..."
 	@sleep 5
 	@$(MAKE) demo-scan
-	@echo "✅ Demo ready! Open http://localhost:3000/demo/infrastructure"
+	@echo "✅ Demo ready! Open http://localhost:3000/demo/infrastructure (legacy demo - archived)"
 
 demo-lab: ## Start intentionally vulnerable lab targets
 	@echo "🔧 Generating demo lab certificates..."

@@ -11,13 +11,14 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  Chip,
   Stack,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import { ArrowForward, Lock, Mail, Visibility, VisibilityOff, Security } from '@mui/icons-material';
+import { ArrowForward, Lock, Mail, Visibility, VisibilityOff, Security, WorkspacePremium, Storage, Shield } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 
 interface AuthPageProps {
@@ -35,6 +36,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     email: '',
     password: '',
   });
+
+  const editionLabel = edition === 'enterprise' ? 'Enterprise' : 'OSS';
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -72,20 +75,26 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       CryptoBOM SaaS Access
                     </Typography>
                     <Typography variant="h3" fontWeight={800} sx={{ mt: 1 }}>
-                      One login for OSS and Enterprise
+                      Start in OSS, unlock Enterprise when you are ready
                     </Typography>
                     <Typography sx={{ mt: 2, color: '#cbd5e1' }}>
-                      Sign in with your approved work account to access OSS or Enterprise modules.
+                      Use your approved work account to enter the open source workspace or switch to the Enterprise workspace for locked compliance, IBM, and multi-cloud features.
                     </Typography>
                   </Box>
 
                   <Stack spacing={2}>
                     <Alert severity="info" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.12)' }}>
-                      OSS includes core CBOM inventory and scanner access. Enterprise adds compliance, IBM Quantum, AWS HSM, and GCP integrations.
+                      OSS includes core CBOM inventory, scanner, analytics, and local workflows. Enterprise unlocks compliance, IBM Quantum, HSM, multi-cloud, and automation.
                     </Alert>
                     <Alert severity="success" sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: 'white', border: '1px solid rgba(16,185,129,0.25)' }}>
-                      Sign in with your work email and approved company credentials.
+                      Sign in with your work email and approved company credentials. Self-service registration is disabled.
                     </Alert>
+                  </Stack>
+
+                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                    <Chip icon={<Storage />} label="OSS ready" size="small" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.24)' }} variant="outlined" />
+                    <Chip icon={<WorkspacePremium />} label="Enterprise locked" size="small" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.24)' }} variant="outlined" />
+                    <Chip icon={<Shield />} label="Work-domain login" size="small" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.24)' }} variant="outlined" />
                   </Stack>
 
                   <Box sx={{ mt: 'auto' }}>
@@ -117,6 +126,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                 <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
                   Work Domain Login
                 </Typography>
+
+                <Box sx={{ mb: 2, p: 2, borderRadius: 2, bgcolor: 'rgba(15, 23, 42, 0.03)', border: '1px solid rgba(15, 23, 42, 0.08)' }}>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Current workspace
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {editionLabel} edition is selected. You can switch editions before login.
+                  </Typography>
+                </Box>
 
                 {error && (
                   <Alert severity="error" sx={{ mb: 2 }}>
@@ -160,17 +178,33 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       Current edition: <strong>{edition.toUpperCase()}</strong>
                     </Typography>
 
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      size="large"
-                      disabled={loading}
-                      endIcon={<ArrowForward />}
-                      sx={{ py: 1.3 }}
-                    >
-                      {loading ? 'Please wait...' : 'Login to Dashboard'}
-                    </Button>
+                    <Alert severity="warning" sx={{ bgcolor: 'rgba(255,244,229,0.04)', color: 'white', border: '1px solid rgba(255,193,7,0.12)' }}>
+                      Self-service registration is disabled. To get Enterprise access, request access below.
+                    </Alert>
 
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        size="large"
+                        disabled={loading}
+                        endIcon={<ArrowForward />}
+                        sx={{ py: 1.3 }}
+                      >
+                        {loading ? 'Please wait...' : 'Login to Dashboard'}
+                      </Button>
+
+                      <Button
+                        variant="outlined"
+                        color="inherit"
+                        onClick={() => window.location.href = 'mailto:admin@example.com?subject=Access%20Request%20for%20CryptoBOM'}
+                        sx={{ py: 1.1 }}
+                      >
+                        Request Enterprise Access
+                      </Button>
+                    </Box>
+
+                    
                   </Stack>
                 </form>
               </CardContent>

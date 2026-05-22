@@ -19,6 +19,7 @@ import {
   MenuItem,
   Avatar,
   Chip,
+  Stack,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -35,6 +36,8 @@ import {
   GitHub,
   CloudQueue,
   Category,
+  Lock,
+  WorkspacePremium,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -47,6 +50,7 @@ interface NavItem {
   path: string;
   badge?: number;
   section?: string;
+  disabled?: boolean;
 }
 
 const Layout: React.FC = () => {
@@ -74,13 +78,10 @@ const Layout: React.FC = () => {
     { text: 'Multi-Cloud', icon: <Cloud />, path: '/enterprise/multicloud', section: 'Enterprise' },
     { text: 'CNCF Tools', icon: <CloudQueue />, path: '/enterprise/cncf', section: 'Enterprise' },
     { text: 'Terraform', icon: <GitHub />, path: '/enterprise/terraform', section: 'Enterprise' },
-    { text: '🔍 Infra Discovery', icon: <Security />, path: '/demo/infrastructure', section: 'Enterprise' },
+    { text: 'CSPM', icon: <CloudQueue />, path: '/enterprise/cspm', section: 'Enterprise' },
   ];
 
-  const visibleEnterpriseItems = editionConfig.features.enterprise ? enterpriseItems : [
-    { text: 'Inventory', icon: <Storage />, path: '/enterprise/inventory', section: 'Enterprise' },
-    { text: '🔍 Infra Discovery', icon: <Security />, path: '/demo/infrastructure', section: 'Enterprise' },
-  ];
+  const enterpriseNav = enterpriseItems.map((it) => ({ ...it, disabled: edition !== 'enterprise' }));
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -129,18 +130,27 @@ const Layout: React.FC = () => {
         <Typography variant="caption" color="text.secondary" sx={{ px: 2, fontWeight: 600, textTransform: 'uppercase' }}>
           Enterprise
         </Typography>
-        {visibleEnterpriseItems.map((item) => (
+        {enterpriseNav.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
               onClick={() => handleNavigation(item.path)}
               selected={isActive(item.path)}
+              disabled={item.disabled}
               sx={{
                 borderRadius: 1,
                 '&.Mui-selected': { bgcolor: 'secondary.main', color: 'white', '&:hover': { bgcolor: 'secondary.dark' } },
+                opacity: item.disabled ? 0.72 : 1,
               }}
             >
               <ListItemIcon sx={{ color: isActive(item.path) ? 'white' : 'inherit', minWidth: 40 }}>
                 {item.icon}
+                {item.disabled && (
+                  <Tooltip title="Enterprise feature — request access to enable">
+                    <Box component="span" sx={{ ml: 1, display: 'inline-flex' }}>
+                      <Lock sx={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }} />
+                    </Box>
+                  </Tooltip>
+                )}
               </ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
@@ -151,13 +161,24 @@ const Layout: React.FC = () => {
       <Divider />
 
       <Box sx={{ p: 2, mt: 'auto' }}>
-        <Chip 
-          icon={<Psychology />} 
-          label="Quantum Ready" 
-          color="secondary" 
-          size="small" 
-          sx={{ width: '100%', justifyContent: 'flex-start' }}
-        />
+        <Stack spacing={1}>
+          <Chip
+            icon={<Psychology />}
+            label="Quantum Ready"
+            color="secondary"
+            size="small"
+            sx={{ width: '100%', justifyContent: 'flex-start' }}
+          />
+          {edition !== 'enterprise' && (
+            <Chip
+              icon={<Lock />}
+              label="Enterprise locked"
+              variant="outlined"
+              size="small"
+              sx={{ width: '100%', justifyContent: 'flex-start' }}
+            />
+          )}
+        </Stack>
       </Box>
     </Box>
   );
@@ -243,6 +264,7 @@ const Layout: React.FC = () => {
           <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
             <Chip size="small" label={user?.email || 'unknown-user'} variant="outlined" />
             <Chip size="small" label={editionConfig.name} color="default" />
+            {edition !== 'enterprise' && <Chip size="small" icon={<WorkspacePremium />} label="Enterprise features locked" variant="outlined" />}
           </Box>
           <Outlet />
         </motion.div>

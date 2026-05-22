@@ -22,7 +22,7 @@ case "$1" in
         nohup ./bin/cryptobom-server > server.log 2>&1 &
         sleep 3
         echo "✅ Server running at: http://localhost:8080"
-        echo "📱 Dashboard: $CRYPTOBOM/web/demo-dashboard.html"
+        echo "📱 Dashboard: http://localhost:8080"
         ;;
     "stop")
         echo "🛑 Stopping CryptoBOM..."
@@ -48,7 +48,7 @@ case "$1" in
         ;;
     "open")
         cd "$CRYPTOBOM"
-        xdg-open web/demo-dashboard.html 2>/dev/null || open web/demo-dashboard.html 2>/dev/null || echo "Open manually: $CRYPTOBOM/web/demo-dashboard.html"
+        xdg-open http://localhost:8080 2>/dev/null || open http://localhost:8080 2>/dev/null || echo "Open manually: http://localhost:8080"
         ;;
     *)
         echo "CryptoBOM SaaS Commands:"

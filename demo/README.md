@@ -1,3 +1,10 @@
+This small Flask server served demo fixtures from `demo/fixtures/` so the
+frontend could be run against seeded data. Demo fixtures have been archived
+to `docs/archive/demo-fixtures/`. Runtime demo endpoints are disabled in
+live builds. See `docs/ARCHIVE_DEMO.md` for usage notes.
+
+# 3. Start the backend API (served in legacy demo mode only)
+make dev-backend
 # CryptoBOM Infrastructure Discovery Demo
 
 A complete, self-contained demo of **real-time weak cryptography detection** across a controlled local environment.

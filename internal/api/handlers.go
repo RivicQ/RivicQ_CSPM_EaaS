@@ -8,11 +8,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	sharedapi "github.com/rivic-q/cryptobom-saas/internal/api/shared"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/cilium"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
-	sharedapi "github.com/rivic-q/cryptobom-saas/internal/api/shared"
 	"github.com/sirupsen/logrus"
 )
 
@@ -124,9 +124,6 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		securityGroup.POST("/events", createSecurityEvent(db, logger))
 		securityGroup.PUT("/events/:id/resolve", resolveSecurityEvent(db, logger))
 	}
-
-	// Infrastructure Discovery Demo
-	RegisterDemoRoutes(router, logger)
 
 	// Metrics Overview (for dashboard)
 	router.GET("/metrics/overview", getMetricsOverview(db, logger))

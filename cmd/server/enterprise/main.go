@@ -67,50 +67,6 @@ func main() {
 		ibmqGroup.POST("/emergency", enterprise.TriggerEmergencyQuantumResponse(cfg, logger))
 	}
 
-	// Enterprise Demo endpoint
-	apiGroup.GET("/dashboard/demo", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "CryptoBOM Enterprise Demo - IBM Quantum Integration",
-			"cbom": []gin.H{
-				{
-					"id":            "1",
-					"name":          "Enterprise CBOM with IBMQ Attestation",
-					"version":       "2.0.0",
-					"status":        "attested",
-					"quantum_safe":  true,
-					"ibmq_attested": true,
-					"created_at":    "2025-01-30T10:00Z",
-					"assets": []gin.H{
-						{
-							"id":             "1",
-							"name":           "Production TLS Certificate",
-							"algorithm":      "RSA-4096",
-							"key_size":       4096,
-							"risk_level":     "low",
-							"quantum_safe":   false,
-							"ibmq_verified":  false,
-							"migration_path": "post_quantum_ready",
-							"last_seen":      "2025-01-30T12:00Z",
-						},
-						{
-							"id":             "2",
-							"name":           "Post-Quantum Encryption",
-							"algorithm":      "CRYSTALS-Kyber",
-							"key_size":       2048,
-							"risk_level":     "none",
-							"quantum_safe":   true,
-							"ibmq_attested":  true,
-							"attestation_id": "ibmq-attest-xyz123",
-							"last_seen":      "2025-01-30T13:00Z",
-						},
-					},
-					"total_assets":     2,
-					"compliance_score": 98.5,
-				},
-			},
-		})
-	})
-
 	// Start server on different port for Enterprise
 	port := ":9090"
 	fmt.Printf("🚀 CryptoBOM Enterprise v%s\n", "2.0.0")
@@ -118,7 +74,6 @@ func main() {
 	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", port)
 	fmt.Printf("🌐 Enterprise API: http://localhost:%s/api/v1\n", port)
 	fmt.Printf("⚛️  IBM Quantum Integration: http://localhost:%s/api/v1/ibmq\n", port)
-	fmt.Printf("📈 Enterprise Demo: http://localhost:%s/api/v1/dashboard/demo\n", port)
 	fmt.Printf("🔒 Enterprise Edition Features:\n")
 	fmt.Printf("   • IBM Quantum attestation & verification\n")
 	fmt.Printf("   • Advanced threat detection with ML\n")
