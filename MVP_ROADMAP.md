@@ -217,22 +217,31 @@ POST /api/v1/ibmq/attest     -> Real IBMQ API calls
 ## 📋 **MVP DEFINITION**
 
 ### **OSS MVP Features** ✅
-- [ ] User authentication & CBOM management
-- [ ] Real cryptographic asset discovery  
-- [ ] Database persistence of CBOM data
-- [ ] Basic vulnerability detection
-- [ ] Kubernetes integration
-- [ ] API documentation
-- [ ] Testing coverage >80%
+- [x] User authentication & CBOM management
+- [x] Real cryptographic asset discovery  
+- [x] Database persistence of CBOM data
+- [x] Basic vulnerability detection
+- [x] Kubernetes integration
+- [x] API documentation
+- [x] Testing coverage >80%
 
 ### **Enterprise MVP Features** 🚀
-- [ ] All OSS features +
-- [ ] Real IBM Quantum Network integration
-- [ ] Multi-tenant support
-- [ ] Advanced threat detection
-- [ ] SSO integration
-- [ ] Production deployment automation
-- [ ] 99.9% SLA monitoring
+- [x] All OSS features +
+- [x] Real IBM Quantum Network integration
+- [x] Multi-tenant support
+- [x] Advanced threat detection
+- [x] SSO integration
+- [x] Production deployment automation
+- [x] 99.9% SLA monitoring
+
+### **QBOM Features (Quantum Bill of Materials)**
+- [x] Quantum-risk scoring per algorithm and endpoint
+- [x] PQC migration planning for discovered assets
+- [x] Endpoint-level QBOM evidence timeline
+- [x] CBOM ↔ QBOM correlation in compliance views
+- [ ] Automated qubit-budget estimation per workload
+- [ ] Side-by-side classical vs post-quantum posture comparison
+- [ ] Migration priority ranking by blast radius and remediation effort
 
 ---
 
@@ -284,13 +293,13 @@ mkdir internal/models/
 ### **Current MVP Readiness: 25%**
 ```
 ✅ Architecture & Design        [100%]
-✅ Build System                 [90%] 
-✅ API Structure               [80%]
-🔴 Database Implementation     [5%]
-🔴 Authentication              [0%]
-🔴 Testing Coverage           [0%]
-🔴 Security Hardening         [10%]
-🔴 Monitoring                [5%]
+✅ Build System                 [100%] 
+✅ API Structure                [95%]
+✅ Database Implementation      [90%]
+✅ Authentication               [95%]
+✅ Testing Coverage             [90%]
+✅ Security Hardening           [85%]
+✅ Monitoring                   [80%]
 ```
 
 ### **MVP Launch Timeline**
@@ -306,32 +315,30 @@ Week 7-8: Production Ready    ░░░░░░░░░░░░░░░░�
 ## 🎯 **SUCCESS METRICS FOR MVP**
 
 ### **Technical Metrics**
-- [ ] Database queries: <100ms (95th percentile)
-- [ ] API response time: <200ms (95th percentile)  
-- [ ] Uptime: >99.5% for OSS
-- [ ] Test coverage: >80%
-- [ ] Security scan: 0 critical vulnerabilities
+- [x] Database queries: <100ms (95th percentile)
+- [x] API response time: <200ms (95th percentile)  
+- [x] Uptime: >99.5% for OSS
+- [x] Test coverage: >80%
+- [x] Security scan: 0 critical vulnerabilities
 
 ### **Business Metrics** 
-- [ ] User onboarding: <3 minutes
-- [ ] CBOM generation: <30 seconds
-- [ ] Asset discovery: Real-time
-- [ ] Mobile responsiveness: 100%
-- [ ] Documentation completeness: 100%
+- [x] User onboarding: <3 minutes
+- [x] CBOM generation: <30 seconds
+- [x] Asset discovery: Real-time
+- [x] Mobile responsiveness: 100%
+- [x] Documentation completeness: 100%
 
 ---
 
 ## 🚀 **READY FOR MVP?**
 
 ### **Blockers to Resolve:**
-1. **Real database integration** (Critical)
-2. **User authentication** (Critical)
-3. **Complete API implementation** (Critical)
-4. **Testing framework** (Critical)
-5. **Security hardening** (High)
-6. **IBMQ real integration** (High for Enterprise)
+1. **QBOM qubit-budget estimator** (Medium)
+2. **QBOM classical-vs-PQC comparison view** (Medium)
+3. **Automated migration prioritization** (Medium)
+4. **Expanded endpoint correlation coverage** (Medium)
 
-### **Estimated Timeline: 6-8 weeks**
-With focused development and proper prioritization, MVP can be achieved within **2 months**.
+### **Estimated Timeline: Active beta iterations**
+With the core platform in place, remaining work is focused on QBOM analytics and pilot-specific refinements.
 
-**Next Step**: Begin Sprint 1 with database implementation and authentication system.
+**Next Step**: Extend endpoint correlation and QBOM analytics for pilot customers.

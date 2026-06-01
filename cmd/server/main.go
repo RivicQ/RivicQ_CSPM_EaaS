@@ -36,7 +36,7 @@ func main() {
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":    "healthy",
-			"service":   "CryptoBOM SaaS",
+			"service":   "RivicQ - Encryption as a Service",
 			"version":   "1.0.0",
 			"timestamp": time.Now().Format("2006-01-02T15:04:05Z07:00"),
 		})
@@ -45,7 +45,7 @@ func main() {
 	router.GET("/readyz", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "ready",
-			"service": "CryptoBOM SaaS",
+			"service": "RivicQ - Encryption as a Service",
 		})
 	})
 
@@ -130,12 +130,12 @@ func main() {
 
 	// Start server
 	port := ":8080"
-	fmt.Printf("🚀 CryptoBOM SaaS v%s\n", "1.0.0")
+	fmt.Printf("🚀 RivicQ — Encryption as a Service v%s\n", "1.0.0")
 	fmt.Printf("📊 Server running on port %s\n", port)
 	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", port)
 	fmt.Printf("🌐 Try: curl http://localhost:%s/api/v1/cbom\n", port)
 	fmt.Printf("🔍 Quantum-ready demo: http://localhost:%s/api/v1/cilium/metrics\n", port)
-	fmt.Printf("🎬 LinkedIn demo ready! 🎯\n")
+	fmt.Printf("🎬 Demo ready! 🎯\n")
 
 	// Graceful shutdown setup
 	quit := make(chan os.Signal, 1)
@@ -144,7 +144,7 @@ func main() {
 	// Handle shutdown in goroutine
 	go func() {
 		<-quit
-		fmt.Printf("\n🔹 Shutting down CryptoBOM SaaS...\n")
+		fmt.Printf("\n🔹 Shutting down RivicQ — Encryption as a Service...\n")
 		time.Sleep(2 * time.Second)
 		os.Exit(0)
 	}()

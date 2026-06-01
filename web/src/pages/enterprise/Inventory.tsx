@@ -53,6 +53,7 @@ import {
   Cell,
 } from 'recharts';
 import { inventoryService } from '../../services/api';
+import PageFrame from '../../components/PageFrame';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -159,24 +160,26 @@ const Inventory: React.FC = () => {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold">
-          Asset Inventory
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" startIcon={<Refresh />} onClick={loadAssets}>
-            Refresh
-          </Button>
-          <Button variant="contained" startIcon={<Add />} onClick={() => setCreateDialogOpen(true)}>
-            Add Asset
-          </Button>
-        </Box>
-      </Box>
+    <PageFrame
+      eyebrow="Enterprise Inventory"
+      title="Asset Inventory"
+      subtitle="Track cryptographic, hardware, software, and cloud assets in one operational workspace."
+      badge={`${summary?.total_assets ?? assets.length} tracked`}
+      action={(
+        <Button variant="contained" startIcon={<Add />} onClick={() => setCreateDialogOpen(true)}>
+          Add Asset
+        </Button>
+      )}
+      secondaryAction={(
+        <Button variant="outlined" startIcon={<Refresh />} onClick={loadAssets} sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.18)' }}>
+          Refresh
+        </Button>
+      )}
+    >
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Total Assets</Typography>
               <Typography variant="h4">{summary?.total_assets ?? 0}</Typography>
@@ -184,7 +187,7 @@ const Inventory: React.FC = () => {
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Quantum Safe</Typography>
               <Typography variant="h4" color="success.main">{summary?.quantum_safe_count ?? 0}%</Typography>
@@ -192,7 +195,7 @@ const Inventory: React.FC = () => {
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>At Risk</Typography>
               <Typography variant="h4" color="error.main">{summary?.vulnerable_assets ?? 0}</Typography>
@@ -200,7 +203,7 @@ const Inventory: React.FC = () => {
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Cloud Providers</Typography>
               <Typography variant="h4">4</Typography>
@@ -211,7 +214,7 @@ const Inventory: React.FC = () => {
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: 300 }}>
+          <Card sx={{ height: 300, borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>Assets by Category</Typography>
               <ResponsiveContainer width="100%" height={250}>
@@ -227,7 +230,7 @@ const Inventory: React.FC = () => {
           </Card>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: 300 }}>
+          <Card sx={{ height: 300, borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>Cloud Distribution</Typography>
               <ResponsiveContainer width="100%" height={250}>
@@ -257,7 +260,7 @@ const Inventory: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Card>
+      <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
             <Tab label="All Assets" />
@@ -269,7 +272,7 @@ const Inventory: React.FC = () => {
           </Tabs>
         </Box>
 
-        <Box sx={{ p: 2, display: 'flex', gap: 2 }}>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <TextField
             size="small"
             placeholder="Search assets..."
@@ -303,7 +306,7 @@ const Inventory: React.FC = () => {
         {loading && <LinearProgress />}
 
         <TableContainer>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow>
                 <TableCell>Asset ID</TableCell>
@@ -340,8 +343,8 @@ const Inventory: React.FC = () => {
         </TableContainer>
       </Card>
 
-      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)}>
-        <DialogTitle>Add New Asset</DialogTitle>
+      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Add New Asset</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <TextField
@@ -391,7 +394,7 @@ const Inventory: React.FC = () => {
           <Button onClick={handleCreateAsset} variant="contained">Create</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageFrame>
   );
 };
 

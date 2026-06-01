@@ -8,7 +8,10 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm --prefix web start",
+    "dev": "npm --prefix web start",
+    "build": "npm --prefix web run build",
+    "test": "npm --prefix web run test:ci"
   },
   "keywords": [],
   "author": "",

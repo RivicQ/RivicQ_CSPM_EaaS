@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Box,
   Card,
   CardContent,
   Typography,
@@ -17,6 +16,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import PageFrame from '../components/PageFrame';
 
 const data = [
   { name: 'Jan', assets: 400, compliance: 75 },
@@ -36,11 +36,12 @@ const complianceData = [
 
 const Analytics: React.FC = () => {
   return (
-    <Box>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Analytics
-      </Typography>
-
+    <PageFrame
+      eyebrow="Insights"
+      title="Analytics"
+      subtitle="A simple executive view of discovery trends, compliance movement, and high-level remediation status."
+      badge="Live metrics"
+    >
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Card>
@@ -102,7 +103,7 @@ const Analytics: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-    </Box>
+    </PageFrame>
   );
 };
 

@@ -85,42 +85,41 @@ func NewDatabaseUserStore(db *sql.DB) *DatabaseUserStore {
 // NewWorkDomainUserStore creates a seeded in-memory store for approved work domains.
 func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 	allowedDomains := parseAllowedDomains(os.Getenv("AUTH_ALLOWED_DOMAINS"))
+	// If no allowed domains are configured, default to rivicq internal domains for demo/staging
 	if len(allowedDomains) == 0 {
-		return nil, fmt.Errorf("AUTH_ALLOWED_DOMAINS environment variable must be set")
+		allowedDomains = []string{"rivicq.de", "rivicq.com"}
 	}
+	users := map[string]*User{}
 
 	bootstrapEmail := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_EMAIL"))
 	bootstrapPassword := os.Getenv("AUTH_BOOTSTRAP_PASSWORD")
-	if bootstrapEmail == "" || bootstrapPassword == "" {
-		return nil, fmt.Errorf("AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD environment variables must be set")
-	}
-	if !emailAllowed(bootstrapEmail, allowedDomains) {
-		return nil, fmt.Errorf("bootstrap email domain is not allowed")
-	}
+	if bootstrapEmail != "" && bootstrapPassword != "" {
+		if !emailAllowed(bootstrapEmail, allowedDomains) {
+			return nil, fmt.Errorf("bootstrap email domain is not allowed")
+		}
 
-	bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
-	if bootstrapName == "" {
-		bootstrapName = "Workspace Admin"
-	}
-	bootstrapRole := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_ROLE"))
-	if bootstrapRole == "" {
-		bootstrapRole = "admin"
-	}
+		bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
+		if bootstrapName == "" {
+			bootstrapName = "Workspace Admin"
+		}
+		bootstrapRole := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_ROLE"))
+		if bootstrapRole == "" {
+			bootstrapRole = "admin"
+		}
 
-	hashedPassword, err := hashPassword(bootstrapPassword)
-	if err != nil {
-		return nil, fmt.Errorf("failed to hash bootstrap password: %w", err)
-	}
+		hashedPassword, err := hashPassword(bootstrapPassword)
+		if err != nil {
+			return nil, fmt.Errorf("failed to hash bootstrap password: %w", err)
+		}
 
-	users := map[string]*User{
-		strings.ToLower(bootstrapEmail): {
+		users[strings.ToLower(bootstrapEmail)] = &User{
 			ID:       "bootstrap-user",
 			TenantID: "tenant-1",
 			Email:    bootstrapEmail,
 			Name:     bootstrapName,
 			Role:     bootstrapRole,
 			Password: hashedPassword,
-		},
+		}
 	}
 
 	return &WorkDomainUserStore{users: users, allowedDomains: allowedDomains}, nil
@@ -128,7 +127,7 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 
 // MockUserStore methods
 func (m *MockUserStore) GetUserByEmail(email string) (*User, error) {
-	if user, exists := m.users[email]; exists {
+	if user, exists := m.users[strings.ToLower(email)]; exists {
 		return user, nil
 	}
 	return nil, fmt.Errorf("user not found")
@@ -142,7 +141,7 @@ func (m *MockUserStore) CreateUser(user *User) error {
 		return err
 	}
 	user.Password = hashedPassword
-	m.users[user.Email] = user
+	m.users[strings.ToLower(user.Email)] = user
 	return nil
 }
 

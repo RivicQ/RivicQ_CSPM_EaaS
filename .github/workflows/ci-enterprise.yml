@@ -1,0 +1,103 @@
+name: CI – Enterprise
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/cryptobom-enterprise
+
+jobs:
+  test-enterprise:
+    name: Test (enterprise)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      - run: go mod download
+
+      - name: Run unit tests (enterprise)
+        run: |
+          # Run all tests including enterprise packages; mock external services when possible
+          go test -v -race -coverprofile=coverage.enterprise.out $(go list ./...)
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-enterprise
+          path: coverage.enterprise.out
+
+  build-enterprise:
+    name: Build Enterprise binary + smoke
+    runs-on: ubuntu-latest
+    needs: test-enterprise
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build enterprise binary
+        run: |
+          mkdir -p bin
+          CGO_ENABLED=0 GOOS=linux go build \
+            -tags=enterprise \
+            -ldflags "-X main.version=${{ github.sha }} -X main.edition=enterprise" \
+            -o bin/cryptobom-enterprise \
+            ./cmd/server/enterprise/main.go
+
+      - name: Start IBMQ mock server
+        run: |
+          # Start mock IBMQ if present; background it
+          if [ -f demo/mock-ibmq/mock_server.go ]; then
+            nohup go run demo/mock-ibmq/mock_server.go > mock_ibmq.log 2>&1 &
+            echo $! > /tmp/mock_ibmq.pid
+            sleep 1
+            echo "Started mock IBMQ server"
+          else
+            echo "No mock IBMQ server found"
+          fi
+
+      - name: Start enterprise backend in demo mode (uses mock IBMQ)
+        run: |
+          DATABASE_URL="" JWT_SECRET=enterprise-smoke CRYPTOBOM_PORT=8081 IBMQ_ENDPOINT="http://localhost:8089" ./bin/cryptobom-enterprise &
+          echo $! > /tmp/cryptobom-enterprise.pid
+
+      - name: Wait for healthz
+        run: |
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:8081/healthz; then
+              echo "Enterprise backend healthy"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Enterprise backend did not start"; exit 1
+
+      - name: Stop processes
+        if: always()
+        run: |
+          if [ -f /tmp/cryptobom-enterprise.pid ]; then kill "$(cat /tmp/cryptobom-enterprise.pid)" || true; fi
+          if [ -f /tmp/mock_ibmq.pid ]; then kill "$(cat /tmp/mock_ibmq.pid)" || true; fi

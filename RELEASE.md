@@ -2,6 +2,35 @@
 
 ---
 
+## 📦 Release v1.3.1 (Current)
+
+**Release Date:** 2026-05-28
+**Edition:** Open Source + Enterprise
+**Status:** ✅ Beta-ready with redesigned OSS/Enterprise navigation and pilot architecture
+
+### 🚀 New in v1.3.1
+
+#### OSS + Enterprise Redesign
+- Added a dedicated redesign and pilot plan for the OSS-first, CNCF-aligned product direction.
+- Linked the redesign from the main README for easier discovery.
+- Clarified the current CBOM endpoint-detection pipeline and the Flyingduck pilot flow.
+
+#### QBOM Foundations
+- Introduced QBOM language as the quantum-extension layer on top of CBOM.
+- Documented QBOM features for endpoint-level quantum risk, PQC migration planning, and compliance correlation.
+- Added the QBOM feature backlog to the roadmap so upcoming work is visible.
+
+#### Benchmark and Readiness Updates
+- Updated benchmark expectations to use the current 10k-asset reference baseline.
+- Reframed the roadmap from historical MVP gaps to active beta and pilot refinement work.
+
+### 📝 Notes
+
+- The current codebase already supports CBOM scanning, endpoint discovery, inventory views, and enterprise integrations.
+- Future work is concentrated on deeper endpoint correlation, QBOM analytics, and customer pilot refinement rather than core MVP recovery.
+
+---
+
 ## 📦 Release v1.3.0 (Current)
 
 **Release Date:** 2026  

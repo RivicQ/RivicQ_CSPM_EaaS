@@ -1,6 +1,7 @@
 import React from 'react';
 import { authService } from '../services/api';
 import { setEditionPreference } from '../config/editions';
+import { getDemoUser } from '../config/demoUsers';
 
 type Edition = 'oss' | 'enterprise';
 
@@ -19,6 +20,9 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   loading: boolean;
   login: (email: string, password: string, edition: Edition) => Promise<void>;
+  register: (name: string, email: string, password: string, edition: Edition) => Promise<void>;
+  loginDemo: (email: string, edition?: Edition) => Promise<void>;
+  registerDemo: (name: string, email: string, edition?: Edition) => Promise<void>;
   logout: () => void;
   setEdition: (edition: Edition) => void;
 }
@@ -87,6 +91,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     completeAuth(response.data);
   }, [completeAuth]);
 
+  const register = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition) => {
+    const response = await authService.register({ name, email, password, edition: nextEdition });
+    completeAuth(response.data);
+  }, [completeAuth]);
+
+  const loginDemo = React.useCallback(async (email: string, nextEdition?: Edition) => {
+    const demoUser = getDemoUser(email);
+    if (!demoUser) {
+      throw new Error('Demo account not found');
+    }
+
+    const editionToUse = nextEdition || demoUser.edition;
+    persist(`demo-${demoUser.edition}-${demoUser.email}`, {
+      id: `demo-${demoUser.edition}-${demoUser.email}`,
+      name: demoUser.name,
+      email: demoUser.email,
+      role: demoUser.role,
+      edition: demoUser.edition,
+    }, editionToUse);
+  }, [persist]);
+
+  const registerDemo = React.useCallback(async (name: string, email: string, nextEdition?: Edition) => {
+    const demoUser = getDemoUser(email);
+    if (!demoUser) {
+      throw new Error('Demo account not found');
+    }
+
+    const editionToUse = nextEdition || demoUser.edition;
+    persist(`demo-${demoUser.edition}-${demoUser.email}`, {
+      id: `demo-${demoUser.edition}-${demoUser.email}`,
+      name: name || demoUser.name,
+      email: demoUser.email,
+      role: demoUser.role,
+      edition: demoUser.edition,
+    }, editionToUse);
+  }, [persist]);
+
   const logout = React.useCallback(() => {
     persist(null, null, edition);
   }, [edition, persist]);
@@ -102,9 +143,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: Boolean(token),
     loading,
     login,
+    register,
+    loginDemo,
+    registerDemo,
     logout,
     setEdition,
-  }), [edition, loading, login, logout, setEdition, token, user]);
+  }), [edition, loading, login, loginDemo, logout, register, registerDemo, setEdition, token, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

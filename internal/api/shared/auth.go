@@ -10,6 +10,7 @@ import (
 )
 
 type authRequest struct {
+	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Edition  string `json:"edition"`
@@ -27,7 +28,7 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 	authGroup := router.Group("/auth")
 	{
 		authGroup.POST("/login", loginHandler(logger, service, allowedDomains))
-		authGroup.POST("/register", registerDisabledHandler())
+		authGroup.POST("/register", registerHandler(logger, service, allowedDomains))
 		authGroup.GET("/me", service.JWTAuthMiddleware(nil), meHandler())
 		authGroup.GET("/editions", editionsHandler(allowedDomains))
 	}
@@ -68,9 +69,60 @@ func loginHandler(logger *logrus.Logger, service *auth.AuthService, allowedDomai
 	}
 }
 
-func registerDisabledHandler() gin.HandlerFunc {
+func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDomains []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Self-service registration is disabled. Contact your workspace administrator."})
+		var req authRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+			return
+		}
+		if !workEmailAllowed(req.Email, allowedDomains) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Work email domain not allowed"})
+			return
+		}
+		if strings.TrimSpace(req.Name) == "" {
+			req.Name = strings.Split(strings.TrimSpace(req.Email), "@")[0]
+		}
+
+		user := &auth.User{
+			Email:    strings.ToLower(strings.TrimSpace(req.Email)),
+			Name:     strings.TrimSpace(req.Name),
+			Password: req.Password,
+			Role:     "viewer",
+		}
+
+		if err := service.Register(user); err != nil {
+			logger.WithError(err).WithField("email", req.Email).Warn("registration failed")
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		token, err := service.LoginWithEdition(req.Email, req.Password, req.Edition)
+		if err != nil {
+			logger.WithError(err).WithField("email", req.Email).Warn("registration login failed")
+			c.JSON(http.StatusCreated, gin.H{
+				"message": "Registration completed. Please log in with your new account.",
+				"user": authUserResponse{Email: user.Email, Name: user.Name, Role: user.Role},
+			})
+			return
+		}
+
+		createdUser, err := service.GetUserByEmail(req.Email)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to load user"})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{
+			"token": token,
+			"user": authUserResponse{
+				ID:    createdUser.ID,
+				Name:  createdUser.Name,
+				Email: createdUser.Email,
+				Role:  createdUser.Role,
+			},
+			"edition": editionForRole(createdUser.Role, req.Edition),
+		})
 	}
 }
 

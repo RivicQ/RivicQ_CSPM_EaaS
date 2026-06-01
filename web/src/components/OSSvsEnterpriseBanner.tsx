@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Typography, Button, Chip } from '@mui/material';
+import { Box, Typography, Button, Chip, Stack } from '@mui/material';
 import { Lock, Upgrade } from '@mui/icons-material';
+import { tokens } from '../theme/tokens';
 
 interface OSSvsEnterpriseBannerProps {
   featureName: string;
@@ -13,32 +14,34 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
 }) => (
   <Box
     sx={{
-      background: 'linear-gradient(135deg, rgba(212,175,55,0.16), rgba(0,194,255,0.14))',
-      border: '1px solid rgba(212,175,55,0.28)',
-      borderRadius: 2,
+      background: `linear-gradient(135deg, rgba(6,182,212,0.12), rgba(212,175,55,0.14))`,
+      border: `1px solid ${tokens.colors.rivicq[200]}`,
+      borderRadius: 4,
       p: 3,
       textAlign: 'center',
     }}
   >
-    <Lock sx={{ fontSize: 48, color: '#d4af37', mb: 1 }} />
-    <Typography variant="h6" fontWeight="bold" gutterBottom>
-      {featureName}
-    </Typography>
-    <Chip label="Enterprise Feature" color="secondary" size="small" sx={{ mb: 2 }} />
-    {description && (
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {description}
+    <Stack spacing={1.5} alignItems="center">
+      <Lock sx={{ fontSize: 42, color: '#d4af37' }} />
+      <Typography variant="h6" fontWeight="bold">
+        {featureName}
       </Typography>
-    )}
+      <Chip label="Enterprise Feature" color="secondary" size="small" />
+      {description && (
+        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 320 }}>
+          {description}
+        </Typography>
+      )}
     <Button
       variant="contained"
       startIcon={<Upgrade />}
-      sx={{ background: 'linear-gradient(45deg, #d4af37, #00c2ff)' }}
+      sx={{ background: 'linear-gradient(45deg, #06b6d4, #d4af37)' }}
       href="https://cryptobom.io/enterprise"
       target="_blank"
       rel="noopener noreferrer"
     >
       Upgrade to Enterprise
     </Button>
+    </Stack>
   </Box>
 );

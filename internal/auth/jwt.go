@@ -200,13 +200,6 @@ func (as *AuthService) LoginWithEdition(email, password, edition string) (string
 
 // Register creates a new user and returns their ID
 func (as *AuthService) Register(user *User) error {
-	// Hash the password
-	hashedPassword, err := hashPassword(user.Password)
-	if err != nil {
-		return err
-	}
-
-	user.Password = hashedPassword
 	return as.userStore.CreateUser(user)
 }
 

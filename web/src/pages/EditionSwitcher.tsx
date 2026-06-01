@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, Divider } from '@mui/material';
 import { ArrowForward, Lock, Security, WorkspacePremium, CloudQueue, Psychology, Storage } from '@mui/icons-material';
 import { setEditionPreference } from '../config/editions';
+import BrandLogo from '../components/BrandLogo';
 
 const EditionSwitcher: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +35,9 @@ const EditionSwitcher: React.FC = () => {
   return (
     <Box sx={{ minHeight: '100vh', background: 'radial-gradient(circle at top, rgba(212,175,55,0.18), transparent 26%), linear-gradient(180deg, #08111f 0%, #0b1424 100%)', py: 8 }}>
       <Container maxWidth="lg">
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <BrandLogo dark />
+        </Box>
         <Stack spacing={2} sx={{ mb: 4, textAlign: 'center' }}>
           <Chip icon={<Lock />} label="Edition Selection" color="primary" sx={{ alignSelf: 'center' }} />
           <Typography variant="h3" fontWeight={900} sx={{ color: '#f8fafc' }}>
@@ -47,7 +51,7 @@ const EditionSwitcher: React.FC = () => {
         <Grid container spacing={3}>
           {cards.map((card) => (
             <Grid item xs={12} md={6} key={card.title}>
-              <Card sx={{ height: '100%', border: '1px solid rgba(212,175,55,0.18)', background: 'linear-gradient(180deg, rgba(16,26,45,0.98), rgba(8,17,31,0.96))' }}>
+              <Card sx={{ height: '100%', borderRadius: 5, border: '1px solid rgba(212,175,55,0.18)', background: 'linear-gradient(180deg, rgba(16,26,45,0.98), rgba(8,17,31,0.96))' }}>
                 <CardContent sx={{ p: 4 }}>
                   <Stack spacing={2}>
                     <Box sx={{ color: card.edition === 'enterprise' ? '#00c2ff' : '#d4af37' }}>
@@ -111,7 +115,7 @@ const EditionSwitcher: React.FC = () => {
           </Grid>
         </Grid>
 
-        <Box sx={{ mt: 4, p: 3, borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)', bgcolor: 'rgba(255,255,255,0.03)' }}>
+        <Box sx={{ mt: 4, p: 3, borderRadius: 4, border: '1px solid rgba(255,255,255,0.08)', bgcolor: 'rgba(255,255,255,0.03)' }}>
           <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
             What gets locked in OSS
           </Typography>

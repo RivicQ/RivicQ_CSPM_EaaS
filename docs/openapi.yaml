@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: CryptoBOM SaaS API
+  title: RivicQ — Encryption as a Service API
   description: |
     ## Quantum-Safe Cryptographic Bill of Materials Management
     
@@ -34,9 +34,9 @@ info:
 servers:
   - url: http://localhost:9090
     description: Local development server
-  - url: https://api.cryptobom.oss.rivicq.de
+  - url: https://api.rivicq.oss.rivicq.de
     description: OSS Edition cloud endpoint
-  - url: https://api.cryptobom.enterprise.rivicq.de
+  - url: https://api.rivicq.enterprise.rivicq.de
     description: Enterprise Edition cloud endpoint
 
 tags:

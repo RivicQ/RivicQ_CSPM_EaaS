@@ -38,7 +38,7 @@ func main() {
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":         "healthy",
-			"service":        "CryptoBOM Enterprise",
+			"service":        "RivicQ - Encryption as a Service (Enterprise)",
 			"edition":        "Enterprise",
 			"version":        "2.0.0",
 			"timestamp":      time.Now().Format("2006-01-02T15:04:05Z07:00"),
@@ -49,7 +49,7 @@ func main() {
 	router.GET("/readyz", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "ready",
-			"service": "CryptoBOM Enterprise",
+			"service": "RivicQ - Encryption as a Service (Enterprise)",
 		})
 	})
 
@@ -69,7 +69,7 @@ func main() {
 
 	// Start server on different port for Enterprise
 	port := ":9090"
-	fmt.Printf("🚀 CryptoBOM Enterprise v%s\n", "2.0.0")
+	fmt.Printf("🚀 RivicQ — Encryption as a Service (Enterprise) v%s\n", "2.0.0")
 	fmt.Printf("📊 Enterprise Server running on port %s\n", port)
 	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", port)
 	fmt.Printf("🌐 Enterprise API: http://localhost:%s/api/v1\n", port)
@@ -91,7 +91,7 @@ func main() {
 	// Handle shutdown in goroutine
 	go func() {
 		<-quit
-		fmt.Printf("\n🔹 Shutting down CryptoBOM Enterprise...\n")
+		fmt.Printf("\n🔹 Shutting down RivicQ — Encryption as a Service (Enterprise)...\n")
 		time.Sleep(2 * time.Second)
 		os.Exit(0)
 	}()

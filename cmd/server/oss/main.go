@@ -36,7 +36,7 @@ func main() {
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":    "healthy",
-			"service":   "CryptoBOM OSS",
+			"service":   "RivicQ - Encryption as a Service (OSS)",
 			"edition":   "Open Source",
 			"version":   "1.0.0",
 			"timestamp": time.Now().Format("2006-01-02T15:04:05Z07:00"),
@@ -46,7 +46,7 @@ func main() {
 	router.GET("/readyz", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "ready",
-			"service": "CryptoBOM OSS",
+			"service": "RivicQ - Encryption as a Service (OSS)",
 		})
 	})
 
@@ -56,7 +56,7 @@ func main() {
 
 	// Start server
 	port := ":8080"
-	fmt.Printf("🚀 CryptoBOM OSS v%s\n", "1.0.0")
+	fmt.Printf("🚀 RivicQ — Encryption as a Service (OSS) v%s\n", "1.0.0")
 	fmt.Printf("📊 OSS Server running on port %s\n", port)
 	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", port)
 	fmt.Printf("🌐 OSS API: http://localhost:%s/api/v1\n", port)
@@ -74,7 +74,7 @@ func main() {
 	// Handle shutdown in goroutine
 	go func() {
 		<-quit
-		fmt.Printf("\n🔹 Shutting down CryptoBOM OSS...\n")
+		fmt.Printf("\n🔹 Shutting down RivicQ — Encryption as a Service (OSS)...\n")
 		time.Sleep(2 * time.Second)
 		os.Exit(0)
 	}()

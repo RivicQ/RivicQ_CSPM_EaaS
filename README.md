@@ -84,6 +84,9 @@ curl http://localhost:8080/healthz
 > **Preparing a live demo for a CISO or enterprise stakeholder? →** [DEMO_ENVIRONMENT.md](DEMO_ENVIRONMENT.md)
 > Recommended environment, 10-minute demo script, and security posture summary.
 
+> **Planning the OSS + Enterprise redesign, endpoint discovery model, and Flyingduck pilot flow? →** [docs/rivicq-redesign-and-pilot-plan.md](docs/rivicq-redesign-and-pilot-plan.md)
+> End-to-end architecture, current CBOM endpoint detection, benchmark targets, and pilot execution plan.
+
 ## 🆓 Open Source Edition
 
 [![CNCF](https://img.shields.io/badge/CNCF-Compliant-blue)](https://cncf.io)

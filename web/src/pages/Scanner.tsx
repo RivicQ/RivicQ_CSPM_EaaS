@@ -25,6 +25,7 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { cbomService } from '../services/api';
+import PageFrame from '../components/PageFrame';
 
 interface ScanJob {
   id: string;
@@ -194,13 +195,12 @@ const Scanner: React.FC = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        CBOM Scanner
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Generate a Cryptographic Bill of Materials (CBOM) for any asset — repo, container image, or hostname.
-      </Typography>
+    <PageFrame
+      eyebrow="Discovery"
+      title="CBOM Scanner"
+      subtitle="Generate a Cryptographic Bill of Materials (CBOM) for any asset — repo, container image, or hostname."
+      badge={isScanning ? 'Scan running' : 'Ready'}
+    >
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
@@ -208,7 +208,7 @@ const Scanner: React.FC = () => {
         </Alert>
       )}
 
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3, borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Scan Configuration
@@ -263,7 +263,7 @@ const Scanner: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Scan History
@@ -276,7 +276,7 @@ const Scanner: React.FC = () => {
               </Typography>
             </Box>
           ) : (
-            <List>
+            <List dense>
               {scanJobs.map((job, index) => (
                 <React.Fragment key={job.id}>
                   {index > 0 && <Divider />}
@@ -310,7 +310,7 @@ const Scanner: React.FC = () => {
           )}
         </CardContent>
       </Card>
-    </Box>
+    </PageFrame>
   );
 };
 

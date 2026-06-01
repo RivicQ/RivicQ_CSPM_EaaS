@@ -88,8 +88,13 @@ export const inventoryService = {
 };
 
 export const authService = {
-  login: (data: { email: string; password: string; edition?: 'oss' | 'enterprise' }) =>
-    api.post('/auth/login', data),
+  login: async (data: { email: string; password: string; edition?: 'oss' | 'enterprise' }) => {
+    return api.post('/auth/login', data);
+  },
+
+  register: async (data: { name: string; email: string; password: string; edition?: 'oss' | 'enterprise' }) => {
+    return api.post('/auth/register', data);
+  },
 
   me: () => api.get('/auth/me'),
 

@@ -8,6 +8,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { Close, RocketLaunch } from '@mui/icons-material';
+import { tokens } from '../theme/tokens';
 
 const BETA_SIGN_UP_URL = 'https://github.com/rivic-q/cryptobom-saas/discussions';
 
@@ -39,7 +40,7 @@ const BetaBanner: React.FC = () => {
       <Alert
         severity="info"
         icon={<RocketLaunch />}
-        sx={{ mb: 3, borderRadius: 2 }}
+        sx={{ mb: 3, borderRadius: 3, border: `1px solid ${tokens.colors.rivicq[100]}` }}
         action={
           <Box display="flex" alignItems="center" gap={1}>
             <Button
@@ -48,7 +49,7 @@ const BetaBanner: React.FC = () => {
               href={BETA_SIGN_UP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)', whiteSpace: 'nowrap' }}
+              sx={{ background: 'linear-gradient(45deg, #06b6d4, #1d4ed8)', whiteSpace: 'nowrap' }}
             >
               Join Beta
             </Button>

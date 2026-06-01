@@ -43,6 +43,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { getEditionConfig } from '../config/editions';
+import { useThemeMode } from '../theme/ThemeContext';
+import ThemeToggle from '../theme/ThemeToggle';
+import BrandLogo from '../components/BrandLogo';
 
 interface NavItem {
   text: string;
@@ -61,6 +64,7 @@ const Layout: React.FC = () => {
   const [notifications] = React.useState(5);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const editionConfig = getEditionConfig();
+  const { mode, toggleMode } = useThemeMode();
 
   const navigationItems: NavItem[] = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
@@ -93,10 +97,7 @@ const Layout: React.FC = () => {
   const drawer = (
     <Box sx={{ width: 280, pt: 2 }}>
       <Box sx={{ px: 2, pb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Security sx={{ color: '#d4af37', fontSize: 32 }} />
-        <Typography variant="h6" fontWeight="bold" sx={{ background: 'linear-gradient(45deg, #d4af37 30%, #00c2ff 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          CryptoBOM
-        </Typography>
+          <BrandLogo compact dark />
       </Box>
       
       <Divider />
@@ -190,19 +191,12 @@ const Layout: React.FC = () => {
           <IconButton edge="start" onClick={() => setDrawerOpen(true)} sx={{ mr: 2 }}>
             <MenuIcon />
           </IconButton>
-          
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, mr: 4 }}>
-            <Box component="span" sx={{ fontWeight: 'bold', background: 'linear-gradient(45deg, #d4af37 30%, #00c2ff 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              RivicQ
-            </Box>
-            <Box component="span" sx={{ color: 'text.secondary', fontWeight: 400, ml: 1 }}>
-              CryptoBOM Enterprise
-            </Box>
-          </Typography>
+          <BrandLogo compact />
 
           <Box sx={{ flexGrow: 1 }} />
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ThemeToggle mode={mode} onToggle={toggleMode} />
             <Tooltip title="Refresh">
               <IconButton>
                 <Refresh />

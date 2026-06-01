@@ -34,6 +34,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { inventoryService } from '../services/api';
+import PageFrame from '../components/PageFrame';
 
 const Assets: React.FC = () => {
   const navigate = useNavigate();
@@ -83,10 +84,17 @@ const Assets: React.FC = () => {
   }
 
   return (
-    <Box>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Crypto Assets
-      </Typography>
+    <PageFrame
+      eyebrow="Inventory"
+      title="Crypto Assets"
+      subtitle="Review cryptographic assets, filter risk, and export selected items for remediation or reporting."
+      badge={`${assets.length} assets`}
+      secondaryAction={(
+        <Button variant="outlined" startIcon={<Refresh />} onClick={() => refetch()} sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.18)' }}>
+          Refresh
+        </Button>
+      )}
+    >
 
       {error && (
         <Alert severity="info" sx={{ mb: 2 }}>
@@ -137,7 +145,7 @@ const Assets: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Paper sx={{ p: 2, mb: 2 }}>
+      <Paper sx={{ p: 2, mb: 2, borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
         <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
           <TextField
             size="small"
@@ -168,7 +176,7 @@ const Assets: React.FC = () => {
         </Box>
       </Paper>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -252,7 +260,7 @@ const Assets: React.FC = () => {
           <Button disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
         </Box>
       )}
-    </Box>
+    </PageFrame>
   );
 };
 

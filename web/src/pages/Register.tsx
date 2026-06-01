@@ -1,6 +1,6 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import AuthPage from './AuthPage';
 
-const Register: React.FC = () => <Navigate to="/login" replace />;
+const Register: React.FC = () => <AuthPage defaultMode="register" />;
 
 export default Register;

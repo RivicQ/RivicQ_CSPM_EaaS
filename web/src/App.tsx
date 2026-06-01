@@ -1,14 +1,17 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
 
 import Layout from './layouts/Layout';
+import { ThemeModeProvider } from './theme/ThemeContext';
 import RequireAuth from './components/RequireAuth';
 import RequireEnterprise from './components/RequireEnterprise';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import Home from './pages/Home';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import EditionSwitcher from './pages/EditionSwitcher';
 import Dashboard from './pages/Dashboard';
 import AssetDetails from './pages/AssetDetails';
@@ -31,13 +34,6 @@ import AWSCloud from './pages/enterprise/AWSCloud';
 import QuantumAttestation from './pages/enterprise/QuantumAttestation';
 import CSPM from './pages/CSPM';
 
-const RootRedirect: React.FC = () => {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) return null;
-  return <Navigate to={isAuthenticated ? '/dashboard' : '/switcher'} replace />;
-};
-
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
 
@@ -49,25 +45,15 @@ const LogoutRedirect: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  // Create a theme for the application
-  const theme = createTheme({
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#d4af37',
-      },
-      secondary: {
-        main: '#00c2ff',
-      },
-      background: {
-        default: '#08111f',
-        paper: '#101a2d',
-      },
-    },
-    typography: {
-      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    },
-  });
+  const [mode, setMode] = React.useState<'light' | 'dark'>('light');
+  const theme = React.useMemo(() => {
+    // lazy load our centralized theme generator
+    // to keep App composition clean
+    const { getAppTheme } = require('./theme/theme');
+    return getAppTheme(mode);
+  }, [mode]);
+
+  const toggleMode = React.useCallback(() => setMode((m) => (m === 'light' ? 'dark' : 'light')), []);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -83,8 +69,10 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
+          <ThemeModeProvider mode={mode} toggleMode={toggleMode}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              {/* expose theme toggle via theme context; Layout will render a toggle control */}
             <GlobalStyles
               styles={{
                 '*': {
@@ -108,11 +96,11 @@ const App: React.FC = () => {
             />
             <BrowserRouter basename={process.env.PUBLIC_URL}>
               <Routes>
+                <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Navigate to="/login" replace />} />
+                <Route path="/register" element={<Register />} />
                 <Route path="/switcher" element={<EditionSwitcher />} />
                 <Route path="/logout" element={<LogoutRedirect />} />
-                <Route path="/" element={<RootRedirect />} />
                 <Route
                   path="/"
                   element={
@@ -144,7 +132,8 @@ const App: React.FC = () => {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>
-          </ThemeProvider>
+            </ThemeProvider>
+          </ThemeModeProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>

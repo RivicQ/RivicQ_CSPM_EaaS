@@ -2,11 +2,7 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
-	"os"
-	"path/filepath"
-	"runtime"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -54,28 +50,6 @@ func getDemoFindings(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Demo fixtures were archived; return empty findings to avoid accidental usage
 		c.JSON(http.StatusOK, gin.H{"findings": []interface{}{}})
-		return
-
-		// Legacy: code to load fixtures (archived) is preserved below for reference and is not executed.
-		// Try to load fixtures file relative to project root
-		fixturesPath := findFixturesPath()
-
-		data, err := os.ReadFile(fixturesPath)
-		if err != nil {
-			logger.WithError(err).Warn("Could not load fixtures file, returning empty findings")
-			c.JSON(http.StatusOK, gin.H{"findings": []interface{}{}})
-			return
-		}
-
-		var result discovery.ScanResult
-		if err := json.Unmarshal(data, &result); err != nil {
-			logger.WithError(err).Error("Failed to parse fixtures file")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse fixtures"})
-			return
-		}
-
-		logger.WithField("findings", len(result.Findings)).Info("Returning seeded demo findings")
-		c.JSON(http.StatusOK, result)
 	}
 }
 
@@ -90,27 +64,4 @@ func getDemoTargets(logger *logrus.Logger) gin.HandlerFunc {
 	}
 }
 
-// findFixturesPath returns the path to the fixtures file
-func findFixturesPath() string {
-	// Try relative to binary location
-	candidates := []string{
-		"demo/fixtures/findings.json",
-		"../demo/fixtures/findings.json",
-		"../../demo/fixtures/findings.json",
-	}
 
-	// Also try relative to source file location
-	_, filename, _, ok := runtime.Caller(0)
-	if ok {
-		base := filepath.Dir(filepath.Dir(filepath.Dir(filename)))
-		candidates = append(candidates, filepath.Join(base, "demo/fixtures/findings.json"))
-	}
-
-	for _, p := range candidates {
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
-	}
-
-	return "demo/fixtures/findings.json"
-}
