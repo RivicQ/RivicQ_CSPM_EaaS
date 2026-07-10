@@ -27,8 +27,16 @@ func main() {
 		log.Fatal("Failed to load OSS configuration:", err)
 	}
 
-	// Initialize database (mock for demo)
-	db := &database.DB{}
+	// Initialize database
+	db := database.New(logger)
+	if db != nil {
+		logger.Info("Database connected — running in production mode with PostgreSQL")
+		if err := database.RunMigrations(db); err != nil {
+			logger.WithError(err).Fatal("Database migration failed")
+		}
+	} else {
+		logger.Warn("No database available — running in demo mode with in-memory auth")
+	}
 
 	// Initialize Gin router
 	router := gin.Default()

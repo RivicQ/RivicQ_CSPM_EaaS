@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS users (
     email       TEXT NOT NULL UNIQUE,
     name        TEXT NOT NULL,
     role        TEXT NOT NULL DEFAULT 'viewer',
+    password    TEXT NOT NULL DEFAULT '',
+    mfa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    mfa_secret  TEXT,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

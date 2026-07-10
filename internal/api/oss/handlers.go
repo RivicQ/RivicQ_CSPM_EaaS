@@ -33,7 +33,7 @@ func allowedDomainsFromEnv() []string {
 
 // SetupRoutes configures OSS API routes (Open Source edition)
 func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger, cfg *config.OSSConfig) {
-	setupOSSAuth(router, logger)
+	setupOSSAuth(router, db, logger)
 
 	// Core CBOM Management (OSS Features)
 	cbom := router.Group("/cbom")
@@ -140,8 +140,8 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	router.GET("/benchmarks", getBenchmarksSummaryOSS(db, logger))
 }
 
-// setupOSSAuth configures authentication for OSS edition with fallback for no-JWT mode
-func setupOSSAuth(router *gin.RouterGroup, logger *logrus.Logger) {
+// setupOSSAuth configures authentication for OSS edition with database when available
+func setupOSSAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger) {
 	jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET"))
 	if jwtSecret == "" {
 		jwtSecret = "oss-default-secret-not-for-production"
@@ -150,20 +150,73 @@ func setupOSSAuth(router *gin.RouterGroup, logger *logrus.Logger) {
 
 	allowedDomains := allowedDomainsFromEnv()
 
-	// Use the OSS work-domain store first. It self-boots with sensible defaults,
-	// but still honors env overrides when provided.
 	var userStore auth.UserStore
-	store, err := auth.NewWorkDomainUserStore()
-	if err == nil {
+
+	// Use DatabaseUserStore when PostgreSQL is connected, fall back to in-memory
+	if db != nil && db.DB != nil {
+		store := auth.NewDatabaseUserStore(db.DB)
 		userStore = store
+		logger.Info("Auth using PostgreSQL database user store")
+
+		// Create default organization and bootstrap admin user
+		bootstrapEmail := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_EMAIL"))
+		if bootstrapEmail == "" {
+			bootstrapEmail = "admin@rivicq.local"
+		}
+		bootstrapPassword := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_PASSWORD"))
+		if bootstrapPassword == "" {
+			bootstrapPassword = "admin12345!"
+		}
+		bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
+		if bootstrapName == "" {
+			bootstrapName = "OSS Admin"
+		}
+		bootstrapRole := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_ROLE"))
+		if bootstrapRole == "" {
+			bootstrapRole = "admin"
+		}
+
+		// Ensure default tenant exists
+		var tenantCount int
+		err := db.DB.QueryRow("SELECT COUNT(*) FROM tenants").Scan(&tenantCount)
+		if err == nil && tenantCount == 0 {
+			_, err := db.DB.Exec(`INSERT INTO tenants (id, name, domain) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
+				"tenant-1", "Default Organization", "rivicq.local")
+			if err != nil {
+				logger.WithError(err).Warn("Failed to create default tenant")
+			}
+		}
+
+		// Create bootstrap admin user if no users exist
+		var userCount int
+		err = db.DB.QueryRow("SELECT COUNT(*) FROM users").Scan(&userCount)
+		if err == nil && userCount == 0 {
+			hashedPassword, hashErr := auth.HashPassword(bootstrapPassword)
+			if hashErr == nil {
+				_, execErr := db.DB.Exec(`
+					INSERT INTO users (id, tenant_id, email, name, role, password)
+					VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (email) DO NOTHING`,
+					"bootstrap-user", "tenant-1", bootstrapEmail, bootstrapName, bootstrapRole, hashedPassword)
+				if execErr != nil {
+					logger.WithError(execErr).Warn("Failed to create bootstrap admin user")
+				} else {
+					logger.WithField("email", bootstrapEmail).Info("Bootstrap admin user created")
+				}
+			}
+		}
 	} else {
-		logger.WithError(err).Fatal("Unable to initialize OSS auth store")
+		store, err := auth.NewWorkDomainUserStore()
+		if err == nil {
+			userStore = store
+		} else {
+			logger.WithError(err).Fatal("Unable to initialize OSS auth store")
+		}
+		if os.Getenv("AUTH_BOOTSTRAP_EMAIL") == "" && os.Getenv("AUTH_BOOTSTRAP_PASSWORD") == "" {
+			logger.Warn("OSS auth bootstrapped with default credentials admin@rivicq.local / admin12345!; override AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD for production")
+		}
 	}
 
 	authService := auth.NewAuthService(jwtSecret, userStore)
-	if os.Getenv("AUTH_BOOTSTRAP_EMAIL") == "" && os.Getenv("AUTH_BOOTSTRAP_PASSWORD") == "" {
-		logger.Warn("OSS auth bootstrapped with default credentials admin@rivicq.local / admin12345!; override AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD for production")
-	}
 	if len(allowedDomains) == 0 {
 		logger.Info("OSS registration is open to any email domain unless AUTH_ALLOWED_DOMAINS is set")
 	}

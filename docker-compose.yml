@@ -47,7 +47,12 @@ services:
     environment:
       - CRYPTOBOM_PORT=8080
       - CRYPTOBOM_LOG_LEVEL=info
-      - DATABASE_URL=postgres://cryptobom:${DB_PASSWORD:-cryptobom_dev}@db:5432/cryptobom?sslmode=disable
+      - CRYPTOBOM_DB_HOST=db
+      - CRYPTOBOM_DB_PORT=5432
+      - CRYPTOBOM_DB_USER=cryptobom
+      - CRYPTOBOM_DB_PASSWORD=${DB_PASSWORD:-cryptobom_dev}
+      - CRYPTOBOM_DB_NAME=cryptobom
+      - CRYPTOBOM_DB_SSLMODE=disable
       - FRONTEND_REDIRECT_URL=http://localhost:3000
     env_file:
       - path: .env
