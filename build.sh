@@ -27,12 +27,14 @@ show_usage() {
     echo "Editions:"
     echo "  oss        - Build Open Source edition (default)"
     echo "  enterprise - Build Enterprise edition with IBMQ integration"
+    echo "  core       - Build unified core binary (edition auto-detected at runtime)"
     echo ""
     echo "Examples:"
     echo "  ./build.sh"
     echo "  ./build.sh oss"
     echo "  ./build.sh enterprise"
     echo "  ./build.sh enterprise v2.0.0"
+    echo "  ./build.sh core          # unified binary, detect OSS/Enterprise at runtime"
     echo ""
 }
 
@@ -245,6 +247,44 @@ EOF
     echo -e "${GREEN}✅ Enterprise deployment files created${NC}"
 }
 
+# Function to build unified core edition (auto-detects OSS/Enterprise at runtime)
+build_core() {
+    echo -e "${YELLOW}🔨 Building CryptoBOM Core Edition v${VERSION}${NC}"
+
+    # Create output directory
+    mkdir -p $OUTPUT_DIR
+
+    # Build unified binary
+    echo -e "${YELLOW}📦 Building unified core server...${NC}"
+    go build \
+        -ldflags "-X main.version=${VERSION} -X main.edition=core" \
+        -o $OUTPUT_DIR/cryptobom-core \
+        ./cmd/server/
+
+    echo -e "${GREEN}✅ Core binary built: $OUTPUT_DIR/cryptobom-core${NC}"
+
+    # Create core deployment Dockerfile
+    cat > deploy/core/docker/Dockerfile.core << 'EOF'
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates tzdata
+
+WORKDIR /app
+
+COPY bin/cryptobom-core /app/cryptobom-server
+
+EXPOSE 8080
+EXPOSE 9090
+
+# Edition is auto-detected at runtime via CRYPTOBOM_LICENSE_KEY env var
+# OSS: no key needed (runs on :8080)
+# Enterprise: set CRYPTOBOM_LICENSE_KEY=ENT-... (runs on :9090)
+CMD ["./cryptobom-server"]
+EOF
+
+    echo -e "${GREEN}✅ Core deployment Dockerfile created${NC}"
+}
+
 # Function to create version info
 create_version_info() {
     echo -e "${YELLOW}📝 Creating version info...${NC}"
@@ -286,6 +326,18 @@ show_summary() {
         echo ""
         echo -e "${BLUE}🚀 Quick Start OSS:${NC}"
         echo -e "  $OUTPUT_DIR/cryptobom-oss"
+    elif [ "$EDITION" = "core" ]; then
+        echo -e "  🚀 Binary:     $OUTPUT_DIR/cryptobom-core"
+        echo -e "  🐳 Docker:     deploy/core/docker/Dockerfile.core"
+        echo ""
+        echo -e "${BLUE}🌟 Core Features (auto-detected at runtime):${NC}"
+        echo -e "  • Set CRYPTOBOM_LICENSE_KEY=ENT-... for Enterprise mode"
+        echo -e "  • Run without for OSS mode (default)"
+        echo -e "  • Enterprise port :9090, OSS port :8080"
+        echo ""
+        echo -e "${BLUE}🚀 Quick Start Core:${NC}"
+        echo -e "  OSS:       $OUTPUT_DIR/cryptobom-core"
+        echo -e "  Enterprise: CRYPTOBOM_LICENSE_KEY=ENT-xxxx $OUTPUT_DIR/cryptobom-core"
     else
         echo -e "  🚀 Binary:     $OUTPUT_DIR/cryptobom-enterprise"
         echo -e "  🐳 Docker:     deploy/enterprise/docker/Dockerfile.enterprise"
@@ -308,6 +360,9 @@ show_summary() {
     if [ "$EDITION" = "oss" ]; then
         echo -e "  🌐 Dashboard:  http://localhost:8080"
         echo -e "  🔗 API:        http://localhost:8080/api/v1"
+    elif [ "$EDITION" = "core" ]; then
+        echo -e "  🌐 OSS:        http://localhost:8080 (no license key)"
+        echo -e "  🔗 Enterprise: http://localhost:9090 (with license key)"
     else
         echo -e "  🌐 Dashboard:  http://localhost:9090"
         echo -e "  🔗 API:        http://localhost:9090/api/v1"
@@ -317,6 +372,9 @@ show_summary() {
 
 # Main build logic
 case "$EDITION" in
+    "core"|"unified"|"single")
+        build_core
+        ;;
     "oss"|"open-source"|"opensource")
         build_oss
         ;;

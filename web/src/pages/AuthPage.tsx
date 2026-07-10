@@ -31,11 +31,10 @@ import {
   WorkspacePremium,
   Storage,
   Shield,
-  RocketLaunch,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
-import { DEMO_USERS, getDemoUser } from '../config/demoUsers';
 
 interface AuthPageProps {
   defaultMode?: 'login' | 'register';
@@ -44,7 +43,7 @@ interface AuthPageProps {
 const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, loginDemo, register, registerDemo, edition, setEdition, isAuthenticated } = useAuth();
+  const { login, register, edition, setEdition, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
@@ -81,40 +80,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       }
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
-      const demoUser = getDemoUser(form.email);
-      if (demoUser) {
-        try {
-          if (mode === 'register') {
-            await registerDemo(form.name || demoUser.name, demoUser.email, demoUser.edition);
-          } else {
-            await loginDemo(demoUser.email, demoUser.edition);
-          }
-          navigate('/dashboard', { replace: true });
-          return;
-        } catch (demoErr: any) {
-          setError(demoErr?.message || 'Demo access failed');
-          return;
-        }
-      }
-
       setError(err?.message || 'Authentication failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async (email: string) => {
-    setLoading(true);
-    setError('');
-    try {
-      const demoUser = getDemoUser(email);
-      if (!demoUser) {
-        throw new Error('Demo account not found');
-      }
-      await loginDemo(demoUser.email, demoUser.edition);
-      navigate('/dashboard', { replace: true });
-    } catch (err: any) {
-      setError(err?.message || 'Demo login failed');
     } finally {
       setLoading(false);
     }
@@ -196,10 +162,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                     <Card sx={{ bgcolor: 'rgba(16,185,129,0.09)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 4 }}>
                       <CardContent sx={{ p: 2.2 }}>
                         <Typography variant="subtitle2" sx={{ color: '#bbf7d0', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-                          Demo access
+                          Enterprise ready
                         </Typography>
                         <Typography variant="body2" sx={{ mt: 1, color: '#ecfdf5' }}>
-                          Launch a passwordless demo session for OSS or Enterprise when you want to explore the platform instantly.
+                          Production-grade crypto inventory, compliance reporting, and quantum-safe migration for your organization.
                         </Typography>
                       </CardContent>
                     </Card>
@@ -213,7 +179,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
                   <Box sx={{ mt: 'auto' }}>
                     <Typography variant="body2" sx={{ color: '#94a3b8' }}>
-                      Select your edition before logging in or use a demo account below.
+                      Select your edition before logging in.
                     </Typography>
                     <ToggleButtonGroup
                       exclusive
@@ -261,32 +227,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   </Typography>
                 </Box>
 
-                    <Paper variant="outlined" sx={{ mb: 2, p: 2, borderRadius: 3, borderColor: 'rgba(148,163,184,0.18)', bgcolor: 'rgba(248,250,252,0.9)' }}>
-                  <Stack spacing={1.25}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <RocketLaunch color="primary" />
-                      <Typography variant="subtitle2" fontWeight={800}>
-                        Quick demo entry
-                      </Typography>
-                    </Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Open a seeded workspace instantly using the demo accounts below.
-                    </Typography>
-                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                          {DEMO_USERS.map((demoUser) => (
-                            <Button
-                              key={demoUser.email}
-                              size="small"
-                              variant={demoUser.edition === edition ? 'contained' : 'outlined'}
-                              onClick={() => handleDemoLogin(demoUser.email)}
-                              disabled={loading}
-                            >
-                              {demoUser.name}
-                            </Button>
-                          ))}
-                    </Stack>
-                  </Stack>
-                </Paper>
+
 
                 {error && (
                   <Alert severity="error" sx={{ mb: 2 }}>
@@ -343,7 +284,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                     <Alert severity="info" sx={{ bgcolor: 'rgba(255,244,229,0.04)', border: '1px solid rgba(255,193,7,0.12)' }}>
                       {mode === 'register'
                         ? 'Registration creates a new workspace identity and returns you to the dashboard.'
-                        : 'Use the demo buttons for instant access or sign in with your workspace credentials.'}
+                        : 'Sign in with your workspace credentials.'}
                     </Alert>
 
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
@@ -368,18 +309,34 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       </Button>
                     </Box>
 
-                    <Box sx={{ mt: 1, p: 2, borderRadius: 2, bgcolor: 'rgba(2,6,23,0.03)', border: '1px dashed rgba(15,23,42,0.12)' }}>
-                      <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
-                        Demo accounts
-                      </Typography>
-                      <Stack spacing={0.75}>
-                        {DEMO_USERS.map((demoUser) => (
-                          <Typography key={demoUser.email} variant="body2" color="text.secondary">
-                            {demoUser.email} · {demoUser.edition.toUpperCase()} · {demoUser.role}
-                          </Typography>
-                        ))}
-                      </Stack>
-                    </Box>
+                    <Divider sx={{ my: 1 }}>OR</Divider>
+
+                    <Alert severity="info" sx={{ bgcolor: 'rgba(255,244,229,0.04)', border: '1px solid rgba(255,193,7,0.12)' }}>
+                      This release ships with GitHub authentication only.
+                    </Alert>
+
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      onClick={async () => {
+                        try {
+                          const resp = await authService.githubStatus();
+                          if (!resp.data.github_oauth_enabled) {
+                            setError('GitHub OAuth is not configured. Contact your administrator.');
+                            return;
+                          }
+                          const loginResp = await authService.githubLogin();
+                          window.location.href = loginResp.data.auth_url;
+                        } catch (err: any) {
+                          setError(err?.response?.data?.message || 'GitHub OAuth not available');
+                        }
+                      }}
+                      sx={{ py: 1.1 }}
+                    >
+                      Sign in with GitHub
+                    </Button>
+
+
                   </Stack>
                 </form>
               </CardContent>

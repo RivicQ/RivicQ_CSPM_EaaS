@@ -4,6 +4,7 @@ import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typograph
 import { ArrowForward, GitHub, Search, Shield, CheckCircle, Warning, Lock } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { cbomService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
 import { tokens } from '../theme/tokens';
 
@@ -31,20 +32,33 @@ const Home: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleScan = () => {
+  const handleScan = async () => {
     if (!repoUrl.trim()) return;
     setScanStatus('scanning');
     setProgress(0);
-    const interval = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
+
+    try {
+      const resp = await cbomService.triggerScan(repoUrl.trim(), 'cbom');
+      const scanId = resp.data.scan_id;
+
+      const interval = setInterval(async () => {
+        try {
+          const statusResp = await cbomService.getScanStatus(scanId);
+          const status = statusResp.data;
+          setProgress(status.progress || 0);
+
+          if (status.status === 'completed' || status.status === 'failed') {
+            clearInterval(interval);
+            setScanStatus(status.status === 'completed' ? 'complete' : 'error');
+          }
+        } catch {
           clearInterval(interval);
-          setScanStatus('complete');
-          return 100;
+          setScanStatus('error');
         }
-        return p + 5;
-      });
-    }, 200);
+      }, 1500);
+    } catch {
+      setScanStatus('error');
+    }
   };
 
   const statusIcon = (status: string) => {

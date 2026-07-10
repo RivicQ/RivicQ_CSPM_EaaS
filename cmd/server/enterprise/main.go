@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -14,6 +15,9 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/api/enterprise"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
+	"github.com/rivic-q/cryptobom-saas/internal/middleware"
+	"github.com/rivic-q/cryptobom-saas/internal/observability"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,8 +35,33 @@ func main() {
 	// Initialize database with enterprise features
 	db := &database.DB{}
 
+	// Initialize OpenTelemetry tracing
+	otelShutdown, err := observability.InitOTEL("cryptobom-enterprise", "2.0.0")
+	if err != nil {
+		logger.Warn("OpenTelemetry initialization failed (tracing disabled): ", err)
+	} else {
+		defer func() {
+			if err := otelShutdown(context.Background()); err != nil {
+				logger.Error("OpenTelemetry shutdown error: ", err)
+			}
+		}()
+		logger.Info("OpenTelemetry tracing enabled")
+	}
+
 	// Initialize Gin router
 	router := gin.Default()
+
+	// Apply enterprise middleware stack (request ID, security headers, audit, rate limit, CORS)
+	router.Use(middleware.RequestID())
+	router.Use(middleware.SecurityHeaders())
+	router.Use(middleware.Audit(logger, db))
+	router.Use(middleware.RateLimit(edition.Detect().Features.APIRateLimit))
+	router.Use(middleware.CORS(middleware.DefaultCORSConfig()))
+	router.Use(middleware.TracingMiddleware("cryptobom-enterprise"))
+	router.Use(func(c *gin.Context) {
+		c.Header("X-CryptoBOM-Edition", "enterprise")
+		c.Next()
+	})
 
 	// Enterprise health check with IBMQ status
 	router.GET("/healthz", func(c *gin.Context) {

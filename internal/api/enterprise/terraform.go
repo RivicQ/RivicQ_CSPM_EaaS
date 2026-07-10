@@ -1,5 +1,3 @@
-//go:build enterprise
-
 package enterprise
 
 import (
@@ -97,6 +95,10 @@ type Workspace struct {
 }
 
 func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusOK, demoTerraformResources())
+		return
+	}
 	tenantID := c.GetHeader("X-Tenant-ID")
 	cloudProvider := c.Query("provider")
 	resourceType := c.Query("type")
@@ -333,6 +335,10 @@ func (h *TerraformHandler) GetWorkspaceState(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ListSecurityFindings(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusOK, demoTerraformFindings())
+		return
+	}
 	tenantID := c.GetHeader("X-Tenant-ID")
 	severity := c.Query("severity")
 	provider := c.Query("provider")

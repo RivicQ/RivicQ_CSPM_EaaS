@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	api "github.com/rivic-q/cryptobom-saas/internal/api"
+	"github.com/rivic-q/cryptobom-saas/internal/api/oss"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 )
@@ -22,7 +22,7 @@ func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
 	router := gin.New()
 	group := router.Group("/api/v1")
 	logger := logrus.New()
-	api.SetupRoutes(group, &database.DB{}, logger, &config.Config{})
+	oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
 
 	payload := map[string]string{"target": "example.com"}
 	body, err := json.Marshal(payload)
@@ -62,7 +62,7 @@ func TestScannerFlowRejectsEmptyTarget(t *testing.T) {
 	router := gin.New()
 	group := router.Group("/api/v1")
 	logger := logrus.New()
-	api.SetupRoutes(group, &database.DB{}, logger, &config.Config{})
+	oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
 
 	payload := map[string]string{"target": "   "}
 	body, err := json.Marshal(payload)

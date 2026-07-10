@@ -48,13 +48,15 @@ services:
       - CRYPTOBOM_PORT=8080
       - CRYPTOBOM_LOG_LEVEL=info
       - DATABASE_URL=postgres://cryptobom:${DB_PASSWORD:-cryptobom_dev}@db:5432/cryptobom?sslmode=disable
+      - FRONTEND_REDIRECT_URL=http://localhost:3000
     env_file:
       - path: .env
         required: false
     depends_on:
       db:
         condition: service_healthy
-      - migrate
+      migrate:
+        condition: service_completed_successfully
     volumes:
       - migrate-status:/migrate-status
     networks:

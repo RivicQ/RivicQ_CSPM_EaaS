@@ -176,6 +176,9 @@ func GoogleCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 
 		// If a frontend redirect URL is configured, redirect the browser instead of returning JSON
 		frontendURL := os.Getenv("FRONTEND_REDIRECT_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
 		if frontendURL != "" {
 			redirectURL := fmt.Sprintf("%s?access_token=%s&refresh_token=%s&edition=%s&user_id=%s&user_name=%s&user_email=%s&user_role=%s",
 				strings.TrimRight(frontendURL, "/")+"/oauth/callback",

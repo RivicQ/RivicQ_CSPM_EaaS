@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
@@ -9,6 +9,10 @@ import { ThemeModeProvider } from './theme/ThemeContext';
 import RequireAuth from './components/RequireAuth';
 import RequireEnterprise from './components/RequireEnterprise';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { PageErrorBoundary } from './components/PageErrorBoundary';
+import { PageSkeleton } from './components/LoadingScreen';
+
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -20,7 +24,8 @@ import Scanner from './pages/Scanner';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import DevSecOpsTools from './pages/DevSecOpsTools';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import RivicQEcosystem from './pages/RivicQEcosystem';
+import OAuthCallback from './pages/OAuthCallback';
 
 import Inventory from './pages/enterprise/Inventory';
 import Compliance from './pages/enterprise/Compliance';
@@ -44,11 +49,17 @@ const LogoutRedirect: React.FC = () => {
   return <Navigate to="/login" replace />;
 };
 
+const wrap = (Component: React.ComponentType<any>, name: string) => (
+  <PageErrorBoundary name={name}>
+    <Suspense fallback={<PageSkeleton />}>
+      <Component />
+    </Suspense>
+  </PageErrorBoundary>
+);
+
 const App: React.FC = () => {
   const [mode, setMode] = React.useState<'light' | 'dark'>('light');
   const theme = React.useMemo(() => {
-    // lazy load our centralized theme generator
-    // to keep App composition clean
     const { getAppTheme } = require('./theme/theme');
     return getAppTheme(mode);
   }, [mode]);
@@ -58,8 +69,8 @@ const App: React.FC = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000, // 1 minute
-        gcTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 60 * 1000,
+        gcTime: 5 * 60 * 1000,
         retry: 2,
       },
     },
@@ -72,7 +83,6 @@ const App: React.FC = () => {
           <ThemeModeProvider mode={mode} toggleMode={toggleMode}>
             <ThemeProvider theme={theme}>
               <CssBaseline />
-              {/* expose theme toggle via theme context; Layout will render a toggle control */}
             <GlobalStyles
               styles={{
                 '*': {
@@ -94,12 +104,13 @@ const App: React.FC = () => {
                 },
               }}
             />
-            <BrowserRouter basename={process.env.PUBLIC_URL}>
+            <BrowserRouter basename={process.env.PUBLIC_URL || '/platform'}>
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/switcher" element={<EditionSwitcher />} />
+                <Route path="/" element={wrap(Home, 'Home')} />
+                <Route path="/login" element={wrap(Login, 'Login')} />
+                <Route path="/register" element={wrap(Register, 'Register')} />
+                <Route path="/oauth/callback" element={wrap(OAuthCallback, 'OAuthCallback')} />
+                <Route path="/switcher" element={wrap(EditionSwitcher, 'EditionSwitcher')} />
                 <Route path="/logout" element={<LogoutRedirect />} />
                 <Route
                   path="/"
@@ -109,25 +120,25 @@ const App: React.FC = () => {
                     </RequireAuth>
                   }
                 >
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="assets" element={<Assets />} />
-                  <Route path="assets/:id" element={<AssetDetails />} />
-                  <Route path="scanner" element={<Scanner />} />
-                  <Route path="analytics" element={<Analytics />} />
-                  <Route path="settings" element={<Settings />} />
-                  <Route path="tools" element={<DevSecOpsTools />} />
+                  <Route path="dashboard" element={wrap(Dashboard, 'Dashboard')} />
+                  <Route path="assets" element={wrap(Assets, 'Assets')} />
+                  <Route path="assets/:id" element={wrap(AssetDetails, 'AssetDetails')} />
+                  <Route path="scanner" element={wrap(Scanner, 'Scanner')} />
+                  <Route path="analytics" element={wrap(Analytics, 'Analytics')} />
+                  <Route path="settings" element={wrap(Settings, 'Settings')} />
+                  <Route path="tools" element={wrap(DevSecOpsTools, 'DevSecOpsTools')} />
+                  <Route path="ecosystem" element={wrap(RivicQEcosystem, 'RivicQEcosystem')} />
 
-                  {/* Enterprise Routes */}
-                  <Route path="enterprise/inventory" element={<RequireEnterprise><Inventory /></RequireEnterprise>} />
-                  <Route path="enterprise/compliance" element={<RequireEnterprise><Compliance /></RequireEnterprise>} />
-                  <Route path="enterprise/quantum" element={<RequireEnterprise><Quantum /></RequireEnterprise>} />
-                  <Route path="enterprise/multicloud" element={<RequireEnterprise><MultiCloud /></RequireEnterprise>} />
-                  <Route path="enterprise/cncf" element={<RequireEnterprise><CNCF /></RequireEnterprise>} />
-                  <Route path="enterprise/terraform" element={<RequireEnterprise><TerraformIaC /></RequireEnterprise>} />
-                  <Route path="enterprise/ibmcloud" element={<RequireEnterprise><IBMCloud /></RequireEnterprise>} />
-                  <Route path="enterprise/awscloud" element={<RequireEnterprise><AWSCloud /></RequireEnterprise>} />
-                  <Route path="enterprise/quantum-attestation" element={<RequireEnterprise><QuantumAttestation /></RequireEnterprise>} />
-                  <Route path="enterprise/cspm" element={<RequireEnterprise><CSPM /></RequireEnterprise>} />
+                  <Route path="enterprise/inventory" element={<RequireEnterprise>{wrap(Inventory, 'Inventory')}</RequireEnterprise>} />
+                  <Route path="enterprise/compliance" element={<RequireEnterprise>{wrap(Compliance, 'Compliance')}</RequireEnterprise>} />
+                  <Route path="enterprise/quantum" element={<RequireEnterprise>{wrap(Quantum, 'Quantum')}</RequireEnterprise>} />
+                  <Route path="enterprise/multicloud" element={<RequireEnterprise>{wrap(MultiCloud, 'MultiCloud')}</RequireEnterprise>} />
+                  <Route path="enterprise/cncf" element={<RequireEnterprise>{wrap(CNCF, 'CNCF')}</RequireEnterprise>} />
+                  <Route path="enterprise/terraform" element={<RequireEnterprise>{wrap(TerraformIaC, 'Terraform')}</RequireEnterprise>} />
+                  <Route path="enterprise/ibmcloud" element={<RequireEnterprise>{wrap(IBMCloud, 'IBMCloud')}</RequireEnterprise>} />
+                  <Route path="enterprise/awscloud" element={<RequireEnterprise>{wrap(AWSCloud, 'AWSCloud')}</RequireEnterprise>} />
+                  <Route path="enterprise/quantum-attestation" element={<RequireEnterprise>{wrap(QuantumAttestation, 'QuantumAttestation')}</RequireEnterprise>} />
+                  <Route path="enterprise/cspm" element={<RequireEnterprise>{wrap(CSPM, 'CSPM')}</RequireEnterprise>} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

@@ -116,7 +116,6 @@ func Load() (*Config, error) {
 	viper.SetDefault("database.host", "localhost")
 	viper.SetDefault("database.port", 5432)
 	viper.SetDefault("database.user", "cryptobom")
-	viper.SetDefault("database.password", "password")
 	viper.SetDefault("database.name", "cryptobom_saas")
 	viper.SetDefault("database.sslmode", "require")
 

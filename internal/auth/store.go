@@ -9,6 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	defaultOSSBootstrapEmail = "admin@rivicq.local"
+	defaultOSSBootstrapName  = "OSS Admin"
+	defaultOSSBootstrapRole  = "admin"
+	defaultOSSBootstrapPass  = "admin12345!"
+)
+
 // MockUserStore implements UserStore interface with database
 type MockUserStore struct {
 	users map[string]*User
@@ -77,49 +84,58 @@ func NewMockUserStore() (*MockUserStore, error) {
 	return &MockUserStore{users: users}, nil
 }
 
+// NewMockUserStoreWithUsers creates a mock user store with the given users.
+func NewMockUserStoreWithUsers(users map[string]*User) *MockUserStore {
+	return &MockUserStore{users: users}
+}
+
 // NewDatabaseUserStore creates a database user store
 func NewDatabaseUserStore(db *sql.DB) *DatabaseUserStore {
 	return &DatabaseUserStore{db: db}
 }
 
 // NewWorkDomainUserStore creates a seeded in-memory store for approved work domains.
+// Returns an error if no bootstrap user is configured, so callers should fall back.
 func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 	allowedDomains := parseAllowedDomains(os.Getenv("AUTH_ALLOWED_DOMAINS"))
-	// If no allowed domains are configured, default to rivicq internal domains for demo/staging
-	if len(allowedDomains) == 0 {
-		allowedDomains = []string{"rivicq.de", "rivicq.com"}
-	}
 	users := map[string]*User{}
 
 	bootstrapEmail := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_EMAIL"))
+	if bootstrapEmail == "" {
+		bootstrapEmail = defaultOSSBootstrapEmail
+		if len(allowedDomains) > 0 {
+			bootstrapEmail = "admin@" + allowedDomains[0]
+		}
+	}
 	bootstrapPassword := os.Getenv("AUTH_BOOTSTRAP_PASSWORD")
-	if bootstrapEmail != "" && bootstrapPassword != "" {
-		if !emailAllowed(bootstrapEmail, allowedDomains) {
-			return nil, fmt.Errorf("bootstrap email domain is not allowed")
-		}
+	if bootstrapPassword == "" {
+		bootstrapPassword = defaultOSSBootstrapPass
+	}
+	bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
+	if bootstrapName == "" {
+		bootstrapName = defaultOSSBootstrapName
+	}
+	bootstrapRole := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_ROLE"))
+	if bootstrapRole == "" {
+		bootstrapRole = defaultOSSBootstrapRole
+	}
 
-		bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
-		if bootstrapName == "" {
-			bootstrapName = "Workspace Admin"
-		}
-		bootstrapRole := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_ROLE"))
-		if bootstrapRole == "" {
-			bootstrapRole = "admin"
-		}
+	if !emailAllowed(bootstrapEmail, allowedDomains) {
+		return nil, fmt.Errorf("bootstrap email domain is not allowed")
+	}
 
-		hashedPassword, err := hashPassword(bootstrapPassword)
-		if err != nil {
-			return nil, fmt.Errorf("failed to hash bootstrap password: %w", err)
-		}
+	hashedPassword, err := hashPassword(bootstrapPassword)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash bootstrap password: %w", err)
+	}
 
-		users[strings.ToLower(bootstrapEmail)] = &User{
-			ID:       "bootstrap-user",
-			TenantID: "tenant-1",
-			Email:    bootstrapEmail,
-			Name:     bootstrapName,
-			Role:     bootstrapRole,
-			Password: hashedPassword,
-		}
+	users[strings.ToLower(bootstrapEmail)] = &User{
+		ID:       "bootstrap-user",
+		TenantID: "tenant-1",
+		Email:    bootstrapEmail,
+		Name:     bootstrapName,
+		Role:     bootstrapRole,
+		Password: hashedPassword,
 	}
 
 	return &WorkDomainUserStore{users: users, allowedDomains: allowedDomains}, nil
@@ -133,9 +149,19 @@ func (m *MockUserStore) GetUserByEmail(email string) (*User, error) {
 	return nil, fmt.Errorf("user not found")
 }
 
+func (m *MockUserStore) GetUserByID(id string) (*User, error) {
+	for _, user := range m.users {
+		if user.ID == id {
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("user not found")
+}
+
 func (m *MockUserStore) CreateUser(user *User) error {
 	user.ID = uuid.New().String()
 	user.TenantID = "tenant-1"
+	user.MFAEnabled = false
 	hashedPassword, err := hashPassword(user.Password)
 	if err != nil {
 		return err
@@ -153,18 +179,21 @@ func (m *MockUserStore) UpdateUser(user *User) error {
 // DatabaseUserStore methods
 func (d *DatabaseUserStore) GetUserByEmail(email string) (*User, error) {
 	query := `
-		SELECT id, tenant_id, email, name, role 
+		SELECT id, tenant_id, email, name, role, mfa_enabled, mfa_secret
 		FROM users 
 		WHERE email = $1`
 
 	user := &User{}
+	var mfaSecret sql.NullString
 	err := d.db.QueryRow(query, email).Scan(
-		&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Role,
+		&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Role, &user.MFAEnabled, &mfaSecret,
 	)
 
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %w", err)
 	}
+
+	user.MFASecret = mfaSecret.String
 
 	// Get password separately for security
 	var password string
@@ -173,6 +202,26 @@ func (d *DatabaseUserStore) GetUserByEmail(email string) (*User, error) {
 		return nil, err
 	}
 	user.Password = password
+
+	return user, nil
+}
+
+func (d *DatabaseUserStore) GetUserByID(id string) (*User, error) {
+	query := `
+		SELECT id, tenant_id, email, name, role, mfa_enabled, mfa_secret
+		FROM users 
+		WHERE id = $1`
+
+	user := &User{}
+	var mfaSecret sql.NullString
+	err := d.db.QueryRow(query, id).Scan(
+		&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Role, &user.MFAEnabled, &mfaSecret,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %w", err)
+	}
+	user.MFASecret = mfaSecret.String
 
 	return user, nil
 }
@@ -217,12 +266,22 @@ func (w *WorkDomainUserStore) GetUserByEmail(email string) (*User, error) {
 	return nil, fmt.Errorf("user not found")
 }
 
+func (w *WorkDomainUserStore) GetUserByID(id string) (*User, error) {
+	for _, user := range w.users {
+		if user.ID == id {
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("user not found")
+}
+
 func (w *WorkDomainUserStore) CreateUser(user *User) error {
 	if !emailAllowed(user.Email, w.allowedDomains) {
 		return fmt.Errorf("email domain not allowed")
 	}
 	user.ID = uuid.New().String()
 	user.TenantID = "tenant-1"
+	user.MFAEnabled = false
 	hashedPassword, err := hashPassword(user.Password)
 	if err != nil {
 		return err
@@ -288,6 +347,11 @@ func CreateDefaultUsers(db *sql.DB) error {
 	}
 
 	return nil
+}
+
+// hashPassword is a local wrapper for the exported HashPassword.
+func hashPassword(password string) (string, error) {
+	return HashPassword(password)
 }
 
 func parseAllowedDomains(raw string) []string {

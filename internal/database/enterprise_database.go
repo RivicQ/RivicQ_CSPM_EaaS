@@ -1,5 +1,3 @@
-//go:build enterprise
-
 package database
 
 import (
@@ -404,6 +402,46 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 			generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);`,
+
+		`CREATE TABLE IF NOT EXISTS api_keys (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			name VARCHAR(255) NOT NULL,
+			key_prefix VARCHAR(8) NOT NULL,
+			key_hash VARCHAR(64) NOT NULL,
+			role VARCHAR(50) DEFAULT 'viewer',
+			scopes TEXT DEFAULT '',
+			expires_at TIMESTAMP WITH TIME ZONE,
+			last_used_at TIMESTAMP WITH TIME ZONE,
+			status VARCHAR(20) DEFAULT 'active',
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		);`,
+
+		`CREATE TABLE IF NOT EXISTS webhooks (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			name VARCHAR(255) NOT NULL,
+			url VARCHAR(1024) NOT NULL,
+			secret VARCHAR(255) NOT NULL,
+			events JSONB NOT NULL DEFAULT '[]',
+			status VARCHAR(20) DEFAULT 'active',
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		);`,
+
+		`CREATE TABLE IF NOT EXISTS webhook_deliveries (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			webhook_id UUID NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE,
+			event_type VARCHAR(100) NOT NULL,
+			status VARCHAR(20) NOT NULL,
+			status_code INT DEFAULT 0,
+			response_body TEXT,
+			delivered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		);`,
+
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_enabled BOOLEAN DEFAULT FALSE;`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_secret VARCHAR(255) DEFAULT '';`,
 	}
 
 	for _, query := range queries {
@@ -445,6 +483,11 @@ func createEnterpriseIndexes(db *EnterpriseDB) error {
 		`CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events(severity);`,
 		`CREATE INDEX IF NOT EXISTS idx_kubernetes_clusters_tenant ON kubernetes_clusters(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_compliance_reports_tenant ON compliance_reports(tenant_id);`,
+		`CREATE INDEX IF NOT EXISTS idx_api_keys_tenant ON api_keys(tenant_id);`,
+		`CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys(key_prefix);`,
+		`CREATE INDEX IF NOT EXISTS idx_webhooks_tenant ON webhooks(tenant_id);`,
+		`CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_webhook ON webhook_deliveries(webhook_id);`,
+		`CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_delivered ON webhook_deliveries(delivered_at);`,
 	}
 
 	for _, idx := range indexes {

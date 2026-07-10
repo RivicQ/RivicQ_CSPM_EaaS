@@ -496,3 +496,13 @@ func (q *Queries) HealthCheck() error {
 	}
 	return nil
 }
+
+// InsertAuditEvent logs an audit event to the database
+func (q *Queries) InsertAuditEvent(tenantID, eventType, requestID, method, path string, status, latencyMs int, ip, userAgent, actorID string) error {
+	_, err := q.db.Exec(
+		`INSERT INTO audit_events (tenant_id, event_type, request_id, method, path, status, latency_ms, ip, user_agent, actor_id)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+		tenantID, eventType, requestID, method, path, status, latencyMs, ip, userAgent, actorID,
+	)
+	return err
+}

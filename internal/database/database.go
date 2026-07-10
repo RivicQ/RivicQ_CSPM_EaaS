@@ -3,62 +3,79 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
 	_ "github.com/lib/pq"
-	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/sirupsen/logrus"
 )
 
 type DB struct {
 	*sql.DB
-	logger *logrus.Logger
+	Queries *Queries
+	logger  *logrus.Logger
 }
 
-func NewConnection(cfg config.DatabaseConfig) (*DB, error) {
+func New(logger *logrus.Logger) *DB {
+	host := envOrDefault("CRYPTOBOM_DB_HOST", "localhost")
+	port := envOrDefaultInt("CRYPTOBOM_DB_PORT", 5432)
+	user := envOrDefault("CRYPTOBOM_DB_USER", "cryptobom")
+	password := os.Getenv("CRYPTOBOM_DB_PASSWORD")
+	dbname := envOrDefault("CRYPTOBOM_DB_NAME", "cryptobom_saas")
+
+	if password == "" {
+		logger.Warn("CRYPTOBOM_DB_PASSWORD not set — using default for local dev only")
+		password = "cryptobom"
+	}
+	sslmode := envOrDefault("CRYPTOBOM_DB_SSLMODE", "disable")
+
 	dsn := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode,
+		host, port, user, password, dbname, sslmode,
 	)
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %w", err)
+		logger.WithError(err).Warn("Database unavailable — running in demo mode")
+		return nil
 	}
 
-	// Test the connection
 	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		logger.WithError(err).Warn("Database unreachable — running in demo mode")
+		db.Close()
+		return nil
 	}
 
-	// Configure connection pool
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
-	logger := logrus.New()
-	logger.Info("Database connection established successfully")
+	logger.Info("Database connection established")
 
 	return &DB{
-		DB:     db,
-		logger: logger,
-	}, nil
+		DB:      db,
+		Queries: NewQueries(db),
+		logger:  logger,
+	}
 }
 
-func RunMigrations(db *DB, migrationsDir string) error {
-	logger := logrus.New()
-	logger.Info("Running database migrations...")
-
-	// Create initial tables
-	if err := createTables(db); err != nil {
-		return fmt.Errorf("failed to create tables: %w", err)
+func RunMigrations(db *DB) error {
+	if db == nil {
+		return nil
 	}
-
-	logger.Info("Database migrations completed successfully")
+	if err := createTables(db); err != nil {
+		return fmt.Errorf("migrations failed: %w", err)
+	}
+	if err := createIndexes(db); err != nil {
+		return fmt.Errorf("index creation failed: %w", err)
+	}
 	return nil
 }
 
 func createTables(db *DB) error {
+	if db == nil {
+		return nil
+	}
 	queries := []string{
 		`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`,
 		`CREATE TABLE IF NOT EXISTS tenants (
@@ -101,17 +118,6 @@ func createTables(db *DB) error {
 			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);`,
-		`CREATE TABLE IF NOT EXISTS quantum_attestations (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			cbom_report_id UUID NOT NULL REFERENCES cbom_reports(id),
-			attestation_type VARCHAR(100) NOT NULL,
-			quantum_network VARCHAR(255),
-			status VARCHAR(50) DEFAULT 'pending',
-			result JSONB,
-			attested_at TIMESTAMP WITH TIME ZONE,
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		);`,
 		`CREATE TABLE IF NOT EXISTS security_events (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 			tenant_id UUID NOT NULL REFERENCES tenants(id),
@@ -137,28 +143,45 @@ func createTables(db *DB) error {
 			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);`,
+		`CREATE TABLE IF NOT EXISTS audit_events (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			tenant_id UUID REFERENCES tenants(id),
+			event_type VARCHAR(50) NOT NULL,
+			request_id VARCHAR(255),
+			method VARCHAR(10),
+			path TEXT,
+			status INT,
+			latency_ms INT,
+			ip VARCHAR(45),
+			user_agent TEXT,
+			actor_id VARCHAR(255),
+			metadata JSONB,
+			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		);`,
 	}
 
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
-			return fmt.Errorf("failed to execute query: %s, error: %w", query, err)
+			return fmt.Errorf("failed to execute query: %s, error: %w", query[:60], err)
 		}
 	}
-
 	return nil
 }
 
-// Create indexes for better performance
 func createIndexes(db *DB) error {
+	if db == nil {
+		return nil
+	}
 	indexes := []string{
 		`CREATE INDEX IF NOT EXISTS idx_users_tenant_id ON users(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_cbom_reports_tenant_id ON cbom_reports(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_crypto_assets_cbom_report_id ON crypto_assets(cbom_report_id);`,
-		`CREATE INDEX IF NOT EXISTS idx_quantum_attestations_cbom_report_id ON quantum_attestations(cbom_report_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_security_events_tenant_id ON security_events(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_kubernetes_clusters_tenant_id ON kubernetes_clusters(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_crypto_assets_quantum_safe ON crypto_assets(quantum_safe);`,
 		`CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events(severity);`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_events_created_at ON audit_events(created_at);`,
+		`CREATE INDEX IF NOT EXISTS idx_audit_events_event_type ON audit_events(event_type);`,
 	}
 
 	for _, index := range indexes {
@@ -166,6 +189,22 @@ func createIndexes(db *DB) error {
 			return fmt.Errorf("failed to create index: %s, error: %w", index, err)
 		}
 	}
-
 	return nil
+}
+
+func envOrDefault(key, def string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return def
+}
+
+func envOrDefaultInt(key string, def int) int {
+	if v := os.Getenv(key); v != "" {
+		var n int
+		if _, err := fmt.Sscanf(v, "%d", &n); err == nil {
+			return n
+		}
+	}
+	return def
 }

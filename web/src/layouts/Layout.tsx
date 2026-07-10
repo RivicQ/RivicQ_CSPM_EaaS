@@ -73,6 +73,7 @@ const Layout: React.FC = () => {
     { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
     { text: 'Settings', icon: <Settings />, path: '/settings' },
     { text: 'DevSecOps Tools', icon: <Category />, path: '/tools' },
+    { text: 'RivicQ Ecosystem', icon: <Category />, path: '/ecosystem' },
   ];
 
   const enterpriseItems: NavItem[] = [

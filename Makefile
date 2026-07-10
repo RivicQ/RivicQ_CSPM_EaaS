@@ -11,7 +11,7 @@
 #   make docker-down  – stop all Docker Compose services
 #   make clean        – remove build artifacts
 
-.PHONY: all dev dev-backend dev-frontend build build-oss build-enterprise \
+.PHONY: all dev dev-core dev-backend dev-frontend build build-core build-oss build-enterprise \
         test lint migrate seed docker-up docker-down clean help
 
 GO        ?= go
@@ -29,6 +29,10 @@ $(ENV_FILE):
 dev: $(ENV_FILE)
 	docker compose up --build
 
+## Start the unified core backend (edition auto-detected from CRYPTOBOM_LICENSE_KEY)
+dev-core: $(ENV_FILE) build-core
+	./$(BIN_DIR)/cryptobom-core
+
 ## Start the Go backend in demo mode (no database required)
 dev-backend: $(ENV_FILE) build-oss
 	CRYPTOBOM_PORT=8080 ./$(BIN_DIR)/cryptobom-oss
@@ -39,15 +43,19 @@ dev-frontend:
 
 # ── Build ───────────────────────────────────────────────────────────────────
 ## Build all binaries
-build: build-oss build-enterprise
+build: build-core build-oss build-enterprise
+
+build-core:
+	@mkdir -p $(BIN_DIR)
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/cryptobom-core ./cmd/server/
 
 build-oss:
 	@mkdir -p $(BIN_DIR)
-	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/cryptobom-oss ./cmd/server/oss/...
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/cryptobom-oss ./cmd/server/oss/
 
 build-enterprise:
 	@mkdir -p $(BIN_DIR)
-	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/cryptobom-enterprise ./cmd/server/enterprise/...
+	$(GO) build $(GOFLAGS) -tags enterprise -o $(BIN_DIR)/cryptobom-enterprise ./cmd/server/enterprise/
 
 # ── Tests ───────────────────────────────────────────────────────────────────
 ## Run Go unit tests with race detector

@@ -1,6 +1,7 @@
 package edition
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -63,6 +64,12 @@ func ossConfig() *Config {
 }
 
 func enterpriseConfig() *Config {
+	rateLimit := 1000
+	if envLimit := os.Getenv("CRYPTOBOM_RATE_LIMIT"); envLimit != "" {
+		if n, err := fmt.Sscanf(envLimit, "%d", &rateLimit); err != nil || n != 1 {
+			rateLimit = 1000
+		}
+	}
 	return &Config{
 		Edition: Enterprise,
 		Features: Features{
@@ -73,7 +80,7 @@ func enterpriseConfig() *Config {
 			ComplianceReporting: true,
 			SSOSAMIL:            true,
 			AuditLog:            true,
-			APIRateLimit:        -1,
+			APIRateLimit:        rateLimit,
 		},
 	}
 }

@@ -60,3 +60,22 @@ CREATE TABLE IF NOT EXISTS bom_reports (
     content     JSONB NOT NULL DEFAULT '{}',
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS audit_events (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    org_id      UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    event_type  TEXT NOT NULL,
+    request_id  TEXT,
+    method      TEXT,
+    path        TEXT,
+    status      INT,
+    latency_ms  INT,
+    ip          TEXT,
+    user_agent  TEXT,
+    actor_id    TEXT,
+    metadata    JSONB,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_events_created_at ON audit_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_events_event_type ON audit_events(event_type);

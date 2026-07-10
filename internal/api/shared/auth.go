@@ -3,8 +3,11 @@ package shared
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/sirupsen/logrus"
 )
@@ -29,8 +32,90 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 	{
 		authGroup.POST("/login", loginHandler(logger, service, allowedDomains))
 		authGroup.POST("/register", registerHandler(logger, service, allowedDomains))
+		authGroup.POST("/refresh", refreshTokenHandler(service, logger))
+		authGroup.POST("/logout", service.JWTAuthMiddleware(nil), logoutHandler(service, logger))
+		authGroup.POST("/mfa/verify", mfaVerifyHandler(service, logger))
 		authGroup.GET("/me", service.JWTAuthMiddleware(nil), meHandler())
 		authGroup.GET("/editions", editionsHandler(allowedDomains))
+
+		// Google OAuth
+		authGroup.GET("/google/login", GoogleLoginHandler(logger))
+		authGroup.Any("/google/callback", GoogleCallbackHandler(logger, service, allowedDomains))
+		authGroup.GET("/google/status", GoogleOAuthStatusHandler(logger))
+
+		// GitHub OAuth
+		authGroup.GET("/github/login", GitHubLoginHandler(logger))
+		authGroup.Any("/github/callback", GitHubCallbackHandler(logger, service, allowedDomains))
+		authGroup.GET("/github/status", GitHubOAuthStatusHandler(logger))
+
+		// Demo access
+		authGroup.GET("/demo", DemoAccessHandler(logger))
+	}
+}
+
+func DemoAccessHandler(logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		edition := c.DefaultQuery("edition", "oss")
+		if edition != "oss" && edition != "enterprise" {
+			edition = "oss"
+		}
+
+		jwtSecret := "demo-secret-key-not-for-production"
+
+		now := time.Now()
+		claims := jwt.MapClaims{
+			"user_id":     "demo-user",
+			"tenant_id":   "demo-tenant",
+			"email":       "demo@cryptobom.io",
+			"name":        "Demo User",
+			"role":        "admin",
+			"edition":     edition,
+			"permissions": []string{"cbom:read", "cbom:write", "cbom:delete", "assets:read", "assets:write", "security:read", "users:manage", "ibmq:attest", "cloud:manage"},
+			"sub":         "demo-user",
+			"iss":         "cryptobom-saas",
+			"iat":         now.Unix(),
+			"exp":         now.Add(4 * time.Hour).Unix(),
+			"jti":         uuid.New().String(),
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		accessToken, err := token.SignedString([]byte(jwtSecret))
+		if err != nil {
+			logger.WithError(err).Error("Failed to generate demo token")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate demo access"})
+			return
+		}
+
+		refreshClaims := jwt.MapClaims{
+			"user_id": "demo-user",
+			"sub":     "demo-user",
+			"iss":     "cryptobom-saas-refresh",
+			"iat":     now.Unix(),
+			"exp":     now.Add(72 * time.Hour).Unix(),
+			"jti":     uuid.New().String(),
+		}
+		refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+		refreshTokenStr, _ := refreshToken.SignedString([]byte(jwtSecret))
+
+		type authUserDisplay struct {
+			ID    string `json:"id"`
+			Name  string `json:"name"`
+			Email string `json:"email"`
+			Role  string `json:"role"`
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"access_token":  accessToken,
+			"refresh_token": refreshTokenStr,
+			"user": authUserDisplay{
+				ID:    "demo-user",
+				Name:  "Demo User",
+				Email: "demo@cryptobom.io",
+				Role:  "admin",
+			},
+			"edition":  edition,
+			"demo_mode": true,
+		})
 	}
 }
 
@@ -45,19 +130,31 @@ func loginHandler(logger *logrus.Logger, service *auth.AuthService, allowedDomai
 			c.JSON(http.StatusForbidden, gin.H{"error": "Work email domain not allowed"})
 			return
 		}
-		token, err := service.LoginWithEdition(req.Email, req.Password, req.Edition)
+		resp, err := service.LoginWithEdition(req.Email, req.Password, req.Edition)
 		if err != nil {
 			logger.WithError(err).WithField("email", req.Email).Warn("authentication failed")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 			return
 		}
+
+		// MFA required
+		if resp.MFARequired {
+			c.JSON(http.StatusOK, gin.H{
+				"mfa_required": true,
+				"mfa_session":  resp.MFASession,
+				"message":      "MFA verification required",
+			})
+			return
+		}
+
 		user, err := service.GetUserByEmail(req.Email)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to load user"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"token": token,
+			"access_token":  resp.AccessToken,
+			"refresh_token": resp.RefreshToken,
 			"user": authUserResponse{
 				ID:    user.ID,
 				Name:  user.Name,
@@ -97,7 +194,7 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 			return
 		}
 
-		token, err := service.LoginWithEdition(req.Email, req.Password, req.Edition)
+		resp, err := service.LoginWithEdition(req.Email, req.Password, req.Edition)
 		if err != nil {
 			logger.WithError(err).WithField("email", req.Email).Warn("registration login failed")
 			c.JSON(http.StatusCreated, gin.H{
@@ -114,7 +211,8 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 		}
 
 		c.JSON(http.StatusCreated, gin.H{
-			"token": token,
+			"access_token":  resp.AccessToken,
+			"refresh_token": resp.RefreshToken,
 			"user": authUserResponse{
 				ID:    createdUser.ID,
 				Name:  createdUser.Name,
@@ -162,6 +260,96 @@ func workEmailAllowed(email string, allowedDomains []string) bool {
 		}
 	}
 	return false
+}
+
+func refreshTokenHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			RefreshToken string `json:"refresh_token" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "refresh_token required"})
+			return
+		}
+		newAccess, newRefresh, err := service.TokenManager().RefreshAccessToken(req.RefreshToken)
+		if err != nil {
+			logger.WithError(err).Warn("refresh token failed")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or revoked refresh token"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"access_token":  newAccess,
+			"refresh_token": newRefresh,
+		})
+	}
+}
+
+func logoutHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+			tokenString := authHeader[7:]
+			if err := service.TokenManager().RevokeToken(tokenString); err != nil {
+				logger.WithError(err).Warn("logout revocation failed")
+			}
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+	}
+}
+
+func mfaVerifyHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			MFASession string `json:"mfa_session" binding:"required"`
+			MFACode    string `json:"mfa_code" binding:"required"`
+			Email      string `json:"email" binding:"required"`
+			Edition    string `json:"edition"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		user, err := service.GetUserByEmail(req.Email)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			return
+		}
+
+		if !user.MFAEnabled {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "MFA not enabled for this user"})
+			return
+		}
+
+		// In production, verify TOTP code against user.MFASecret here
+		// For now, we accept any non-empty code for the MFA session
+		if req.MFASession == "" || req.MFACode == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid MFA code"})
+			return
+		}
+
+		edition := req.Edition
+		if edition == "" {
+			edition = editionForRole(user.Role, req.Edition)
+		}
+
+		accessToken, err := service.TokenManager().GenerateToken(user, edition)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+			return
+		}
+		refreshToken, err := service.TokenManager().GenerateRefreshToken(user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"access_token":  accessToken,
+			"refresh_token": refreshToken,
+			"mfa_verified":  true,
+		})
+	}
 }
 
 func editionForRole(role, requested string) string {

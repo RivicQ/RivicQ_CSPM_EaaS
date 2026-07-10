@@ -1,13 +1,23 @@
 import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api/v1';
+import { getAPIBaseURL, setAPIBaseURL } from '../config/editions';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getAPIBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Auto-update base URL when edition detection changes it
+export function syncAPIBaseURL(): void {
+  const url = getAPIBaseURL();
+  if (api.defaults.baseURL !== url) {
+    api.defaults.baseURL = url;
+  }
+}
+
+// Allow external code to update the API base URL at runtime
+export { setAPIBaseURL, getAPIBaseURL };
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
@@ -22,7 +32,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');
-      window.location.href = '/login';
+      window.location.href = '/platform/login';
     }
     return Promise.reject(error);
   }
@@ -99,6 +109,14 @@ export const authService = {
   me: () => api.get('/auth/me'),
 
   editions: () => api.get('/auth/editions'),
+
+  googleLogin: () => api.get('/auth/google/login'),
+
+  googleStatus: () => api.get('/auth/google/status'),
+
+  githubLogin: () => api.get('/auth/github/login'),
+
+  githubStatus: () => api.get('/auth/github/status'),
 };
 
 export const complianceService = {
@@ -384,6 +402,29 @@ export const securityService = {
   
   mlSecurityScan: (data: any) =>
     api.post('/security/ml-scan', data),
+};
+
+export const cspmService = {
+  getOverview: () => api.get('/cspm/overview'),
+};
+
+export const ecosystemService = {
+  getTools: () => api.get('/ecosystem/tools'),
+  getTool: (id: string) => api.get(`/ecosystem/tools/${id}`),
+  getCategories: () => api.get('/ecosystem/categories'),
+};
+
+export const coreService = {
+  getStatus: (edition?: string) => api.get('/core/status', { params: { edition } }),
+  getServices: () => api.get('/core/services'),
+  checkIntegration: (name: string) => api.get(`/core/integrations/${name}`),
+};
+
+export const gitHubScanService = {
+  scanRepos: (repos: string[], scanType?: string, deepScan?: boolean) =>
+    api.post('/github/scan', { repos, scan_type: scanType, deep_scan: deepScan }),
+  listRepos: (org?: string) => api.get('/github/repos', { params: { org } }),
+  getScanStatus: (id: string) => api.get(`/github/scans/${id}`),
 };
 
 export default api;

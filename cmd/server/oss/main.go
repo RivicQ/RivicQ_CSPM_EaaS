@@ -12,6 +12,7 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/api/oss"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/middleware"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,6 +32,32 @@ func main() {
 
 	// Initialize Gin router
 	router := gin.Default()
+
+	// CORS middleware — required for frontend dev server (different port)
+	router.Use(middleware.CORS(middleware.DefaultCORSConfig()))
+
+	// Edition detection for frontend auto-config
+	router.GET("/edition", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"edition": "oss",
+			"features": gin.H{
+				"dashboard":           true,
+				"assetInventory":      true,
+				"scanner":             true,
+				"analytics":           true,
+				"authentication":      true,
+				"github_oauth":        os.Getenv("GITHUB_OAUTH_CLIENT_ID") != "",
+				"google_oauth":        os.Getenv("GOOGLE_OAUTH_CLIENT_ID") != "",
+				"ecosystem":           true,
+				"compliance":          true,
+				"benchmarks":          true,
+				"monitoring":          true,
+				"kubernetes":          true,
+				"agentic_security":    os.Getenv("AGENTIC_SECURITY_ENDPOINT") != "",
+				"protocol":            os.Getenv("RIVICQ_PROTOCOL_ENDPOINT") != "",
+			},
+		})
+	})
 
 	// Simple health check
 	router.GET("/healthz", func(c *gin.Context) {
@@ -66,6 +93,23 @@ func main() {
 	fmt.Printf("   • Vulnerability detection\n")
 	fmt.Printf("   • Kubernetes integration\n")
 	fmt.Printf("   • Real-time monitoring dashboard\n")
+
+	// Show connected services
+	if ep := os.Getenv("AGENTIC_SECURITY_ENDPOINT"); ep != "" {
+		fmt.Printf("   • Agentic Security AI: %s\n", ep)
+	}
+	if ep := os.Getenv("RIVICQ_PROTOCOL_ENDPOINT"); ep != "" {
+		fmt.Printf("   • RivicQ Protocol: %s\n", ep)
+	}
+	if os.Getenv("GITHUB_TOKEN") != "" {
+		fmt.Printf("   • GitHub Scanning: enabled\n")
+	}
+	if os.Getenv("GITHUB_OAUTH_CLIENT_ID") != "" {
+		fmt.Printf("   • GitHub OAuth: enabled\n")
+	}
+	if os.Getenv("GOOGLE_OAUTH_CLIENT_ID") != "" {
+		fmt.Printf("   • Google OAuth: enabled\n")
+	}
 
 	// Graceful shutdown setup
 	quit := make(chan os.Signal, 1)

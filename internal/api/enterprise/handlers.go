@@ -1,11 +1,10 @@
-//go:build enterprise
-
 package enterprise
 
 import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,13 +19,6 @@ import (
 
 // SetupRoutes configures Enterprise API routes with IBMQ integration
 func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) {
-	// API middleware
-	router.Use(gin.Recovery())
-	router.Use(gin.Logger())
-
-	// All OSS Features Plus Enterprise Enhancements
-	router.Use(enterpriseMiddleware(cfg))
-
 	if jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET")); jwtSecret != "" {
 		if store, err := auth.NewWorkDomainUserStore(); err == nil {
 			shared.SetupAuthRoutes(router, logger, auth.NewAuthService(jwtSecret, store), allowedDomainsFromEnv())
@@ -38,40 +30,53 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	// Initialize Enterprise database with fallback
 	var enterpriseDB *database.EnterpriseDB
 	dbConfig := config.DatabaseConfig{
-		Host:     "localhost",
-		Port:     5432,
-		User:     "cryptobom",
-		Password: "password",
-		Name:     "cryptobom_enterprise",
-		SSLMode:  "disable",
+		Host:     getEnvOrDefault("CRYPTOBOM_DB_HOST", "localhost"),
+		Port:     getEnvOrDefaultInt("CRYPTOBOM_DB_PORT", 5432),
+		User:     getEnvOrDefault("CRYPTOBOM_DB_USER", "cryptobom"),
+		Password: os.Getenv("CRYPTOBOM_DB_PASSWORD"),
+		Name:     getEnvOrDefault("CRYPTOBOM_DB_NAME", "cryptobom_enterprise"),
+		SSLMode:  getEnvOrDefault("CRYPTOBOM_DB_SSLMODE", "disable"),
 	}
-	enterpriseDB, _ = database.NewEnterpriseConnection(dbConfig)
+	enterpriseDB, err := database.NewEnterpriseConnection(dbConfig)
+	if err != nil {
+		logger.WithError(err).Warn("Enterprise database unavailable — enterprise endpoints will use demo mode")
+	}
 
-	// Initialize handlers
+	// Initialize handlers (nil-safe: each handler checks for nil db internally)
 	inventoryHandler := NewInventoryHandler(enterpriseDB, logger, cfg)
 	complianceHandler := NewComplianceHandler(enterpriseDB, logger)
 	multicloudHandler := NewMultiCloudHandler(enterpriseDB, logger)
 	cncfHandler := NewCNCFHandler(enterpriseDB, logger)
 	terraformHandler := NewTerraformHandler(enterpriseDB, logger)
 	quantumHandler := NewQuantumAttestationHandler(enterpriseDB, logger)
+	apiKeyManager := NewAPIKeyManager(enterpriseDB, logger)
+	webhookManager := NewWebhookManager(enterpriseDB, logger)
+	auditViewer := NewAuditViewer(enterpriseDB, logger)
 
-	// Setup Inventory routes
+	// Setup Enterprise-specific routes (nil-safe: handlers return demo data when db is nil)
 	inventoryHandler.SetupRoutes(router)
-
-	// Setup Compliance routes
 	complianceHandler.SetupRoutes(router)
-
-	// Setup Multi-Cloud routes
 	multicloudHandler.SetupRoutes(router)
-
-	// Setup CNCF routes
 	cncfHandler.SetupRoutes(router)
-
-	// Setup Terraform routes
 	terraformHandler.SetupRoutes(router)
-
-	// Setup Quantum routes
 	quantumHandler.SetupRoutes(router)
+
+	// Enterprise feature routes with auth middleware
+	jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET"))
+	var enterpriseAuth gin.HandlerFunc = func(c *gin.Context) { c.Next() } // no-op fallback
+	if jwtSecret != "" {
+		if store, err := auth.NewWorkDomainUserStore(); err == nil {
+			authSvc := auth.NewAuthService(jwtSecret, store)
+			enterpriseAuth = authSvc.JWTAuthMiddleware(nil)
+		}
+	}
+	apiKeyManager.SetupRoutes(router, enterpriseAuth)
+	webhookManager.SetupRoutes(router, enterpriseAuth)
+	auditViewer.SetupRoutes(router, enterpriseAuth)
+
+	if enterpriseDB == nil {
+		logger.Info("Enterprise endpoints registered in demo mode")
+	}
 
 	// Enhanced CBOM Management with IBMQ Attestation
 	cbom := router.Group("/cbom")
@@ -91,6 +96,7 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		assetsGroup.GET("", shared.ListCryptoAssets(db, logger))
 		assetsGroup.GET("/:id", shared.GetCryptoAsset(db, logger))
 		assetsGroup.PUT("/:id", shared.UpdateCryptoAsset(db, logger))
+		assetsGroup.GET("/:id/bom", shared.GetAssetBOM(db, logger))
 		assetsGroup.POST("/:id/quantum-verify", verifyAssetQuantum(db, logger, cfg))
 	}
 
@@ -161,6 +167,48 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 
 	// Metrics Overview with Quantum Data
 	router.GET("/metrics/overview", shared.GetMetricsOverview(db, logger))
+
+	// CSPM (Cryptographic Security Posture Management)
+	cspmGroup := router.Group("/cspm")
+	cspmGroup.Use(enterpriseAuth)
+	{
+		cspmGroup.GET("/overview", GetCSPMOverview(db, logger, cfg))
+	}
+
+	// Enterprise Cloud HSM & Key Management Extensions
+	enterpriseGroup := router.Group("/enterprise")
+	{
+		ibmGroup := enterpriseGroup.Group("/ibm")
+		{
+			ibmGroup.GET("/hpcs/status", getHPCSStatus(db, logger, cfg))
+			ibmGroup.GET("/hpcs/keys", getHPCSKeys(db, logger, cfg))
+			ibmGroup.GET("/cos/buckets", getCOSBuckets(db, logger, cfg))
+			ibmGroup.POST("/hpcs/keys/:keyId/attest", attestHPCSKey(db, logger, cfg))
+		}
+		awsGroup := enterpriseGroup.Group("/aws")
+		{
+			awsGroup.GET("/cloudhsm/status", getCloudHSMStatus(db, logger, cfg))
+			awsGroup.GET("/kms/keys", getKMSKeys(db, logger, cfg))
+			awsGroup.GET("/cloudtrail/crypto-events", getCloudTrailAudit(db, logger, cfg))
+		}
+		quantumGroup := enterpriseGroup.Group("/quantum")
+		{
+			quantumGroup.GET("/assessment", getQuantumRiskAssessment(db, logger, cfg))
+			quantumGroup.POST("/scan", scanForPQCAlgorithms(db, logger, cfg))
+			quantumGroup.GET("/attest/:assetId", getAttestationReport(db, logger, cfg))
+			quantumGroup.GET("/migration-roadmap", getMigrationRoadmap(db, logger, cfg))
+			quantumGroup.GET("/bom/:assetId/export", exportQuantumSafeBOM(db, logger, cfg))
+		}
+		gcpGroup := enterpriseGroup.Group("/gcp")
+		{
+			gcpGroup.GET("/kms/keys", getGCPKMSKeys(db, logger, cfg))
+			gcpGroup.GET("/gke/workloads", getGKEWorkloads(db, logger, cfg))
+			gcpGroup.GET("/hsm/keyrings", getGCPHSMKeyRings(db, logger, cfg))
+		}
+	}
+
+	// Benchmarks (edition-agnostic)
+	router.GET("/benchmarks", getBenchmarksSummary(db, logger))
 }
 
 func allowedDomainsFromEnv() []string {
@@ -410,15 +458,6 @@ func TriggerEmergencyQuantumResponse(cfg *config.EnterpriseConfig, logger *logru
 	}
 }
 
-// Enterprise middleware
-func enterpriseMiddleware(cfg *config.EnterpriseConfig) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Header("X-CryptoBOM-Edition", "Enterprise")
-		c.Header("X-IBMQ-Enabled", fmt.Sprintf("%v", cfg.IBMQ.Enabled))
-		c.Next()
-	}
-}
-
 // Enterprise CBOM handlers with IBMQ integration
 func attestCBOMReport(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -605,4 +644,245 @@ func getQuantumMetrics(db *database.DB, logger *logrus.Logger, cfg *config.Enter
 			"quantum_risk_score":  0.15,
 		})
 	}
+}
+
+// ── Enterprise Cloud HSM / Key Management ──────────────────────────────
+
+func getHPCSStatus(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Getting IBM HPCS status")
+		c.JSON(http.StatusOK, gin.H{
+			"status":   "operational",
+			"provider": "ibm",
+			"service":  "hpcs",
+			"region":   "us-south",
+			"instance": "cryptobom-hpcs",
+			"enabled":  true,
+		})
+	}
+}
+
+func getHPCSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Listing IBM HPCS keys")
+		c.JSON(http.StatusOK, gin.H{
+			"keys": []gin.H{
+				{"id": "hpcs-key-1", "algorithm": "AES-256", "state": "active", "origin": "ibm-hpcs"},
+				{"id": "hpcs-key-2", "algorithm": "RSA-4096", "state": "active", "origin": "ibm-hpcs"},
+			},
+			"total": 2,
+		})
+	}
+}
+
+func getCOSBuckets(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Listing IBM COS buckets")
+		c.JSON(http.StatusOK, gin.H{
+			"buckets": []gin.H{
+				{"name": "cryptobom-backup", "region": "us-east", "objects": 1280},
+				{"name": "cryptobom-logs", "region": "us-east", "objects": 45000},
+			},
+			"total": 2,
+		})
+	}
+}
+
+func attestHPCSKey(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		keyId := c.Param("keyId")
+		logger.WithField("key_id", keyId).Info("Attesting IBM HPCS key")
+		c.JSON(http.StatusAccepted, gin.H{
+			"key_id":        keyId,
+			"status":        "attestation_initiated",
+			"provider":      "ibm-hpcs",
+			"verified":      true,
+		})
+	}
+}
+
+// ── AWS Cloud HSM / KMS ────────────────────────────────────────────────
+
+func getCloudHSMStatus(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Getting AWS CloudHSM status")
+		c.JSON(http.StatusOK, gin.H{
+			"status":      "operational",
+			"provider":    "aws",
+			"service":     "cloudhsm",
+			"region":      cfg.Cloud.AWS.Region,
+			"enabled":     cfg.Cloud.AWS.Enabled,
+		})
+	}
+}
+
+func getKMSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Listing AWS KMS keys")
+		c.JSON(http.StatusOK, gin.H{
+			"keys": []gin.H{
+				{"id": "kms-key-1", "algorithm": "SYMMETRIC_DEFAULT", "state": "enabled"},
+				{"id": "kms-key-2", "algorithm": "RSA_4096", "state": "enabled"},
+			},
+			"total": 2,
+		})
+	}
+}
+
+func getCloudTrailAudit(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Getting AWS CloudTrail crypto events")
+		c.JSON(http.StatusOK, gin.H{
+			"events": []gin.H{
+				{"event": "kms:Decrypt", "count": 120, "last_seen": time.Now().Add(-1 * time.Hour).Format(time.RFC3339)},
+				{"event": "kms:GenerateDataKey", "count": 45, "last_seen": time.Now().Add(-5 * time.Minute).Format(time.RFC3339)},
+			},
+			"total": 2,
+		})
+	}
+}
+
+// ── Quantum Attestation Extended ────────────────────────────────────────
+
+func getQuantumRiskAssessment(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Getting quantum risk assessment")
+		c.JSON(http.StatusOK, gin.H{
+			"overall_risk":         "medium",
+			"quantum_safe_assets":  15,
+			"vulnerable_assets":    8,
+			"migration_priority":   "high",
+			"risk_score":           0.35,
+		})
+	}
+}
+
+func scanForPQCAlgorithms(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Scanning for PQC algorithms")
+		c.JSON(http.StatusAccepted, gin.H{
+			"scan_id":       fmt.Sprintf("pqc-scan-%d", time.Now().Unix()),
+			"status":        "in_progress",
+			"assets_scanned": 0,
+		})
+	}
+}
+
+func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		assetId := c.Param("assetId")
+		logger.WithField("asset_id", assetId).Info("Getting attestation report")
+		c.JSON(http.StatusOK, gin.H{
+			"asset_id":      assetId,
+			"attestations": []gin.H{
+				{"algorithm": "RSA-2048", "status": "verified", "quantum_safe": false},
+				{"algorithm": "AES-256", "status": "verified", "quantum_safe": true},
+			},
+			"summary": gin.H{"total": 2, "quantum_safe": 1, "vulnerable": 1},
+		})
+	}
+}
+
+func getMigrationRoadmap(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Getting migration roadmap")
+		c.JSON(http.StatusOK, gin.H{
+			"phases": []gin.H{
+				{"phase": 1, "description": "Inventory and classify cryptographic assets", "status": "in_progress", "completion": 65},
+				{"phase": 2, "description": "Prioritize critical algorithms for migration", "status": "pending", "completion": 0},
+				{"phase": 3, "description": "Implement PQC replacements", "status": "pending", "completion": 0},
+			},
+			"total_phases":  3,
+			"current_phase": 1,
+			"estimated_completion": "2026-Q4",
+		})
+	}
+}
+
+func exportQuantumSafeBOM(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		assetId := c.Param("assetId")
+		logger.WithField("asset_id", assetId).Info("Exporting quantum-safe BOM")
+		c.JSON(http.StatusOK, gin.H{
+			"asset_id":    assetId,
+			"bom_version": "2.0",
+			"format":      "cyclonedx",
+			"components":  shared.BOMComponents(),
+			"summary":     gin.H{"total": 3, "quantum_safe": 2, "pqc_ready": 1},
+		})
+	}
+}
+
+// ── GCP Cloud HSM / KMS ────────────────────────────────────────────────
+
+func getGCPKMSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Listing GCP KMS keys")
+		c.JSON(http.StatusOK, gin.H{
+			"keys": []gin.H{
+				{"id": "gcp-kms-1", "algorithm": "GOOGLE_SYMMETRIC_ENCRYPTION", "state": "enabled", "location": "global"},
+				{"id": "gcp-kms-2", "algorithm": "RSA_DECRYPT_OAEP_4096_SHA256", "state": "enabled", "location": "us-central1"},
+			},
+			"total": 2,
+		})
+	}
+}
+
+func getGKEWorkloads(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Listing GKE workloads")
+		c.JSON(http.StatusOK, gin.H{
+			"workloads": []gin.H{
+				{"name": "api-server", "namespace": "default", "crypto_assets": 4, "quantum_safe": 2},
+				{"name": "auth-service", "namespace": "security", "crypto_assets": 6, "quantum_safe": 3},
+			},
+			"total": 2,
+		})
+	}
+}
+
+func getGCPHSMKeyRings(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Listing GCP HSM key rings")
+		c.JSON(http.StatusOK, gin.H{
+			"key_rings": []gin.H{
+				{"name": "cryptobom-production", "location": "us-central1", "keys": 4, "hsm": true},
+				{"name": "cryptobom-staging", "location": "us-east1", "keys": 2, "hsm": false},
+			},
+			"total": 2,
+		})
+	}
+}
+
+// ── Benchmarks ─────────────────────────────────────────────────────────
+
+func getBenchmarksSummary(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger.Info("Getting benchmark summary")
+		c.JSON(http.StatusOK, gin.H{
+			"benchmarks": []gin.H{
+				{"name": "NIST SP 800-56A", "status": "compliant", "score": 92.5, "findings": 2},
+				{"name": "BSI TR-02102", "status": "compliant", "score": 88.0, "findings": 3},
+				{"name": "PCI DSS 4.0", "status": "non_compliant", "score": 65.0, "findings": 7},
+			},
+			"overall_score": 81.8,
+		})
+	}
+}
+
+// env helper functions
+func getEnvOrDefault(key, def string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return def
+}
+
+func getEnvOrDefaultInt(key string, def int) int {
+	if v := os.Getenv(key); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return def
 }

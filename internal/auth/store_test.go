@@ -53,3 +53,48 @@ func TestNewMockUserStore_AdminUserExists(t *testing.T) {
 		t.Errorf("expected role %q, got %q", "admin", user.Role)
 	}
 }
+
+func TestNewWorkDomainUserStore_UsesDefaultsWhenUnset(t *testing.T) {
+	t.Setenv("AUTH_ALLOWED_DOMAINS", "")
+	t.Setenv("AUTH_BOOTSTRAP_EMAIL", "")
+	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "")
+	t.Setenv("AUTH_BOOTSTRAP_NAME", "")
+	t.Setenv("AUTH_BOOTSTRAP_ROLE", "")
+
+	store, err := auth.NewWorkDomainUserStore()
+	if err != nil {
+		t.Fatalf("expected default work-domain store to initialize, got error: %v", err)
+	}
+
+	user, err := store.GetUserByEmail("admin@rivicq.local")
+	if err != nil {
+		t.Fatalf("expected default admin user, got error: %v", err)
+	}
+	if user.Name != "OSS Admin" {
+		t.Fatalf("expected default name OSS Admin, got %q", user.Name)
+	}
+	if user.Role != "admin" {
+		t.Fatalf("expected default role admin, got %q", user.Role)
+	}
+}
+
+func TestNewWorkDomainUserStore_UsesAllowedDomainPrefix(t *testing.T) {
+	t.Setenv("AUTH_ALLOWED_DOMAINS", "example.com")
+	t.Setenv("AUTH_BOOTSTRAP_EMAIL", "")
+	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "")
+	t.Setenv("AUTH_BOOTSTRAP_NAME", "")
+	t.Setenv("AUTH_BOOTSTRAP_ROLE", "")
+
+	store, err := auth.NewWorkDomainUserStore()
+	if err != nil {
+		t.Fatalf("expected store with allowed domain prefix to initialize, got error: %v", err)
+	}
+
+	user, err := store.GetUserByEmail("admin@example.com")
+	if err != nil {
+		t.Fatalf("expected default admin at allowed domain, got error: %v", err)
+	}
+	if user.Email != "admin@example.com" {
+		t.Fatalf("expected email admin@example.com, got %q", user.Email)
+	}
+}
