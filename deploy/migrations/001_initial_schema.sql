@@ -1,19 +1,21 @@
--- CryptoBOM SaaS - Initial Schema
--- PostgreSQL 15
+-- CryptoBOM SaaS Database Schema
+-- Tenant based architecture
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE IF NOT EXISTS organizations (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+CREATE TABLE IF NOT EXISTS tenants (
+    id          TEXT PRIMARY KEY,
     name        TEXT NOT NULL,
     plan        TEXT NOT NULL DEFAULT 'oss',
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE IF NOT EXISTS users (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id      UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    tenant_id   TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     email       TEXT NOT NULL UNIQUE,
     name        TEXT NOT NULL,
     role        TEXT NOT NULL DEFAULT 'viewer',
@@ -24,9 +26,10 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE IF NOT EXISTS assets (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    tenant_id       TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     name            TEXT NOT NULL,
     cloud_provider  TEXT,
     category        TEXT,
@@ -40,13 +43,14 @@ CREATE TABLE IF NOT EXISTS assets (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_assets_org_id ON assets(org_id);
-CREATE INDEX IF NOT EXISTS idx_assets_cloud_provider ON assets(cloud_provider);
-CREATE INDEX IF NOT EXISTS idx_assets_algorithm ON assets(algorithm);
+
+CREATE INDEX idx_assets_tenant_id 
+ON assets(tenant_id);
+
 
 CREATE TABLE IF NOT EXISTS scan_jobs (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id      UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    tenant_id   TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     status      TEXT NOT NULL DEFAULT 'pending',
     scan_type   TEXT NOT NULL DEFAULT 'quick',
     started_at  TIMESTAMPTZ,
@@ -55,18 +59,20 @@ CREATE TABLE IF NOT EXISTS scan_jobs (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE IF NOT EXISTS bom_reports (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id      UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    tenant_id   TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     asset_id    UUID REFERENCES assets(id) ON DELETE SET NULL,
     format      TEXT NOT NULL DEFAULT 'cyclonedx',
     content     JSONB NOT NULL DEFAULT '{}',
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE IF NOT EXISTS audit_events (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id      UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    tenant_id   TEXT REFERENCES tenants(id) ON DELETE SET NULL,
     event_type  TEXT NOT NULL,
     request_id  TEXT,
     method      TEXT,
@@ -80,5 +86,6 @@ CREATE TABLE IF NOT EXISTS audit_events (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_audit_events_created_at ON audit_events(created_at);
-CREATE INDEX IF NOT EXISTS idx_audit_events_event_type ON audit_events(event_type);
+
+CREATE INDEX idx_audit_events_created_at 
+ON audit_events(created_at);
