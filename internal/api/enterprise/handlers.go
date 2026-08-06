@@ -1,6 +1,7 @@
 package enterprise
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -14,6 +15,8 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/rivic-q/cryptobom-saas/internal/quantum"
+	"github.com/rivic-q/cryptobom-saas/internal/quantum/builtin"
+	"github.com/rivic-q/cryptobom-saas/internal/quantum/provider"
 	"github.com/sirupsen/logrus"
 )
 
@@ -48,7 +51,29 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	multicloudHandler := NewMultiCloudHandler(enterpriseDB, logger)
 	cncfHandler := NewCNCFHandler(enterpriseDB, logger)
 	terraformHandler := NewTerraformHandler(enterpriseDB, logger)
-	quantumHandler := NewQuantumAttestationHandler(enterpriseDB, logger)
+
+	// Quantum Provider SDK: register builtin providers and instantiate the ones
+	// with configuration. IBM Quantum stays opt-in and reports itself
+	// unavailable when no API key is configured (it is never a hard dependency).
+	quantumRegistry := provider.NewRegistry()
+	if err := builtin.Register(context.Background(), quantumRegistry, builtin.Options{
+		Logger: logger,
+		IBM: quantum.IBMQuantumConfig{
+			APIKey:  cfg.IBMQ.APIKey,
+			BaseURL: cfg.IBMQ.Endpoint,
+			Network: cfg.IBMQ.Network,
+			Timeout: cfg.IBMQ.Timeout,
+		},
+		EnableIBM: cfg.IBMQ.Enabled,
+	}); err != nil {
+		logger.WithError(err).Warn("failed to register builtin quantum providers")
+	}
+	if errs := quantumRegistry.Init(context.Background(), nil); len(errs) > 0 {
+		for _, err := range errs {
+			logger.WithError(err).Warn("quantum provider initialisation skipped")
+		}
+	}
+	quantumHandler := NewQuantumAttestationHandler(enterpriseDB, logger, quantumRegistry)
 	apiKeyManager := NewAPIKeyManager(enterpriseDB, logger)
 	webhookManager := NewWebhookManager(enterpriseDB, logger)
 	auditViewer := NewAuditViewer(enterpriseDB, logger)

@@ -10,18 +10,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/quantum/provider"
 	"github.com/sirupsen/logrus"
 )
 
 type QuantumAttestationHandler struct {
-	db     *database.EnterpriseDB
-	logger *logrus.Logger
+	db        *database.EnterpriseDB
+	logger    *logrus.Logger
+	providers *provider.Registry
 }
 
-func NewQuantumAttestationHandler(db *database.EnterpriseDB, logger *logrus.Logger) *QuantumAttestationHandler {
+func NewQuantumAttestationHandler(db *database.EnterpriseDB, logger *logrus.Logger, registry *provider.Registry) *QuantumAttestationHandler {
+	if registry == nil {
+		registry = provider.NewRegistry()
+	}
 	return &QuantumAttestationHandler{
-		db:     db,
-		logger: logger,
+		db:        db,
+		logger:    logger,
+		providers: registry,
 	}
 }
 
@@ -36,6 +42,7 @@ func (h *QuantumAttestationHandler) SetupRoutes(router *gin.RouterGroup) {
 
 		quantum.GET("/networks", h.ListQuantumNetworks)
 		quantum.GET("/providers", h.ListQuantumProviders)
+		quantum.GET("/providers/:name/status", h.GetQuantumProviderStatus)
 
 		quantum.GET("/readiness", h.GetQuantumReadiness)
 		quantum.GET("/migration", h.GetMigrationPlan)
@@ -271,32 +278,76 @@ func (h *QuantumAttestationHandler) ListQuantumNetworks(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"networks": networks})
 }
 
+// demoQuantumProviders is the static fallback shown when the provider registry
+// has no instantiated providers (e.g. registry initialisation skipped).
+var demoQuantumProviders = []map[string]interface{}{
+	{
+		"name":      "IBM Quantum",
+		"type":      "quantum_computing",
+		"api_type":  "rest",
+		"endpoints": []string{"https://api.quantum-computing.ibm.com"},
+		"features":  []string{"Qiskit", "Quantum Circuits", "Hybrid Jobs"},
+	},
+	{
+		"name":      "Q-CTRL",
+		"type":      "quantum_control",
+		"api_type":  "rest",
+		"endpoints": []string{"https://api.q-ctrl.com"},
+		"features":  []string{"Error Suppression", "Error Mitigation", "Pulse Level"},
+	},
+	{
+		"name":      "Rigetti",
+		"type":      "quantum_computing",
+		"api_type":  "rest",
+		"endpoints": []string{"https://api.rigetti.com"},
+		"features":  []string{"Quil", "Quantum VM", "Hybrid Computing"},
+	},
+}
+
+// ListQuantumProviders reflects the providers registered in the Quantum SDK
+// provider registry, each with its live status and capabilities.
 func (h *QuantumAttestationHandler) ListQuantumProviders(c *gin.Context) {
-	providers := []map[string]interface{}{
-		{
-			"name":      "IBM Quantum",
-			"type":      "quantum_computing",
-			"api_type":  "rest",
-			"endpoints": []string{"https://api.quantum-computing.ibm.com"},
-			"features":  []string{"Qiskit", "Quantum Circuits", "Hybrid Jobs"},
-		},
-		{
-			"name":      "Q-CTRL",
-			"type":      "quantum_control",
-			"api_type":  "rest",
-			"endpoints": []string{"://api.q-ctrl.com"},
-			"features":  []string{"Error Suppression", "Error Mitigation", "Pulse Level"},
-		},
-		{
-			"name":      "Rigetti",
-			"type":      "quantum_computing",
-			"api_type":  "rest",
-			"endpoints": []string{"https://api.rigetti.com"},
-			"features":  []string{"Quil", "Quantum VM", "Hybrid Computing"},
-		},
+	providers := make([]gin.H, 0, len(h.providers.SortedProviderNames()))
+	for _, name := range h.providers.SortedProviderNames() {
+		p, ok := h.providers.Get(name)
+		if !ok {
+			continue
+		}
+		info := p.Info()
+		providers = append(providers, gin.H{
+			"name":          info.Name,
+			"version":       info.Version,
+			"vendor":        info.Vendor,
+			"type":          info.Kind,
+			"features":      info.Capabilities,
+			"opt_in":        info.OptIn,
+			"status":        p.Status(c.Request.Context()),
+			"documentation": info.Documentation,
+		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"providers": providers})
+	if len(providers) == 0 {
+		for _, demo := range demoQuantumProviders {
+			providers = append(providers, gin.H(demo))
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"providers": providers, "total": len(providers)})
+}
+
+// GetQuantumProviderStatus returns the live status of a single registered
+// provider by name.
+func (h *QuantumAttestationHandler) GetQuantumProviderStatus(c *gin.Context) {
+	name := c.Param("name")
+	p, ok := h.providers.Get(name)
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "provider not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"provider": p.Info().Name,
+		"status":   p.Status(c.Request.Context()),
+	})
 }
 
 func (h *QuantumAttestationHandler) GetQuantumReadiness(c *gin.Context) {
