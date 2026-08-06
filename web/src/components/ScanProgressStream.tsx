@@ -8,6 +8,7 @@ import {
   ListItemText,
   Chip,
 } from '@mui/material';
+import { getAPIBaseURL } from '../config/editions';
 
 export interface ScanProgressEvent {
   type: 'start' | 'progress' | 'finding' | 'complete' | 'error';
@@ -46,7 +47,7 @@ const ScanProgressStream: React.FC<ScanProgressStreamProps> = ({
     setProgress(0);
     setStatus('running');
 
-    const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:8080/api/v1';
+    const apiBase = getAPIBaseURL();
     const es = new EventSource(`${apiBase}/scan/${scanId}/stream`);
     esRef.current = es;
 

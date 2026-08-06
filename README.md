@@ -5,22 +5,22 @@
 
 ## Badges
 
-[![Stars](https://img.shields.io/github/stars/rivic-q/cryptobom-saas?style=social)](https://github.com/rivic-q/cryptobom-saas/stargazers)
-[![Forks](https://img.shields.io/github/forks/rivic-q/cryptobom-saas?style=social)](https://github.com/rivic-q/cryptobom-saas/network)
-[![Issues](https://img.shields.io/github/issues/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas/issues)
-[![PRs](https://img.shields.io/github/issues-pr/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas/pulls)
+[![Stars](https://img.shields.io/github/stars/Rivicq-com/CSPM?style=social)](https://github.com/Rivicq-com/CSPM/stargazers)
+[![Forks](https://img.shields.io/github/forks/Rivicq-com/CSPM?style=social)](https://github.com/Rivicq-com/CSPM/network)
+[![Issues](https://img.shields.io/github/issues/Rivicq-com/CSPM)](https://github.com/Rivicq-com/CSPM/issues)
+[![PRs](https://img.shields.io/github/issues-pr/Rivicq-com/CSPM)](https://github.com/Rivicq-com/CSPM/pulls)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/github/v/release/rivic-q/cryptobom-saas?include_prereleases&label=release)](https://github.com/rivic-q/cryptobom-saas/releases)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/rivic-q/cryptobom-saas)](https://golang.org/)
-[![Release Date](https://img.shields.io/github/release-date/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas/releases)
-[![Last Commit](https://img.shields.io/github/last-commit/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas/commits)
-[![Contributors](https://img.shields.io/github/contributors/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas/graphs/contributors)
-[![Code Size](https://img.shields.io/github/languages/code-size/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas)
+[![Version](https://img.shields.io/github/v/release/Rivicq-com/CSPM?include_prereleases&label=release)](https://github.com/Rivicq-com/CSPM/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/Rivicq-com/CSPM)](https://golang.org/)
+[![Release Date](https://img.shields.io/github/release-date/Rivicq-com/CSPM)](https://github.com/Rivicq-com/CSPM/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/Rivicq-com/CSPM)](https://github.com/Rivicq-com/CSPM/commits)
+[![Contributors](https://img.shields.io/github/contributors/Rivicq-com/CSPM)](https://github.com/Rivicq-com/CSPM/graphs/contributors)
+[![Code Size](https://img.shields.io/github/languages/code-size/Rivicq-com/CSPM)](https://github.com/Rivicq-com/CSPM)
 [![Docker](https://img.shields.io/docker/pulls/rivicq/cryptobom-oss)](https://hub.docker.com/r/rivicq/cryptobom-oss)
-[![Tests](https://img.shields.io/github/actions/workflow/status/rivic-q/cryptobom-saas/ci-oss.yml?label=CI)](https://github.com/rivic-q/cryptobom-saas/actions)
-[![Pages](https://img.shields.io/github/actions/workflow/status/rivic-q/cryptobom-saas/deploy-pages.yml?label=Pages)](https://github.com/rivic-q/cryptobom-saas/actions/workflows/deploy-pages.yml)
-[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)](https://github.com/rivic-q/cryptobom-saas)
-[![Language](https://img.shields.io/github/languages/top/rivic-q/cryptobom-saas)](https://github.com/rivic-q/cryptobom-saas)
+[![Tests](https://img.shields.io/github/actions/workflow/status/Rivicq-com/CSPM/ci-oss.yml?label=CI)](https://github.com/Rivicq-com/CSPM/actions)
+[![Pages](https://img.shields.io/github/actions/workflow/status/Rivicq-com/CSPM/pages.yml?label=Pages)](https://github.com/Rivicq-com/CSPM/actions/workflows/pages.yml)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)](https://github.com/Rivicq-com/CSPM)
+[![Language](https://img.shields.io/github/languages/top/Rivicq-com/CSPM)](https://github.com/Rivicq-com/CSPM)
 
 ---
 
@@ -28,7 +28,7 @@
 
 ```bash
 # 1. Clone and start the backend
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/Rivicq-com/CSPM.git
 cd cryptobom-saas
 go run ./cmd/server/oss/main.go &
 
@@ -50,11 +50,11 @@ curl -s -X POST http://localhost:8080/api/v1/scans \
 
 The animation below illustrates the CryptoBOM SaaS platform workflow — from cryptographic asset discovery through PQC compliance validation, IBM Quantum attestation, and final Cloud HSM vault storage.
 
-### ▶ [Launch Animation on GitHub Pages](https://rivic-q.github.io/cryptobom-saas/)
+### ▶ [Launch Animation on GitHub Pages](https://rivicq-com.github.io/CSPM/)
 
-> 🌐 **GitHub Pages (live site + animation):** [https://rivic-q.github.io/cryptobom-saas/](https://rivic-q.github.io/cryptobom-saas/)
+> 🌐 **GitHub Pages (live site + animation):** [https://rivicq-com.github.io/CSPM/](https://rivicq-com.github.io/CSPM/)
 > 
-> 🎞️ **Direct animation link:** [https://rivic-q.github.io/cryptobom-saas/media/cryptobom-animation.html](https://rivic-q.github.io/cryptobom-saas/media/cryptobom-animation.html)
+> 🎞️ **Direct animation link:** [https://rivicq-com.github.io/CSPM/media/cryptobom-animation.html](https://rivicq-com.github.io/CSPM/media/cryptobom-animation.html)
 
 | Phase | Name                    | Duration | Key Visual                        |
 |-------|-------------------------|----------|-----------------------------------|
@@ -71,7 +71,7 @@ You can also open [`media/cryptobom-animation.html`](media/cryptobom-animation.h
 
 ```bash
 # Clone, copy env template, start all services with Docker Compose
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/Rivicq-com/CSPM.git
 cd cryptobom-saas
 cp .env.example .env          # edit JWT_SECRET before production use
 docker compose up -d
@@ -87,13 +87,19 @@ curl http://localhost:8080/healthz
 > **Planning the OSS + Enterprise redesign, endpoint discovery model, and Flyingduck pilot flow? →** [docs/rivicq-redesign-and-pilot-plan.md](docs/rivicq-redesign-and-pilot-plan.md)
 > End-to-end architecture, current CBOM endpoint detection, benchmark targets, and pilot execution plan.
 
+> **Building on the Quantum SDK & plugin ecosystem? →**
+> [docs/quantum-sdk.md](docs/quantum-sdk.md) (architecture) ·
+> [docs/plugin-development.md](docs/plugin-development.md) (authoring) ·
+> [docs/enterprise-sdk.md](docs/enterprise-sdk.md) (OSS → enterprise) ·
+> [docs/sdks/](docs/sdks/) (multi-language bindings)
+
 ## 🆓 Open Source Edition
 
 [![CNCF](https://img.shields.io/badge/CNCF-Compliant-blue)](https://cncf.io)
 [![DevSecOps](https://img.shields.io/badge/DevSecOps-Automated-green)](https://devsecops.org)
 [![IBM Quantum](https://img.shields.io/badge/IBM%20Quantum-Enterprise-purple)](https://quantum-computing.ibm.com)
 [![KIPU Q-CTRL](https://img.shields.io/badge/KIPU%20Q%2DCTRL-Advanced%20Control-orange)](https://q-ctrl.com)
-[![Multi-Language](https://img.shields.io/badge/Multi%2DLanguage-Python%20%7C%20Java%20%7C%20Rust%20%7C%20C%2B%2B%20%7C%20C%20%7C%20Ruby-brightgreen)](https://github.com/rivic-q/cryptobom-saas)
+[![Multi-Language](https://img.shields.io/badge/Multi%2DLanguage-Python%20%7C%20Java%20%7C%20Rust%20%7C%20C%2B%2B%20%7C%20C%20%7C%20Ruby-brightgreen)](https://github.com/Rivicq-com/CSPM)
 [![Quantum-Safe](https://img.shields.io/badge/Quantum%2DSafe-NIST%20PQC-blue)](https://nist.gov/pqc/)
 
 ## 🏗️ RivicQ High-Level Architecture v1.3
@@ -410,7 +416,7 @@ This software is licensed under the **Apache License 2.0**. See [LICENSE](LICENS
 
 ## 🚀 Start Your Quantum-Ready DevSecOps Journey Today
 
-**[⭐ Try OSS Version](https://github.com/rivic-q/cryptobom-saas)** | **[🏢 Contact Enterprise](https://rivicq.de/enterprise)** | **[🎬 View Animation](https://rivic-q.github.io/cryptobom-saas/)** | **[📖 Docs](https://docs.rivicq.de)**
+**[⭐ Try OSS Version](https://github.com/Rivicq-com/CSPM)** | **[🏢 Contact Enterprise](https://rivicq.de/enterprise)** | **[🎬 View Animation](https://rivicq-com.github.io/CSPM/)** | **[📖 Docs](https://docs.rivicq.de)**
 
 ---
 

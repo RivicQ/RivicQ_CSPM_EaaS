@@ -32,7 +32,10 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');
-      window.location.href = '/platform/login';
+      // Redirect to the login route under the app's router basename so it
+      // works both in dev (/platform) and on GitHub Pages (/CSPM/).
+      const base = process.env.PUBLIC_URL || '/platform';
+      window.location.href = `${window.location.origin}${base}/login`;
     }
     return Promise.reject(error);
   }

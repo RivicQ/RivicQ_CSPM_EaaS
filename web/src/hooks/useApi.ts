@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
 import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api/v1';
+import { getAPIBaseURL } from '../config/editions';
 
 export function useApi() {
   const api = useMemo(() => {
-    const instance = axios.create({ baseURL: API_BASE_URL });
+    const instance = axios.create({ baseURL: getAPIBaseURL() });
     instance.interceptors.request.use((config) => {
       const token = localStorage.getItem('auth_token');
       if (token) config.headers.Authorization = `Bearer ${token}`;

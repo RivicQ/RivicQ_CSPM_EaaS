@@ -107,22 +107,27 @@ export const setEditionPreference = (edition: 'oss' | 'enterprise') => {
 const editionClient = axios.create({ timeout: 3000 });
 
 export const getEditionFromBackend = async (): Promise<{ edition: string; features: Record<string, any>; baseURL: string } | null> => {
-  // Try direct proxy port first (dev: CRA proxy forwards /edition to the backend)
-  const proxyBase = process.env.REACT_APP_API_URL || window.location.origin;
+  // Port probing is only valid in local dev (http://localhost). On https
+  // deployments (GitHub Pages, production) plain-http probes are mixed
+  // content and always fail, so skip them entirely.
+  const host = window.location.hostname;
+  const isLocalHttp =
+    window.location.protocol === 'http:' &&
+    (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local'));
 
-  for (const port of [OSS_PORT, ENTERPRISE_PORT]) {
-    try {
-      // In dev mode, CRA proxy handles requests to the backend.
-      // Try the backend directly on each port for edition detection.
-      const host = window.location.hostname;
-      const resp = await editionClient.get(`http://${host}:${port}/edition`, { timeout: 2000 });
-      if (resp.data && resp.data.edition) {
-        const detectedURL = `http://${host}:${port}${API_PREFIX}`;
-        setAPIBaseURL(detectedURL);
-        return { ...resp.data, baseURL: detectedURL };
+  if (isLocalHttp) {
+    for (const port of [OSS_PORT, ENTERPRISE_PORT]) {
+      try {
+        // Try the backend directly on each port for edition detection.
+        const resp = await editionClient.get(`http://${host}:${port}/edition`, { timeout: 2000 });
+        if (resp.data && resp.data.edition) {
+          const detectedURL = `http://${host}:${port}${API_PREFIX}`;
+          setAPIBaseURL(detectedURL);
+          return { ...resp.data, baseURL: detectedURL };
+        }
+      } catch {
+        continue;
       }
-    } catch {
-      continue;
     }
   }
   return null;
