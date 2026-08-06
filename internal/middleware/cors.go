@@ -38,9 +38,21 @@ func CORS(cfg CORSConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 
+		// Browsers reject Access-Control-Allow-Origin: * when credentials are
+		// enabled. When the config permits credentials, reflect the request
+		// origin (after allow-list validation when one is configured) instead
+		// of sending a wildcard, otherwise the web dashboard gets CORS errors
+		// on every authenticated request.
 		if allowAll {
-			c.Header("Access-Control-Allow-Origin", "*")
-		} else if originMap[origin] {
+			if cfg.AllowCredentials {
+				if origin != "" {
+					c.Header("Access-Control-Allow-Origin", origin)
+					c.Header("Vary", "Origin")
+				}
+			} else {
+				c.Header("Access-Control-Allow-Origin", "*")
+			}
+		} else if originMap[strings.ToLower(origin)] {
 			c.Header("Access-Control-Allow-Origin", origin)
 			c.Header("Vary", "Origin")
 		}

@@ -39,6 +39,11 @@ Thumbs.db
 secrets/
 *.pem
 *.key
+rsaande
+rsaande.pub
+rsande
+rsande.pub
+*.ppk
 
 # Logs
 *.log
@@ -48,6 +53,7 @@ secrets/
 
 # Kubernetes
 *.kubeconfig
+kubectl
 
 # Node
 node_modules/
@@ -69,6 +75,9 @@ kind-cluster/
 minikube/
 # Frontend build artifacts
 web/build/
+web/.env.save
+web/.env
+web/.env.*
 
 # OSS/Enterprise compiled binaries
 /oss
@@ -79,3 +88,5 @@ web/build/
 .venv/
 __pycache__/
 *.pyc
+.env
+.env.*

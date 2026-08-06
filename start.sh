@@ -1,8 +1,22 @@
 #!/bin/bash
-export JWT_SECRET="yD0BFJr5Erziw8dOsPCzo5Zugu7fypP/FotfZfnDdLd/5pZP3lIISIaeQvgTIshW"
-export AUTH_BOOTSTRAP_EMAIL="admin@rivicq.de"
-export AUTH_BOOTSTRAP_PASSWORD="m/pUoJZYeDQeFZZWZyqnh9Bp"
-export AUTH_BOOTSTRAP_NAME="Workspace Admin"
-export AUTH_BOOTSTRAP_ROLE="admin"
-export AUTH_ALLOWED_DOMAINS="rivicq.de"
+set -euo pipefail
+
+# Load local configuration from .env (gitignored). Do NOT hardcode secrets here.
+if [ -f "$(dirname "$0")/.env" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    source "$(dirname "$0")/.env"
+    set +a
+fi
+
+if [ -z "${JWT_SECRET:-}" ] || [ "${#JWT_SECRET}" -lt 32 ]; then
+    echo "ERROR: JWT_SECRET must be set (>= 32 chars) in .env" >&2
+    exit 1
+fi
+
+if [ -z "${AUTH_BOOTSTRAP_EMAIL:-}" ] || [ -z "${AUTH_BOOTSTRAP_PASSWORD:-}" ]; then
+    echo "ERROR: AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD must be set in .env" >&2
+    exit 1
+fi
+
 exec /tmp/cryptobom-server

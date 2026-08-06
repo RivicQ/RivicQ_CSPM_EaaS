@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/api/shared"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
@@ -196,7 +197,7 @@ func setupOSSAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logge
 				_, execErr := db.DB.Exec(`
 					INSERT INTO users (id, tenant_id, email, name, role, password)
 					VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (email) DO NOTHING`,
-					"bootstrap-user", "tenant-1", bootstrapEmail, bootstrapName, bootstrapRole, hashedPassword)
+					uuid.New().String(), "tenant-1", bootstrapEmail, bootstrapName, bootstrapRole, hashedPassword)
 				if execErr != nil {
 					logger.WithError(execErr).Warn("Failed to create bootstrap admin user")
 				} else {

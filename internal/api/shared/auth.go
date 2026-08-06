@@ -3,11 +3,8 @@ package shared
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/sirupsen/logrus"
 )
@@ -49,53 +46,38 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 		authGroup.GET("/github/status", GitHubOAuthStatusHandler(logger))
 
 		// Demo access
-		authGroup.GET("/demo", DemoAccessHandler(logger))
+		authGroup.GET("/demo", DemoAccessHandler(logger, service))
 	}
 }
 
-func DemoAccessHandler(logger *logrus.Logger) gin.HandlerFunc {
+func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		edition := c.DefaultQuery("edition", "oss")
 		if edition != "oss" && edition != "enterprise" {
 			edition = "oss"
 		}
 
-		jwtSecret := "demo-secret-key-not-for-production"
-
-		now := time.Now()
-		claims := jwt.MapClaims{
-			"user_id":     "demo-user",
-			"tenant_id":   "demo-tenant",
-			"email":       "demo@cryptobom.io",
-			"name":        "Demo User",
-			"role":        "admin",
-			"edition":     edition,
-			"permissions": []string{"cbom:read", "cbom:write", "cbom:delete", "assets:read", "assets:write", "security:read", "users:manage", "ibmq:attest", "cloud:manage"},
-			"sub":         "demo-user",
-			"iss":         "cryptobom-saas",
-			"iat":         now.Unix(),
-			"exp":         now.Add(4 * time.Hour).Unix(),
-			"jti":         uuid.New().String(),
+		demoUser := &auth.User{
+			ID:       "demo-user",
+			TenantID: "tenant-1",
+			Email:    "demo@cryptobom.io",
+			Name:     "Demo User",
+			Role:     "admin",
 		}
 
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		accessToken, err := token.SignedString([]byte(jwtSecret))
+		accessToken, err := service.TokenManager().GenerateToken(demoUser, edition)
 		if err != nil {
-			logger.WithError(err).Error("Failed to generate demo token")
+			logger.WithError(err).Error("Failed to generate demo access token")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate demo access"})
 			return
 		}
 
-		refreshClaims := jwt.MapClaims{
-			"user_id": "demo-user",
-			"sub":     "demo-user",
-			"iss":     "cryptobom-saas-refresh",
-			"iat":     now.Unix(),
-			"exp":     now.Add(72 * time.Hour).Unix(),
-			"jti":     uuid.New().String(),
+		refreshToken, err := service.TokenManager().GenerateRefreshToken(demoUser)
+		if err != nil {
+			logger.WithError(err).Error("Failed to generate demo refresh token")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate demo access"})
+			return
 		}
-		refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-		refreshTokenStr, _ := refreshToken.SignedString([]byte(jwtSecret))
 
 		type authUserDisplay struct {
 			ID    string `json:"id"`
@@ -106,14 +88,14 @@ func DemoAccessHandler(logger *logrus.Logger) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, gin.H{
 			"access_token":  accessToken,
-			"refresh_token": refreshTokenStr,
+			"refresh_token": refreshToken,
 			"user": authUserDisplay{
 				ID:    "demo-user",
 				Name:  "Demo User",
 				Email: "demo@cryptobom.io",
 				Role:  "admin",
 			},
-			"edition":  edition,
+			"edition":   edition,
 			"demo_mode": true,
 		})
 	}

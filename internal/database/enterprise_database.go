@@ -3,6 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -16,10 +18,13 @@ type EnterpriseDB struct {
 }
 
 func NewEnterpriseConnection(cfg config.DatabaseConfig) (*EnterpriseDB, error) {
-	dsn := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode,
-	)
+	dsn := strings.TrimSpace(os.Getenv("DATABASE_URL"))
+	if dsn == "" {
+		dsn = fmt.Sprintf(
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode,
+		)
+	}
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {

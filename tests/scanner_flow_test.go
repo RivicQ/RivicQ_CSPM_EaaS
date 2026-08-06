@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -24,7 +25,7 @@ func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
 	logger := logrus.New()
 	oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
 
-	payload := map[string]string{"target": "example.com"}
+	payload := map[string]string{"target": "127.0.0.1"}
 	body, err := json.Marshal(payload)
 	require.NoError(t, err)
 
@@ -38,23 +39,34 @@ func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
 	var response map[string]any
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
 	assert.Equal(t, "accepted", response["status"])
-	assert.Equal(t, "example.com", response["target"])
+	assert.Equal(t, "127.0.0.1", response["target"])
 	assert.NotEmpty(t, response["scan_id"])
 
 	scanID, ok := response["scan_id"].(string)
 	require.True(t, ok)
 
-	statusReq := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+scanID, nil)
-	statusRec := httptest.NewRecorder()
-	router.ServeHTTP(statusRec, statusReq)
-
-	assert.Equal(t, http.StatusOK, statusRec.Code)
-
+	// Scanning runs asynchronously over the network, so poll for a terminal
+	// state instead of asserting completion on the first response.
+	deadline := time.Now().Add(10 * time.Second)
 	var status map[string]any
-	require.NoError(t, json.Unmarshal(statusRec.Body.Bytes(), &status))
-	assert.Equal(t, scanID, status["scan_id"])
-	assert.Equal(t, float64(100), status["progress"])
+	for time.Now().Before(deadline) {
+		statusReq := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+scanID, nil)
+		statusRec := httptest.NewRecorder()
+		router.ServeHTTP(statusRec, statusReq)
+
+		assert.Equal(t, http.StatusOK, statusRec.Code)
+
+		require.NoError(t, json.Unmarshal(statusRec.Body.Bytes(), &status))
+		assert.Equal(t, scanID, status["scan_id"])
+
+		if s, _ := status["status"].(string); s == "completed" || s == "failed" {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+
 	assert.Equal(t, "completed", status["status"])
+	assert.Equal(t, float64(100), status["progress"])
 }
 
 func TestScannerFlowRejectsEmptyTarget(t *testing.T) {
