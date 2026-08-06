@@ -31,7 +31,7 @@ and on a minimal cloud target using Docker Compose.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 
 # 2. Copy the environment template and adjust values
@@ -64,7 +64,7 @@ without requiring a local Go or Node installation.
 
 ```bash
 # 1. Clone
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 
 # 2. Copy env template (edit JWT_SECRET at minimum)
@@ -108,7 +108,7 @@ Pre-built images are published to the GitHub Container Registry on every
 push to `master`:
 
 ```
-ghcr.io/rivic-q/cryptobom-saas/cryptobom-oss:latest
+ghcr.io/RivicQ/RivicQ_CSPM_EaaS/cryptobom-oss:latest
 ```
 
 ---

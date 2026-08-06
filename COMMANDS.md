@@ -15,7 +15,7 @@
 
 ```bash
 # Clone and enter the repo
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 
 # Copy env template (edit JWT_SECRET before production use)

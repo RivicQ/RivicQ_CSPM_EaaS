@@ -46,7 +46,7 @@ make --version          # GNU Make 4.x
 
 ```bash
 # 1. Clone
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 
 # 2. Start full stack  (PostgreSQL → migrations → backend → frontend)

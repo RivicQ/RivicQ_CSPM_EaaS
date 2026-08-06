@@ -96,7 +96,7 @@ metadata:
   name: cryptobom-oss
 spec:
   source:
-    repoURL: https://github.com/rivic-q/cryptobom-saas
+    repoURL: https://github.com/RivicQ/RivicQ_CSPM_EaaS
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc

@@ -285,7 +285,7 @@ git push origin v1.3.0
 
 ```bash
 # Download from releases
-curl -L -o cryptobom-oss https://github.com/rivic-q/cryptobom-saas/releases/download/v1.3.0/cryptobom-oss
+curl -L -o cryptobom-oss https://github.com/RivicQ/RivicQ_CSPM_EaaS/releases/download/v1.3.0/cryptobom-oss
 chmod +x cryptobom-oss
 ```
 
@@ -303,7 +303,7 @@ docker pull rivicq/cryptobom-enterprise:v1.3.0
 
 ```bash
 # Clone specific version
-git clone -b v1.3.0 --depth 1 https://github.com/rivic-q/cryptobom-saas.git
+git clone -b v1.3.0 --depth 1 https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 ```
 
 ---
@@ -376,8 +376,8 @@ The Open Source Edition is free to use. For enterprise features:
 ## 📞 Support
 
 ### Community Support
-- GitHub Discussions: https://github.com/rivic-q/cryptobom-saas/discussions
-- Issue Tracker: https://github.com/rivic-q/cryptobom-saas/issues
+- GitHub Discussions: https://github.com/RivicQ/RivicQ_CSPM_EaaS/discussions
+- Issue Tracker: https://github.com/RivicQ/RivicQ_CSPM_EaaS/issues
 
 ### Enterprise Support
 - Email: enterprise@rivicq.de

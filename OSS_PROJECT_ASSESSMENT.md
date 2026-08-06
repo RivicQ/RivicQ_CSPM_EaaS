@@ -726,7 +726,7 @@ jobs:
   "@type": "SoftwareApplication",
   "name": "CryptoBOM SaaS",
   "description": "Enterprise CBOM platform",
-  "downloadUrl": "https://github.com/rivic-q/cryptobom-saas",
+  "downloadUrl": "https://github.com/RivicQ/RivicQ_CSPM_EaaS",
   "license": "https://opensource.org/licenses/Apache-2.0"
 }
 </script>

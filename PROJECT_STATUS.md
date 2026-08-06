@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-12  
 **Version:** 1.0.0-beta1 (Enterprise Edition)  
-**Repository:** https://github.com/rivic-q/cryptobom-saas  
+**Repository:** https://github.com/RivicQ/RivicQ_CSPM_EaaS  
 **License:** Apache 2.0  
 
 ---

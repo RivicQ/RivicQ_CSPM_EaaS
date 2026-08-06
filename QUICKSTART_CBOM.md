@@ -37,7 +37,7 @@ apt-get install -y curl jq
 
 ```bash
 # Clone the repo
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 
 # Build and start the OSS server

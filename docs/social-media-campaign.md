@@ -37,7 +37,7 @@ The platform includes:
 • Full CNCF compliance with Helm charts
 
 Open source version is available NOW 🎉
-github.com/rivic-q/cryptobom-saas
+github.com/RivicQ/RivicQ_CSPM_EaaS
 
 Enterprise version with IBM Quantum integration coming Q2 2025
 
@@ -66,7 +66,7 @@ Join our community: discord.gg/cryptobom
 
 65% of your crypto is quantum-vulnerable. 70% of organizations don't know their crypto assets.
 
-We just launched the solution: github.com/rivic-q/cryptobom-saas
+We just launched the solution: github.com/RivicQ/RivicQ_CSPM_EaaS
 
 #CBOM #Cybersecurity #QuantumComputing #CloudNative #CNCF
 ```
@@ -117,7 +117,7 @@ Q4 2025: CNCF Graduation Application 🏛️
 
 Join us in securing the quantum future!
 
-Try now: github.com/rivic-q/cryptobom-saas
+Try now: github.com/RivicQ/RivicQ_CSPM_EaaS
 Community: discord.gg/cryptobom
 Demo: rivicq.de/cryptobom-demo
 
@@ -135,7 +135,7 @@ The problem: Most organizations don't know what cryptographic assets they have, 
 
 Our solution: Real-time eBPF-based discovery + Kubernetes-native deployment + IBM Quantum integration.
 
-Open source and ready to deploy: github.com/rivic-q/cryptobom-saas
+Open source and ready to deploy: github.com/RivicQ/RivicQ_CSPM_EaaS
 Live demo: rivicq.de/cryptobom-demo
 
 The tech stack is Go, eBPF, Kubernetes, Prometheus, and includes IBM Quantum Network integration for quantum vulnerability assessment.
@@ -166,7 +166,7 @@ This helps with:
 • Shadow crypto discovery
 • Automated CBOM generation
 
-Try it: github.com/rivic-q/cryptobom-saas
+Try it: github.com/RivicQ/RivicQ_CSPM_EaaS
 Demo: rivicq.de/cryptobom-demo
 
 #Kubernetes #CloudNative #DevSecOps #CBOM
@@ -185,7 +185,7 @@ Tech stack:
 • Prometheus for observability
 • IBM Quantum Network for quantum assessment
 
-Open source now: github.com/rivic-q/cryptobom-saas
+Open source now: github.com/RivicQ/RivicQ_CSPM_EaaS
 
 Would love to get the Go community's feedback!
 
@@ -208,7 +208,7 @@ Key features:
 • Compliance automation (eIDAS 2.0, DORA, NIST PQC)
 • Enterprise SSO and HSM support (Enterprise version)
 
-GitHub: github.com/rivic-q/cryptobom-saas
+GitHub: github.com/RivicQ/RivicQ_CSPM_EaaS
 Demo: rivicq.de/cryptobom-demo
 
 #Cybersecurity #InfoSec #Compliance #QuantumSecurity
@@ -280,7 +280,7 @@ Coming Q2 2025:
 
 ## Getting Started
 ```bash
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 ./scripts/deploy-oss-demo.sh
 ```

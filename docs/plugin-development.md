@@ -45,8 +45,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/rivic-q/cryptobom-saas/internal/quantum"
-	"github.com/rivic-q/cryptobom-saas/internal/quantum/provider"
+	"github.com/RivicQ/RivicQ_CSPM_EaaS/internal/quantum"
+	"github.com/RivicQ/RivicQ_CSPM_EaaS/internal/quantum/provider"
 )
 
 type Provider struct{}

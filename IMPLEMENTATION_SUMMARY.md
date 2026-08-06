@@ -1,7 +1,7 @@
 # 🚀 CryptoBOM SaaS MVP - Successfully Committed to GitHub
 
 ## 📋 Repository Information
-**Repository**: https://github.com/rivic-q/cryptobom-saas  
+**Repository**: https://github.com/RivicQ/RivicQ_CSPM_EaaS  
 **Branch**: master  
 **Commit Hash**: `03b9057`
 **Status**: Successfully committed and pushed

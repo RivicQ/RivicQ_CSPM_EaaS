@@ -321,8 +321,8 @@ Please read our security policy at: https://rivicq.de/security
 [![Go](https://img.shields.io/badge/Go-1.21+-blue)](https://golang.org)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.20+-green)](https://kubernetes.io)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://github.com/rivic-q/cryptobom-saas/workflows/CI/badge.svg)](https://github.com/rivic-q/cryptobom-saas/actions)
-[![codecov](https://codecov.io/gh/rivic-q/cryptobom-saas/branch/main/graph/badge.svg)](https://codecov.io/gh/rivic-q/cryptobom-saas)
+[![Build Status](https://github.com/RivicQ/RivicQ_CSPM_EaaS/workflows/CI/badge.svg)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions)
+[![codecov](https://codecov.io/gh/RivicQ/RivicQ_CSPM_EaaS/branch/main/graph/badge.svg)](https://codecov.io/gh/RivicQ/RivicQ_CSPM_EaaS)
 
 > **The world's first CNCF-compliant CBOM platform with real-time cryptographic asset discovery and quantum vulnerability assessment.**
 
@@ -345,7 +345,7 @@ Please read our security policy at: https://rivicq.de/security
 ### One-Click Installation
 ```bash
 # Clone and deploy
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 ./scripts/deploy-oss-demo.sh
 ```
@@ -418,7 +418,7 @@ open http://localhost:8080
 ### Local Development
 ```bash
 # Setup development environment
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 go mod download
 npm install
@@ -468,7 +468,7 @@ We welcome contributions! Please see our [Contributing Guide](docs/contributing.
 
 ## 📱 Community
 
-- [GitHub Discussions](https://github.com/rivic-q/cryptobom-saas/discussions)
+- [GitHub Discussions](https://github.com/RivicQ/RivicQ_CSPM_EaaS/discussions)
 - [Discord Community](https://discord.gg/cryptobom)
 - [LinkedIn](https://linkedin.com/company/rivic-q)
 - [Twitter](https://twitter.com/rivic_q)
@@ -564,7 +564,7 @@ Licensed under the Apache License 2.0 - see [LICENSE](LICENSE) file for details.
 ☸️ Full CNCF compliance
 
 Open source now available! ⭐
-github.com/rivic-q/cryptobom-saas
+github.com/RivicQ/RivicQ_CSPM_EaaS
 
 #CryptoBOM #Kubernetes #CloudNative #Cybersecurity #QuantumComputing #CNCF
 ```
@@ -588,7 +588,7 @@ This addresses a $4.5B problem in cryptographic risk management, helping organiz
 • Plan migration to quantum-safe algorithms
 
 Open source version is available NOW 🎉
-github.com/rivic-q/cryptobom-saas
+github.com/RivicQ/RivicQ_CSPM_EaaS
 
 Enterprise version with IBM Quantum integration coming Q2 2025
 

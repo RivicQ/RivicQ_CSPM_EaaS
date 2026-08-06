@@ -41,7 +41,7 @@ policy.
 
 ```bash
 # Clone the repository
-git clone https://github.com/rivic-q/cryptobom-saas.git
+git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd cryptobom-saas
 
 # Install Go dependencies
@@ -179,8 +179,8 @@ This is the **Open Source Edition**. Enterprise features include:
 
 ## 📞 Getting Help
 
-- **Issues:** https://github.com/rivic-q/cryptobom-saas/issues
-- **Discussions:** https://github.com/rivic-q/cryptobom-saas/discussions
+- **Issues:** https://github.com/RivicQ/RivicQ_CSPM_EaaS/issues
+- **Discussions:** https://github.com/RivicQ/RivicQ_CSPM_EaaS/discussions
 - **Enterprise Support:** enterprise@rivicq.de
 
 ---

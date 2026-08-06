@@ -461,7 +461,7 @@ npm run dev
 ## Support & Escalation
 
 ### Quick Links
-- **GitHub Repository**: https://github.com/rivic-q/cryptobom-saas
+- **GitHub Repository**: https://github.com/RivicQ/RivicQ_CSPM_EaaS
 - **Deployment Docs**: `docs/DEPLOYMENT.md`
 - **Rollback Runbook**: `docs/ROLLBACK_RUNBOOK.md`
 - **Monitoring Setup**: `deploy/kubernetes/MONITORING.md`

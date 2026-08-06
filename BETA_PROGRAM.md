@@ -94,7 +94,7 @@ CryptoBOM is built with a security-first architecture. During beta, the followin
 
 ### Option A – GitHub Discussions (recommended)
 
-1. Open a new discussion: <https://github.com/rivic-q/cryptobom-saas/discussions>
+1. Open a new discussion: <https://github.com/RivicQ/RivicQ_CSPM_EaaS/discussions>
 2. Select the **Beta Access Request** category
 3. Describe your organisation, use case, and estimated scale (assets, cloud providers)
 

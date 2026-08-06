@@ -194,7 +194,7 @@ graph TB
 
 ### 📞 Contact Information
 - **Website**: rivicq.de
-- **GitHub**: github.com/rivic-q/cryptobom-saas
+- **GitHub**: github.com/RivicQ/RivicQ_CSPM_EaaS
 - **Email**: hello@rivicq.de
 - **LinkedIn**: @rivic-q
 
