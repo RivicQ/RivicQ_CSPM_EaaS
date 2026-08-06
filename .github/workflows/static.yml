@@ -48,6 +48,41 @@ jobs:
         env:
           NEXT_PUBLIC_EDITION: oss
 
+      - name: Publish Quantum SDK & plugin docs to the site
+        run: |
+          mkdir -p web/out/docs/sdks
+          cp docs-oss/quantum-sdk/quantum-sdk.md web/out/docs/
+          cp docs-oss/quantum-sdk/plugin-development.md web/out/docs/
+          cp docs-oss/quantum-sdk/enterprise-sdk.md web/out/docs/
+          cp docs-oss/quantum-sdk/sdks/*.md web/out/docs/sdks/
+          cat > web/out/docs/index.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Quantum SDK &amp; Plugin Ecosystem</title>
+          <style>
+            body{font-family:Inter,system-ui,sans-serif;margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(99,102,241,.18),transparent 60%),#0b0f1a;color:#e6e8f0}
+            main{max-width:760px;margin:0 auto;padding:64px 24px}
+            a{color:#8b93ff;text-decoration:none} a:hover{text-decoration:underline}
+            h1{font-size:2rem;letter-spacing:-.02em}
+            .cards{display:grid;gap:12px;margin-top:28px}
+            .card{background:#131a2b;border:1px solid #232d45;border-radius:10px;padding:16px 18px}
+            .card h2{font-size:1rem;margin:0 0 4px}
+            .card p{margin:0;color:#9aa3c0;font-size:.9rem}
+          </style></head>
+          <body><main>
+            <h1>Quantum SDK &amp; Plugin Ecosystem</h1>
+            <p>Open-source post-quantum provider SDK for the CSPM platform.</p>
+            <div class="cards">
+              <div class="card"><h2><a href="quantum-sdk.md">SDK Architecture</a></h2><p>Provider contract, registry, plugin manifests.</p></div>
+              <div class="card"><h2><a href="plugin-development.md">Plugin Development Guide</a></h2><p>Write and sign provider plugins.</p></div>
+              <div class="card"><h2><a href="enterprise-sdk.md">Enterprise SDK</a></h2><p>Extend the platform with cloud providers.</p></div>
+              <div class="card"><h2><a href="sdks/README.md">Language Bindings</a></h2><p>Rust, Python, TypeScript, Java, .NET.</p></div>
+            </div>
+          </main></body>
+          </html>
+          EOF
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

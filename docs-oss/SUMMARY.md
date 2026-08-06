@@ -6,6 +6,12 @@
 - [Architecture Overview](getting-started/architecture.md)
 - [Configuration Guide](getting-started/configuration.md)
 
+## ⚛️ Quantum SDK & Plugin Ecosystem
+- [SDK Architecture](quantum-sdk/quantum-sdk.md)
+- [Plugin Development Guide](quantum-sdk/plugin-development.md)
+- [Enterprise SDK & Plugins](quantum-sdk/enterprise-sdk.md)
+- [Language Bindings](quantum-sdk/sdks/README.md)
+
 ## 📖 Guides
 - [Kubernetes Deployment](guides/kubernetes-deployment.md)
 - [Docker Setup](guides/docker-setup.md)
