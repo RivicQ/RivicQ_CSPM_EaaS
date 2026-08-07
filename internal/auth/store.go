@@ -63,11 +63,11 @@ func NewMockUserStore() (*MockUserStore, error) {
 			Role:     "operator",
 			Password: hashedPassword,
 		},
-		"revan.ande@rivicq.de": {
+		"revansai.ande@rivicq.com": {
 			ID:       "user-3",
 			TenantID: "tenant-1",
-			Email:    "revan.ande@rivicq.de",
-			Name:     "Revan Ande",
+			Email:    "revansai.ande@rivicq.com",
+			Name:     "Revansai Ande",
 			Role:     "admin",
 			Password: hashedPassword,
 		},
@@ -142,7 +142,7 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 	// whose email falls within an allowed domain. All share the bootstrap
 	// password so the demo credentials stay consistent across stores.
 	demoUsers := []*User{
-		{ID: "user-admin", Email: "revan.ande@rivicq.de", Name: "Revan Ande", Role: "admin"},
+		{ID: "user-admin", Email: "revansai.ande@rivicq.com", Name: "Revansai Ande", Role: "admin"},
 		{ID: "user-operator", Email: "pratik.rughe@rivicq.de", Name: "Pratik Rughe", Role: "operator"},
 		{ID: "user-analyst", Email: "danush.m@rivicq.de", Name: "Danush M", Role: "analyst"},
 		{ID: "user-viewer", Email: "sales@rivicq.de", Name: "Sales Team", Role: "viewer"},
@@ -325,8 +325,8 @@ func CreateDefaultUsers(db *sql.DB) error {
 		{
 			ID:       "user-admin",
 			TenantID: "tenant-1",
-			Email:    "revan.ande@rivicq.de",
-			Name:     "Revan Ande",
+			Email:    "revansai.ande@rivicq.com",
+			Name:     "Revansai Ande",
 			Role:     "admin",
 			Password: bootstrapPassword,
 		},

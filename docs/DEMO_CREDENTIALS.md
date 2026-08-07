@@ -8,7 +8,7 @@ All demo users share the password **`DemoPass123!`** and belong to the `rivicq.d
 
 | Tier | Role | Email | Password |
 |---|---|---|---|
-| Enterprise | Admin | `revan.ande@rivicq.de` | `DemoPass123!` |
+| Enterprise | Admin | `revansai.ande@rivicq.com` | `DemoPass123!` |
 | Professional | Operator | `pratik.rughe@rivicq.de` | `DemoPass123!` |
 | Professional | Analyst | `danush.m@rivicq.de` | `DemoPass123!` |
 | Community | Viewer | `sales@rivicq.de` | `DemoPass123!` |

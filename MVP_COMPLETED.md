@@ -21,7 +21,7 @@
   - Role-based permissions (admin, operator, analyst, viewer)
   - Enterprise vs OSS edition detection
   - Multi-tenant support with user management
-  - Default users created: danush.m@rivicq.de (admin), pratik.rughe@rivicq.de (operator), revan.ande@rivicq.de (analyst), sales@rivicq.de (viewer)
+  - Default users created: danush.m@rivicq.de (admin), pratik.rughe@rivicq.de (operator), revansai.ande@rivicq.com (analyst), sales@rivicq.de (viewer)
 
 #### **💾 Real Database Layer**
 - ✅ **Complete Database Implementation** with PostgreSQL

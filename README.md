@@ -196,7 +196,7 @@ For enterprise features, please contact us:
 
 ### RivicQ GmbH
 - **Website**: https://rivicq.de
-- **Founder**: Revan Ande
+- **Founder**: Revansai Ande
 - **Address**: LEAP BERLIN - Rudower Chaussee 29, 12489 Berlin, Germany
 - **Location**: WISTA Innovations- und Gründungszentrum (IGZ)
 
