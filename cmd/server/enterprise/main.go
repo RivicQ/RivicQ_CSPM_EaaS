@@ -82,6 +82,14 @@ func main() {
 		})
 	})
 
+	router.GET("/edition", func(c *gin.Context) {
+		editionCfg := edition.Detect()
+		c.JSON(200, gin.H{
+			"edition":  editionCfg.Edition,
+			"features": editionCfg.Features,
+		})
+	})
+
 	// Setup Enterprise API routes
 	apiGroup := router.Group("/api/v1")
 	enterprise.SetupRoutes(apiGroup, db, logger, cfg)
