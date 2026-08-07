@@ -213,7 +213,7 @@ func (tm *TokenManager) getPermissionsForRole(role, edition string) []string {
 	}
 
 	// Add enterprise-specific permissions
-	if edition == "enterprise" {
+	if edition == "enterprise" || edition == "professional" {
 		enterprisePermissions := map[string][]string{
 			"admin":    {"ibmq:attest", "ibmq:emergency", "ml:analyze", "cloud:manage", "sso:manage"},
 			"operator": {"ibmq:attest", "ml:analyze", "cloud:read"},
@@ -302,8 +302,10 @@ func (as *AuthService) LoginWithEdition(email, password, edition string) (*Login
 
 	if edition == "" {
 		edition = "oss"
-		if user.Role == "admin" || user.Role == "operator" {
+		if user.Role == "admin" {
 			edition = "enterprise"
+		} else if user.Role == "operator" || user.Role == "analyst" {
+			edition = "professional"
 		}
 	}
 

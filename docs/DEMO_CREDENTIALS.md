@@ -1,20 +1,48 @@
 # Demo Credentials (local / staging only)
 
-These credentials are provided for local development and demo purposes only. Do NOT use them in production.
+These credentials are provided for local development and demo purposes only. Do **NOT** use them in production.
 
-- Admin (bootstrap): revan.ande@rivicq.de / DemoPass123!
-  - Name: Revan Ande
-  - Role: admin
+## Three-tier demo set
 
-- Operator: pratik.rughe@rivicq.de / DemoPass123!
-  - Role: operator
+All demo users share the password **`DemoPass123!`** and belong to the `rivicq.de` work domain.
 
-- Viewer: sales@rivicq.de / DemoPass123!
-  - Role: viewer
+| Tier | Role | Email | Password |
+|---|---|---|---|
+| Enterprise | Admin | `revan.ande@rivicq.de` | `DemoPass123!` |
+| Professional | Operator | `pratik.rughe@rivicq.de` | `DemoPass123!` |
+| Professional | Analyst | `danush.m@rivicq.de` | `DemoPass123!` |
+| Community | Viewer | `sales@rivicq.de` | `DemoPass123!` |
 
-How to use
-- Copy `.env.demo` to your environment (or source it) and start the server in dev mode.
-- The auth store will pick up `AUTH_BOOTSTRAP_EMAIL` and `AUTH_BOOTSTRAP_PASSWORD` to create the bootstrap user.
+Edition is resolved automatically:
+- `admin` → Enterprise
+- `operator` / `analyst` → Professional
+- `viewer` → Community (reported as `oss` by the API, normalized to Community in the UI)
 
-Security
-- These demo credentials are intentionally weak for convenience. Replace them with secure passwords and rotate keys before any public/staging deployment.
+## One-click demo access (no credentials)
+
+The server exposes a quick-access endpoint that issues a token for the Demo User:
+
+```
+GET /api/v1/auth/demo                 # Community
+GET /api/v1/auth/demo?edition=enterprise   # Enterprise
+GET /api/v1/auth/demo?edition=professional # Professional
+```
+
+Returns `demo@cryptobom.io` (role `admin`, `demo_mode: true`).
+
+## How to use
+
+1. Copy `.env` (gitignored) or `.env.demo` into your environment (or `source` it) and start the server.
+2. The auth store picks up `AUTH_BOOTSTRAP_EMAIL` / `AUTH_BOOTSTRAP_PASSWORD` to create the Enterprise admin bootstrap user.
+3. Database-backed setups can seed all four users with:
+
+   ```bash
+   source .env.demo
+   DATABASE_URL=$DATABASE_URL scripts/create-demo-users.sh
+   ```
+
+## Security
+
+- These demo credentials are intentionally shared/weak for convenience. Replace them with unique passwords and rotate keys before any public or staging deployment.
+- `.env` is gitignored — keep it out of the repository. Never commit `JWT_SECRET`, OAuth client secrets, or personal access tokens.
+- Rotate the demo JWT secret and any GitHub OAuth / PAT that has been shared (see `.env` comments).

@@ -53,7 +53,7 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		edition := c.DefaultQuery("edition", "oss")
-		if edition != "oss" && edition != "enterprise" {
+		if edition != "oss" && edition != "professional" && edition != "enterprise" {
 			edition = "oss"
 		}
 
@@ -222,7 +222,7 @@ func meHandler() gin.HandlerFunc {
 func editionsHandler(allowedDomains []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"editions":     []string{"oss", "enterprise"},
+			"editions":     []string{"community", "professional", "enterprise"},
 			"work_domains": allowedDomains,
 		})
 	}
@@ -336,11 +336,14 @@ func mfaVerifyHandler(service *auth.AuthService, logger *logrus.Logger) gin.Hand
 
 func editionForRole(role, requested string) string {
 	requested = strings.ToLower(strings.TrimSpace(requested))
-	if requested == "oss" || requested == "enterprise" {
+	if requested == "oss" || requested == "professional" || requested == "enterprise" {
 		return requested
 	}
-	if role == "admin" || role == "operator" {
+	if role == "admin" {
 		return "enterprise"
+	}
+	if role == "operator" || role == "analyst" {
+		return "professional"
 	}
 	return "oss"
 }

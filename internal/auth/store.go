@@ -13,7 +13,7 @@ const (
 	defaultOSSBootstrapEmail = "admin@rivicq.local"
 	defaultOSSBootstrapName  = "OSS Admin"
 	defaultOSSBootstrapRole  = "admin"
-	defaultOSSBootstrapPass  = "admin12345!"
+	defaultOSSBootstrapPass  = "DemoPass123!"
 )
 
 // MockUserStore implements UserStore interface with database
@@ -52,7 +52,7 @@ func NewMockUserStore() (*MockUserStore, error) {
 			TenantID: "tenant-1",
 			Email:    "danush.m@rivicq.de",
 			Name:     "Danush M",
-			Role:     "admin",
+			Role:     "analyst",
 			Password: hashedPassword,
 		},
 		"pratik.rughe@rivicq.de": {
@@ -68,7 +68,7 @@ func NewMockUserStore() (*MockUserStore, error) {
 			TenantID: "tenant-1",
 			Email:    "revan.ande@rivicq.de",
 			Name:     "Revan Ande",
-			Role:     "analyst",
+			Role:     "admin",
 			Password: hashedPassword,
 		},
 		"sales@rivicq.de": {
@@ -136,6 +136,23 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 		Name:     bootstrapName,
 		Role:     bootstrapRole,
 		Password: hashedPassword,
+	}
+
+	// Seed the three-tier demo set (admin/operator/analyst/viewer) for any user
+	// whose email falls within an allowed domain. All share the bootstrap
+	// password so the demo credentials stay consistent across stores.
+	demoUsers := []*User{
+		{ID: "user-admin", Email: "revan.ande@rivicq.de", Name: "Revan Ande", Role: "admin"},
+		{ID: "user-operator", Email: "pratik.rughe@rivicq.de", Name: "Pratik Rughe", Role: "operator"},
+		{ID: "user-analyst", Email: "danush.m@rivicq.de", Name: "Danush M", Role: "analyst"},
+		{ID: "user-viewer", Email: "sales@rivicq.de", Name: "Sales Team", Role: "viewer"},
+	}
+	for _, du := range demoUsers {
+		if emailAllowed(du.Email, allowedDomains) {
+			du.TenantID = "tenant-1"
+			du.Password = hashedPassword
+			users[strings.ToLower(du.Email)] = du
+		}
 	}
 
 	return &WorkDomainUserStore{users: users, allowedDomains: allowedDomains}, nil
@@ -308,8 +325,8 @@ func CreateDefaultUsers(db *sql.DB) error {
 		{
 			ID:       "user-admin",
 			TenantID: "tenant-1",
-			Email:    "danush.m@rivicq.de",
-			Name:     "Danush M",
+			Email:    "revan.ande@rivicq.de",
+			Name:     "Revan Ande",
 			Role:     "admin",
 			Password: bootstrapPassword,
 		},
@@ -324,8 +341,8 @@ func CreateDefaultUsers(db *sql.DB) error {
 		{
 			ID:       "user-analyst",
 			TenantID: "tenant-1",
-			Email:    "revan.ande@rivicq.de",
-			Name:     "Revan Ande",
+			Email:    "danush.m@rivicq.de",
+			Name:     "Danush M",
 			Role:     "analyst",
 			Password: bootstrapPassword,
 		},

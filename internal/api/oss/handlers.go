@@ -166,7 +166,7 @@ func setupOSSAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logge
 		}
 		bootstrapPassword := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_PASSWORD"))
 		if bootstrapPassword == "" {
-			bootstrapPassword = "admin12345!"
+			bootstrapPassword = "DemoPass123!"
 		}
 		bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
 		if bootstrapName == "" {
@@ -213,7 +213,7 @@ func setupOSSAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logge
 			logger.WithError(err).Fatal("Unable to initialize OSS auth store")
 		}
 		if os.Getenv("AUTH_BOOTSTRAP_EMAIL") == "" && os.Getenv("AUTH_BOOTSTRAP_PASSWORD") == "" {
-			logger.Warn("OSS auth bootstrapped with default credentials admin@rivicq.local / admin12345!; override AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD for production")
+			logger.Warn("OSS auth bootstrapped with default credentials admin@rivicq.local / DemoPass123!; override AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD for production")
 		}
 	}
 
