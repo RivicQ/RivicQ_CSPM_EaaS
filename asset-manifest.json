@@ -1,12 +1,12 @@
 {
   "files": {
-    "main.js": "/RivicQ_CSPM_EaaS/static/js/main.1b05251a.js",
+    "main.js": "/RivicQ_CSPM_EaaS/static/js/main.63d8f03a.js",
     "static/js/453.27f1f524.chunk.js": "/RivicQ_CSPM_EaaS/static/js/453.27f1f524.chunk.js",
     "index.html": "/RivicQ_CSPM_EaaS/index.html",
-    "main.1b05251a.js.map": "/RivicQ_CSPM_EaaS/static/js/main.1b05251a.js.map",
+    "main.63d8f03a.js.map": "/RivicQ_CSPM_EaaS/static/js/main.63d8f03a.js.map",
     "453.27f1f524.chunk.js.map": "/RivicQ_CSPM_EaaS/static/js/453.27f1f524.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/main.1b05251a.js"
+    "static/js/main.63d8f03a.js"
   ]
 }
