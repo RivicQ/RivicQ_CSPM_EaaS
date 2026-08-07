@@ -1,16 +1,43 @@
 import { createTheme } from '@mui/material/styles';
 import { tokens } from './tokens';
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    tertiary: Palette['primary'];
+  }
+  interface PaletteOptions {
+    tertiary?: PaletteOptions['primary'];
+  }
+}
+
+declare module '@mui/material/Chip' {
+  interface ChipPropsColorOverrides {
+    tertiary: true;
+  }
+}
+
 const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
-  const isDark = mode !== 'light';
+  const isDark = mode === 'dark';
+
+  const surface = isDark ? tokens.colors.surface : tokens.colors.surfaceLight;
+  const text = isDark ? tokens.colors.text : tokens.colors.textLight;
+  const border = isDark ? tokens.colors.border : tokens.colors.borderLight;
+
+  const primary = isDark ? tokens.colors.rivicq : {
+    50: '#e0f7ff', 100: '#b8edff', 200: '#7ee1ff', 300: '#45d4ff', 400: '#1cc9ff', 500: '#0096d9', 600: '#007ab0', 700: '#005f8a', 800: '#004563', 900: '#002c40',
+  };
+  const gold = isDark ? tokens.colors.gold : {
+    50: '#fdf8e9', 100: '#faedc4', 200: '#f2dc8b', 300: '#e8c95a', 400: '#ddbb3f', 500: '#a8800f', 600: '#8c6a0d', 700: '#6e5516', 800: '#4a3a0e', 900: '#2e2408',
+  };
+
   return createTheme({
     palette: {
-      mode: 'dark',
+      mode,
       primary: {
-        main: tokens.colors.rivicq[500],
-        light: tokens.colors.rivicq[300],
-        dark: tokens.colors.rivicq[700],
-        contrastText: '#ffffff',
+        main: primary[500],
+        light: primary[300],
+        dark: primary[700],
+        contrastText: isDark ? '#ffffff' : '#00364a',
       },
       secondary: {
         main: tokens.colors.crypto.quantum,
@@ -18,28 +45,26 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
         dark: '#7c3aed',
         contrastText: '#ffffff',
       },
-      error: {
-        main: tokens.colors.crypto.critical,
+      tertiary: {
+        main: gold[500],
+        light: gold[300],
+        dark: gold[700],
+        contrastText: isDark ? '#08111f' : '#ffffff',
       },
-      warning: {
-        main: tokens.colors.crypto.high,
-      },
-      info: {
-        main: tokens.colors.crypto.info,
-      },
-      success: {
-        main: tokens.colors.crypto.low,
-      },
+      error: { main: tokens.colors.crypto.critical },
+      warning: { main: tokens.colors.crypto.high },
+      info: { main: tokens.colors.crypto.info },
+      success: { main: tokens.colors.crypto.low },
       background: {
-        default: tokens.colors.surface[0],
-        paper: tokens.colors.surface[1],
+        default: surface[0],
+        paper: surface[1],
       },
       text: {
-        primary: tokens.colors.text.primary,
-        secondary: tokens.colors.text.secondary,
-        disabled: tokens.colors.text.muted,
+        primary: text.primary,
+        secondary: text.secondary,
+        disabled: text.muted,
       },
-      divider: tokens.colors.border,
+      divider: border,
     },
     typography: {
       fontFamily: tokens.typography.fontFamily,
@@ -55,29 +80,27 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
       body2: { fontWeight: 400 },
       button: { fontWeight: 600, textTransform: 'none' },
     },
-    shape: {
-      borderRadius: tokens.borderRadius.md,
-    },
+    shape: { borderRadius: tokens.borderRadius.md },
     spacing: 8,
     components: {
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            backgroundColor: tokens.colors.surface[0],
+            backgroundColor: surface[0],
             scrollbarWidth: 'thin',
-            scrollbarColor: `${tokens.colors.border} ${tokens.colors.surface[0]}`,
+            scrollbarColor: `${border} ${surface[0]}`,
           },
           '::-webkit-scrollbar': { width: 8, height: 8 },
-          '::-webkit-scrollbar-track': { background: tokens.colors.surface[0] },
-          '::-webkit-scrollbar-thumb': { background: tokens.colors.border, borderRadius: 4 },
-          '::-webkit-scrollbar-thumb:hover': { background: tokens.colors.text.muted },
+          '::-webkit-scrollbar-track': { background: surface[0] },
+          '::-webkit-scrollbar-thumb': { background: border, borderRadius: 4 },
+          '::-webkit-scrollbar-thumb:hover': { background: text.muted },
         },
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            background: tokens.colors.surface[1],
-            border: `1px solid ${tokens.colors.border}`,
+            background: surface[1],
+            border: `1px solid ${border}`,
             borderRadius: tokens.borderRadius.lg,
             boxShadow: tokens.shadows.panel,
           },
@@ -85,9 +108,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
       },
       MuiCardContent: {
         styleOverrides: {
-          root: {
-            '&:last-child': { paddingBottom: 24 },
-          },
+          root: { '&:last-child': { paddingBottom: 24 } },
         },
       },
       MuiButton: {
@@ -99,24 +120,16 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
             padding: '8px 20px',
           },
           containedPrimary: {
-            boxShadow: `0 0 20px ${tokens.colors.rivicq[500]}33`,
-            '&:hover': {
-              boxShadow: `0 0 30px ${tokens.colors.rivicq[500]}55`,
-            },
+            boxShadow: `0 0 20px ${primary[500]}33`,
+            '&:hover': { boxShadow: `0 0 30px ${primary[500]}55` },
           },
-          outlined: {
-            borderColor: tokens.colors.border,
-          },
+          outlined: { borderColor: border },
         },
       },
       MuiChip: {
         styleOverrides: {
-          root: {
-            fontWeight: 500,
-          },
-          outlined: {
-            borderColor: tokens.colors.border,
-          },
+          root: { fontWeight: 500 },
+          outlined: { borderColor: border },
         },
       },
       MuiTableHead: {
@@ -124,44 +137,40 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
           root: {
             '& .MuiTableCell-head': {
               fontWeight: 600,
-              color: tokens.colors.text.secondary,
-              backgroundColor: tokens.colors.surface[2],
-              borderBottom: `1px solid ${tokens.colors.border}`,
+              color: text.secondary,
+              backgroundColor: surface[2],
+              borderBottom: `1px solid ${border}`,
             },
           },
         },
       },
       MuiTableRow: {
         styleOverrides: {
-          root: {
-            '&:hover': {
-              backgroundColor: tokens.colors.surface[2],
-            },
-          },
+          root: { '&:hover': { backgroundColor: surface[2] } },
         },
       },
       MuiTableCell: {
         styleOverrides: {
           root: {
-            borderBottom: `1px solid ${tokens.colors.border}`,
-            color: tokens.colors.text.primary,
+            borderBottom: `1px solid ${border}`,
+            color: text.primary,
           },
         },
       },
       MuiAppBar: {
         styleOverrides: {
           root: {
-            backgroundColor: `${tokens.colors.surface[1]}ee`,
+            backgroundColor: `${surface[1]}ee`,
             backdropFilter: 'blur(12px)',
-            borderBottom: `1px solid ${tokens.colors.border}`,
+            borderBottom: `1px solid ${border}`,
           },
         },
       },
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: tokens.colors.surface[1],
-            borderRight: `1px solid ${tokens.colors.border}`,
+            backgroundColor: surface[1],
+            borderRight: `1px solid ${border}`,
           },
         },
       },
@@ -169,18 +178,16 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
         styleOverrides: {
           root: {
             borderRadius: tokens.borderRadius.full,
-            backgroundColor: tokens.colors.surface[3],
+            backgroundColor: surface[3],
           },
-          bar: {
-            borderRadius: tokens.borderRadius.full,
-          },
+          bar: { borderRadius: tokens.borderRadius.full },
         },
       },
       MuiDialog: {
         styleOverrides: {
           paper: {
-            backgroundColor: tokens.colors.surface[1],
-            border: `1px solid ${tokens.colors.border}`,
+            backgroundColor: surface[1],
+            border: `1px solid ${border}`,
             borderRadius: tokens.borderRadius.lg,
           },
         },
@@ -189,22 +196,20 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
         styleOverrides: {
           root: {
             '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: tokens.colors.border,
-              },
-              '&:hover fieldset': {
-                borderColor: tokens.colors.rivicq[500],
-              },
+              '& fieldset': { borderColor: border },
+              '&:hover fieldset': { borderColor: primary[500] },
             },
           },
         },
       },
       MuiTab: {
         styleOverrides: {
-          root: {
-            textTransform: 'none',
-            fontWeight: 600,
-          },
+          root: { textTransform: 'none', fontWeight: 600 },
+        },
+      },
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: { backgroundColor: surface[3], color: text.primary, border: `1px solid ${border}` },
         },
       },
     },

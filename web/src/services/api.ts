@@ -411,6 +411,15 @@ export const cspmService = {
   getOverview: () => api.get('/cspm/overview'),
 };
 
+export const postureService = {
+  getOverview: () => api.get('/cspm/overview'),
+  getAccounts: (params?: { provider?: string }) => api.get('/cloud/accounts', { params }),
+  getResourcesSummary: () => api.get('/cloud/resources/summary'),
+  getSecurityEvents: () => api.get('/security/events'),
+  getThreatIntelligence: () => api.get('/security/threats'),
+  getConformancePacks: () => api.get('/compliance/dashboard'),
+};
+
 export const ecosystemService = {
   getTools: () => api.get('/ecosystem/tools'),
   getTool: (id: string) => api.get(`/ecosystem/tools/${id}`),

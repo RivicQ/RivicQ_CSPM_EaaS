@@ -37,6 +37,8 @@ import TerraformIaC from './pages/enterprise/Terraform';
 import IBMCloud from './pages/enterprise/IBMCloud';
 import AWSCloud from './pages/enterprise/AWSCloud';
 import QuantumAttestation from './pages/enterprise/QuantumAttestation';
+import CloudPosture from './pages/enterprise/CloudPosture';
+import ConformancePacks from './pages/enterprise/ConformancePacks';
 import CSPM from './pages/CSPM';
 
 const LogoutRedirect: React.FC = () => {
@@ -58,7 +60,7 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 );
 
 const App: React.FC = () => {
-  const [mode, setMode] = React.useState<'light' | 'dark'>('light');
+  const [mode, setMode] = React.useState<'light' | 'dark'>('dark');
   const theme = React.useMemo(() => {
     const { getAppTheme } = require('./theme/theme');
     return getAppTheme(mode);
@@ -84,7 +86,7 @@ const App: React.FC = () => {
             <ThemeProvider theme={theme}>
               <CssBaseline />
             <GlobalStyles
-              styles={{
+              styles={(theme) => ({
                 '*': {
                   boxSizing: 'border-box',
                 },
@@ -93,16 +95,16 @@ const App: React.FC = () => {
                   height: '8px',
                 },
                 '::-webkit-scrollbar-track': {
-                  background: '#f5f5f5',
+                  background: theme.palette.background.default,
                 },
                 '::-webkit-scrollbar-thumb': {
-                  background: '#c1c1c1',
+                  background: theme.palette.divider,
                   borderRadius: '4px',
                 },
                 '::-webkit-scrollbar-thumb:hover': {
-                  background: '#a8a8a8',
+                  background: theme.palette.text.disabled,
                 },
-              }}
+              })}
             />
             <BrowserRouter basename={process.env.PUBLIC_URL || '/platform'}>
               <Routes>
@@ -138,6 +140,8 @@ const App: React.FC = () => {
                   <Route path="enterprise/ibmcloud" element={<RequireEnterprise>{wrap(IBMCloud, 'IBMCloud')}</RequireEnterprise>} />
                   <Route path="enterprise/awscloud" element={<RequireEnterprise>{wrap(AWSCloud, 'AWSCloud')}</RequireEnterprise>} />
                   <Route path="enterprise/quantum-attestation" element={<RequireEnterprise>{wrap(QuantumAttestation, 'QuantumAttestation')}</RequireEnterprise>} />
+                  <Route path="enterprise/cloud-posture" element={<RequireEnterprise>{wrap(CloudPosture, 'CloudPosture')}</RequireEnterprise>} />
+                  <Route path="enterprise/conformance-packs" element={<RequireEnterprise>{wrap(ConformancePacks, 'ConformancePacks')}</RequireEnterprise>} />
                   <Route path="enterprise/cspm" element={<RequireEnterprise>{wrap(CSPM, 'CSPM')}</RequireEnterprise>} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />

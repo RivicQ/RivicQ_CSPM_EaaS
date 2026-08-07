@@ -38,6 +38,8 @@ import {
   Category,
   Lock,
   WorkspacePremium,
+  GppGood,
+  FactCheck,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -46,6 +48,7 @@ import { getEditionConfig } from '../config/editions';
 import { useThemeMode } from '../theme/ThemeContext';
 import ThemeToggle from '../theme/ThemeToggle';
 import BrandLogo from '../components/BrandLogo';
+import { tokens } from '../theme/tokens';
 
 interface NavItem {
   text: string;
@@ -77,6 +80,8 @@ const Layout: React.FC = () => {
   ];
 
   const enterpriseItems: NavItem[] = [
+    { text: 'Cloud Posture', icon: <GppGood />, path: '/enterprise/cloud-posture', section: 'Enterprise' },
+    { text: 'Conformance Packs', icon: <FactCheck />, path: '/enterprise/conformance-packs', section: 'Enterprise' },
     { text: 'Inventory', icon: <Storage />, path: '/enterprise/inventory', section: 'Enterprise' },
     { text: 'Compliance', icon: <Assessment />, path: '/enterprise/compliance', section: 'Enterprise' },
     { text: 'Quantum', icon: <Psychology />, path: '/enterprise/quantum', section: 'Enterprise' },
@@ -114,10 +119,10 @@ const Layout: React.FC = () => {
               selected={isActive(item.path)}
               sx={{
                 borderRadius: 1,
-                '&.Mui-selected': { bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' } },
+                '&.Mui-selected': { bgcolor: 'primary.main', color: 'primary.contrastText', '&:hover': { bgcolor: 'primary.dark' } },
               }}
             >
-              <ListItemIcon sx={{ color: isActive(item.path) ? 'white' : 'inherit', minWidth: 40 }}>
+              <ListItemIcon sx={{ color: isActive(item.path) ? 'primary.contrastText' : 'inherit', minWidth: 40 }}>
                 {item.badge ? <Badge badgeContent={item.badge} color="error">{item.icon}</Badge> : item.icon}
               </ListItemIcon>
               <ListItemText primary={item.text} />
@@ -140,16 +145,16 @@ const Layout: React.FC = () => {
               disabled={item.disabled}
               sx={{
                 borderRadius: 1,
-                '&.Mui-selected': { bgcolor: 'secondary.main', color: 'white', '&:hover': { bgcolor: 'secondary.dark' } },
+                '&.Mui-selected': { bgcolor: 'tertiary.main', color: 'tertiary.contrastText', '&:hover': { bgcolor: 'tertiary.dark' } },
                 opacity: item.disabled ? 0.72 : 1,
               }}
             >
-              <ListItemIcon sx={{ color: isActive(item.path) ? 'white' : 'inherit', minWidth: 40 }}>
+              <ListItemIcon sx={{ color: isActive(item.path) ? 'tertiary.contrastText' : 'inherit', minWidth: 40 }}>
                 {item.icon}
                 {item.disabled && (
                   <Tooltip title="Enterprise feature — request access to enable">
                     <Box component="span" sx={{ ml: 1, display: 'inline-flex' }}>
-                      <Lock sx={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }} />
+                      <Lock sx={{ fontSize: 16, color: 'text.disabled' }} />
                     </Box>
                   </Tooltip>
                 )}
@@ -187,7 +192,7 @@ const Layout: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'rgba(16,26,45,0.88)', color: 'text.primary', boxShadow: 1, backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(212,175,55,0.18)' }}>
+      <AppBar position="fixed" sx={(theme) => ({ zIndex: theme.zIndex.drawer + 1, bgcolor: `${theme.palette.background.paper}ee`, color: 'text.primary', boxShadow: 1, backdropFilter: 'blur(10px)', borderBottom: `1px solid ${tokens.colors.gold[500]}33` })}>
         <Toolbar>
           <IconButton edge="start" onClick={() => setDrawerOpen(true)} sx={{ mr: 2 }}>
             <MenuIcon />
@@ -217,7 +222,7 @@ const Layout: React.FC = () => {
             <Chip
               size="small"
               label={edition.toUpperCase()}
-              color={edition === 'enterprise' ? 'secondary' : 'primary'}
+              color={edition === 'enterprise' ? 'tertiary' : 'primary'}
               sx={{ mr: 1 }}
             />
 
