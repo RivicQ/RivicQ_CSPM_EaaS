@@ -24,7 +24,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
   const border = isDark ? tokens.colors.border : tokens.colors.borderLight;
 
   const primary = isDark ? tokens.colors.rivicq : {
-    50: '#e0f7ff', 100: '#b8edff', 200: '#7ee1ff', 300: '#45d4ff', 400: '#1cc9ff', 500: '#0096d9', 600: '#007ab0', 700: '#005f8a', 800: '#004563', 900: '#002c40',
+    50: '#e8f1ff', 100: '#cfe2ff', 200: '#a8c8ff', 300: '#78a9ff', 400: '#4589ff', 500: '#0f62fe', 600: '#0a54e6', 700: '#0043ce', 800: '#002d9c', 900: '#001d6e',
   };
   const gold = isDark ? tokens.colors.gold : {
     50: '#fdf8e9', 100: '#faedc4', 200: '#f2dc8b', 300: '#e8c95a', 400: '#ddbb3f', 500: '#a8800f', 600: '#8c6a0d', 700: '#6e5516', 800: '#4a3a0e', 900: '#2e2408',

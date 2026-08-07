@@ -45,7 +45,7 @@ const FRAMEWORKS = [
   { id: 'dora', name: 'DORA', color: '#f59e0b' },
   { id: 'gdpr', name: 'GDPR', color: '#3b82f6' },
   { id: 'eu_ai_act', name: 'EU AI Act', color: '#8b5cf6' },
-  { id: 'soc2', name: 'SOC 2', color: '#06b6d4' },
+  { id: 'soc2', name: 'SOC 2', color: '#0f62fe' },
   { id: 'nist', name: 'NIST', color: '#f59e0b' },
   { id: 'pqc', name: 'PQC', color: '#ef4444' },
 ];

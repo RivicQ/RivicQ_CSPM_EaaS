@@ -44,7 +44,8 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { getEditionConfig } from '../config/editions';
+import { getEditionConfig, isPaidEdition } from '../config/editions';
+import { MODULES } from '../config/modules';
 import { useThemeMode } from '../theme/ThemeContext';
 import ThemeToggle from '../theme/ThemeToggle';
 import BrandLogo from '../components/BrandLogo';
@@ -91,7 +92,15 @@ const Layout: React.FC = () => {
     { text: 'CSPM', icon: <CloudQueue />, path: '/enterprise/cspm', section: 'Enterprise' },
   ];
 
-  const enterpriseNav = enterpriseItems.map((it) => ({ ...it, disabled: edition !== 'enterprise' }));
+  const enterpriseNav = enterpriseItems.map((it) => ({ ...it, disabled: !isPaidEdition(edition) }));
+
+  const modulesNav: NavItem[] = [
+    { text: 'All Modules', icon: <Category />, path: '/modules', section: 'Security Modules' },
+    ...MODULES.map((m) => {
+      const Icon = m.icon;
+      return { text: m.name, icon: <Icon />, path: `/modules/${m.id}`, section: 'Security Modules' };
+    }),
+  ].map((it) => ({ ...it, disabled: !isPaidEdition(edition) }));
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -167,6 +176,40 @@ const Layout: React.FC = () => {
 
       <Divider />
 
+      <List sx={{ px: 1, py: 2 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ px: 2, fontWeight: 600, textTransform: 'uppercase' }}>
+          Security Modules
+        </Typography>
+        {modulesNav.map((item) => (
+          <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+            <ListItemButton
+              onClick={() => handleNavigation(item.path)}
+              selected={isActive(item.path)}
+              disabled={item.disabled}
+              sx={{
+                borderRadius: 1,
+                '&.Mui-selected': { bgcolor: 'tertiary.main', color: 'tertiary.contrastText', '&:hover': { bgcolor: 'tertiary.dark' } },
+                opacity: item.disabled ? 0.72 : 1,
+              }}
+            >
+              <ListItemIcon sx={{ color: isActive(item.path) ? 'tertiary.contrastText' : 'inherit', minWidth: 40 }}>
+                {item.icon}
+                {item.disabled && (
+                  <Tooltip title="Paid edition feature — upgrade to enable">
+                    <Box component="span" sx={{ ml: 1, display: 'inline-flex' }}>
+                      <Lock sx={{ fontSize: 16, color: 'text.disabled' }} />
+                    </Box>
+                  </Tooltip>
+                )}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+
+      <Divider />
+
       <Box sx={{ p: 2, mt: 'auto' }}>
         <Stack spacing={1}>
           <Chip
@@ -176,10 +219,10 @@ const Layout: React.FC = () => {
             size="small"
             sx={{ width: '100%', justifyContent: 'flex-start' }}
           />
-          {edition !== 'enterprise' && (
+          {!isPaidEdition(edition) && (
             <Chip
               icon={<Lock />}
-              label="Enterprise locked"
+              label="Modules locked"
               variant="outlined"
               size="small"
               sx={{ width: '100%', justifyContent: 'flex-start' }}
@@ -264,7 +307,7 @@ const Layout: React.FC = () => {
           <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
             <Chip size="small" label={user?.email || 'unknown-user'} variant="outlined" />
             <Chip size="small" label={editionConfig.name} color="default" />
-            {edition !== 'enterprise' && <Chip size="small" icon={<WorkspacePremium />} label="Enterprise features locked" variant="outlined" />}
+            {!isPaidEdition(edition) && <Chip size="small" icon={<WorkspacePremium />} label="Upgrade to unlock modules" variant="outlined" />}
           </Box>
           <Outlet />
         </motion.div>

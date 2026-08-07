@@ -14,6 +14,7 @@ import {
   cloudService, complianceService, inventoryService, postureService, securityService,
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { isPaidEdition } from '../config/editions';
 import PageFrame from '../components/PageFrame';
 import { tokens } from '../theme/tokens';
 
@@ -60,7 +61,7 @@ const Dashboard: React.FC = () => {
     queryKey: ['dashboard-cspm'],
     queryFn: () => postureService.getOverview().then((r) => r.data),
     retry: 1,
-    enabled: edition === 'enterprise',
+    enabled: isPaidEdition(edition),
   });
 
   const { data: assetsData } = useQuery({
@@ -85,7 +86,7 @@ const Dashboard: React.FC = () => {
     queryKey: ['dashboard-compliance'],
     queryFn: () => complianceService.getAllDashboards().then((r) => r.data),
     retry: 1,
-    enabled: edition === 'enterprise',
+    enabled: isPaidEdition(edition),
   });
 
   const assets = React.useMemo(() => {
@@ -154,7 +155,7 @@ const Dashboard: React.FC = () => {
       subtitle="Unified posture across cloud accounts, workloads, crypto inventory, and PQC migration readiness."
       badge="COMMAND CENTER"
       action={
-        edition === 'enterprise'
+        isPaidEdition(edition)
           ? (
             <Button variant="contained" endIcon={<ArrowForward />} onClick={() => navigate('/enterprise/cloud-posture')}>
               Open Cloud Posture

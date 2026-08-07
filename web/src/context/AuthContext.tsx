@@ -1,8 +1,6 @@
 import React from 'react';
 import { authService, syncAPIBaseURL } from '../services/api';
-import { setEditionPreference, getEditionFromBackend } from '../config/editions';
-
-type Edition = 'oss' | 'enterprise';
+import { setEditionPreference, getEditionFromBackend, normalizeEdition, Edition } from '../config/editions';
 
 export interface AuthUser {
   id: string;
@@ -31,11 +29,11 @@ function readStoredAuth() {
   try {
     const token = localStorage.getItem('auth_token');
     const userRaw = localStorage.getItem('auth_user');
-    const edition = (localStorage.getItem('app_edition') as Edition | null) || 'oss';
+    const edition = normalizeEdition(localStorage.getItem('app_edition')) || 'community';
     const user = userRaw ? JSON.parse(userRaw) : null;
     return { token, user, edition };
   } catch {
-    return { token: null, user: null, edition: 'oss' as Edition };
+    return { token: null, user: null, edition: 'community' as Edition };
   }
 }
 
@@ -43,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = React.useState(true);
   const [token, setToken] = React.useState<string | null>(null);
   const [user, setUser] = React.useState<AuthUser | null>(null);
-  const [edition, setEditionState] = React.useState<Edition>('oss');
+  const [edition, setEditionState] = React.useState<Edition>('community');
 
   React.useEffect(() => {
     let cancelled = false;
@@ -53,10 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const remote = await getEditionFromBackend();
       if (cancelled) return;
 
-      const detectedEdition = (remote?.edition as Edition) || stored.edition;
+      const detectedEdition = normalizeEdition(remote?.edition || stored.edition);
       if (remote?.edition) {
         syncAPIBaseURL();
-        setEditionPreference(remote.edition as Edition);
+        setEditionPreference(detectedEdition);
       }
 
       setToken(stored.token);
@@ -97,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     const nextToken = String(token);
     const nextUser = payload.user;
-    const nextEdition = (payload?.edition || nextUser.edition || 'oss') as Edition;
+    const nextEdition = normalizeEdition(payload?.edition || nextUser.edition || 'community');
     persist(nextToken, nextUser, nextEdition);
   }, [persist]);
 

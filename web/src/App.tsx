@@ -39,6 +39,8 @@ import AWSCloud from './pages/enterprise/AWSCloud';
 import QuantumAttestation from './pages/enterprise/QuantumAttestation';
 import CloudPosture from './pages/enterprise/CloudPosture';
 import ConformancePacks from './pages/enterprise/ConformancePacks';
+import SecurityModulePage from './pages/enterprise/SecurityModule';
+import PlatformModules from './pages/enterprise/PlatformModules';
 import CSPM from './pages/CSPM';
 
 const LogoutRedirect: React.FC = () => {
@@ -143,6 +145,8 @@ const App: React.FC = () => {
                   <Route path="enterprise/cloud-posture" element={<RequireEnterprise>{wrap(CloudPosture, 'CloudPosture')}</RequireEnterprise>} />
                   <Route path="enterprise/conformance-packs" element={<RequireEnterprise>{wrap(ConformancePacks, 'ConformancePacks')}</RequireEnterprise>} />
                   <Route path="enterprise/cspm" element={<RequireEnterprise>{wrap(CSPM, 'CSPM')}</RequireEnterprise>} />
+                  <Route path="modules" element={<RequireEnterprise>{wrap(PlatformModules, 'PlatformModules')}</RequireEnterprise>} />
+                  <Route path="modules/:moduleId" element={<RequireEnterprise>{wrap(SecurityModulePage, 'SecurityModule')}</RequireEnterprise>} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

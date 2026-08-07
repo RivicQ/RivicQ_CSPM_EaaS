@@ -49,7 +49,7 @@ const BetaBanner: React.FC = () => {
               href={BETA_SIGN_UP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              sx={{ background: 'linear-gradient(45deg, #06b6d4, #1d4ed8)', whiteSpace: 'nowrap' }}
+              sx={{ background: 'linear-gradient(45deg, #0f62fe, #0043ce)', whiteSpace: 'nowrap' }}
             >
               Join Beta
             </Button>

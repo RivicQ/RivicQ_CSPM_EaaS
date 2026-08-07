@@ -1,9 +1,10 @@
 import React from 'react';
 import { Box, Button, Card, CardContent, Chip, Stack, TextField, Typography } from '@mui/material';
 import { AutoAwesome, HelpOutline } from '@mui/icons-material';
+import { Edition } from '../config/editions';
 
 interface AIAssistantPanelProps {
-  edition: 'oss' | 'enterprise';
+  edition: Edition;
   totalAssets: number;
   complianceScore: number;
   pqcReadiness: number;
@@ -20,9 +21,11 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ edition, totalAsset
 
   const generateAnswer = () => {
     const lines = [
-      edition === 'oss'
-        ? 'You are in OSS mode. Core CBOM scanning, auth, assets, and analytics are available.'
-        : 'You are in Enterprise mode. CISO, CSPM, multi-cloud, and PQC controls are unlocked.',
+      edition === 'community'
+        ? 'You are in Community mode. Core CBOM scanning, auth, assets, and analytics are available.'
+        : edition === 'professional'
+          ? 'You are in Professional mode. Cloud posture, conformance packs, and the full security module suite are unlocked.'
+          : 'You are in Enterprise mode. CISO, CSPM, multi-cloud, PQC, and HSM controls are unlocked.',
       `Current scale: ${totalAssets.toLocaleString()} assets`,
       `Compliance posture: ${complianceScore}%`,
       `PQC readiness: ${pqcReadiness}%`,
@@ -33,7 +36,7 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ edition, totalAsset
     }
 
     if (/enterprise|unlock|upgrade/i.test(question)) {
-      lines.push('To unlock enterprise, switch the edition on the login/register screen and log in with an enterprise account.');
+      lines.push('To unlock Professional or Enterprise, switch the edition on the login/register screen and log in with a paid workspace account.');
     } else if (/benchmark|performance|speed/i.test(question)) {
       lines.push('Benchmark recommendation: keep p95 latency under 250 ms and scan latency under 10 s for the demo environment.');
     } else {
@@ -44,7 +47,7 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ edition, totalAsset
   };
 
   return (
-    <Card sx={{ border: '1px solid rgba(212,175,55,0.25)', background: 'linear-gradient(135deg, rgba(16,26,45,0.95), rgba(8,17,31,0.95))' }}>
+    <Card sx={{ border: '1px solid rgba(15,98,254,0.30)', background: 'linear-gradient(135deg, rgba(16,26,45,0.95), rgba(8,17,31,0.95))' }}>
       <CardContent>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
           <AutoAwesome color="primary" />
@@ -55,7 +58,7 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ edition, totalAsset
         </Stack>
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Ask in plain English. The assistant explains OSS limits, enterprise unlocks, and benchmark guidance.
+          Ask in plain English. The assistant explains Community limits, paid unlocks, and benchmark guidance.
         </Typography>
 
         <TextField
@@ -76,7 +79,7 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ edition, totalAsset
           <Button size="small" variant="outlined" onClick={() => setQuestion('Show me benchmark guidance for RivicQ.')}>
             Benchmark Guidance
           </Button>
-          <Button size="small" variant="outlined" onClick={() => setQuestion('What is locked in OSS?')}>
+          <Button size="small" variant="outlined" onClick={() => setQuestion('What is locked in Community?')}>
             Locked Features
           </Button>
         </Stack>

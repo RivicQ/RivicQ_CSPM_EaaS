@@ -4,6 +4,31 @@ export const OSS_PORT = 8080;
 export const ENTERPRISE_PORT = 9090;
 export const API_PREFIX = '/api/v1';
 
+export type Edition = 'community' | 'professional' | 'enterprise';
+
+export const EDITIONS: Edition[] = ['community', 'professional', 'enterprise'];
+
+export const normalizeEdition = (raw: string | null | undefined): Edition => {
+  switch ((raw || '').toLowerCase()) {
+    case 'oss':
+    case 'community':
+      return 'community';
+    case 'professional':
+    case 'pro':
+      return 'professional';
+    case 'enterprise':
+      return 'enterprise';
+    default:
+      return 'community';
+  }
+};
+
+export const isPaidEdition = (edition: Edition): boolean =>
+  edition === 'professional' || edition === 'enterprise';
+
+export const isEnterpriseEdition = (edition: Edition): boolean =>
+  edition === 'enterprise';
+
 function detectBaseURL(): string {
   try {
     const stored = localStorage.getItem('api_base_url');
@@ -25,9 +50,9 @@ export function setAPIBaseURL(url: string): void {
   } catch {}
 }
 
-export const OSS_CONFIG = {
-  edition: 'oss',
-  name: 'CryptoBOM OSS',
+export const COMMUNITY_CONFIG = {
+  edition: 'community',
+  name: 'RivicQ Community',
   features: {
     dashboard: true,
     assetInventory: true,
@@ -52,12 +77,58 @@ export const OSS_CONFIG = {
     gitHubScanning: true,
     agenticSecurity: true,
     crosschainProtocol: true,
+    aiSecurity: false,
+    identity: false,
+    supplyChain: false,
+    dspm: false,
+    threatIntel: false,
+    vulnerability: false,
+    apiSecurity: false,
+    incidentResponse: false,
+  },
+};
+
+export const PROFESSIONAL_CONFIG = {
+  edition: 'professional',
+  name: 'RivicQ Professional',
+  features: {
+    dashboard: true,
+    assetInventory: true,
+    scanner: true,
+    analytics: true,
+    settings: true,
+    cspm: true,
+    qbom: true,
+    eaas: true,
+    recovery: true,
+    integrations: true,
+    pricing: false,
+    enterprise: true,
+    multiCloud: true,
+    quantum: false,
+    cncf: true,
+    compliance: true,
+    terraform: true,
+    ibmCloud: false,
+    awsCloud: true,
+    quantumAttestation: false,
+    gitHubScanning: true,
+    agenticSecurity: true,
+    crosschainProtocol: true,
+    aiSecurity: true,
+    identity: true,
+    supplyChain: true,
+    dspm: true,
+    threatIntel: true,
+    vulnerability: true,
+    apiSecurity: true,
+    incidentResponse: true,
   },
 };
 
 export const ENTERPRISE_CONFIG = {
   edition: 'enterprise',
-  name: 'CryptoBOM Enterprise',
+  name: 'RivicQ Enterprise',
   features: {
     dashboard: true,
     assetInventory: true,
@@ -82,23 +153,37 @@ export const ENTERPRISE_CONFIG = {
     gitHubScanning: true,
     agenticSecurity: true,
     crosschainProtocol: true,
+    aiSecurity: true,
+    identity: true,
+    supplyChain: true,
+    dspm: true,
+    threatIntel: true,
+    vulnerability: true,
+    apiSecurity: true,
+    incidentResponse: true,
   },
 };
 
-export type EditionConfig = typeof OSS_CONFIG;
+export type EditionConfig = typeof COMMUNITY_CONFIG;
 
-export const getEditionConfig = (): EditionConfig => {
-  const edition = (() => {
-    try {
-      return localStorage.getItem('app_edition') || process.env.REACT_APP_EDITION || 'oss';
-    } catch {
-      return process.env.REACT_APP_EDITION || 'oss';
-    }
-  })();
-  return edition === 'enterprise' ? ENTERPRISE_CONFIG : OSS_CONFIG;
+const EDITION_CONFIGS: Record<Edition, EditionConfig> = {
+  community: COMMUNITY_CONFIG,
+  professional: PROFESSIONAL_CONFIG,
+  enterprise: ENTERPRISE_CONFIG,
 };
 
-export const setEditionPreference = (edition: 'oss' | 'enterprise') => {
+export const getEditionConfig = (): EditionConfig => {
+  const raw = (() => {
+    try {
+      return localStorage.getItem('app_edition') || process.env.REACT_APP_EDITION || 'community';
+    } catch {
+      return process.env.REACT_APP_EDITION || 'community';
+    }
+  })();
+  return EDITION_CONFIGS[normalizeEdition(raw)];
+};
+
+export const setEditionPreference = (edition: Edition) => {
   try {
     localStorage.setItem('app_edition', edition);
   } catch {}

@@ -14,7 +14,7 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
 }) => (
   <Box
     sx={{
-      background: `linear-gradient(135deg, rgba(6,182,212,0.12), rgba(212,175,55,0.14))`,
+      background: `linear-gradient(135deg, rgba(15,98,254,0.14), rgba(212,175,55,0.14))`,
       border: `1px solid ${tokens.colors.rivicq[200]}`,
       borderRadius: 4,
       p: 3,
@@ -35,7 +35,7 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
     <Button
       variant="contained"
       startIcon={<Upgrade />}
-      sx={{ background: 'linear-gradient(45deg, #06b6d4, #d4af37)' }}
+      sx={{ background: 'linear-gradient(45deg, #0f62fe, #d4af37)' }}
       href="https://cryptobom.io/enterprise"
       target="_blank"
       rel="noopener noreferrer"

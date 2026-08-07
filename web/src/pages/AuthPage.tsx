@@ -54,7 +54,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     password: '',
   });
 
-  const editionLabel = edition === 'enterprise' ? 'Enterprise' : 'OSS';
+  const editionLabel = edition === 'enterprise' ? 'Enterprise' : edition === 'professional' ? 'Professional' : 'Community';
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -97,7 +97,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         overflow: 'hidden',
         py: 5,
         background:
-          'radial-gradient(circle at top left, rgba(6,182,212,0.18), transparent 30%), radial-gradient(circle at bottom right, rgba(212,175,55,0.16), transparent 24%), linear-gradient(180deg, #06111f 0%, #0b1220 100%)',
+          'radial-gradient(circle at top left, rgba(15,98,254,0.20), transparent 30%), radial-gradient(circle at bottom right, rgba(212,175,55,0.16), transparent 24%), linear-gradient(180deg, #050a18 0%, #0b1530 100%)',
       }}
     >
       <Box
@@ -172,7 +172,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   </Stack>
 
                   <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                    <Chip icon={<Storage />} label="OSS" size="small" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.24)' }} variant="outlined" />
+                    <Chip icon={<Storage />} label="Community" size="small" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.24)' }} variant="outlined" />
+                    <Chip icon={<WorkspacePremium />} label="Professional" size="small" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.24)' }} variant="outlined" />
                     <Chip icon={<WorkspacePremium />} label="Enterprise" size="small" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.24)' }} variant="outlined" />
                     <Chip icon={<Shield />} label="Demo access" size="small" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.24)' }} variant="outlined" />
                   </Stack>
@@ -184,11 +185,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                     <ToggleButtonGroup
                       exclusive
                       value={edition}
-                      onChange={(_, value: 'oss' | 'enterprise' | null) => value && setEdition(value)}
+                      onChange={(_, value: 'community' | 'professional' | 'enterprise' | null) => value && setEdition(value)}
                       sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}
                     >
-                      <ToggleButton value="oss" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.25)' }}>
-                        OSS
+                      <ToggleButton value="community" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.25)' }}>
+                        Community
+                      </ToggleButton>
+                      <ToggleButton value="professional" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.25)' }}>
+                        Professional
                       </ToggleButton>
                       <ToggleButton value="enterprise" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.25)' }}>
                         Enterprise

@@ -37,7 +37,7 @@ const tools = [
     category: 'IaC',
     description: 'Provision cloud and Kubernetes infrastructure reproducibly.',
     icon: <AccountTree />,
-    accent: '#00c2ff',
+    accent: '#4589ff',
     docs: 'https://www.terraform.io/docs',
   },
   {
@@ -77,7 +77,7 @@ const tools = [
     category: 'Security',
     description: 'Static analysis for code vulnerabilities and secure coding issues.',
     icon: <Code />,
-    accent: '#00c2ff',
+    accent: '#4589ff',
     docs: 'https://codeql.github.com/docs/',
   },
   {
@@ -169,7 +169,7 @@ const DevSecOpsTools: React.FC = () => {
                     Core dashboard, CBOM scanner, local demos, and dev tooling.
                   </Typography>
                 </Box>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'rgba(0,194,255,0.08)' }}>
+                <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'rgba(15,98,254,0.10)' }}>
                   <Typography variant="subtitle2">Enterprise</Typography>
                   <Typography variant="body2" color="text.secondary">
                     CISO, CSPM, compliance, IBM Quantum, AWS/GCP integrations, and advanced reporting.

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAPIBaseURL, setAPIBaseURL } from '../config/editions';
+import { getAPIBaseURL, setAPIBaseURL, Edition } from '../config/editions';
 
 const api = axios.create({
   baseURL: getAPIBaseURL(),
@@ -101,11 +101,11 @@ export const inventoryService = {
 };
 
 export const authService = {
-  login: async (data: { email: string; password: string; edition?: 'oss' | 'enterprise' }) => {
+  login: async (data: { email: string; password: string; edition?: Edition }) => {
     return api.post('/auth/login', data);
   },
 
-  register: async (data: { name: string; email: string; password: string; edition?: 'oss' | 'enterprise' }) => {
+  register: async (data: { name: string; email: string; password: string; edition?: Edition }) => {
     return api.post('/auth/register', data);
   },
 

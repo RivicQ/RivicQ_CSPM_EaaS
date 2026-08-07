@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography, Container, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
+import { normalizeEdition } from '../config/editions';
 
 const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ const OAuthCallback: React.FC = () => {
   React.useEffect(() => {
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
-    const edition = (searchParams.get('edition') || 'oss') as 'oss' | 'enterprise';
+    const edition = normalizeEdition(searchParams.get('edition'));
     const userId = searchParams.get('user_id');
     const userName = searchParams.get('user_name');
     const userEmail = searchParams.get('user_email');

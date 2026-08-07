@@ -1,12 +1,13 @@
 import React from 'react';
 import { Box, Button, Card, CardContent, Chip, Stack, TextField, Typography } from '@mui/material';
 import { AutoAwesome, SmartToy } from '@mui/icons-material';
+import { Edition, isPaidEdition } from '../config/editions';
 
 type AssistantContext = 'dashboard' | 'tools' | 'auth' | 'enterprise' | 'scanner';
 
 type AssistantProps = {
   contextKey: AssistantContext;
-  edition: 'oss' | 'enterprise';
+  edition: Edition;
   title?: string;
   description?: string;
   benchmark?: {
@@ -28,8 +29,8 @@ const CONTEXT_PROMPTS: Record<AssistantContext, string[]> = {
     'What tools are locked to Enterprise in this workspace?',
   ],
   auth: [
-    'How do I switch between OSS and Enterprise?',
-    'What features are limited in OSS?',
+    'How do I switch between Community and Enterprise?',
+    'What features are limited in Community?',
     'What demo credentials should I use?',
   ],
   enterprise: [
@@ -44,31 +45,31 @@ const CONTEXT_PROMPTS: Record<AssistantContext, string[]> = {
   ],
 };
 
-const ASSISTANT_RESPONSES: Record<AssistantContext, (edition: 'oss' | 'enterprise', benchmark?: AssistantProps['benchmark']) => string> = {
+const ASSISTANT_RESPONSES: Record<AssistantContext, (edition: Edition, benchmark?: AssistantProps['benchmark']) => string> = {
   dashboard: (edition, benchmark) => {
-    const base = edition === 'enterprise'
-      ? 'Enterprise unlocks executive compliance, cloud posture, and PQC migration analytics.'
-      : 'OSS keeps core CBOM, auth, scanning, and public dashboards available while locking enterprise views.';
+    const base = isPaidEdition(edition)
+      ? 'Your paid edition unlocks executive compliance, cloud posture, and PQC migration analytics.'
+      : 'Community keeps core CBOM, auth, scanning, and public dashboards available while locking paid module views.';
     return benchmark
       ? `${base} Benchmark snapshot: ${benchmark.throughput} req/sec, p95 ${benchmark.p95_latency_ms} ms, scan time ${benchmark.scan_time_seconds}s.`
       : base;
   },
   tools: (edition, benchmark) => {
-    const base = edition === 'enterprise'
+    const base = isPaidEdition(edition)
       ? 'Use GitHub Actions for CI, Terraform for infra, Kubernetes for runtime, and Prometheus/Grafana for observability. Trivy, CodeQL, and Syft provide supply-chain and security coverage.'
-      : 'OSS can use the core DevSecOps toolchain view, but some enterprise automation cards remain locked.';
+      : 'Community can use the core DevSecOps toolchain view, but some paid automation cards remain locked.';
     return benchmark ? `${base} Current benchmark: ${benchmark.throughput} req/sec and ${benchmark.p95_latency_ms} ms p95.` : base;
   },
-  auth: (edition) => edition === 'enterprise'
-    ? 'Enterprise access unlocks compliance, multi-cloud, IBM Quantum, and advanced reporting.'
-    : 'OSS access includes CBOM scanning and local demos, while enterprise-specific routes stay locked.' ,
-  enterprise: (edition) => edition === 'enterprise'
-    ? 'Enterprise enables CISO, CSPM, PQC, multi-cloud HSM, and compliance workflows.'
-    : 'The enterprise surface is locked in OSS and will redirect you to the dashboard.' ,
+  auth: (edition) => isPaidEdition(edition)
+    ? 'Paid access unlocks compliance, multi-cloud, quantum, and advanced reporting.'
+    : 'Community access includes CBOM scanning and local demos, while paid routes stay locked.' ,
+  enterprise: (edition) => isPaidEdition(edition)
+    ? 'Your edition enables CISO, CSPM, PQC, multi-cloud HSM, and compliance workflows.'
+    : 'The module surface is locked in Community and will redirect you to the dashboard.' ,
   scanner: (edition, benchmark) => {
-    const base = edition === 'enterprise'
+    const base = isPaidEdition(edition)
       ? 'The scanner can be extended with compliance checks and cloud integrations.'
-      : 'OSS scanning focuses on CBOM generation, asset discovery, and local demo workflows.';
+      : 'Community scanning focuses on CBOM generation, asset discovery, and local demo workflows.';
     return benchmark ? `${base} Demo benchmark scan time is ${benchmark.scan_time_seconds}s for a 10k asset reference set.` : base;
   },
 };
@@ -89,7 +90,7 @@ const ContextualAIAssistant: React.FC<AssistantProps> = ({ contextKey, edition, 
   };
 
   return (
-    <Card sx={{ border: '1px solid rgba(212,175,55,0.25)', background: 'linear-gradient(135deg, rgba(16,26,45,0.95), rgba(8,17,31,0.95))' }}>
+    <Card sx={{ border: '1px solid rgba(15,98,254,0.30)', background: 'linear-gradient(135deg, rgba(16,26,45,0.95), rgba(8,17,31,0.95))' }}>
       <CardContent>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
           <AutoAwesome color="primary" />

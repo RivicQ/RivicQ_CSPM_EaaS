@@ -104,8 +104,8 @@ const Home: React.FC = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', background: 'radial-gradient(1200px 600px at 80% -10%, rgba(0,194,255,0.12), transparent 60%), radial-gradient(900px 500px at 0% 10%, rgba(212,175,55,0.10), transparent 55%), linear-gradient(180deg, #060d1a 0%, #08111f 45%, #0b1424 100%)', position: 'relative', overflow: 'hidden' }}>
-      <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(0,194,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,194,255,0.04) 1px, transparent 1px)', backgroundSize: '72px 72px', pointerEvents: 'none' }} />
+    <Box sx={{ minHeight: '100vh', background: 'radial-gradient(1200px 600px at 80% -10%, rgba(15,98,254,0.16), transparent 60%), radial-gradient(900px 500px at 0% 10%, rgba(212,175,55,0.10), transparent 55%), linear-gradient(180deg, #050a18 0%, #081020 45%, #0b1530 100%)', position: 'relative', overflow: 'hidden' }}>
+      <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(15,98,254,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(15,98,254,0.05) 1px, transparent 1px)', backgroundSize: '72px 72px', pointerEvents: 'none' }} />
 
       <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 }, position: 'relative' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 8 }}>
@@ -123,7 +123,7 @@ const Home: React.FC = () => {
 
         <Box sx={{ textAlign: 'center', mb: 8 }}>
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <Chip icon={<Shield />} label="Complete Cloud & Cyber Security Posture" sx={{ mb: 3, bgcolor: 'rgba(0,194,255,0.10)', color: tokens.colors.rivicq[300], border: '1px solid rgba(0,194,255,0.35)' }} />
+            <Chip icon={<Shield />} label="Complete Cloud & Cyber Security Posture" sx={{ mb: 3, bgcolor: 'rgba(15,98,254,0.12)', color: tokens.colors.rivicq[300], border: '1px solid rgba(15,98,254,0.4)' }} />
             <Typography variant="h2" fontWeight={900} sx={{ color: tokens.colors.text.primary, mb: 2, lineHeight: 1.08, fontSize: { xs: '2.1rem', md: '3.8rem' } }}>
               Your entire security posture.
               <br />
@@ -137,7 +137,7 @@ const Home: React.FC = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <Card sx={{ maxWidth: 700, mx: 'auto', mb: 3, p: 0.5, bgcolor: 'rgba(17,32,58,0.8)', border: '1px solid rgba(0,194,255,0.30)', backdropFilter: 'blur(10px)' }}>
+            <Card sx={{ maxWidth: 700, mx: 'auto', mb: 3, p: 0.5, bgcolor: 'rgba(13,28,64,0.8)', border: '1px solid rgba(15,98,254,0.35)', backdropFilter: 'blur(10px)' }}>
               <CardContent sx={{ p: 3 }}>
                 <Stack spacing={2}>
                   <TextField
@@ -179,7 +179,7 @@ const Home: React.FC = () => {
 
         {scanStatus !== 'idle' && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-            <Card sx={{ mb: 6, bgcolor: 'rgba(11,21,38,0.9)', border: '1px solid rgba(0,194,255,0.20)' }}>
+            <Card sx={{ mb: 6, bgcolor: 'rgba(8,16,32,0.9)', border: '1px solid rgba(15,98,254,0.28)' }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ mb: 2, color: tokens.colors.text.primary }}>Live Scan Visualization</Typography>
                 <LinearProgress variant="determinate" value={progress} sx={{ height: 8, mb: 3 }} />

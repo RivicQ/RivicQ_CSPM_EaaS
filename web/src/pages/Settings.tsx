@@ -23,6 +23,7 @@ import {
   WorkspacePremium,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import { isEnterpriseEdition } from '../config/editions';
 import PageFrame from '../components/PageFrame';
 
 const Settings: React.FC = () => {
@@ -83,8 +84,10 @@ const Settings: React.FC = () => {
                   <Typography variant="subtitle2" gutterBottom>Workspace mode</Typography>
                   <Typography variant="body2" color="text.secondary">
                     {edition === 'enterprise'
-                      ? 'Enterprise mode enables compliance, cloud governance, and attestation controls.'
-                      : 'OSS mode focuses on inventory, scanner, and local developer workflows.'}
+                      ? 'Enterprise mode enables compliance, cloud governance, quantum attestation, and HSM controls.'
+                      : edition === 'professional'
+                        ? 'Professional mode enables compliance, multi-cloud posture, and the full security module suite.'
+                        : 'Community mode focuses on inventory, scanner, and local developer workflows.'}
                   </Typography>
                 </Box>
               </Stack>
@@ -102,7 +105,7 @@ const Settings: React.FC = () => {
               <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
                 <Chip label="AWS Connected" color="success" icon={<Cloud />} />
                 <Chip label="GCP Connected" color="success" icon={<Cloud />} />
-                {edition === 'enterprise' && <Chip label="IBM Cloud Connected" color="success" icon={<Cloud />} />}
+                {isEnterpriseEdition(edition) && <Chip label="IBM Cloud Connected" color="success" icon={<Cloud />} />}
               </Stack>
             </CardContent>
           </Card>
