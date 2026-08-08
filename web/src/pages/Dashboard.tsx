@@ -2,10 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Alert, Avatar, Box, Button, Card, CardContent, Chip, CircularProgress, Grid, Stack, Typography,
+  Alert, Avatar, Box, Button, Card, CardContent, Chip, CircularProgress, Grid, Stack, Typography, useTheme,
 } from '@mui/material';
 import {
-  ArrowForward, GppGood, Lock, Memory, NotificationsActive, Security, Storage, Warning,
+  ArrowForward, GppGood, Lock, Memory, NotificationsActive, Security,
 } from '@mui/icons-material';
 import {
   Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -50,6 +50,7 @@ const DEMO_FEED = [
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { edition } = useAuth();
+  const theme = useTheme();
 
   const { data: summaryData, isLoading: summaryLoading } = useQuery({
     queryKey: ['dashboard-summary'],
@@ -168,7 +169,7 @@ const Dashboard: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard title="Posture Score" metric={`${healthScore}/100`} subtitle="CSPM + crypto posture" icon={<GppGood />} color={tokens.colors.rivicq[400]}>
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-              <Box sx={{ position: 'relative', width: 84, height: 84, borderRadius: '50%', border: `6px solid ${tokens.colors.navy[3]}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box sx={{ position: 'relative', width: 84, height: 84, borderRadius: '50%', border: `6px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Box sx={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '6px solid transparent', borderTopColor: healthScore >= 80 ? tokens.colors.crypto.low : healthScore >= 60 ? tokens.colors.crypto.high : tokens.colors.crypto.critical, borderRightColor: healthScore >= 80 ? tokens.colors.crypto.low : healthScore >= 60 ? tokens.colors.crypto.high : tokens.colors.crypto.critical, transform: `rotate(${healthScore / 100 * 360}deg)` }} />
                 <Typography variant="h5" fontWeight={800} sx={{ color: tokens.colors.text.primary }}>{healthScore}</Typography>
               </Box>
@@ -228,7 +229,7 @@ const Dashboard: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke={tokens.colors.border} />
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: tokens.colors.text.secondary }} />
                     <YAxis tick={{ fontSize: 11, fill: tokens.colors.text.secondary }} />
-                    <Tooltip contentStyle={{ backgroundColor: tokens.colors.navy[2], border: `1px solid ${tokens.colors.border}`, borderRadius: 8 }} />
+                    <Tooltip contentStyle={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 8, color: theme.palette.text.primary }} />
                     <Bar dataKey="value" fill={tokens.colors.rivicq[500]} radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -251,7 +252,7 @@ const Dashboard: React.FC = () => {
                         <Cell key={`risk-${index}`} fill={SEVERITY_COLORS[index % SEVERITY_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: tokens.colors.navy[2], border: `1px solid ${tokens.colors.border}`, borderRadius: 8 }} />
+                    <Tooltip contentStyle={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 8, color: theme.palette.text.primary }} />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
@@ -269,7 +270,7 @@ const Dashboard: React.FC = () => {
                 {feed.map((evt: any, i: number) => {
                   const color = SEVERITY_COLORS[['low', 'medium', 'high', 'critical'].indexOf(evt.severity) + 1] || tokens.colors.crypto.low;
                   return (
-                    <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 0.75, px: 1, borderRadius: 1, '&:hover': { bgcolor: tokens.colors.navy[2] } }}>
+                    <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 0.75, px: 1, borderRadius: 1, '&:hover': { bgcolor: theme.palette.action.hover } }}>
                       <Chip size="small" label={(evt.severity || 'low').toUpperCase()} sx={{ bgcolor: `${color}22`, color, fontWeight: 700, minWidth: 84 }} />
                       <Typography variant="body2" sx={{ color: tokens.colors.text.primary, flexGrow: 1 }}>{evt.message}</Typography>
                       <Typography variant="caption" sx={{ color: tokens.colors.text.muted, whiteSpace: 'nowrap' }}>{evt.time}</Typography>
@@ -290,13 +291,14 @@ const Dashboard: React.FC = () => {
 };
 
 const TooltipCell: React.FC<{ risk: number }> = ({ risk }) => {
-  const color = SEVERITY_COLORS[risk] || tokens.colors.navy[3];
+  const theme = useTheme();
+  const color = SEVERITY_COLORS[risk] || theme.palette.divider;
   return (
     <Box
       sx={{
         aspectRatio: '1 / 1',
         borderRadius: 0.75,
-        bgcolor: risk === 0 ? `${tokens.colors.navy[3]}66` : `${color}cc`,
+        bgcolor: risk === 0 ? theme.palette.divider : `${color}cc`,
         cursor: 'pointer',
         transition: 'transform 0.15s',
         '&:hover': { transform: 'scale(1.2)' },

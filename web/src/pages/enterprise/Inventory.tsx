@@ -171,7 +171,7 @@ const Inventory: React.FC = () => {
         </Button>
       )}
       secondaryAction={(
-        <Button variant="outlined" startIcon={<Refresh />} onClick={loadAssets} sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.18)' }}>
+        <Button variant="outlined" startIcon={<Refresh />} onClick={loadAssets}>
           Refresh
         </Button>
       )}

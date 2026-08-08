@@ -1,5 +1,4 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -20,10 +19,8 @@ import {
   Dashboard,
   Storage,
   Security,
-  Assessment,
   Analytics,
   Settings,
-  Home,
   Refresh,
   Notifications,
   Visibility,
@@ -48,7 +45,7 @@ const DevSecOpsLayout: React.FC<{ children: React.ReactNode; title?: string; sub
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const [notifications, setNotifications] = React.useState(5);
+  const [notifications] = React.useState(5);
 
   const navigationItems: NavItem[] = [
     {

@@ -1,9 +1,35 @@
 # CryptoBOM SaaS — Executive Project Status
 
-**Date:** 2026-03-12  
-**Version:** 1.0.0-beta1 (Enterprise Edition)  
+**Date:** 2026-08-08  
+**Version:** 1.2.0 (OSS Edition)  
 **Repository:** https://github.com/RivicQ/RivicQ_CSPM_EaaS  
 **License:** Apache 2.0  
+
+---
+
+## 🚀 v1.2.0 – Minimal Light-First Enterprise Redesign
+
+> **CryptoBOM SaaS v1.2.0 ships a full-platform UX/UI redesign.**
+>
+> The entire web platform (landing, auth, app shell, dashboard, security modules,
+> and enterprise pages) now runs on a minimal **light-first enterprise theme** —
+> clean white/light surfaces, refined indigo + emerald accents, airy spacing, and a
+> Stripe/Vercel-style SaaS aesthetic. Dark mode remains available via the theme toggle.
+
+**What changed:**
+
+- **Design system** — new light-first palette in `web/src/theme/tokens.ts` (indigo `#4f46e5`,
+  emerald `#059669`, light-gray surfaces), MUI theme defaults to `light` mode, rounded
+  buttons/chips/cards, bordered panels, custom scrollbars.
+- **Brand** — new indigo→emerald 6-point logo mark, `CryptoBOM EaaS` tagline.
+- **App shell** — rebuilt `Layout.tsx` with grouped navigation (Workspace / Enterprise /
+  Security Modules), collapsible module section, topbar search, edition chip, and user menu.
+- **Landing & auth** — light-first landing with repo-scan demo and two-tier pricing cards;
+  split-panel auth screen with edition selector and GitHub OAuth.
+- **Security Modules catalog** — completed the `SEEDS` catalog in `web/src/config/modules.ts`
+  with 6 new module seeds (Cloud Security, Runtime Security, Network Security, Detection
+  Engineering, Digital Forensics, Red Team), closing all remaining category gaps.
+- **Quality** — `npm run type-check`, `npm run lint` (0 errors), and a clean production build.
 
 ---
 

@@ -90,7 +90,7 @@ const Assets: React.FC = () => {
       subtitle="Review cryptographic assets, filter risk, and export selected items for remediation or reporting."
       badge={`${assets.length} assets`}
       secondaryAction={(
-        <Button variant="outlined" startIcon={<Refresh />} onClick={() => refetch()} sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.18)' }}>
+        <Button variant="outlined" startIcon={<Refresh />} onClick={() => refetch()}>
           Refresh
         </Button>
       )}

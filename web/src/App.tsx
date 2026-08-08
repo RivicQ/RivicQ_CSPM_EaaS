@@ -62,7 +62,7 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 );
 
 const App: React.FC = () => {
-  const [mode, setMode] = React.useState<'light' | 'dark'>('dark');
+  const [mode, setMode] = React.useState<'light' | 'dark'>('light');
   const theme = React.useMemo(() => {
     const { getAppTheme } = require('./theme/theme');
     return getAppTheme(mode);

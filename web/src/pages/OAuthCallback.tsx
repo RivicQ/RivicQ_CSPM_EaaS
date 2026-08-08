@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography, Container, Alert } from '@mui/material';
+import { CircularProgress, Typography, Container, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { normalizeEdition } from '../config/editions';

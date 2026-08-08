@@ -15,7 +15,7 @@ const RequireEnterprise: React.FC<{ children: React.ReactElement }> = ({ childre
         <Card sx={{ maxWidth: 720, width: '100%', border: '1px solid rgba(15,98,254,0.30)' }}>
           <CardContent sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={2} alignItems="flex-start">
-              <Lock sx={{ fontSize: 42, color: '#78a9ff' }} />
+              <Lock sx={{ fontSize: 42, color: 'primary.main' }} />
               <Typography variant="h4" fontWeight={800}>
                 Enterprise feature locked
               </Typography>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Alert, Avatar, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Stack, Typography,
+  Alert, Avatar, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Stack, Typography, useTheme,
 } from '@mui/material';
 import {
   Cloud, CloudDone, CloudOff, GppGood, Memory, NotificationsActive, Refresh, Storage, Warning,
@@ -51,6 +51,7 @@ const DEMO_FEED = [
 const severityLabel = (severity: string) => severity.toUpperCase();
 
 const CloudPosture: React.FC = () => {
+  const theme = useTheme();
   const { data: overview, isLoading } = useQuery({
     queryKey: ['cloud-posture-overview'],
     queryFn: () => postureService.getOverview().then((r) => r.data),
@@ -136,7 +137,7 @@ const CloudPosture: React.FC = () => {
             value: `${healthScore}/100`, sub: 'Weighted across all controls',
             gauge: (
               <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                <Box sx={{ position: 'relative', width: 84, height: 84, borderRadius: '50%', border: `6px solid ${tokens.colors.navy[3]}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ position: 'relative', width: 84, height: 84, borderRadius: '50%', border: `6px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Box sx={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '6px solid transparent', borderTopColor: healthScore >= 80 ? tokens.colors.crypto.low : healthScore >= 60 ? tokens.colors.crypto.high : tokens.colors.crypto.critical, borderRightColor: healthScore >= 80 ? tokens.colors.crypto.low : healthScore >= 60 ? tokens.colors.crypto.high : tokens.colors.crypto.critical, transform: `rotate(${healthScore / 100 * 360}deg)` }} />
                   <Typography variant="h5" fontWeight={800} sx={{ color: tokens.colors.text.primary }}>{healthScore}</Typography>
                 </Box>
@@ -185,7 +186,7 @@ const CloudPosture: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke={tokens.colors.border} />
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: tokens.colors.text.secondary }} />
                     <YAxis tick={{ fontSize: 11, fill: tokens.colors.text.secondary }} />
-                    <Tooltip contentStyle={{ backgroundColor: tokens.colors.navy[2], border: `1px solid ${tokens.colors.border}`, borderRadius: 8 }} />
+                    <Tooltip contentStyle={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 8, color: theme.palette.text.primary }} />
                     <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                       {byProvider.map((entry: any) => (
                         <Cell key={entry.name} fill={providerColor(entry.name)} />
@@ -209,7 +210,7 @@ const CloudPosture: React.FC = () => {
                         <Cell key={entry.name} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: tokens.colors.navy[2], border: `1px solid ${tokens.colors.border}`, borderRadius: 8 }} />
+                    <Tooltip contentStyle={{ backgroundColor: theme.palette.background.paper, border: `1px solid ${theme.palette.divider}`, borderRadius: 8, color: theme.palette.text.primary }} />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
@@ -270,7 +271,7 @@ const CloudPosture: React.FC = () => {
             {DEMO_FEED.map((evt) => {
               const color = SEVERITY_COLORS[evt.severity] || tokens.colors.text.muted;
               return (
-                <Box key={evt.time + evt.message} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1, px: 1, borderRadius: 1, '&:hover': { bgcolor: tokens.colors.navy[2] } }}>
+                <Box key={evt.time + evt.message} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1, px: 1, borderRadius: 1, '&:hover': { bgcolor: theme.palette.action.hover } }}>
                   <Chip size="small" label={severityLabel(evt.severity)} sx={{ bgcolor: `${color}22`, color, fontWeight: 700, minWidth: 84 }} />
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="body2" sx={{ color: tokens.colors.text.primary }}>{evt.message}</Typography>

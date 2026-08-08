@@ -1,12 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, Divider } from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, Divider, useTheme } from '@mui/material';
 import { ArrowForward, Lock, Security, WorkspacePremium, CloudQueue, Psychology, Storage, Shield } from '@mui/icons-material';
 import { setEditionPreference, Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 
 const EditionSwitcher: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   const chooseEdition = (edition: Edition) => {
     setEditionPreference(edition);
@@ -19,7 +21,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Core CBOM scanning, dashboard, auth, and local operations. Free for open source teams.',
       icon: <Security sx={{ fontSize: 34 }} />,
       edition: 'community' as Edition,
-      accent: '#78a9ff',
+      accent: '#6366f1',
       highlights: ['CBOM scan basics', 'Dashboard & auth', 'GitHub & CI', 'Local workflows'],
       action: 'Continue with Community',
     },
@@ -28,7 +30,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Cloud posture, conformance packs, and the full security module suite for growing teams.',
       icon: <Shield sx={{ fontSize: 34 }} />,
       edition: 'professional' as Edition,
-      accent: '#d4af37',
+      accent: '#d97706',
       highlights: ['CSPM & conformance packs', 'AI / Identity / Supply chain', 'Multi-cloud accounts', 'Threat & vuln management'],
       action: 'Continue with Professional',
     },
@@ -37,21 +39,27 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'CISO-level controls, PQC / quantum attestation, HSM, SSO, and executive reporting.',
       icon: <WorkspacePremium sx={{ fontSize: 34 }} />,
       edition: 'enterprise' as Edition,
-      accent: '#0f62fe',
+      accent: '#059669',
       highlights: ['Quantum & HSM (IBM/HPCS)', 'SSO, audit & RBAC', 'Terraform & IaC scanning', 'Executive analytics'],
       action: 'Continue with Enterprise',
     },
   ];
 
+  const pageBg = isDark
+    ? 'radial-gradient(circle at top, rgba(99,102,241,0.2), transparent 26%), linear-gradient(180deg, #0b1220 0%, #0f172a 100%)'
+    : 'radial-gradient(circle at top, rgba(99,102,241,0.1), transparent 26%), linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)';
+
+  const cardBg = isDark ? 'linear-gradient(180deg, #1e293b, #0f172a)' : 'linear-gradient(180deg, #ffffff, #f8fafc)';
+
   return (
-    <Box sx={{ minHeight: '100vh', background: 'radial-gradient(circle at top, rgba(15,98,254,0.20), transparent 26%), linear-gradient(180deg, #050a18 0%, #0b1530 100%)', py: 8 }}>
+    <Box sx={{ minHeight: '100vh', background: pageBg, py: 8 }}>
       <Container maxWidth="lg">
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-          <BrandLogo dark />
+          <BrandLogo />
         </Box>
         <Stack spacing={2} sx={{ mb: 4, textAlign: 'center' }}>
-          <Chip icon={<Lock />} label="Edition Selection" color="primary" sx={{ alignSelf: 'center' }} />
-          <Typography variant="h3" fontWeight={900} sx={{ color: '#f8fafc' }}>
+          <Chip icon={<Lock />} label="Edition Selection" color="primary" sx={{ alignSelf: 'center', fontWeight: 600 }} />
+          <Typography variant="h3" fontWeight={900} sx={{ letterSpacing: '-0.02em' }}>
             Choose your RivicQ workspace
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 900, mx: 'auto' }}>
@@ -62,13 +70,22 @@ const EditionSwitcher: React.FC = () => {
         <Grid container spacing={3}>
           {cards.map((card) => (
             <Grid item xs={12} md={4} key={card.title}>
-              <Card sx={{ height: '100%', borderRadius: 5, border: `1px solid ${card.accent}44`, background: 'linear-gradient(180deg, rgba(13,28,64,0.98), rgba(5,10,24,0.96))' }}>
+              <Card
+                sx={{
+                  height: '100%',
+                  borderRadius: 3,
+                  border: `1px solid ${card.accent}44`,
+                  background: cardBg,
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': { transform: 'translateY(-4px)', boxShadow: `0 16px 40px ${card.accent}22` },
+                }}
+              >
                 <CardContent sx={{ p: 4 }}>
                   <Stack spacing={2}>
                     <Box sx={{ color: card.accent }}>
                       {card.icon}
                     </Box>
-                    <Typography variant="h5" fontWeight={800}>
+                    <Typography variant="h5" fontWeight={800} sx={{ letterSpacing: '-0.01em' }}>
                       {card.title}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -94,11 +111,11 @@ const EditionSwitcher: React.FC = () => {
           ))}
         </Grid>
 
-        <Divider sx={{ my: 4, borderColor: 'rgba(255,255,255,0.12)' }} />
+        <Divider sx={{ my: 4 }} />
 
         <Grid container spacing={2} sx={{ mt: 4 }}>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: 'rgba(120,169,255,0.08)' }}>
+            <Card sx={{ height: '100%', bgcolor: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)' }}>
               <CardContent>
                 <Storage color="primary" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Community quick start</Typography>
@@ -107,7 +124,7 @@ const EditionSwitcher: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: 'rgba(212,175,55,0.08)' }}>
+            <Card sx={{ height: '100%', bgcolor: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.18)' }}>
               <CardContent>
                 <CloudQueue color="secondary" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Professional unlocks</Typography>
@@ -116,7 +133,7 @@ const EditionSwitcher: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: 'rgba(15,98,254,0.08)' }}>
+            <Card sx={{ height: '100%', bgcolor: 'rgba(5,150,105,0.06)', border: '1px solid rgba(5,150,105,0.18)' }}>
               <CardContent>
                 <Psychology color="success" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Enterprise extends</Typography>
@@ -126,7 +143,7 @@ const EditionSwitcher: React.FC = () => {
           </Grid>
         </Grid>
 
-        <Box sx={{ mt: 4, p: 3, borderRadius: 4, border: '1px solid rgba(255,255,255,0.08)', bgcolor: 'rgba(255,255,255,0.03)' }}>
+        <Box sx={{ mt: 4, p: 3, borderRadius: 3, border: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
           <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
             What gets locked in Community
           </Typography>

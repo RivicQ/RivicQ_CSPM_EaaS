@@ -8,6 +8,16 @@ import {
   BugReport,
   Api,
   Bolt,
+  Cloud,
+  Monitor,
+  Hub,
+  Rule,
+  Search,
+  GppGood,
+  FactCheck,
+  Insights,
+  Shield,
+  AutoAwesome,
 } from '@mui/icons-material';
 import { tokens } from '../theme/tokens';
 
@@ -41,6 +51,7 @@ export interface SecurityModuleConfig {
   color: string;
   score: number;
   connected: boolean;
+  umbrella?: boolean;
   kpis: ModuleKpi[];
   capabilities: string[];
   frameworks: string[];
@@ -48,7 +59,176 @@ export interface SecurityModuleConfig {
   findings: ModuleFinding[];
 }
 
-export const MODULES: SecurityModuleConfig[] = [
+export const MODULE_CATEGORIES_ORDER = [
+  'Cloud Security',
+  'Identity Security',
+  'Quantum Security',
+  'Supply Chain',
+  'AI Security',
+  'API Security',
+  'Application Security',
+  'Runtime Security',
+  'Network Security',
+  'Data Security',
+  'Threat Intelligence',
+  'Detection Engineering',
+  'Vulnerability Management',
+  'Incident Response',
+  'Digital Forensics',
+  'Red Team',
+  'Compliance',
+  'Enterprise Analytics',
+] as const;
+
+type CategoryName = (typeof MODULE_CATEGORIES_ORDER)[number];
+
+const ICON_BY_CATEGORY: Record<CategoryName, SvgIconComponent> = {
+  'Cloud Security': Cloud,
+  'Identity Security': Badge,
+  'Quantum Security': Psychology,
+  'Supply Chain': AccountTree,
+  'AI Security': AutoAwesome,
+  'API Security': Api,
+  'Application Security': BugReport,
+  'Runtime Security': Monitor,
+  'Network Security': Hub,
+  'Data Security': DataObject,
+  'Threat Intelligence': Radar,
+  'Detection Engineering': Rule,
+  'Vulnerability Management': Shield,
+  'Incident Response': Bolt,
+  'Digital Forensics': Search,
+  'Red Team': GppGood,
+  'Compliance': FactCheck,
+  'Enterprise Analytics': Insights,
+};
+
+const COLOR_BY_CATEGORY: Record<CategoryName, string> = {
+  'Cloud Security': tokens.colors.rivicq[400],
+  'Identity Security': tokens.colors.rivicq[300],
+  'Quantum Security': tokens.colors.crypto.quantum,
+  'Supply Chain': tokens.colors.crypto.info,
+  'AI Security': tokens.colors.crypto.quantum,
+  'API Security': tokens.colors.rivicq[300],
+  'Application Security': tokens.colors.crypto.medium,
+  'Runtime Security': tokens.colors.crypto.high,
+  'Network Security': tokens.colors.crypto.info,
+  'Data Security': tokens.colors.crypto.low,
+  'Threat Intelligence': tokens.colors.crypto.high,
+  'Detection Engineering': tokens.colors.crypto.info,
+  'Vulnerability Management': tokens.colors.crypto.medium,
+  'Incident Response': tokens.colors.crypto.critical,
+  'Digital Forensics': tokens.colors.crypto.classic,
+  'Red Team': tokens.colors.crypto.critical,
+  'Compliance': tokens.colors.gold[500],
+  'Enterprise Analytics': tokens.colors.brand.blue,
+};
+
+const KPI_LABELS: Record<CategoryName, string[]> = {
+  'Cloud Security': ['Cloud assets', 'Misconfigurations', 'Public exposure', 'Risk score'],
+  'Identity Security': ['Identities tracked', 'Non-human identities', 'Privilege sprawl', 'Stale credentials'],
+  'Quantum Security': ['Crypto inventory', 'PQC readiness', 'Vulnerable keys', 'Quantum risk'],
+  'Supply Chain': ['BOMs generated', 'Signed artifacts', 'High-risk deps', 'Provenance coverage'],
+  'AI Security': ['AI assets', 'Prompt incidents', 'Guardrail coverage', 'Exposed model keys'],
+  'API Security': ['APIs discovered', 'Shadow APIs', 'Auth failures', 'Contract coverage'],
+  'Application Security': ['Apps scanned', 'Findings open', 'Scan coverage', 'Mean time to fix'],
+  'Runtime Security': ['Hosts monitored', 'Runtime alerts', 'Detections', 'Policy coverage'],
+  'Network Security': ['Network assets', 'Exposed ports', 'Open paths', 'Segmentation'],
+  'Data Security': ['Data assets', 'PII records', 'Exposures', 'Classification'],
+  'Threat Intelligence': ['Intel feeds', 'Active actors', 'IOC matches', 'Context time'],
+  'Detection Engineering': ['Rules deployed', 'Coverage', 'False positives', 'Detections'],
+  'Vulnerability Management': ['Open vulns', 'Critical / high', 'Patch coverage', 'MTTR'],
+  'Incident Response': ['Open incidents', 'Active cases', 'MTTR', 'Playbook coverage'],
+  'Digital Forensics': ['Active cases', 'Evidence chains', 'Capture time', 'Integrity'],
+  'Red Team': ['Campaigns', 'Attack paths', 'Validation', 'Exposure'],
+  'Compliance': ['Controls', 'Pass rate', 'Frameworks', 'Open gaps'],
+  'Enterprise Analytics': ['Risk score', 'Predictions', 'Dashboards', 'Correlation'],
+};
+
+const SCOPES = ['prod', 'staging', 'aws-main', 'k8s-prod', 'cloud-edge', 'entra-id'];
+
+const hash = (s: string): number => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 997;
+  return h;
+};
+
+const prefixOf = (id: string): string =>
+  id
+    .split('-')
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 3);
+
+const severityFor = (h: number, i: number): ModuleSeverity => {
+  const sevs: ModuleSeverity[] = ['critical', 'high', 'high', 'medium', 'medium'];
+  return sevs[(h + i) % sevs.length];
+};
+
+function generateKpis(seed: ModuleSeed, h: number): ModuleKpi[] {
+  const labels = KPI_LABELS[seed.category];
+  const colors = [tokens.colors.rivicq[300], tokens.colors.crypto.high, tokens.colors.crypto.medium, tokens.colors.crypto.info];
+  return labels.map((label, i) => {
+    if (i === 0) return { label, value: `${(300 + (h % 2400)).toLocaleString()}`, delta: `+${(h % 40)} this week`, color: colors[0] };
+    if (i === 1) return { label, value: `${60 + (h % 35)}%`, color: colors[1] };
+    if (i === 2) return { label, value: `${h % 45}`, color: colors[2] };
+    return { label, value: `${55 + (h % 40)}`, color: colors[3] };
+  });
+}
+
+function generateFindings(seed: ModuleSeed): ModuleFinding[] {
+  const h = hash(seed.id);
+  const caps = seed.capabilities;
+  const prefix = prefixOf(seed.id);
+  const refs: string[] = seed.frameworks && seed.frameworks.length > 0 ? seed.frameworks : ['INTERNAL'];
+  const picks = (n: number) => caps[n] ?? caps[0];
+  return [
+    { id: `${prefix}-${100 + (h % 900)}`, title: `Open ${picks(0).toLowerCase()} gap detected in production scope`, ref: refs[0], severity: severityFor(h, 0), status: 'open', scope: SCOPES[h % SCOPES.length] },
+    { id: `${prefix}-${90 + (h % 900)}`, title: `Coverage below threshold for ${picks(1).toLowerCase()}`, ref: refs[1] ?? refs[0], severity: severityFor(h, 1), status: 'investigating', scope: SCOPES[(h + 1) % SCOPES.length] },
+    { id: `${prefix}-${80 + (h % 900)}`, title: `Configuration drift observed in ${picks(2).toLowerCase()}`, ref: refs[2] ?? refs[0], severity: severityFor(h, 2), status: 'open', scope: SCOPES[(h + 2) % SCOPES.length] },
+    { id: `${prefix}-${70 + (h % 900)}`, title: `Evidence gap for ${picks(3).toLowerCase()} in quarterly review`, ref: refs[3] ?? refs[0], severity: severityFor(h, 3), status: 'monitoring', scope: SCOPES[(h + 3) % SCOPES.length] },
+  ];
+}
+
+interface ModuleSeed {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  category: CategoryName;
+  capabilities: string[];
+  frameworks?: string[];
+  integrations?: string[];
+  umbrella?: boolean;
+  score?: number;
+  connected?: boolean;
+}
+
+function moduleFromSeed(seed: ModuleSeed): SecurityModuleConfig {
+  const h = hash(seed.id);
+  return {
+    id: seed.id,
+    name: seed.name,
+    tagline: seed.tagline,
+    description: seed.description,
+    category: seed.category,
+    icon: ICON_BY_CATEGORY[seed.category],
+    color: COLOR_BY_CATEGORY[seed.category],
+    score: seed.score ?? 55 + (h % 40),
+    connected: seed.connected ?? false,
+    umbrella: seed.umbrella,
+    kpis: generateKpis(seed, h),
+    capabilities: seed.capabilities,
+    frameworks: seed.frameworks ?? [],
+    integrations: seed.integrations ?? [],
+    findings: generateFindings(seed),
+  };
+}
+
+// ── Hand-authored flagship (umbrella) modules ────────────────────────────
+
+const UMBRELLA_MODULES: SecurityModuleConfig[] = [
   {
     id: 'ai-security',
     name: 'AI Security',
@@ -59,6 +239,7 @@ export const MODULES: SecurityModuleConfig[] = [
     color: tokens.colors.crypto.quantum,
     score: 74,
     connected: false,
+    umbrella: true,
     kpis: [
       { label: 'AI assets', value: '312', delta: '+28 this week', color: tokens.colors.rivicq[300] },
       { label: 'Guardrail coverage', value: '86%', color: tokens.colors.crypto.low },
@@ -88,11 +269,12 @@ export const MODULES: SecurityModuleConfig[] = [
     name: 'Identity Security',
     tagline: 'Map identities, entitlements, and trust across the estate.',
     description: 'Build a continuous identity graph of users, service accounts, and non-human identities. Detect privilege sprawl, stale credentials, and risky access paths.',
-    category: 'Identity',
+    category: 'Identity Security',
     icon: Badge,
     color: tokens.colors.rivicq[400],
     score: 69,
     connected: false,
+    umbrella: true,
     kpis: [
       { label: 'Identities tracked', value: '2,481', delta: '+39 this week', color: tokens.colors.rivicq[300] },
       { label: 'Non-human identities', value: '487', color: tokens.colors.crypto.info },
@@ -127,6 +309,7 @@ export const MODULES: SecurityModuleConfig[] = [
     color: tokens.colors.crypto.info,
     score: 81,
     connected: true,
+    umbrella: true,
     kpis: [
       { label: 'BOMs generated', value: '1,284', color: tokens.colors.rivicq[300] },
       { label: 'CBOM coverage', value: '92%', color: tokens.colors.crypto.low },
@@ -161,6 +344,7 @@ export const MODULES: SecurityModuleConfig[] = [
     color: tokens.colors.crypto.low,
     score: 64,
     connected: false,
+    umbrella: true,
     kpis: [
       { label: 'Data assets', value: '38,412', color: tokens.colors.rivicq[300] },
       { label: 'PII records', value: '1.2M', color: tokens.colors.crypto.high },
@@ -195,6 +379,7 @@ export const MODULES: SecurityModuleConfig[] = [
     color: tokens.colors.crypto.high,
     score: 77,
     connected: false,
+    umbrella: true,
     kpis: [
       { label: 'Active threat actors', value: '14', color: tokens.colors.crypto.critical },
       { label: 'CVE coverage', value: '2,307', color: tokens.colors.rivicq[300] },
@@ -229,6 +414,7 @@ export const MODULES: SecurityModuleConfig[] = [
     color: tokens.colors.crypto.medium,
     score: 71,
     connected: true,
+    umbrella: true,
     kpis: [
       { label: 'Open vulnerabilities', value: '1,847', color: tokens.colors.crypto.high },
       { label: 'Critical / high', value: '212', color: tokens.colors.crypto.critical },
@@ -263,6 +449,7 @@ export const MODULES: SecurityModuleConfig[] = [
     color: tokens.colors.rivicq[300],
     score: 66,
     connected: false,
+    umbrella: true,
     kpis: [
       { label: 'APIs discovered', value: '1,024', color: tokens.colors.rivicq[300] },
       { label: 'Shadow APIs', value: '37', color: tokens.colors.crypto.critical },
@@ -297,6 +484,7 @@ export const MODULES: SecurityModuleConfig[] = [
     color: tokens.colors.crypto.critical,
     score: 83,
     connected: false,
+    umbrella: true,
     kpis: [
       { label: 'Open incidents', value: '6', color: tokens.colors.crypto.high },
       { label: 'Active cases', value: '3', color: tokens.colors.crypto.medium },
@@ -321,12 +509,263 @@ export const MODULES: SecurityModuleConfig[] = [
       { id: 'IR-0004', title: 'RCA report pending for June outage', ref: '800-61-4', severity: 'low', status: 'open', scope: 'rca-june' },
     ],
   },
+  {
+    id: 'quantum-security',
+    name: 'Quantum Security',
+    tagline: 'Crypto agility, PQC readiness, and quantum risk at scale.',
+    description: 'The Quantum Readiness Platform: continuous cryptographic inventory, TLS and PKI discovery, harvest-now-decrypt-later detection, and ML-KEM / ML-DSA migration planning with FIPS 203/204/205 compliance.',
+    category: 'Quantum Security',
+    icon: Psychology,
+    color: tokens.colors.crypto.quantum,
+    score: 78,
+    connected: false,
+    umbrella: true,
+    kpis: [
+      { label: 'Crypto inventory', value: '8,412', color: tokens.colors.rivicq[300] },
+      { label: 'PQC readiness', value: '68%', color: tokens.colors.crypto.high },
+      { label: 'Vulnerable keys', value: '214', color: tokens.colors.crypto.critical },
+      { label: 'Quantum risk', value: '34', color: tokens.colors.crypto.info },
+    ],
+    capabilities: [
+      'CBOM scanning & QBOM generation',
+      'Crypto, certificate & PKI inventory',
+      'TLS analysis & crypto agility dashboard',
+      'PQC readiness & quantum risk scores',
+      'Harvest now, decrypt later detection',
+      'ML-KEM / ML-DSA migration planner',
+      'NIST PQC & FIPS 203/204/205 compliance',
+    ],
+    frameworks: ['NIST FIPS 203', 'NIST FIPS 204', 'NIST FIPS 205', 'ETSI TR 103 619', 'CNSA 2.0'],
+    integrations: ['Open Quantum Safe', 'IBM Quantum', 'AWS Braket', 'Azure Quantum', 'SoftHSM'],
+    findings: [
+      { id: 'QS-0211', title: 'RSA-2048 key used to protect data-at-rest with >15-year retention', ref: 'HNDL-001', severity: 'critical', status: 'open', scope: 'payments-db' },
+      { id: 'QS-0184', title: 'TLS 1.2 cipher suite without hybrid PQC negotiated in production', ref: 'CNSA-2.0', severity: 'high', status: 'investigating', scope: 'edge-proxy' },
+      { id: 'QS-0153', title: 'Certificate chain still rooted in SHA-1 trust anchor', ref: 'FIPS-186-5', severity: 'high', status: 'open', scope: 'pki-root' },
+      { id: 'QS-0118', title: 'ML-KEM migration planned for 2027 but inventory incomplete', ref: 'ETSI-TR-103619', severity: 'medium', status: 'monitoring', scope: 'crypto-inventory' },
+    ],
+  },
+  {
+    id: 'appsec',
+    name: 'Application Security',
+    tagline: 'Secure software from source to build to runtime.',
+    description: 'End-to-end application security spanning SAST, DAST, SCA, secret scanning, and IaC analysis with CI/CD enforcement and runtime protection.',
+    category: 'Application Security',
+    icon: BugReport,
+    color: tokens.colors.crypto.medium,
+    score: 72,
+    connected: false,
+    umbrella: true,
+    kpis: [
+      { label: 'Apps scanned', value: '486', color: tokens.colors.rivicq[300] },
+      { label: 'Findings open', value: '312', color: tokens.colors.crypto.high },
+      { label: 'Scan coverage', value: '81%', color: tokens.colors.crypto.medium },
+      { label: 'Mean time to fix', value: '9 days', color: tokens.colors.crypto.low },
+    ],
+    capabilities: [
+      'SAST / DAST / IAST / RASP',
+      'Software composition analysis',
+      'Secret scanning & credential exposure',
+      'IaC / Terraform / Helm scanning',
+      'CI/CD pipeline security',
+      'Runtime protection & WAF',
+    ],
+    frameworks: ['OWASP Top 10', 'OWASP ASVS', 'PCI DSS 4.0', 'NIST SSDF'],
+    integrations: ['Semgrep', 'CodeQL', 'Snyk', 'Trivy', 'GitHub Actions'],
+    findings: [
+      { id: 'AS-0117', title: 'SQL injection in legacy checkout endpoint', ref: 'OWASP-A03', severity: 'critical', status: 'open', scope: 'checkout-api' },
+      { id: 'AS-0102', title: 'Hardcoded database password in Terraform module', ref: 'Terraform-001', severity: 'critical', status: 'open', scope: 'infra/terraform' },
+      { id: 'AS-0088', title: 'Helm chart runs container as root by default', ref: 'CIS-K8S-1.5', severity: 'high', status: 'investigating', scope: 'helm/charts' },
+      { id: 'AS-0074', title: 'SAST coverage missing for two payment repos', ref: 'OWASP-ASVS', severity: 'medium', status: 'monitoring', scope: 'payments' },
+    ],
+  },
+  {
+    id: 'compliance',
+    name: 'Compliance',
+    tagline: 'Continuous compliance across global frameworks.',
+    description: 'Map every control to DORA, NIS2, ISO 27001, SOC 2, PCI DSS, HIPAA, GDPR, FedRAMP, CIS, NIST CSF 2.0, ISO 42001, the EU AI Act, and the Cyber Resilience Act with evidence automation.',
+    category: 'Compliance',
+    icon: FactCheck,
+    color: tokens.colors.gold[500],
+    score: 80,
+    connected: false,
+    umbrella: true,
+    kpis: [
+      { label: 'Controls', value: '1,204', color: tokens.colors.rivicq[300] },
+      { label: 'Pass rate', value: '88%', color: tokens.colors.crypto.low },
+      { label: 'Frameworks', value: '14', color: tokens.colors.gold[400] },
+      { label: 'Open gaps', value: '37', color: tokens.colors.crypto.high },
+    ],
+    capabilities: [
+      'Continuous compliance monitoring',
+      'Control-to-evidence mapping',
+      'Automated evidence collection',
+      'Gap analysis & remediation plans',
+      'Executive compliance reporting',
+      'Regulatory horizon scanning',
+    ],
+    frameworks: ['DORA', 'NIS2', 'ISO 27001', 'SOC 2', 'PCI DSS', 'HIPAA', 'GDPR', 'FedRAMP', 'CIS Benchmarks', 'NIST CSF 2.0', 'NIST 800-53', 'ISO 42001', 'EU AI Act', 'CRA'],
+    integrations: ['ServiceNow', 'Vanta', 'Drata', 'Jira', 'AWS Config'],
+    findings: [
+      { id: 'CP-0031', title: 'DORA ICT risk register not updated this quarter', ref: 'DORA-Art-6', severity: 'high', status: 'open', scope: 'risk-register' },
+      { id: 'CP-0027', title: 'NIS2 incident reporting workflow not tested', ref: 'NIS2-Art-23', severity: 'high', status: 'investigating', scope: 'soc-process' },
+      { id: 'CP-0019', title: 'PCI DSS 4.0 requirement 11.6 evidence pending', ref: 'PCI-11.6', severity: 'medium', status: 'monitoring', scope: 'cd-trails' },
+      { id: 'CP-0011', title: 'EU AI Act high-risk AI inventory incomplete', ref: 'EU-AI-Art-9', severity: 'high', status: 'open', scope: 'ai-registry' },
+    ],
+  },
+  {
+    id: 'analytics',
+    name: 'Enterprise Analytics',
+    tagline: 'Unified risk scores, dashboards, and predictive analytics.',
+    description: 'Global, cyber, quantum, AI, compliance, and identity risk scores feeding executive, SOC, CISO, and board dashboards with a real-time unified risk graph and digital twin.',
+    category: 'Enterprise Analytics',
+    icon: Insights,
+    color: tokens.colors.brand.blue,
+    score: 85,
+    connected: false,
+    umbrella: true,
+    kpis: [
+      { label: 'Global risk score', value: '72', color: tokens.colors.crypto.high },
+      { label: 'Predictions', value: '124', color: tokens.colors.rivicq[300] },
+      { label: 'Dashboards', value: '8', color: tokens.colors.gold[400] },
+      { label: 'Correlation', value: '96%', color: tokens.colors.crypto.low },
+    ],
+    capabilities: [
+      'Global security & cyber risk scores',
+      'Quantum readiness & AI risk scoring',
+      'Executive, SOC, CISO & board dashboards',
+      'Predictive risk analytics',
+      'Real-time attack graph & digital twin',
+      'Cross-domain asset correlation',
+    ],
+    frameworks: ['FAIR', 'NIST CSF 2.0', 'ISO 31000'],
+    integrations: ['Prometheus', 'Grafana', 'OpenTelemetry', 'Snowflake', 'Databricks'],
+    findings: [
+      { id: 'AN-0014', title: 'Board dashboard missing quantum risk exposure view', ref: 'FAIR-01', severity: 'medium', status: 'open', scope: 'board' },
+      { id: 'AN-0009', title: 'Predictive model drift above acceptable threshold', ref: 'ISO-31000', severity: 'high', status: 'investigating', scope: 'risk-engine' },
+      { id: 'AN-0005', title: 'Risk graph lacks coverage for 3 cloud accounts', ref: 'NIST-CSF-2.0', severity: 'medium', status: 'monitoring', scope: 'risk-graph' },
+    ],
+  },
 ];
+
+// ── Seed catalog (full vision, generated consistently) ───────────────────
+
+const SEEDS: ModuleSeed[] = [
+  {
+    id: 'cloud-security',
+    name: 'Cloud Security',
+    tagline: 'Continuous cloud posture across every account and workload.',
+    description: 'Assess cloud accounts, workloads, storage, and services against CIS, NIST, and SOC 2 baselines. Detect misconfigurations, public exposure, and drift in real time with one-click remediation.',
+    category: 'Cloud Security',
+    capabilities: [
+      'Multi-account posture scanning',
+      'Misconfiguration & drift detection',
+      'Public exposure monitoring',
+      'CSPM baseline & conformance packs',
+      'Auto-remediation playbooks',
+      'Cloud-native threat correlation',
+    ],
+    frameworks: ['CIS Foundations', 'NIST 800-53', 'SOC 2', 'PCI DSS 4.0'],
+    integrations: ['AWS', 'Azure', 'GCP', 'IBM Cloud', 'Kubernetes'],
+    connected: true,
+  },
+  {
+    id: 'runtime-security',
+    name: 'Runtime Security',
+    tagline: 'Protect workloads and containers in production at runtime.',
+    description: 'Monitor hosts, containers, and serverless functions for anomalous behavior, drift, and active threats. Enforce policy at runtime and respond to detections with automated containment.',
+    category: 'Runtime Security',
+    capabilities: [
+      'Container & host monitoring',
+      'Behavioral anomaly detection',
+      'Runtime policy enforcement',
+      'Serverless & function protection',
+      'Automated containment',
+      'Process & file integrity monitoring',
+    ],
+    frameworks: ['NIST 800-190', 'CIS Docker', 'CIS Kubernetes', 'OWASP'],
+    integrations: ['Falco', 'Aqua', 'Sysdig', 'Lacework', 'Wazuh'],
+    score: 63,
+  },
+  {
+    id: 'network-security',
+    name: 'Network Security',
+    tagline: 'Visualize, segment, and defend the network attack surface.',
+    description: 'Discover network assets and map open paths, exposed ports, and lateral movement risk. Enforce segmentation, inspect east-west traffic, and track protocol anomalies across the estate.',
+    category: 'Network Security',
+    capabilities: [
+      'Attack-surface discovery',
+      'Exposed port & path mapping',
+      'Network segmentation & micro-segmentation',
+      'East-west traffic inspection',
+      'Firewall & security group auditing',
+      'DNS & protocol anomaly detection',
+    ],
+    frameworks: ['NIST 800-41', 'CIS AWS', 'ISO 27001', 'Zero Trust'],
+    integrations: ['AWS VPC', 'Azure VNet', 'Calico', 'Istio', 'Zeek'],
+    score: 58,
+  },
+  {
+    id: 'detection-engineering',
+    name: 'Detection Engineering',
+    tagline: 'Design, tune, and validate high-fidelity detections.',
+    description: 'Build a detection-as-code pipeline: author Sigma and KQL rules, deploy to SIEM and XDR engines, measure coverage, and continuously reduce false positives.',
+    category: 'Detection Engineering',
+    capabilities: [
+      'Detection-as-code authoring',
+      'Sigma & KQL rule pipelines',
+      'SIEM / XDR rule deployment',
+      'MITRE ATT&CK coverage mapping',
+      'False-positive tuning',
+      'Detection validation & tests',
+    ],
+    frameworks: ['MITRE ATT&CK', 'NIST 800-61', 'Sigma'],
+    integrations: ['Splunk', 'Sentinel', 'Elastic', 'CrowdStrike', 'Sigma'],
+    score: 61,
+  },
+  {
+    id: 'digital-forensics',
+    name: 'Digital Forensics',
+    tagline: 'Evidence-grade capture, analysis, and chain-of-custody.',
+    description: 'Perform memory, disk, and cloud forensics with tamper-proof evidence chains. Preserve artifacts, correlate timelines, and produce investigation-ready reports for incident response and eDiscovery.',
+    category: 'Digital Forensics',
+    capabilities: [
+      'Memory & disk acquisition',
+      'Cloud & container forensics',
+      'Tamper-proof evidence chains',
+      'Timeline & artifact correlation',
+      'Forensic imaging & hashing',
+      'Investigation-ready reporting',
+    ],
+    frameworks: ['NIST SP 800-86', 'ACPO', 'ISO/IEC 27037'],
+    integrations: ['Velociraptor', 'Volatility', 'Autopsy', 'FTK', 'Cellebrite'],
+    score: 57,
+  },
+  {
+    id: 'red-team',
+    name: 'Red Team',
+    tagline: 'Adversary-emulation campaigns that validate your defenses.',
+    description: 'Plan and execute realistic attack campaigns across the kill chain. Measure detection and response effectiveness, prioritize exposures, and prove the impact of validated attack paths.',
+    category: 'Red Team',
+    capabilities: [
+      'Adversary emulation planning',
+      'Attack path & kill-chain simulation',
+      'Phishing & social engineering ops',
+      'Detection & response validation',
+      'Exposure quantification',
+      'Campaign scoring & reporting',
+    ],
+    frameworks: ['MITRE ATT&CK', 'Lockheed Kill Chain', 'PTES'],
+    integrations: ['Cobalt Strike', 'Caldera', 'Atomic Red Team', 'Impacket', 'BloodHound'],
+    score: 67,
+  },
+];
+
+export const MODULES: SecurityModuleConfig[] = [...UMBRELLA_MODULES, ...SEEDS.map(moduleFromSeed)];
 
 export const getModuleById = (id: string): SecurityModuleConfig | undefined =>
   MODULES.find((m) => m.id === id);
 
-export const MODULE_CATEGORIES = Array.from(new Set(MODULES.map((m) => m.category)));
+export const MODULE_CATEGORIES = MODULE_CATEGORIES_ORDER.filter((c) => MODULES.some((m) => m.category === c));
 
 export const SEVERITY_COLORS: Record<ModuleSeverity, string> = {
   critical: tokens.colors.crypto.critical,

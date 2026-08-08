@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Box, Button, Card, CardContent, Chip, Grid, Stack, Typography, Skeleton,
 } from '@mui/material';
-import { Security, Warning, Cloud, Storage, Dns, ArrowForward, Psychology } from '@mui/icons-material';
+import { Warning, Cloud, Dns } from '@mui/icons-material';
 import { tokens } from '../theme/tokens';
 import PageFrame from '../components/PageFrame';
 import { cspmService } from '../services/api';
@@ -16,13 +16,6 @@ const riskColor = (risk: string) => {
     case 'critical': return tokens.colors.crypto.critical;
     default: return tokens.colors.text.muted;
   }
-};
-
-const riskIcon = (risk: string) => {
-  if (risk === 'low') return '\uD83D\uDFE2';
-  if (risk === 'medium') return '\uD83D\uDFE1';
-  if (risk === 'high') return '\uD83D\uDFE0';
-  return '\uD83D\uDD34';
 };
 
 const CSPM: React.FC = () => {

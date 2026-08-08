@@ -25,7 +25,7 @@ const PlatformModules: React.FC = () => {
       subtitle="Config-driven, domain-focused modules across the full security lifecycle. Enable connectors to stream live findings or explore seeded baseline data."
       badge="MODULES"
       action={
-        <Button variant="contained" endIcon={<ArrowForward />} onClick={() => {}}>
+        <Button variant="contained" endIcon={<ArrowForward />} onClick={() => navigate('/modules/cloud-security')}>
           Explore catalog
         </Button>
       }
@@ -42,7 +42,7 @@ const PlatformModules: React.FC = () => {
       {grouped.map(({ category, modules }) => (
         <Box key={category} sx={{ mb: 4 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-            <Category sx={{ fontSize: 20, color: tokens.colors.rivicq[300] }} />
+            <Category sx={{ fontSize: 20, color: 'primary.main' }} />
             <Typography variant="h6" fontWeight={800} sx={{ color: tokens.colors.text.primary }}>{category}</Typography>
             <Chip size="small" label={`${modules.length} modules`} variant="outlined" />
           </Stack>
@@ -53,7 +53,15 @@ const PlatformModules: React.FC = () => {
               const openCount = m.findings.filter((f) => f.status === 'open' || f.status === 'investigating').length;
               return (
                 <Grid item xs={12} sm={6} md={4} key={m.id}>
-                  <Card sx={{ height: '100%', cursor: locked ? 'not-allowed' : 'pointer', '&:hover': locked ? {} : { transform: 'translateY(-4px)', transition: 'transform 0.2s' } }} onClick={() => !locked && navigate(`/modules/${m.id}`)}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      cursor: locked ? 'not-allowed' : 'pointer',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      '&:hover': locked ? {} : { transform: 'translateY(-4px)', boxShadow: '0 12px 32px rgba(79,70,229,0.14)' },
+                    }}
+                    onClick={() => !locked && navigate(`/modules/${m.id}`)}
+                  >
                     <CardContent>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                         <Avatar sx={{ bgcolor: `${m.color}22`, color: m.color }}><Icon /></Avatar>

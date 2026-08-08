@@ -1,6 +1,6 @@
 {
   "name": "cryptobom-saas",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "[![CNCF](https://img.shields.io/badge/CNCF-Compliant-blue)](https://cncf.io) [![Go](https://img.shields.io/badge/Go-1.21+-blue)](https://golang.org) [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.20+-green)](https://kubernetes.io) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)",
   "main": "index.js",
   "directories": {

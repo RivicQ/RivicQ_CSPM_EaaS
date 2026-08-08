@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Box, CircularProgress, Alert } from '@mui/material';
 import QBOMViewer from '../../components/QBOMViewer';
 import PageFrame from '../../components/PageFrame';
 
 const QuantumBOMPage: React.FC = () => {
   const { scan_id } = useParams<{ scan_id: string }>();
-  const navigate = useNavigate();
   const [qbom, setQBOM] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

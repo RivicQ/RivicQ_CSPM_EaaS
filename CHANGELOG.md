@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-08-08
+- Redesign the full web platform with a minimal light-first enterprise theme
+  (indigo/emerald accents, light surfaces, dark-mode toggle preserved).
+- Default the app to light mode (`App.tsx`) and rebuild the MUI design system
+  (`web/src/theme/tokens.ts`, `web/src/theme/theme.ts`).
+- Rebuild the app shell: grouped navigation, collapsible Security Modules section,
+  topbar search, edition chip, user menu (`web/src/layouts/Layout.tsx`).
+- Rework landing, auth, edition switcher, dashboard, and enterprise pages to the
+  new light-first design.
+- Complete the Security Modules `SEEDS` catalog: add Cloud Security, Runtime Security,
+  Network Security, Detection Engineering, Digital Forensics, and Red Team seeds
+  (`web/src/config/modules.ts`).
+- Clean up lint warnings in redesigned files; type-check and production build pass.
+
 ## [1.1.0] - 2026-05-22
 - Remove runtime demo endpoints and seeded fallback data (frontend and backend).
 - Add CSPM Control Center scaffold and UX updates for edition gating.
