@@ -8,8 +8,8 @@ BUILD_DIR="$ROOT/web/build"
 TMP_WORKTREE="$(mktemp -d /tmp/cspm-ghpages.XXXXXX)"
 
 cd "$ROOT/web"
-echo "==> Building with REACT_APP_EDITION=enterprise"
-REACT_APP_EDITION=enterprise npm run build
+echo "==> Building with REACT_APP_EDITION=enterprise, relative API base"
+REACT_APP_EDITION=enterprise REACT_APP_API_URL=/api/v1 npm run build
 
 echo "==> Preparing build artifacts (docs, media, SPA 404)"
 cp "$BUILD_DIR/index.html" "$BUILD_DIR/404.html"
