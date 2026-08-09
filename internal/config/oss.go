@@ -49,6 +49,16 @@ type CloudConfig struct {
 	AWS   AWSConfig   `yaml:"aws"`
 	GCP   GCPConfig   `yaml:"gcp"`
 	Azure AzureConfig `yaml:"azure"`
+	IBM   IBMConfig   `yaml:"ibm"`
+}
+
+type IBMConfig struct {
+	Enabled      bool   `yaml:"enabled"`
+	APIKey       string `yaml:"api_key"`
+	Region       string `yaml:"region"`
+	HPCSEnabled  bool   `yaml:"hpcs_enabled"`
+	HPCSInstance string `yaml:"hpcs_instance"`
+	COSEndpoint  string `yaml:"cos_endpoint"`
 }
 
 type AWSConfig struct {
@@ -264,6 +274,14 @@ func LoadEnterprise() (*EnterpriseConfig, error) {
 				ClientID:     getEnv("AZURE_CLIENT_ID", ""),
 				ClientSecret: getEnv("AZURE_CLIENT_SECRET", ""),
 			},
+			IBM: IBMConfig{
+				Enabled:      getEnvBool("IBM_ENABLED", false),
+				APIKey:       getEnv("IBM_API_KEY", ""),
+				Region:       getEnv("IBM_REGION", "us-south"),
+				HPCSEnabled:  getEnvBool("HPCS_ENABLED", false),
+				HPCSInstance: getEnv("HPCS_INSTANCE", ""),
+				COSEndpoint:  getEnv("IBM_COS_ENDPOINT", ""),
+			},
 		},
 		SSO: SSOConfig{
 			SAML: SAMLConfig{
@@ -297,6 +315,14 @@ func LoadEnterprise() (*EnterpriseConfig, error) {
 			AdvancedAnalytics:       true,
 			PremiumSupport:          true,
 		},
+	}
+
+	// Override with environment variables if present
+	if os.Getenv("CRYPTOBOM_PORT") != "" {
+		config.Server.Port = os.Getenv("CRYPTOBOM_PORT")
+	}
+	if os.Getenv("CRYPTOBOM_LOG_LEVEL") != "" {
+		config.Logging.Level = os.Getenv("CRYPTOBOM_LOG_LEVEL")
 	}
 
 	return config, nil

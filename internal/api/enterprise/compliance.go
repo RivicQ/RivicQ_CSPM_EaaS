@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -490,10 +491,27 @@ func (h *ComplianceHandler) GenerateReport(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
-	var config DelveConfig
-	c.ShouldBindJSON(&config)
+	var delveCfg DelveConfig
+	c.ShouldBindJSON(&delveCfg)
 
-	h.logger.Info("Connecting to Delve API: ", config.APIEndpoint)
+	if delveCfg.APIEndpoint == "" || delveCfg.APIKey == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "API endpoint and API key are required"})
+		return
+	}
+
+	h.logger.Info("Connecting to Delve API: ", delveCfg.APIEndpoint)
+
+	// Verify connectivity against the Delve API before enabling the integration.
+	resp, err := callDelveAPI(delveCfg, "GET", "/api/v1/controls", nil)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to reach Delve API", "detail": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Delve API returned error", "status_code": resp.StatusCode})
+		return
+	}
 
 	query := `UPDATE compliance_frameworks SET delve_integration = true WHERE tenant_id = $1`
 	h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
@@ -506,8 +524,20 @@ func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetDelveStatus(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+	connected := false
+	err := h.db.QueryRow(
+		`SELECT delve_integration FROM compliance_frameworks WHERE tenant_id = $1 LIMIT 1`,
+		tenantID,
+	).Scan(&connected)
+
+	status := "disconnected"
+	if err == nil && connected {
+		status = "connected"
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"status":    "connected",
+		"status":    status,
 		"provider":  "delve",
 		"version":   "2.1.0",
 		"last_sync": time.Now().Add(-1 * time.Hour),
@@ -517,18 +547,62 @@ func (h *ComplianceHandler) GetDelveStatus(c *gin.Context) {
 func (h *ComplianceHandler) SyncDelveData(c *gin.Context) {
 	h.logger.Info("Syncing data from Delve")
 
+	var delveCfg DelveConfig
+	if err := c.ShouldBindJSON(&delveCfg); err != nil {
+		delveCfg = DelveConfig{
+			APIEndpoint: os.Getenv("DELVE_ENDPOINT"),
+			APIKey:      os.Getenv("DELVE_API_KEY"),
+		}
+	}
+
+	// Graceful demo fallback when Delve is not configured.
+	if delveCfg.APIEndpoint == "" || delveCfg.APIKey == "" {
+		h.logger.Warn("Delve not configured; returning demo sync")
+		c.JSON(http.StatusOK, gin.H{
+			"status":   "sync_completed",
+			"provider": "delve",
+			"message":  "Data synchronization completed (demo)",
+			"controls": 128,
+			"demo":     true,
+		})
+		return
+	}
+
+	controls, err := h.fetchDelveData(delveCfg.APIEndpoint, delveCfg.APIKey)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to sync data from Delve", "detail": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"status":   "sync_started",
+		"status":   "sync_completed",
 		"provider": "delve",
-		"message":  "Data synchronization initiated",
+		"message":  "Data synchronization completed",
+		"controls": len(controls),
 	})
 }
 
 func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
-	var config KertosConfig
-	c.ShouldBindJSON(&config)
+	var kertosCfg KertosConfig
+	c.ShouldBindJSON(&kertosCfg)
 
-	h.logger.Info("Connecting to Kertos API: ", config.APIEndpoint)
+	if kertosCfg.APIEndpoint == "" || kertosCfg.APIKey == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "API endpoint and API key are required"})
+		return
+	}
+
+	h.logger.Info("Connecting to Kertos API: ", kertosCfg.APIEndpoint)
+
+	resp, err := callKertosAPI(kertosCfg, "GET", "/api/compliance/controls", nil)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to reach Kertos API", "detail": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Kertos API returned error", "status_code": resp.StatusCode})
+		return
+	}
 
 	query := `UPDATE compliance_frameworks SET kertos_integration = true WHERE tenant_id = $1`
 	h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
@@ -541,8 +615,20 @@ func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetKertosStatus(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+	connected := false
+	err := h.db.QueryRow(
+		`SELECT kertos_integration FROM compliance_frameworks WHERE tenant_id = $1 LIMIT 1`,
+		tenantID,
+	).Scan(&connected)
+
+	status := "disconnected"
+	if err == nil && connected {
+		status = "connected"
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"status":    "connected",
+		"status":    status,
 		"provider":  "kertos",
 		"version":   "1.8.0",
 		"last_sync": time.Now().Add(-30 * time.Minute),
@@ -552,10 +638,39 @@ func (h *ComplianceHandler) GetKertosStatus(c *gin.Context) {
 func (h *ComplianceHandler) SyncKertosData(c *gin.Context) {
 	h.logger.Info("Syncing data from Kertos")
 
+	var kertosCfg KertosConfig
+	if err := c.ShouldBindJSON(&kertosCfg); err != nil {
+		kertosCfg = KertosConfig{
+			APIEndpoint: os.Getenv("KERTOS_ENDPOINT"),
+			APIKey:      os.Getenv("KERTOS_API_KEY"),
+			OrgID:       os.Getenv("KERTOS_ORG_ID"),
+		}
+	}
+
+	// Graceful demo fallback when Kertos is not configured.
+	if kertosCfg.APIEndpoint == "" || kertosCfg.APIKey == "" {
+		h.logger.Warn("Kertos not configured; returning demo sync")
+		c.JSON(http.StatusOK, gin.H{
+			"status":   "sync_completed",
+			"provider": "kertos",
+			"message":  "Data synchronization completed (demo)",
+			"controls": 96,
+			"demo":     true,
+		})
+		return
+	}
+
+	controls, err := h.fetchKertosData(kertosCfg.APIEndpoint, kertosCfg.APIKey)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to sync data from Kertos", "detail": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"status":   "sync_started",
+		"status":   "sync_completed",
 		"provider": "kertos",
-		"message":  "Data synchronization initiated",
+		"message":  "Data synchronization completed",
+		"controls": len(controls),
 	})
 }
 

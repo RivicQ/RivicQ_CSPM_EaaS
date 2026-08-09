@@ -119,30 +119,27 @@ clean:
 ## Demo targets
 .PHONY: demo demo-lab demo-scan demo-stop demo-clean build-scanner
 
-demo: demo-lab ## Start demo lab + run scan + open UI
+demo: ## Start demo scan + open UI
 	@echo "🚀 Starting CryptoBOM Infrastructure Discovery Demo..."
-	@sleep 5
+	@sleep 2
 	@$(MAKE) demo-scan
-	@echo "✅ Demo ready! Open http://localhost:3000/demo/infrastructure (legacy demo - archived)"
+	@echo "✅ Demo ready! Open http://localhost:3000/platform/infrastructure"
 
-demo-lab: ## Start intentionally vulnerable lab targets
-	@echo "🔧 Generating demo lab certificates..."
-	@cd demo/lab && bash certs/gen-certs.sh
-	@echo "🐳 Starting vulnerable lab services..."
-	docker compose -f demo/lab/docker-compose.yml up -d
-	@echo "✅ Lab running: TLS 1.0 (4431), TLS 1.2-weak (4432), TLS 1.3-good (4433), SSH-weak (2222), MD5-API (5001), Java-legacy (8443)"
+demo-lab: ## Archived: demo lab fixtures were removed in v1.1.0
+	@echo "ℹ️  The demo lab (demo/lab) was archived in v1.1.0. See docs/ARCHIVE_DEMO.md."
+	@echo "   Use 'make demo' or 'make demo-scan' for the current demo experience."
 
 demo-scan: ## Run the infrastructure discovery scanner against the demo lab
 	@echo "🔍 Running CryptoBOM weak crypto discovery scan..."
 	go run ./cmd/demo-scanner/... --output cbom-findings.json --format table
 	@echo "📄 Full findings written to cbom-findings.json"
 
-demo-stop: ## Stop the demo lab
-	docker compose -f demo/lab/docker-compose.yml down
+demo-stop: ## Archived: demo lab is not running (fixtures removed in v1.1.0)
+	@echo "ℹ️  The demo lab was archived in v1.1.0. See docs/ARCHIVE_DEMO.md."
 
-demo-clean: demo-stop ## Stop and remove demo lab volumes + certs
-	docker compose -f demo/lab/docker-compose.yml down -v
-	rm -rf demo/lab/certs/*.pem demo/lab/certs/*.key demo/lab/certs/*.crt cbom-findings.json
+demo-clean: ## Archived: no demo lab volumes to clean
+	@echo "ℹ️  The demo lab was archived in v1.1.0. See docs/ARCHIVE_DEMO.md."
+	rm -f cbom-findings.json
 
 build-scanner: ## Build the demo scanner binary
 	@mkdir -p $(BIN_DIR)

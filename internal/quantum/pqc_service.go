@@ -28,9 +28,9 @@ import (
 type PQCAlgorithm string
 
 const (
-	AlgoMLKEM768   PQCAlgorithm = "ML-KEM-768"   // FIPS 203
-	AlgoMLDSA65    PQCAlgorithm = "ML-DSA-65"    // FIPS 204
-	AlgoSLHDSASHA2 PQCAlgorithm = "SLH-DSA-SHA2-128s" // FIPS 205
+	AlgoMLKEM768   PQCAlgorithm = "ML-KEM-768"                // FIPS 203
+	AlgoMLDSA65    PQCAlgorithm = "ML-DSA-65"                 // FIPS 204
+	AlgoSLHDSASHA2 PQCAlgorithm = "SLH-DSA-SHA2-128s"         // FIPS 205
 	AlgoHybridKEM  PQCAlgorithm = "HYBRID-ECDH-P256-MLKEM768" // Hybrid classical+PQC
 )
 
@@ -39,27 +39,27 @@ type QuantumRiskLevel string
 
 const (
 	RiskLevelCritical QuantumRiskLevel = "CRITICAL" // Harvest-now-decrypt-later threat
-	RiskLevelHigh     QuantumRiskLevel = "HIGH"      // Vulnerable within 10 years
-	RiskLevelMedium   QuantumRiskLevel = "MEDIUM"    // Vulnerable 10-20 years
-	RiskLevelLow      QuantumRiskLevel = "LOW"       // PQC-ready or symmetric >= 256-bit
-	RiskLevelSafe     QuantumRiskLevel = "SAFE"      // Already quantum-safe
+	RiskLevelHigh     QuantumRiskLevel = "HIGH"     // Vulnerable within 10 years
+	RiskLevelMedium   QuantumRiskLevel = "MEDIUM"   // Vulnerable 10-20 years
+	RiskLevelLow      QuantumRiskLevel = "LOW"      // PQC-ready or symmetric >= 256-bit
+	RiskLevelSafe     QuantumRiskLevel = "SAFE"     // Already quantum-safe
 )
 
 // CryptoAsset represents a discovered cryptographic primitive in a codebase/system.
 type CryptoAsset struct {
-	ID           string           `json:"id"`
-	TenantID     string           `json:"tenant_id"`
-	Name         string           `json:"name"`
-	Algorithm    string           `json:"algorithm"`
-	KeySize      int              `json:"key_size"`
-	Location     string           `json:"location"`     // file path / service name
-	LineNumber   int              `json:"line_number,omitempty"`
-	Usage        string           `json:"usage"`        // encryption, signing, hashing, kex
-	QuantumRisk  QuantumRiskLevel `json:"quantum_risk"`
-	HarvestRisk  bool             `json:"harvest_risk"` // data encrypted today, decrypted later
-	MigrationPath string          `json:"migration_path,omitempty"`
-	DiscoveredAt time.Time        `json:"discovered_at"`
-	LastSeenAt   time.Time        `json:"last_seen_at"`
+	ID            string           `json:"id"`
+	TenantID      string           `json:"tenant_id"`
+	Name          string           `json:"name"`
+	Algorithm     string           `json:"algorithm"`
+	KeySize       int              `json:"key_size"`
+	Location      string           `json:"location"` // file path / service name
+	LineNumber    int              `json:"line_number,omitempty"`
+	Usage         string           `json:"usage"` // encryption, signing, hashing, kex
+	QuantumRisk   QuantumRiskLevel `json:"quantum_risk"`
+	HarvestRisk   bool             `json:"harvest_risk"` // data encrypted today, decrypted later
+	MigrationPath string           `json:"migration_path,omitempty"`
+	DiscoveredAt  time.Time        `json:"discovered_at"`
+	LastSeenAt    time.Time        `json:"last_seen_at"`
 }
 
 // PQCKeyPair represents a generated post-quantum key pair.
@@ -85,18 +85,18 @@ type PQCSignature struct {
 
 // QuantumMigrationReport summarises the quantum readiness of a tenant's crypto estate.
 type QuantumMigrationReport struct {
-	TenantID        string             `json:"tenant_id"`
-	GeneratedAt     time.Time          `json:"generated_at"`
-	TotalAssets     int                `json:"total_assets"`
-	CriticalAssets  int                `json:"critical_assets"`
-	HighRiskAssets  int                `json:"high_risk_assets"`
-	SafeAssets      int                `json:"safe_assets"`
-	ReadinessScore  float64            `json:"readiness_score"` // 0.0 - 100.0
-	Assets          []CryptoAsset      `json:"assets"`
+	TenantID        string                    `json:"tenant_id"`
+	GeneratedAt     time.Time                 `json:"generated_at"`
+	TotalAssets     int                       `json:"total_assets"`
+	CriticalAssets  int                       `json:"critical_assets"`
+	HighRiskAssets  int                       `json:"high_risk_assets"`
+	SafeAssets      int                       `json:"safe_assets"`
+	ReadinessScore  float64                   `json:"readiness_score"` // 0.0 - 100.0
+	Assets          []CryptoAsset             `json:"assets"`
 	Recommendations []MigrationRecommendation `json:"recommendations"`
-	BSICompliant    bool               `json:"bsi_compliant"`
-	DORACompliant   bool               `json:"dora_compliant"`
-	EIDASReady      bool               `json:"eidas_ready"`
+	BSICompliant    bool                      `json:"bsi_compliant"`
+	DORACompliant   bool                      `json:"dora_compliant"`
+	EIDASReady      bool                      `json:"eidas_ready"`
 }
 
 // MigrationRecommendation is a concrete migration action.
@@ -112,8 +112,8 @@ type MigrationRecommendation struct {
 
 // PQCService provides post-quantum cryptographic operations for CryptoBOM.
 type PQCService struct {
-	logger       *logrus.Logger
-	hsmClient    *AWSHSMClient             // optional; nil = software-only mode
+	logger         *logrus.Logger
+	hsmClient      *AWSHSMClient              // optional; nil = software-only mode
 	attestProvider QuantumAttestationProvider // optional; nil = no attestation
 }
 
@@ -134,7 +134,7 @@ func (s *PQCService) GenerateKeyPair(ctx context.Context, algo PQCAlgorithm, hsm
 
 	if hsmSeed && s.hsmClient != nil {
 		op, err := s.hsmClient.GenerateHSMEntropy(ctx, 64)
-		if err != nil {
+		if err != nil || op == nil || len(op.ResultHex) < 128 {
 			s.logger.WithError(err).Warn("HSM seed unavailable, falling back to crypto/rand")
 			seedEntropy = make([]byte, 64)
 			rand.Read(seedEntropy)
@@ -156,7 +156,7 @@ func (s *PQCService) GenerateKeyPair(ctx context.Context, algo PQCAlgorithm, hsm
 		copy(keyMaterial[i*64:], h.Sum(nil))
 	}
 
-	publicKey  := keyMaterial[:128]
+	publicKey := keyMaterial[:128]
 	privateKey := keyMaterial[128:]
 
 	fingerprint := sha512.Sum512(publicKey)
@@ -173,8 +173,8 @@ func (s *PQCService) GenerateKeyPair(ctx context.Context, algo PQCAlgorithm, hsm
 	}
 
 	s.logger.WithFields(logrus.Fields{
-		"algorithm": algo,
-		"key_id":    keyID,
+		"algorithm":  algo,
+		"key_id":     keyID,
 		"hsm_backed": kp.HSMBacked,
 	}).Info("PQC key pair generated")
 
@@ -223,9 +223,9 @@ func (s *PQCService) AssessCryptoAsset(asset *CryptoAsset) QuantumRiskLevel {
 		"ML-KEM-768": true, "ML-KEM-1024": true,
 		"ML-DSA-65": true, "ML-DSA-87": true,
 		"SLH-DSA-SHA2-128s": true,
-		"AES-256": true, "AES-256-GCM": true,
+		"AES-256":           true, "AES-256-GCM": true,
 		"ChaCha20-Poly1305": true,
-		"SHA-3-256": true, "SHA-3-512": true,
+		"SHA-3-256":         true, "SHA-3-512": true,
 		"BLAKE3": true,
 	}
 
@@ -290,7 +290,7 @@ func (s *PQCService) GenerateMigrationReport(ctx context.Context, tenantID strin
 
 	report.BSICompliant = report.CriticalAssets == 0 && report.ReadinessScore >= 80
 	report.DORACompliant = report.CriticalAssets == 0
-	report.EIDASReady    = report.ReadinessScore >= 90
+	report.EIDASReady = report.ReadinessScore >= 90
 
 	s.logger.WithFields(logrus.Fields{
 		"tenant_id":       tenantID,
@@ -355,7 +355,7 @@ func riskRationale(risk QuantumRiskLevel) string {
 // MarshalJSON prevents private key from being accidentally serialised.
 func (kp PQCKeyPair) MarshalJSON() ([]byte, error) {
 	type safe PQCKeyPair
-	 s := safe(kp)
-	 s.PrivateKey = "[REDACTED]"
-	 return json.Marshal(s)
+	s := safe(kp)
+	s.PrivateKey = "[REDACTED]"
+	return json.Marshal(s)
 }

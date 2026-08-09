@@ -12,8 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/api/shared"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/awscloud"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/ibmcloud"
 	"github.com/rivic-q/cryptobom-saas/internal/quantum"
 	"github.com/rivic-q/cryptobom-saas/internal/quantum/builtin"
 	"github.com/rivic-q/cryptobom-saas/internal/quantum/provider"
@@ -37,12 +39,16 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		Port:     getEnvOrDefaultInt("CRYPTOBOM_DB_PORT", 5432),
 		User:     getEnvOrDefault("CRYPTOBOM_DB_USER", "cryptobom"),
 		Password: os.Getenv("CRYPTOBOM_DB_PASSWORD"),
-		Name:     getEnvOrDefault("CRYPTOBOM_DB_NAME", "cryptobom_enterprise"),
+		Name:     getEnvOrDefault("CRYPTOBOM_ENTERPRISE_DB_NAME", "cryptobom_enterprise"),
 		SSLMode:  getEnvOrDefault("CRYPTOBOM_DB_SSLMODE", "disable"),
 	}
 	enterpriseDB, err := database.NewEnterpriseConnection(dbConfig)
 	if err != nil {
 		logger.WithError(err).Warn("Enterprise database unavailable — enterprise endpoints will use demo mode")
+	} else {
+		if err := database.RunEnterpriseMigrations(enterpriseDB); err != nil {
+			logger.WithError(err).Warn("Enterprise migrations failed — enterprise endpoints will use demo mode")
+		}
 	}
 
 	// Initialize handlers (nil-safe: each handler checks for nil db internally)
@@ -676,52 +682,74 @@ func getQuantumMetrics(db *database.DB, logger *logrus.Logger, cfg *config.Enter
 func getHPCSStatus(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Getting IBM HPCS status")
-		c.JSON(http.StatusOK, gin.H{
-			"status":   "operational",
-			"provider": "ibm",
-			"service":  "hpcs",
-			"region":   "us-south",
-			"instance": "cryptobom-hpcs",
-			"enabled":  true,
+		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{
+			APIKey:       cfg.Cloud.IBM.APIKey,
+			Region:       cfg.Cloud.IBM.Region,
+			HPCSEnabled:  cfg.Cloud.IBM.HPCSEnabled,
+			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
 		})
+		status, err := client.GetStatus()
+		if err != nil && !client.Configured {
+			logger.WithError(err).Warn("HPCS not configured, returning demo status")
+		}
+		c.JSON(http.StatusOK, status)
 	}
 }
 
 func getHPCSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Listing IBM HPCS keys")
-		c.JSON(http.StatusOK, gin.H{
-			"keys": []gin.H{
-				{"id": "hpcs-key-1", "algorithm": "AES-256", "state": "active", "origin": "ibm-hpcs"},
-				{"id": "hpcs-key-2", "algorithm": "RSA-4096", "state": "active", "origin": "ibm-hpcs"},
-			},
-			"total": 2,
+		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{
+			APIKey:       cfg.Cloud.IBM.APIKey,
+			Region:       cfg.Cloud.IBM.Region,
+			HPCSEnabled:  cfg.Cloud.IBM.HPCSEnabled,
+			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
 		})
+		keys, err := client.ListKeys()
+		if err != nil && !client.Configured {
+			logger.WithError(err).Warn("HPCS not configured, returning demo keys")
+		}
+		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys)})
 	}
 }
 
 func getCOSBuckets(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Listing IBM COS buckets")
-		c.JSON(http.StatusOK, gin.H{
-			"buckets": []gin.H{
-				{"name": "cryptobom-backup", "region": "us-east", "objects": 1280},
-				{"name": "cryptobom-logs", "region": "us-east", "objects": 45000},
-			},
-			"total": 2,
+		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{
+			APIKey:       cfg.Cloud.IBM.APIKey,
+			Region:       cfg.Cloud.IBM.Region,
+			HPCSEnabled:  cfg.Cloud.IBM.HPCSEnabled,
+			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
 		})
+		buckets, err := client.ListCOSBuckets()
+		if err != nil && !client.Configured {
+			logger.WithError(err).Warn("IBM COS not configured, returning demo buckets")
+		}
+		c.JSON(http.StatusOK, gin.H{"buckets": buckets, "total": len(buckets)})
 	}
 }
 
 func attestHPCSKey(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		keyId := c.Param("keyId")
-		logger.WithField("key_id", keyId).Info("Attesting IBM HPCS key")
-		c.JSON(http.StatusAccepted, gin.H{
-			"key_id":        keyId,
-			"status":        "attestation_initiated",
-			"provider":      "ibm-hpcs",
-			"verified":      true,
+		keyID := c.Param("keyId")
+		logger.WithField("key_id", keyID).Info("Attesting IBM HPCS key")
+		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{
+			APIKey:       cfg.Cloud.IBM.APIKey,
+			Region:       cfg.Cloud.IBM.Region,
+			HPCSEnabled:  cfg.Cloud.IBM.HPCSEnabled,
+			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
+		})
+		report, err := client.AttestKey(keyID)
+		if err != nil && !client.Configured {
+			logger.WithError(err).Warn("HPCS not configured, returning demo attestation")
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"key_id":   keyID,
+			"status":   "attested",
+			"provider": "ibm-hpcs",
+			"verified": report != nil && report.NISTCompliant,
+			"report":   report,
 		})
 	}
 }
@@ -731,39 +759,37 @@ func attestHPCSKey(db *database.DB, logger *logrus.Logger, cfg *config.Enterpris
 func getCloudHSMStatus(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Getting AWS CloudHSM status")
-		c.JSON(http.StatusOK, gin.H{
-			"status":      "operational",
-			"provider":    "aws",
-			"service":     "cloudhsm",
-			"region":      cfg.Cloud.AWS.Region,
-			"enabled":     cfg.Cloud.AWS.Enabled,
-		})
+		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
+		status, err := client.GetClusterStatus()
+		if err != nil {
+			logger.WithError(err).Warn("CloudHSM lookup failed, returning demo status")
+		}
+		c.JSON(http.StatusOK, status)
 	}
 }
 
 func getKMSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Listing AWS KMS keys")
-		c.JSON(http.StatusOK, gin.H{
-			"keys": []gin.H{
-				{"id": "kms-key-1", "algorithm": "SYMMETRIC_DEFAULT", "state": "enabled"},
-				{"id": "kms-key-2", "algorithm": "RSA_4096", "state": "enabled"},
-			},
-			"total": 2,
-		})
+		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
+		keys, err := client.ListKMSKeys()
+		if err != nil {
+			logger.WithError(err).Warn("KMS lookup failed, returning demo keys")
+		}
+		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys)})
 	}
 }
 
 func getCloudTrailAudit(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Getting AWS CloudTrail crypto events")
-		c.JSON(http.StatusOK, gin.H{
-			"events": []gin.H{
-				{"event": "kms:Decrypt", "count": 120, "last_seen": time.Now().Add(-1 * time.Hour).Format(time.RFC3339)},
-				{"event": "kms:GenerateDataKey", "count": 45, "last_seen": time.Now().Add(-5 * time.Minute).Format(time.RFC3339)},
-			},
-			"total": 2,
-		})
+		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
+		since := time.Now().Add(-24 * time.Hour)
+		events, err := client.GetCryptoAuditEvents(since)
+		if err != nil {
+			logger.WithError(err).Warn("CloudTrail lookup failed, returning demo events")
+		}
+		c.JSON(http.StatusOK, gin.H{"events": events, "total": len(events)})
 	}
 }
 
@@ -773,11 +799,11 @@ func getQuantumRiskAssessment(db *database.DB, logger *logrus.Logger, cfg *confi
 	return func(c *gin.Context) {
 		logger.Info("Getting quantum risk assessment")
 		c.JSON(http.StatusOK, gin.H{
-			"overall_risk":         "medium",
-			"quantum_safe_assets":  15,
-			"vulnerable_assets":    8,
-			"migration_priority":   "high",
-			"risk_score":           0.35,
+			"overall_risk":        "medium",
+			"quantum_safe_assets": 15,
+			"vulnerable_assets":   8,
+			"migration_priority":  "high",
+			"risk_score":          0.35,
 		})
 	}
 }
@@ -786,8 +812,8 @@ func scanForPQCAlgorithms(db *database.DB, logger *logrus.Logger, cfg *config.En
 	return func(c *gin.Context) {
 		logger.Info("Scanning for PQC algorithms")
 		c.JSON(http.StatusAccepted, gin.H{
-			"scan_id":       fmt.Sprintf("pqc-scan-%d", time.Now().Unix()),
-			"status":        "in_progress",
+			"scan_id":        fmt.Sprintf("pqc-scan-%d", time.Now().Unix()),
+			"status":         "in_progress",
 			"assets_scanned": 0,
 		})
 	}
@@ -798,7 +824,7 @@ func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.En
 		assetId := c.Param("assetId")
 		logger.WithField("asset_id", assetId).Info("Getting attestation report")
 		c.JSON(http.StatusOK, gin.H{
-			"asset_id":      assetId,
+			"asset_id": assetId,
 			"attestations": []gin.H{
 				{"algorithm": "RSA-2048", "status": "verified", "quantum_safe": false},
 				{"algorithm": "AES-256", "status": "verified", "quantum_safe": true},
@@ -817,8 +843,8 @@ func getMigrationRoadmap(db *database.DB, logger *logrus.Logger, cfg *config.Ent
 				{"phase": 2, "description": "Prioritize critical algorithms for migration", "status": "pending", "completion": 0},
 				{"phase": 3, "description": "Implement PQC replacements", "status": "pending", "completion": 0},
 			},
-			"total_phases":  3,
-			"current_phase": 1,
+			"total_phases":         3,
+			"current_phase":        1,
 			"estimated_completion": "2026-Q4",
 		})
 	}

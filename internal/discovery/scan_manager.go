@@ -89,7 +89,12 @@ func (sm *ScanManager) GetScan(id string) (*ScanJob, bool) {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
 	job, ok := sm.jobs[id]
-	return job, ok
+	if !ok {
+		return nil, false
+	}
+	// Return a snapshot so callers can read mutable fields without the lock.
+	snapshot := *job
+	return &snapshot, true
 }
 
 func (sm *ScanManager) ListScans() []*ScanJob {

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pquerna/otp/totp"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/sirupsen/logrus"
 )
@@ -32,6 +33,9 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 		authGroup.POST("/refresh", refreshTokenHandler(service, logger))
 		authGroup.POST("/logout", service.JWTAuthMiddleware(nil), logoutHandler(service, logger))
 		authGroup.POST("/mfa/verify", mfaVerifyHandler(service, logger))
+		authGroup.POST("/mfa/setup", service.JWTAuthMiddleware(nil), mfaSetupHandler(service, logger))
+		authGroup.POST("/mfa/confirm", service.JWTAuthMiddleware(nil), mfaConfirmHandler(service, logger))
+		authGroup.POST("/mfa/disable", service.JWTAuthMiddleware(nil), mfaDisableHandler(service, logger))
 		authGroup.GET("/me", service.JWTAuthMiddleware(nil), meHandler())
 		authGroup.GET("/editions", editionsHandler(allowedDomains))
 
@@ -303,9 +307,14 @@ func mfaVerifyHandler(service *auth.AuthService, logger *logrus.Logger) gin.Hand
 			return
 		}
 
-		// In production, verify TOTP code against user.MFASecret here
-		// For now, we accept any non-empty code for the MFA session
-		if req.MFASession == "" || req.MFACode == "" {
+		// Validate the server-issued login challenge before trusting the code.
+		if !service.ValidateMFASession(req.MFASession, req.Email) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired MFA session"})
+			return
+		}
+
+		// Real TOTP verification against the user's stored secret.
+		if !service.ValidateTOTP(user, req.MFACode) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid MFA code"})
 			return
 		}
@@ -331,6 +340,94 @@ func mfaVerifyHandler(service *auth.AuthService, logger *logrus.Logger) gin.Hand
 			"refresh_token": refreshToken,
 			"mfa_verified":  true,
 		})
+	}
+}
+
+func mfaSetupHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		email := c.GetString("email")
+		secret, provisioningURI, err := service.GenerateMFASecret(email)
+		if err != nil {
+			logger.WithError(err).Error("MFA setup failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate MFA secret"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"secret":            secret,
+			"provisioning_uri":  provisioningURI,
+			"issuer":            "RivicQ CryptoBOM",
+			"account":           email,
+		})
+	}
+}
+
+func mfaConfirmHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Secret string `json:"secret" binding:"required"`
+			Code   string `json:"code" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		email := c.GetString("email")
+		user, err := service.GetUserByEmail(email)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			return
+		}
+
+		// Verify the presented code against the secret the user just scanned.
+		if !totp.Validate(strings.TrimSpace(req.Code), req.Secret) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid verification code"})
+			return
+		}
+
+		user.MFASecret = req.Secret
+		user.MFAEnabled = true
+		if err := service.UpdateUser(user); err != nil {
+			logger.WithError(err).Error("MFA confirm failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enable MFA"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"mfa_enabled": true, "message": "MFA enabled successfully"})
+	}
+}
+
+func mfaDisableHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Code string `json:"code" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		email := c.GetString("email")
+		user, err := service.GetUserByEmail(email)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			return
+		}
+
+		if !service.ValidateTOTP(user, req.Code) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid MFA code"})
+			return
+		}
+
+		user.MFASecret = ""
+		user.MFAEnabled = false
+		if err := service.UpdateUser(user); err != nil {
+			logger.WithError(err).Error("MFA disable failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to disable MFA"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"mfa_enabled": false, "message": "MFA disabled successfully"})
 	}
 }
 

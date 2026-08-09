@@ -33,7 +33,15 @@ func main() {
 	}
 
 	// Initialize database with enterprise features
-	db := &database.DB{}
+	db := database.New(logger)
+	if db != nil {
+		logger.Info("Database connected — running in production mode with PostgreSQL")
+		if err := database.RunMigrations(db); err != nil {
+			logger.WithError(err).Fatal("Database migration failed")
+		}
+	} else {
+		logger.Warn("No database available — running in demo mode with in-memory auth")
+	}
 
 	// Initialize OpenTelemetry tracing
 	otelShutdown, err := observability.InitOTEL("cryptobom-enterprise", "2.0.0")
@@ -105,12 +113,12 @@ func main() {
 	}
 
 	// Start server on different port for Enterprise
-	port := ":9090"
+	port := ":" + cfg.Server.Port
 	fmt.Printf("🚀 RivicQ — Encryption as a Service (Enterprise) v%s\n", "2.0.0")
 	fmt.Printf("📊 Enterprise Server running on port %s\n", port)
-	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", port)
-	fmt.Printf("🌐 Enterprise API: http://localhost:%s/api/v1\n", port)
-	fmt.Printf("⚛️  IBM Quantum Integration: http://localhost:%s/api/v1/ibmq\n", port)
+	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", cfg.Server.Port)
+	fmt.Printf("🌐 Enterprise API: http://localhost:%s/api/v1\n", cfg.Server.Port)
+	fmt.Printf("⚛️  IBM Quantum Integration: http://localhost:%s/api/v1/ibmq\n", cfg.Server.Port)
 	fmt.Printf("🔒 Enterprise Edition Features:\n")
 	fmt.Printf("   • IBM Quantum attestation & verification\n")
 	fmt.Printf("   • Advanced threat detection with ML\n")

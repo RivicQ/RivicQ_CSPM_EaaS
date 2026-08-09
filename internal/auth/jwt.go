@@ -2,12 +2,14 @@ package auth
 
 import (
 	"errors"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -55,6 +57,52 @@ func (b *TokenBlacklist) IsRevoked(jti string) bool {
 	defer b.mu.RUnlock()
 	_, ok := b.tokens[jti]
 	return ok
+}
+
+// MFASession is a server-side, single-use MFA challenge created at login time.
+type MFASession struct {
+	UserID  string
+	Email   string
+	Expires time.Time
+}
+
+// MFASessionStore keeps in-flight MFA challenges in memory so that arbitrary
+// session values cannot be used to bypass the second factor.
+type MFASessionStore struct {
+	mu       sync.RWMutex
+	sessions map[string]*MFASession
+}
+
+func NewMFASessionStore() *MFASessionStore {
+	return &MFASessionStore{sessions: make(map[string]*MFASession)}
+}
+
+// Create issues a new single-use MFA challenge for a user and returns its ID.
+func (s *MFASessionStore) Create(user *User) string {
+	id := uuid.New().String()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.sessions[id] = &MFASession{
+		UserID:  user.ID,
+		Email:   strings.ToLower(strings.TrimSpace(user.Email)),
+		Expires: time.Now().Add(10 * time.Minute),
+	}
+	return id
+}
+
+// Validate consumes the challenge: it must exist, match the requesting user,
+// and not be expired. Challenges are single-use.
+func (s *MFASessionStore) Validate(id, email string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	sess, ok := s.sessions[id]
+	if !ok {
+		return false
+	}
+	delete(s.sessions, id)
+
+	return sess.Email == strings.ToLower(strings.TrimSpace(email)) && time.Now().Before(sess.Expires)
 }
 
 // TokenManager handles JWT token generation and validation
@@ -203,6 +251,34 @@ func (as *AuthService) MFARequired(userID string) bool {
 	return user.MFAEnabled
 }
 
+// ValidateMFASession verifies that a login MFA challenge is valid for the user.
+func (as *AuthService) ValidateMFASession(sessionID, email string) bool {
+	return as.mfaSessions.Validate(sessionID, email)
+}
+
+// GenerateMFASecret creates a new TOTP secret for a user and returns the
+// provisioning URI for their authenticator app.
+func (as *AuthService) GenerateMFASecret(email string) (string, string, error) {
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "RivicQ CryptoBOM",
+		AccountName: email,
+		Period:      30,
+		SecretSize:  20,
+	})
+	if err != nil {
+		return "", "", err
+	}
+	return key.Secret(), key.URL(), nil
+}
+
+// ValidateTOTP checks a TOTP code against a user's stored secret.
+func (as *AuthService) ValidateTOTP(user *User, code string) bool {
+	if user == nil || strings.TrimSpace(user.MFASecret) == "" {
+		return false
+	}
+	return totp.Validate(strings.TrimSpace(code), user.MFASecret)
+}
+
 // getPermissionsForRole returns permissions based on user role and edition
 func (tm *TokenManager) getPermissionsForRole(role, edition string) []string {
 	basePermissions := map[string][]string{
@@ -247,6 +323,7 @@ type UserStore interface {
 type AuthService struct {
 	tokenManager *TokenManager
 	userStore    UserStore
+	mfaSessions  *MFASessionStore
 }
 
 // NewAuthService creates a new authentication service
@@ -254,6 +331,7 @@ func NewAuthService(secretKey string, userStore UserStore) *AuthService {
 	return &AuthService{
 		tokenManager: NewTokenManager(secretKey),
 		userStore:    userStore,
+		mfaSessions:  NewMFASessionStore(),
 	}
 }
 
@@ -265,6 +343,11 @@ func (as *AuthService) TokenManager() *TokenManager {
 // GetUserByEmail exposes the underlying lookup for API handlers.
 func (as *AuthService) GetUserByEmail(email string) (*User, error) {
 	return as.userStore.GetUserByEmail(email)
+}
+
+// UpdateUser persists a user (used for MFA enable/disable).
+func (as *AuthService) UpdateUser(user *User) error {
+	return as.userStore.UpdateUser(user)
 }
 
 // Login authenticates a user and returns a LoginResponse.
@@ -293,10 +376,9 @@ func (as *AuthService) LoginWithEdition(email, password, edition string) (*Login
 
 	// MFA enforcement: if user has MFA enabled, require second factor
 	if user.MFAEnabled {
-		mfaSession := uuid.New().String()
 		return &LoginResponse{
 			MFARequired: true,
-			MFASession:  mfaSession,
+			MFASession:  as.mfaSessions.Create(user),
 		}, nil
 	}
 

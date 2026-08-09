@@ -3,6 +3,7 @@ package gcpcloud
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
@@ -28,30 +29,41 @@ func NewClient(ctx context.Context, projectID string) (*Client, error) {
 		return nil, fmt.Errorf("gcp project id is required")
 	}
 
-	instancesClient, err := compute.NewInstancesRESTClient(ctx, option.WithoutAuthentication())
+	// Prefer explicit key file (GCP_KEY_FILE), then Application Default
+	// Credentials. Unauthenticated clients are only used for emulators, never
+	// by default, otherwise every real API call fails with permission errors.
+	var opts []option.ClientOption
+	if keyFile := os.Getenv("GCP_KEY_FILE"); keyFile != "" {
+		opts = append(opts, option.WithCredentialsFile(keyFile))
+	} else if emulator := os.Getenv("STORAGE_EMULATOR_HOST"); emulator != "" {
+		opts = append(opts, option.WithoutAuthentication(), option.WithEndpoint("http://"+emulator))
+	}
+
+	instancesClient, err := compute.NewInstancesRESTClient(ctx, opts...)
 	if err != nil {
+		// Fall back to default credentials only (no unauthenticated client).
 		instancesClient, err = compute.NewInstancesRESTClient(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("gcp compute client: %w", err)
 		}
 	}
-	_ = instancesClient
 
-	storageClient, err := storage.NewClient(ctx)
+	storageClient, err := storage.NewClient(ctx, opts...)
 	if err != nil {
 		// OK, we'll skip bucket listing
 	}
 
-	clustersClient, err := container.NewClusterManagerClient(ctx)
+	clustersClient, err := container.NewClusterManagerClient(ctx, opts...)
 	if err != nil {
 		// OK, we'll skip cluster listing
 	}
 
 	return &Client{
-		projectID: projectID,
-		configured: true,
-		bucketsClient: storageClient,
-		clustersClient: clustersClient,
+		projectID:       projectID,
+		configured:      true,
+		instancesClient: instancesClient,
+		bucketsClient:   storageClient,
+		clustersClient:  clustersClient,
 	}, nil
 }
 
@@ -83,18 +95,16 @@ func (c *Client) ListGCEInstances(ctx context.Context) ([]GCEInstance, error) {
 		return nil, fmt.Errorf("gcp not configured")
 	}
 
-	client, err := compute.NewInstancesRESTClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("gcp compute client: %w", err)
+	if c.instancesClient == nil {
+		return nil, fmt.Errorf("gcp compute not initialized")
 	}
-	defer client.Close()
 
 	var allInstances []GCEInstance
 	req := &computepb.AggregatedListInstancesRequest{
 		Project: c.projectID,
 	}
 
-	it := client.AggregatedList(ctx, req)
+	it := c.instancesClient.AggregatedList(ctx, req)
 	for {
 		pair, err := it.Next()
 		if err == iterator.Done {
@@ -300,6 +310,9 @@ func (c *Client) mapGKECluster(cluster *containerpb.Cluster) GKECluster {
 }
 
 func (c *Client) Close() error {
+	if c.instancesClient != nil {
+		c.instancesClient.Close()
+	}
 	if c.bucketsClient != nil {
 		c.bucketsClient.Close()
 	}

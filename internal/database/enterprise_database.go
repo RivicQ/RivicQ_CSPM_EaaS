@@ -56,25 +56,35 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 		`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`,
 		`CREATE EXTENSION IF NOT EXISTS "pg_trgm";`,
 
-		`CREATE TYPE asset_category AS ENUM (
-			'cryptographic', 'ai', 'hardware', 'software', 'infrastructure'
-		);`,
+		`DO $$ BEGIN
+			CREATE TYPE asset_category AS ENUM (
+				'cryptographic', 'ai', 'hardware', 'software', 'infrastructure'
+			);
+		EXCEPTION WHEN duplicate_object THEN NULL; END $$;`,
 
-		`CREATE TYPE cloud_provider AS ENUM (
-			'aws', 'gcp', 'ibm_cloud', 'azure', 'on_premise'
-		);`,
+		`DO $$ BEGIN
+			CREATE TYPE cloud_provider AS ENUM (
+				'aws', 'gcp', 'ibm_cloud', 'azure', 'on_premise'
+			);
+		EXCEPTION WHEN duplicate_object THEN NULL; END $$;`,
 
-		`CREATE TYPE compliance_framework AS ENUM (
-			'iso27001', 'dora', 'gdpr', 'eu_ai_act', 'soc2', 'nist', 'pqc', 'cis', 'hipaa', 'pci_dss'
-		);`,
+		`DO $$ BEGIN
+			CREATE TYPE compliance_framework AS ENUM (
+				'iso27001', 'dora', 'gdpr', 'eu_ai_act', 'soc2', 'nist', 'pqc', 'cis', 'hipaa', 'pci_dss'
+			);
+		EXCEPTION WHEN duplicate_object THEN NULL; END $$;`,
 
-		`CREATE TYPE risk_level AS ENUM (
-			'critical', 'high', 'medium', 'low', 'info'
-		);`,
+		`DO $$ BEGIN
+			CREATE TYPE risk_level AS ENUM (
+				'critical', 'high', 'medium', 'low', 'info'
+			);
+		EXCEPTION WHEN duplicate_object THEN NULL; END $$;`,
 
-		`CREATE TYPE attestation_status AS ENUM (
-			'pending', 'in_progress', 'attested', 'failed', 'expired'
-		);`,
+		`DO $$ BEGIN
+			CREATE TYPE attestation_status AS ENUM (
+				'pending', 'in_progress', 'attested', 'failed', 'expired'
+			);
+		EXCEPTION WHEN duplicate_object THEN NULL; END $$;`,
 
 		`CREATE TABLE IF NOT EXISTS tenants (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

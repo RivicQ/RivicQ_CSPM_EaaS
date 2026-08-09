@@ -42,6 +42,7 @@ import ConformancePacks from './pages/enterprise/ConformancePacks';
 import SecurityModulePage from './pages/enterprise/SecurityModule';
 import PlatformModules from './pages/enterprise/PlatformModules';
 import CSPM from './pages/CSPM';
+import InfraDiscovery from './pages/InfraDiscovery';
 
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
@@ -132,6 +133,7 @@ const App: React.FC = () => {
                   <Route path="settings" element={wrap(Settings, 'Settings')} />
                   <Route path="tools" element={wrap(DevSecOpsTools, 'DevSecOpsTools')} />
                   <Route path="ecosystem" element={wrap(RivicQEcosystem, 'RivicQEcosystem')} />
+                  <Route path="infrastructure" element={wrap(InfraDiscovery, 'InfraDiscovery')} />
 
                   <Route path="enterprise/inventory" element={<RequireEnterprise>{wrap(Inventory, 'Inventory')}</RequireEnterprise>} />
                   <Route path="enterprise/compliance" element={<RequireEnterprise>{wrap(Compliance, 'Compliance')}</RequireEnterprise>} />
