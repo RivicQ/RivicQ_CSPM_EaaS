@@ -47,7 +47,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const location = useLocation();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const { login, register, edition, setEdition, isAuthenticated } = useAuth();
+  const { login, register, edition, setEdition, isAuthenticated, supabaseEnabled, supabaseLogin, supabaseRegister } = useAuth();
   const [showPassword, setShowPassword] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
@@ -345,6 +345,34 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                     >
                       Sign in with GitHub
                     </Button>
+
+                    {supabaseEnabled && (
+                      <Button
+                        variant="outlined"
+                        color="success"
+                        fullWidth
+                        disabled={loading}
+                        onClick={async () => {
+                          setLoading(true);
+                          setError('');
+                          try {
+                            if (mode === 'register') {
+                              await supabaseRegister(form.name || form.email.split('@')[0], form.email, form.password, edition);
+                            } else {
+                              await supabaseLogin(form.email, form.password, edition);
+                            }
+                            navigate('/dashboard', { replace: true });
+                          } catch (err: any) {
+                            setError(err?.message || 'Supabase authentication failed');
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        sx={{ py: 1.1 }}
+                      >
+                        Continue with Supabase
+                      </Button>
+                    )}
                   </Stack>
                 </form>
               </CardContent>

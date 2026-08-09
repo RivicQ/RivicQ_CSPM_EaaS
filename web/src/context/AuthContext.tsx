@@ -1,6 +1,7 @@
 import React from 'react';
 import { authService, syncAPIBaseURL } from '../services/api';
 import { setEditionPreference, getEditionFromBackend, normalizeEdition, Edition } from '../config/editions';
+import { supabaseAuthService, isSupabaseConfigured } from '../services/supabase';
 
 export interface AuthUser {
   id: string;
@@ -16,8 +17,11 @@ interface AuthContextValue {
   edition: Edition;
   isAuthenticated: boolean;
   loading: boolean;
+  supabaseEnabled: boolean;
   login: (email: string, password: string, edition: Edition) => Promise<void>;
   register: (name: string, email: string, password: string, edition: Edition) => Promise<void>;
+  supabaseLogin: (email: string, password: string, edition: Edition) => Promise<void>;
+  supabaseRegister: (name: string, email: string, password: string, edition: Edition) => Promise<void>;
   logout: () => void;
   setEdition: (edition: Edition) => void;
   persistAuth: (payload: any) => void;
@@ -48,6 +52,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const init = async () => {
       const stored = readStoredAuth();
+
+      const sbSession = await supabaseAuthService.getSession();
+      let sbUser: AuthUser | null = null;
+      let sbToken: string | null = null;
+      if (sbSession?.user?.email) {
+        sbUser = {
+          id: sbSession.user.id,
+          name: (sbSession.user.user_metadata as any)?.name || sbSession.user.email.split('@')[0],
+          email: sbSession.user.email,
+          edition: normalizeEdition((sbSession.user.user_metadata as any)?.edition),
+        };
+        sbToken = sbSession.access_token ?? null;
+      }
+
       const remote = await getEditionFromBackend();
       if (cancelled) return;
 
@@ -57,8 +75,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setEditionPreference(detectedEdition);
       }
 
-      setToken(stored.token);
-      setUser(stored.user);
+      setToken(sbToken ?? stored.token);
+      setUser(sbUser ?? stored.user);
       setEditionState(detectedEdition);
       setLoading(false);
     };
@@ -109,7 +127,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     completeAuth(response.data);
   }, [completeAuth]);
 
+  const supabaseLogin = React.useCallback(async (email: string, password: string, nextEdition: Edition) => {
+    const supabaseUser = await supabaseAuthService.signIn(email, password);
+    const sbToken = await supabaseAuthService.getSessionToken();
+    persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
+  }, [persist]);
+
+  const supabaseRegister = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition) => {
+    const supabaseUser = await supabaseAuthService.signUp(name, email, password, nextEdition);
+    const sbToken = await supabaseAuthService.getSessionToken();
+    persist(sbToken, supabaseUser, nextEdition);
+  }, [persist]);
+
   const logout = React.useCallback(() => {
+    if (isSupabaseConfigured) {
+      supabaseAuthService.signOut().catch(() => undefined);
+    }
     persist(null, null, edition);
   }, [edition, persist]);
 
@@ -123,12 +156,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     edition,
     isAuthenticated: Boolean(token),
     loading,
+    supabaseEnabled: isSupabaseConfigured,
     login,
     register,
+    supabaseLogin,
+    supabaseRegister,
     logout,
     setEdition,
     persistAuth: completeAuth,
-  }), [edition, loading, login, logout, register, setEdition, token, user, completeAuth]);
+  }), [edition, loading, login, register, supabaseLogin, supabaseRegister, logout, setEdition, token, user, completeAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

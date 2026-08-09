@@ -36,6 +36,8 @@ jobs:
         run: npm run build
         env:
           REACT_APP_EDITION: enterprise
+          REACT_APP_SUPABASE_URL: https://suhoabdijefnsoxveewn.supabase.co
+          REACT_APP_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8q50RgRBzXcuvjdaF7qBpg_E0GKHPt4
 
       - name: Generate API docs (ReDoc)
         run: |
