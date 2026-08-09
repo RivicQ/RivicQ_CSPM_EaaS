@@ -90,11 +90,11 @@ func main() {
 	oss.SetupRoutes(apiGroup, db, logger, cfg)
 
 	// Start server
-	port := ":8080"
+	port := ":" + cfg.Server.Port
 	fmt.Printf("🚀 RivicQ — Encryption as a Service (OSS) v%s\n", "1.0.0")
 	fmt.Printf("📊 OSS Server running on port %s\n", port)
-	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", port)
-	fmt.Printf("🌐 OSS API: http://localhost:%s/api/v1\n", port)
+	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", cfg.Server.Port)
+	fmt.Printf("🌐 OSS API: http://localhost:%s/api/v1\n", cfg.Server.Port)
 	fmt.Printf("🔓 Open Source Edition Features:\n")
 	fmt.Printf("   • eBPF cryptographic asset discovery\n")
 	fmt.Printf("   • Basic CBOM management\n")
