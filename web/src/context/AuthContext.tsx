@@ -11,6 +11,11 @@ export interface AuthUser {
   edition: Edition;
 }
 
+export interface RegisterResult {
+  requiresConfirmation: boolean;
+  email?: string;
+}
+
 interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
@@ -18,10 +23,12 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   loading: boolean;
   supabaseEnabled: boolean;
+  backendReachable: boolean;
   login: (email: string, password: string, edition: Edition) => Promise<void>;
-  register: (name: string, email: string, password: string, edition: Edition) => Promise<void>;
+  register: (name: string, email: string, password: string, edition: Edition) => Promise<RegisterResult>;
   supabaseLogin: (email: string, password: string, edition: Edition) => Promise<void>;
-  supabaseRegister: (name: string, email: string, password: string, edition: Edition) => Promise<void>;
+  supabaseRegister: (name: string, email: string, password: string, edition: Edition) => Promise<RegisterResult>;
+  demoLogin: (edition: Edition) => Promise<void>;
   logout: () => void;
   setEdition: (edition: Edition) => void;
   persistAuth: (payload: any) => void;
@@ -46,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = React.useState<string | null>(null);
   const [user, setUser] = React.useState<AuthUser | null>(null);
   const [edition, setEditionState] = React.useState<Edition>('community');
+  const [backendReachable, setBackendReachable] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -66,7 +74,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sbToken = sbSession.access_token ?? null;
       }
 
-      const remote = await getEditionFromBackend();
+      let remote: { edition: string; features: Record<string, any>; baseURL: string } | null = null;
+      try {
+        remote = await getEditionFromBackend();
+      } catch {
+        remote = null;
+      }
       if (cancelled) return;
 
       const detectedEdition = normalizeEdition(remote?.edition || stored.edition);
@@ -75,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setEditionPreference(detectedEdition);
       }
 
+      setBackendReachable(Boolean(remote?.edition));
       setToken(sbToken ?? stored.token);
       setUser(sbUser ?? stored.user);
       setEditionState(detectedEdition);
@@ -117,27 +131,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     persist(nextToken, nextUser, nextEdition);
   }, [persist]);
 
-  const login = React.useCallback(async (email: string, password: string, nextEdition: Edition) => {
-    const response = await authService.login({ email, password, edition: nextEdition });
-    completeAuth(response.data);
-  }, [completeAuth]);
-
-  const register = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition) => {
-    const response = await authService.register({ name, email, password, edition: nextEdition });
-    completeAuth(response.data);
-  }, [completeAuth]);
-
   const supabaseLogin = React.useCallback(async (email: string, password: string, nextEdition: Edition) => {
     const supabaseUser = await supabaseAuthService.signIn(email, password);
     const sbToken = await supabaseAuthService.getSessionToken();
     persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
   }, [persist]);
 
-  const supabaseRegister = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition) => {
-    const supabaseUser = await supabaseAuthService.signUp(name, email, password, nextEdition);
-    const sbToken = await supabaseAuthService.getSessionToken();
-    persist(sbToken, supabaseUser, nextEdition);
+  const supabaseRegister = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition): Promise<RegisterResult> => {
+    const { user: supabaseUser, session } = await supabaseAuthService.signUp(name, email, password, nextEdition);
+    if (session?.access_token) {
+      persist(session.access_token, supabaseUser, nextEdition);
+      return { requiresConfirmation: false };
+    }
+    return { requiresConfirmation: true, email: supabaseUser.email };
   }, [persist]);
+
+  const login = React.useCallback(async (email: string, password: string, nextEdition: Edition) => {
+    if (backendReachable) {
+      const response = await authService.login({ email, password, edition: nextEdition });
+      completeAuth(response.data);
+      return;
+    }
+    if (isSupabaseConfigured) {
+      const supabaseUser = await supabaseAuthService.signIn(email, password);
+      const sbToken = await supabaseAuthService.getSessionToken();
+      persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
+      return;
+    }
+    throw new Error('No authentication provider is available on this deployment.');
+  }, [backendReachable, completeAuth, persist]);
+
+  const register = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition): Promise<RegisterResult> => {
+    if (backendReachable) {
+      const response = await authService.register({ name, email, password, edition: nextEdition });
+      completeAuth(response.data);
+      return { requiresConfirmation: false };
+    }
+    if (isSupabaseConfigured) {
+      return supabaseRegister(name, email, password, nextEdition);
+    }
+    throw new Error('No authentication provider is available on this deployment.');
+  }, [backendReachable, completeAuth, supabaseRegister]);
+
+  const demoLogin = React.useCallback(async (nextEdition: Edition) => {
+    const response = await authService.demo(nextEdition);
+    completeAuth(response.data);
+  }, [completeAuth]);
 
   const logout = React.useCallback(() => {
     if (isSupabaseConfigured) {
@@ -157,14 +196,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: Boolean(token),
     loading,
     supabaseEnabled: isSupabaseConfigured,
+    backendReachable,
     login,
     register,
     supabaseLogin,
     supabaseRegister,
+    demoLogin,
     logout,
     setEdition,
     persistAuth: completeAuth,
-  }), [edition, loading, login, register, supabaseLogin, supabaseRegister, logout, setEdition, token, user, completeAuth]);
+  }), [edition, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, logout, setEdition, token, user, completeAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

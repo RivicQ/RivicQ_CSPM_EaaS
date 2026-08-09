@@ -41,7 +41,7 @@ export const supabaseAuthService = {
     return toAuthUser(user.email, normalizeEdition((user.user_metadata as any)?.edition));
   },
 
-  async signUp(name: string, email: string, password: string, edition: Edition): Promise<SupabaseAuthUser> {
+  async signUp(name: string, email: string, password: string, edition: Edition): Promise<{ user: SupabaseAuthUser; session: any }> {
     if (!supabase) throw new Error('Supabase is not configured');
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -51,7 +51,7 @@ export const supabaseAuthService = {
     if (error) throw error;
     const user = data.user;
     if (!user?.email) throw new Error('Supabase sign up did not return a user');
-    return toAuthUser(user.email, edition);
+    return { user: toAuthUser(user.email, edition), session: data.session };
   },
 
   async signOut(): Promise<void> {

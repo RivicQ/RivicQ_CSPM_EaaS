@@ -12,6 +12,7 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  LinearProgress,
   Stack,
   Tab,
   Tabs,
@@ -23,6 +24,11 @@ import {
 } from '@mui/material';
 import {
   ArrowForward,
+  AutoAwesome,
+  CheckCircle,
+  GitHub,
+  Google,
+  Key,
   Lock,
   Mail,
   Person,
@@ -36,10 +42,26 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
+import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 
 interface AuthPageProps {
   defaultMode?: 'login' | 'register';
+}
+
+function passwordStrength(password: string): { score: number; label: string; color: string } {
+  let score = 0;
+  if (password.length >= 8) score += 1;
+  if (password.length >= 12) score += 1;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+  if (/\d/.test(password) && /[^A-Za-z0-9]/.test(password)) score += 1;
+  const map = [
+    { label: 'Weak', color: 'error' },
+    { label: 'Fair', color: 'warning' },
+    { label: 'Good', color: 'info' },
+    { label: 'Strong', color: 'success' },
+  ];
+  return { score, label: map[score]?.label ?? 'Weak', color: map[score]?.color ?? 'error' };
 }
 
 const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
@@ -47,16 +69,34 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const location = useLocation();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const { login, register, edition, setEdition, isAuthenticated, supabaseEnabled, supabaseLogin, supabaseRegister } = useAuth();
+  const {
+    login,
+    register,
+    supabaseLogin,
+    supabaseRegister,
+    demoLogin,
+    edition,
+    setEdition,
+    isAuthenticated,
+    supabaseEnabled,
+    backendReachable,
+  } = useAuth();
   const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirm, setShowConfirm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [mode, setMode] = React.useState<'login' | 'register'>(defaultMode);
+  const [confirmationSent, setConfirmationSent] = React.useState<{ email: string } | null>(null);
   const [form, setForm] = React.useState({
     name: '',
     email: '',
     password: '',
+    confirm: '',
   });
+
+  const strength = React.useMemo(() => passwordStrength(form.password), [form.password]);
+  const canSubmit = form.email.includes('@') && form.password.length >= 8 &&
+    (mode === 'login' || (form.name.trim() !== '' && form.password === form.confirm));
 
   const editionLabel = edition === 'enterprise' ? 'Enterprise' : edition === 'professional' ? 'Professional' : 'Community';
 
@@ -69,29 +109,65 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
   React.useEffect(() => {
     setMode(defaultMode);
+    setError('');
+    setConfirmationSent(null);
   }, [defaultMode]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError('');
+    setConfirmationSent(null);
 
     try {
-      if (mode === 'register') {
-        await register(form.name || form.email.split('@')[0], form.email, form.password, edition);
+      const result = mode === 'register'
+        ? await register(form.name || form.email.split('@')[0], form.email, form.password, edition)
+        : await login(form.email, form.password, edition);
+
+      if (mode === 'register' && result?.requiresConfirmation) {
+        setConfirmationSent({ email: form.email });
       } else {
-        await login(form.email, form.password, edition);
+        navigate('/dashboard', { replace: true });
       }
-      navigate('/dashboard', { replace: true });
     } catch (err: any) {
-      setError(err?.message || 'Authentication failed');
+      setError(err?.message || (mode === 'register' ? 'Registration failed' : 'Authentication failed'));
     } finally {
       setLoading(false);
     }
   };
 
-  const title = mode === 'register' ? 'Create your workspace identity' : 'Sign in to your secure workspace';
-  const submitLabel = mode === 'register' ? 'Create account' : 'Login to Dashboard';
+  const handleDemo = async () => {
+    if (!backendReachable) return;
+    setLoading(true);
+    setError('');
+    try {
+      await demoLogin(edition);
+      navigate('/dashboard', { replace: true });
+    } catch (err: any) {
+      setError(err?.message || 'Demo access unavailable');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const socialLogin = async (provider: 'github' | 'google') => {
+    setError('');
+    try {
+      const statusResp = await (provider === 'github' ? authService.githubStatus() : authService.googleStatus());
+      if (!statusResp.data[`${provider}_oauth_enabled`]) {
+        setError(`${provider === 'github' ? 'GitHub' : 'Google'} OAuth is not configured on this deployment.`);
+        return;
+      }
+      const loginResp = await (provider === 'github' ? authService.githubLogin() : authService.googleLogin());
+      window.location.href = loginResp.data.auth_url;
+    } catch (err: any) {
+      setError(err?.response?.data?.message || `${provider === 'github' ? 'GitHub' : 'Google'} OAuth not available`);
+    }
+  };
+
+  const title = mode === 'register' ? 'Create your workspace' : 'Welcome back';
+  const submitLabel = mode === 'register' ? 'Create account' : 'Sign in';
+  const providerName = backendReachable ? 'RivicQ Identity' : 'Supabase';
 
   const leftBg = isDark
     ? 'linear-gradient(160deg, #0f172a 0%, #312e81 130%)'
@@ -147,13 +223,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                 <Stack spacing={3} sx={{ height: '100%' }}>
                   <Box>
                     <Typography variant="overline" sx={{ display: 'block', color: 'primary.main', letterSpacing: 4, fontWeight: 700 }}>
-                      Welcome
+                      CryptoBOM EaaS
                     </Typography>
                     <Typography variant="h3" fontWeight={900} sx={{ mt: 1, lineHeight: 1.02, letterSpacing: '-0.02em' }}>
-                      Clear access to OSS and Enterprise workspaces.
+                      {mode === 'register' ? 'Start building your crypto inventory.' : 'Secure access to your workspace.'}
                     </Typography>
                     <Typography sx={{ mt: 2, color: 'text.secondary', maxWidth: 540 }}>
-                      A focused login and onboarding flow for crypto inventory, scanner, compliance, and enterprise governance.
+                      Discover, inventory, and govern cryptographic assets with automated CBOM generation, cloud posture
+                      checks, and post-quantum migration planning.
                     </Typography>
                   </Box>
 
@@ -164,10 +241,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                           <Security sx={{ color: 'primary.main' }} />
                           <Box>
                             <Typography variant="subtitle2" sx={{ letterSpacing: 1, textTransform: 'uppercase', fontWeight: 700 }}>
-                              Simple navigation
+                              Command Center
                             </Typography>
                             <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
-                              Start in the welcome page, choose an edition, and go directly to the dashboard or scanner without extra noise.
+                              Unified posture across cloud accounts, crypto inventory, and PQC readiness.
                             </Typography>
                           </Box>
                         </Stack>
@@ -179,10 +256,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                           <BadgeIcon sx={{ color: 'success.main' }} />
                           <Box>
                             <Typography variant="subtitle2" sx={{ color: 'success.main', letterSpacing: 1, textTransform: 'uppercase', fontWeight: 700 }}>
-                              Enterprise ready
+                              Complete SaaS toolkit
                             </Typography>
                             <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
-                              Production-grade crypto inventory, compliance reporting, and quantum-safe migration for your organization.
+                              Security modules, compliance frameworks, realtime monitoring, and enterprise governance.
                             </Typography>
                           </Box>
                         </Stack>
@@ -199,12 +276,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
                   <Box sx={{ mt: 'auto' }}>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Select your edition before logging in.
+                      Select your edition before authenticating.
                     </Typography>
                     <ToggleButtonGroup
                       exclusive
                       value={edition}
-                      onChange={(_, value: 'community' | 'professional' | 'enterprise' | null) => value && setEdition(value)}
+                      onChange={(_, value: Edition | null) => value && setEdition(value)}
                       sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}
                     >
                       <ToggleButton value="community" sx={{ textTransform: 'none', fontWeight: 600 }}>Community</ToggleButton>
@@ -230,151 +307,211 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   </Tabs>
                 </Stack>
 
-                <Box sx={{ mb: 2, p: 2, borderRadius: 2, bgcolor: 'action.hover', border: 1, borderColor: 'divider' }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
-                    Current workspace
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {editionLabel} edition is selected. You can switch editions before authentication.
-                  </Typography>
-                </Box>
-
-                {error && (
-                  <Alert severity="error" sx={{ mb: 2 }}>
-                    {error}
+                {confirmationSent && (
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    <strong>Check your inbox.</strong> A confirmation link was sent to {confirmationSent.email}. Verify your
+                    email, then sign in to continue.
                   </Alert>
                 )}
 
-                <form onSubmit={handleSubmit}>
-                  <Stack spacing={2.25}>
-                    {mode === 'register' && (
-                      <TextField
-                        label="Full name"
-                        value={form.name}
-                        onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                        InputProps={{ startAdornment: <InputAdornment position="start"><Person /></InputAdornment> }}
-                        fullWidth
-                        required
-                      />
-                    )}
-                    <TextField
-                      label="Email"
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                      InputProps={{ startAdornment: <InputAdornment position="start"><Mail /></InputAdornment> }}
-                      fullWidth
-                      required
-                    />
-                    <TextField
-                      label="Password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={form.password}
-                      onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start"><Lock /></InputAdornment>,
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                      fullWidth
-                      required
-                    />
-
-                    <Divider sx={{ my: 1 }} />
-
-                    <Typography variant="body2" color="text.secondary">
-                      Current edition: <strong>{edition.toUpperCase()}</strong>
-                    </Typography>
-
-                    <Alert severity="info" sx={{ borderRadius: 2 }}>
-                      {mode === 'register'
-                        ? 'Registration creates a new workspace identity and returns you to the dashboard.'
-                        : 'Sign in with your workspace credentials.'}
-                    </Alert>
-
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        size="large"
-                        disabled={loading}
-                        endIcon={<ArrowForward />}
-                        sx={{ py: 1.3 }}
-                      >
-                        {loading ? 'Please wait...' : submitLabel}
-                      </Button>
-
-                      <Button
-                        variant="outlined"
-                        color="inherit"
-                        onClick={() => window.location.href = 'mailto:enterprise@rivicq.de?subject=Access%20Request%20for%20CryptoBOM'}
-                        sx={{ py: 1.1 }}
-                      >
-                        Request Enterprise Access
-                      </Button>
+                {!confirmationSent && (
+                  <>
+                    <Box sx={{ mb: 2, p: 2, borderRadius: 2, bgcolor: 'action.hover', border: 1, borderColor: 'divider' }}>
+                      <Typography variant="subtitle2" fontWeight={700}>
+                        Current workspace
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {editionLabel} edition · signed in via <strong>{providerName}</strong>
+                        {!backendReachable && ' (browser authentication)'}
+                      </Typography>
                     </Box>
 
-                    <Divider sx={{ my: 1 }}>OR</Divider>
-
-                    <Alert severity="info" sx={{ borderRadius: 2 }}>
-                      This release ships with GitHub authentication only.
-                    </Alert>
-
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      onClick={async () => {
-                        try {
-                          const resp = await authService.githubStatus();
-                          if (!resp.data.github_oauth_enabled) {
-                            setError('GitHub OAuth is not configured. Contact your administrator.');
-                            return;
-                          }
-                          const loginResp = await authService.githubLogin();
-                          window.location.href = loginResp.data.auth_url;
-                        } catch (err: any) {
-                          setError(err?.response?.data?.message || 'GitHub OAuth not available');
-                        }
-                      }}
-                      sx={{ py: 1.1 }}
-                    >
-                      Sign in with GitHub
-                    </Button>
-
-                    {supabaseEnabled && (
-                      <Button
-                        variant="outlined"
-                        color="success"
-                        fullWidth
-                        disabled={loading}
-                        onClick={async () => {
-                          setLoading(true);
-                          setError('');
-                          try {
-                            if (mode === 'register') {
-                              await supabaseRegister(form.name || form.email.split('@')[0], form.email, form.password, edition);
-                            } else {
-                              await supabaseLogin(form.email, form.password, edition);
-                            }
-                            navigate('/dashboard', { replace: true });
-                          } catch (err: any) {
-                            setError(err?.message || 'Supabase authentication failed');
-                          } finally {
-                            setLoading(false);
-                          }
-                        }}
-                        sx={{ py: 1.1 }}
-                      >
-                        Continue with Supabase
-                      </Button>
+                    {error && (
+                      <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                      </Alert>
                     )}
-                  </Stack>
-                </form>
+
+                    <form onSubmit={handleSubmit}>
+                      <Stack spacing={2.25}>
+                        {mode === 'register' && (
+                          <TextField
+                            label="Full name"
+                            value={form.name}
+                            onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                            InputProps={{ startAdornment: <InputAdornment position="start"><Person /></InputAdornment> }}
+                            fullWidth
+                            required
+                          />
+                        )}
+                        <TextField
+                          label="Email"
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                          InputProps={{ startAdornment: <InputAdornment position="start"><Mail /></InputAdornment> }}
+                          fullWidth
+                          required
+                        />
+                        <Box>
+                          <TextField
+                            label="Password"
+                            type={showPassword ? 'text' : 'password'}
+                            value={form.password}
+                            onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+                            InputProps={{
+                              startAdornment: <InputAdornment position="start"><Lock /></InputAdornment>,
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                            fullWidth
+                            required
+                          />
+                          {mode === 'register' && form.password && (
+                            <Box sx={{ mt: 1 }}>
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={(strength.score / 3) * 100}
+                                  color={strength.color as 'error' | 'warning' | 'info' | 'success'}
+                                  sx={{ flexGrow: 1, height: 6, borderRadius: 3 }}
+                                />
+                                <Typography variant="caption" color={`${strength.color}.main`} sx={{ fontWeight: 700 }}>
+                                  {strength.label}
+                                </Typography>
+                              </Stack>
+                            </Box>
+                          )}
+                        </Box>
+                        {mode === 'register' && (
+                          <TextField
+                            label="Confirm password"
+                            type={showConfirm ? 'text' : 'password'}
+                            value={form.confirm}
+                            onChange={(e) => setForm((prev) => ({ ...prev, confirm: e.target.value }))}
+                            InputProps={{
+                              startAdornment: <InputAdornment position="start"><Key /></InputAdornment>,
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton onClick={() => setShowConfirm((prev) => !prev)} edge="end">
+                                    {showConfirm ? <VisibilityOff /> : <Visibility />}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                            error={Boolean(form.confirm && form.confirm !== form.password)}
+                            helperText={form.confirm && form.confirm !== form.password ? 'Passwords do not match' : ' '}
+                            fullWidth
+                            required
+                          />
+                        )}
+
+                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Current edition: <strong>{edition.toUpperCase()}</strong>
+                          </Typography>
+                          {mode === 'login' && (
+                            <Typography variant="body2" component="a" href="#forgot" sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                              Forgot password?
+                            </Typography>
+                          )}
+                        </Stack>
+
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            size="large"
+                            disabled={loading || !canSubmit}
+                            endIcon={<ArrowForward />}
+                            sx={{ py: 1.3 }}
+                          >
+                            {loading ? 'Please wait...' : submitLabel}
+                          </Button>
+
+                          {backendReachable && (
+                            <Button
+                              variant="outlined"
+                              color="success"
+                              startIcon={<AutoAwesome />}
+                              disabled={loading}
+                              onClick={handleDemo}
+                              sx={{ py: 1.1 }}
+                            >
+                              Try the demo
+                            </Button>
+                          )}
+                        </Box>
+
+                        <Divider sx={{ my: 1 }}>OR CONTINUE WITH</Divider>
+
+                        <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }}>
+                          {backendReachable && (
+                            <>
+                              <Button
+                                variant="outlined"
+                                startIcon={<GitHub />}
+                                onClick={() => socialLogin('github')}
+                                sx={{ py: 1.1, flex: 1, minWidth: 140 }}
+                              >
+                                GitHub
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                startIcon={<Google />}
+                                onClick={() => socialLogin('google')}
+                                sx={{ py: 1.1, flex: 1, minWidth: 140 }}
+                              >
+                                Google
+                              </Button>
+                            </>
+                          )}
+                          {supabaseEnabled && (
+                            <Button
+                              variant="outlined"
+                              color="success"
+                              startIcon={<CheckCircle />}
+                              onClick={async () => {
+                                setLoading(true);
+                                setError('');
+                                try {
+                                  if (mode === 'register') {
+                                    const result = await supabaseRegister(form.name || form.email.split('@')[0], form.email, form.password, edition);
+                                    if (result?.requiresConfirmation) {
+                                      setConfirmationSent({ email: form.email });
+                                    } else {
+                                      navigate('/dashboard', { replace: true });
+                                    }
+                                  } else {
+                                    await supabaseLogin(form.email, form.password, edition);
+                                    navigate('/dashboard', { replace: true });
+                                  }
+                                } catch (err: any) {
+                                  setError(err?.message || 'Supabase authentication failed');
+                                } finally {
+                                  setLoading(false);
+                                }
+                              }}
+                              sx={{ py: 1.1, flex: 1, minWidth: 140 }}
+                            >
+                              Supabase
+                            </Button>
+                          )}
+                        </Stack>
+
+                        <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
+                          By continuing you agree to the <a href="#terms" style={{ color: 'inherit' }}>Terms of Service</a> and{' '}
+                          <a href="#privacy" style={{ color: 'inherit' }}>Privacy Policy</a>. Authentication is handled by {providerName}.
+                        </Typography>
+                      </Stack>
+                    </form>
+                  </>
+                )}
               </CardContent>
             </Card>
           </Grid>

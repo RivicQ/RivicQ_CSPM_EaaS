@@ -120,6 +120,8 @@ export const authService = {
   githubLogin: () => api.get('/auth/github/login'),
 
   githubStatus: () => api.get('/auth/github/status'),
+
+  demo: (edition?: Edition) => api.get('/auth/demo', { params: { edition } }),
 };
 
 export const complianceService = {
