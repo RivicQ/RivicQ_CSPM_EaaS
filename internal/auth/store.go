@@ -266,10 +266,10 @@ func (d *DatabaseUserStore) CreateUser(user *User) error {
 func (d *DatabaseUserStore) UpdateUser(user *User) error {
 	query := `
 		UPDATE users 
-		SET name = $2, role = $3, updated_at = NOW()
+		SET name = $2, role = $3, mfa_enabled = $4, mfa_secret = $5, updated_at = NOW()
 		WHERE id = $1`
 
-	_, err := d.db.Exec(query, user.ID, user.Name, user.Role)
+	_, err := d.db.Exec(query, user.ID, user.Name, user.Role, user.MFAEnabled, user.MFASecret)
 	return err
 }
 

@@ -176,7 +176,11 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 
 		if err := service.Register(user); err != nil {
 			logger.WithError(err).WithField("email", req.Email).Warn("registration failed")
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			msg := err.Error()
+			if strings.Contains(strings.ToLower(msg), "duplicate key") {
+				msg = "An account with this email already exists. Please log in instead."
+			}
+			c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 			return
 		}
 

@@ -75,6 +75,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     supabaseLogin,
     supabaseRegister,
     demoLogin,
+    verifyMfa,
     edition,
     setEdition,
     isAuthenticated,
@@ -87,6 +88,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const [error, setError] = React.useState('');
   const [mode, setMode] = React.useState<'login' | 'register'>(defaultMode);
   const [confirmationSent, setConfirmationSent] = React.useState<{ email: string } | null>(null);
+  const [mfaStep, setMfaStep] = React.useState<{ email: string; session: string } | null>(null);
+  const [mfaCode, setMfaCode] = React.useState('');
   const [form, setForm] = React.useState({
     name: '',
     email: '',
@@ -124,13 +127,37 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         ? await register(form.name || form.email.split('@')[0], form.email, form.password, edition)
         : await login(form.email, form.password, edition);
 
+      if (result?.mfaRequired) {
+        setMfaStep({ email: form.email, session: result.mfaSession || '' });
+        setMfaCode('');
+        return;
+      }
       if (mode === 'register' && result?.requiresConfirmation) {
         setConfirmationSent({ email: form.email });
       } else {
         navigate('/dashboard', { replace: true });
       }
     } catch (err: any) {
-      setError(err?.message || (mode === 'register' ? 'Registration failed' : 'Authentication failed'));
+      setError(
+        err?.response?.data?.error ||
+        err?.message ||
+        (mode === 'register' ? 'Registration failed' : 'Authentication failed')
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMfaSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!mfaStep) return;
+    setLoading(true);
+    setError('');
+    try {
+      await verifyMfa(mfaStep.email, mfaCode.trim(), mfaStep.session, edition);
+      navigate('/dashboard', { replace: true });
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'MFA verification failed');
     } finally {
       setLoading(false);
     }
@@ -144,7 +171,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       await demoLogin(edition);
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
-      setError(err?.message || 'Demo access unavailable');
+      setError(err?.response?.data?.error || err?.message || 'Demo access unavailable');
     } finally {
       setLoading(false);
     }
@@ -301,7 +328,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>
                     {title}
                   </Typography>
-                  <Tabs value={mode} onChange={(_, nextMode: 'login' | 'register') => setMode(nextMode)} textColor="primary" indicatorColor="primary">
+                  <Tabs
+                    value={mode}
+                    onChange={(_, nextMode: 'login' | 'register') => {
+                      setMode(nextMode);
+                      setMfaStep(null);
+                      setError('');
+                    }}
+                    textColor="primary"
+                    indicatorColor="primary"
+                  >
                     <Tab value="login" label="Login" />
                     <Tab value="register" label="Register" />
                   </Tabs>
@@ -332,6 +368,53 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       </Alert>
                     )}
 
+                    {mfaStep && (
+                      <form onSubmit={handleMfaSubmit}>
+                        <Stack spacing={2.25}>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={700}>
+                              Two-factor authentication required
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                              Enter the 6-digit code from your authenticator app for <strong>{mfaStep.email}</strong>.
+                            </Typography>
+                          </Box>
+                          <TextField
+                            label="Authenticator code"
+                            value={mfaCode}
+                            onChange={(e) => setMfaCode(e.target.value)}
+                            inputProps={{ inputMode: 'numeric', maxLength: 6 }}
+                            InputProps={{ startAdornment: <InputAdornment position="start"><Key /></InputAdornment> }}
+                            fullWidth
+                            required
+                          />
+                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                            <Button
+                              type="submit"
+                              variant="contained"
+                              size="large"
+                              disabled={loading || mfaCode.trim().length < 6}
+                              endIcon={<ArrowForward />}
+                              sx={{ py: 1.3 }}
+                            >
+                              {loading ? 'Verifying...' : 'Verify and sign in'}
+                            </Button>
+                            <Button
+                              variant="text"
+                              disabled={loading}
+                              onClick={() => {
+                                setMfaStep(null);
+                                setError('');
+                              }}
+                            >
+                              Back
+                            </Button>
+                          </Stack>
+                        </Stack>
+                      </form>
+                    )}
+
+                    {!mfaStep && (
                     <form onSubmit={handleSubmit}>
                       <Stack spacing={2.25}>
                         {mode === 'register' && (
@@ -448,6 +531,23 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                           )}
                         </Box>
 
+                        {backendReachable && !mfaStep && (
+                          <Box sx={{ p: 1.5, borderRadius: 2, border: 1, borderColor: 'divider', bgcolor: 'action.hover' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                              Demo workspace credentials (password <strong>DemoPass123!</strong>):
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
+                              Enterprise&nbsp;· revansai.ande@rivicq.com
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
+                              Professional&nbsp;· pratik.rughe@rivicq.de · danush.m@rivicq.de
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
+                              Community&nbsp;· sales@rivicq.de
+                            </Typography>
+                          </Box>
+                        )}
+
                         <Divider sx={{ my: 1 }}>OR CONTINUE WITH</Divider>
 
                         <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }}>
@@ -510,6 +610,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                         </Typography>
                       </Stack>
                     </form>
+                    )}
                   </>
                 )}
               </CardContent>

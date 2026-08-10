@@ -12,9 +12,13 @@ export interface AuthUser {
 }
 
 export interface RegisterResult {
-  requiresConfirmation: boolean;
+  requiresConfirmation?: boolean;
   email?: string;
+  mfaRequired?: boolean;
+  mfaSession?: string;
 }
+
+export type LoginResult = RegisterResult;
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -24,11 +28,12 @@ interface AuthContextValue {
   loading: boolean;
   supabaseEnabled: boolean;
   backendReachable: boolean;
-  login: (email: string, password: string, edition: Edition) => Promise<void>;
+  login: (email: string, password: string, edition: Edition) => Promise<LoginResult>;
   register: (name: string, email: string, password: string, edition: Edition) => Promise<RegisterResult>;
   supabaseLogin: (email: string, password: string, edition: Edition) => Promise<void>;
   supabaseRegister: (name: string, email: string, password: string, edition: Edition) => Promise<RegisterResult>;
   demoLogin: (edition: Edition) => Promise<void>;
+  verifyMfa: (email: string, code: string, session: string, edition: Edition) => Promise<void>;
   logout: () => void;
   setEdition: (edition: Edition) => void;
   persistAuth: (payload: any) => void;
@@ -82,10 +87,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       if (cancelled) return;
 
-      const detectedEdition = normalizeEdition(remote?.edition || stored.edition);
+      // Backend /edition reports the *server build* (the OSS server says
+      // "oss"), not the user's entitlement. Prefer the persisted edition so a
+      // previously selected Enterprise/Professional workspace survives reloads
+      // instead of snapping back to Community and hiding features.
+      const detectedEdition = normalizeEdition(sbUser?.edition || stored.edition || remote?.edition);
       if (remote?.edition) {
         syncAPIBaseURL();
-        setEditionPreference(detectedEdition);
+        if (!sbUser?.edition && !stored.edition) {
+          setEditionPreference(detectedEdition);
+        }
       }
 
       setBackendReachable(Boolean(remote?.edition));
@@ -146,17 +157,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { requiresConfirmation: true, email: supabaseUser.email };
   }, [persist]);
 
-  const login = React.useCallback(async (email: string, password: string, nextEdition: Edition) => {
+  const login = React.useCallback(async (email: string, password: string, nextEdition: Edition): Promise<LoginResult> => {
     if (backendReachable) {
       const response = await authService.login({ email, password, edition: nextEdition });
-      completeAuth(response.data);
-      return;
+      const data = response.data;
+      if (data?.mfa_required) {
+        return { mfaRequired: true, mfaSession: data.mfa_session, email };
+      }
+      completeAuth(data);
+      return { requiresConfirmation: false };
     }
     if (isSupabaseConfigured) {
       const supabaseUser = await supabaseAuthService.signIn(email, password);
       const sbToken = await supabaseAuthService.getSessionToken();
       persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
-      return;
+      return { requiresConfirmation: false };
     }
     throw new Error('No authentication provider is available on this deployment.');
   }, [backendReachable, completeAuth, persist]);
@@ -164,7 +179,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition): Promise<RegisterResult> => {
     if (backendReachable) {
       const response = await authService.register({ name, email, password, edition: nextEdition });
-      completeAuth(response.data);
+      const data = response.data;
+      if (data?.mfa_required) {
+        return { requiresConfirmation: true, email, mfaRequired: true, mfaSession: data.mfa_session };
+      }
+      completeAuth(data);
       return { requiresConfirmation: false };
     }
     if (isSupabaseConfigured) {
@@ -172,6 +191,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     throw new Error('No authentication provider is available on this deployment.');
   }, [backendReachable, completeAuth, supabaseRegister]);
+
+  const verifyMfa = React.useCallback(async (email: string, code: string, session: string, nextEdition: Edition) => {
+    const response = await authService.verifyMfa({ email, mfa_code: code, mfa_session: session, edition: nextEdition });
+    completeAuth(response.data);
+  }, [completeAuth]);
 
   const demoLogin = React.useCallback(async (nextEdition: Edition) => {
     const response = await authService.demo(nextEdition);
@@ -202,10 +226,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabaseLogin,
     supabaseRegister,
     demoLogin,
+    verifyMfa,
     logout,
     setEdition,
     persistAuth: completeAuth,
-  }), [edition, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, logout, setEdition, token, user, completeAuth]);
+  }), [edition, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, verifyMfa, logout, setEdition, token, user, completeAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
