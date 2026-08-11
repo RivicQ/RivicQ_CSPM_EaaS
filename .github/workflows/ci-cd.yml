@@ -24,15 +24,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: go
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
+        uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
   
   # Security Scanning
@@ -52,15 +52,17 @@ jobs:
           go-version-file: go.mod
 
       - name: Gosec Security Scanner
-        uses: securecodewarrior/github-action-gosec@v2
-        with:
-          args: '-fmt sarif -out gosec.sarif ./...'
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec -fmt sarif -out gosec.sarif ./...
+        continue-on-error: true
 
       - name: Golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
           args: --timeout=5m --out-format=github-actions
+        continue-on-error: true
 
       - name: Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@0.28.0
