@@ -90,7 +90,8 @@ jobs:
         id: image
         run: |
           REGISTRY="${{ steps.reg.outputs.registry }}"
-          IMAGE="${REGISTRY}/${{ github.repository }}/cryptobom-oss"
+          REPO="$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          IMAGE="${REGISTRY}/${REPO}/cryptobom-oss"
           TAG="${{ inputs.image_tag }}"
           echo "full=${IMAGE}:${TAG}" >> "$GITHUB_OUTPUT"
           echo "latest=${IMAGE}:latest" >> "$GITHUB_OUTPUT"

@@ -30,6 +30,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Resolve lowercase image path
+        id: img
+        run: echo "path=$(echo 'ghcr.io/${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -37,7 +41,7 @@ jobs:
           file: ./deploy/docker/Dockerfile.enterprise
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/cryptobom-saas:latest
-            ghcr.io/${{ github.repository }}/cryptobom-saas:${{ github.sha }}
+            ${{ steps.img.outputs.path }}/cryptobom-saas:latest
+            ${{ steps.img.outputs.path }}/cryptobom-saas:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
