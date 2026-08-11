@@ -148,6 +148,10 @@ echo ""
 TOTAL=$(echo "$BOM_RESP" | jq -r '.summary.total // (.findings.total // "?")' 2>/dev/null || echo "?")
 AT_RISK=$(echo "$BOM_RESP" | jq -r '.summary.at_risk // (.findings.critical // "?")' 2>/dev/null || echo "?")
 QS=$(echo "$BOM_RESP" | jq -r '.summary.quantum_safe // "?"' 2>/dev/null || echo "?")
+COMPONENT_COUNT=$(echo "$BOM_RESP" | jq -r '.components | length // "?"' 2>/dev/null || echo "?")
+if [[ "$COMPONENT_COUNT" != "?" ]] && [[ "$COMPONENT_COUNT" -gt 0 ]]; then
+  TOTAL="$COMPONENT_COUNT"
+fi
 
 echo "────────────────────────────────────────────────────────────────"
 echo "  CBOM Summary"

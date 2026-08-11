@@ -62,7 +62,7 @@ func TestScanAll_SummaryCounts(t *testing.T) {
 		{Severity: SeverityLow, QuantumSafe: false, BSIRef: "BSI-5"},
 	}
 
-	summary := computeSummary([]Target{{}, {}}, 2, findings)
+	summary := computeSummary([]Target{{}, {}}, 2, findings, nil)
 	assert.Equal(t, 2, summary.TotalTargets)
 	assert.Equal(t, 2, summary.ScannedTargets)
 	assert.Equal(t, 5, summary.TotalFindings)

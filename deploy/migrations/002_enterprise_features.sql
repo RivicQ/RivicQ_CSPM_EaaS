@@ -1,10 +1,16 @@
 -- CryptoBOM SaaS - Enterprise Features Schema
 -- PostgreSQL 15
+--
+-- NOTE: this file is applied AFTER 001_initial_schema.sql on fresh installs.
+-- The embedded Go migrations in internal/database/enterprise_database.go are
+-- the source of truth at runtime; this file mirrors that schema for manual /
+-- ops-managed installs. Tables reference `tenants` (not `organizations`),
+-- matching the Go schema.
 
 -- HSM Key Management
 CREATE TABLE IF NOT EXISTS hsm_keys (
     id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id            UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    org_id            UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     provider          TEXT NOT NULL,
     key_id            TEXT NOT NULL,
     hsm_cluster_id    TEXT,
@@ -23,8 +29,8 @@ ON hsm_keys(org_id, provider);
 -- Quantum Security Scans
 CREATE TABLE IF NOT EXISTS quantum_scans (
     id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id                UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    asset_id              UUID REFERENCES assets(id) ON DELETE SET NULL,
+    org_id                UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    asset_id              UUID REFERENCES inventory_assets(id) ON DELETE SET NULL,
     risk_score            INT NOT NULL DEFAULT 0,
     pqc_algorithms        JSONB NOT NULL DEFAULT '[]',
     vulnerable_algorithms JSONB NOT NULL DEFAULT '[]',
@@ -40,7 +46,7 @@ ON quantum_scans(org_id);
 -- Cloud Connections
 CREATE TABLE IF NOT EXISTS cloud_connections (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    org_id          UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     provider        TEXT NOT NULL,
     account_id      TEXT,
     region          TEXT,
@@ -64,7 +70,7 @@ ON cloud_connections(org_id);
 
 CREATE TABLE IF NOT EXISTS enterprise_audit_events (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    org_id          UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     user_id         UUID REFERENCES users(id) ON DELETE SET NULL,
     action          TEXT NOT NULL,
     resource        TEXT NOT NULL,
@@ -77,4 +83,3 @@ CREATE TABLE IF NOT EXISTS enterprise_audit_events (
 
 CREATE INDEX IF NOT EXISTS idx_enterprise_audit_events_org_id
 ON enterprise_audit_events(org_id, created_at DESC);
-

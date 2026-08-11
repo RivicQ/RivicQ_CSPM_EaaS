@@ -2,8 +2,17 @@ import React from 'react';
 import { Box, Button, Card, CardContent, Chip, Stack, TextField, Typography } from '@mui/material';
 import { AutoAwesome, SmartToy } from '@mui/icons-material';
 import { Edition, isPaidEdition } from '../config/editions';
+import { aiService } from '../services/api';
 
 type AssistantContext = 'dashboard' | 'tools' | 'auth' | 'enterprise' | 'scanner';
+
+const BACKEND_CONTEXT: Record<AssistantContext, string> = {
+  dashboard: 'dashboard',
+  tools: 'dashboard',
+  auth: 'dashboard',
+  enterprise: 'posture',
+  scanner: 'scan',
+};
 
 type AssistantProps = {
   contextKey: AssistantContext;
@@ -77,16 +86,36 @@ const ASSISTANT_RESPONSES: Record<AssistantContext, (edition: Edition, benchmark
 const ContextualAIAssistant: React.FC<AssistantProps> = ({ contextKey, edition, title, description, benchmark }) => {
   const [question, setQuestion] = React.useState(CONTEXT_PROMPTS[contextKey][0]);
   const [answer, setAnswer] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     setQuestion(CONTEXT_PROMPTS[contextKey][0]);
   }, [contextKey]);
 
-  const generateAnswer = () => {
-    const hints = CONTEXT_PROMPTS[contextKey];
-    const selectedHint = hints.find((hint) => question.toLowerCase().includes(hint.toLowerCase().split(' ').slice(0, 3).join(' '))) || hints[0];
-    const response = ASSISTANT_RESPONSES[contextKey](edition, benchmark);
-    setAnswer(`${response} Suggested next action: ${selectedHint}`);
+  const generateAnswer = async () => {
+    setLoading(true);
+    try {
+      const response = await aiService.analyze({
+        context: BACKEND_CONTEXT[contextKey],
+        query: question,
+      });
+      const body = response?.data;
+      setAnswer(
+        body?.summary ||
+        body?.analysis ||
+        body?.response ||
+        body?.suggestion ||
+        body?.message ||
+        'Analysis complete.'
+      );
+    } catch {
+      const hints = CONTEXT_PROMPTS[contextKey];
+      const selectedHint = hints.find((hint) => question.toLowerCase().includes(hint.toLowerCase().split(' ').slice(0, 3).join(' '))) || hints[0];
+      const response = ASSISTANT_RESPONSES[contextKey](edition, benchmark);
+      setAnswer(`${response} Suggested next action: ${selectedHint}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -124,8 +153,8 @@ const ContextualAIAssistant: React.FC<AssistantProps> = ({ contextKey, edition, 
           ))}
         </Stack>
 
-        <Button variant="contained" onClick={generateAnswer} startIcon={<SmartToy />} sx={{ mb: 2 }}>
-          Generate Guidance
+        <Button variant="contained" onClick={generateAnswer} startIcon={<SmartToy />} sx={{ mb: 2 }} disabled={loading}>
+          {loading ? 'Analyzing…' : 'Generate Guidance'}
         </Button>
 
         {answer && (

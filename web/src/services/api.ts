@@ -444,6 +444,18 @@ export const coreService = {
   checkIntegration: (name: string) => api.get(`/core/integrations/${name}`),
 };
 
+export const analyticsService = {
+  getReports: () => api.get('/analytics/reports'),
+  getInsights: () => api.post('/analytics/insights'),
+  getForecasts: () => api.get('/analytics/forecasts'),
+};
+
+export const aiService = {
+  analyze: (data: { context: string; target_id?: string; query?: string }) =>
+    api.post('/ai/analyze', data),
+  status: () => api.get('/ai/status'),
+};
+
 export const gitHubScanService = {
   scanRepos: (repos: string[], scanType?: string, deepScan?: boolean) =>
     api.post('/github/scan', { repos, scan_type: scanType, deep_scan: deepScan }),

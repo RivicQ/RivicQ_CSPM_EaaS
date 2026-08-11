@@ -20,6 +20,99 @@ func demoMode(db *database.DB) bool {
 	return db == nil || db.DB == nil || db.Queries == nil
 }
 
+// installScanPersistence wires the DB-backed persist hook into the shared scan
+// manager so completed scans are stored as CBOM reports + crypto assets.
+func installScanPersistence(db *database.DB, logger *logrus.Logger) {
+	discovery.GetScanManager().SetPersistFunc(persistCBOMScanResult(db, logger))
+}
+
+// persistCBOMScanResult writes a completed scan result into PostgreSQL when
+// available, returning the CBOM report ID as the stable asset ID.
+func persistCBOMScanResult(db *database.DB, logger *logrus.Logger) discovery.PersistFunc {
+	return func(job *discovery.ScanJob, result *discovery.ScanResult) (string, error) {
+		if demoMode(db) {
+			return "", nil
+		}
+
+		// Ensure the default tenant exists before writing the CBOM report
+		// (crypto_assets and cbom_reports reference tenants by FK).
+		if _, err := db.DB.Exec(`INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+			defaultTenantID, "Default Organization"); err != nil {
+			logger.WithError(err).Warn("Failed to ensure default tenant for scan persistence")
+		}
+
+		bomJSON, err := json.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+
+		report := &database.CBOMReport{
+			TenantID:     defaultTenantID,
+			Name:         job.Target,
+			Version:      "1.0",
+			CycloneDXBOM: string(bomJSON),
+			Metadata:     fmt.Sprintf(`{"scan_type":%q,"scan_id":%q}`, job.ScanType, job.ID),
+			Status:       "completed",
+		}
+		if err := db.Queries.CreateCBOMReport(report); err != nil {
+			logger.WithError(err).Error("Failed to persist CBOM report from scan")
+			return "", err
+		}
+
+		for _, comp := range result.Components {
+			asset := &database.CryptoAsset{
+				CBOMReportID:       report.ID,
+				Algorithm:          comp.Algorithm,
+				KeySize:            comp.KeySize,
+				Usage:              "cryptographic",
+				Location:           comp.Location,
+				VulnerabilityScore: vulnerabilityScore(comp.RiskLevel),
+				QuantumSafe:        comp.QuantumSafe,
+				Metadata:           fmt.Sprintf(`{"library":%q,"version":%q,"pqc_status":%q}`, comp.Library, comp.Version, comp.PQCStatus),
+			}
+			if err := db.Queries.CreateCryptoAsset(asset); err != nil {
+				logger.WithError(err).Warn("Failed to persist crypto asset from scan")
+			}
+		}
+
+		return report.ID, nil
+	}
+}
+
+// vulnerabilityScore maps a finding severity to a 0-10 vulnerability score.
+func vulnerabilityScore(level discovery.SeverityLevel) int {
+	switch level {
+	case discovery.SeverityCritical:
+		return 9
+	case discovery.SeverityHigh:
+		return 7
+	case discovery.SeverityMedium:
+		return 4
+	case discovery.SeverityLow:
+		return 1
+	}
+	return 0
+}
+
+// componentsToGin renders CBOM components as the public API shape.
+func componentsToGin(components []discovery.CBOMComponent) []gin.H {
+	out := make([]gin.H, 0, len(components))
+	for _, c := range components {
+		out = append(out, gin.H{
+			"algorithm":    c.Algorithm,
+			"key_size":     c.KeySize,
+			"library":      c.Library,
+			"version":      c.Version,
+			"risk_level":   c.RiskLevel,
+			"quantum_safe": c.QuantumSafe,
+			"pqc_status":   c.PQCStatus,
+			"location":     c.Location,
+			"bsi_ref":      c.BSIRef,
+		})
+	}
+	return out
+}
+
 // ── CBOM Handlers ─────────────────────────────────────────────────────────
 
 func CreateCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
@@ -30,10 +123,10 @@ func CreateCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		}
 
 		var body struct {
-			Name     string          `json:"name" binding:"required"`
-			Version  string          `json:"version" binding:"required"`
+			Name         string          `json:"name" binding:"required"`
+			Version      string          `json:"version" binding:"required"`
 			CycloneDXBOM json.RawMessage `json:"cyclonedx_bom"`
-			Metadata json.RawMessage `json:"metadata"`
+			Metadata     json.RawMessage `json:"metadata"`
 		}
 		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -155,6 +248,8 @@ func ScanCBOMReport(db *database.DB, logger *logrus.Logger, cfg interface{}) gin
 			target = "localhost"
 		}
 
+		installScanPersistence(db, logger)
+
 		sm := discovery.GetScanManager()
 		job := sm.StartScan(target, "cbom")
 
@@ -167,6 +262,7 @@ func ScanCBOMReport(db *database.DB, logger *logrus.Logger, cfg interface{}) gin
 		c.JSON(http.StatusAccepted, gin.H{
 			"id":          id,
 			"scan_id":     job.ID,
+			"asset_id":    job.AssetID,
 			"scan_status": "started",
 			"target":      target,
 			"result_url":  fmt.Sprintf("/api/v1/scans/%s", job.ID),
@@ -602,12 +698,13 @@ func GetCiliumMetrics(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 // ── Scan Flow (headleap) ──────────────────────────────────────────────────
 
 type ScanRequest struct {
-	Target   string   `json:"target" binding:"required"`
-	ScanType string   `json:"scan_type"`
+	Target   string `json:"target" binding:"required"`
+	ScanType string `json:"scan_type"`
 }
 
 type ScanResponse struct {
 	ScanID    string `json:"scan_id"`
+	AssetID   string `json:"asset_id"`
 	Status    string `json:"status"`
 	Target    string `json:"target"`
 	ScanType  string `json:"scan_type"`
@@ -630,15 +727,18 @@ func TriggerCBOMScan(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			req.ScanType = "cbom"
 		}
 
+		installScanPersistence(db, logger)
+
 		sm := discovery.GetScanManager()
 		job := sm.StartScan(req.Target, req.ScanType)
 
 		logger.WithFields(logrus.Fields{
-			"scan_id": job.ID, "target": req.Target, "scan_type": req.ScanType,
+			"scan_id": job.ID, "asset_id": job.AssetID, "target": req.Target, "scan_type": req.ScanType,
 		}).Info("CBOM scan triggered")
 
 		resp := ScanResponse{
 			ScanID:    job.ID,
+			AssetID:   job.AssetID,
 			Status:    "accepted",
 			Target:    req.Target,
 			ScanType:  req.ScanType,
@@ -662,11 +762,12 @@ func GetCBOMScanStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		}
 
 		resp := gin.H{
-			"scan_id":  job.ID,
-			"target":   job.Target,
-			"scan_type": job.ScanType,
-			"status":   job.Status,
-			"progress": job.Progress,
+			"scan_id":    job.ID,
+			"asset_id":   job.AssetID,
+			"target":     job.Target,
+			"scan_type":  job.ScanType,
+			"status":     job.Status,
+			"progress":   job.Progress,
 			"created_at": job.CreatedAt.Format(time.RFC3339),
 		}
 
@@ -680,6 +781,13 @@ func GetCBOMScanStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 				"low":            r.Summary.Low,
 				"quantum_unsafe": r.Summary.QuantumUnsafe,
 			}
+			resp["summary"] = gin.H{
+				"total":        r.Summary.TotalComponents,
+				"at_risk":      r.Summary.AtRisk,
+				"quantum_safe": r.Summary.QuantumSafe,
+				"pqc_ready":    r.Summary.PQCReady,
+			}
+			resp["components"] = componentsToGin(r.Components)
 			resp["targets"] = r.Targets
 			resp["result_url"] = "/api/v1/scans/" + id + "/report"
 		}
@@ -689,6 +797,32 @@ func GetCBOMScanStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, resp)
+	}
+}
+
+// GetCBOMScanReport returns the full structured report for a completed scan.
+func GetCBOMScanReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		logger.WithField("scan_id", id).Info("Getting CBOM scan report")
+
+		sm := discovery.GetScanManager()
+		job, ok := sm.GetScan(id)
+		if !ok {
+			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
+			return
+		}
+		if job.Status != "completed" || job.Result == nil {
+			c.JSON(http.StatusConflict, gin.H{
+				"scan_id":  job.ID,
+				"status":   job.Status,
+				"progress": job.Progress,
+				"error":    "scan report not ready",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, job.Result)
 	}
 }
 
@@ -710,16 +844,117 @@ func GetAssetBOM(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		logger.WithField("asset_id", id).Info("Getting asset CBOM")
-		c.JSON(http.StatusOK, gin.H{
-			"asset_id":    id,
-			"bom_version": "1.0",
-			"generated":   time.Now().UTC().Format(time.RFC3339),
-			"components":  assetBOMDemo(),
-			"summary": gin.H{
-				"total": 3, "quantum_safe": 2, "at_risk": 1, "pqc_ready": 1,
-			},
-		})
+
+		sm := discovery.GetScanManager()
+		if result, ok := sm.GetResult(id); ok && len(result.Components) > 0 {
+			c.JSON(http.StatusOK, gin.H{
+				"asset_id":    id,
+				"bom_version": "1.0",
+				"generated":   time.Now().UTC().Format(time.RFC3339),
+				"components":  componentsToGin(result.Components),
+				"summary": gin.H{
+					"total":        len(result.Components),
+					"quantum_safe": result.Summary.QuantumSafe,
+					"at_risk":      result.Summary.AtRisk,
+					"pqc_ready":    result.Summary.PQCReady,
+				},
+			})
+			return
+		}
+
+		if !demoMode(db) {
+			assets, err := db.Queries.ListCryptoAssets(id, 100, 0)
+			if err == nil && len(assets) > 0 {
+				components := make([]gin.H, 0, len(assets))
+				quantumSafe, atRisk := 0, 0
+				for _, a := range assets {
+					components = append(components, gin.H{
+						"algorithm":    a.Algorithm,
+						"key_size":     a.KeySize,
+						"library":      libraryFromMetadata(a.Metadata),
+						"version":      versionFromMetadata(a.Metadata),
+						"risk_level":   riskLevelFromScore(a.VulnerabilityScore),
+						"quantum_safe": a.QuantumSafe,
+						"location":     a.Location,
+					})
+					if a.QuantumSafe {
+						quantumSafe++
+					}
+					if a.VulnerabilityScore >= 7 {
+						atRisk++
+					}
+				}
+				c.JSON(http.StatusOK, gin.H{
+					"asset_id":    id,
+					"bom_version": "1.0",
+					"generated":   time.Now().UTC().Format(time.RFC3339),
+					"components":  components,
+					"summary": gin.H{
+						"total":        len(components),
+						"quantum_safe": quantumSafe,
+						"at_risk":      atRisk,
+					},
+				})
+				return
+			}
+		}
+
+		// No scan data for this asset yet – fall back to demo components only in
+		// demo mode so the UI still renders an example CBOM.
+		if demoMode(db) {
+			c.JSON(http.StatusOK, gin.H{
+				"asset_id":    id,
+				"bom_version": "1.0",
+				"generated":   time.Now().UTC().Format(time.RFC3339),
+				"components":  assetBOMDemo(),
+				"summary": gin.H{
+					"total": 3, "quantum_safe": 2, "at_risk": 1, "pqc_ready": 1,
+				},
+			})
+			return
+		}
+
+		c.JSON(http.StatusNotFound, gin.H{"error": "no CBOM found for asset"})
 	}
+}
+
+func riskLevelFromScore(score int) string {
+	switch {
+	case score >= 9:
+		return "CRITICAL"
+	case score >= 7:
+		return "HIGH"
+	case score >= 4:
+		return "MEDIUM"
+	default:
+		return "LOW"
+	}
+}
+
+func libraryFromMetadata(metadata string) string {
+	if metadata == "" {
+		return ""
+	}
+	var meta struct {
+		Library string `json:"library"`
+	}
+	if err := json.Unmarshal([]byte(metadata), &meta); err != nil {
+		return ""
+	}
+	return meta.Library
+}
+
+func versionFromMetadata(metadata string) string {
+	if metadata == "" {
+		return ""
+	}
+	var meta struct {
+		Version string `json:"version"`
+	}
+	if err := json.Unmarshal([]byte(metadata), &meta); err != nil {
+		return ""
+	}
+	return meta.Version
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────

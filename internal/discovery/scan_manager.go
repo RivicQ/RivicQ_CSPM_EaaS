@@ -2,6 +2,11 @@ package discovery
 
 import (
 	"context"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -9,36 +14,66 @@ import (
 )
 
 type ScanJob struct {
-	ID        string       `json:"id"`
-	Target    string       `json:"target"`
-	ScanType  string       `json:"scan_type"`
-	Status    string       `json:"status"`
-	Progress  int          `json:"progress"`
-	Result    *ScanResult  `json:"result,omitempty"`
-	Error     string       `json:"error,omitempty"`
-	CreatedAt time.Time    `json:"created_at"`
-	UpdatedAt time.Time    `json:"updated_at"`
+	ID        string      `json:"id"`
+	AssetID   string      `json:"asset_id,omitempty"`
+	Target    string      `json:"target"`
+	ScanType  string      `json:"scan_type"`
+	Status    string      `json:"status"`
+	Progress  int         `json:"progress"`
+	Result    *ScanResult `json:"result,omitempty"`
+	Error     string      `json:"error,omitempty"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
 }
 
+// PersistFunc persists a completed scan result and returns a stable asset ID
+// for the scanned target. It is optional; when nil the result stays in memory.
+type PersistFunc func(job *ScanJob, result *ScanResult) (string, error)
+
 type ScanManager struct {
-	mu      sync.RWMutex
-	jobs    map[string]*ScanJob
-	scanner *Scanner
+	mu        sync.RWMutex
+	jobs      map[string]*ScanJob
+	results   map[string]*ScanResult // assetID -> latest completed result
+	scanner   *Scanner
+	persistFn PersistFunc
 }
 
 func NewScanManager() *ScanManager {
 	return &ScanManager{
 		jobs:    make(map[string]*ScanJob),
+		results: make(map[string]*ScanResult),
 		scanner: NewScanner(),
 	}
+}
+
+// SetPersistFunc installs a persistence callback invoked when a scan completes.
+func (sm *ScanManager) SetPersistFunc(fn PersistFunc) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	sm.persistFn = fn
+}
+
+// AssetIDFor returns a stable, deterministic asset identifier for a target.
+func (sm *ScanManager) AssetIDFor(target string) string {
+	return uuid.NewSHA1(uuid.NameSpaceURL, []byte(strings.TrimSpace(target))).String()
+}
+
+// GetResult returns the latest completed scan result for an asset.
+func (sm *ScanManager) GetResult(assetID string) (*ScanResult, bool) {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	result, ok := sm.results[assetID]
+	return result, ok
 }
 
 func (sm *ScanManager) StartScan(target, scanType string) *ScanJob {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
+	assetID := sm.AssetIDFor(target)
 	job := &ScanJob{
 		ID:        uuid.New().String(),
+		AssetID:   assetID,
 		Target:    target,
 		ScanType:  scanType,
 		Status:    "pending",
@@ -61,7 +96,7 @@ func (sm *ScanManager) executeScan(job *ScanJob) {
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
-	targets := buildTargets(job.Target)
+	targets := buildTargets(job.Target, job.ScanType)
 
 	sm.mu.Lock()
 	job.Progress = 30
@@ -83,6 +118,22 @@ func (sm *ScanManager) executeScan(job *ScanJob) {
 	job.Result = result
 	job.Status = "completed"
 	job.Progress = 100
+
+	assetID := job.AssetID
+	if assetID == "" {
+		assetID = sm.AssetIDFor(job.Target)
+		job.AssetID = assetID
+	}
+
+	if sm.persistFn != nil {
+		if persisted, perr := sm.persistFn(job, result); perr == nil && persisted != "" {
+			job.AssetID = persisted
+		}
+	}
+
+	// Keep the latest result indexed by asset so GetAssetBOM can resolve it
+	// even when persistence is unavailable (demo mode).
+	sm.results[job.AssetID] = result
 }
 
 func (sm *ScanManager) GetScan(id string) (*ScanJob, bool) {
@@ -107,12 +158,136 @@ func (sm *ScanManager) ListScans() []*ScanJob {
 	return scans
 }
 
-func buildTargets(target string) []Target {
-	return []Target{
-		{ID: "target-1", Host: target, Port: 443, Protocol: "tls", Label: "TLS Scan: " + target},
-		{ID: "target-2", Host: target, Port: 22, Protocol: "ssh", Label: "SSH Scan: " + target},
-		{ID: "target-3", Host: target, Port: 80, Protocol: "http", Label: "HTTP Scan: " + target},
+// buildTargets converts a scan target into the scanner work list. It supports
+// local repositories / files (SBOM scan), hostnames, host:port endpoints, and
+// URLs. The scan type adjusts the target set:
+//
+//	quick       – TLS + SSH only
+//	cbom        – TLS + SSH + HTTP (+ SBOM when target is a local path)
+//	full        – TLS + SSH + HTTP + SBOM
+//	compliance  – TLS + SSH + HTTP (+ SBOM when target is a local path)
+func buildTargets(target, scanType string) []Target {
+	host, port, path := normalizeTarget(target)
+
+	var targets []Target
+	idx := 0
+	nextID := func() string {
+		idx++
+		return "target-" + strconv.Itoa(idx)
 	}
+
+	isLocal := path != "" && (isDir(path) || isFile(path))
+
+	if isLocal {
+		// Local repository or manifest file -> SBOM scan.
+		targets = append(targets, Target{
+			ID:       nextID(),
+			Host:     "local",
+			Path:     path,
+			Protocol: "sbom",
+			Label:    "SBOM Scan: " + target,
+		})
+		// "full" scans also probe localhost endpoints.
+		if scanType != "full" {
+			return targets
+		}
+		host = "localhost"
+		port = 0
+	}
+
+	if port == 0 {
+		port = 443
+	}
+
+	if host != "" {
+		switch scanType {
+		case "quick":
+			targets = append(targets,
+				Target{ID: nextID(), Host: host, Port: port, Protocol: "tls", Label: "TLS Scan: " + target},
+				Target{ID: nextID(), Host: host, Port: 22, Protocol: "ssh", Label: "SSH Scan: " + target},
+			)
+		default:
+			targets = append(targets,
+				Target{ID: nextID(), Host: host, Port: port, Protocol: "tls", Label: "TLS Scan: " + target},
+				Target{ID: nextID(), Host: host, Port: 22, Protocol: "ssh", Label: "SSH Scan: " + target},
+				Target{ID: nextID(), Host: host, Port: 80, Protocol: "http", Label: "HTTP Scan: " + target},
+			)
+		}
+	}
+
+	return targets
+}
+
+// normalizeTarget strips scheme / trailing slashes and resolves a host, port and
+// local filesystem path from the raw scan target.
+func normalizeTarget(target string) (host string, port int, path string) {
+	raw := strings.TrimSpace(target)
+	if raw == "" {
+		return "localhost", 0, ""
+	}
+
+	// Local path (directory or file) – resolve relative to the working directory.
+	if strings.HasPrefix(raw, "./") || strings.HasPrefix(raw, "../") || raw == "." || raw == ".." ||
+		strings.HasPrefix(raw, "/") || strings.HasPrefix(raw, "~") {
+		if strings.HasPrefix(raw, "~") {
+			home, err := os.UserHomeDir()
+			if err == nil {
+				raw = filepath.Join(home, strings.TrimPrefix(raw, "~"))
+			}
+		}
+		abs, err := filepath.Abs(raw)
+		if err == nil {
+			raw = abs
+		}
+		if isDir(raw) || isFile(raw) {
+			return "local", 0, raw
+		}
+	}
+
+	// URL (http/https).
+	if strings.Contains(raw, "://") {
+		if u, err := url.Parse(raw); err == nil && u.Hostname() != "" {
+			h := u.Hostname()
+			if p := u.Port(); p != "" {
+				if n, perr := strconv.Atoi(p); perr == nil {
+					return h, n, ""
+				}
+			}
+			if u.Scheme == "https" {
+				return h, 443, ""
+			}
+			return h, 80, ""
+		}
+	}
+
+	// host:port.
+	if h, p, err := parseTargetHostPort(raw); err == nil {
+		return h, p, ""
+	}
+
+	return raw, 0, ""
+}
+
+func parseTargetHostPort(hostPort string) (string, int, error) {
+	parts := strings.Split(hostPort, ":")
+	if len(parts) != 2 {
+		return "", 0, os.ErrInvalid
+	}
+	port, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return "", 0, err
+	}
+	return parts[0], port, nil
+}
+
+func isDir(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
+}
+
+func isFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }
 
 var defaultScanManager = NewScanManager()

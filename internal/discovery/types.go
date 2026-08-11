@@ -2,13 +2,14 @@ package discovery
 
 import "time"
 
-// Target represents a network endpoint to scan
+// Target represents a network endpoint or local path to scan
 type Target struct {
 	ID       string `json:"id"`
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
-	Protocol string `json:"protocol"` // "tls", "ssh", "http"
+	Protocol string `json:"protocol"` // "tls", "ssh", "http", "sbom"
 	Label    string `json:"label"`
+	Path     string `json:"path,omitempty"` // local filesystem path when Protocol == "sbom"
 }
 
 // SeverityLevel represents the severity of a finding
@@ -47,23 +48,41 @@ type Finding struct {
 
 // ScanResult represents the result of scanning all targets
 type ScanResult struct {
-	ScanID      string      `json:"scan_id"`
-	StartedAt   time.Time   `json:"started_at"`
-	CompletedAt time.Time   `json:"completed_at"`
-	Targets     []Target    `json:"targets"`
-	Findings    []Finding   `json:"findings"`
-	Summary     ScanSummary `json:"summary"`
+	ScanID      string          `json:"scan_id"`
+	StartedAt   time.Time       `json:"started_at"`
+	CompletedAt time.Time       `json:"completed_at"`
+	Targets     []Target        `json:"targets"`
+	Findings    []Finding       `json:"findings"`
+	Components  []CBOMComponent `json:"components"`
+	Summary     ScanSummary     `json:"summary"`
+}
+
+// CBOMComponent is a single entry in a Cryptographic Bill of Materials.
+type CBOMComponent struct {
+	Algorithm   string        `json:"algorithm"`
+	KeySize     int           `json:"key_size,omitempty"`
+	Library     string        `json:"library,omitempty"`
+	Version     string        `json:"version,omitempty"`
+	RiskLevel   SeverityLevel `json:"risk_level"`
+	QuantumSafe bool          `json:"quantum_safe"`
+	PQCStatus   string        `json:"pqc_status"`
+	Location    string        `json:"location,omitempty"`
+	BSIRef      string        `json:"bsi_ref,omitempty"`
 }
 
 // ScanSummary contains aggregated counts from the scan
 type ScanSummary struct {
-	TotalTargets   int `json:"total_targets"`
-	ScannedTargets int `json:"scanned_targets"`
-	TotalFindings  int `json:"total_findings"`
-	Critical       int `json:"critical"`
-	High           int `json:"high"`
-	Medium         int `json:"medium"`
-	Low            int `json:"low"`
-	QuantumUnsafe  int `json:"quantum_unsafe"`
-	BSIReferenced  int `json:"bsi_referenced"`
+	TotalTargets    int `json:"total_targets"`
+	ScannedTargets  int `json:"scanned_targets"`
+	TotalFindings   int `json:"total_findings"`
+	Critical        int `json:"critical"`
+	High            int `json:"high"`
+	Medium          int `json:"medium"`
+	Low             int `json:"low"`
+	QuantumUnsafe   int `json:"quantum_unsafe"`
+	BSIReferenced   int `json:"bsi_referenced"`
+	TotalComponents int `json:"total_components"`
+	AtRisk          int `json:"at_risk"`
+	QuantumSafe     int `json:"quantum_safe"`
+	PQCReady        int `json:"pqc_ready"`
 }

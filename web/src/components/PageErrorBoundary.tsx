@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Box, Typography, Button, Skeleton } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 
 interface Props {

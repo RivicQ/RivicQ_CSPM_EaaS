@@ -2,6 +2,7 @@ package enterprise
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -240,6 +241,9 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 
 	// Benchmarks (edition-agnostic)
 	router.GET("/benchmarks", getBenchmarksSummary(db, logger))
+
+	// AI intelligence
+	SetupAIRoutes(router, db, logger)
 }
 
 func allowedDomainsFromEnv() []string {
@@ -534,15 +538,18 @@ func verifyAssetQuantum(db *database.DB, logger *logrus.Logger, cfg *config.Ente
 func getThreatIntelligence(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Getting ML-powered threat intelligence")
+		analysis, err := analyzeThreats(c.Request.Context(), db, tenantIDFor(c))
+		if err != nil {
+			logger.WithError(err).Error("Threat intelligence analysis failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Threat analysis failed"})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
-			"threats": []gin.H{
-				{
-					"type":          "quantum_vulnerability",
-					"severity":      "high",
-					"confidence":    0.95,
-					"ibmq_detected": true,
-				},
-			},
+			"threats":           analysis.Threats,
+			"total_threats":     analysis.TotalThreats,
+			"quantum_risk_score": analysis.QuantumRiskScore,
+			"pqc_readiness":     analysis.PQCReadiness,
+			"source":            analysis.Source,
 		})
 	}
 }
@@ -550,12 +557,29 @@ func getThreatIntelligence(db *database.DB, logger *logrus.Logger, cfg *config.E
 func performMLSecurityScan(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Performing ML-powered security scan")
+		analysis, err := analyzeThreats(c.Request.Context(), db, tenantIDFor(c))
+		if err != nil {
+			logger.WithError(err).Error("ML security scan failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "ML security scan failed"})
+			return
+		}
+		// Persist detected high/critical findings into the real events feed.
+		if err := persistThreatEvents(db, analysis, tenantIDFor(c)); err != nil {
+			logger.WithError(err).Warn("failed to persist detected threat events")
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"scan_results": gin.H{
-				"ml_threats_detected": 3,
-				"quantum_risks":       2,
+				"ml_threats_detected": analysis.TotalThreats,
+				"quantum_risks":       analysis.VulnerableAssets,
+				"critical":            analysis.Critical,
+				"high":                analysis.High,
+				"medium":              analysis.Medium,
+				"low":                 analysis.Low,
 				"ibmq_verified":       true,
 			},
+			"threats":      analysis.Threats,
+			"scan_id":      fmt.Sprintf("ml-scan-%d", time.Now().Unix()),
+			"generated_at": analysis.GeneratedAt,
 		})
 	}
 }
@@ -563,9 +587,50 @@ func performMLSecurityScan(db *database.DB, logger *logrus.Logger, cfg *config.E
 // Cloud integration handlers
 func listCloudProviders(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"providers": []string{"aws", "gcp", "azure"},
-		})
+		tenantID := tenantIDFor(c)
+		providers := []gin.H{}
+
+		// Report which providers are configured via the SDK env.
+		sdks := newCloudSDKs(c.Request.Context())
+		if sdks.aws != nil {
+			providers = append(providers, gin.H{"provider": "aws", "configured": true, "source": "sdk"})
+		}
+		if sdks.gcp != nil {
+			providers = append(providers, gin.H{"provider": "gcp", "configured": true, "source": "sdk"})
+		}
+		if sdks.azure != nil {
+			providers = append(providers, gin.H{"provider": "azure", "configured": true, "source": "sdk"})
+		}
+
+		// Add providers registered in the enterprise DB.
+		if db != nil {
+			rows, err := db.Query(`SELECT DISTINCT provider FROM cloud_accounts WHERE tenant_id = $1 AND status = 'active'`, tenantID)
+			if err == nil {
+				defer rows.Close()
+				seen := map[string]bool{"aws": sdks.aws != nil, "gcp": sdks.gcp != nil, "azure": sdks.azure != nil}
+				for rows.Next() {
+					var provider string
+					if err := rows.Scan(&provider); err != nil {
+						continue
+					}
+					if seen[provider] {
+						continue
+					}
+					seen[provider] = true
+					providers = append(providers, gin.H{"provider": provider, "configured": true, "source": "db"})
+				}
+			}
+		}
+
+		if len(providers) == 0 {
+			providers = []gin.H{
+				{"provider": "aws", "configured": false, "source": "unconfigured"},
+				{"provider": "gcp", "configured": false, "source": "unconfigured"},
+				{"provider": "azure", "configured": false, "source": "unconfigured"},
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{"providers": providers})
 	}
 }
 
@@ -590,30 +655,131 @@ func configureAzureIntegration(db *database.DB, logger *logrus.Logger, cfg *conf
 // SSO handlers
 func listSSOProviders(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"providers": []string{"saml", "ldap", "oauth2"},
-		})
+		tenantID := tenantIDFor(c)
+		providers := []gin.H{}
+
+		if db != nil {
+			rows, err := db.Query(`
+				SELECT provider, enabled, metadata FROM sso_configs
+				WHERE tenant_id = $1
+			`, tenantID)
+			if err == nil {
+				defer rows.Close()
+				for rows.Next() {
+					var provider string
+					var enabled bool
+					var metadata interface{}
+					if err := rows.Scan(&provider, &enabled, &metadata); err != nil {
+						continue
+					}
+					providers = append(providers, gin.H{
+						"provider": provider,
+						"enabled":  enabled,
+						"metadata": metadata,
+					})
+				}
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{"providers": providers})
 	}
 }
 
 func configureSAMLIntegration(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"saml": "configured"})
+		tenantID := tenantIDFor(c)
+		var req struct {
+			IDPMetadata string `json:"idp_metadata"`
+			EntityID    string `json:"entity_id"`
+			ACSURL      string `json:"acs_url"`
+			Enabled     bool   `json:"enabled"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if db == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+			return
+		}
+		metadataJSON, _ := json.Marshal(map[string]interface{}{
+			"idp_metadata": req.IDPMetadata,
+			"entity_id":    req.EntityID,
+			"acs_url":      req.ACSURL,
+		})
+		_, err := db.Exec(`
+			INSERT INTO sso_configs (tenant_id, provider, enabled, metadata, created_at, updated_at)
+			VALUES ($1, 'saml', $2, $3, NOW(), NOW())
+			ON CONFLICT (tenant_id, provider)
+			DO UPDATE SET enabled = EXCLUDED.enabled, metadata = EXCLUDED.metadata, updated_at = NOW()
+		`, tenantID, req.Enabled, string(metadataJSON))
+		if err != nil {
+			logger.WithError(err).Error("Failed to configure SAML integration")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to configure SAML integration"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"saml": "configured", "enabled": req.Enabled})
 	}
 }
 
 func configureLDAPIntegration(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"ldap": "configured"})
+		tenantID := tenantIDFor(c)
+		var req struct {
+			ServerURL string `json:"server_url"`
+			BindDN    string `json:"bind_dn"`
+			BaseDN    string `json:"base_dn"`
+			Enabled   bool   `json:"enabled"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if db == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+			return
+		}
+		metadataJSON, _ := json.Marshal(map[string]interface{}{
+			"server_url": req.ServerURL,
+			"bind_dn":    req.BindDN,
+			"base_dn":    req.BaseDN,
+		})
+		_, err := db.Exec(`
+			INSERT INTO sso_configs (tenant_id, provider, enabled, metadata, created_at, updated_at)
+			VALUES ($1, 'ldap', $2, $3, NOW(), NOW())
+			ON CONFLICT (tenant_id, provider)
+			DO UPDATE SET enabled = EXCLUDED.enabled, metadata = EXCLUDED.metadata, updated_at = NOW()
+		`, tenantID, req.Enabled, string(metadataJSON))
+		if err != nil {
+			logger.WithError(err).Error("Failed to configure LDAP integration")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to configure LDAP integration"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"ldap": "configured", "enabled": req.Enabled})
 	}
 }
 
 // Analytics handlers
 func generateCustomReports(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		analysis, err := analyzeThreats(c.Request.Context(), db, tenantIDFor(c))
+		if err != nil {
+			logger.WithError(err).Error("Report generation failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Report generation failed"})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"reports": []gin.H{
-				{"type": "quantum_risk_assessment", "ibmq_data": true},
+				{
+					"type":                "quantum_risk_assessment",
+					"ibmq_data":           cfg.IBMQ.Enabled,
+					"total_assets":        analysis.TotalAssets,
+					"quantum_safe_assets": analysis.QuantumSafeAssets,
+					"vulnerable_assets":   analysis.VulnerableAssets,
+					"pqc_readiness":       analysis.PQCReadiness,
+					"threats_detected":    analysis.TotalThreats,
+					"generated_at":        analysis.GeneratedAt,
+				},
 			},
 		})
 	}
@@ -621,20 +787,30 @@ func generateCustomReports(db *database.DB, logger *logrus.Logger, cfg *config.E
 
 func getMLInsights(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		insights, err := generateInsights(c.Request.Context(), db, tenantIDFor(c))
+		if err != nil {
+			logger.WithError(err).Error("Insight generation failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Insight generation failed"})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
-			"insights": []gin.H{
-				{"type": "quantum_threat_prediction", "confidence": 0.98},
-			},
+			"insights": insights,
+			"total":    len(insights),
 		})
 	}
 }
 
 func getQuantumThreatForecasts(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		forecasts, err := generateForecasts(c.Request.Context(), db, tenantIDFor(c))
+		if err != nil {
+			logger.WithError(err).Error("Forecast generation failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Forecast generation failed"})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
-			"forecasts": []gin.H{
-				{"threat": "quantum_compromise", "probability": 0.05, "ibmq_predicted": true},
-			},
+			"forecasts": forecasts,
+			"total":     len(forecasts),
 		})
 	}
 }
@@ -668,12 +844,13 @@ func configureDatadogIntegration(db *database.DB, logger *logrus.Logger, cfg *co
 // Quantum metrics handler
 func getQuantumMetrics(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"quantum_safe_assets": 15,
-			"quantum_vulnerable":  8,
-			"ibmq_attestations":   12,
-			"quantum_risk_score":  0.15,
-		})
+		metrics, err := computeQuantumMetrics(c.Request.Context(), db, tenantIDFor(c))
+		if err != nil {
+			logger.WithError(err).Error("Quantum metrics computation failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Quantum metrics computation failed"})
+			return
+		}
+		c.JSON(http.StatusOK, metrics)
 	}
 }
 
@@ -798,12 +975,27 @@ func getCloudTrailAudit(db *database.DB, logger *logrus.Logger, cfg *config.Ente
 func getQuantumRiskAssessment(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Getting quantum risk assessment")
+		analysis, err := analyzeThreats(c.Request.Context(), db, tenantIDFor(c))
+		if err != nil {
+			logger.WithError(err).Error("Quantum risk assessment failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Quantum risk assessment failed"})
+			return
+		}
+		overall := severityFromRisk(analysis.QuantumRiskScore)
+		migrationPriority := "low"
+		if analysis.VulnerableAssets > 0 {
+			migrationPriority = severityFromRisk(analysis.QuantumRiskScore)
+		}
 		c.JSON(http.StatusOK, gin.H{
-			"overall_risk":        "medium",
-			"quantum_safe_assets": 15,
-			"vulnerable_assets":   8,
-			"migration_priority":  "high",
-			"risk_score":          0.35,
+			"overall_risk":         overall,
+			"quantum_safe_assets":  analysis.QuantumSafeAssets,
+			"vulnerable_assets":    analysis.VulnerableAssets,
+			"total_assets":         analysis.TotalAssets,
+			"migration_priority":   migrationPriority,
+			"risk_score":           analysis.QuantumRiskScore,
+			"pqc_readiness":        analysis.PQCReadiness,
+			"threats_detected":     analysis.TotalThreats,
+			"algorithm_stats":      analysis.AlgorithmStats,
 		})
 	}
 }
@@ -821,15 +1013,46 @@ func scanForPQCAlgorithms(db *database.DB, logger *logrus.Logger, cfg *config.En
 
 func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		assetId := c.Param("assetId")
-		logger.WithField("asset_id", assetId).Info("Getting attestation report")
+		assetID := c.Param("assetId")
+		logger.WithField("asset_id", assetID).Info("Getting attestation report")
+
+		attestations := []gin.H{}
+		if db != nil {
+			rows, err := db.Query(`
+				SELECT qa.id, ca.algorithm, qa.status, ca.quantum_safe, qa.attested_at
+				FROM quantum_attestations qa
+				JOIN cbom_reports cr ON qa.cbom_report_id = cr.id
+				JOIN crypto_assets ca ON ca.cbom_report_id = cr.id
+				WHERE ca.id = $1
+			`, assetID)
+			if err == nil {
+				defer rows.Close()
+				for rows.Next() {
+					var id, algorithm, status string
+					var quantumSafe bool
+					var attestedAt interface{}
+					if err := rows.Scan(&id, &algorithm, &status, &quantumSafe, &attestedAt); err != nil {
+						continue
+					}
+					attestations = append(attestations, gin.H{
+						"algorithm":    algorithm,
+						"status":       status,
+						"quantum_safe": quantumSafe,
+					})
+				}
+			}
+		}
+
+		quantumSafe := 0
+		for _, a := range attestations {
+			if a["quantum_safe"] == true {
+				quantumSafe++
+			}
+		}
 		c.JSON(http.StatusOK, gin.H{
-			"asset_id": assetId,
-			"attestations": []gin.H{
-				{"algorithm": "RSA-2048", "status": "verified", "quantum_safe": false},
-				{"algorithm": "AES-256", "status": "verified", "quantum_safe": true},
-			},
-			"summary": gin.H{"total": 2, "quantum_safe": 1, "vulnerable": 1},
+			"asset_id":     assetID,
+			"attestations": attestations,
+			"summary":      gin.H{"total": len(attestations), "quantum_safe": quantumSafe, "vulnerable": len(attestations) - quantumSafe},
 		})
 	}
 }
@@ -837,17 +1060,71 @@ func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.En
 func getMigrationRoadmap(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Getting migration roadmap")
+		analysis, err := analyzeThreats(c.Request.Context(), db, tenantIDFor(c))
+		if err != nil {
+			logger.WithError(err).Error("Migration roadmap computation failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Migration roadmap computation failed"})
+			return
+		}
+
+		phase1Completion := 0
+		if analysis.TotalAssets > 0 {
+			phase1Completion = 100
+		}
+		phase2Completion := 0
+		criticalHigh := analysis.Critical + analysis.High
+		if criticalHigh > 0 {
+			phase2Completion = 100 - int(float64(criticalHigh)/float64(max(analysis.TotalThreats, 1))*100)
+			if phase2Completion < 0 {
+				phase2Completion = 0
+			}
+		} else if analysis.TotalAssets > 0 {
+			phase2Completion = 100
+		}
+		phase3Completion := int(analysis.PQCReadiness)
+
 		c.JSON(http.StatusOK, gin.H{
 			"phases": []gin.H{
-				{"phase": 1, "description": "Inventory and classify cryptographic assets", "status": "in_progress", "completion": 65},
-				{"phase": 2, "description": "Prioritize critical algorithms for migration", "status": "pending", "completion": 0},
-				{"phase": 3, "description": "Implement PQC replacements", "status": "pending", "completion": 0},
+				{"phase": 1, "description": "Inventory and classify cryptographic assets", "status": statusFor(phase1Completion), "completion": phase1Completion},
+				{"phase": 2, "description": "Prioritize critical algorithms for migration", "status": statusFor(phase2Completion), "completion": phase2Completion},
+				{"phase": 3, "description": "Implement PQC replacements", "status": statusFor(phase3Completion), "completion": phase3Completion},
 			},
 			"total_phases":         3,
-			"current_phase":        1,
+			"current_phase":        currentPhase(phase1Completion, phase2Completion, phase3Completion),
 			"estimated_completion": "2026-Q4",
+			"quantum_safe_assets":  analysis.QuantumSafeAssets,
+			"vulnerable_assets":    analysis.VulnerableAssets,
 		})
 	}
+}
+
+func statusFor(completion int) string {
+	switch {
+	case completion >= 100:
+		return "completed"
+	case completion > 0:
+		return "in_progress"
+	default:
+		return "pending"
+	}
+}
+
+func currentPhase(phase1, phase2, phase3 int) int {
+	switch {
+	case phase1 < 100:
+		return 1
+	case phase2 < 100:
+		return 2
+	default:
+		return 3
+	}
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 func exportQuantumSafeBOM(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {

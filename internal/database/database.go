@@ -179,6 +179,27 @@ func createTables(db *DB) error {
 			metadata JSONB,
 			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 		);`,
+		`CREATE TABLE IF NOT EXISTS sso_configs (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+			provider TEXT NOT NULL,
+			enabled BOOLEAN DEFAULT FALSE,
+			metadata JSONB,
+			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+			UNIQUE(tenant_id, provider)
+		);`,
+		`CREATE TABLE IF NOT EXISTS cloud_accounts (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+			provider TEXT NOT NULL,
+			account_id TEXT NOT NULL,
+			account_name TEXT,
+			status TEXT DEFAULT 'active',
+			metadata JSONB,
+			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+		);`,
 	}
 
 	for _, query := range queries {

@@ -62,6 +62,7 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	{
 		scansGroup.POST("", shared.TriggerCBOMScan(db, logger))
 		scansGroup.GET("/:id", shared.GetCBOMScanStatus(db, logger))
+		scansGroup.GET("/:id/report", shared.GetCBOMScanReport(db, logger))
 	}
 
 	// Basic Security Monitoring
@@ -455,17 +456,17 @@ func getCSPMOverviewOSS(logger *logrus.Logger) gin.HandlerFunc {
 		logger.Info("Serving CSPM overview (OSS edition)")
 
 		type algorithmRisk struct {
-			Name       string `json:"name"`
-			Usage      int    `json:"usage"`
-			RiskLevel  string `json:"risk_level"`
-			QuantumSafe bool  `json:"quantum_safe"`
-			Migration  string `json:"migration"`
+			Name        string `json:"name"`
+			Usage       int    `json:"usage"`
+			RiskLevel   string `json:"risk_level"`
+			QuantumSafe bool   `json:"quantum_safe"`
+			Migration   string `json:"migration"`
 		}
 		type topologyLink struct {
-			From     string `json:"from"`
-			To       string `json:"to"`
-			Encrypted bool  `json:"encrypted"`
-			Provider string `json:"provider"`
+			From      string `json:"from"`
+			To        string `json:"to"`
+			Encrypted bool   `json:"encrypted"`
+			Provider  string `json:"provider"`
 		}
 
 		c.JSON(http.StatusOK, gin.H{

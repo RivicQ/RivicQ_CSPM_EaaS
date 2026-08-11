@@ -8,6 +8,120 @@ import (
 	"strings"
 )
 
+// cryptoLibraryProfile describes how a detected cryptographic library maps
+// into a CBOM component.
+type cryptoLibraryProfile struct {
+	Algorithm   string
+	QuantumSafe bool
+	RiskLevel   SeverityLevel
+	PQCStatus   string
+	BSIRef      string
+}
+
+// cryptoLibraries maps a normalized (lowercase) library or package name to its
+// cryptographic profile so SBOM components can be surfaced as CBOM entries.
+var cryptoLibraries = map[string]cryptoLibraryProfile{
+	// OpenSSL family
+	"openssl":   {Algorithm: "OpenSSL (RSA/AES)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"libssl":    {Algorithm: "OpenSSL (RSA/AES)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"libcrypto": {Algorithm: "OpenSSL (RSA/AES)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"boringssl": {Algorithm: "BoringSSL (AES-GCM)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-2, Section 3.3"},
+	// Post-quantum
+	"liboqs":   {Algorithm: "ML-KEM / ML-DSA", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "pqc_ready", BSIRef: "BSI TR-02102-1, Section 4"},
+	"pqcrypto": {Algorithm: "ML-KEM / ML-DSA", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "pqc_ready", BSIRef: "BSI TR-02102-1, Section 4"},
+	// TLS / SSL implementations
+	"mbedtls": {Algorithm: "TLS (mbedTLS)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-2, Section 3.3"},
+	"wolfssl": {Algorithm: "TLS (wolfSSL)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-2, Section 3.3"},
+	"gnutls":  {Algorithm: "TLS (GnuTLS)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-2, Section 3.3"},
+	"nss":     {Algorithm: "TLS (NSS)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-2, Section 3.3"},
+	// Languages / runtimes
+	"golang.org/x/crypto": {Algorithm: "Go crypto", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3"},
+	"bcryptjs":            {Algorithm: "bcrypt", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.3"},
+	"bcrypt":              {Algorithm: "bcrypt", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.3"},
+	"argon2":              {Algorithm: "Argon2", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.3"},
+	"scrypt":              {Algorithm: "scrypt", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.3"},
+	"pbkdf2":              {Algorithm: "PBKDF2", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.3"},
+	// JS ecosystem
+	"crypto-js":    {Algorithm: "AES/SHA (crypto-js)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3"},
+	"node-forge":   {Algorithm: "RSA/AES (node-forge)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"jsencrypt":    {Algorithm: "RSA (jsencrypt)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"jsonwebtoken": {Algorithm: "HMAC/RSA (JWT)", RiskLevel: SeverityMedium, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.3"},
+	// Python ecosystem
+	"cryptography": {Algorithm: "Python cryptography (RSA/AES)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"pycryptodome": {Algorithm: "PyCryptodome (RSA/AES)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"pynacl":       {Algorithm: "NaCl (X25519/ChaCha)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.6"},
+	"passlib":      {Algorithm: "Password hashing (passlib)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.3"},
+	// Java ecosystem
+	"org.bouncycastle":       {Algorithm: "Bouncy Castle (RSA/EC)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"bcprov":                 {Algorithm: "Bouncy Castle (RSA/EC)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	"spring-security-crypto": {Algorithm: "Spring Security Crypto", RiskLevel: SeverityMedium, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3"},
+	// .NET ecosystem
+	"system.security.cryptography": {Algorithm: ".NET Crypto (RSA/AES)", RiskLevel: SeverityHigh, QuantumSafe: false, PQCStatus: "migration_required", BSIRef: "BSI TR-02102-1, Section 3.5"},
+	// Generic libsodium
+	"libsodium":     {Algorithm: "libsodium (X25519/ChaCha)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.6"},
+	"sodium-native": {Algorithm: "libsodium (X25519/ChaCha)", RiskLevel: SeverityLow, QuantumSafe: true, PQCStatus: "safe", BSIRef: "BSI TR-02102-1, Section 3.6"},
+}
+
+// normalizedCryptoName strips common scoping prefixes so package references like
+// "github.com/org/crypto" or "org.bouncycastle:bcprov" can be matched.
+func normalizedCryptoName(name string) string {
+	n := strings.ToLower(strings.TrimSpace(name))
+	if idx := strings.Index(n, "bouncycastle"); idx >= 0 {
+		return "org.bouncycastle"
+	}
+	if idx := strings.Index(n, "golang.org/x/crypto"); idx >= 0 {
+		return "golang.org/x/crypto"
+	}
+	if idx := strings.Index(n, "system.security.cryptography"); idx >= 0 {
+		return "system.security.cryptography"
+	}
+	// Drop scope prefix (e.g. "org.example:openssl" -> "openssl")
+	if idx := strings.LastIndex(n, ":"); idx >= 0 {
+		n = n[idx+1:]
+	}
+	return n
+}
+
+// CBOMComponentsFromSBOM converts detected SBOM components into CBOM entries by
+// matching known cryptographic libraries.
+func CBOMComponentsFromSBOM(sbom *SBOMResult) []CBOMComponent {
+	if sbom == nil {
+		return nil
+	}
+	components := make([]CBOMComponent, 0, len(sbom.Components))
+	seen := map[string]bool{}
+	for _, c := range sbom.Components {
+		key := normalizedCryptoName(c.Name)
+		profile, ok := cryptoLibraries[key]
+		if !ok {
+			// Also match the raw name (handles direct "openssl" references).
+			if p, ok2 := cryptoLibraries[strings.ToLower(strings.TrimSpace(c.Name))]; ok2 {
+				profile = p
+				ok = true
+			}
+		}
+		if !ok {
+			continue
+		}
+		dedupe := profile.Algorithm + "@" + c.Version
+		if seen[dedupe] {
+			continue
+		}
+		seen[dedupe] = true
+		components = append(components, CBOMComponent{
+			Algorithm:   profile.Algorithm,
+			Library:     c.Name,
+			Version:     c.Version,
+			RiskLevel:   profile.RiskLevel,
+			QuantumSafe: profile.QuantumSafe,
+			PQCStatus:   profile.PQCStatus,
+			Location:    c.FilePath,
+			BSIRef:      profile.BSIRef,
+		})
+	}
+	return components
+}
+
 type SBOMComponent struct {
 	Name     string `json:"name"`
 	Version  string `json:"version"`
@@ -156,9 +270,9 @@ func parsePackageJSON(path string) []SBOMComponent {
 		return nil
 	}
 	var pkg struct {
-		Name         string            `json:"name"`
-		Version      string            `json:"version"`
-		Dependencies map[string]string `json:"dependencies"`
+		Name            string            `json:"name"`
+		Version         string            `json:"version"`
+		Dependencies    map[string]string `json:"dependencies"`
 		DevDependencies map[string]string `json:"devDependencies"`
 	}
 	if err := json.Unmarshal(data, &pkg); err != nil {
