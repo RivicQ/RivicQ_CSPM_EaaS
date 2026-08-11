@@ -457,6 +457,7 @@ func TestRunSuite(t *testing.T) {
 
 // BenchmarkAPICalls benchmarks API performance
 func BenchmarkAPICalls(b *testing.B) {
+	gin.SetMode(gin.TestMode)
 	router := gin.New()
 	router.GET("/api/v1/assets", func(c *gin.Context) {
 		c.JSON(200, gin.H{"data": []interface{}{}})
