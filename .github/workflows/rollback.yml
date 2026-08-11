@@ -25,16 +25,32 @@ on:
         required: false
 
 jobs:
+  resolve-editions:
+    name: Resolve editions to rollback
+    runs-on: ubuntu-latest
+    outputs:
+      editions: ${{ steps.resolve.outputs.editions }}
+    steps:
+      - name: Resolve editions
+        id: resolve
+        run: |
+          if [ "${{ inputs.edition }}" == "both" ]; then
+            echo 'editions=["oss","enterprise"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "editions=[\"${{ inputs.edition }}\"]" >> "$GITHUB_OUTPUT"
+          fi
+
   rollback:
     name: Rollback ${{ matrix.edition }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
+    needs: resolve-editions
     environment: ${{ inputs.environment }}
     permissions:
       contents: read
       id-token: write
     strategy:
       matrix:
-        edition: ${{ fromJson(inputs.edition == 'both' ? '["oss", "enterprise"]' : format('["{0}"]', inputs.edition)) }}
+        edition: ${{ fromJson(needs.resolve-editions.outputs.editions) }}
     
     steps:
       - name: Checkout code
