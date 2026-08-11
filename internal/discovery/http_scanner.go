@@ -38,7 +38,7 @@ func (s *HTTPScanner) Scan(ctx context.Context, target Target) ([]Finding, error
 	if err != nil {
 		return nil, fmt.Errorf("http get %s: %w", md5URL, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 1024))
 	if err != nil {

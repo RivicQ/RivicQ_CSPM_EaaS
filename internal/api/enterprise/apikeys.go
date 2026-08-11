@@ -24,17 +24,17 @@ func NewAPIKeyManager(db *database.EnterpriseDB, logger *logrus.Logger) *APIKeyM
 }
 
 type APIKey struct {
-	ID        string    `json:"id"`
-	TenantID  string    `json:"tenant_id"`
-	Name      string    `json:"name"`
-	KeyPrefix string    `json:"key_prefix"`
-	KeyHash   string    `json:"-"`
-	Role      string    `json:"role"`
-	Scopes    []string  `json:"scopes,omitempty"`
+	ID        string     `json:"id"`
+	TenantID  string     `json:"tenant_id"`
+	Name      string     `json:"name"`
+	KeyPrefix string     `json:"key_prefix"`
+	KeyHash   string     `json:"-"`
+	Role      string     `json:"role"`
+	Scopes    []string   `json:"scopes,omitempty"`
 	ExpiresAt *time.Time `json:"expires_at,omitempty"`
 	LastUsed  *time.Time `json:"last_used_at,omitempty"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
+	Status    string     `json:"status"`
+	CreatedAt time.Time  `json:"created_at"`
 }
 
 func (m *APIKeyManager) SetupRoutes(router *gin.RouterGroup, authMW gin.HandlerFunc) {
@@ -67,7 +67,7 @@ func (m *APIKeyManager) ListKeys(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list API keys"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var keys []APIKey
 	for rows.Next() {
@@ -94,9 +94,9 @@ func (m *APIKeyManager) CreateKey(c *gin.Context) {
 	}
 
 	var req struct {
-		Name      string    `json:"name" binding:"required"`
-		Role      string    `json:"role"`
-		Scopes    []string  `json:"scopes"`
+		Name      string     `json:"name" binding:"required"`
+		Role      string     `json:"role"`
+		Scopes    []string   `json:"scopes"`
 		ExpiresAt *time.Time `json:"expires_at"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -157,7 +157,10 @@ func (m *APIKeyManager) UpdateKey(c *gin.Context) {
 		Role   string   `json:"role"`
 		Scopes []string `json:"scopes"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	_, err := m.db.Exec(`
 		UPDATE api_keys SET name = COALESCE(NULLIF($1,''), name), role = COALESCE(NULLIF($2,''), role),
@@ -200,12 +203,12 @@ func (m *APIKeyManager) APIKeyAuthMiddleware() gin.HandlerFunc {
 		}
 
 		if k.ExpiresAt != nil && time.Now().After(*k.ExpiresAt) {
-			m.db.Exec(`UPDATE api_keys SET status = 'expired' WHERE id = $1`, k.ID)
+			_, _ = m.db.Exec(`UPDATE api_keys SET status = 'expired' WHERE id = $1`, k.ID)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "API key has expired"})
 			return
 		}
 
-		m.db.Exec(`UPDATE api_keys SET last_used_at = NOW() WHERE id = $1`, k.ID)
+		_, _ = m.db.Exec(`UPDATE api_keys SET last_used_at = NOW() WHERE id = $1`, k.ID)
 
 		c.Set("tenant_id", k.TenantID)
 		c.Set("user_id", k.ID)

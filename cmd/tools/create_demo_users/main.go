@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		logger.Fatalf("failed to open database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	if err := auth.CreateDefaultUsers(db); err != nil {
 		logger.Fatalf("failed to create default users: %v", err)

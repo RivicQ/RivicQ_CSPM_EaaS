@@ -38,13 +38,13 @@ func startMockSSHServer(t *testing.T, hostKey ssh.Signer, kexAlgos []string) (in
 			go func(c net.Conn) {
 				//nolint:errcheck
 				ssh.NewServerConn(c, cfg)
-				c.Close()
+				_ = c.Close()
 			}(conn)
 		}
 	}()
 
 	port := ln.Addr().(*net.TCPAddr).Port
-	return port, func() { ln.Close() }
+	return port, func() { _ = ln.Close() }
 }
 
 func TestSSHScanner_Scan_DSAHostKey_Findings(t *testing.T) {
@@ -117,4 +117,3 @@ func TestSSHScanner_ScanBanner_HostKeyExtracted(t *testing.T) {
 	}
 	assert.True(t, found, "expected RSA_HOST_KEY from scanBanner")
 }
-

@@ -315,7 +315,7 @@ This document defines the complete user journey from first login through CBOM sc
 | **IBM Cloud HPCS** | 🟡 Pending creds | `IBM_CLOUD_API_KEY` not found | [Setup] |
 | **GCP KMS** | 🟡 Pending creds | Service account not configured | [Setup] |
 | **Slack Notifications** | ✅ Active | Scan alerts → #security channel | [Configure] |
-| **Google Workspace SSO** | ✅ Active | rivicq.de domain authenticated | [Manage] |
+| **Google Workspace SSO** | ✅ Active | rivicq.com domain authenticated | [Manage] |
 | **Database** | ✅ Production | PostgreSQL on Cloud SQL | [Monitor] |
 
 **Setup UI:**

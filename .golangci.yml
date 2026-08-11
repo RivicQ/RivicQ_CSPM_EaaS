@@ -1,0 +1,18 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  exclusions:
+    # Third-party Go code shipped inside web/node_modules must not be analyzed.
+    paths:
+      - web/node_modules
+      - node_modules
+
+run:
+  timeout: 5m

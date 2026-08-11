@@ -26,14 +26,14 @@ type Claims struct {
 
 // User data structure
 type User struct {
-	ID             string `json:"id"`
-	TenantID       string `json:"tenant_id"`
-	Email          string `json:"email"`
-	Name           string `json:"name"`
-	Role           string `json:"role"`
-	Password       string `json:"-"`
-	MFAEnabled     bool   `json:"mfa_enabled"`
-	MFASecret      string `json:"-"`
+	ID         string `json:"id"`
+	TenantID   string `json:"tenant_id"`
+	Email      string `json:"email"`
+	Name       string `json:"name"`
+	Role       string `json:"role"`
+	Password   string `json:"-"`
+	MFAEnabled bool   `json:"mfa_enabled"`
+	MFASecret  string `json:"-"`
 }
 
 // TokenBlacklist stores revoked tokens for refresh rotation.
@@ -43,7 +43,7 @@ type TokenBlacklist struct {
 }
 
 func NewTokenBlacklist() *TokenBlacklist {
-	return &TokenBlacklist{ tokens: make(map[string]time.Time) }
+	return &TokenBlacklist{tokens: make(map[string]time.Time)}
 }
 
 func (b *TokenBlacklist) Revoke(jti string, expiry time.Time) {
@@ -118,7 +118,7 @@ type TokenManager struct {
 func NewTokenManager(secretKey string) *TokenManager {
 	return &TokenManager{
 		secretKey:      secretKey,
-		accessTokenTTL: 1 * time.Hour,  // 1 hour access token
+		accessTokenTTL: 1 * time.Hour,       // 1 hour access token
 		refreshTTL:     30 * 24 * time.Hour, // 30 day refresh
 		issuer:         "cryptobom-saas",
 		blacklist:      NewTokenBlacklist(),
@@ -384,9 +384,10 @@ func (as *AuthService) LoginWithEdition(email, password, edition string) (*Login
 
 	if edition == "" {
 		edition = "oss"
-		if user.Role == "admin" {
+		switch user.Role {
+		case "admin":
 			edition = "enterprise"
-		} else if user.Role == "operator" || user.Role == "analyst" {
+		case "operator", "analyst":
 			edition = "professional"
 		}
 	}

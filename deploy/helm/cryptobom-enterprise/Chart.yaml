@@ -13,12 +13,12 @@ keywords:
   - quantum
   - enterprise
   - ibm-quantum
-home: https://rivicq.de/cryptobom-enterprise
+home: https://rivicq.com/cryptobom-enterprise
 sources:
   - https://github.com/rivic-q/cryptobom-saas
 maintainers:
   - name: RivicQ Team
-    email: enterprise@rivicq.de
+    email: enterprise@rivicq.com
 dependencies:
   - name: postgresql
     version: 12.x.x

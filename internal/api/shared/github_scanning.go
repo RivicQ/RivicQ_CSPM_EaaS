@@ -117,7 +117,7 @@ func GitHubRepoListHandler(logger *logrus.Logger) gin.HandlerFunc {
 			c.JSON(http.StatusBadGateway, gin.H{"error": fmt.Sprintf("GitHub API request failed: %v", err)})
 			return
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			c.JSON(resp.StatusCode, gin.H{"error": fmt.Sprintf("GitHub API returned status %d", resp.StatusCode)})

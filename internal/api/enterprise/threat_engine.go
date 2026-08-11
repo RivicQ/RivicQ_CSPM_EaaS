@@ -165,7 +165,7 @@ func queryCryptoAssets(ctx context.Context, q sqlQuerier, tenantID string) ([]cr
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var out []cryptoAssetRow
 	for rows.Next() {

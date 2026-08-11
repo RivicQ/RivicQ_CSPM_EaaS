@@ -3,7 +3,6 @@ package enterprise
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -110,7 +109,7 @@ func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list attestations"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var attestations []QuantumAttestation
 	for rows.Next() {
@@ -125,7 +124,7 @@ func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(attestationData, &attestation.AttestationData)
+		_ = json.Unmarshal(attestationData, &attestation.AttestationData)
 		attestations = append(attestations, attestation)
 	}
 
@@ -195,7 +194,7 @@ func (h *QuantumAttestationHandler) GetAttestation(c *gin.Context) {
 		return
 	}
 
-	json.Unmarshal(attestationData, &attestation.AttestationData)
+	_ = json.Unmarshal(attestationData, &attestation.AttestationData)
 
 	c.JSON(http.StatusOK, attestation)
 }
@@ -211,7 +210,7 @@ func (h *QuantumAttestationHandler) VerifyAttestation(c *gin.Context) {
 	h.logger.Info("Verifying quantum attestation: ", attestationID)
 
 	query := `UPDATE quantum_attestations SET status = 'attested', attested_at = NOW() WHERE id = $1`
-	h.db.Exec(query, attestationID)
+	_, _ = h.db.Exec(query, attestationID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":          attestationID,
@@ -232,7 +231,7 @@ func (h *QuantumAttestationHandler) RefreshAttestation(c *gin.Context) {
 	h.logger.Info("Refreshing quantum attestation: ", attestationID)
 
 	query := `UPDATE quantum_attestations SET status = 'pending', attested_at = NULL WHERE id = $1`
-	h.db.Exec(query, attestationID)
+	_, _ = h.db.Exec(query, attestationID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":      attestationID,
@@ -499,7 +498,10 @@ func (h *QuantumAttestationHandler) MigrateAlgorithm(c *gin.Context) {
 		SourceAlgorithm string `json:"source_algorithm"`
 		TargetAlgorithm string `json:"target_algorithm"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	h.logger.Info("Migrating algorithm for tenant: ", tenantID, " from: ", req.SourceAlgorithm, " to: ", req.TargetAlgorithm)
 
@@ -554,40 +556,4 @@ func (c *IBMQuantumClient) GetJobResult(ctx context.Context, jobID string) (map[
 
 func (c *IBMQuantumClient) VerifyAttestation(ctx context.Context, data map[string]interface{}) (bool, error) {
 	return true, nil
-}
-
-func generateQuantumAttestation(ctx context.Context, client *IBMQuantumClient, assetID string) (*QuantumAttestation, error) {
-	networkInfo, err := client.GetNetworkInfo(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get network info: %w", err)
-	}
-
-	attestation := &QuantumAttestation{
-		ID:              uuid.New(),
-		AttestationType: "quantum_readiness",
-		QuantumNetwork:  networkInfo["name"].(string),
-		QuantumProvider: "IBM Quantum",
-		QubitCount:      networkInfo["qubits"].(int),
-		ErrorRate:       networkInfo["error_rate"].(float64),
-		Status:          "attested",
-		AttestedAt:      &[]time.Time{time.Now()}[0],
-		ExpiresAt:       &[]time.Time{time.Now().Add(365 * 24 * time.Hour)}[0],
-		AttestationData: networkInfo,
-	}
-
-	return attestation, nil
-}
-
-func calculateQuantumReadinessScore(assets []map[string]interface{}) int {
-	var quantumSafe, total int
-	for _, asset := range assets {
-		total++
-		if asset["quantum_safe"] == true {
-			quantumSafe++
-		}
-	}
-	if total == 0 {
-		return 0
-	}
-	return (quantumSafe * 100) / total
 }

@@ -94,7 +94,7 @@ func buildTopology(db *database.DB, tenantID string) []TopologyLink {
 	}
 	rows, err := db.Query(`SELECT provider FROM cloud_accounts WHERE tenant_id = $1 AND status = 'active'`, tenantID)
 	if err == nil {
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 		var links []TopologyLink
 		for rows.Next() {
 			var provider string
@@ -119,7 +119,7 @@ func buildTopology(db *database.DB, tenantID string) []TopologyLink {
 
 	clusterRows, err := db.Query(`SELECT name, platform, region FROM kubernetes_clusters WHERE tenant_id = $1`, tenantID)
 	if err == nil {
-		defer clusterRows.Close()
+		defer func() { _ = clusterRows.Close() }()
 		var links []TopologyLink
 		for clusterRows.Next() {
 			var name, platform, region string

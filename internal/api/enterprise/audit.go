@@ -86,7 +86,6 @@ func (v *AuditViewer) ListEvents(c *gin.Context) {
 	if actorID != "" {
 		query += ` AND actor_id = $` + string(rune('0'+argIdx))
 		args = append(args, actorID)
-		argIdx++
 	}
 	query += ` ORDER BY created_at DESC LIMIT 100`
 
@@ -96,7 +95,7 @@ func (v *AuditViewer) ListEvents(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query audit events"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var events []AuditEvent
 	for rows.Next() {
@@ -155,9 +154,15 @@ func (v *AuditViewer) GetSummary(c *gin.Context) {
 	since := time.Now().AddDate(0, 0, -parseInt(days, 30))
 
 	var totalEvents, errors4xx, errors5xx int
-	v.db.QueryRow(`SELECT COUNT(*) FROM audit_events WHERE tenant_id = $1 AND created_at >= $2`, tenantID, since).Scan(&totalEvents)
-	v.db.QueryRow(`SELECT COUNT(*) FROM audit_events WHERE tenant_id = $1 AND status >= 400 AND status < 500 AND created_at >= $2`, tenantID, since).Scan(&errors4xx)
-	v.db.QueryRow(`SELECT COUNT(*) FROM audit_events WHERE tenant_id = $1 AND status >= 500 AND created_at >= $2`, tenantID, since).Scan(&errors5xx)
+	if err := v.db.QueryRow(`SELECT COUNT(*) FROM audit_events WHERE tenant_id = $1 AND created_at >= $2`, tenantID, since).Scan(&totalEvents); err != nil {
+		v.logger.Error("Failed to summarize audit events: ", err)
+	}
+	if err := v.db.QueryRow(`SELECT COUNT(*) FROM audit_events WHERE tenant_id = $1 AND status >= 400 AND status < 500 AND created_at >= $2`, tenantID, since).Scan(&errors4xx); err != nil {
+		v.logger.Error("Failed to summarize audit events: ", err)
+	}
+	if err := v.db.QueryRow(`SELECT COUNT(*) FROM audit_events WHERE tenant_id = $1 AND status >= 500 AND created_at >= $2`, tenantID, since).Scan(&errors5xx); err != nil {
+		v.logger.Error("Failed to summarize audit events: ", err)
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"total_events": totalEvents,
@@ -180,7 +185,7 @@ func (v *AuditViewer) ExportEvents(c *gin.Context) {
 		Format string `json:"format"`
 		Days   int    `json:"days"`
 	}
-	c.ShouldBindJSON(&req)
+	_ = c.ShouldBindJSON(&req)
 	if req.Days <= 0 || req.Days > 365 {
 		req.Days = 7
 	}
@@ -197,14 +202,17 @@ func (v *AuditViewer) ExportEvents(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to export events"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var events []map[string]interface{}
 	for rows.Next() {
 		var eventType, method, path, ip, actorID string
 		var status, latencyMs int
 		var createdAt time.Time
-		rows.Scan(&eventType, &method, &path, &status, &latencyMs, &ip, &actorID, &createdAt)
+		if err := rows.Scan(&eventType, &method, &path, &status, &latencyMs, &ip, &actorID, &createdAt); err != nil {
+			v.logger.Error("Failed to scan audit export row: ", err)
+			continue
+		}
 		events = append(events, map[string]interface{}{
 			"event_type": eventType, "method": method, "path": path,
 			"status": status, "latency_ms": latencyMs, "ip": ip,
@@ -213,9 +221,9 @@ func (v *AuditViewer) ExportEvents(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"format":  req.Format,
-		"events":  events,
-		"total":   len(events),
+		"format":      req.Format,
+		"events":      events,
+		"total":       len(events),
 		"exported_at": time.Now(),
 	})
 }

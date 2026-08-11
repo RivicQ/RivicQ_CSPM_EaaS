@@ -81,7 +81,7 @@ func (h *CNCFHandler) ListTools(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list tools"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var tools []CNCFPlugin
 	for rows.Next() {
@@ -94,7 +94,9 @@ func (h *CNCFHandler) ListTools(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(config, &tool.Configuration)
+		if err := json.Unmarshal(config, &tool.Configuration); err != nil {
+			continue
+		}
 		tools = append(tools, tool)
 	}
 
@@ -147,7 +149,10 @@ func (h *CNCFHandler) UpdateTool(c *gin.Context) {
 		Status   string `json:"status"`
 		Version  string `json:"version"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	query := `
 		UPDATE cncf_tools 
@@ -217,7 +222,7 @@ func (h *CNCFHandler) CheckToolHealth(c *gin.Context) {
 	h.logger.Info("Checking health for tool: ", toolID)
 
 	query := `UPDATE cncf_tools SET last_health_check = NOW() WHERE id = $1`
-	h.db.Exec(query, toolID)
+	_, _ = h.db.Exec(query, toolID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"tool_id":    toolID,

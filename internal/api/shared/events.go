@@ -145,12 +145,6 @@ func StreamScanProgress(db interface{}, logger *logrus.Logger) gin.HandlerFunc {
 			scanID = uuid.New().String()
 		}
 
-		flusher, ok := c.Writer.(gin.ResponseWriter)
-		if !ok {
-			c.JSON(500, gin.H{"error": "streaming not supported"})
-			return
-		}
-
 		c.Header("Content-Type", "text/event-stream")
 		c.Header("Cache-Control", "no-cache")
 		c.Header("Connection", "keep-alive")
@@ -164,12 +158,12 @@ func StreamScanProgress(db interface{}, logger *logrus.Logger) gin.HandlerFunc {
 			select {
 			case msg, ok := <-ss.msg:
 				if !ok {
-					fmt.Fprintf(w, "event: done\ndata: %s\n\n", `{"scan_id":"`+scanID+`","status":"completed"}`)
-					flusher.Flush()
+					_, _ = fmt.Fprintf(w, "event: done\ndata: %s\n\n", `{"scan_id":"`+scanID+`","status":"completed"}`)
+					c.Writer.Flush()
 					return false
 				}
-				fmt.Fprintf(w, "event: progress\ndata: %s\n\n", string(msg))
-				flusher.Flush()
+				_, _ = fmt.Fprintf(w, "event: progress\ndata: %s\n\n", string(msg))
+				c.Writer.Flush()
 				return true
 			case <-c.Request.Context().Done():
 				ss.close()

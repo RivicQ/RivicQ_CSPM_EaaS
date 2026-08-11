@@ -469,8 +469,8 @@ npm run dev
 
 ### On-Call Contacts
 - **DevSecOps Lead**: @devops-oncall (Slack)
-- **SRE Team**: sre@rivic-q.io
-- **Engineering**: engineering@rivic-q.io
+- **SRE Team**: sre@rivicq.com
+- **Engineering**: engineering@rivicq.com
 
 ### Monitoring & Alerts
 - **Grafana**: https://grafana.cryptobom.io

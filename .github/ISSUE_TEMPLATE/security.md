@@ -9,5 +9,5 @@ assignees: ''
 This repository uses responsible disclosure. Do **not** post security
 vulnerabilities as public issues.
 
-Please report security issues to `security@rivicq.de` following the instructions
+Please report security issues to `security@rivicq.com` following the instructions
 in `SECURITY.md`.

@@ -746,5 +746,5 @@ curl https://api.cryptobom.example.com/healthz
 
 **Report Generated:** May 25, 2026  
 **Next Review:** June 8, 2026 (post-launch assessment)  
-**Contact:** devops@rivicq.de | engineering@rivicq.de
+**Contact:** devops@rivicq.com | engineering@rivicq.com
 

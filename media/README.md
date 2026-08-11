@@ -52,13 +52,13 @@ ffmpeg -i input.mp4 -c:v libx264 -crf 28 -preset fast demo-optimized.mp4
 
 Share demos via:
 - GitHub Releases: https://github.com/RivicQ/RivicQ_CSPM_EaaS/releases
-- Documentation: https://docs.rivicq.de
+- Documentation: https://docs.rivicq.com
 - YouTube: https://youtube.com/@rivicq
 
 ## 🔗 Links
 
-- **Live Demo**: https://demo.rivicq.de
-- **Documentation**: https://docs.rivicq.de
+- **Live Demo**: https://demo.rivicq.com
+- **Documentation**: https://docs.rivicq.com
 - **GitHub**: https://github.com/RivicQ/RivicQ_CSPM_EaaS
 
 ---

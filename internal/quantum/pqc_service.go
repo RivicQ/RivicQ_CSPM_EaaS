@@ -151,8 +151,8 @@ func (s *PQCService) GenerateKeyPair(ctx context.Context, algo PQCAlgorithm, hsm
 	keyMaterial := make([]byte, 256)
 	h := sha512.New()
 	for i := 0; i < 4; i++ {
-		h.Write(seedEntropy)
-		h.Write([]byte(fmt.Sprintf("%s-block-%d", algo, i)))
+		_, _ = h.Write(seedEntropy)
+		_, _ = fmt.Fprintf(h, "%s-block-%d", algo, i)
 		copy(keyMaterial[i*64:], h.Sum(nil))
 	}
 

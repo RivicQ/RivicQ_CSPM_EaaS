@@ -256,7 +256,7 @@ func TestRegistry_Events(t *testing.T) {
 	r.Register("a", stubFactory("a"))
 	r.Register("b", stubFactory("b", true))
 	r.Init(context.Background(), nil)
-	r.Close()
+	_ = r.Close()
 
 	types := map[EventType]int{}
 	for i := 0; i < 5; i++ {

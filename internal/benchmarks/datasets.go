@@ -449,7 +449,7 @@ func (ds *RealWorldDataset) SaveDataset(filename string) error {
 		return err
 	}
 
-	return fmt.Errorf("File saving not implemented - use data bytes")
+	return fmt.Errorf("file saving not implemented - use data bytes")
 }
 
 // GetDatasetBytes returns JSON bytes for API response

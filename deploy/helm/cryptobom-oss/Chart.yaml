@@ -16,7 +16,7 @@ sources:
   - https://github.com/rivic-q/cryptobom-saas
 maintainers:
   - name: RivicQ Team
-    email: hello@rivicq.de
+    email: hello@rivicq.com
 dependencies:
   - name: postgresql
     version: 12.x.x

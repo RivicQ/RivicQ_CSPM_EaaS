@@ -47,10 +47,10 @@ func newCloudSDKs(ctx context.Context) *cloudSDKs {
 
 type awsInventoryResult struct {
 	EC2Instances []awscloud.EC2Instance `json:"ec2_instances,omitempty"`
-	S3Buckets    []awscloud.S3Bucket   `json:"s3_buckets,omitempty"`
+	S3Buckets    []awscloud.S3Bucket    `json:"s3_buckets,omitempty"`
 	RDSInstances []awscloud.RDSInstance `json:"rds_instances,omitempty"`
 	EKSClusters  []awscloud.EKSCluster  `json:"eks_clusters,omitempty"`
-	Total        int                     `json:"total"`
+	Total        int                    `json:"total"`
 }
 
 func (c *cloudSDKs) fetchAWSInventory(ctx context.Context) (*awsInventoryResult, error) {
@@ -97,7 +97,7 @@ type gcpInventoryResult struct {
 	GCEInstances []gcpcloud.GCEInstance `json:"gce_instances,omitempty"`
 	GCSBuckets   []gcpcloud.GCSBucket   `json:"gcs_buckets,omitempty"`
 	GKEClusters  []gcpcloud.GKECluster  `json:"gke_clusters,omitempty"`
-	Total        int                     `json:"total"`
+	Total        int                    `json:"total"`
 }
 
 func (c *cloudSDKs) fetchGCPInventory(ctx context.Context) (*gcpInventoryResult, error) {
@@ -137,7 +137,7 @@ type azureInventoryResult struct {
 	VMs             []azurecloud.AzureVM             `json:"virtual_machines,omitempty"`
 	StorageAccounts []azurecloud.AzureStorageAccount `json:"storage_accounts,omitempty"`
 	AKSClusters     []azurecloud.AKSCluster          `json:"aks_clusters,omitempty"`
-	Total           int                               `json:"total"`
+	Total           int                              `json:"total"`
 }
 
 func (c *cloudSDKs) fetchAzureInventory(ctx context.Context) (*azureInventoryResult, error) {
@@ -169,37 +169,4 @@ func (c *cloudSDKs) fetchAzureInventory(ctx context.Context) (*azureInventoryRes
 	result.Total += len(clusters)
 
 	return result, nil
-}
-
-// ── Resource summary (aggregated) ───────────────────────────────────────
-
-type aggregatedSummary struct {
-	AWS   *awsInventoryResult   `json:"aws,omitempty"`
-	GCP   *gcpInventoryResult   `json:"gcp,omitempty"`
-	Azure *azureInventoryResult `json:"azure,omitempty"`
-	Total int                   `json:"total"`
-}
-
-func (c *cloudSDKs) fetchAll(ctx context.Context) (*aggregatedSummary, error) {
-	summary := &aggregatedSummary{}
-
-	awsResult, err := c.fetchAWSInventory(ctx)
-	if err == nil {
-		summary.AWS = awsResult
-		summary.Total += awsResult.Total
-	}
-
-	gcpResult, err := c.fetchGCPInventory(ctx)
-	if err == nil {
-		summary.GCP = gcpResult
-		summary.Total += gcpResult.Total
-	}
-
-	azureResult, err := c.fetchAzureInventory(ctx)
-	if err == nil {
-		summary.Azure = azureResult
-		summary.Total += azureResult.Total
-	}
-
-	return summary, nil
 }

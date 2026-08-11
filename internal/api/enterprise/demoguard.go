@@ -1,25 +1,12 @@
 package enterprise
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rivic-q/cryptobom-saas/internal/database"
 )
 
-// demoGuard wraps an enterprise handler to return demo data when DB is nil.
-// Prevents 500 errors in demo mode when no enterprise DB is configured.
-func demoGuard(db *database.EnterpriseDB, handler gin.HandlerFunc, demoData gin.H) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if db == nil {
-			c.JSON(http.StatusOK, demoData)
-			return
-		}
-		handler(c)
-	}
-}
-
+// demoAssetsList returns demo asset data for demo mode.
 func demoAssetsList() gin.H {
 	return gin.H{
 		"assets": []gin.H{

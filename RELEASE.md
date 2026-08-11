@@ -314,7 +314,7 @@ git clone -b v1.3.0 --depth 1 https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 
 ```bash
 # Helm deployment
-helm repo add rivicq https://rivicq.de/charts
+helm repo add rivicq https://rivicq.com/charts
 helm install cryptobom-oss rivicq/cryptobom-oss --version v1.3.0
 ```
 
@@ -347,7 +347,7 @@ services:
 
 **Do NOT** open public issues for security vulnerabilities.
 
-Email: hello@rivicq.de  
+Email: hello@rivicq.com  
 PGP Key: Available on request
 
 ---
@@ -368,8 +368,8 @@ The Open Source Edition is free to use. For enterprise features:
 | 24/7 Support | ❌ | ✅ |
 | SOC 2 / PCI DSS | ❌ | ✅ |
 
-**Contact:** enterprise@rivicq.de  
-**Website:** https://rivicq.de/enterprise
+**Contact:** enterprise@rivicq.com  
+**Website:** https://rivicq.com/enterprise
 
 ---
 
@@ -380,8 +380,8 @@ The Open Source Edition is free to use. For enterprise features:
 - Issue Tracker: https://github.com/RivicQ/RivicQ_CSPM_EaaS/issues
 
 ### Enterprise Support
-- Email: enterprise@rivicq.de
-- Portal: https://portal.rivicq.de/support
+- Email: enterprise@rivicq.com
+- Portal: https://portal.rivicq.com/support
 
 ---
 

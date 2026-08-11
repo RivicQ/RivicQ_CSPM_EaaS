@@ -36,7 +36,7 @@ func persistCBOMScanResult(db *database.DB, logger *logrus.Logger) discovery.Per
 
 		// Ensure the default tenant exists before writing the CBOM report
 		// (crypto_assets and cbom_reports reference tenants by FK).
-		if _, err := db.DB.Exec(`INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+		if _, err := db.Exec(`INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
 			defaultTenantID, "Default Organization"); err != nil {
 			logger.WithError(err).Warn("Failed to ensure default tenant for scan persistence")
 		}
@@ -242,7 +242,10 @@ func ScanCBOMReport(db *database.DB, logger *logrus.Logger, cfg interface{}) gin
 		var req struct {
 			Target string `json:"target"`
 		}
-		c.ShouldBindJSON(&req)
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		target := req.Target
 		if target == "" {
 			target = "localhost"

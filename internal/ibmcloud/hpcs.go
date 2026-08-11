@@ -133,7 +133,7 @@ func (c *HPCSClient) getIAMToken() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("iam token request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
@@ -168,7 +168,7 @@ func (c *HPCSClient) doAPI(method, path string, out interface{}) error {
 	if err != nil {
 		return fmt.Errorf("hpcs %s %s: %w", method, path, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))

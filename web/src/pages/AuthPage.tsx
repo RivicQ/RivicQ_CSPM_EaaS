@@ -537,13 +537,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                               Demo workspace credentials (password <strong>DemoPass123!</strong>):
                             </Typography>
                             <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
-                              Enterprise&nbsp;· revansai.ande@rivicq.com
+                              Enterprise&nbsp;· admin@rivicq.com
                             </Typography>
                             <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
-                              Professional&nbsp;· pratik.rughe@rivicq.de · danush.m@rivicq.de
+                              Professional&nbsp;· operator@rivicq.com · analyst@rivicq.com
                             </Typography>
                             <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
-                              Community&nbsp;· sales@rivicq.de
+                              Community&nbsp;· sales@rivicq.com
                             </Typography>
                           </Box>
                         )}

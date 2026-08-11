@@ -46,7 +46,7 @@ func New(logger *logrus.Logger) *DB {
 
 	if err := db.Ping(); err != nil {
 		logger.WithError(err).Warn("Database unreachable — running in demo mode")
-		db.Close()
+		_ = db.Close()
 		return nil
 	}
 

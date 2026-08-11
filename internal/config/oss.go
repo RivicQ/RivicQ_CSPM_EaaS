@@ -347,7 +347,9 @@ func getEnvInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intValue, err := fmt.Sscanf(value, "%d", new(int)); err == nil && intValue == 1 {
 			var result int
-			fmt.Sscanf(value, "%d", &result)
+			if _, err := fmt.Sscanf(value, "%d", &result); err != nil {
+				return 0
+			}
 			return result
 		}
 	}

@@ -47,34 +47,34 @@ func NewMockUserStore() (*MockUserStore, error) {
 	}
 
 	users := map[string]*User{
-		"danush.m@rivicq.de": {
+		"analyst@rivicq.com": {
 			ID:       "user-1",
 			TenantID: "tenant-1",
-			Email:    "danush.m@rivicq.de",
-			Name:     "Danush M",
+			Email:    "analyst@rivicq.com",
+			Name:     "Analyst",
 			Role:     "analyst",
 			Password: hashedPassword,
 		},
-		"pratik.rughe@rivicq.de": {
+		"operator@rivicq.com": {
 			ID:       "user-2",
 			TenantID: "tenant-1",
-			Email:    "pratik.rughe@rivicq.de",
-			Name:     "Pratik Rughe",
+			Email:    "operator@rivicq.com",
+			Name:     "Operator",
 			Role:     "operator",
 			Password: hashedPassword,
 		},
-		"revansai.ande@rivicq.com": {
+		"admin@rivicq.com": {
 			ID:       "user-3",
 			TenantID: "tenant-1",
-			Email:    "revansai.ande@rivicq.com",
-			Name:     "Revansai Ande",
+			Email:    "admin@rivicq.com",
+			Name:     "Admin",
 			Role:     "admin",
 			Password: hashedPassword,
 		},
-		"sales@rivicq.de": {
+		"sales@rivicq.com": {
 			ID:       "user-4",
 			TenantID: "tenant-1",
-			Email:    "sales@rivicq.de",
+			Email:    "sales@rivicq.com",
 			Name:     "Sales Team",
 			Role:     "viewer",
 			Password: hashedPassword,
@@ -142,10 +142,10 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 	// whose email falls within an allowed domain. All share the bootstrap
 	// password so the demo credentials stay consistent across stores.
 	demoUsers := []*User{
-		{ID: "user-admin", Email: "revansai.ande@rivicq.com", Name: "Revansai Ande", Role: "admin"},
-		{ID: "user-operator", Email: "pratik.rughe@rivicq.de", Name: "Pratik Rughe", Role: "operator"},
-		{ID: "user-analyst", Email: "danush.m@rivicq.de", Name: "Danush M", Role: "analyst"},
-		{ID: "user-viewer", Email: "sales@rivicq.de", Name: "Sales Team", Role: "viewer"},
+		{ID: "user-admin", Email: "admin@rivicq.com", Name: "Admin", Role: "admin"},
+		{ID: "user-operator", Email: "operator@rivicq.com", Name: "Operator", Role: "operator"},
+		{ID: "user-analyst", Email: "analyst@rivicq.com", Name: "Analyst", Role: "analyst"},
+		{ID: "user-viewer", Email: "sales@rivicq.com", Name: "Sales Team", Role: "viewer"},
 	}
 	for _, du := range demoUsers {
 		if emailAllowed(du.Email, allowedDomains) {
@@ -325,31 +325,31 @@ func CreateDefaultUsers(db *sql.DB) error {
 		{
 			ID:       "user-admin",
 			TenantID: "tenant-1",
-			Email:    "revansai.ande@rivicq.com",
-			Name:     "Revansai Ande",
+			Email:    "admin@rivicq.com",
+			Name:     "Admin",
 			Role:     "admin",
 			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-operator",
 			TenantID: "tenant-1",
-			Email:    "pratik.rughe@rivicq.de",
-			Name:     "Pratik Rughe",
+			Email:    "operator@rivicq.com",
+			Name:     "Operator",
 			Role:     "operator",
 			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-analyst",
 			TenantID: "tenant-1",
-			Email:    "danush.m@rivicq.de",
-			Name:     "Danush M",
+			Email:    "analyst@rivicq.com",
+			Name:     "Analyst",
 			Role:     "analyst",
 			Password: bootstrapPassword,
 		},
 		{
 			ID:       "user-viewer",
 			TenantID: "tenant-1",
-			Email:    "sales@rivicq.de",
+			Email:    "sales@rivicq.com",
 			Name:     "Sales Team",
 			Role:     "viewer",
 			Password: bootstrapPassword,

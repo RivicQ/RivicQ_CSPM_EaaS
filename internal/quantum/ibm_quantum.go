@@ -152,7 +152,7 @@ func (q *IBMQuantumClient) AttestAlgorithm(ctx context.Context, req QuantumAttes
 	if err != nil {
 		return nil, fmt.Errorf("failed to send attestation request: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -195,7 +195,7 @@ func (q *IBMQuantumClient) GetNetworkInfo(ctx context.Context) (*QuantumNetworkI
 	if err != nil {
 		return nil, fmt.Errorf("failed to send network info request: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -237,7 +237,7 @@ func (q *IBMQuantumClient) GetPostQuantumAlgorithms(ctx context.Context) ([]Post
 	if err != nil {
 		return nil, fmt.Errorf("failed to send algorithms request: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -298,7 +298,7 @@ func (q *IBMQuantumClient) GetMigrationPath(ctx context.Context, fromAlgorithm s
 	if err != nil {
 		return nil, fmt.Errorf("failed to send migration request: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

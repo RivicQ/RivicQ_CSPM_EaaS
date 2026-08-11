@@ -606,7 +606,7 @@ func listCloudProviders(db *database.DB, logger *logrus.Logger, cfg *config.Ente
 		if db != nil {
 			rows, err := db.Query(`SELECT DISTINCT provider FROM cloud_accounts WHERE tenant_id = $1 AND status = 'active'`, tenantID)
 			if err == nil {
-				defer rows.Close()
+				defer func() { _ = rows.Close() }()
 				seen := map[string]bool{"aws": sdks.aws != nil, "gcp": sdks.gcp != nil, "azure": sdks.azure != nil}
 				for rows.Next() {
 					var provider string
@@ -664,7 +664,7 @@ func listSSOProviders(db *database.DB, logger *logrus.Logger, cfg *config.Enterp
 				WHERE tenant_id = $1
 			`, tenantID)
 			if err == nil {
-				defer rows.Close()
+				defer func() { _ = rows.Close() }()
 				for rows.Next() {
 					var provider string
 					var enabled bool
@@ -1026,7 +1026,7 @@ func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.En
 				WHERE ca.id = $1
 			`, assetID)
 			if err == nil {
-				defer rows.Close()
+				defer func() { _ = rows.Close() }()
 				for rows.Next() {
 					var id, algorithm, status string
 					var quantumSafe bool

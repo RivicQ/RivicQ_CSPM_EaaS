@@ -119,7 +119,7 @@ func GitHubCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
 			return
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		var ghUser GitHubUser
 		if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
@@ -131,7 +131,7 @@ func GitHubCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 		if ghUser.Email == "" {
 			emailResp, err := client.Get("https://api.github.com/user/emails")
 			if err == nil {
-				defer emailResp.Body.Close()
+				defer func() { _ = emailResp.Body.Close() }()
 				var emails []GitHubEmail
 				if err := json.NewDecoder(emailResp.Body).Decode(&emails); err == nil {
 					for _, e := range emails {

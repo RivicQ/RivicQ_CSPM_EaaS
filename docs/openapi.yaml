@@ -24,19 +24,19 @@ info:
   version: 1.3.0
   contact:
     name: RivicQ GmbH
-    url: https://rivicq.de
-    email: enterprise@rivicq.de
+    url: https://rivicq.com
+    email: enterprise@rivicq.com
   license:
     name: RivicQ Open Source License (R-OSL)
     url: https://github.com/rivic-q/cryptobom-saas/blob/main/LICENSE
-  termsOfService: https://rivicq.de/terms
+  termsOfService: https://rivicq.com/terms
 
 servers:
   - url: http://localhost:9090
     description: Local development server
-  - url: https://api.rivicq.oss.rivicq.de
+  - url: https://api.rivicq.oss.rivicq.com
     description: OSS Edition cloud endpoint
-  - url: https://api.rivicq.enterprise.rivicq.de
+  - url: https://api.rivicq.enterprise.rivicq.com
     description: Enterprise Edition cloud endpoint
 
 tags:
@@ -636,4 +636,4 @@ security:
 
 externalDocs:
   description: Full documentation
-  url: https://docs.rivicq.de
+  url: https://docs.rivicq.com

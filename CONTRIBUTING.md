@@ -173,7 +173,7 @@ This is the **Open Source Edition**. Enterprise features include:
 - Full NIST PQC algorithm support
 - Advanced analytics and ML features
 
-**For Enterprise Edition:** https://rivicq.de/enterprise
+**For Enterprise Edition:** https://rivicq.com/enterprise
 
 ---
 
@@ -181,7 +181,7 @@ This is the **Open Source Edition**. Enterprise features include:
 
 - **Issues:** https://github.com/RivicQ/RivicQ_CSPM_EaaS/issues
 - **Discussions:** https://github.com/RivicQ/RivicQ_CSPM_EaaS/discussions
-- **Enterprise Support:** enterprise@rivicq.de
+- **Enterprise Support:** enterprise@rivicq.com
 
 ---
 

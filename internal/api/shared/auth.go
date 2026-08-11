@@ -64,7 +64,7 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 		demoUser := &auth.User{
 			ID:       "demo-user",
 			TenantID: "tenant-1",
-			Email:    "demo@cryptobom.io",
+			Email:    "demo@rivicq.com",
 			Name:     "Demo User",
 			Role:     "admin",
 		}
@@ -96,7 +96,7 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 			"user": authUserDisplay{
 				ID:    "demo-user",
 				Name:  "Demo User",
-				Email: "demo@cryptobom.io",
+				Email: "demo@rivicq.com",
 				Role:  "admin",
 			},
 			"edition":   edition,

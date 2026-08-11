@@ -60,7 +60,6 @@ type KubernetesConfig struct {
 	Kubeconfig    string `mapstructure:"kubeconfig"`
 	Namespace     string `mapstructure:"namespace"`
 	OperatorImage string `mapstructure:"operator_image"`
-	eBPFEnabled   bool   `mapstructure:"ebpf_enabled"`
 	CiliumEnabled bool   `mapstructure:"cilium_enabled"`
 }
 

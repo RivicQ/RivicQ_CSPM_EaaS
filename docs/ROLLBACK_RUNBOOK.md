@@ -322,8 +322,8 @@ curl http://localhost:8080/healthz
 ## Contacts & Escalation
 
 - **On-call DevOps**: `@devops-oncall` in Slack
-- **SRE Team**: sre@rivic-q.io
-- **Engineering Lead**: engineering@rivic-q.io
+- **SRE Team**: sre@rivicq.com
+- **Engineering Lead**: engineering@rivicq.com
 - **Incident Commander**: use PagerDuty to escalate
 
 ---

@@ -3,7 +3,7 @@
 Responsible disclosure is important. If you discover a vulnerability in this
 project, please follow the steps below.
 
-1. Send an email to security@rivicq.de with a clear title and reproduction steps.
+1. Send an email to security@rivicq.com with a clear title and reproduction steps.
 2. Do not create a public GitHub issue for a security vulnerability.
 3. Include an impact assessment, steps to reproduce, and any PoC code or artifacts.
 4. We will acknowledge receipt within 48 hours and coordinate a timeline for

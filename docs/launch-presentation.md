@@ -193,9 +193,9 @@ graph TB
 4. **Schedule Enterprise Demo**: Q2 2025 preview
 
 ### 📞 Contact Information
-- **Website**: rivicq.de
+- **Website**: rivicq.com
 - **GitHub**: github.com/RivicQ/RivicQ_CSPM_EaaS
-- **Email**: hello@rivicq.de
+- **Email**: hello@rivicq.com
 - **LinkedIn**: @rivic-q
 
 ---

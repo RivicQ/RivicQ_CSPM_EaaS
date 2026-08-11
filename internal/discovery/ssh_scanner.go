@@ -53,7 +53,7 @@ func (s *SSHScanner) Scan(ctx context.Context, target Target) ([]Finding, error)
 	if err != nil {
 		return nil, fmt.Errorf("dial %s: %w", addr, err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	sshConn, chans, reqs, err := ssh.NewClientConn(conn, addr, cfg)
 	if err != nil {
@@ -67,7 +67,7 @@ func (s *SSHScanner) Scan(ctx context.Context, target Target) ([]Finding, error)
 		}
 	}
 	if sshConn != nil {
-		defer sshConn.Close()
+		defer func() { _ = sshConn.Close() }()
 		go ssh.DiscardRequests(reqs)
 		for range chans {
 			// drain
@@ -117,11 +117,11 @@ func (s *SSHScanner) scanBanner(ctx context.Context, target Target, now time.Tim
 	if err != nil {
 		return nil, fmt.Errorf("dial %s: %w", addr, err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	sshConn, _, _, err := ssh.NewClientConn(conn, addr, cfg)
 	if sshConn != nil {
-		defer sshConn.Close()
+		defer func() { _ = sshConn.Close() }()
 	}
 	// Expected to fail on auth, but host key will be set
 

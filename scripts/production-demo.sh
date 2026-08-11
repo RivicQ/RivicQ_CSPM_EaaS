@@ -161,7 +161,7 @@ ${NC}"
 
 🚀 Available NOW:
    • Open Source: github.com/rivic-q/cryptobom-saas
-   • Live Demo: rivic-q.io/cryptobom-demo
+   • Live Demo: rivicq.com/cryptobom-demo
    • Community: Discord/Slack/LinkedIn
 
 🏢 Enterprise Version - Q2 2025:

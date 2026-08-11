@@ -46,7 +46,7 @@ func (s *TLSScanner) Scan(ctx context.Context, target Target) ([]Finding, error)
 	if err != nil {
 		return nil, fmt.Errorf("connect %s: %w", addr, err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	tlsConn, ok := conn.(*tls.Conn)
 	if !ok {

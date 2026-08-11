@@ -127,7 +127,7 @@ func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list resources"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var resources []TerraformResource
 	for rows.Next() {
@@ -142,8 +142,8 @@ func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(secFindings, &resource.SecurityFindings)
-		json.Unmarshal(compIssues, &resource.ComplianceIssues)
+		_ = json.Unmarshal(secFindings, &resource.SecurityFindings)
+		_ = json.Unmarshal(compIssues, &resource.ComplianceIssues)
 		resources = append(resources, resource)
 	}
 
@@ -157,7 +157,10 @@ func (h *TerraformHandler) ScanTerraformResources(c *gin.Context) {
 		Workspace  string `json:"workspace"`
 		ModulePath string `json:"module_path"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	h.logger.Info("Starting Terraform security scan for tenant: ", tenantID)
 

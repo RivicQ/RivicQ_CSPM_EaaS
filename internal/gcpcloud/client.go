@@ -34,7 +34,7 @@ func NewClient(ctx context.Context, projectID string) (*Client, error) {
 	// by default, otherwise every real API call fails with permission errors.
 	var opts []option.ClientOption
 	if keyFile := os.Getenv("GCP_KEY_FILE"); keyFile != "" {
-		opts = append(opts, option.WithCredentialsFile(keyFile))
+		opts = append(opts, option.WithAuthCredentialsFile(option.ServiceAccount, keyFile))
 	} else if emulator := os.Getenv("STORAGE_EMULATOR_HOST"); emulator != "" {
 		opts = append(opts, option.WithoutAuthentication(), option.WithEndpoint("http://"+emulator))
 	}
@@ -48,14 +48,14 @@ func NewClient(ctx context.Context, projectID string) (*Client, error) {
 		}
 	}
 
-	storageClient, err := storage.NewClient(ctx, opts...)
-	if err != nil {
-		// OK, we'll skip bucket listing
+	var storageClient *storage.Client
+	if sc, err := storage.NewClient(ctx, opts...); err == nil {
+		storageClient = sc
 	}
 
-	clustersClient, err := container.NewClusterManagerClient(ctx, opts...)
-	if err != nil {
-		// OK, we'll skip cluster listing
+	var clustersClient *container.ClusterManagerClient
+	if cc, err := container.NewClusterManagerClient(ctx, opts...); err == nil {
+		clustersClient = cc
 	}
 
 	return &Client{
@@ -72,22 +72,22 @@ func (c *Client) Configured() bool {
 }
 
 type GCEInstance struct {
-	Name              string            `json:"name"`
-	Zone              string            `json:"zone"`
-	MachineType       string            `json:"machine_type"`
-	Status            string            `json:"status"`
-	PrivateIP         string            `json:"private_ip"`
-	PublicIP          string            `json:"public_ip"`
-	Network           string            `json:"network"`
-	Subnetwork        string            `json:"subnetwork"`
-	Tags              map[string]string `json:"tags"`
-	Labels            map[string]string `json:"labels"`
-	CPUCores          int32             `json:"cpu_cores"`
-	MemoryMB          int64             `json:"memory_mb"`
-	DiskSizeGB        int64             `json:"disk_size_gb"`
-	Confidentiality   bool              `json:"confidentiality"`
-	ServiceAccounts   []string          `json:"service_accounts"`
-	CreatedAt         time.Time         `json:"created_at"`
+	Name            string            `json:"name"`
+	Zone            string            `json:"zone"`
+	MachineType     string            `json:"machine_type"`
+	Status          string            `json:"status"`
+	PrivateIP       string            `json:"private_ip"`
+	PublicIP        string            `json:"public_ip"`
+	Network         string            `json:"network"`
+	Subnetwork      string            `json:"subnetwork"`
+	Tags            map[string]string `json:"tags"`
+	Labels          map[string]string `json:"labels"`
+	CPUCores        int32             `json:"cpu_cores"`
+	MemoryMB        int64             `json:"memory_mb"`
+	DiskSizeGB      int64             `json:"disk_size_gb"`
+	Confidentiality bool              `json:"confidentiality"`
+	ServiceAccounts []string          `json:"service_accounts"`
+	CreatedAt       time.Time         `json:"created_at"`
 }
 
 func (c *Client) ListGCEInstances(ctx context.Context) ([]GCEInstance, error) {
@@ -234,19 +234,19 @@ func (c *Client) ListGCSBuckets(ctx context.Context) ([]GCSBucket, error) {
 }
 
 type GKECluster struct {
-	Name              string            `json:"name"`
-	Location          string            `json:"location"`
-	Status            string            `json:"status"`
-	Version           string            `json:"version"`
-	Endpoint          string            `json:"endpoint"`
-	Network           string            `json:"network"`
-	Subnetwork        string            `json:"subnetwork"`
-	NodeCount         int32             `json:"node_count"`
-	Labels            map[string]string `json:"labels"`
-	MasterAuthorized  bool              `json:"master_authorized_networks"`
-	PrivateCluster    bool              `json:"private_cluster"`
-	ReleaseChannel    string            `json:"release_channel"`
-	CreatedAt         time.Time         `json:"created_at"`
+	Name             string            `json:"name"`
+	Location         string            `json:"location"`
+	Status           string            `json:"status"`
+	Version          string            `json:"version"`
+	Endpoint         string            `json:"endpoint"`
+	Network          string            `json:"network"`
+	Subnetwork       string            `json:"subnetwork"`
+	NodeCount        int32             `json:"node_count"`
+	Labels           map[string]string `json:"labels"`
+	MasterAuthorized bool              `json:"master_authorized_networks"`
+	PrivateCluster   bool              `json:"private_cluster"`
+	ReleaseChannel   string            `json:"release_channel"`
+	CreatedAt        time.Time         `json:"created_at"`
 }
 
 func (c *Client) ListGKEClusters(ctx context.Context) ([]GKECluster, error) {
@@ -302,8 +302,8 @@ func (c *Client) mapGKECluster(cluster *containerpb.Cluster) GKECluster {
 		Subnetwork:       cluster.GetSubnetwork(),
 		NodeCount:        nodeCount,
 		Labels:           labels,
-		MasterAuthorized: cluster.GetMasterAuthorizedNetworksConfig() != nil && cluster.GetMasterAuthorizedNetworksConfig().GetEnabled(),
-		PrivateCluster:   cluster.GetPrivateClusterConfig() != nil && cluster.GetPrivateClusterConfig().GetEnablePrivateEndpoint(),
+		MasterAuthorized: cluster.GetControlPlaneEndpointsConfig().GetIpEndpointsConfig().GetAuthorizedNetworksConfig().GetEnabled(),
+		PrivateCluster:   cluster.GetControlPlaneEndpointsConfig().GetIpEndpointsConfig().GetPrivateEndpoint() != "",
 		ReleaseChannel:   releaseChannel,
 		CreatedAt:        parseTime(cluster.GetCreateTime()),
 	}
@@ -311,13 +311,13 @@ func (c *Client) mapGKECluster(cluster *containerpb.Cluster) GKECluster {
 
 func (c *Client) Close() error {
 	if c.instancesClient != nil {
-		c.instancesClient.Close()
+		_ = c.instancesClient.Close()
 	}
 	if c.bucketsClient != nil {
-		c.bucketsClient.Close()
+		_ = c.bucketsClient.Close()
 	}
 	if c.clustersClient != nil {
-		c.clustersClient.Close()
+		_ = c.clustersClient.Close()
 	}
 	return nil
 }

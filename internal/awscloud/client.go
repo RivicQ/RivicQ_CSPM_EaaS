@@ -200,18 +200,18 @@ func (c *Client) mapEC2Instance(inst ec2types.Instance) EC2Instance {
 // ── S3 Buckets ──────────────────────────────────────────────────────────
 
 type S3Bucket struct {
-	Name         string                 `json:"name"`
-	Region       string                 `json:"region"`
-	CreationDate time.Time              `json:"creation_date"`
-	Encryption   bool                   `json:"encryption"`
-	Versioning   string                 `json:"versioning"`
-	PublicAccess bool                   `json:"public_access"`
-	Tags         map[string]string      `json:"tags"`
-	ACL          []S3BucketGrant `json:"acl,omitempty"`
+	Name         string            `json:"name"`
+	Region       string            `json:"region"`
+	CreationDate time.Time         `json:"creation_date"`
+	Encryption   bool              `json:"encryption"`
+	Versioning   string            `json:"versioning"`
+	PublicAccess bool              `json:"public_access"`
+	Tags         map[string]string `json:"tags"`
+	ACL          []S3BucketGrant   `json:"acl,omitempty"`
 }
 
 type S3BucketGrant struct {
-	Grantee string `json:"grantee"`
+	Grantee    string `json:"grantee"`
 	Permission string `json:"permission"`
 	Type       string `json:"type"`
 }
@@ -279,7 +279,7 @@ func (c *Client) inspectBucket(ctx context.Context, b s3types.Bucket) S3Bucket {
 	} else if pubResp.PublicAccessBlockConfiguration != nil {
 		blockPublicACLs := pubResp.PublicAccessBlockConfiguration.BlockPublicAcls
 		blockPublicPolicy := pubResp.PublicAccessBlockConfiguration.BlockPublicPolicy
-		bucket.PublicAccess = !(aws.ToBool(blockPublicACLs) && aws.ToBool(blockPublicPolicy))
+		bucket.PublicAccess = !aws.ToBool(blockPublicACLs) || !aws.ToBool(blockPublicPolicy)
 	}
 
 	return bucket
@@ -288,25 +288,25 @@ func (c *Client) inspectBucket(ctx context.Context, b s3types.Bucket) S3Bucket {
 // ── RDS Instances ───────────────────────────────────────────────────────
 
 type RDSInstance struct {
-	DBInstanceIdentifier string            `json:"db_instance_identifier"`
-	Engine               string            `json:"engine"`
-	EngineVersion        string            `json:"engine_version"`
-	DBInstanceClass      string            `json:"db_instance_class"`
-	Status               string            `json:"status"`
-	Endpoint             string            `json:"endpoint"`
-	Port                 int32             `json:"port"`
-	Region               string            `json:"region"`
-	MultiAZ              bool              `json:"multi_az"`
-	StorageEncrypted     bool              `json:"storage_encrypted"`
-	StorageType          string            `json:"storage_type"`
-	AllocatedStorage     int32             `json:"allocated_storage"`
-	VPCID                string            `json:"vpc_id"`
-	SubnetGroup          string            `json:"subnet_group"`
-	PubliclyAccessible   bool              `json:"publicly_accessible"`
-	DeletionProtection   bool              `json:"deletion_protection"`
-	AutoMinorVersionUpgrade bool           `json:"auto_minor_version_upgrade"`
-	Tags                 map[string]string `json:"tags"`
-	CreatedAt            time.Time         `json:"created_at"`
+	DBInstanceIdentifier    string            `json:"db_instance_identifier"`
+	Engine                  string            `json:"engine"`
+	EngineVersion           string            `json:"engine_version"`
+	DBInstanceClass         string            `json:"db_instance_class"`
+	Status                  string            `json:"status"`
+	Endpoint                string            `json:"endpoint"`
+	Port                    int32             `json:"port"`
+	Region                  string            `json:"region"`
+	MultiAZ                 bool              `json:"multi_az"`
+	StorageEncrypted        bool              `json:"storage_encrypted"`
+	StorageType             string            `json:"storage_type"`
+	AllocatedStorage        int32             `json:"allocated_storage"`
+	VPCID                   string            `json:"vpc_id"`
+	SubnetGroup             string            `json:"subnet_group"`
+	PubliclyAccessible      bool              `json:"publicly_accessible"`
+	DeletionProtection      bool              `json:"deletion_protection"`
+	AutoMinorVersionUpgrade bool              `json:"auto_minor_version_upgrade"`
+	Tags                    map[string]string `json:"tags"`
+	CreatedAt               time.Time         `json:"created_at"`
 }
 
 func (c *Client) ListRDSInstances(ctx context.Context) ([]RDSInstance, error) {
@@ -368,44 +368,44 @@ func (c *Client) mapRDSInstance(db rdstypes.DBInstance) RDSInstance {
 	}
 
 	return RDSInstance{
-		DBInstanceIdentifier:   aws.ToString(db.DBInstanceIdentifier),
-		Engine:                 aws.ToString(db.Engine),
-		EngineVersion:          aws.ToString(db.EngineVersion),
-		DBInstanceClass:        aws.ToString(db.DBInstanceClass),
-		Status:                 aws.ToString(db.DBInstanceStatus),
-		Endpoint:               endpoint,
-		Port:                   port,
-		MultiAZ:                aws.ToBool(db.MultiAZ),
-		StorageEncrypted:       aws.ToBool(db.StorageEncrypted),
-		StorageType:            aws.ToString(db.StorageType),
-		AllocatedStorage:       aws.ToInt32(db.AllocatedStorage),
-		VPCID:                  vpcID,
-		SubnetGroup:            subnetGroup,
-		PubliclyAccessible:     aws.ToBool(db.PubliclyAccessible),
-		DeletionProtection:     aws.ToBool(db.DeletionProtection),
+		DBInstanceIdentifier:    aws.ToString(db.DBInstanceIdentifier),
+		Engine:                  aws.ToString(db.Engine),
+		EngineVersion:           aws.ToString(db.EngineVersion),
+		DBInstanceClass:         aws.ToString(db.DBInstanceClass),
+		Status:                  aws.ToString(db.DBInstanceStatus),
+		Endpoint:                endpoint,
+		Port:                    port,
+		MultiAZ:                 aws.ToBool(db.MultiAZ),
+		StorageEncrypted:        aws.ToBool(db.StorageEncrypted),
+		StorageType:             aws.ToString(db.StorageType),
+		AllocatedStorage:        aws.ToInt32(db.AllocatedStorage),
+		VPCID:                   vpcID,
+		SubnetGroup:             subnetGroup,
+		PubliclyAccessible:      aws.ToBool(db.PubliclyAccessible),
+		DeletionProtection:      aws.ToBool(db.DeletionProtection),
 		AutoMinorVersionUpgrade: aws.ToBool(db.AutoMinorVersionUpgrade),
-		Tags:                   tags,
-		CreatedAt:              aws.ToTime(db.InstanceCreateTime),
+		Tags:                    tags,
+		CreatedAt:               aws.ToTime(db.InstanceCreateTime),
 	}
 }
 
 // ── EKS Clusters ────────────────────────────────────────────────────────
 
 type EKSCluster struct {
-	Name               string            `json:"name"`
-	ARN                string            `json:"arn"`
-	Status             string            `json:"status"`
-	Version            string            `json:"version"`
-	Endpoint           string            `json:"endpoint"`
-	RoleARN            string            `json:"role_arn"`
-	VPCID              string            `json:"vpc_id"`
-	SubnetIDs          []string          `json:"subnet_ids"`
-	SecurityGroupIDs   []string          `json:"security_group_ids"`
-	NodeGroupCount     int               `json:"node_group_count"`
-	Tags               map[string]string `json:"tags"`
-	CreatedAt          time.Time         `json:"created_at"`
-	LoggingEnabled     bool              `json:"logging_enabled"`
-	EncryptionEnabled  bool              `json:"encryption_enabled"`
+	Name              string            `json:"name"`
+	ARN               string            `json:"arn"`
+	Status            string            `json:"status"`
+	Version           string            `json:"version"`
+	Endpoint          string            `json:"endpoint"`
+	RoleARN           string            `json:"role_arn"`
+	VPCID             string            `json:"vpc_id"`
+	SubnetIDs         []string          `json:"subnet_ids"`
+	SecurityGroupIDs  []string          `json:"security_group_ids"`
+	NodeGroupCount    int               `json:"node_group_count"`
+	Tags              map[string]string `json:"tags"`
+	CreatedAt         time.Time         `json:"created_at"`
+	LoggingEnabled    bool              `json:"logging_enabled"`
+	EncryptionEnabled bool              `json:"encryption_enabled"`
 }
 
 func (c *Client) ListEKSClusters(ctx context.Context) ([]EKSCluster, error) {
@@ -475,6 +475,6 @@ func (c *Client) mapEKSCluster(cluster *ekstypes.Cluster) EKSCluster {
 		Tags:              tags,
 		CreatedAt:         aws.ToTime(cluster.CreatedAt),
 		LoggingEnabled:    loggingEnabled,
-		EncryptionEnabled: cluster.EncryptionConfig != nil && len(cluster.EncryptionConfig) > 0,
+		EncryptionEnabled: len(cluster.EncryptionConfig) > 0,
 	}
 }

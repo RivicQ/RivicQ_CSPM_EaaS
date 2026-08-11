@@ -195,7 +195,7 @@ For enterprise features, please contact us:
 ## 📞 Contact for Enterprise / Sales
 
 ### RivicQ GmbH
-- **Website**: https://rivicq.de
+- **Website**: https://rivicq.com
 - **Founder**: Revansai Ande
 - **Address**: LEAP BERLIN - Rudower Chaussee 29, 12489 Berlin, Germany
 - **Location**: WISTA Innovations- und Gründungszentrum (IGZ)
@@ -379,9 +379,9 @@ docker run -p 9090:9090 \
 RivicQ GmbH · LEAP BERLIN - Rudower Chaussee 29 · 12489 Berlin, Germany
 WISTA Innovations- und Gründungszentrum (IGZ)
 
-- **🏢 Berlin HQ**: hello@rivicq.de
-- **📧 Email**: enterprise@rivicq.de
-- **🌐 Website**: https://rivicq.de/enterprise
+- **🏢 Berlin HQ**: hello@rivicq.com
+- **📧 Email**: enterprise@rivicq.com
+- **🌐 Website**: https://rivicq.com/enterprise
 
 ---
 
@@ -409,14 +409,14 @@ This software is licensed under the **Apache License 2.0**. See [LICENSE](LICENS
 ## 📞 Contact
 
 ### RivicQ GmbH
-- **Website:** https://rivicq.de
+- **Website:** https://rivicq.com
 - **Address:** LEAP BERLIN - Rudower Chaussee 29, 12489 Berlin, Germany (WISTA IGZ)
 
 ---
 
 ## 🚀 Start Your Quantum-Ready DevSecOps Journey Today
 
-**[⭐ Try OSS Version](https://github.com/RivicQ/RivicQ_CSPM_EaaS)** | **[🏢 Contact Enterprise](https://rivicq.de/enterprise)** | **[🎬 View Animation](https://rivicq.github.io/RivicQ_CSPM_EaaS/)** | **[📖 Docs](https://docs.rivicq.de)**
+**[⭐ Try OSS Version](https://github.com/RivicQ/RivicQ_CSPM_EaaS)** | **[🏢 Contact Enterprise](https://rivicq.com/enterprise)** | **[🎬 View Animation](https://rivicq.github.io/RivicQ_CSPM_EaaS/)** | **[📖 Docs](https://docs.rivicq.com)**
 
 ---
 

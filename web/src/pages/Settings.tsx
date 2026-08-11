@@ -29,7 +29,7 @@ import PageFrame from '../components/PageFrame';
 const Settings: React.FC = () => {
   const { user, edition } = useAuth();
   const displayName = user?.name || 'Workspace user';
-  const email = user?.email || 'unknown@rivicq.de';
+  const email = user?.email || 'unknown@rivicq.com';
 
   return (
     <PageFrame

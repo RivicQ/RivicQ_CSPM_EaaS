@@ -10,15 +10,15 @@ import (
 )
 
 type CoreStatus struct {
-	Version      string            `json:"version"`
-	Uptime       string            `json:"uptime"`
-	GoVersion    string            `json:"go_version"`
-	OS           string            `json:"os"`
-	Arch         string            `json:"arch"`
-	Edition      string            `json:"edition"`
+	Version      string             `json:"version"`
+	Uptime       string             `json:"uptime"`
+	GoVersion    string             `json:"go_version"`
+	OS           string             `json:"os"`
+	Arch         string             `json:"arch"`
+	Edition      string             `json:"edition"`
 	Integrations IntegrationsStatus `json:"integrations"`
-	Tools        ToolsStatus       `json:"tools"`
-	Services     ServicesStatus    `json:"services"`
+	Tools        ToolsStatus        `json:"tools"`
+	Services     ServicesStatus     `json:"services"`
 }
 
 type IntegrationsStatus struct {
@@ -153,7 +153,7 @@ func probeService(endpoint, name string) ServiceHealth {
 			Error:     err.Error(),
 		}
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	status := "healthy"
 	if resp.StatusCode >= 400 {
 		status = "degraded"

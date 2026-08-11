@@ -9,46 +9,46 @@ import (
 type CbomReportPhase string
 
 const (
-// CbomReportConditionType defines the type for conditions in a CbomReport.
-CbomReportConditionType = "Ready"
+	// CbomReportConditionType defines the type for conditions in a CbomReport.
+	CbomReportConditionType = "Ready"
 
-// CbomReportConditionReason defines the reason for conditions in a CbomReport.
-CbomReportConditionReason = "Processing"
+	// CbomReportConditionReason defines the reason for conditions in a CbomReport.
+	CbomReportConditionReason = "Processing"
 
-// CbomReportPhasePending is the phase when a report has been submitted but not yet processed.
-CbomReportPhasePending CbomReportPhase = "Pending"
+	// CbomReportPhasePending is the phase when a report has been submitted but not yet processed.
+	CbomReportPhasePending CbomReportPhase = "Pending"
 
-// CbomReportPhaseRunning is the phase when a report is currently being processed.
-CbomReportPhaseRunning CbomReportPhase = "Running"
+	// CbomReportPhaseRunning is the phase when a report is currently being processed.
+	CbomReportPhaseRunning CbomReportPhase = "Running"
 
-// CbomReportPhaseCompleted is the phase when a report has been processed successfully.
-CbomReportPhaseCompleted CbomReportPhase = "Completed"
+	// CbomReportPhaseCompleted is the phase when a report has been processed successfully.
+	CbomReportPhaseCompleted CbomReportPhase = "Completed"
 )
 
 // Scope defines the scope of a CBOM scan.
 type Scope struct {
-Name       string   `json:"name"`
-Clusters   []string `json:"clusters,omitempty"`
-Namespaces []string `json:"namespaces,omitempty"`
+	Name       string   `json:"name"`
+	Clusters   []string `json:"clusters,omitempty"`
+	Namespaces []string `json:"namespaces,omitempty"`
 }
 
 // CbomReportSpec defines the desired state of a CBOM report.
 type CbomReportSpec struct {
-Name               string      `json:"name,omitempty"`
-Description        string      `json:"description,omitempty"`
-Tenant             string      `json:"tenant,omitempty"`
-Scopes             []Scope     `json:"scopes,omitempty"`
-Priority           string      `json:"priority,omitempty"`
-NISTPQCStatus      string      `json:"nistPqcStatus,omitempty"`
-IBMQuantumScore    float64     `json:"ibmQuantumScore,omitempty"`
-LastScanTime       *metav1.Time `json:"lastScanTime,omitempty"`
-ComplianceDeadline *metav1.Time `json:"complianceDeadline,omitempty"`
+	Name               string       `json:"name,omitempty"`
+	Description        string       `json:"description,omitempty"`
+	Tenant             string       `json:"tenant,omitempty"`
+	Scopes             []Scope      `json:"scopes,omitempty"`
+	Priority           string       `json:"priority,omitempty"`
+	NISTPQCStatus      string       `json:"nistPqcStatus,omitempty"`
+	IBMQuantumScore    float64      `json:"ibmQuantumScore,omitempty"`
+	LastScanTime       *metav1.Time `json:"lastScanTime,omitempty"`
+	ComplianceDeadline *metav1.Time `json:"complianceDeadline,omitempty"`
 }
 
 // CbomReportStatus defines the observed state of a CbomReport.
 type CbomReportStatus struct {
-Phase      CbomReportPhase    `json:"phase,omitempty"`
-Conditions []metav1.Condition `json:"conditions,omitempty"`
+	Phase      CbomReportPhase    `json:"phase,omitempty"`
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -57,18 +57,18 @@ Conditions []metav1.Condition `json:"conditions,omitempty"`
 
 // CbomReport is the Schema for the cbomreports API.
 type CbomReport struct {
-metav1.TypeMeta   `json:",inline"`
-metav1.ObjectMeta `json:"metadata,omitempty"`
-Spec              CbomReportSpec   `json:"spec,omitempty"`
-Status            CbomReportStatus `json:"status,omitempty"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              CbomReportSpec   `json:"spec,omitempty"`
+	Status            CbomReportStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
 // CbomReportList contains a list of CbomReport.
 type CbomReportList struct {
-metav1.TypeMeta `json:",inline"`
-metav1.ListMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []CbomReport `json:"items"`
 }
 
@@ -140,7 +140,7 @@ func (in *CbomReportList) DeepCopyObject() runtime.Object {
 	}
 	out := new(CbomReportList)
 	out.TypeMeta = in.TypeMeta
-	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	in.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		out.Items = make([]CbomReport, len(in.Items))
 		for i := range in.Items {

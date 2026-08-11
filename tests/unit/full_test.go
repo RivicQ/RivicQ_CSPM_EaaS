@@ -12,7 +12,7 @@ func TestHealthEndpoint(t *testing.T) {
 	router := http.NewServeMux()
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"status":  "healthy",
 			"service": "CryptoBOM SaaS",
 			"version": "1.3.0",
@@ -28,7 +28,7 @@ func TestHealthEndpoint(t *testing.T) {
 	}
 
 	var resp map[string]string
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	_ = json.Unmarshal(w.Body.Bytes(), &resp)
 	if resp["status"] != "healthy" {
 		t.Errorf("Expected healthy status")
 	}
@@ -38,7 +38,7 @@ func TestAssetDiscovery(t *testing.T) {
 	router := http.NewServeMux()
 	router.HandleFunc("/api/v1/engine/discover", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"discovered": 5,
 			"assets": []map[string]string{
 				{"name": "tls-cert", "algorithm": "RSA-2048"},
@@ -62,7 +62,7 @@ func TestComplianceScan(t *testing.T) {
 	router := http.NewServeMux()
 	router.HandleFunc("/api/v1/engine/compliance-scan", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"framework": "NIST",
 			"score":     85,
 			"status":    "compliant",
@@ -84,7 +84,7 @@ func TestQuantumAttestation(t *testing.T) {
 	router := http.NewServeMux()
 	router.HandleFunc("/api/v1/engine/quantum-attest", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"quantumSafe": false,
 			"confidence":  0.94,
 			"provider":    "mock",
@@ -106,7 +106,7 @@ func TestDevSecOpsAssessment(t *testing.T) {
 	router := http.NewServeMux()
 	router.HandleFunc("/api/v1/engine/devsecops-assess", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"pipeline":               "github-actions",
 			"quantumVulnerabilities": 3,
 			"complianceViolations":   0,
@@ -132,12 +132,12 @@ func TestAssetCRUD(t *testing.T) {
 	router.HandleFunc("/api/v1/assets", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			var asset map[string]interface{}
-			json.NewDecoder(r.Body).Decode(&asset)
+			_ = json.NewDecoder(r.Body).Decode(&asset)
 			id := "asset-1"
 			asset["id"] = id
 			assets[id] = asset
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(asset)
+			_ = json.NewEncoder(w).Encode(asset)
 		}
 	})
 
@@ -155,7 +155,7 @@ func TestMigrationPlan(t *testing.T) {
 	router := http.NewServeMux()
 	router.HandleFunc("/api/v1/engine/migration-plan", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"phases": []map[string]interface{}{
 				{"phase": 1, "algorithm": "Kyber-1024", "duration": "3 months"},
 			},

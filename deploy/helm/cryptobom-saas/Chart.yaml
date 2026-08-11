@@ -19,7 +19,7 @@ sources:
 
 maintainers:
   - name: Revan Ande
-    email: revan.ande@rivicq.de
+    email: engineering@rivicq.com
 
 dependencies:
   - name: postgresql

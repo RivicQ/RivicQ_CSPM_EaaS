@@ -187,5 +187,5 @@ terraform -chdir=deploy/terraform/ibm apply
 ---
 
 **Full assessment:** See [DEPLOYMENT_READINESS_ASSESSMENT.md](DEPLOYMENT_READINESS_ASSESSMENT.md)  
-**Contact:** devops@rivicq.de | engineering@rivicq.de
+**Contact:** devops@rivicq.com | engineering@rivicq.com
 

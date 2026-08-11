@@ -69,7 +69,7 @@ func (w *WebhookManager) ListWebhooks(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list webhooks"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var webhooks []Webhook
 	for rows.Next() {
@@ -78,7 +78,7 @@ func (w *WebhookManager) ListWebhooks(c *gin.Context) {
 		if err := rows.Scan(&wh.ID, &wh.TenantID, &wh.Name, &wh.URL, &eventsStr, &wh.Status, &wh.CreatedAt); err != nil {
 			continue
 		}
-		json.Unmarshal([]byte(eventsStr), &wh.Events)
+		_ = json.Unmarshal([]byte(eventsStr), &wh.Events)
 		webhooks = append(webhooks, wh)
 	}
 	c.JSON(http.StatusOK, gin.H{"webhooks": webhooks})
@@ -140,7 +140,10 @@ func (w *WebhookManager) UpdateWebhook(c *gin.Context) {
 		URL    string   `json:"url"`
 		Events []string `json:"events"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	eventsJSON, _ := json.Marshal(req.Events)
 	_, err := w.db.Exec(`
@@ -217,7 +220,7 @@ func (w *WebhookManager) ListDeliveries(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list deliveries"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	type Delivery struct {
 		ID           string    `json:"id"`
@@ -254,7 +257,7 @@ func (w *WebhookManager) DispatchEvent(tenantID, eventType string, data interfac
 		w.logger.WithError(err).Error("Failed to query webhooks for dispatch")
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var wh Webhook
@@ -297,7 +300,7 @@ func (w *WebhookManager) deliver(wh Webhook, eventType string, payload interface
 		w.recordDelivery(wh.ID, eventType, "failed", 0, err.Error())
 		return fmt.Errorf("delivery failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	status := "delivered"
 	if resp.StatusCode >= 400 {
@@ -305,7 +308,7 @@ func (w *WebhookManager) deliver(wh Webhook, eventType string, payload interface
 	}
 
 	var respBuf bytes.Buffer
-	respBuf.ReadFrom(resp.Body)
+	_, _ = respBuf.ReadFrom(resp.Body)
 	respBody := respBuf.String()
 	if len(respBody) > 1000 {
 		respBody = respBody[:1000]
@@ -319,7 +322,7 @@ func (w *WebhookManager) recordDelivery(webhookID, eventType, status string, sta
 	if w.db == nil {
 		return
 	}
-	w.db.Exec(`
+	_, _ = w.db.Exec(`
 		INSERT INTO webhook_deliveries (id, webhook_id, event_type, status, status_code, response_body, delivered_at)
 		VALUES ($1, $2, $3, $4, $5, $6, NOW())
 	`, uuid.New().String(), webhookID, eventType, status, statusCode, responseBody)

@@ -4,14 +4,14 @@ These credentials are provided for local development and demo purposes only. Do 
 
 ## Three-tier demo set
 
-All demo users share the password **`DemoPass123!`** and belong to the `rivicq.de` work domain.
+All demo users share the password **`DemoPass123!`** and belong to the `rivicq.com` work domain.
 
 | Tier | Role | Email | Password |
 |---|---|---|---|
-| Enterprise | Admin | `revansai.ande@rivicq.com` | `DemoPass123!` |
-| Professional | Operator | `pratik.rughe@rivicq.de` | `DemoPass123!` |
-| Professional | Analyst | `danush.m@rivicq.de` | `DemoPass123!` |
-| Community | Viewer | `sales@rivicq.de` | `DemoPass123!` |
+| Enterprise | Admin | `admin@rivicq.com` | `DemoPass123!` |
+| Professional | Operator | `operator@rivicq.com` | `DemoPass123!` |
+| Professional | Analyst | `analyst@rivicq.com` | `DemoPass123!` |
+| Community | Viewer | `sales@rivicq.com` | `DemoPass123!` |
 
 Edition is resolved automatically:
 - `admin` → Enterprise
@@ -28,7 +28,7 @@ GET /api/v1/auth/demo?edition=enterprise   # Enterprise
 GET /api/v1/auth/demo?edition=professional # Professional
 ```
 
-Returns `demo@cryptobom.io` (role `admin`, `demo_mode: true`).
+Returns `demo@rivicq.com` (role `admin`, `demo_mode: true`).
 
 ## How to use
 

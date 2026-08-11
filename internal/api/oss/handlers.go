@@ -182,7 +182,7 @@ func setupOSSAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logge
 		var tenantCount int
 		err := db.DB.QueryRow("SELECT COUNT(*) FROM tenants").Scan(&tenantCount)
 		if err == nil && tenantCount == 0 {
-			_, err := db.DB.Exec(`INSERT INTO tenants (id, name, domain) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
+			_, err := db.Exec(`INSERT INTO tenants (id, name, domain) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
 				"tenant-1", "Default Organization", "rivicq.local")
 			if err != nil {
 				logger.WithError(err).Warn("Failed to create default tenant")
@@ -195,7 +195,7 @@ func setupOSSAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logge
 		if err == nil && userCount == 0 {
 			hashedPassword, hashErr := auth.HashPassword(bootstrapPassword)
 			if hashErr == nil {
-				_, execErr := db.DB.Exec(`
+				_, execErr := db.Exec(`
 					INSERT INTO users (id, tenant_id, email, name, role, password)
 					VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (email) DO NOTHING`,
 					uuid.New().String(), "tenant-1", bootstrapEmail, bootstrapName, bootstrapRole, hashedPassword)
@@ -278,8 +278,8 @@ type ecosystemTool struct {
 }
 
 var ecosystemTools = []ecosystemTool{
-	{ID: "sdk-py", Name: "cryptobom-core (Python)", Category: "sdk", Description: "Python SDK for CBOM scanning, quantum risk assessment, and PQC migration planning.", Edition: "both", Status: "available", Type: "sdk", DocsURL: "https://docs.rivicq.de/python", RepoURL: "https://github.com/rivic-q/cryptobom-python", InstallCmd: "pip install cryptobom-core"},
-	{ID: "sdk-java", Name: "cryptobom-enterprise (Java)", Category: "sdk", Description: "Java SDK for enterprise CBOM generation, IBM Quantum attestation, and multi-cloud scanning.", Edition: "enterprise", Status: "enterprise_only", Type: "sdk", DocsURL: "https://docs.rivicq.de/java", InstallCmd: "mvn dependency:copy -Dartifact=com.rivicq:cryptobom-enterprise:1.3.0"},
+	{ID: "sdk-py", Name: "cryptobom-core (Python)", Category: "sdk", Description: "Python SDK for CBOM scanning, quantum risk assessment, and PQC migration planning.", Edition: "both", Status: "available", Type: "sdk", DocsURL: "https://docs.rivicq.com/python", RepoURL: "https://github.com/rivic-q/cryptobom-python", InstallCmd: "pip install cryptobom-core"},
+	{ID: "sdk-java", Name: "cryptobom-enterprise (Java)", Category: "sdk", Description: "Java SDK for enterprise CBOM generation, IBM Quantum attestation, and multi-cloud scanning.", Edition: "enterprise", Status: "enterprise_only", Type: "sdk", DocsURL: "https://docs.rivicq.com/java", InstallCmd: "mvn dependency:copy -Dartifact=com.rivicq:cryptobom-enterprise:1.3.0"},
 	{ID: "sdk-rust", Name: "cryptobom-enterprise (Rust)", Category: "sdk", Description: "Rust crate for high-performance cryptographic asset scanning with quantum provider integration.", Edition: "enterprise", Status: "enterprise_only", Type: "sdk", InstallCmd: "cargo install cryptobom-enterprise --features quantum"},
 	{ID: "sdk-cpp", Name: "cryptobom-cpp", Category: "sdk", Description: "C++ library for embedded CBOM scanning in native applications and IoT firmware.", Edition: "enterprise", Status: "beta", Type: "sdk", RepoURL: "https://github.com/rivicq/cryptobom-cpp"},
 	{ID: "sdk-c", Name: "libcryptobom (C)", Category: "sdk", Description: "C library for lightweight cryptographic discovery in constrained environments.", Edition: "enterprise", Status: "beta", Type: "sdk", InstallCmd: "wget https://github.com/rivicq/cryptobom-c/releases/download/v1.3.0/libcryptobom.so"},
@@ -287,13 +287,13 @@ var ecosystemTools = []ecosystemTool{
 	{ID: "cli-oss", Name: "CryptoBOM Scanner (OSS)", Category: "cli", Description: "Standalone CLI for TLS/SSH/HTTP cryptographic discovery and SBOM generation.", Edition: "oss", Status: "available", Type: "cli", RepoURL: "https://github.com/rivic-q/cryptobom-saas", InstallCmd: "go install github.com/rivic-q/cryptobom-saas/cmd/scanner@latest"},
 	{ID: "cli-enterprise", Name: "CryptoBOM Scanner (Enterprise)", Category: "cli", Description: "Enterprise CLI with multi-cloud HSM scanning, quantum attestation, and ML threat detection.", Edition: "enterprise", Status: "enterprise_only", Type: "cli", InstallCmd: "docker pull rivic-q/cryptobom-enterprise:latest"},
 	{ID: "cli-demo", Name: "Infrastructure Discovery Scanner", Category: "cli", Description: "Demo scanner for weak crypto discovery across TLS, SSH, and HTTP endpoints.", Edition: "both", Status: "available", Type: "cli", RepoURL: "https://github.com/rivic-q/cryptobom-saas", InstallCmd: "make build-scanner && ./bin/cryptobom-scanner"},
-	{ID: "plugin-headlamp", Name: "Headlamp Plugin", Category: "plugin", Description: "Kubernetes cluster crypto dashboard — visualize CBOM data, quantum risk, and compliance status in Headlamp.", Edition: "both", Status: "available", Type: "plugin", DocsURL: "https://docs.rivicq.de/headlamp", RepoURL: "https://github.com/rivic-q/cryptobom-headlamp-plugin"},
+	{ID: "plugin-headlamp", Name: "Headlamp Plugin", Category: "plugin", Description: "Kubernetes cluster crypto dashboard — visualize CBOM data, quantum risk, and compliance status in Headlamp.", Edition: "both", Status: "available", Type: "plugin", DocsURL: "https://docs.rivicq.com/headlamp", RepoURL: "https://github.com/rivic-q/cryptobom-headlamp-plugin"},
 	{ID: "plugin-k8s-operator", Name: "Kubernetes Operator", Category: "plugin", Description: "Automated CBOM scanning for Kubernetes clusters — detects cryptographic assets in pods, services, and secrets.", Edition: "enterprise", Status: "enterprise_only", Type: "plugin", RepoURL: "https://github.com/rivic-q/cryptobom-operator"},
-	{ID: "cloud-aws", Name: "AWS Cloud Integration", Category: "service", Description: "CloudHSM cluster status, KMS key inventory, CloudTrail cryptographic event auditing.", Edition: "enterprise", Status: "enterprise_only", Type: "service", DocsURL: "https://docs.rivicq.de/aws"},
-	{ID: "cloud-gcp", Name: "GCP Cloud Integration", Category: "service", Description: "Cloud KMS key management, GKE workload crypto scanning, HSM key ring attestation.", Edition: "enterprise", Status: "enterprise_only", Type: "service", DocsURL: "https://docs.rivicq.de/gcp"},
-	{ID: "cloud-ibm", Name: "IBM Cloud HPCS", Category: "service", Description: "Hyper Protect Crypto Service key management, COS bucket attestation, quantum-safe key generation.", Edition: "enterprise", Status: "enterprise_only", Type: "service", DocsURL: "https://docs.rivicq.de/ibm"},
+	{ID: "cloud-aws", Name: "AWS Cloud Integration", Category: "service", Description: "CloudHSM cluster status, KMS key inventory, CloudTrail cryptographic event auditing.", Edition: "enterprise", Status: "enterprise_only", Type: "service", DocsURL: "https://docs.rivicq.com/aws"},
+	{ID: "cloud-gcp", Name: "GCP Cloud Integration", Category: "service", Description: "Cloud KMS key management, GKE workload crypto scanning, HSM key ring attestation.", Edition: "enterprise", Status: "enterprise_only", Type: "service", DocsURL: "https://docs.rivicq.com/gcp"},
+	{ID: "cloud-ibm", Name: "IBM Cloud HPCS", Category: "service", Description: "Hyper Protect Crypto Service key management, COS bucket attestation, quantum-safe key generation.", Edition: "enterprise", Status: "enterprise_only", Type: "service", DocsURL: "https://docs.rivicq.com/ibm"},
 	{ID: "cloud-azure", Name: "Azure Cloud Integration", Category: "service", Description: "Azure Key Vault, managed HSM, and cryptographic asset inventory scanning.", Edition: "enterprise", Status: "enterprise_only", Type: "service"},
-	{ID: "quantum-ibm", Name: "IBM Quantum Attestation", Category: "service", Description: "Quantum network attestation for CBOM reports — validates PQC readiness against IBM Quantum systems.", Edition: "enterprise", Status: "enterprise_only", Type: "service", DocsURL: "https://docs.rivicq.de/quantum"},
+	{ID: "quantum-ibm", Name: "IBM Quantum Attestation", Category: "service", Description: "Quantum network attestation for CBOM reports — validates PQC readiness against IBM Quantum systems.", Edition: "enterprise", Status: "enterprise_only", Type: "service", DocsURL: "https://docs.rivicq.com/quantum"},
 	{ID: "int-prometheus", Name: "Prometheus", Category: "integration", Description: "Scrape cryptographic asset metrics, quantum risk scores, and compliance status.", Edition: "both", Status: "available", Type: "integration", DocsURL: "https://prometheus.io/docs"},
 	{ID: "int-grafana", Name: "Grafana", Category: "integration", Description: "Pre-built CBOM compliance dashboards with DORA, NIS2, and quantum risk visualizations.", Edition: "both", Status: "available", Type: "integration", DocsURL: "https://grafana.com/docs"},
 	{ID: "int-cilium", Name: "Cilium / eBPF", Category: "integration", Description: "Real-time cryptographic flow monitoring via eBPF — detect TLS/SSH algorithm usage in live traffic.", Edition: "both", Status: "available", Type: "integration", DocsURL: "https://docs.cilium.io"},
@@ -314,7 +314,7 @@ var ecosystemTools = []ecosystemTool{
 	{ID: "crosschain-protocol", Name: "RivicQ Crosschain Protocol", Category: "service", Description: "Secure cross-chain communication protocol with eIDAS 2.0 compliance, zk-proofs, and quantum-safe signatures.", Edition: "both", Status: "available", Type: "service", DocsURL: "https://github.com/rivicq/rivicq-protocol", RepoURL: "https://github.com/rivicq/rivicq-protocol", InstallCmd: "docker pull rivicq/crosschain-hub"},
 
 	// GitHub Integration
-	{ID: "github-scanning", Name: "GitHub Crypto Scanning", Category: "integration", Description: "Scan GitHub repositories for cryptographic assets, weak algorithms, and quantum risk. Integrates with GitHub Actions.", Edition: "oss", Status: "available", Type: "integration", DocsURL: "https://docs.rivicq.de/github-scanning"},
+	{ID: "github-scanning", Name: "GitHub Crypto Scanning", Category: "integration", Description: "Scan GitHub repositories for cryptographic assets, weak algorithms, and quantum risk. Integrates with GitHub Actions.", Edition: "oss", Status: "available", Type: "integration", DocsURL: "https://docs.rivicq.com/github-scanning"},
 }
 
 func getEcosystemTools(logger *logrus.Logger) gin.HandlerFunc {

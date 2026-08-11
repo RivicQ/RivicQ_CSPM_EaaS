@@ -35,7 +35,7 @@ The two-DB split avoids a schema clash between the legacy OSS `tenants` table
 | Work-domain restriction | Real | `AUTH_ALLOWED_DOMAINS` enforced on login/OAuth. |
 | **TOTP MFA** | Real | `github.com/pquerna/otp`; server-side single-use 10-min `MFASession`; routes `/mfa/setup`, `/mfa/confirm`, `/mfa/disable`, and rewritten `/mfa/verify`. Wrong codes and session replay are rejected. |
 | Google / GitHub OAuth | Real (needs creds) | Uses configured OAuth client IDs/secrets; disabled when unset. |
-| Demo access | Real | `GET /api/v1/auth/demo?edition=...` issues a token for `demo@cryptobom.io`. |
+| Demo access | Real | `GET /api/v1/auth/demo?edition=...` issues a token for `demo@rivicq.com`. |
 
 ## Cloud providers
 

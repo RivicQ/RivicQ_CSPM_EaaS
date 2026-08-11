@@ -115,7 +115,7 @@ func (h *MultiCloudHandler) ListCloudAccounts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list cloud accounts"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var accounts []CloudAccount
 	for rows.Next() {
@@ -129,8 +129,8 @@ func (h *MultiCloudHandler) ListCloudAccounts(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(regions, &account.Regions)
-		json.Unmarshal(services, &account.Services)
+		_ = json.Unmarshal(regions, &account.Regions)
+		_ = json.Unmarshal(services, &account.Services)
 		accounts = append(accounts, account)
 	}
 
@@ -186,7 +186,10 @@ func (h *MultiCloudHandler) UpdateCloudAccount(c *gin.Context) {
 		Services    []string `json:"services"`
 		Status      string   `json:"status"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	regionsJSON, _ := json.Marshal(req.Regions)
 	servicesJSON, _ := json.Marshal(req.Services)
@@ -455,13 +458,13 @@ func (h *MultiCloudHandler) GetResourcesSummary(c *gin.Context) {
 			"azure":     5,
 		},
 		"by_service": gin.H{
-			"ec2":          30,
-			"s3":           25,
-			"rds":          15,
-			"compute":      30,
-			"storage":      20,
-			"kubernetes":   20,
-			"quantum":      10,
+			"ec2":              30,
+			"s3":               25,
+			"rds":              15,
+			"compute":          30,
+			"storage":          20,
+			"kubernetes":       20,
+			"quantum":          10,
 			"virtual_machines": 5,
 		},
 		"security_findings": gin.H{
@@ -481,5 +484,3 @@ func (h *MultiCloudHandler) GetResourcesSummary(c *gin.Context) {
 
 	c.JSON(http.StatusOK, summary)
 }
-
-

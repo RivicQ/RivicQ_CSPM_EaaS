@@ -203,7 +203,7 @@ func (h *InventoryHandler) ListAssets(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list assets"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []Asset
 	for rows.Next() {
@@ -218,8 +218,8 @@ func (h *InventoryHandler) ListAssets(c *gin.Context) {
 			h.logger.Error("Failed to scan asset: ", err)
 			continue
 		}
-		json.Unmarshal(metadata, &asset.Metadata)
-		json.Unmarshal(tags, &asset.Tags)
+		_ = json.Unmarshal(metadata, &asset.Metadata)
+		_ = json.Unmarshal(tags, &asset.Tags)
 		assets = append(assets, asset)
 	}
 
@@ -258,8 +258,8 @@ func (h *InventoryHandler) GetAsset(c *gin.Context) {
 		return
 	}
 
-	json.Unmarshal(metadata, &asset.Metadata)
-	json.Unmarshal(tags, &asset.Tags)
+	_ = json.Unmarshal(metadata, &asset.Metadata)
+	_ = json.Unmarshal(tags, &asset.Tags)
 
 	c.JSON(http.StatusOK, asset)
 }
@@ -366,7 +366,7 @@ func (h *InventoryHandler) ListAssetsByCategory(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list assets"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []Asset
 	for rows.Next() {
@@ -380,8 +380,8 @@ func (h *InventoryHandler) ListAssetsByCategory(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(metadata, &asset.Metadata)
-		json.Unmarshal(tags, &asset.Tags)
+		_ = json.Unmarshal(metadata, &asset.Metadata)
+		_ = json.Unmarshal(tags, &asset.Tags)
 		assets = append(assets, asset)
 	}
 
@@ -409,7 +409,7 @@ func (h *InventoryHandler) ListAssetsByCloudProvider(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list assets"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []Asset
 	for rows.Next() {
@@ -423,8 +423,8 @@ func (h *InventoryHandler) ListAssetsByCloudProvider(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(metadata, &asset.Metadata)
-		json.Unmarshal(tags, &asset.Tags)
+		_ = json.Unmarshal(metadata, &asset.Metadata)
+		_ = json.Unmarshal(tags, &asset.Tags)
 		assets = append(assets, asset)
 	}
 
@@ -451,7 +451,7 @@ func (h *InventoryHandler) ListCryptoAssets(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list crypto assets"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []CryptoAsset
 	for rows.Next() {
@@ -477,7 +477,10 @@ func (h *InventoryHandler) ScanCryptoAssets(c *gin.Context) {
 	var req struct {
 		AssetIDs []string `json:"asset_ids"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	h.logger.Info("Starting crypto asset scan for ", len(req.AssetIDs), " assets")
 
@@ -503,7 +506,7 @@ func (h *InventoryHandler) ListAIAssets(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list AI assets"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []AIAsset
 	for rows.Next() {
@@ -574,7 +577,7 @@ func (h *InventoryHandler) ListHardwareAssets(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list hardware assets"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []HardwareAsset
 	for rows.Next() {
@@ -589,7 +592,7 @@ func (h *InventoryHandler) ListHardwareAssets(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(networkInterfaces, &asset.NetworkInterfaces)
+		_ = json.Unmarshal(networkInterfaces, &asset.NetworkInterfaces)
 		assets = append(assets, asset)
 	}
 
@@ -623,7 +626,7 @@ func (h *InventoryHandler) ListSoftwareAssets(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list software assets"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []SoftwareAsset
 	for rows.Next() {
@@ -638,7 +641,7 @@ func (h *InventoryHandler) ListSoftwareAssets(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(sbom, &asset.SBOM)
+		_ = json.Unmarshal(sbom, &asset.SBOM)
 		assets = append(assets, asset)
 	}
 
@@ -659,8 +662,9 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 			Content map[string]interface{} `json:"content"`
 			Path    string                 `json:"path"`
 		}
-		c.ShouldBindJSON(&req)
-		scanPath = req.Path
+		if err := c.ShouldBindJSON(&req); err == nil {
+			scanPath = req.Path
+		}
 	}
 
 	var sbomResult *discovery.SBOMResult
@@ -694,7 +698,7 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 		for _, comp := range sbomResult.Components {
 			assetID := uuid.New()
 			invAssetID := uuid.New()
-			h.db.Exec(`
+			_, _ = h.db.Exec(`
 				INSERT INTO inventory_assets (id, tenant_id, asset_id, name, category, cloud_provider, metadata, tags, discovered_at)
 				VALUES ($1, $2, $3, $4, 'software', 'on_prem', '{}', '{}', NOW())
 				ON CONFLICT DO NOTHING`,
@@ -703,7 +707,7 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 			meta, _ := json.Marshal(map[string]interface{}{
 				"purl": comp.PURL, "file_path": comp.FilePath,
 			})
-			h.db.Exec(`
+			_, _ = h.db.Exec(`
 				INSERT INTO software_assets (id, inventory_asset_id, name, version, license_type, sbom, last_patch_date)
 				VALUES ($1, $2, $3, $4, $5, $6, NOW())
 				ON CONFLICT DO NOTHING`,
@@ -716,11 +720,11 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 	components := make([]gin.H, len(sbomResult.Components))
 	for i, comp := range sbomResult.Components {
 		components[i] = gin.H{
-			"name":     comp.Name,
-			"version":  comp.Version,
-			"type":     comp.Type,
-			"license":  comp.License,
-			"purl":     comp.PURL,
+			"name":    comp.Name,
+			"version": comp.Version,
+			"type":    comp.Type,
+			"license": comp.License,
+			"purl":    comp.PURL,
 		}
 	}
 
@@ -757,7 +761,7 @@ func (h *InventoryHandler) ListInfrastructureAssets(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list infrastructure assets"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []InfrastructureAsset
 	for rows.Next() {
@@ -771,10 +775,10 @@ func (h *InventoryHandler) ListInfrastructureAssets(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(config, &asset.Configuration)
-		json.Unmarshal(netConfig, &asset.NetworkConfig)
-		json.Unmarshal(subnetIDs, &asset.SubnetIDs)
-		json.Unmarshal(secGroups, &asset.SecurityGroups)
+		_ = json.Unmarshal(config, &asset.Configuration)
+		_ = json.Unmarshal(netConfig, &asset.NetworkConfig)
+		_ = json.Unmarshal(subnetIDs, &asset.SubnetIDs)
+		_ = json.Unmarshal(secGroups, &asset.SecurityGroups)
 		assets = append(assets, asset)
 	}
 
@@ -811,27 +815,41 @@ func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
 		ByCloudProvider: make(map[string]int),
 	}
 
-	h.db.QueryRow("SELECT COUNT(*) FROM inventory_assets WHERE tenant_id = $1", tenantID).Scan(&summary.TotalAssets)
+	if err := h.db.QueryRow("SELECT COUNT(*) FROM inventory_assets WHERE tenant_id = $1", tenantID).Scan(&summary.TotalAssets); err != nil {
+		h.logger.Error("Failed to count assets: ", err)
+	}
 
 	categories := []string{"cryptographic", "ai", "hardware", "software", "infrastructure"}
 	for _, cat := range categories {
 		var count int
-		h.db.QueryRow("SELECT COUNT(*) FROM inventory_assets WHERE tenant_id = $1 AND category = $2", tenantID, cat).Scan(&count)
+		if err := h.db.QueryRow("SELECT COUNT(*) FROM inventory_assets WHERE tenant_id = $1 AND category = $2", tenantID, cat).Scan(&count); err != nil {
+			h.logger.Error("Failed to count assets by category: ", err)
+			continue
+		}
 		summary.ByCategory[cat] = count
 	}
 
 	providers := []string{"aws", "gcp", "ibm_cloud", "azure"}
 	for _, p := range providers {
 		var count int
-		h.db.QueryRow("SELECT COUNT(*) FROM inventory_assets WHERE tenant_id = $1 AND cloud_provider = $2", tenantID, p).Scan(&count)
+		if err := h.db.QueryRow("SELECT COUNT(*) FROM inventory_assets WHERE tenant_id = $1 AND cloud_provider = $2", tenantID, p).Scan(&count); err != nil {
+			h.logger.Error("Failed to count assets by provider: ", err)
+			continue
+		}
 		summary.ByCloudProvider[p] = count
 	}
 
-	h.db.QueryRow("SELECT COUNT(*) FROM cryptographic_assets ca JOIN inventory_assets ia ON ca.inventory_asset_id = ia.id WHERE ia.tenant_id = $1 AND ca.quantum_safe = true", tenantID).Scan(&summary.QuantumSafeCount)
+	if err := h.db.QueryRow("SELECT COUNT(*) FROM cryptographic_assets ca JOIN inventory_assets ia ON ca.inventory_asset_id = ia.id WHERE ia.tenant_id = $1 AND ca.quantum_safe = true", tenantID).Scan(&summary.QuantumSafeCount); err != nil {
+		h.logger.Error("Failed to count quantum-safe assets: ", err)
+	}
 
-	h.db.QueryRow("SELECT COUNT(*) FROM cryptographic_assets ca JOIN inventory_assets ia ON ca.inventory_asset_id = ia.id WHERE ia.tenant_id = $1 AND ca.quantum_safe = false", tenantID).Scan(&summary.NonQuantumSafe)
+	if err := h.db.QueryRow("SELECT COUNT(*) FROM cryptographic_assets ca JOIN inventory_assets ia ON ca.inventory_asset_id = ia.id WHERE ia.tenant_id = $1 AND ca.quantum_safe = false", tenantID).Scan(&summary.NonQuantumSafe); err != nil {
+		h.logger.Error("Failed to count non-quantum-safe assets: ", err)
+	}
 
-	h.db.QueryRow("SELECT COUNT(*) FROM cryptographic_assets ca JOIN inventory_assets ia ON ca.inventory_asset_id = ia.id WHERE ia.tenant_id = $1 AND ca.vulnerability_score > 7", tenantID).Scan(&summary.VulnerableAssets)
+	if err := h.db.QueryRow("SELECT COUNT(*) FROM cryptographic_assets ca JOIN inventory_assets ia ON ca.inventory_asset_id = ia.id WHERE ia.tenant_id = $1 AND ca.vulnerability_score > 7", tenantID).Scan(&summary.VulnerableAssets); err != nil {
+		h.logger.Error("Failed to count vulnerable assets: ", err)
+	}
 
 	c.JSON(http.StatusOK, summary)
 }

@@ -137,7 +137,7 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list frameworks"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var frameworks []map[string]interface{}
 	for rows.Next() {
@@ -177,7 +177,10 @@ func (h *ComplianceHandler) CreateFramework(c *gin.Context) {
 		Framework string `json:"framework" binding:"required"`
 		Scope     string `json:"scope"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	frameworkID := uuid.New()
 
@@ -258,7 +261,10 @@ func (h *ComplianceHandler) UpdateFramework(c *gin.Context) {
 		Status string `json:"status"`
 		Score  int    `json:"score"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	query := `
 		UPDATE compliance_frameworks 
@@ -296,7 +302,7 @@ func (h *ComplianceHandler) ListControls(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list controls"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var controls []ComplianceControl
 	for rows.Next() {
@@ -310,7 +316,9 @@ func (h *ComplianceHandler) ListControls(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		json.Unmarshal(evidence, &control.Evidence)
+		if err := json.Unmarshal(evidence, &control.Evidence); err != nil {
+			continue
+		}
 		controls = append(controls, control)
 	}
 
@@ -467,7 +475,7 @@ func (h *ComplianceHandler) ListReports(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list reports"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	c.JSON(http.StatusOK, gin.H{"reports": []map[string]interface{}{}})
 }
@@ -478,7 +486,10 @@ func (h *ComplianceHandler) GenerateReport(c *gin.Context) {
 		Title     string `json:"title"`
 		Format    string `json:"format"`
 	}
-	c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	reportID := uuid.New()
 
@@ -492,7 +503,10 @@ func (h *ComplianceHandler) GenerateReport(c *gin.Context) {
 
 func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
 	var delveCfg DelveConfig
-	c.ShouldBindJSON(&delveCfg)
+	if err := c.ShouldBindJSON(&delveCfg); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	if delveCfg.APIEndpoint == "" || delveCfg.APIKey == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "API endpoint and API key are required"})
@@ -507,14 +521,14 @@ func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to reach Delve API", "detail": err.Error()})
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Delve API returned error", "status_code": resp.StatusCode})
 		return
 	}
 
 	query := `UPDATE compliance_frameworks SET delve_integration = true WHERE tenant_id = $1`
-	h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
+	_, _ = h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "connected",
@@ -584,7 +598,10 @@ func (h *ComplianceHandler) SyncDelveData(c *gin.Context) {
 
 func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
 	var kertosCfg KertosConfig
-	c.ShouldBindJSON(&kertosCfg)
+	if err := c.ShouldBindJSON(&kertosCfg); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	if kertosCfg.APIEndpoint == "" || kertosCfg.APIKey == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "API endpoint and API key are required"})
@@ -598,14 +615,14 @@ func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to reach Kertos API", "detail": err.Error()})
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Kertos API returned error", "status_code": resp.StatusCode})
 		return
 	}
 
 	query := `UPDATE compliance_frameworks SET kertos_integration = true WHERE tenant_id = $1`
-	h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
+	_, _ = h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "connected",
@@ -698,7 +715,7 @@ func (h *ComplianceHandler) ListRisks(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list risks"})
 		return
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	c.JSON(http.StatusOK, gin.H{"risks": []map[string]interface{}{}})
 }
@@ -707,7 +724,10 @@ func (h *ComplianceHandler) CreateRisk(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 
 	var risk map[string]interface{}
-	c.ShouldBindJSON(&risk)
+	if err := c.ShouldBindJSON(&risk); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	riskID := uuid.New()
 
@@ -826,10 +846,12 @@ func (h *ComplianceHandler) fetchDelveData(endpoint, apiKey string) ([]map[strin
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var data []map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&data)
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, err
+	}
 
 	return data, nil
 }
@@ -843,10 +865,12 @@ func (h *ComplianceHandler) fetchKertosData(endpoint, apiKey string) ([]map[stri
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var data []map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&data)
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, err
+	}
 
 	return data, nil
 }

@@ -369,7 +369,7 @@ LTS Policy:
 ✅ Add CODE_OF_CONDUCT.md (use Contributor Covenant v2.1)
 - Be respectful, inclusive, professional
 - Zero tolerance for harassment
-- Report violations to conduct@rivicq.de
+- Report violations to conduct@rivicq.com
 ```
 
 #### 3. **No Issue Templates**
@@ -407,7 +407,7 @@ LTS Policy:
 ❌ No SLA for security patches
 
 ✅ Create SECURITY.md:
-  - Report to: security@rivicq.de (NOT public issues)
+  - Report to: security@rivicq.com (NOT public issues)
   - Response time: 48 hours acknowledgment, 7 days fix/patch
   - Disclosure policy: 90 days before public disclosure
   - No bug bounty program mentioned (yet?)

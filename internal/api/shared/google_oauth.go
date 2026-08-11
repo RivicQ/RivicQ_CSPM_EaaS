@@ -125,7 +125,7 @@ func GoogleCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
 			return
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		var googleUser GoogleUser
 		if err := json.NewDecoder(resp.Body).Decode(&googleUser); err != nil {

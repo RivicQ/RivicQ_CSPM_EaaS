@@ -138,7 +138,7 @@ func (q *Queries) ListCBOMReports(tenantID string, limit, offset int) ([]CBOMRep
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var reports []CBOMReport
 	for rows.Next() {
@@ -230,7 +230,7 @@ func (q *Queries) ListCryptoAssets(cbomReportID string, limit, offset int) ([]Cr
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var assets []CryptoAsset
 	for rows.Next() {
@@ -294,7 +294,7 @@ func (q *Queries) ListQuantumAttestations(cbomReportID string, limit, offset int
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var attestations []QuantumAttestation
 	for rows.Next() {
@@ -345,7 +345,7 @@ func (q *Queries) ListSecurityEvents(tenantID string, limit, offset int) ([]Secu
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var events []SecurityEvent
 	for rows.Next() {
@@ -397,7 +397,7 @@ func (q *Queries) ListKubernetesClusters(tenantID string, limit, offset int) ([]
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var clusters []KubernetesCluster
 	for rows.Next() {
@@ -461,7 +461,7 @@ func (q *Queries) GetMetricsOverview(tenantID string) (map[string]interface{}, e
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	algorithms := make(map[string]int)
 	for rows.Next() {
