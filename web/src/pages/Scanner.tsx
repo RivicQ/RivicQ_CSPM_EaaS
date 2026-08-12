@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box, Button, Chip, Grid, LinearProgress, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
@@ -18,12 +18,23 @@ import { DEMO_SCAN_FINDINGS, DEMO_SCAN_SCHEDULES } from '../data/workspaceDemo';
 interface ScanJob {
   id: string;
   scanId?: string;
-  status: 'idle' | 'running' | 'completed' | 'failed';
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'pending';
   type: string;
   target: string;
   startedAt?: string;
   findings: number;
   progress: number;
+}
+
+interface ScanFinding {
+  id?: string;
+  severity: string;
+  title: string;
+  asset?: string;
+  target_label?: string;
+  recommendation?: string;
+  remediation?: string;
+  [key: string]: unknown;
 }
 
 const POLL_INTERVAL_MS = 1500;
@@ -36,25 +47,58 @@ const SCAN_TYPE_INFO: Record<string, string> = {
   compliance: 'Maps findings to ISO 27001, SOC 2, PCI-DSS, and PQC controls.',
 };
 
+const mapApiScan = (s: any): ScanJob => ({
+  id: s.id ?? s.scan_id,
+  scanId: s.scan_id ?? s.id,
+  status: s.status ?? 'pending',
+  type: s.scan_type ?? 'cbom',
+  target: s.target ?? '',
+  startedAt: s.created_at,
+  findings: s.findings?.total ?? 0,
+  progress: s.progress ?? (s.status === 'completed' ? 100 : 0),
+});
+
 const Scanner: React.FC = () => {
   const [tab, setTab] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const [scanType, setScanType] = useState<'quick' | 'full' | 'compliance' | 'cbom'>('cbom');
-  const [scanTarget, setScanTarget] = useState('production/*');
-  const [scanJobs, setScanJobs] = useState<ScanJob[]>([
-    { id: 'demo-1', status: 'completed', type: 'cbom', target: 'aws-prod-accounts', startedAt: new Date(Date.now() - 3600000).toISOString(), findings: 47, progress: 100 },
-    { id: 'demo-2', status: 'completed', type: 'compliance', target: 'k8s/cluster-prod', startedAt: new Date(Date.now() - 86400000).toISOString(), findings: 12, progress: 100 },
-  ]);
+  const [scanTarget, setScanTarget] = useState('./');
+  const [scanJobs, setScanJobs] = useState<ScanJob[]>([]);
+  const [liveFindings, setLiveFindings] = useState<ScanFinding[]>([]);
   const [scanProgress, setScanProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const pollTimerRef = useRef<number | null>(null);
   const pollAttemptsRef = useRef(0);
 
-  const { data: benchmarks } = useQuery({
+  const { data: scanList, refetch: refetchScans } = useQuery({
+    queryKey: ['cbom-scans'],
+    queryFn: () => cbomService.listScans().then((r) => r.data).catch(() => null),
+    refetchInterval: 15_000,
+  });
+
+  const { data: findingsData, refetch: refetchFindings } = useQuery({
+    queryKey: ['cbom-findings'],
+    queryFn: () => cbomService.getScanFindings().then((r) => r.data).catch(() => null),
+    refetchInterval: 15_000,
+  });
+
+  const { data: benchmarksRaw } = useQuery({
     queryKey: ['scanner-benchmarks'],
     queryFn: () => benchmarkService.getSummary().then((r) => r.data).catch(() => null),
     retry: 0,
   });
+
+  useEffect(() => {
+    if (scanList?.scans?.length) {
+      setScanJobs(scanList.scans.map(mapApiScan));
+    }
+  }, [scanList]);
+
+  useEffect(() => {
+    if (findingsData?.findings?.length) {
+      setLiveFindings(findingsData.findings);
+    }
+  }, [findingsData]);
 
   useEffect(() => () => { if (pollTimerRef.current) window.clearInterval(pollTimerRef.current); }, []);
 
@@ -65,6 +109,11 @@ const Scanner: React.FC = () => {
   const updateJob = (jobId: string, updater: (job: ScanJob) => ScanJob) => {
     setScanJobs((prev) => prev.map((job) => (job.id === jobId ? updater(job) : job)));
   };
+
+  const refreshScanData = useCallback(() => {
+    refetchScans();
+    refetchFindings();
+  }, [refetchScans, refetchFindings]);
 
   const pollScanStatus = (jobId: string, scanId: string) => {
     clearPolling();
@@ -81,9 +130,16 @@ const Scanner: React.FC = () => {
           ...job,
           status: status === 'failed' ? 'failed' : status === 'completed' ? 'completed' : 'running',
           progress,
-          findings: data.findings?.total ?? data.findings?.count ?? job.findings,
+          findings: data.findings?.total ?? job.findings,
         }));
-        if (status === 'completed' || status === 'failed') { clearPolling(); setIsScanning(false); }
+        if (data.finding_items?.length) {
+          setLiveFindings(data.finding_items);
+        }
+        if (status === 'completed' || status === 'failed') {
+          clearPolling();
+          setIsScanning(false);
+          refreshScanData();
+        }
       } catch {
         if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
           clearPolling(); setIsScanning(false);
@@ -96,7 +152,7 @@ const Scanner: React.FC = () => {
 
   const startScan = async () => {
     const target = scanTarget.trim();
-    if (!target) { setError('Specify a scan target.'); return; }
+    if (!target) { setError('Specify a scan target (hostname, URL, or local path like ./).'); return; }
     clearPolling(); setIsScanning(true); setError(null); setScanProgress(0);
     const newJob: ScanJob = { id: `scan-${Date.now()}`, status: 'running', type: scanType, target, startedAt: new Date().toISOString(), findings: 0, progress: 0 };
     setScanJobs((prev) => [newJob, ...prev]);
@@ -104,22 +160,12 @@ const Scanner: React.FC = () => {
     try {
       const response = await cbomService.triggerScan(target, scanType);
       const scanId = response.data?.scan_id ?? response.data?.scanId ?? newJob.id;
-      updateJob(newJob.id, (job) => ({ ...job, scanId }));
-      pollScanStatus(newJob.id, scanId);
+      updateJob(newJob.id, (job) => ({ ...job, scanId, id: scanId }));
+      pollScanStatus(scanId, scanId);
     } catch {
-      clearPolling();
-      setError('Live scan unavailable — showing demo progress.');
-      let p = 0;
-      const demoInterval = window.setInterval(() => {
-        p += 15;
-        setScanProgress(p);
-        updateJob(newJob.id, (job) => ({ ...job, progress: p, findings: Math.floor(p / 3) }));
-        if (p >= 100) {
-          window.clearInterval(demoInterval);
-          updateJob(newJob.id, (job) => ({ ...job, status: 'completed', findings: 23, progress: 100 }));
-          setIsScanning(false);
-        }
-      }, 400);
+      clearPolling(); setIsScanning(false);
+      setError('Could not reach the CBOM scan API. Start the backend on :9090 or use GitHub Pages demo mode.');
+      setScanJobs((prev) => prev.filter((j) => j.id !== newJob.id));
     }
   };
 
@@ -130,10 +176,17 @@ const Scanner: React.FC = () => {
     return <Schedule color="disabled" fontSize="small" />;
   };
 
-  const bench = benchmarks ?? { throughput_rps: 1240, p95_latency_ms: 182, scan_time_seconds: 8.4, coverage_pct: 94 };
+  const benchList = benchmarksRaw?.benchmarks ?? [];
+  const bench = benchList[0] ?? benchmarksRaw ?? { throughput_rps: 1240, p95_latency_ms: 182, scan_time_seconds: 8.4, coverage_pct: 94 };
+
+  const findings: ScanFinding[] = liveFindings.length
+    ? liveFindings
+    : (findingsData?.source === 'cbom_scans' ? [] : DEMO_SCAN_FINDINGS as ScanFinding[]);
+  const totalFindings = findings.length || scanJobs.reduce((s, j) => s + j.findings, 0);
+  const completedScans = scanJobs.filter((j) => j.status === 'completed').length;
 
   return (
-    <PageFrame eyebrow="Discovery" title="CBOM Scanner" subtitle="Generate cryptographic bills of materials, track findings, and schedule continuous discovery." badge={isScanning ? 'Scanning' : 'Ready'}>
+    <PageFrame eyebrow="Discovery" title="CBOM Scanner" subtitle="Detect cryptographic material via TLS, SSH, HTTP, and SBOM discovery — results feed inventory and analytics." badge={isScanning ? 'Scanning' : 'Ready'}>
       {error && (
         <Box sx={{ mb: 2.5, p: 1.5, borderRadius: `${designSystem.radius.md}px`, bgcolor: 'warning.main', color: 'warning.contrastText' }}>
           <Typography variant="body2">{error}</Typography>
@@ -141,8 +194,8 @@ const Scanner: React.FC = () => {
       )}
 
       <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
-        <Grid item xs={6} sm={3}><StatCard label="Scans today" value={scanJobs.filter((j) => j.status === 'completed').length + 3} icon={<History />} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
-        <Grid item xs={6} sm={3}><StatCard label="Findings" value={scanJobs.reduce((s, j) => s + j.findings, 0) + DEMO_SCAN_FINDINGS.length} icon={<BugReport />} accent={tokens.colors.crypto.high} delay={1} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard label="Completed scans" value={completedScans} icon={<History />} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard label="Findings" value={totalFindings} icon={<BugReport />} accent={tokens.colors.crypto.high} delay={1} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Coverage" value={`${bench.coverage_pct ?? 94}%`} icon={<Security />} accent={tokens.colors.crypto.low} delay={2} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Scan time" value={`${bench.scan_time_seconds ?? 8.4}s`} icon={<Speed />} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
       </Grid>
@@ -165,12 +218,12 @@ const Scanner: React.FC = () => {
           <TextField
             fullWidth
             label="Scan Target"
-            placeholder="myrepo/, ghcr.io/org/image:tag, production/*"
+            placeholder="example.com, https://host:443, ./my-repo"
             value={scanTarget}
             onChange={(e) => setScanTarget(e.target.value)}
             disabled={isScanning}
             sx={{ mb: 2 }}
-            helperText="Repository path, container image, cloud account glob, or hostname"
+            helperText="Hostname, URL, local repo path (./), or filesystem path for SBOM crypto discovery"
           />
           <ToggleButtonGroup exclusive value={scanType} onChange={(_, v) => v && setScanType(v)} size="small" sx={{ mb: 2, flexWrap: 'wrap' }}>
             {(['cbom', 'quick', 'full', 'compliance'] as const).map((type) => (
@@ -189,14 +242,17 @@ const Scanner: React.FC = () => {
               <LinearProgress variant="determinate" value={scanProgress} sx={{ height: 8, borderRadius: 4 }} />
             </Box>
           )}
-          <Button variant="contained" startIcon={<PlayArrow />} onClick={startScan} disabled={isScanning} size="large" sx={{ background: designSystem.gradient.brand, px: 3 }}>
-            {isScanning ? 'Scanning…' : 'Start Scan'}
-          </Button>
+          <Stack direction="row" spacing={1.5}>
+            <Button variant="contained" startIcon={<PlayArrow />} onClick={startScan} disabled={isScanning} size="large" sx={{ background: designSystem.gradient.brand, px: 3 }}>
+              {isScanning ? 'Scanning…' : 'Start CBOM Scan'}
+            </Button>
+            <Button variant="outlined" startIcon={<Refresh />} onClick={refreshScanData}>Refresh</Button>
+          </Stack>
         </TabPanel>
 
         <TabPanel value={tab} index={1}>
           {scanJobs.length === 0 ? (
-            <EmptyState icon={<Security />} title="No scans yet" description="Configure and run your first CBOM scan." />
+            <EmptyState icon={<Security />} title="No scans yet" description="Run a CBOM scan against a hostname or local repository." action={{ label: 'New Scan', onClick: () => setTab(0) }} />
           ) : (
             <Stack spacing={1.25}>
               {scanJobs.map((job) => (
@@ -217,18 +273,22 @@ const Scanner: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tab} index={2}>
-          <Stack spacing={1.5}>
-            {DEMO_SCAN_FINDINGS.map((f) => (
-              <Box key={f.id} sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider', borderLeft: 4, borderLeftColor: f.severity === 'critical' ? 'error.main' : f.severity === 'high' ? 'warning.main' : 'info.main' }}>
-                <Stack direction="row" spacing={1} alignItems="center" mb={0.5}>
-                  <Chip label={f.severity.toUpperCase()} size="small" color={f.severity === 'critical' ? 'error' : f.severity === 'high' ? 'warning' : 'default'} />
-                  <Typography fontWeight={700}>{f.title}</Typography>
-                </Stack>
-                <Typography variant="body2" color="text.secondary">Asset: {f.asset}</Typography>
-                <Typography variant="body2" sx={{ mt: 1 }}>{f.recommendation}</Typography>
-              </Box>
-            ))}
-          </Stack>
+          {findings.length === 0 ? (
+            <EmptyState icon={<BugReport />} title="No findings yet" description="Complete a CBOM scan to populate cryptographic findings from TLS, SSH, HTTP, and SBOM discovery." action={{ label: 'Run Scan', onClick: () => setTab(0) }} />
+          ) : (
+            <Stack spacing={1.5}>
+              {findings.map((f, idx) => (
+                <Box key={f.id ?? `finding-${idx}`} sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider', borderLeft: 4, borderLeftColor: f.severity === 'critical' ? 'error.main' : f.severity === 'high' ? 'warning.main' : 'info.main' }}>
+                  <Stack direction="row" spacing={1} alignItems="center" mb={0.5}>
+                    <Chip label={(f.severity || 'info').toUpperCase()} size="small" color={f.severity === 'critical' ? 'error' : f.severity === 'high' ? 'warning' : 'default'} />
+                    <Typography fontWeight={700}>{f.title}</Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary">Asset: {f.asset ?? f.target_label ?? '—'}</Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>{f.recommendation ?? f.remediation}</Typography>
+                </Box>
+              ))}
+            </Stack>
+          )}
         </TabPanel>
 
         <TabPanel value={tab} index={3}>
@@ -253,8 +313,8 @@ const Scanner: React.FC = () => {
             {[
               { label: 'Throughput', value: `${bench.throughput_rps ?? 1240} req/s`, hint: 'Scanner API capacity' },
               { label: 'P95 latency', value: `${bench.p95_latency_ms ?? 182} ms`, hint: 'End-to-end scan orchestration' },
-              { label: 'Scan duration', value: `${bench.scan_time_seconds ?? 8.4}s`, hint: '10k asset reference set' },
-              { label: 'Coverage', value: `${bench.coverage_pct ?? 94}%`, hint: 'Connected cloud accounts' },
+              { label: 'Scan duration', value: `${bench.scan_time_seconds ?? 8.4}s`, hint: 'Per reference asset set' },
+              { label: 'Coverage', value: `${bench.coverage_pct ?? 94}%`, hint: 'Connected targets' },
             ].map((item) => (
               <Grid item xs={12} sm={6} key={item.label}>
                 <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover' }}>

@@ -784,6 +784,7 @@ func GetCBOMScanStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 				"low":            r.Summary.Low,
 				"quantum_unsafe": r.Summary.QuantumUnsafe,
 			}
+			resp["finding_items"] = findingsToGin(r.Findings)
 			resp["summary"] = gin.H{
 				"total":        r.Summary.TotalComponents,
 				"at_risk":      r.Summary.AtRisk,

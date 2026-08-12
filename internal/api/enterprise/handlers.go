@@ -233,6 +233,8 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	// Scan flow (shared with OSS — scanner, Quantum BOM)
 	scansGroup := router.Group("/scans")
 	{
+		scansGroup.GET("", shared.ListCBOMScans(db, logger))
+		scansGroup.GET("/findings", shared.ScanFindingsHandler(logger))
 		scansGroup.POST("", shared.TriggerCBOMScan(db, logger))
 		scansGroup.GET("/:id", shared.GetCBOMScanStatus(db, logger))
 		scansGroup.GET("/:id/report", shared.GetCBOMScanReport(db, logger))

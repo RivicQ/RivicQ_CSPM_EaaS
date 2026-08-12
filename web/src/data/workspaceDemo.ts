@@ -60,12 +60,18 @@ export const DEMO_FORECAST = [
 
 export function normalizeAssets(data: unknown): any[] {
   const list = Array.isArray(data) ? data : ((data as any)?.assets ?? (data as any)?.items ?? []);
-  return list.length ? list : DEMO_ASSETS;
+  if (list.length) return list;
+  if ((data as any)?.source === 'cbom_scans') return [];
+  if ((data as any)?.demo_mode === true) return DEMO_ASSETS;
+  return DEMO_ASSETS;
 }
 
 export function normalizeSummary(data: unknown): typeof DEMO_INVENTORY_SUMMARY {
   if (!data || typeof data !== 'object') return DEMO_INVENTORY_SUMMARY;
   const d = data as Record<string, unknown>;
+  if (d.source === 'cbom_scans' && Number(d.total_assets ?? 0) === 0) {
+    return { ...DEMO_INVENTORY_SUMMARY, total_assets: 0, quantum_safe_count: 0, non_quantum_safe: 0, vulnerable_assets: 0, compliance_score: 0 };
+  }
   const rawCategory = (d.by_category ?? d.byCategory ?? {}) as Record<string, number>;
   const rawCloud = (d.by_cloud_provider ?? d.byCloudProvider ?? {}) as Record<string, number>;
   return {

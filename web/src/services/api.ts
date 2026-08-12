@@ -403,6 +403,18 @@ export const cbomService = {
   getScanStatus: (scanId: string) =>
     api.get(`/scans/${scanId}`),
 
+  listScans: () =>
+    api.get('/scans'),
+
+  getScanReport: (scanId: string) =>
+    api.get(`/scans/${scanId}/report`),
+
+  getScanFindings: () =>
+    api.get('/scans/findings'),
+
+  getScanQBOM: (scanId: string) =>
+    api.get(`/scans/${scanId}/qbom`),
+
   // Get CBOM for a specific asset
   getAssetBOM: (assetId: string) =>
     api.get(`/assets/${assetId}/bom`),

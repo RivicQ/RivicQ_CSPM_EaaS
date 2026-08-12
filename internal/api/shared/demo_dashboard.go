@@ -12,10 +12,10 @@ import (
 func SetupDashboardDemoRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	inventory := router.Group("/inventory")
 	{
-		inventory.GET("/assets", demoInventoryAssets(logger))
+		inventory.GET("/assets", InventoryAssetsHandler(logger, demoInventoryAssets(logger)))
 		inventory.GET("/assets/:id", demoInventoryAsset(logger))
-		inventory.GET("/summary", demoInventorySummary(logger))
-		inventory.GET("/crypto", demoInventoryAssets(logger))
+		inventory.GET("/summary", InventorySummaryHandler(logger, demoInventorySummary(logger)))
+		inventory.GET("/crypto", InventoryAssetsHandler(logger, demoInventoryAssets(logger)))
 	}
 
 	router.GET("/cloud/resources/summary", demoCloudResourcesSummary(logger))

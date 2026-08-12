@@ -17,7 +17,7 @@ import { GlassCard, EmptyState, DetailTabs, TabPanel } from '../components/ui';
 import { metricValueSx } from '../theme/designSystem';
 import { categoryColor } from '../theme/chartTheme';
 import { tokens } from '../theme/tokens';
-import { DEMO_ASSETS, normalizeAssets, normalizeSummary } from '../data/workspaceDemo';
+import { normalizeAssets, normalizeSummary } from '../data/workspaceDemo';
 
 const CATEGORY_META: Record<string, { color: string; desc: string }> = {
   cryptographic: { color: categoryColor('cryptographic'), desc: 'Keys, certs, TLS, and HSM material' },
@@ -237,7 +237,6 @@ const Assets: React.FC = () => {
           <Stack spacing={1.5}>
             {assets
               .filter((a) => ['HIGH', 'CRITICAL'].includes((a.risk_level || a.riskLevel || '').toUpperCase()))
-              .concat(DEMO_ASSETS.filter((d) => !assets.find((a) => a.id === d.id)))
               .slice(0, 8)
               .map((asset) => (
                 <Box key={asset.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', borderLeft: 4, borderColor: getRiskColor(asset.risk_level || asset.riskLevel) === 'error' ? 'error.main' : 'warning.main' }}>
