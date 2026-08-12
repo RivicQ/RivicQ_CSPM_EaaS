@@ -203,11 +203,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [completeAuth]);
 
   const logout = React.useCallback(() => {
+    if (backendReachable && token) {
+      authService.logout().catch(() => undefined);
+    }
     if (isSupabaseConfigured) {
       supabaseAuthService.signOut().catch(() => undefined);
     }
     persist(null, null, edition);
-  }, [edition, persist]);
+  }, [backendReachable, edition, persist, token]);
 
   const setEdition = React.useCallback((nextEdition: Edition) => {
     persist(token, user, nextEdition);

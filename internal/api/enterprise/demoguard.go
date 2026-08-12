@@ -7,6 +7,19 @@ import (
 )
 
 // demoAssetsList returns demo asset data for demo mode.
+func demoInventorySummary() gin.H {
+	return gin.H{
+		"total_assets":       150,
+		"compliance_score":   74,
+		"by_category":        gin.H{"cryptographic": 89, "ai": 12, "hardware": 24, "software": 18, "infrastructure": 7},
+		"by_cloud_provider":  gin.H{"aws": 80, "gcp": 45, "ibm_cloud": 20, "azure": 5},
+		"quantum_safe_count": 94,
+		"non_quantum_safe":   56,
+		"vulnerable_assets":  23,
+		"last_scan_time":     time.Now().UTC().Format(time.RFC3339),
+	}
+}
+
 func demoAssetsList() gin.H {
 	return gin.H{
 		"assets": []gin.H{

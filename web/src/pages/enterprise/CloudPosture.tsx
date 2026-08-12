@@ -9,20 +9,12 @@ import {
 import {
   Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
+import { chartTheme, providerColor as themedProviderColor } from '../../theme/chartTheme';
 import { tokens } from '../../theme/tokens';
 import PageFrame from '../../components/PageFrame';
 import { postureService } from '../../services/api';
 
-const PROVIDER_COLORS: Record<string, string> = {
-  aws: '#FF9900',
-  azure: '#0078D4',
-  gcp: '#4285F4',
-  ibm: '#0f62fe',
-  ibm_cloud: '#0f62fe',
-  kubernetes: '#326ce5',
-};
-
-const providerColor = (provider: string) => PROVIDER_COLORS[provider] || tokens.colors.text.muted;
+const providerColor = (provider: string) => themedProviderColor(provider);
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: tokens.colors.crypto.critical,
@@ -163,7 +155,7 @@ const CloudPosture: React.FC = () => {
           },
           {
             title: 'Accounts Monitored', icon: <CloudDone />, color: tokens.colors.crypto.low,
-            value: String(accounts.length), sub: `${Object.keys(PROVIDER_COLORS).length - 1} cloud providers`,
+            value: String(accounts.length), sub: `${Object.keys(chartTheme.providers).length} cloud providers`,
           },
         ].map((kpi) => (
           <Grid item xs={12} sm={6} md={3} key={kpi.title}>

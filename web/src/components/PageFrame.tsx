@@ -1,5 +1,13 @@
 import React from 'react';
-import { Box, Chip, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
+import { motion } from 'framer-motion';
+import designSystem, {
+  commandCenterCardSx,
+  commandCenterEyebrowSx,
+  commandCenterTitleSx,
+  proBlueActionStackSx,
+  proBlueBadgeSx,
+} from '../theme/designSystem';
 
 type PageFrameProps = {
   eyebrow?: string;
@@ -9,6 +17,7 @@ type PageFrameProps = {
   action?: React.ReactNode;
   secondaryAction?: React.ReactNode;
   children?: React.ReactNode;
+  creative?: boolean;
 };
 
 const PageFrame: React.FC<PageFrameProps> = ({
@@ -19,72 +28,105 @@ const PageFrame: React.FC<PageFrameProps> = ({
   action,
   secondaryAction,
   children,
+  creative = true,
 }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const blue = designSystem.proBlue;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box
+        component={motion.div}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
         sx={{
-          position: 'relative',
-          overflow: 'hidden',
-          background: isDark
-            ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, #1e293b 60%, #0f172a 100%)`
-            : `linear-gradient(135deg, #ffffff 0%, #eef2ff 55%, #f0fdf4 100%)`,
-          border: 1,
-          borderColor: isDark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.14)',
-          borderRadius: 3,
-          boxShadow: isDark ? '0 20px 60px rgba(0,0,0,0.35)' : '0 1px 2px rgba(15,23,42,0.04), 0 12px 32px rgba(79,70,229,0.08)',
+          ...(creative ? commandCenterCardSx : {
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: `${designSystem.radius.xl}px`,
+            border: 1,
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
+          }),
+          borderRadius: `${designSystem.radius.xl}px`,
         }}
       >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: -80,
-            right: -40,
-            width: 260,
-            height: 260,
-            borderRadius: '50%',
-            background: isDark ? 'radial-gradient(circle, rgba(129,140,248,0.18), transparent 70%)' : 'radial-gradient(circle, rgba(99,102,241,0.14), transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
-        <Box sx={{ p: { xs: 2.5, md: 3.25 }, position: 'relative' }}>
-          <Stack spacing={1.5}>
-            {eyebrow && (
+        {creative && (
+          <>
+            <Box sx={{ position: 'absolute', inset: 0, background: blue.commandGlow, pointerEvents: 'none' }} />
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                opacity: 0.04,
+                backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+                backgroundSize: '48px 48px',
+                pointerEvents: 'none',
+              }}
+            />
+          </>
+        )}
+        <Box sx={{ p: { xs: 2.5, md: 3 }, position: 'relative' }}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            justifyContent="space-between"
+            alignItems={{ xs: 'flex-start', md: 'flex-end' }}
+            spacing={2}
+          >
+            <Box>
+              {(eyebrow || badge) && (
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.25 }}>
+                  {eyebrow && (
+                    <Typography sx={creative ? commandCenterEyebrowSx : { ...commandCenterEyebrowSx, color: 'primary.main' }}>
+                      {eyebrow}
+                    </Typography>
+                  )}
+                  {badge && (
+                    <Box sx={creative ? proBlueBadgeSx : {
+                      ...proBlueBadgeSx,
+                      bgcolor: 'action.selected',
+                      color: 'primary.main',
+                      borderColor: 'divider',
+                    }}
+                    >
+                      {badge}
+                    </Box>
+                  )}
+                </Stack>
+              )}
               <Typography
-                variant="overline"
-                sx={{ letterSpacing: 3, color: 'primary.main', fontWeight: 700 }}
+                variant="h4"
+                sx={creative ? commandCenterTitleSx : { ...commandCenterTitleSx, color: 'text.primary' }}
               >
-                {eyebrow}
+                {title}
               </Typography>
-            )}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 2, flexWrap: 'wrap' }}>
-              <Box>
-                <Typography variant="h4" fontWeight={800} sx={{ lineHeight: 1.1, letterSpacing: '-0.02em' }}>
-                  {title}
+              {subtitle && (
+                <Typography
+                  sx={{
+                    color: creative ? blue.textSecondary : 'text.secondary',
+                    mt: 1,
+                    maxWidth: 680,
+                    lineHeight: 1.65,
+                    fontSize: '0.9375rem',
+                  }}
+                >
+                  {subtitle}
                 </Typography>
-                {subtitle && (
-                  <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1, maxWidth: 880 }}>
-                    {subtitle}
-                  </Typography>
-                )}
-              </Box>
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" alignItems="center">
-                {badge && (
-                  <Chip
-                    label={badge}
-                    color="primary"
-                    variant="outlined"
-                    size="small"
-                    sx={{ fontWeight: 700 }}
-                  />
-                )}
+              )}
+            </Box>
+            {(action || secondaryAction) && (
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                flexWrap="wrap"
+                alignItems="center"
+                sx={{ flexShrink: 0, ...(creative ? proBlueActionStackSx : {}) }}
+              >
                 {secondaryAction}
                 {action}
               </Stack>
-            </Box>
+            )}
           </Stack>
         </Box>
       </Box>

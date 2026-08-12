@@ -1,0 +1,97 @@
+/* RivicQ CryptoBOM — Design Tokens (aligned with web/src/theme/tokens.ts) */
+:root {
+  /* Brand */
+  --rivicq-50: #eef2ff;
+  --rivicq-100: #e0e7ff;
+  --rivicq-200: #c7d2fe;
+  --rivicq-300: #a5b4fc;
+  --rivicq-400: #818cf8;
+  --rivicq-500: #6366f1;
+  --rivicq-600: #4f46e5;
+  --rivicq-700: #4338ca;
+  --rivicq-800: #3730a3;
+  --rivicq-900: #312e81;
+
+  --gold-400: #fbbf24;
+  --gold-500: #f59e0b;
+  --gold-600: #d97706;
+
+  --quantum: #7c3aed;
+  --quantum-light: #a78bfa;
+  --success: #059669;
+  --success-light: #10b981;
+  --critical: #dc2626;
+  --high: #ea580c;
+  --medium: #ca8a04;
+
+  --brand-gradient: linear-gradient(135deg, #4f46e5 0%, #818cf8 55%, #059669 100%);
+  --brand-gradient-dark: linear-gradient(135deg, #4338ca 0%, #6366f1 40%, #7c3aed 100%);
+  --hero-gradient: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(79, 70, 229, 0.35), transparent),
+                   radial-gradient(ellipse 60% 50% at 80% 50%, rgba(124, 58, 237, 0.15), transparent),
+                   radial-gradient(ellipse 50% 40% at 10% 80%, rgba(5, 150, 105, 0.12), transparent);
+
+  /* Surfaces — dark theme default for marketing */
+  --bg-base: #070b14;
+  --bg-elevated: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-card: rgba(15, 23, 42, 0.72);
+  --bg-card-hover: rgba(30, 41, 59, 0.85);
+  --bg-glass: rgba(15, 23, 42, 0.55);
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --border: rgba(148, 163, 184, 0.12);
+  --border-strong: rgba(148, 163, 184, 0.22);
+
+  /* Typography */
+  --font-sans: "Inter", "SF Pro Text", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
+
+  /* Shadows & glows */
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.35);
+  --glow-blue: 0 0 40px rgba(79, 70, 229, 0.25);
+  --glow-purple: 0 0 40px rgba(124, 58, 237, 0.2);
+  --glow-green: 0 0 40px rgba(5, 150, 105, 0.2);
+
+  /* Layout */
+  --nav-height: 72px;
+  --max-width: 1280px;
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}

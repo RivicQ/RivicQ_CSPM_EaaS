@@ -1,30 +1,11 @@
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  TextField,
-  Button,
-  Switch,
-  FormControlLabel,
-  Divider,
-  Avatar,
-  Chip,
-  Stack,
-} from '@mui/material';
-import {
-  Save,
-  Security,
-  Notifications,
-  Person,
-  Cloud,
-  WorkspacePremium,
-} from '@mui/icons-material';
+import { Avatar, Box, Button, Chip, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
+import { Save, Security, Notifications, Person, Cloud, WorkspacePremium } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { isEnterpriseEdition } from '../config/editions';
 import PageFrame from '../components/PageFrame';
+import { GlassCard } from '../components/ui';
+import designSystem from '../theme/designSystem';
 
 const Settings: React.FC = () => {
   const { user, edition } = useAuth();
@@ -32,106 +13,86 @@ const Settings: React.FC = () => {
   const email = user?.email || 'unknown@rivicq.com';
 
   return (
-    <PageFrame
-      eyebrow="Profile & Access"
-      title="Settings"
-      subtitle="Manage your profile, security defaults, and connected cloud integrations from one clean workspace."
-      badge={edition.toUpperCase()}
-    >
-      <Grid container spacing={3}>
+    <PageFrame eyebrow="Profile & Access" title="Settings" subtitle="Manage your profile, security defaults, and connected cloud integrations." badge={edition.toUpperCase()}>
+      <Grid container spacing={2.5}>
         <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
-            <CardContent sx={{ p: 3 }}>
-              <Stack spacing={2.5}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Person color="primary" />
-                  <Typography variant="h6">Profile</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main' }}>{displayName.charAt(0).toUpperCase()}</Avatar>
-                  <Box>
-                    <Typography variant="body1" fontWeight="medium">{displayName}</Typography>
-                    <Typography variant="body2" color="text.secondary">{email}</Typography>
-                    <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                      <Chip label={edition.toUpperCase()} size="small" />
-                      <Chip label={user?.role || 'workspace-user'} size="small" variant="outlined" />
-                    </Stack>
-                  </Box>
-                </Box>
-                <TextField fullWidth label="Display Name" defaultValue={displayName} />
-                <TextField fullWidth label="Email" defaultValue={email} />
-                <Button variant="contained" startIcon={<Save />}>Save Changes</Button>
+          <GlassCard glow="#6366f1" delay={0}>
+            <Stack spacing={2.5}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Person color="primary" fontSize="small" />
+                <Typography variant="subtitle1" fontWeight={700}>Profile</Typography>
               </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
-            <CardContent sx={{ p: 3 }}>
-              <Stack spacing={2.5}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Security color="primary" />
-                  <Typography variant="h6">Security</Typography>
-                </Box>
-                <FormControlLabel control={<Switch defaultChecked />} label="Two-Factor Authentication" />
-                <Divider />
-                <FormControlLabel control={<Switch defaultChecked />} label="Email Notifications" />
-                <Divider />
-                <FormControlLabel control={<Switch />} label="Session Timeout (30 minutes)" />
-                <Divider />
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main', fontWeight: 700 }}>{displayName.charAt(0).toUpperCase()}</Avatar>
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom>Workspace mode</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {edition === 'enterprise'
-                      ? 'Enterprise mode enables compliance, cloud governance, quantum attestation, and HSM controls.'
-                      : edition === 'professional'
-                        ? 'Professional mode enables compliance, multi-cloud posture, and the full security module suite.'
-                        : 'Community mode focuses on inventory, scanner, and local developer workflows.'}
-                  </Typography>
+                  <Typography fontWeight={600}>{displayName}</Typography>
+                  <Typography variant="body2" color="text.secondary">{email}</Typography>
+                  <Stack direction="row" spacing={0.75} sx={{ mt: 1 }}>
+                    <Chip label={edition} size="small" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
+                    <Chip label={user?.role || 'admin'} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+                  </Stack>
                 </Box>
               </Stack>
-            </CardContent>
-          </Card>
+              <TextField fullWidth label="Display Name" defaultValue={displayName} size="small" />
+              <TextField fullWidth label="Email" defaultValue={email} size="small" />
+              <Button variant="contained" startIcon={<Save />}>Save Changes</Button>
+            </Stack>
+          </GlassCard>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <Cloud color="primary" />
-                <Typography variant="h6">Cloud Integrations</Typography>
-              </Box>
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                <Chip label="AWS Connected" color="success" icon={<Cloud />} />
-                <Chip label="GCP Connected" color="success" icon={<Cloud />} />
-                {isEnterpriseEdition(edition) && <Chip label="IBM Cloud Connected" color="success" icon={<Cloud />} />}
+          <GlassCard glow="#7c3aed" delay={1}>
+            <Stack spacing={2}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Security color="secondary" fontSize="small" />
+                <Typography variant="subtitle1" fontWeight={700}>Security</Typography>
               </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 4, border: '1px solid rgba(148,163,184,0.16)' }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <Notifications color="primary" />
-                <Typography variant="h6">Notifications</Typography>
-              </Box>
-              <FormControlLabel control={<Switch defaultChecked />} label="Security Alerts" />
-              <Divider sx={{ my: 2 }} />
-              <FormControlLabel control={<Switch defaultChecked />} label="Compliance Updates" />
-              <Divider sx={{ my: 2 }} />
-              <FormControlLabel control={<Switch defaultChecked />} label="Quantum Readiness Alerts" />
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <WorkspacePremium color="secondary" />
-                <Typography variant="body2" color="text.secondary">
-                  Profile updates stay local until you save them to the workspace.
+              <FormControlLabel control={<Switch defaultChecked />} label="Two-Factor Authentication" />
+              <Divider />
+              <FormControlLabel control={<Switch defaultChecked />} label="Email Notifications" />
+              <Divider />
+              <FormControlLabel control={<Switch />} label="Session Timeout (30 min)" />
+              <Box sx={{ p: 1.5, borderRadius: `${designSystem.radius.sm}px`, bgcolor: 'action.hover' }}>
+                <Typography variant="caption" color="text.secondary">
+                  {isEnterpriseEdition(edition) ? 'Enterprise mode — full module catalog enabled.' : 'Community mode — upgrade for enterprise modules.'}
                 </Typography>
               </Box>
-            </CardContent>
-          </Card>
+            </Stack>
+          </GlassCard>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <GlassCard delay={2}>
+            <Stack spacing={2}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Cloud color="primary" fontSize="small" />
+                <Typography variant="subtitle1" fontWeight={700}>Cloud Integrations</Typography>
+              </Stack>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                <Chip icon={<Cloud />} label="AWS Connected" color="success" variant="outlined" size="small" />
+                <Chip icon={<Cloud />} label="GCP Connected" color="success" variant="outlined" size="small" />
+              </Stack>
+            </Stack>
+          </GlassCard>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <GlassCard delay={3}>
+            <Stack spacing={2}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Notifications color="primary" fontSize="small" />
+                <Typography variant="subtitle1" fontWeight={700}>Notifications</Typography>
+              </Stack>
+              <FormControlLabel control={<Switch defaultChecked />} label="Security Alerts" />
+              <FormControlLabel control={<Switch defaultChecked />} label="Compliance Updates" />
+              <FormControlLabel control={<Switch defaultChecked />} label="Quantum Readiness Alerts" />
+              {!isEnterpriseEdition(edition) && (
+                <Button variant="outlined" startIcon={<WorkspacePremium />} size="small" sx={{ alignSelf: 'flex-start' }}>
+                  Upgrade to Enterprise
+                </Button>
+              )}
+            </Stack>
+          </GlassCard>
         </Grid>
       </Grid>
     </PageFrame>

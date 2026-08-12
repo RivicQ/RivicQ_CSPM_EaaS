@@ -123,15 +123,25 @@ export const authService = {
 
   editions: () => api.get('/auth/editions'),
 
-  googleLogin: () => api.get('/auth/google/login'),
+  googleLogin: (edition?: Edition) =>
+    api.get('/auth/google/login', { params: { edition: edition === 'community' ? 'oss' : edition } }),
+
+  googleExchange: (data: { code: string; state: string }) =>
+    api.post('/auth/google/exchange', data),
 
   googleStatus: () => api.get('/auth/google/status'),
 
-  githubLogin: () => api.get('/auth/github/login'),
+  githubLogin: (edition?: Edition) =>
+    api.get('/auth/github/login', { params: { edition: edition === 'community' ? 'oss' : edition } }),
 
   githubStatus: () => api.get('/auth/github/status'),
 
-  demo: (edition?: Edition) => api.get('/auth/demo', { params: { edition } }),
+  providers: () => api.get('/auth/providers'),
+
+  logout: () => api.post('/auth/logout'),
+
+  demo: (edition?: Edition) =>
+    api.get('/auth/demo', { params: { edition: edition === 'community' ? 'oss' : edition } }),
 };
 
 export const complianceService = {

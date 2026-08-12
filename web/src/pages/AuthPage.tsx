@@ -44,6 +44,49 @@ import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
+import designSystem, { commandCenterCardSx, proBlueContainedButtonSx } from '../theme/designSystem';
+
+const authHeroPanelSx = {
+  ...commandCenterCardSx,
+  backdropFilter: 'blur(16px)',
+  borderRadius: 4,
+  '& .MuiTypography-overline': {
+    color: designSystem.proBlue.accentMuted,
+  },
+  '& .MuiTypography-h3': {
+    color: designSystem.proBlue.textPrimary,
+  },
+  '& .MuiTypography-subtitle2:not([class*="MuiTypography-color"])': {
+    color: designSystem.proBlue.textPrimary,
+  },
+  '& .MuiTypography-body2': {
+    color: designSystem.proBlue.textSecondary,
+  },
+  '& .MuiCard-root': {
+    bgcolor: 'rgba(255,255,255,0.06)',
+    borderColor: designSystem.proBlue.border,
+    color: designSystem.proBlue.textPrimary,
+  },
+  '& .MuiChip-root': {
+    color: designSystem.proBlue.textSecondary,
+    borderColor: designSystem.proBlue.border,
+    bgcolor: 'rgba(255,255,255,0.04)',
+    '& .MuiChip-icon': { color: designSystem.proBlue.accentMuted },
+    '& .MuiChip-label': { color: designSystem.proBlue.textSecondary },
+  },
+  '& .MuiToggleButtonGroup-root .MuiToggleButton-root': {
+    color: designSystem.proBlue.textSecondary,
+    borderColor: `${designSystem.proBlue.border} !important`,
+    textTransform: 'none',
+    fontWeight: 600,
+    '&.Mui-selected': {
+      color: designSystem.proBlue.textPrimary,
+      bgcolor: 'rgba(255,255,255,0.14)',
+      borderColor: `${designSystem.proBlue.accentMuted} !important`,
+    },
+    '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' },
+  },
+};
 
 interface AuthPageProps {
   defaultMode?: 'login' | 'register';
@@ -96,6 +139,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     password: '',
     confirm: '',
   });
+  const [googleRedirectUri, setGoogleRedirectUri] = React.useState('');
 
   const strength = React.useMemo(() => passwordStrength(form.password), [form.password]);
   const canSubmit = form.email.includes('@') && form.password.length >= 8 &&
@@ -115,6 +159,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     setError('');
     setConfirmationSent(null);
   }, [defaultMode]);
+
+  React.useEffect(() => {
+    if (!backendReachable) return;
+    authService.googleStatus()
+      .then((resp) => {
+        if (resp.data?.google_oauth_enabled && resp.data?.redirect_uri) {
+          setGoogleRedirectUri(resp.data.redirect_uri);
+        }
+      })
+      .catch(() => {});
+  }, [backendReachable]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -185,7 +240,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         setError(`${provider === 'github' ? 'GitHub' : 'Google'} OAuth is not configured on this deployment.`);
         return;
       }
-      const loginResp = await (provider === 'github' ? authService.githubLogin() : authService.googleLogin());
+      const loginResp = await (provider === 'github' ? authService.githubLogin(edition) : authService.googleLogin(edition));
       window.location.href = loginResp.data.auth_url;
     } catch (err: any) {
       setError(err?.response?.data?.message || `${provider === 'github' ? 'GitHub' : 'Google'} OAuth not available`);
@@ -196,10 +251,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const submitLabel = mode === 'register' ? 'Create account' : 'Sign in';
   const providerName = backendReachable ? 'RivicQ Identity' : 'Supabase';
 
-  const leftBg = isDark
-    ? 'linear-gradient(160deg, #0f172a 0%, #312e81 130%)'
-    : 'linear-gradient(160deg, #ffffff 0%, #eef2ff 80%, #f0fdf4 100%)';
-
   return (
     <Box
       sx={{
@@ -208,24 +259,32 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         overflow: 'hidden',
         py: 5,
         background: isDark
-          ? 'radial-gradient(circle at top left, rgba(99,102,241,0.2), transparent 30%), radial-gradient(circle at bottom right, rgba(245,158,11,0.1), transparent 24%), linear-gradient(180deg, #0b1220 0%, #0f172a 100%)'
-          : 'radial-gradient(circle at top left, rgba(99,102,241,0.12), transparent 30%), radial-gradient(circle at bottom right, rgba(5,150,105,0.08), transparent 24%), linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
+          ? `${designSystem.proBlue.commandCenter}`
+          : 'linear-gradient(180deg, #f8fafc 0%, #eff6ff 50%, #f8fafc 100%)',
       }}
     >
       <Box
         sx={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: 'linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px)',
+          background: isDark ? designSystem.proBlue.commandGlow : designSystem.gradient.meshLight,
+          pointerEvents: 'none',
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'linear-gradient(rgba(59,130,246,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px)',
           backgroundSize: '72px 72px',
-          opacity: 0.4,
+          opacity: isDark ? 0.35 : 0.25,
           pointerEvents: 'none',
         }}
       />
 
       <Container maxWidth="lg" sx={{ position: 'relative' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
-          <BrandLogo />
+          <BrandLogo dark={isDark} />
           <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
             <Chip label={`${edition.toUpperCase()} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
             <Chip label="OSS + Enterprise" variant="outlined" sx={{ fontWeight: 600 }} />
@@ -234,58 +293,47 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
         <Grid container spacing={4} alignItems="stretch">
           <Grid item xs={12} md={5}>
-            <Card
-              sx={{
-                height: '100%',
-                background: leftBg,
-                color: isDark ? '#f8fafc' : '#0f172a',
-                border: 1,
-                borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(100,116,139,0.14)',
-                backdropFilter: 'blur(16px)',
-                boxShadow: isDark ? '0 30px 80px rgba(2,6,23,0.32)' : '0 24px 60px rgba(79,70,229,0.1)',
-                borderRadius: 4,
-              }}
-            >
+            <Card sx={{ height: '100%', ...authHeroPanelSx }}>
               <CardContent sx={{ p: 4.5, height: '100%' }}>
                 <Stack spacing={3} sx={{ height: '100%' }}>
                   <Box>
-                    <Typography variant="overline" sx={{ display: 'block', color: 'primary.main', letterSpacing: 4, fontWeight: 700 }}>
+                    <Typography variant="overline" sx={{ display: 'block', letterSpacing: 4, fontWeight: 700 }}>
                       CryptoBOM EaaS
                     </Typography>
                     <Typography variant="h3" fontWeight={900} sx={{ mt: 1, lineHeight: 1.02, letterSpacing: '-0.02em' }}>
                       {mode === 'register' ? 'Start building your crypto inventory.' : 'Secure access to your workspace.'}
                     </Typography>
-                    <Typography sx={{ mt: 2, color: 'text.secondary', maxWidth: 540 }}>
+                    <Typography sx={{ mt: 2, maxWidth: 540 }}>
                       Discover, inventory, and govern cryptographic assets with automated CBOM generation, cloud posture
                       checks, and post-quantum migration planning.
                     </Typography>
                   </Box>
 
                   <Stack spacing={2}>
-                    <Card sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(99,102,241,0.05)', border: 1, borderColor: 'divider', borderRadius: 3 }}>
+                    <Card sx={{ borderRadius: 3 }}>
                       <CardContent sx={{ p: 2.2 }}>
                         <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                          <Security sx={{ color: 'primary.main' }} />
+                          <Security sx={{ color: designSystem.proBlue.accentLight }} />
                           <Box>
                             <Typography variant="subtitle2" sx={{ letterSpacing: 1, textTransform: 'uppercase', fontWeight: 700 }}>
                               Command Center
                             </Typography>
-                            <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
+                            <Typography variant="body2" sx={{ mt: 0.5 }}>
                               Unified posture across cloud accounts, crypto inventory, and PQC readiness.
                             </Typography>
                           </Box>
                         </Stack>
                       </CardContent>
                     </Card>
-                    <Card sx={{ bgcolor: isDark ? 'rgba(16,185,129,0.09)' : 'rgba(5,150,105,0.06)', border: 1, borderColor: 'success.main', borderRadius: 3 }}>
+                    <Card sx={{ bgcolor: 'rgba(16,185,129,0.12) !important', border: 1, borderColor: 'success.main', borderRadius: 3 }}>
                       <CardContent sx={{ p: 2.2 }}>
                         <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                          <BadgeIcon sx={{ color: 'success.main' }} />
+                          <BadgeIcon sx={{ color: 'success.light' }} />
                           <Box>
-                            <Typography variant="subtitle2" sx={{ color: 'success.main', letterSpacing: 1, textTransform: 'uppercase', fontWeight: 700 }}>
+                            <Typography variant="subtitle2" sx={{ color: 'success.light', letterSpacing: 1, textTransform: 'uppercase', fontWeight: 700 }}>
                               Complete SaaS toolkit
                             </Typography>
-                            <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
+                            <Typography variant="body2" sx={{ mt: 0.5 }}>
                               Security modules, compliance frameworks, realtime monitoring, and enterprise governance.
                             </Typography>
                           </Box>
@@ -302,7 +350,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   </Stack>
 
                   <Box sx={{ mt: 'auto' }}>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    <Typography variant="body2">
                       Select your edition before authenticating.
                     </Typography>
                     <ToggleButtonGroup
@@ -311,9 +359,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       onChange={(_, value: Edition | null) => value && setEdition(value)}
                       sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}
                     >
-                      <ToggleButton value="community" sx={{ textTransform: 'none', fontWeight: 600 }}>Community</ToggleButton>
-                      <ToggleButton value="professional" sx={{ textTransform: 'none', fontWeight: 600 }}>Professional</ToggleButton>
-                      <ToggleButton value="enterprise" sx={{ textTransform: 'none', fontWeight: 600 }}>Enterprise</ToggleButton>
+                      <ToggleButton value="community">Community</ToggleButton>
+                      <ToggleButton value="professional">Professional</ToggleButton>
+                      <ToggleButton value="enterprise">Enterprise</ToggleButton>
                     </ToggleButtonGroup>
                   </Box>
                 </Stack>
@@ -362,6 +410,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       </Typography>
                     </Box>
 
+                    {googleRedirectUri && window.location.hostname === 'localhost' && (
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        Google sign-in requires this redirect URI in Google Cloud Console → Credentials →
+                        Authorized redirect URIs:{' '}
+                        <Box component="code" sx={{ display: 'block', mt: 1, wordBreak: 'break-all' }}>
+                          {googleRedirectUri}
+                        </Box>
+                      </Alert>
+                    )}
+
                     {error && (
                       <Alert severity="error" sx={{ mb: 2 }}>
                         {error}
@@ -395,7 +453,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                               size="large"
                               disabled={loading || mfaCode.trim().length < 6}
                               endIcon={<ArrowForward />}
-                              sx={{ py: 1.3 }}
+                              sx={{ py: 1.3, ...proBlueContainedButtonSx }}
                             >
                               {loading ? 'Verifying...' : 'Verify and sign in'}
                             </Button>
@@ -512,7 +570,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                             size="large"
                             disabled={loading || !canSubmit}
                             endIcon={<ArrowForward />}
-                            sx={{ py: 1.3 }}
+                            sx={{ py: 1.3, ...proBlueContainedButtonSx }}
                           >
                             {loading ? 'Please wait...' : submitLabel}
                           </Button>
@@ -571,7 +629,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                               </Button>
                             </>
                           )}
-                          {supabaseEnabled && (
+                          {supabaseEnabled && !backendReachable && (
                             <Button
                               variant="outlined"
                               color="success"

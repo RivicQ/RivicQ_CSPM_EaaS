@@ -22,6 +22,8 @@ import (
 )
 
 func main() {
+	config.LoadDotEnv()
+
 	// Initialize logger
 	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)

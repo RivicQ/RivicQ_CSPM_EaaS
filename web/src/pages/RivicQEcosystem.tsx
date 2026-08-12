@@ -1,36 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
   Button,
+  Chip,
+  Grid,
   Stack,
   TextField,
   InputAdornment,
   LinearProgress,
-  Alert,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Tabs,
   Tab,
   Tooltip,
-  Divider,
+  Typography,
+  useTheme,
 } from '@mui/material';
-import {
-  Search,
-  GitHub,
-  OpenInNew,
-  Category,
-} from '@mui/icons-material';
+import { Search, GitHub, OpenInNew, Category } from '@mui/icons-material';
+import PageFrame from '../components/PageFrame';
+import { GlassCard, EmptyState } from '../components/ui';
 import { ecosystemService } from '../services/api';
+import { tokens } from '../theme/tokens';
+import designSystem from '../theme/designSystem';
 
 interface EcosystemTool {
   id: string;
@@ -55,13 +50,14 @@ const CATEGORIES = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  available: '#22c55e',
-  beta: '#eab308',
-  coming_soon: '#6b7280',
-  enterprise_only: '#a855f7',
+  available: tokens.colors.crypto.low,
+  beta: tokens.colors.crypto.high,
+  coming_soon: tokens.colors.text.muted,
+  enterprise_only: tokens.colors.crypto.quantum,
 };
 
 const RivicQEcosystem: React.FC = () => {
+  const theme = useTheme();
   const [tools, setTools] = useState<EcosystemTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('all');
@@ -86,44 +82,59 @@ const RivicQEcosystem: React.FC = () => {
     return true;
   });
 
-  if (loading) return <LinearProgress />;
+  if (loading) {
+    return (
+      <PageFrame eyebrow="Platform" title="RivicQ Ecosystem" subtitle="Loading tools catalog...">
+        <LinearProgress sx={{ borderRadius: 99 }} />
+      </PageFrame>
+    );
+  }
 
   return (
-    <Box>
-      <Box sx={{ mb: 3 }}>
-        <Box display="flex" alignItems="center" gap={1} sx={{ mb: 0.5 }}>
-          <Category sx={{ color: '#6366f1', fontSize: 32 }} />
-          <Typography variant="h4" fontWeight="bold">
-            RivicQ Ecosystem
-          </Typography>
+    <PageFrame
+      eyebrow="Platform"
+      title="RivicQ Ecosystem"
+      subtitle="Open source tools, SDKs, and services spanning OSS to Enterprise — scan, inventory, attest, and migrate cryptographic assets."
+      badge={`${tools.length} tools`}
+    >
+      <GlassCard hover={false} padding={2} delay={0}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
+          <TextField
+            size="small"
+            placeholder="Search tools..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><Search /></InputAdornment>,
+            }}
+            sx={{ minWidth: 260, flex: 1 }}
+          />
+          <Tabs
+            value={category}
+            onChange={(_, v) => setCategory(v)}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{ minHeight: 40 }}
+          >
+            {CATEGORIES.map((c) => <Tab key={c.id} value={c.id} label={c.label} />)}
+          </Tabs>
+        </Stack>
+      </GlassCard>
+
+      {filtered.length === 0 ? (
+        <Box sx={{ mt: 2.5 }}>
+          <EmptyState
+            icon={<Category />}
+            title="No tools found"
+            description="Try a different search term or category filter."
+          />
         </Box>
-        <Typography variant="body2" color="text.secondary">
-          Open source tools, SDKs, and services spanning OSS to Enterprise — scan, inventory, attest, and migrate cryptographic assets.
-        </Typography>
-      </Box>
-
-      <Stack direction="row" spacing={2} sx={{ mb: 3 }} flexWrap="wrap" useFlexGap>
-        <TextField
-          size="small"
-          placeholder="Search tools..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{
-            startAdornment: <InputAdornment position="start"><Search /></InputAdornment>,
-          }}
-          sx={{ minWidth: 260 }}
-        />
-        <Tabs value={category} onChange={(_, v) => setCategory(v)} variant="scrollable" scrollButtons="auto">
-          {CATEGORIES.map((c) => <Tab key={c.id} value={c.id} label={c.label} />)}
-        </Tabs>
-      </Stack>
-
-      <Grid container spacing={2}>
-        {filtered.map((tool) => (
-          <Grid item xs={12} sm={6} md={4} key={tool.id}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', border: `1px solid ${STATUS_COLORS[tool.status]}22` }}>
-              <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
-                <Stack spacing={1.5}>
+      ) : (
+        <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+          {filtered.map((tool, i) => (
+            <Grid item xs={12} sm={6} md={4} key={tool.id}>
+              <GlassCard glow={STATUS_COLORS[tool.status]} delay={i % 9}>
+                <Stack spacing={1.5} sx={{ height: '100%' }}>
                   <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                     <Box>
                       <Typography variant="subtitle1" fontWeight={700}>
@@ -132,72 +143,97 @@ const RivicQEcosystem: React.FC = () => {
                       <Chip
                         label={tool.type.toUpperCase()}
                         size="small"
-                        sx={{ fontSize: '0.65rem', bgcolor: '#6366f120', color: '#6366f1', fontWeight: 600, mt: 0.5 }}
+                        sx={{
+                          fontSize: '0.65rem',
+                          bgcolor: `${tokens.colors.rivicq[500]}18`,
+                          color: tokens.colors.rivicq[500],
+                          fontWeight: 600,
+                          mt: 0.5,
+                        }}
                       />
                     </Box>
                     <Tooltip title={tool.status.replace('_', ' ').toUpperCase()}>
                       <Chip
                         label={tool.status === 'available' ? 'OSS' : tool.status === 'enterprise_only' ? 'Enterprise' : tool.status.replace('_', ' ')}
                         size="small"
-                        sx={{ bgcolor: STATUS_COLORS[tool.status] + '22', color: STATUS_COLORS[tool.status], fontWeight: 600, fontSize: '0.65rem' }}
+                        sx={{
+                          bgcolor: `${STATUS_COLORS[tool.status]}18`,
+                          color: STATUS_COLORS[tool.status],
+                          fontWeight: 600,
+                          fontSize: '0.65rem',
+                        }}
                       />
                     </Tooltip>
                   </Box>
 
-                  <Typography variant="body2" color="text.secondary" sx={{ minHeight: 40 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ minHeight: 40, lineHeight: 1.6 }}>
                     {tool.description}
                   </Typography>
 
-                  <Box display="flex" gap={0.5} flexWrap="wrap">
-                    <Chip label={tool.edition === 'both' ? 'OSS + Enterprise' : tool.edition === 'oss' ? 'OSS' : 'Enterprise'} size="small" variant="outlined" sx={{ fontSize: '0.6rem' }} />
-                  </Box>
+                  <Chip
+                    label={tool.edition === 'both' ? 'OSS + Enterprise' : tool.edition === 'oss' ? 'OSS' : 'Enterprise'}
+                    size="small"
+                    variant="outlined"
+                    sx={{ width: 'fit-content', fontSize: '0.65rem' }}
+                  />
 
                   {tool.install_cmd && (
-                    <Paper variant="outlined" sx={{ p: 1, bgcolor: '#0f172a', borderRadius: 1 }}>
-                      <Typography variant="caption" sx={{ color: '#94a3b8', fontFamily: 'monospace', display: 'block', fontSize: '0.65rem' }}>
+                    <Box
+                      sx={{
+                        p: 1.25,
+                        borderRadius: `${designSystem.radius.sm}px`,
+                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.6)' : 'rgba(15,23,42,0.04)',
+                        border: 1,
+                        borderColor: 'divider',
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'text.secondary',
+                          fontFamily: tokens.typography.mono,
+                          display: 'block',
+                          fontSize: '0.68rem',
+                          wordBreak: 'break-all',
+                        }}
+                      >
                         {tool.install_cmd}
                       </Typography>
-                    </Paper>
+                    </Box>
                   )}
 
-                  <Box display="flex" gap={1} sx={{ mt: 'auto' }}>
+                  <Box display="flex" gap={1} sx={{ mt: 'auto', pt: 0.5 }}>
                     {tool.docs_url && (
-                      <Button size="small" startIcon={<OpenInNew />} href={tool.docs_url} target="_blank" sx={{ fontSize: '0.7rem' }}>
+                      <Button size="small" startIcon={<OpenInNew />} href={tool.docs_url} target="_blank">
                         Docs
                       </Button>
                     )}
                     {tool.repo_url && (
-                      <Button size="small" startIcon={<GitHub />} href={tool.repo_url} target="_blank" sx={{ fontSize: '0.7rem' }}>
+                      <Button size="small" startIcon={<GitHub />} href={tool.repo_url} target="_blank">
                         Repo
                       </Button>
                     )}
                   </Box>
                 </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {filtered.length === 0 && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          No tools found matching your criteria.
-        </Alert>
+              </GlassCard>
+            </Grid>
+          ))}
+        </Grid>
       )}
 
-      <Divider sx={{ my: 4 }} />
-
-      <Box>
-        <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-          Edition Coverage
-        </Typography>
-        <TableContainer component={Paper} variant="outlined">
+      <GlassCard hover={false} delay={2} padding={0}>
+        <Box sx={{ p: 2.5, pb: 0 }}>
+          <Typography variant="h6" fontWeight={700}>
+            Edition Coverage
+          </Typography>
+        </Box>
+        <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                <TableCell><Typography variant="caption" fontWeight="bold">Category</Typography></TableCell>
-                <TableCell><Typography variant="caption" fontWeight="bold">OSS</Typography></TableCell>
-                <TableCell><Typography variant="caption" fontWeight="bold">Enterprise</Typography></TableCell>
+              <TableRow>
+                <TableCell>Category</TableCell>
+                <TableCell>OSS</TableCell>
+                <TableCell>Enterprise</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -212,7 +248,7 @@ const RivicQEcosystem: React.FC = () => {
                 { category: 'Kubernetes', oss: 'Cluster scanning, Cilium/eBPF', ent: 'Operator, Headlamp plugin, quantum scanning' },
               ].map((row) => (
                 <TableRow key={row.category} hover>
-                  <TableCell><Typography variant="body2" fontWeight="medium">{row.category}</Typography></TableCell>
+                  <TableCell><Typography variant="body2" fontWeight={600}>{row.category}</Typography></TableCell>
                   <TableCell><Typography variant="caption" color="text.secondary">{row.oss}</Typography></TableCell>
                   <TableCell><Typography variant="caption" color="text.secondary">{row.ent}</Typography></TableCell>
                 </TableRow>
@@ -220,37 +256,28 @@ const RivicQEcosystem: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
-      </Box>
-    </Box>
+      </GlassCard>
+    </PageFrame>
   );
 };
 
 const TOOLS_DATA: EcosystemTool[] = [
-  // SDKs & Libraries
   { id: 'sdk-py', name: 'cryptobom-core (Python)', category: 'sdk', description: 'Python SDK for CBOM scanning, quantum risk assessment, and PQC migration planning.', edition: 'both', status: 'available', type: 'sdk', docs_url: 'https://docs.rivicq.com/python', repo_url: 'https://github.com/rivic-q/cryptobom-python', install_cmd: 'pip install cryptobom-core' },
   { id: 'sdk-java', name: 'cryptobom-enterprise (Java)', category: 'sdk', description: 'Java SDK for enterprise-grade CBOM generation, IBM Quantum attestation, multi-cloud scanning.', edition: 'enterprise', status: 'enterprise_only', type: 'sdk', docs_url: 'https://docs.rivicq.com/java', install_cmd: 'mvn dependency:copy -Dartifact=com.rivicq:cryptobom-enterprise:1.3.0' },
   { id: 'sdk-rust', name: 'cryptobom-enterprise (Rust)', category: 'sdk', description: 'Rust crate for high-performance cryptographic asset scanning with quantum provider integration.', edition: 'enterprise', status: 'enterprise_only', type: 'sdk', install_cmd: 'cargo install cryptobom-enterprise --features quantum' },
   { id: 'sdk-cpp', name: 'cryptobom-cpp', category: 'sdk', description: 'C++ library for embedded CBOM scanning in native applications and IoT firmware.', edition: 'enterprise', status: 'beta', type: 'sdk', repo_url: 'https://github.com/rivicq/cryptobom-cpp' },
   { id: 'sdk-c', name: 'libcryptobom (C)', category: 'sdk', description: 'C library for lightweight cryptographic discovery in constrained environments.', edition: 'enterprise', status: 'beta', type: 'sdk', install_cmd: 'wget https://github.com/rivicq/cryptobom-c/releases/download/v1.3.0/libcryptobom.so' },
   { id: 'sdk-ruby', name: 'cryptobom-enterprise (Ruby)', category: 'sdk', description: 'Ruby gem for CBOM generation and compliance reporting in Rails applications.', edition: 'enterprise', status: 'enterprise_only', type: 'sdk', install_cmd: 'gem install cryptobom-enterprise' },
-
-  // CLI & Scanner
   { id: 'cli-oss', name: 'CryptoBOM Scanner (OSS)', category: 'cli', description: 'Standalone CLI for TLS/SSH/HTTP cryptographic discovery and SBOM generation.', edition: 'oss', status: 'available', type: 'cli', repo_url: 'https://github.com/rivic-q/cryptobom-saas', install_cmd: 'go install github.com/rivic-q/cryptobom-saas/cmd/scanner@latest' },
   { id: 'cli-enterprise', name: 'CryptoBOM Scanner (Enterprise)', category: 'cli', description: 'Enterprise CLI with multi-cloud HSM scanning, quantum attestation, and ML threat detection.', edition: 'enterprise', status: 'enterprise_only', type: 'cli', install_cmd: 'docker pull rivic-q/cryptobom-enterprise:latest' },
   { id: 'cli-demo', name: 'Infrastructure Discovery Scanner', category: 'cli', description: 'Demo scanner for weak crypto discovery across TLS, SSH, and HTTP endpoints.', edition: 'both', status: 'available', type: 'cli', repo_url: 'https://github.com/rivic-q/cryptobom-saas', install_cmd: 'make build-scanner && ./bin/cryptobom-scanner' },
-
-  // Plugins
   { id: 'plugin-headlamp', name: 'Headlamp Plugin', category: 'plugin', description: 'Kubernetes cluster crypto dashboard — visualize CBOM data, quantum risk, and compliance status directly in Headlamp.', edition: 'both', status: 'available', type: 'plugin', docs_url: 'https://docs.rivicq.com/headlamp', repo_url: 'https://github.com/rivic-q/cryptobom-headlamp-plugin' },
   { id: 'plugin-k8s-operator', name: 'Kubernetes Operator', category: 'plugin', description: 'Automated CBOM scanning for Kubernetes clusters — detects cryptographic assets in pods, services, and secrets.', edition: 'enterprise', status: 'enterprise_only', type: 'plugin', repo_url: 'https://github.com/rivic-q/cryptobom-operator' },
-
-  // Cloud Services
   { id: 'cloud-aws', name: 'AWS Cloud Integration', category: 'service', description: 'CloudHSM cluster status, KMS key inventory, CloudTrail cryptographic event auditing.', edition: 'enterprise', status: 'enterprise_only', type: 'service', docs_url: 'https://docs.rivicq.com/aws' },
   { id: 'cloud-gcp', name: 'GCP Cloud Integration', category: 'service', description: 'Cloud KMS key management, GKE workload crypto scanning, HSM key ring attestation.', edition: 'enterprise', status: 'enterprise_only', type: 'service', docs_url: 'https://docs.rivicq.com/gcp' },
   { id: 'cloud-ibm', name: 'IBM Cloud HPCS', category: 'service', description: 'Hyper Protect Crypto Service key management, COS bucket attestation, quantum-safe key generation.', edition: 'enterprise', status: 'enterprise_only', type: 'service', docs_url: 'https://docs.rivicq.com/ibm' },
   { id: 'cloud-azure', name: 'Azure Cloud Integration', category: 'service', description: 'Azure Key Vault, managed HSM, and cryptographic asset inventory scanning.', edition: 'enterprise', status: 'enterprise_only', type: 'service' },
   { id: 'quantum-ibm', name: 'IBM Quantum Attestation', category: 'service', description: 'Quantum network attestation for CBOM reports — validates PQC readiness against IBM Quantum systems.', edition: 'enterprise', status: 'enterprise_only', type: 'service', docs_url: 'https://docs.rivicq.com/quantum' },
-
-  // Integrations
   { id: 'int-cncf-prometheus', name: 'Prometheus', category: 'integration', description: 'Scrape cryptographic asset metrics, quantum risk scores, and compliance status.', edition: 'both', status: 'available', type: 'integration', docs_url: 'https://prometheus.io/docs' },
   { id: 'int-cncf-grafana', name: 'Grafana', category: 'integration', description: 'Pre-built CBOM compliance dashboards with DORA, NIS2, and quantum risk visualizations.', edition: 'both', status: 'available', type: 'integration', docs_url: 'https://grafana.com/docs' },
   { id: 'int-cncf-argocd', name: 'ArgoCD', category: 'integration', description: 'GitOps deployment with CBOM compliance gates — block deployments with critical crypto findings.', edition: 'enterprise', status: 'enterprise_only', type: 'integration' },

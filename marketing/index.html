@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RivicQ CryptoBOM — Enterprise cryptographic security posture management. CBOM discovery, PQC readiness, and multi-cloud compliance." />
+  <meta name="theme-color" content="#4f46e5" />
+  <title>RivicQ CryptoBOM — Cryptographic Security Posture Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+            <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z"/>
+          </svg>
+        </div>
+        RivicQ CryptoBOM
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Platform</a></li>
+        <li><a href="#posture">Posture</a></li>
+        <li><a href="#compliance">Compliance</a></li>
+        <li><a href="#cloud">Multi-Cloud</a></li>
+        <li><a href="showcase.html">Live Demo</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="#" class="btn btn-ghost" data-platform-link data-platform-path="/login">Sign In</a>
+        <a href="#" class="btn btn-primary" data-platform-link data-platform-path="/register">Start Free</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container hero-content">
+      <div>
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Enterprise MVP — Now in Beta
+        </div>
+        <h1 class="hero-title">
+          Cryptographic Security<br />
+          <span class="gradient-text">Posture Management</span>
+        </h1>
+        <p class="hero-desc">
+          Discover every cryptographic asset across code, cloud, and infrastructure.
+          Generate CBOM &amp; QBOM inventories, assess PQC readiness, and automate compliance — all from one platform.
+        </p>
+        <div class="hero-cta">
+          <a href="#" class="btn btn-primary btn-lg" data-platform-link data-platform-path="/register">
+            Start CBOM Scan
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="showcase.html" class="btn btn-secondary btn-lg">View Live Demo</a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-value" data-count="12847">0</div>
+            <div class="hero-stat-label">Assets Discovered</div>
+          </div>
+          <div>
+            <div class="hero-stat-value" data-count="18">0</div>
+            <div class="hero-stat-label">Security Modules</div>
+          </div>
+          <div>
+            <div class="hero-stat-value" data-count="94" data-suffix="%">0</div>
+            <div class="hero-stat-label">Compliance Coverage</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-canvas-wrap">
+          <canvas id="heroNetwork"></canvas>
+          <div class="hero-visual-overlay">
+            <div class="hero-metric-card critical">
+              <div class="value" id="heroCritical">23</div>
+              <div class="label">Critical Findings</div>
+            </div>
+            <div class="hero-metric-card quantum">
+              <div class="value" id="heroPQC">67%</div>
+              <div class="label">PQC Readiness</div>
+            </div>
+            <div class="hero-metric-card success">
+              <div class="value" id="heroCompliant">94%</div>
+              <div class="label">Compliance Score</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Bar -->
+  <section class="trust-bar">
+    <div class="container trust-bar-inner">
+      <span class="trust-label">Trusted frameworks &amp; standards</span>
+      <div class="trust-logos">
+        <span class="trust-logo">NIST PQC</span>
+        <span class="trust-logo">ISO 27001</span>
+        <span class="trust-logo">SOC 2 Type II</span>
+        <span class="trust-logo">BSI TR-02102</span>
+        <span class="trust-logo">DORA</span>
+        <span class="trust-logo">eIDAS 2.0</span>
+        <span class="trust-logo">FedRAMP</span>
+        <span class="trust-logo">PCI DSS</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">Platform Capabilities</span>
+        <h2 class="section-title">Complete cryptographic<br /><span class="gradient-text">visibility &amp; control</span></h2>
+        <p class="section-subtitle">
+          From source code to cloud infrastructure — discover, assess, and remediate cryptographic risks across your entire attack surface.
+        </p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card featured reveal reveal-delay-1">
+          <div>
+            <div class="feature-icon blue">🔍</div>
+            <h3>CBOM Discovery Engine</h3>
+            <p>
+              Automated cryptographic bill of materials generation across repositories, containers, Kubernetes clusters, and network endpoints. Real-time asset inventory with algorithm classification.
+            </p>
+          </div>
+          <div class="feature-visual">
+            <canvas id="featureChart"></canvas>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon purple">⚛️</div>
+          <h3>Quantum Risk Assessment</h3>
+          <p>PQC readiness scoring with NIST FIPS 203/204/205 algorithm mapping, break-time estimates, and migration roadmaps.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon green">☁️</div>
+          <h3>Multi-Cloud Posture</h3>
+          <p>Unified CSPM across AWS, Azure, GCP, IBM Cloud, and Kubernetes with HSM/KMS inventory and key lifecycle tracking.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon gold">📋</div>
+          <h3>Compliance Automation</h3>
+          <p>Continuous compliance monitoring against NIST, ISO, SOC 2, DORA, GDPR, and EU AI Act with automated evidence collection.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon blue">🔐</div>
+          <h3>DevSecOps Integration</h3>
+          <p>CI/CD pipeline hooks, GitHub Actions, GitLab CI, eBPF syscall tracing, and policy-as-code enforcement.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon purple">🏢</div>
+          <h3>Enterprise Attestation</h3>
+          <p>IBM Quantum attestation, multi-tenant SaaS, SSO/SAML, audit trails, and German-engineered TÜV-certified processes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Posture Score -->
+  <section class="section posture-section" id="posture">
+    <div class="container" id="postureSection">
+      <div class="reveal">
+        <span class="section-label">Security Posture</span>
+        <h2 class="section-title">Real-time cryptographic<br /><span class="gradient-text">risk scoring</span></h2>
+        <p class="section-subtitle">
+          Continuous posture assessment with severity-weighted scoring across algorithms, key sizes, protocols, and compliance gaps.
+        </p>
+      </div>
+      <div class="posture-grid">
+        <div class="posture-ring-wrap reveal">
+          <svg viewBox="0 0 260 260">
+            <defs>
+              <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4f46e5"/>
+                <stop offset="50%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#059669"/>
+              </linearGradient>
+            </defs>
+            <circle class="posture-ring-bg" cx="130" cy="130" r="120"/>
+            <circle class="posture-ring-fill" id="postureRing" cx="130" cy="130" r="120"/>
+          </svg>
+          <div class="posture-score-center">
+            <div class="posture-score-value" id="postureScoreValue">0</div>
+            <div class="posture-score-label">Posture Score</div>
+          </div>
+        </div>
+        <div class="posture-breakdown reveal reveal-delay-1">
+          <div class="posture-item">
+            <span class="posture-item-label">Algorithm Strength</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill low" data-width="85"></div></div>
+            <span class="posture-item-score">85</span>
+          </div>
+          <div class="posture-item">
+            <span class="posture-item-label">Key Management</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill medium" data-width="72"></div></div>
+            <span class="posture-item-score">72</span>
+          </div>
+          <div class="posture-item">
+            <span class="posture-item-label">Protocol Security</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill low" data-width="91"></div></div>
+            <span class="posture-item-score">91</span>
+          </div>
+          <div class="posture-item">
+            <span class="posture-item-label">PQC Readiness</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill high" data-width="67"></div></div>
+            <span class="posture-item-score">67</span>
+          </div>
+          <div class="posture-item">
+            <span class="posture-item-label">Compliance Coverage</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill low" data-width="94"></div></div>
+            <span class="posture-item-score">94</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compliance -->
+  <section class="section" id="compliance">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">Compliance Frameworks</span>
+        <h2 class="section-title">Automated compliance<br /><span class="gradient-text">across frameworks</span></h2>
+        <p class="section-subtitle">
+          Map cryptographic findings to regulatory requirements with continuous evidence collection and audit-ready reporting.
+        </p>
+      </div>
+      <div class="compliance-grid">
+        <div class="compliance-card active reveal">
+          <div class="compliance-icon">🛡️</div>
+          <div class="compliance-name">NIST CSF 2.0</div>
+          <div class="compliance-status pass">✓ 98% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-1">
+          <div class="compliance-icon">📜</div>
+          <div class="compliance-name">ISO 27001:2022</div>
+          <div class="compliance-status pass">✓ 96% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-2">
+          <div class="compliance-icon">🏦</div>
+          <div class="compliance-name">DORA</div>
+          <div class="compliance-status pass">✓ 94% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-3">
+          <div class="compliance-icon">⚛️</div>
+          <div class="compliance-name">NIST PQC</div>
+          <div class="compliance-status pass">✓ 89% Compliant</div>
+        </div>
+        <div class="compliance-card reveal">
+          <div class="compliance-icon">🔒</div>
+          <div class="compliance-name">SOC 2 Type II</div>
+          <div class="compliance-status pass">✓ 97% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-1">
+          <div class="compliance-icon">🇪🇺</div>
+          <div class="compliance-name">GDPR / eIDAS</div>
+          <div class="compliance-status pass">✓ 95% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-2">
+          <div class="compliance-icon">💳</div>
+          <div class="compliance-name">PCI DSS 4.0</div>
+          <div class="compliance-status pass">✓ 92% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-3">
+          <div class="compliance-icon">🤖</div>
+          <div class="compliance-name">EU AI Act</div>
+          <div class="compliance-status pass">✓ 88% Compliant</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Multi-Cloud -->
+  <section class="section cloud-section" id="cloud">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">Multi-Cloud CSPM</span>
+        <h2 class="section-title">Unified posture across<br /><span class="gradient-text">every cloud</span></h2>
+        <p class="section-subtitle">
+          Connect AWS, Azure, GCP, IBM Cloud, and Kubernetes clusters for centralized cryptographic asset discovery and key management visibility.
+        </p>
+      </div>
+      <div class="cloud-visual reveal">
+        <div class="cloud-hub">
+          <div class="cloud-center">CryptoBOM<br/>Hub</div>
+          <div class="cloud-providers">
+            <button class="cloud-provider" data-provider="aws">Amazon AWS</button>
+            <button class="cloud-provider" data-provider="azure">Microsoft Azure</button>
+            <button class="cloud-provider" data-provider="gcp">Google Cloud</button>
+            <button class="cloud-provider" data-provider="ibm">IBM Cloud</button>
+            <button class="cloud-provider" data-provider="k8s">Kubernetes</button>
+          </div>
+        </div>
+        <div class="cloud-stats">
+          <div class="cloud-stat">
+            <div class="cloud-stat-value" id="cloudAssets">4,821</div>
+            <div class="cloud-stat-label">Crypto Assets</div>
+          </div>
+          <div class="cloud-stat">
+            <div class="cloud-stat-value" id="cloudKeys">892</div>
+            <div class="cloud-stat-label">Managed Keys</div>
+          </div>
+          <div class="cloud-stat">
+            <div class="cloud-stat-value" id="cloudFindings">47</div>
+            <div class="cloud-stat-label">Active Findings</div>
+          </div>
+          <div class="cloud-stat">
+            <div class="cloud-stat-value" id="cloudScore">82</div>
+            <div class="cloud-stat-label">Posture Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PQC Timeline -->
+  <section class="section">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">PQC Migration</span>
+        <h2 class="section-title">Your path to<br /><span class="gradient-text">quantum readiness</span></h2>
+        <p class="section-subtitle">
+          Structured migration roadmap from classical cryptography to NIST-standardized post-quantum algorithms.
+        </p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Phase 1 — Now</div>
+          <div class="timeline-title">Cryptographic Discovery &amp; Inventory</div>
+          <div class="timeline-desc">Automated CBOM generation across all environments. Identify RSA, ECDSA, and SHA-1 dependencies with quantum vulnerability scoring.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Phase 2 — Q1 2026</div>
+          <div class="timeline-title">Hybrid Cryptography Deployment</div>
+          <div class="timeline-desc">Deploy CRYSTALS-Kyber and Dilithium alongside existing algorithms. Enable crypto-agility with algorithm negotiation.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Phase 3 — Q3 2026</div>
+          <div class="timeline-title">IBM Quantum Attestation</div>
+          <div class="timeline-desc">Validate PQC implementations with real quantum hardware attestation. Generate compliance certificates for audit.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Phase 4 — 2027</div>
+          <div class="timeline-title">Full PQC Migration</div>
+          <div class="timeline-desc">Complete transition to quantum-safe cryptography. Deprecate classical algorithms. Continuous monitoring and re-certification.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card reveal">
+        <h2>Ready to secure your cryptographic posture?</h2>
+        <p>Start with a free CBOM scan in under 5 minutes. No credit card required. Enterprise features available on request.</p>
+        <div class="cta-actions">
+          <a href="#" class="btn btn-primary btn-lg" data-platform-link data-platform-path="/register">Start Free Scan</a>
+          <a href="showcase.html" class="btn btn-secondary btn-lg">Explore Live Demo</a>
+          <a href="https://rivicq.com/enterprise" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">Contact Enterprise</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+                <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z"/>
+              </svg>
+            </div>
+            RivicQ
+          </a>
+          <p>German-engineered cryptographic security posture management. Made in Berlin.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="#features">CBOM Discovery</a></li>
+            <li><a href="#posture">Posture Scoring</a></li>
+            <li><a href="#compliance">Compliance</a></li>
+            <li><a href="showcase.html">Live Demo</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="../QUICKSTART_CBOM.md">Quickstart Guide</a></li>
+            <li><a href="../docs/quantum-sdk.md">Quantum SDK</a></li>
+            <li><a href="../media/cryptobom-animation.html">Platform Animation</a></li>
+            <li><a href="https://docs.rivicq.com" target="_blank" rel="noopener">Documentation</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="https://rivicq.com" target="_blank" rel="noopener">About RivicQ</a></li>
+            <li><a href="https://rivicq.com/enterprise" target="_blank" rel="noopener">Enterprise</a></li>
+            <li><a href="#" data-platform-link data-platform-path="/login">Sign In</a></li>
+            <li><a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 RivicQ GmbH. All rights reserved.</span>
+        <span>LEAP BERLIN · Rudower Chaussee 29 · 12489 Berlin, Germany</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/visuals.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

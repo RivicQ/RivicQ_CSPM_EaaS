@@ -32,9 +32,18 @@ export const isEnterpriseEdition = (edition: Edition): boolean =>
 function detectBaseURL(): string {
   try {
     const stored = localStorage.getItem('api_base_url');
-    if (stored) return stored;
+    if (stored) return normalizeAPIBaseURL(stored);
   } catch {}
-  return process.env.REACT_APP_API_URL || `/api/v1`;
+  const env = process.env.REACT_APP_API_URL;
+  if (env) return normalizeAPIBaseURL(env);
+  return API_PREFIX;
+}
+
+export function normalizeAPIBaseURL(url: string): string {
+  const trimmed = url.replace(/\/+$/, '');
+  if (trimmed.endsWith(API_PREFIX)) return trimmed;
+  if (trimmed.match(/:\d+$/)) return `${trimmed}${API_PREFIX}`;
+  return trimmed;
 }
 
 let apiBaseURL = detectBaseURL();
@@ -44,7 +53,7 @@ export function getAPIBaseURL(): string {
 }
 
 export function setAPIBaseURL(url: string): void {
-  apiBaseURL = url;
+  apiBaseURL = normalizeAPIBaseURL(url);
   try {
     localStorage.setItem('api_base_url', url);
   } catch {}

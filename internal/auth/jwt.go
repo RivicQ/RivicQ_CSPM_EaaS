@@ -382,6 +382,15 @@ func (as *AuthService) LoginWithEdition(email, password, edition string) (*Login
 		}, nil
 	}
 
+	edition = strings.ToLower(strings.TrimSpace(edition))
+	switch edition {
+	case "community":
+		edition = "oss"
+	case "pro":
+		edition = "professional"
+	case "ent":
+		edition = "enterprise"
+	}
 	if edition == "" {
 		edition = "oss"
 		switch user.Role {

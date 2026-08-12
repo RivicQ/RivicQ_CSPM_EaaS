@@ -21,7 +21,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Core CBOM scanning, dashboard, auth, and local operations. Free for open source teams.',
       icon: <Security sx={{ fontSize: 34 }} />,
       edition: 'community' as Edition,
-      accent: '#6366f1',
+      accent: '#2563eb',
       highlights: ['CBOM scan basics', 'Dashboard & auth', 'GitHub & CI', 'Local workflows'],
       action: 'Continue with Community',
     },

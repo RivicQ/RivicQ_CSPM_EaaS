@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { cbomService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
 import { tokens } from '../theme/tokens';
+import designSystem, { glassSurface } from '../theme/designSystem';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -106,8 +107,8 @@ const Home: React.FC = () => {
   };
 
   const heroBg = isDark
-    ? 'radial-gradient(1200px 600px at 80% -10%, rgba(99,102,241,0.16), transparent 60%), radial-gradient(900px 500px at 0% 10%, rgba(245,158,11,0.08), transparent 55%), linear-gradient(180deg, #0f172a 0%, #0b1220 45%, #0f172a 100%)'
-    : 'radial-gradient(1200px 600px at 80% -10%, rgba(99,102,241,0.12), transparent 60%), radial-gradient(900px 500px at 0% 10%, rgba(5,150,105,0.06), transparent 55%), linear-gradient(180deg, #ffffff 0%, #f8fafc 55%, #f1f5f9 100%)';
+    ? designSystem.proBlue.commandCenter
+    : 'linear-gradient(180deg, #ffffff 0%, #eff6ff 55%, #f8fafc 100%)';
 
   const cardBg = isDark ? 'rgba(30,41,59,0.55)' : 'rgba(255,255,255,0.85)';
   const cardBorder = isDark ? 'rgba(148,163,184,0.14)' : 'rgba(100,116,139,0.14)';
@@ -126,7 +127,7 @@ const Home: React.FC = () => {
         sx={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: 'linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(59,130,246,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.05) 1px, transparent 1px)',
           backgroundSize: '72px 72px',
           pointerEvents: 'none',
           maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.5), transparent 70%)',
@@ -134,8 +135,26 @@ const Home: React.FC = () => {
       />
 
       <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4 }, position: 'relative' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 10 }}>
-          <BrandLogo />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 2,
+            flexWrap: 'wrap',
+            mb: 10,
+            p: 1.5,
+            borderRadius: `${designSystem.radius.xl}px`,
+            ...(isDark
+              ? {
+                background: designSystem.proBlue.commandCenter,
+                border: `1px solid ${designSystem.proBlue.border}`,
+                boxShadow: designSystem.proBlue.shadow,
+              }
+              : glassSurface(theme, true)),
+          }}
+        >
+          <BrandLogo dark={isDark} />
           <Stack direction="row" spacing={1}>
             <Button variant="text" sx={{ color: 'text.secondary' }} onClick={() => navigate('/login')}>Features</Button>
             <Button variant="text" sx={{ color: 'text.secondary' }} onClick={() => navigate('/login')}>Product</Button>

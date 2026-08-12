@@ -28,6 +28,8 @@ type Server struct {
 }
 
 func New() *Server {
+	config.LoadDotEnv()
+
 	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)
 

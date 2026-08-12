@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Chip, Grid, Stack, Typography } from '@mui/material';
 import {
   AccountTree,
   Analytics,
@@ -19,9 +10,13 @@ import {
   Security,
   Visibility,
   Science,
+  OpenInNew,
 } from '@mui/icons-material';
+import PageFrame from '../components/PageFrame';
+import { GlassCard } from '../components/ui';
 import ContextualAIAssistant from '../components/ContextualAIAssistant';
 import { useAuth } from '../context/AuthContext';
+import { tokens } from '../theme/tokens';
 
 const tools = [
   {
@@ -98,86 +93,118 @@ const tools = [
   },
 ];
 
+const pipelineSteps = [
+  'GitHub Actions runs CI, security scans, and deploy steps.',
+  'Terraform manages repeatable cloud and Kubernetes infrastructure.',
+  'Kubernetes hosts the application, scanner, and observability stack.',
+  'Prometheus + Grafana expose operational and security metrics.',
+  'Trivy + CodeQL + Syft keep the supply chain and code base guarded.',
+];
+
 const DevSecOpsTools: React.FC = () => {
   const { edition } = useAuth();
 
   return (
-    <Box>
-      <Stack spacing={1.25} sx={{ mb: 3 }}>
-        <Chip label="DevSecOps Tools" color="primary" sx={{ width: 'fit-content' }} />
-        <Typography variant="h4" fontWeight={900}>
-          Gold Cyber Toolchain for OSS and Enterprise
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 960 }}>
-          A practical reference surface for the tools behind the RivicQ platform: CI/CD, IaC, runtime orchestration, observability, security, and software supply chain controls.
-        </Typography>
-      </Stack>
-
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        {tools.map((tool) => (
+    <PageFrame
+      eyebrow="Toolchain"
+      title="DevSecOps Tools"
+      subtitle="A practical reference for the CI/CD, IaC, runtime, observability, security, and supply chain tools behind RivicQ."
+      badge="Gold Cyber Stack"
+    >
+      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
+        {tools.map((tool, i) => (
           <Grid item xs={12} sm={6} md={4} key={tool.name}>
-            <Card sx={{ height: '100%', border: '1px solid rgba(212,175,55,0.16)' }}>
-              <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <Box sx={{ color: tool.accent, mb: 1.5 }}>{tool.icon}</Box>
-                <Typography variant="h6" fontWeight={800}>{tool.name}</Typography>
-                <Chip size="small" label={tool.category} sx={{ width: 'fit-content', mt: 1, mb: 1.5 }} />
-                <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>
+            <Box sx={{ height: '100%' }}>
+              <GlassCard glow={tool.accent} delay={i}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <Box sx={{ color: tool.accent, mb: 1.5, '& svg': { fontSize: 28 } }}>{tool.icon}</Box>
+                <Typography variant="h6" fontWeight={800} sx={{ letterSpacing: '-0.01em' }}>
+                  {tool.name}
+                </Typography>
+                <Chip
+                  size="small"
+                  label={tool.category}
+                  sx={{ width: 'fit-content', mt: 1, mb: 1.5, fontWeight: 600, fontSize: '0.7rem' }}
+                />
+                <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1, lineHeight: 1.6 }}>
                   {tool.description}
                 </Typography>
-                <Button href={tool.docs} target="_blank" rel="noopener noreferrer" sx={{ alignSelf: 'flex-start', mt: 2 }}>
+                <Button
+                  href={tool.docs}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  endIcon={<OpenInNew sx={{ fontSize: 16 }} />}
+                  sx={{ alignSelf: 'flex-start', mt: 2 }}
+                >
                   Open Docs
                 </Button>
-              </CardContent>
-            </Card>
+              </Box>
+              </GlassCard>
+            </Box>
           </Grid>
         ))}
       </Grid>
 
-      <Grid container spacing={3} sx={{ mb: 3 }}>
+      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         <Grid item xs={12} md={7}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                DevSecOps Pipeline Reference
-              </Typography>
-              <Stack spacing={1.5}>
-                {[
-                  'GitHub Actions runs CI, security scans, and deploy steps.',
-                  'Terraform manages repeatable cloud and Kubernetes infrastructure.',
-                  'Kubernetes hosts the application, scanner, and observability stack.',
-                  'Prometheus + Grafana expose operational and security metrics.',
-                  'Trivy + CodeQL + Syft keep the supply chain and code base guarded.',
-                ].map((item) => (
-                  <Box key={item} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.03)' }}>
-                    <Typography variant="body2">{item}</Typography>
-                  </Box>
-                ))}
-              </Stack>
-            </CardContent>
-          </Card>
+          <GlassCard hover={false} delay={0}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+              DevSecOps Pipeline Reference
+            </Typography>
+            <Stack spacing={1.25}>
+              {pipelineSteps.map((item, i) => (
+                <Box
+                  key={item}
+                  sx={{
+                    p: 1.75,
+                    borderRadius: `${tokens.borderRadius.md}px`,
+                    bgcolor: 'action.hover',
+                    border: 1,
+                    borderColor: 'divider',
+                    display: 'flex',
+                    gap: 1.5,
+                    alignItems: 'flex-start',
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: tokens.typography.mono,
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: 'primary.main',
+                      minWidth: 20,
+                    }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {item}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          </GlassCard>
         </Grid>
         <Grid item xs={12} md={5}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                OSS vs Enterprise Tool Access
-              </Typography>
-              <Stack spacing={1.5}>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'rgba(212,175,55,0.08)' }}>
-                  <Typography variant="subtitle2">OSS</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Core dashboard, CBOM scanner, local demos, and dev tooling.
-                  </Typography>
-                </Box>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'rgba(15,98,254,0.10)' }}>
-                  <Typography variant="subtitle2">Enterprise</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    CISO, CSPM, compliance, IBM Quantum, AWS/GCP integrations, and advanced reporting.
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
+          <GlassCard hover={false} glow={tokens.colors.rivicq[500]} delay={1}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+              OSS vs Enterprise Access
+            </Typography>
+            <Stack spacing={1.5}>
+              <Box sx={{ p: 2, borderRadius: `${tokens.borderRadius.md}px`, bgcolor: 'rgba(212,175,55,0.08)', border: 1, borderColor: 'divider' }}>
+                <Typography variant="subtitle2" fontWeight={700}>Community / OSS</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Core dashboard, CBOM scanner, local demos, and dev tooling.
+                </Typography>
+              </Box>
+              <Box sx={{ p: 2, borderRadius: `${tokens.borderRadius.md}px`, bgcolor: 'rgba(79,70,229,0.08)', border: 1, borderColor: 'divider' }}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: 'primary.main' }}>Enterprise</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  CISO, CSPM, compliance, IBM Quantum, AWS/GCP integrations, and advanced reporting.
+                </Typography>
+              </Box>
+            </Stack>
+          </GlassCard>
         </Grid>
       </Grid>
 
@@ -187,7 +214,7 @@ const DevSecOpsTools: React.FC = () => {
         title="DevSecOps AI Assistant"
         description="Ask about GitHub Actions, Terraform, Kubernetes, Prometheus, Grafana, Trivy, CodeQL, Syft, or benchmark guidance."
       />
-    </Box>
+    </PageFrame>
   );
 };
 

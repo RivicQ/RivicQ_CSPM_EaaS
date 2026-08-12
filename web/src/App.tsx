@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
+import designSystem from './theme/designSystem';
 
 import Layout from './layouts/Layout';
 import { ThemeModeProvider } from './theme/ThemeContext';
@@ -90,19 +91,25 @@ const App: React.FC = () => {
               <CssBaseline />
             <GlobalStyles
               styles={(theme) => ({
-                '*': {
-                  boxSizing: 'border-box',
+                '*': { boxSizing: 'border-box' },
+                '::selection': {
+                  background: theme.palette.mode === 'dark' ? 'rgba(59,130,246,0.35)' : 'rgba(37,99,235,0.2)',
+                  color: theme.palette.text.primary,
                 },
-                '::-webkit-scrollbar': {
-                  width: '8px',
-                  height: '8px',
+                ':focus-visible': {
+                  outline: `2px solid ${theme.palette.primary.main}`,
+                  outlineOffset: 2,
                 },
-                '::-webkit-scrollbar-track': {
-                  background: theme.palette.background.default,
+                body: {
+                  ...(theme.palette.mode === 'dark'
+                    ? { background: designSystem.gradient.meshDark, backgroundColor: theme.palette.background.default }
+                    : { background: designSystem.gradient.meshLight, backgroundColor: theme.palette.background.default }),
                 },
+                '::-webkit-scrollbar': { width: 8, height: 8 },
+                '::-webkit-scrollbar-track': { background: 'transparent' },
                 '::-webkit-scrollbar-thumb': {
                   background: theme.palette.divider,
-                  borderRadius: '4px',
+                  borderRadius: 4,
                 },
                 '::-webkit-scrollbar-thumb:hover': {
                   background: theme.palette.text.disabled,

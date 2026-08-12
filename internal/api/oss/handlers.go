@@ -2,39 +2,19 @@ package oss
 
 import (
 	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/api/shared"
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/core"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/sirupsen/logrus"
 )
 
-func allowedDomainsFromEnv() []string {
-	raw := strings.TrimSpace(os.Getenv("AUTH_ALLOWED_DOMAINS"))
-	if raw == "" {
-		return nil
-	}
-	parts := strings.Split(raw, ",")
-	domains := make([]string, 0, len(parts))
-	for _, part := range parts {
-		domain := strings.ToLower(strings.TrimSpace(part))
-		if domain != "" {
-			domains = append(domains, domain)
-		}
-	}
-	return domains
-}
-
 // SetupRoutes configures OSS API routes (Open Source edition)
 func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger, cfg *config.OSSConfig) {
-	setupOSSAuth(router, db, logger)
+	shared.SetupStandardAuth(router, db, logger)
 
 	// Core CBOM Management (OSS Features)
 	cbom := router.Group("/cbom")
@@ -63,6 +43,7 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		scansGroup.POST("", shared.TriggerCBOMScan(db, logger))
 		scansGroup.GET("/:id", shared.GetCBOMScanStatus(db, logger))
 		scansGroup.GET("/:id/report", shared.GetCBOMScanReport(db, logger))
+		scansGroup.GET("/:id/qbom", shared.GetScanQBOM(db, logger))
 	}
 
 	// Basic Security Monitoring
@@ -113,13 +94,26 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	// Metrics Overview for OSS Dashboard
 	router.GET("/metrics/overview", shared.GetMetricsOverview(db, logger))
 
-	// Demo scan endpoint for infrastructure discovery
-	router.GET("/demo/scan", getDemoScanResults(logger))
-
 	// CSPM (Cryptographic Security Posture Management) - available in both editions
 	router.GET("/cspm/overview", getCSPMOverviewOSS(logger))
 
-	// RivicQ Ecosystem tools listing
+	// GitHub Scanning (OSS edition — repository crypto scanning)
+	shared.SetupGitHubScanningRoutes(router, logger)
+
+	// Benchmarks (edition-agnostic)
+	router.GET("/benchmarks", getBenchmarksSummaryOSS(db, logger))
+
+	// Demo scan, ecosystem, core
+	RegisterSupplementalRoutes(router, logger)
+
+	// Dashboard demo routes — inventory, cloud, compliance, analytics for OSS UI
+	shared.SetupDashboardDemoRoutes(router, logger)
+}
+
+// RegisterSupplementalRoutes exposes scanner-adjacent OSS routes for enterprise reuse.
+func RegisterSupplementalRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
+	router.GET("/demo/scan", getDemoScanResults(logger))
+
 	ecosystemGroup := router.Group("/ecosystem")
 	{
 		ecosystemGroup.GET("/tools", getEcosystemTools(logger))
@@ -127,102 +121,12 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		ecosystemGroup.GET("/categories", getEcosystemCategories(logger))
 	}
 
-	// Unified Core Status — connects all OSS tools into a single health endpoint
 	coreGroup := router.Group("/core")
 	{
 		coreGroup.GET("/status", getCoreStatus(logger))
 		coreGroup.GET("/services", getCoreServices(logger))
 		coreGroup.GET("/integrations/:name", getCoreIntegrationCheck(logger))
 	}
-
-	// GitHub Scanning (OSS edition — repository crypto scanning)
-	shared.SetupGitHubScanningRoutes(router, logger)
-
-	// Benchmarks (edition-agnostic)
-	router.GET("/benchmarks", getBenchmarksSummaryOSS(db, logger))
-}
-
-// setupOSSAuth configures authentication for OSS edition with database when available
-func setupOSSAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger) {
-	jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET"))
-	if jwtSecret == "" {
-		jwtSecret = "oss-default-secret-not-for-production"
-		logger.Warn("JWT_SECRET not set — using default OSS secret for development only")
-	}
-
-	allowedDomains := allowedDomainsFromEnv()
-
-	var userStore auth.UserStore
-
-	// Use DatabaseUserStore when PostgreSQL is connected, fall back to in-memory
-	if db != nil && db.DB != nil {
-		store := auth.NewDatabaseUserStore(db.DB)
-		userStore = store
-		logger.Info("Auth using PostgreSQL database user store")
-
-		// Create default organization and bootstrap admin user
-		bootstrapEmail := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_EMAIL"))
-		if bootstrapEmail == "" {
-			bootstrapEmail = "admin@rivicq.local"
-		}
-		bootstrapPassword := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_PASSWORD"))
-		if bootstrapPassword == "" {
-			bootstrapPassword = "DemoPass123!"
-		}
-		bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
-		if bootstrapName == "" {
-			bootstrapName = "OSS Admin"
-		}
-		bootstrapRole := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_ROLE"))
-		if bootstrapRole == "" {
-			bootstrapRole = "admin"
-		}
-
-		// Ensure default tenant exists
-		var tenantCount int
-		err := db.DB.QueryRow("SELECT COUNT(*) FROM tenants").Scan(&tenantCount)
-		if err == nil && tenantCount == 0 {
-			_, err := db.Exec(`INSERT INTO tenants (id, name, domain) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
-				"tenant-1", "Default Organization", "rivicq.local")
-			if err != nil {
-				logger.WithError(err).Warn("Failed to create default tenant")
-			}
-		}
-
-		// Create bootstrap admin user if no users exist
-		var userCount int
-		err = db.DB.QueryRow("SELECT COUNT(*) FROM users").Scan(&userCount)
-		if err == nil && userCount == 0 {
-			hashedPassword, hashErr := auth.HashPassword(bootstrapPassword)
-			if hashErr == nil {
-				_, execErr := db.Exec(`
-					INSERT INTO users (id, tenant_id, email, name, role, password)
-					VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (email) DO NOTHING`,
-					uuid.New().String(), "tenant-1", bootstrapEmail, bootstrapName, bootstrapRole, hashedPassword)
-				if execErr != nil {
-					logger.WithError(execErr).Warn("Failed to create bootstrap admin user")
-				} else {
-					logger.WithField("email", bootstrapEmail).Info("Bootstrap admin user created")
-				}
-			}
-		}
-	} else {
-		store, err := auth.NewWorkDomainUserStore()
-		if err == nil {
-			userStore = store
-		} else {
-			logger.WithError(err).Fatal("Unable to initialize OSS auth store")
-		}
-		if os.Getenv("AUTH_BOOTSTRAP_EMAIL") == "" && os.Getenv("AUTH_BOOTSTRAP_PASSWORD") == "" {
-			logger.Warn("OSS auth bootstrapped with default credentials admin@rivicq.local / DemoPass123!; override AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD for production")
-		}
-	}
-
-	authService := auth.NewAuthService(jwtSecret, userStore)
-	if len(allowedDomains) == 0 {
-		logger.Info("OSS registration is open to any email domain unless AUTH_ALLOWED_DOMAINS is set")
-	}
-	shared.SetupAuthRoutes(router, logger, authService, allowedDomains)
 }
 
 func attestCBOMReportOSS(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {

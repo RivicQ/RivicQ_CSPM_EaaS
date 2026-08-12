@@ -41,6 +41,7 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 
 		// Google OAuth
 		authGroup.GET("/google/login", GoogleLoginHandler(logger))
+		authGroup.POST("/google/exchange", GoogleExchangeHandler(logger, service, allowedDomains))
 		authGroup.Any("/google/callback", GoogleCallbackHandler(logger, service, allowedDomains))
 		authGroup.GET("/google/status", GoogleOAuthStatusHandler(logger))
 
@@ -51,15 +52,25 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 
 		// Demo access
 		authGroup.GET("/demo", DemoAccessHandler(logger, service))
+		authGroup.GET("/providers", authProvidersHandler())
+	}
+}
+
+func authProvidersHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"password":             true,
+			"demo":                 true,
+			"mfa":                  true,
+			"google_oauth_enabled": initGoogleOAuthConfig() != nil,
+			"github_oauth_enabled": initGitHubOAuthConfig() != nil,
+		})
 	}
 }
 
 func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		edition := c.DefaultQuery("edition", "oss")
-		if edition != "oss" && edition != "professional" && edition != "enterprise" {
-			edition = "oss"
-		}
+		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
 
 		demoUser := &auth.User{
 			ID:       "demo-user",
@@ -112,11 +123,11 @@ func loginHandler(logger *logrus.Logger, service *auth.AuthService, allowedDomai
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 			return
 		}
-		if !workEmailAllowed(req.Email, allowedDomains) {
+		if !auth.EmailDomainAllowed(req.Email, allowedDomains) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Work email domain not allowed"})
 			return
 		}
-		resp, err := service.LoginWithEdition(req.Email, req.Password, req.Edition)
+		resp, err := service.LoginWithEdition(req.Email, req.Password, normalizeAuthEdition(req.Edition))
 		if err != nil {
 			logger.WithError(err).WithField("email", req.Email).Warn("authentication failed")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
@@ -159,7 +170,7 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 			return
 		}
-		if !workEmailAllowed(req.Email, allowedDomains) {
+		if !auth.EmailDomainAllowed(req.Email, allowedDomains) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Work email domain not allowed"})
 			return
 		}
@@ -184,7 +195,7 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 			return
 		}
 
-		resp, err := service.LoginWithEdition(req.Email, req.Password, req.Edition)
+		resp, err := service.LoginWithEdition(req.Email, req.Password, normalizeAuthEdition(req.Edition))
 		if err != nil {
 			logger.WithError(err).WithField("email", req.Email).Warn("registration login failed")
 			c.JSON(http.StatusCreated, gin.H{
@@ -237,19 +248,7 @@ func editionsHandler(allowedDomains []string) gin.HandlerFunc {
 }
 
 func workEmailAllowed(email string, allowedDomains []string) bool {
-	if len(allowedDomains) == 0 {
-		return true
-	}
-	parts := strings.Split(strings.ToLower(strings.TrimSpace(email)), "@")
-	if len(parts) != 2 {
-		return false
-	}
-	for _, domain := range allowedDomains {
-		if parts[1] == strings.ToLower(strings.TrimSpace(domain)) {
-			return true
-		}
-	}
-	return false
+	return auth.EmailDomainAllowed(email, allowedDomains)
 }
 
 func refreshTokenHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
@@ -323,7 +322,7 @@ func mfaVerifyHandler(service *auth.AuthService, logger *logrus.Logger) gin.Hand
 			return
 		}
 
-		edition := req.Edition
+		edition := normalizeAuthEdition(req.Edition)
 		if edition == "" {
 			edition = editionForRole(user.Role, req.Edition)
 		}
@@ -343,6 +342,13 @@ func mfaVerifyHandler(service *auth.AuthService, logger *logrus.Logger) gin.Hand
 			"access_token":  accessToken,
 			"refresh_token": refreshToken,
 			"mfa_verified":  true,
+			"user": authUserResponse{
+				ID:    user.ID,
+				Name:  user.Name,
+				Email: user.Email,
+				Role:  user.Role,
+			},
+			"edition": edition,
 		})
 	}
 }
@@ -436,9 +442,8 @@ func mfaDisableHandler(service *auth.AuthService, logger *logrus.Logger) gin.Han
 }
 
 func editionForRole(role, requested string) string {
-	requested = strings.ToLower(strings.TrimSpace(requested))
-	if requested == "oss" || requested == "professional" || requested == "enterprise" {
-		return requested
+	if strings.TrimSpace(requested) != "" {
+		return normalizeAuthEdition(requested)
 	}
 	if role == "admin" {
 		return "enterprise"

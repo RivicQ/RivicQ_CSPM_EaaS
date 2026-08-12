@@ -1,7 +1,17 @@
 import React from 'react';
-import { Box, Button, Card, CardContent, Chip, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  Stack,
+  TextField,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { AutoAwesome, HelpOutline } from '@mui/icons-material';
 import { Edition } from '../config/editions';
+import { GlassCard } from './ui';
+import designSystem from '../theme/designSystem';
 
 interface AIAssistantPanelProps {
   edition: Edition;
@@ -15,7 +25,27 @@ interface AIAssistantPanelProps {
   } | null;
 }
 
-const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ edition, totalAssets, complianceScore, pqcReadiness, benchmark }) => {
+const promptButtonSx = {
+  textTransform: 'none' as const,
+  fontWeight: 500,
+  borderColor: 'divider',
+  color: 'text.primary',
+  bgcolor: 'action.hover',
+  '&:hover': {
+    borderColor: 'primary.main',
+    bgcolor: 'action.selected',
+  },
+};
+
+const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
+  edition,
+  totalAssets,
+  complianceScore,
+  pqcReadiness,
+  benchmark,
+}) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [question, setQuestion] = React.useState('How do I move from OSS to Enterprise?');
   const [answer, setAnswer] = React.useState('');
 
@@ -47,57 +77,75 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ edition, totalAsset
   };
 
   return (
-    <Card sx={{ border: '1px solid rgba(15,98,254,0.30)', background: 'linear-gradient(135deg, rgba(16,26,45,0.95), rgba(8,17,31,0.95))' }}>
-      <CardContent>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-          <AutoAwesome color="primary" />
-          <Typography variant="h6" fontWeight={700}>
-            RivicQ AI Assistance
-          </Typography>
-          <Chip size="small" color={edition === 'enterprise' ? 'secondary' : 'primary'} label={edition.toUpperCase()} />
-        </Stack>
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Ask in plain English. The assistant explains Community limits, paid unlocks, and benchmark guidance.
+    <GlassCard hover={false} glow={designSystem.proBlue.accent}>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }} flexWrap="wrap" useFlexGap>
+        <AutoAwesome color="primary" />
+        <Typography variant="h6" fontWeight={700} color="text.primary">
+          RivicQ AI Assistance
         </Typography>
+        <Chip size="small" color={edition === 'enterprise' ? 'secondary' : 'primary'} label={edition.toUpperCase()} />
+      </Stack>
 
-        <TextField
-          fullWidth
-          multiline
-          minRows={3}
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          label="Ask RivicQ AI"
-          placeholder="Example: What do I get in Enterprise?"
-          sx={{ mb: 2 }}
-        />
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.65 }}>
+        Ask in plain English. The assistant explains Community limits, paid unlocks, and benchmark guidance.
+      </Typography>
 
-        <Stack direction="row" spacing={1} sx={{ mb: 2 }} flexWrap="wrap">
-          <Button size="small" variant="outlined" onClick={() => setQuestion('How do I move from OSS to Enterprise?')}>
-            OSS vs Enterprise
-          </Button>
-          <Button size="small" variant="outlined" onClick={() => setQuestion('Show me benchmark guidance for RivicQ.')}>
-            Benchmark Guidance
-          </Button>
-          <Button size="small" variant="outlined" onClick={() => setQuestion('What is locked in Community?')}>
-            Locked Features
-          </Button>
-        </Stack>
+      <TextField
+        fullWidth
+        multiline
+        minRows={3}
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        label="Ask RivicQ AI"
+        placeholder="Example: What do I get in Enterprise?"
+        sx={{
+          mb: 2,
+          '& .MuiInputLabel-root': { color: 'text.secondary' },
+          '& .MuiInputLabel-root.Mui-focused': { color: 'primary.main' },
+          '& .MuiOutlinedInput-root': {
+            color: 'text.primary',
+            bgcolor: isDark ? 'rgba(15,23,42,0.45)' : 'rgba(255,255,255,0.85)',
+            '& fieldset': { borderColor: 'divider' },
+            '&:hover fieldset': { borderColor: 'primary.main' },
+            '&.Mui-focused fieldset': { borderColor: 'primary.main' },
+          },
+        }}
+      />
 
-        <Button variant="contained" onClick={generateAnswer} startIcon={<HelpOutline />} sx={{ mb: 2 }}>
-          Generate Guidance
+      <Stack direction="row" spacing={1} sx={{ mb: 2 }} flexWrap="wrap" useFlexGap>
+        <Button size="small" variant="outlined" sx={promptButtonSx} onClick={() => setQuestion('How do I move from OSS to Enterprise?')}>
+          OSS vs Enterprise
         </Button>
+        <Button size="small" variant="outlined" sx={promptButtonSx} onClick={() => setQuestion('Show me benchmark guidance for RivicQ.')}>
+          Benchmark Guidance
+        </Button>
+        <Button size="small" variant="outlined" sx={promptButtonSx} onClick={() => setQuestion('What is locked in Community?')}>
+          Locked Features
+        </Button>
+      </Stack>
 
-        {answer && (
-          <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.22)' }}>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              AI Response
-            </Typography>
-            <Typography variant="body2">{answer}</Typography>
-          </Box>
-        )}
-      </CardContent>
-    </Card>
+      <Button variant="contained" onClick={generateAnswer} startIcon={<HelpOutline />} sx={{ mb: 2 }}>
+        Generate Guidance
+      </Button>
+
+      {answer && (
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: `${designSystem.radius.md}px`,
+            bgcolor: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(59,130,246,0.06)',
+            border: `1px solid ${isDark ? 'rgba(96,165,250,0.28)' : 'rgba(59,130,246,0.2)'}`,
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.primary', fontWeight: 700 }}>
+            AI Response
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65 }}>
+            {answer}
+          </Typography>
+        </Box>
+      )}
+    </GlassCard>
   );
 };
 

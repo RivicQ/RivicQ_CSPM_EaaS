@@ -53,7 +53,19 @@ services:
       - CRYPTOBOM_DB_PASSWORD=${DB_PASSWORD:-cryptobom_dev}
       - CRYPTOBOM_DB_NAME=cryptobom
       - CRYPTOBOM_DB_SSLMODE=disable
-      - FRONTEND_REDIRECT_URL=http://localhost:3000
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-change-in-production-min-32-chars}
+      - AUTH_BOOTSTRAP_EMAIL=${AUTH_BOOTSTRAP_EMAIL:-admin@rivicq.local}
+      - AUTH_BOOTSTRAP_PASSWORD=${AUTH_BOOTSTRAP_PASSWORD:-DemoPass123!}
+      - FRONTEND_REDIRECT_URL=http://localhost:3000/platform
+      - FRONTEND_BASE_PATH=/platform
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET:-}
+      - GOOGLE_OAUTH_REDIRECT_URL=${GOOGLE_OAUTH_REDIRECT_URL:-http://localhost:9090/api/v1/auth/google/callback}
+      - GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID:-}
+      - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET:-}
+      - GITHUB_OAUTH_REDIRECT_URL=${GITHUB_OAUTH_REDIRECT_URL:-http://localhost:8080/api/v1/auth/github/callback}
+      - AUTH_ALLOWED_DOMAINS=${AUTH_ALLOWED_DOMAINS:-}
+      - AUTH_ALLOW_GMAIL=${AUTH_ALLOW_GMAIL:-true}
     env_file:
       - path: .env
         required: false
@@ -80,7 +92,8 @@ services:
       - NODE_ENV=development
       # REACT_APP_API_URL is used by the browser, not the container.
       # Keep this as localhost:<host-port> so the browser can reach the API.
-      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_API_URL=http://localhost:8080/api/v1
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-change-in-production-min-32-chars}
     command: sh -c "npm install --silent && npm run dev"
     networks:
       - cryptobom-net

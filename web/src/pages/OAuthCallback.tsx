@@ -12,26 +12,55 @@ const OAuthCallback: React.FC = () => {
   const [error, setError] = React.useState('');
 
   React.useEffect(() => {
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const edition = normalizeEdition(searchParams.get('edition'));
-    const userId = searchParams.get('user_id');
-    const userName = searchParams.get('user_name');
-    const userEmail = searchParams.get('user_email');
-    const userRole = searchParams.get('user_role') || 'viewer';
+    const decode = (value: string | null) => {
+      if (!value) return '';
+      try {
+        return decodeURIComponent(value);
+      } catch {
+        return value;
+      }
+    };
 
-    if (!accessToken) {
-      setError('No access token received from authentication provider. Please try again.');
+    const oauthError = searchParams.get('error');
+    if (oauthError) {
+      const description = decode(searchParams.get('error_description')) || oauthError;
+      if (oauthError === 'redirect_uri_mismatch') {
+        authService.googleStatus()
+          .then((resp) => {
+            const uri = resp.data?.redirect_uri;
+            setError(
+              uri
+                ? `Google OAuth redirect URI mismatch. Add this exact URI in Google Cloud Console → Credentials → Authorized redirect URIs:\n${uri}`
+                : `Google OAuth redirect URI mismatch (${description}).`
+            );
+          })
+          .catch(() => setError(`Google OAuth redirect URI mismatch (${description}).`));
+        return;
+      }
+      setError(description);
       return;
     }
 
-    const finish = async () => {
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+
+    const finishWithTokens = async (
+      accessToken: string,
+      refreshToken: string | null,
+      edition: ReturnType<typeof normalizeEdition>,
+      user?: { id: string; name: string; email: string; role: string },
+    ) => {
       try {
-        if (userId && userName) {
+        if (user?.id && user.name) {
           persistAuth({
             access_token: accessToken,
             refresh_token: refreshToken,
-            user: { id: userId, name: userName, email: userEmail || '', role: userRole },
+            user: {
+              id: user.id,
+              name: decode(user.name),
+              email: decode(user.email),
+              role: user.role,
+            },
             edition,
           });
         } else {
@@ -55,6 +84,52 @@ const OAuthCallback: React.FC = () => {
         setError('Failed to complete authentication. Please try logging in manually.');
       }
     };
+
+    const finish = async () => {
+      if (code && state) {
+        try {
+          const resp = await authService.googleExchange({ code, state });
+          const data = resp.data;
+          await finishWithTokens(
+            data.access_token,
+            data.refresh_token,
+            normalizeEdition(data.edition),
+            data.user
+              ? {
+                  id: data.user.id,
+                  name: data.user.name,
+                  email: data.user.email,
+                  role: data.user.role || 'viewer',
+                }
+              : undefined,
+          );
+        } catch (err: any) {
+          setError(err?.response?.data?.error || err?.message || 'Google sign-in failed');
+        }
+        return;
+      }
+
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const edition = normalizeEdition(searchParams.get('edition'));
+      const userId = searchParams.get('user_id');
+      const userName = searchParams.get('user_name');
+      const userEmail = searchParams.get('user_email');
+      const userRole = searchParams.get('user_role') || 'viewer';
+
+      if (!accessToken) {
+        setError('No access token received from authentication provider. Please try again.');
+        return;
+      }
+
+      await finishWithTokens(accessToken, refreshToken, edition, {
+        id: userId || '',
+        name: userName || '',
+        email: userEmail || '',
+        role: userRole,
+      });
+    };
+
     finish();
   }, [searchParams, navigate, persistAuth]);
 

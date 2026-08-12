@@ -223,6 +223,11 @@ func (h *InventoryHandler) ListAssets(c *gin.Context) {
 		assets = append(assets, asset)
 	}
 
+	if len(assets) == 0 {
+		c.JSON(http.StatusOK, demoAssetsList())
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"assets": assets,
 		"total":  len(assets),
@@ -808,6 +813,11 @@ type InventorySummary struct {
 }
 
 func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
+	if h.db == nil {
+		c.JSON(http.StatusOK, demoInventorySummary())
+		return
+	}
+
 	tenantID := c.GetHeader("X-Tenant-ID")
 
 	summary := InventorySummary{
@@ -849,6 +859,11 @@ func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
 
 	if err := h.db.QueryRow("SELECT COUNT(*) FROM cryptographic_assets ca JOIN inventory_assets ia ON ca.inventory_asset_id = ia.id WHERE ia.tenant_id = $1 AND ca.vulnerability_score > 7", tenantID).Scan(&summary.VulnerableAssets); err != nil {
 		h.logger.Error("Failed to count vulnerable assets: ", err)
+	}
+
+	if summary.TotalAssets == 0 {
+		c.JSON(http.StatusOK, demoInventorySummary())
+		return
 	}
 
 	c.JSON(http.StatusOK, summary)

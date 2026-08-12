@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
@@ -32,7 +31,7 @@ type GitHubEmail struct {
 
 var (
 	githubOAuthConfig *oauth2.Config
-	githubStateMap    = make(map[string]string)
+	githubStateMap    = make(map[string]string) // state -> edition
 )
 
 func initGitHubOAuthConfig() *oauth2.Config {
@@ -73,7 +72,8 @@ func GitHubLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
 		}
 
 		state := generateOAuthState()
-		githubStateMap[state] = time.Now().UTC().Format(time.RFC3339)
+		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
+		githubStateMap[state] = edition
 
 		redirectURL := config.AuthCodeURL(state, oauth2.AccessTypeOffline)
 		c.JSON(http.StatusOK, gin.H{
@@ -99,7 +99,8 @@ func GitHubCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 			return
 		}
 
-		if _, exists := githubStateMap[state]; !exists {
+		requestedEdition, exists := githubStateMap[state]
+		if !exists {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid state parameter"})
 			return
 		}
@@ -175,7 +176,10 @@ func GitHubCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 			existingUser = newUser
 		}
 
-		edition := "oss"
+		edition := normalizeAuthEdition(requestedEdition)
+		if edition == "" {
+			edition = editionForRole(existingUser.Role, "")
+		}
 
 		accessToken, err := service.TokenManager().GenerateToken(existingUser, edition)
 		if err != nil {
@@ -189,26 +193,19 @@ func GitHubCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 			return
 		}
 
-		// If a frontend redirect URL is configured, redirect the browser instead of returning JSON
-		frontendURL := os.Getenv("FRONTEND_REDIRECT_URL")
-		if frontendURL == "" {
-			frontendURL = "http://localhost:3000"
+		params := url.Values{}
+		params.Set("access_token", accessToken)
+		params.Set("refresh_token", refreshToken)
+		params.Set("edition", edition)
+		params.Set("user_id", existingUser.ID)
+		params.Set("user_name", existingUser.Name)
+		params.Set("user_email", existingUser.Email)
+		params.Set("user_role", existingUser.Role)
+		if token.AccessToken != "" {
+			params.Set("github_token", token.AccessToken)
 		}
-		if frontendURL != "" {
-			redirectURL := fmt.Sprintf("%s?access_token=%s&refresh_token=%s&edition=%s&github_token=%s&user_id=%s&user_name=%s&user_email=%s&user_role=%s",
-				strings.TrimRight(frontendURL, "/")+"/oauth/callback",
-				accessToken,
-				refreshToken,
-				edition,
-				token.AccessToken,
-				existingUser.ID,
-				url.QueryEscape(existingUser.Name),
-				url.QueryEscape(existingUser.Email),
-				existingUser.Role,
-			)
-			c.Redirect(http.StatusTemporaryRedirect, redirectURL)
-			return
-		}
+		c.Redirect(http.StatusTemporaryRedirect, buildOAuthFrontendRedirect(params))
+		return
 
 		c.JSON(http.StatusOK, gin.H{
 			"access_token":  accessToken,

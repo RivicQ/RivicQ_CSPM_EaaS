@@ -97,7 +97,7 @@ func NewDatabaseUserStore(db *sql.DB) *DatabaseUserStore {
 // NewWorkDomainUserStore creates a seeded in-memory store for approved work domains.
 // Returns an error if no bootstrap user is configured, so callers should fall back.
 func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
-	allowedDomains := parseAllowedDomains(os.Getenv("AUTH_ALLOWED_DOMAINS"))
+	allowedDomains := AllowedDomainsFromEnv()
 	users := map[string]*User{}
 
 	bootstrapEmail := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_EMAIL"))
@@ -120,7 +120,7 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 		bootstrapRole = defaultOSSBootstrapRole
 	}
 
-	if !emailAllowed(bootstrapEmail, allowedDomains) {
+	if !EmailDomainAllowed(bootstrapEmail, allowedDomains) {
 		return nil, fmt.Errorf("bootstrap email domain is not allowed")
 	}
 
@@ -148,7 +148,7 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 		{ID: "user-viewer", Email: "sales@rivicq.com", Name: "Sales Team", Role: "viewer"},
 	}
 	for _, du := range demoUsers {
-		if emailAllowed(du.Email, allowedDomains) {
+		if EmailDomainAllowed(du.Email, allowedDomains) {
 			du.TenantID = "tenant-1"
 			du.Password = hashedPassword
 			users[strings.ToLower(du.Email)] = du
@@ -274,7 +274,7 @@ func (d *DatabaseUserStore) UpdateUser(user *User) error {
 }
 
 func (w *WorkDomainUserStore) GetUserByEmail(email string) (*User, error) {
-	if !emailAllowed(email, w.allowedDomains) {
+	if !EmailDomainAllowed(email, w.allowedDomains) {
 		return nil, fmt.Errorf("email domain not allowed")
 	}
 	if user, exists := w.users[strings.ToLower(email)]; exists {
@@ -293,7 +293,7 @@ func (w *WorkDomainUserStore) GetUserByID(id string) (*User, error) {
 }
 
 func (w *WorkDomainUserStore) CreateUser(user *User) error {
-	if !emailAllowed(user.Email, w.allowedDomains) {
+	if !EmailDomainAllowed(user.Email, w.allowedDomains) {
 		return fmt.Errorf("email domain not allowed")
 	}
 	user.ID = uuid.New().String()
@@ -369,32 +369,4 @@ func CreateDefaultUsers(db *sql.DB) error {
 // hashPassword is a local wrapper for the exported HashPassword.
 func hashPassword(password string) (string, error) {
 	return HashPassword(password)
-}
-
-func parseAllowedDomains(raw string) []string {
-	parts := strings.Split(raw, ",")
-	domains := make([]string, 0, len(parts))
-	for _, part := range parts {
-		domain := strings.ToLower(strings.TrimSpace(part))
-		if domain != "" {
-			domains = append(domains, domain)
-		}
-	}
-	return domains
-}
-
-func emailAllowed(email string, allowedDomains []string) bool {
-	if len(allowedDomains) == 0 {
-		return true
-	}
-	parts := strings.Split(strings.ToLower(strings.TrimSpace(email)), "@")
-	if len(parts) != 2 {
-		return false
-	}
-	for _, domain := range allowedDomains {
-		if parts[1] == strings.ToLower(strings.TrimSpace(domain)) {
-			return true
-		}
-	}
-	return false
 }

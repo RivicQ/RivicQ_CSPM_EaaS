@@ -11,7 +11,7 @@
 #   make docker-down  – stop all Docker Compose services
 #   make clean        – remove build artifacts
 
-.PHONY: all dev dev-core dev-backend dev-frontend build build-core build-oss build-enterprise \
+.PHONY: all dev dev-core dev-backend dev-enterprise dev-frontend build build-core build-oss build-enterprise \
         test lint migrate seed docker-up docker-down clean help
 
 GO        ?= go
@@ -31,13 +31,17 @@ dev: $(ENV_FILE)
 
 ## Start the unified core backend (edition auto-detected from CRYPTOBOM_LICENSE_KEY)
 dev-core: $(ENV_FILE) build-core
-	./$(BIN_DIR)/cryptobom-core
+	@set -a && . ./$(ENV_FILE) && set +a && ./$(BIN_DIR)/cryptobom-core
 
 ## Start the Go backend in demo mode (no database required)
 dev-backend: $(ENV_FILE) build-oss
-	CRYPTOBOM_PORT=8080 ./$(BIN_DIR)/cryptobom-oss
+	@set -a && . ./$(ENV_FILE) && set +a && CRYPTOBOM_PORT=8080 ./$(BIN_DIR)/cryptobom-oss
 
-## Start the React frontend (requires backend running on :8080)
+## Start the Enterprise backend on :9090 (demo mode without DB, or with DATABASE_URL)
+dev-enterprise: $(ENV_FILE) build-enterprise
+	@set -a && . ./$(ENV_FILE) && set +a && CRYPTOBOM_PORT=9090 CRYPTOBOM_LICENSE_KEY=$${CRYPTOBOM_LICENSE_KEY:-ENT-dev-local} ./$(BIN_DIR)/cryptobom-enterprise
+
+## Start the React frontend (requires backend running on :8080 or :9090)
 dev-frontend:
 	cd web && npm install --silent && npm run dev
 

@@ -1,5 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 import { tokens } from './tokens';
+import designSystem, { proBlueContainedButtonSx } from './designSystem';
+import appTypography from './typography';
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -17,11 +19,13 @@ declare module '@mui/material/Chip' {
 }
 
 const LIGHT_PRIMARY = {
-  50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81',
+  50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
+  500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1a4480', 900: '#0c2340',
 };
 
 const DARK_PRIMARY = {
-  50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81',
+  50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
+  500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1a4480', 900: '#0c2340',
 };
 
 const LIGHT_GOLD = {
@@ -76,21 +80,26 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
         secondary: text.secondary,
         disabled: text.muted,
       },
+      action: {
+        hover: isDark ? 'rgba(148,163,184,0.08)' : 'rgba(100,116,139,0.06)',
+        selected: isDark ? 'rgba(59,130,246,0.14)' : 'rgba(37,99,235,0.08)',
+      },
       divider: border,
     },
     typography: {
-      fontFamily: tokens.typography.fontFamily,
-      h1: { fontWeight: 800, letterSpacing: '-0.025em' },
-      h2: { fontWeight: 800, letterSpacing: '-0.025em' },
-      h3: { fontWeight: 700, letterSpacing: '-0.02em' },
-      h4: { fontWeight: 700, letterSpacing: '-0.01em' },
-      h5: { fontWeight: 600 },
-      h6: { fontWeight: 600 },
-      subtitle1: { fontWeight: 600 },
-      subtitle2: { fontWeight: 600 },
-      body1: { fontWeight: 400 },
-      body2: { fontWeight: 400 },
-      button: { fontWeight: 600, textTransform: 'none' },
+      fontFamily: appTypography.fontFamily,
+      h1: { fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.15 },
+      h2: { fontWeight: 600, letterSpacing: '-0.022em', lineHeight: 1.18 },
+      h3: { fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.22 },
+      h4: { fontWeight: 600, letterSpacing: '-0.018em', lineHeight: 1.25, fontSize: '1.625rem' },
+      h5: { fontWeight: 600, letterSpacing: '-0.01em' },
+      h6: { fontWeight: 600, letterSpacing: '-0.008em' },
+      subtitle1: { fontWeight: 600, letterSpacing: '-0.01em' },
+      subtitle2: { fontWeight: 600, letterSpacing: '-0.008em', fontSize: '0.8125rem' },
+      body1: { fontWeight: 400, lineHeight: 1.6 },
+      body2: { fontWeight: 400, lineHeight: 1.55, fontSize: '0.875rem' },
+      button: { fontWeight: 600, textTransform: 'none', letterSpacing: '-0.008em' },
+      overline: { fontWeight: 600, letterSpacing: '0.06em', fontSize: '0.6875rem' },
     },
     shape: { borderRadius: tokens.borderRadius.md },
     spacing: 8,
@@ -112,10 +121,17 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
       MuiCard: {
         styleOverrides: {
           root: {
-            background: surface[1],
-            border: `1px solid ${border}`,
+            background: isDark ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.92)',
+            backdropFilter: 'blur(16px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
+            border: `1px solid ${isDark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.12)'}`,
             borderRadius: tokens.borderRadius.lg,
-            boxShadow: tokens.shadows.panel,
+            boxShadow: designSystem.shadow.sm,
+            transition: designSystem.motion.smooth,
+            '&:hover': {
+              boxShadow: designSystem.shadow.md,
+              borderColor: isDark ? 'rgba(148,163,184,0.2)' : 'rgba(100,116,139,0.18)',
+            },
           },
         },
       },
@@ -138,10 +154,10 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
             textTransform: 'none',
             fontWeight: 600,
             padding: '8px 20px',
+            transition: designSystem.motion.smooth,
           },
           containedPrimary: {
-            boxShadow: `0 1px 2px rgba(15,23,42,0.06), 0 4px 12px ${primary[600]}2e`,
-            '&:hover': { boxShadow: `0 2px 4px rgba(15,23,42,0.08), 0 8px 20px ${primary[600]}4d` },
+            ...proBlueContainedButtonSx,
           },
           outlined: { borderColor: border },
         },
@@ -174,6 +190,15 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
           root: {
             borderBottom: `1px solid ${border}`,
             color: text.primary,
+          },
+        },
+      },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            '&.Mui-selected': {
+              backgroundColor: isDark ? 'rgba(59,130,246,0.14)' : 'rgba(37,99,235,0.08)',
+            },
           },
         },
       },
@@ -224,7 +249,28 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
       },
       MuiTab: {
         styleOverrides: {
-          root: { textTransform: 'none', fontWeight: 600 },
+          root: {
+            textTransform: 'none',
+            fontWeight: 600,
+            minHeight: 44,
+            borderRadius: tokens.borderRadius.md,
+            '&.Mui-selected': { color: primary[600] },
+          },
+        },
+      },
+      MuiToggleButton: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
+            fontWeight: 600,
+            borderColor: border,
+            borderRadius: `${tokens.borderRadius.md}px !important`,
+            '&.Mui-selected': {
+              background: isDark ? 'rgba(59,130,246,0.18)' : 'rgba(37,99,235,0.1)',
+              color: primary[600],
+              borderColor: `${primary[500]}44`,
+            },
+          },
         },
       },
       MuiTooltip: {

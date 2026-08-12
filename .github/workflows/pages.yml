@@ -63,6 +63,8 @@ jobs:
           cp docs/index.html web/build/docs/index.html
           mkdir -p web/build/media
           cp -r media/. web/build/media/
+          mkdir -p web/build/marketing
+          cp -r marketing/. web/build/marketing/
 
       - name: Deploy to GitHub Pages (gh-pages branch)
         uses: peaceiris/actions-gh-pages@v4
