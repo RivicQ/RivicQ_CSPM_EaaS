@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
-import designSystem, { gradientTextSx } from '../../theme/designSystem';
+import designSystem from '../../theme/designSystem';
 
 type EmptyStateProps = {
   icon?: React.ReactNode;

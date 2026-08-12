@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import {
   Box, Button, Chip, CircularProgress, Grid, IconButton, InputAdornment,
   LinearProgress, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  TextField, Tooltip, Typography,
+  TextField, Typography,
 } from '@mui/material';
 import {
   Search, Refresh, Download, Visibility, Security, Assessment, Storage,
@@ -57,8 +57,6 @@ const Assets: React.FC = () => {
   const paginatedAssets = filteredAssets.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.max(1, Math.ceil(filteredAssets.length / rowsPerPage));
 
-  const quantumSafe = assets.filter((a) => a.quantum_safe || a.quantumSafe).length;
-  const atRisk = assets.filter((a) => ['HIGH', 'CRITICAL'].includes((a.risk_level || a.riskLevel || '').toUpperCase())).length;
   const migrationQueue = assets.filter((a) => !(a.quantum_safe || a.quantumSafe));
 
   const getRiskColor = (level: string): 'success' | 'warning' | 'error' | 'default' => {

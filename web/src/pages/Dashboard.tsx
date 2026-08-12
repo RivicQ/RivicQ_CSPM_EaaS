@@ -47,6 +47,8 @@ const DEMO_FEED = [
   { time: '1h ago', severity: 'medium', message: 'Azure Key Vault soft-delete purge protection disabled' },
 ];
 
+const DEFAULT_FINDINGS = { critical: 2, high: 8, medium: 15, low: 25 };
+
 const ChartTooltipContent: React.FC<any> = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -139,7 +141,10 @@ const Dashboard: React.FC = () => {
 
   const totalResources = resourcesSummary?.total_resources ?? (assets.length || 1427);
   const healthScore = (cspmOverview as any)?.health_score ?? (summaryData as any)?.compliance_score ?? 78;
-  const findings = resourcesSummary?.security_findings ?? { critical: 2, high: 8, medium: 15, low: 25 };
+  const findings = React.useMemo(
+    () => resourcesSummary?.security_findings ?? DEFAULT_FINDINGS,
+    [resourcesSummary],
+  );
   const totalFindings = (Object.values(findings) as number[]).reduce((a, b) => a + b, 0);
 
   const algorithmData = React.useMemo(() => {
