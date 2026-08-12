@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-08-12
+
+### Changed
+- Restructured the repository: removed redundant internal planning docs, database dumps, committed binaries, and archived demo fixtures.
+- Streamlined `README.md` and added `docs/README.md` plus `docs/editions.md` as the canonical documentation index.
+
 ## [1.2.0] - 2026-08-08
 - Redesign the full web platform with a minimal light-first enterprise theme
   (indigo/emerald accents, light surfaces, dark-mode toggle preserved).

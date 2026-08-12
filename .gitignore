@@ -84,6 +84,11 @@ web/.env.*
 /oss
 /enterprise
 /cryptobom-server
+/scanner
+
+# Database dumps (never commit)
+*.sql
+cryptobom_backup.sql
 
 # Python virtual environments
 .venv/
