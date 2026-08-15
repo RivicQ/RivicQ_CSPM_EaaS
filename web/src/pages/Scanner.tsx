@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Box, Button, Chip, Grid, LinearProgress, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
@@ -59,7 +60,8 @@ const mapApiScan = (s: any): ScanJob => ({
 });
 
 const Scanner: React.FC = () => {
-  const [tab, setTab] = useState(0);
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState(() => (searchParams.get('tab') === 'github' ? 5 : 0));
   const [isScanning, setIsScanning] = useState(false);
   const [scanType, setScanType] = useState<'quick' | 'full' | 'compliance' | 'cbom'>('cbom');
   const [scanTarget, setScanTarget] = useState('./');
@@ -69,6 +71,10 @@ const Scanner: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const pollTimerRef = useRef<number | null>(null);
   const pollAttemptsRef = useRef(0);
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'github') setTab(5);
+  }, [searchParams]);
 
   const { data: scanList, refetch: refetchScans } = useQuery({
     queryKey: ['cbom-scans'],
@@ -186,7 +192,7 @@ const Scanner: React.FC = () => {
   const completedScans = scanJobs.filter((j) => j.status === 'completed').length;
 
   return (
-    <PageFrame eyebrow="Discovery" title="CBOM Scanner" subtitle="Detect cryptographic material via TLS, SSH, HTTP, and SBOM discovery — results feed inventory and analytics." badge={isScanning ? 'Scanning' : 'Ready'}>
+    <PageFrame eyebrow="Cryptographic Security Posture Management" title="CBOM Scanner" subtitle="Detect cryptographic material via TLS, SSH, HTTP, SBOM discovery, and authorized GitHub repository content analysis — results feed inventory, PQC, and analytics." badge={isScanning ? 'Scanning' : 'Ready'}>
       {error && (
         <Box sx={{ mb: 2.5, p: 1.5, borderRadius: `${designSystem.radius.md}px`, bgcolor: 'warning.main', color: 'warning.contrastText' }}>
           <Typography variant="body2">{error}</Typography>

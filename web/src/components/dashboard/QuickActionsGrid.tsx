@@ -1,13 +1,11 @@
 import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, Assessment, Cloud, DocumentScanner, FactCheck, GitHub, Radar, Storage } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import {
-  Assessment, Cloud, DocumentScanner, FactCheck, Radar, Storage,
-} from '@mui/icons-material';
 import dashboardDesign from '../../theme/dashboardDesign';
 import { chartTheme } from '../../theme/chartTheme';
 import { panelTitleSx } from '../../theme/designSystem';
+import { tokens } from '../../theme/tokens';
 
 type QuickAction = {
   label: string;
@@ -153,7 +151,8 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ actions, onNavigate
           xs: '1fr',
           sm: 'repeat(2, minmax(0, 1fr))',
           md: 'repeat(3, minmax(0, 1fr))',
-          lg: 'repeat(6, minmax(0, 1fr))',
+          lg: 'repeat(4, minmax(0, 1fr))',
+          xl: 'repeat(7, minmax(0, 1fr))',
         },
         gap: { xs: 0.875, md: 1 },
       }}
@@ -166,10 +165,11 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ actions, onNavigate
 );
 
 export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
+  { label: 'GitHub Scan', description: 'Real repo analysis', icon: <GitHub />, path: '/scanner?tab=github', accent: tokens.colors.crypto.quantum },
   { label: 'Run Scan', description: 'CBOM discovery', icon: <DocumentScanner />, path: '/scanner', accent: chartTheme.quickActions[0] },
   { label: 'Assets', description: 'Crypto inventory', icon: <Storage />, path: '/assets', accent: chartTheme.quickActions[1] },
   { label: 'Analytics', description: 'Trends & reports', icon: <Assessment />, path: '/analytics', accent: chartTheme.quickActions[2] },
-  { label: 'CSPM', description: 'Posture view', icon: <Radar />, path: '/cspm', accent: chartTheme.quickActions[3] },
+  { label: 'CSPM', description: 'Crypto posture', icon: <Radar />, path: '/enterprise/cspm', accent: chartTheme.quickActions[3] },
   { label: 'Compliance', description: 'Framework scores', icon: <FactCheck />, path: '/enterprise/compliance', accent: chartTheme.quickActions[4] },
   { label: 'Cloud', description: 'Multi-cloud posture', icon: <Cloud />, path: '/enterprise/cloud-posture', accent: chartTheme.quickActions[5] },
 ];

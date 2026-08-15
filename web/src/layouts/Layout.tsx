@@ -231,7 +231,26 @@ const Layout: React.FC = () => {
         }}
       />
       <Box sx={{ px: sidebarCollapsed && isDesktop ? 1 : 2, py: 1.5, display: 'flex', alignItems: 'center', position: 'relative', flexShrink: 0, justifyContent: 'space-between', gap: 1 }}>
-        {!(sidebarCollapsed && isDesktop) && <BrandLogo compact dark />}
+        {!(sidebarCollapsed && isDesktop) && (
+          <Box sx={{ minWidth: 0 }}>
+            <BrandLogo compact dark />
+            <Typography
+              variant="caption"
+              sx={{
+                display: 'block',
+                mt: 0.35,
+                pl: 0.25,
+                color: designSystem.proBlue.accentMuted,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                fontSize: '0.58rem',
+                textTransform: 'uppercase',
+              }}
+            >
+              CSPM Enterprise
+            </Typography>
+          </Box>
+        )}
         {isDesktop && (
           <Tooltip title={sidebarCollapsed ? 'Expand navigation' : 'Collapse navigation'}>
             <IconButton
@@ -423,7 +442,7 @@ const Layout: React.FC = () => {
               }}
             />
             <InputBase
-              placeholder="Search assets, findings..."
+              placeholder="Search CSPM, GitHub, findings…"
               sx={{
                 fontSize: '0.8125rem',
                 fontWeight: 500,

@@ -317,7 +317,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
               <CardContent sx={{ p: 4.5, height: '100%' }}>
                 <Stack spacing={3} sx={{ height: '100%' }}>
                   <Box>
-                    <Typography variant="overline" sx={{ display: 'block', letterSpacing: 2, fontWeight: 700 }}>
+                    <Typography variant="overline" sx={{ display: 'block', letterSpacing: 1.6, fontWeight: 800, fontSize: '0.7rem' }}>
                       Cryptographic Security Posture Management
                     </Typography>
                     <Typography variant="h3" fontWeight={900} sx={{ mt: 1, lineHeight: 1.02, letterSpacing: '-0.02em' }}>

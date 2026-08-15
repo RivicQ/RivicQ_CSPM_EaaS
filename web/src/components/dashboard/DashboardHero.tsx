@@ -116,8 +116,9 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
               sx={{
                 ...commandCenterTitleSx,
                 mb: 1,
-                fontSize: { xs: '1.375rem', sm: '1.5rem', md: '1.625rem' },
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.85rem' },
                 lineHeight: 1.15,
+                maxWidth: 720,
               }}
             >
               {title}
@@ -125,7 +126,7 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
             <Typography
               sx={{
                 color: blue.textSecondary,
-                maxWidth: 560,
+                maxWidth: 720,
                 lineHeight: 1.65,
                 fontSize: { xs: '0.875rem', md: '0.9375rem' },
               }}

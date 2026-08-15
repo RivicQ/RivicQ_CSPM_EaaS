@@ -5,7 +5,7 @@ import {
   Box, Button, Chip, CircularProgress, Grid, Stack, ToggleButton, ToggleButtonGroup, Typography, useMediaQuery, useTheme,
 } from '@mui/material';
 import {
-  ArrowForward, AutoGraph, GppGood, Lock, Memory, NotificationsActive, Security, TrendingUp,
+  ArrowForward, AutoGraph, GitHub, GppGood, Lock, Memory, NotificationsActive, Security, TrendingUp,
   Timeline,
 } from '@mui/icons-material';
 import {
@@ -28,6 +28,7 @@ import RiskHeatmap from '../components/dashboard/RiskHeatmap';
 import AlgorithmDistributionChart from '../components/dashboard/AlgorithmDistributionChart';
 import PQCReadinessPanel from '../components/dashboard/PQCReadinessPanel';
 import QuickActionsGrid, { DEFAULT_QUICK_ACTIONS } from '../components/dashboard/QuickActionsGrid';
+import CspmCapabilityStrip from '../components/dashboard/CspmCapabilityStrip';
 import ComplianceScoreGrid from '../components/dashboard/ComplianceScoreGrid';
 import TopFindingsList from '../components/dashboard/TopFindingsList';
 import ScanActivityTimeline from '../components/dashboard/ScanActivityTimeline';
@@ -383,12 +384,12 @@ const Dashboard: React.FC = () => {
   return (
     <Box sx={dashboardDesign.layout.page}>
       <DashboardHero
-        eyebrow="Cryptographic Security Posture Management"
-        title="Security Command Center"
-        subtitle="Welcome to Cryptographic Security Posture Management (RivicQ CSPM) — unified cryptographic posture across cloud accounts, workloads, CBOM inventory, and PQC migration readiness."
+        eyebrow="Security Command Center"
+        title="Cryptographic Security Posture Management"
+        subtitle="Welcome to RivicQ CSPM — unified cryptographic posture across cloud accounts, workloads, GitHub repositories, CBOM inventory, and PQC migration readiness."
         meta={
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {['AWS', 'Azure', 'GCP', 'K8s'].map((c) => (
+            {['CSPM', 'CBOM', 'PQC', 'GitHub', 'AWS', 'Azure', 'GCP', 'K8s'].map((c) => (
               <Chip
                 key={c}
                 label={c}
@@ -407,33 +408,46 @@ const Dashboard: React.FC = () => {
           </Stack>
         }
         action={
-          isPaidEdition(edition) ? (
-            <Button
-              variant="contained"
-              disableElevation
-              fullWidth
-              endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
-              onClick={() => navigate('/enterprise/cloud-posture')}
-              sx={{ ...heroPrimaryCtaSx, maxWidth: { sm: 'none' } }}
-            >
-              Cloud Posture
-            </Button>
-          ) : (
+          <Stack spacing={1} sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 180 } }}>
+            {isPaidEdition(edition) ? (
+              <Button
+                variant="contained"
+                disableElevation
+                fullWidth
+                endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
+                onClick={() => navigate('/enterprise/cloud-posture')}
+                sx={{ ...heroPrimaryCtaSx, maxWidth: { sm: 'none' } }}
+              >
+                Cloud Posture
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                fullWidth
+                endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
+                onClick={() => navigate('/scanner')}
+                sx={{ ...heroSecondaryCtaSx, maxWidth: { sm: 'none' } }}
+              >
+                Run CBOM Scan
+              </Button>
+            )}
             <Button
               variant="outlined"
               fullWidth
-              endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
-              onClick={() => navigate('/scanner')}
+              startIcon={<GitHub sx={{ fontSize: 18 }} />}
+              onClick={() => navigate('/scanner?tab=github')}
               sx={{ ...heroSecondaryCtaSx, maxWidth: { sm: 'none' } }}
             >
-              Run CBOM Scan
+              Scan GitHub
             </Button>
-          )
+          </Stack>
         }
         liveScanMetrics={liveScanMetrics}
       >
         <PostureRing score={healthScore} size={isCompact ? 96 : 128} onDark />
       </DashboardHero>
+
+      <CspmCapabilityStrip onNavigate={navigate} />
 
       <QuickActionsGrid actions={quickActions} onNavigate={navigate} />
 

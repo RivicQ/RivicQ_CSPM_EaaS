@@ -14,7 +14,7 @@ const Settings: React.FC = () => {
   const email = user?.email || 'unknown@rivicq.com';
 
   return (
-    <PageFrame eyebrow="Profile & Access" title="Settings" subtitle="Manage your profile, security defaults, and connected cloud integrations." badge={edition.toUpperCase()}>
+    <PageFrame eyebrow="Cryptographic Security Posture Management" title="Settings" subtitle="Manage your profile, security defaults, GitHub scanning, and connected cloud integrations." badge={edition.toUpperCase()}>
       <Grid container spacing={2.5}>
         <Grid item xs={12} md={6}>
           <GlassCard glow="#6366f1" delay={0}>
@@ -100,10 +100,11 @@ const Settings: React.FC = () => {
             <Stack spacing={1.5}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <GitHub color="primary" fontSize="small" />
-                <Typography variant="subtitle1" fontWeight={700}>GitHub</Typography>
+                <Typography variant="subtitle1" fontWeight={700}>GitHub repository scanning</Typography>
+                <Chip label="Enterprise scanner" size="small" sx={{ fontWeight: 700, fontSize: '0.65rem' }} />
               </Stack>
               <Typography variant="body2" color="text.secondary">
-                Connect an authorized repository. Scans use GitHub Contents APIs when GITHUB_TOKEN is set; otherwise DEMO_MODE serves the synthetic fixture.
+                Connect an authorized repository. Scans use GitHub Contents APIs when GITHUB_TOKEN is set; otherwise DEMO_MODE serves the synthetic fixture with evidence-backed findings.
               </Typography>
               <GitHubRepoScanPanel />
             </Stack>
