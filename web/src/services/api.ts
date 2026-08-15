@@ -111,7 +111,20 @@ export const authService = {
     return api.post('/auth/login', data);
   },
 
-  register: async (data: { name: string; email: string; password: string; edition?: Edition }) => {
+  register: async (data: {
+    name: string;
+    email: string;
+    password: string;
+    edition?: Edition;
+    first_name?: string;
+    last_name?: string;
+    organisation?: string;
+    job_title?: string;
+    country?: string;
+    industry?: string;
+    organisation_size?: string;
+    accept_terms?: boolean;
+  }) => {
     return api.post('/auth/register', data);
   },
 
@@ -482,7 +495,10 @@ export const gitHubScanService = {
   scanRepos: (repos: string[], scanType?: string, deepScan?: boolean) =>
     api.post('/github/scan', { repos, scan_type: scanType, deep_scan: deepScan }),
   listRepos: (org?: string) => api.get('/github/repos', { params: { org } }),
+  listScans: () => api.get('/github/scans'),
   getScanStatus: (id: string) => api.get(`/github/scans/${id}`),
+  compareScans: (id: string, against: string) =>
+    api.get(`/github/scans/${id}/compare`, { params: { against } }),
 };
 
 export default api;

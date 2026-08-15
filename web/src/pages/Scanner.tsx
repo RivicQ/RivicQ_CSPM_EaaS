@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box, Button, Chip, Grid, LinearProgress, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
-import {
-  PlayArrow, CheckCircle, Error as ErrorIcon, Schedule, Security, Refresh,
+import { GitHub, PlayArrow, CheckCircle, Error as ErrorIcon, Schedule, Security, Refresh,
   History, BugReport, Event, Speed,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
@@ -14,6 +13,7 @@ import { GlassCard, EmptyState, DetailTabs, TabPanel } from '../components/ui';
 import designSystem from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
 import { DEMO_SCAN_FINDINGS, DEMO_SCAN_SCHEDULES } from '../data/workspaceDemo';
+import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 
 interface ScanJob {
   id: string;
@@ -210,6 +210,7 @@ const Scanner: React.FC = () => {
             { label: 'Findings', icon: <BugReport fontSize="small" /> },
             { label: 'Schedules', icon: <Event fontSize="small" /> },
             { label: 'Benchmarks', icon: <Speed fontSize="small" /> },
+            { label: 'GitHub', icon: <GitHub fontSize="small" /> },
           ]}
         />
 
@@ -325,6 +326,10 @@ const Scanner: React.FC = () => {
               </Grid>
             ))}
           </Grid>
+        </TabPanel>
+
+        <TabPanel value={tab} index={5}>
+          <GitHubRepoScanPanel />
         </TabPanel>
       </GlassCard>
     </PageFrame>

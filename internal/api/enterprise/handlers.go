@@ -244,6 +244,9 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	// RivicQ ecosystem + demo scan (OSS-compatible)
 	oss.RegisterSupplementalRoutes(router, logger)
 
+	// GitHub repository content scanning (same handlers as OSS — extend, do not replace)
+	shared.SetupGitHubScanningRoutes(router, logger)
+
 	// AI intelligence
 	SetupAIRoutes(router, db, logger)
 }

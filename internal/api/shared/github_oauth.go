@@ -205,20 +205,6 @@ func GitHubCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 			params.Set("github_token", token.AccessToken)
 		}
 		c.Redirect(http.StatusTemporaryRedirect, buildOAuthFrontendRedirect(params))
-		return
-
-		c.JSON(http.StatusOK, gin.H{
-			"access_token":  accessToken,
-			"refresh_token": refreshToken,
-			"user": authUserResponse{
-				ID:    existingUser.ID,
-				Name:  existingUser.Name,
-				Email: existingUser.Email,
-				Role:  existingUser.Role,
-			},
-			"github_token": token.AccessToken,
-			"edition":      edition,
-		})
 	}
 }
 

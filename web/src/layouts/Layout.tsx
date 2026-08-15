@@ -23,6 +23,9 @@ import {
   useMediaQuery,
   useTheme,
   InputBase,
+  Paper,
+  BottomNavigation,
+  BottomNavigationAction,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -46,6 +49,7 @@ import {
   Search,
   ExpandMore,
   ChevronRight,
+  ChevronLeft,
   Logout,
   Person,
 } from '@mui/icons-material';
@@ -80,18 +84,39 @@ interface NavItem {
 }
 
 const DRAWER_WIDTH = 260;
+const DRAWER_WIDTH_COLLAPSED = 76;
 
 const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, edition, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
+    try {
+      return localStorage.getItem('rivicq.sidebar.collapsed') === '1';
+    } catch {
+      return false;
+    }
+  });
   const [notifications] = React.useState(5);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [modulesOpen, setModulesOpen] = React.useState(false);
   const { mode, toggleMode } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const desktopWidth = sidebarCollapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH;
+  const touchNav = isTablet || isMobile;
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('rivicq.sidebar.collapsed', sidebarCollapsed ? '1' : '0');
+    } catch {
+      /* ignore */
+    }
+  }, [sidebarCollapsed]);
 
   const navigationItems: NavItem[] = [
     { text: 'Command Center', icon: <Dashboard />, path: '/dashboard' },
@@ -155,27 +180,39 @@ const Layout: React.FC = () => {
 
   const renderNavItem = (item: NavItem, dense = false) => {
     const active = isActive(item.path);
-    return (
-      <ListItem key={item.path} disablePadding sx={{ mb: dense ? 0 : 0.125, px: 1.5 }}>
-        <ListItemButton
-          onClick={() => handleNavigation(item.path)}
-          selected={active}
-          disabled={item.disabled}
-          sx={sidebarNavItemButtonSx(active, !!item.disabled)}
-        >
-          <ListItemIcon sx={{ color: 'inherit', minWidth: 32, '& svg': { fontSize: 18 } }}>
-            {item.badge ? <Badge badgeContent={item.badge} color="error">{item.icon}</Badge> : item.icon}
-          </ListItemIcon>
+    const button = (
+      <ListItemButton
+        onClick={() => handleNavigation(item.path)}
+        selected={active}
+        disabled={item.disabled}
+        sx={{
+          ...sidebarNavItemButtonSx(active, !!item.disabled),
+          justifyContent: sidebarCollapsed && isDesktop ? 'center' : undefined,
+          px: sidebarCollapsed && isDesktop ? 1 : undefined,
+          minHeight: touchNav ? 44 : undefined,
+        }}
+      >
+        <ListItemIcon sx={{ color: 'inherit', minWidth: sidebarCollapsed && isDesktop ? 0 : 32, '& svg': { fontSize: 18 } }}>
+          {item.badge ? <Badge badgeContent={item.badge} color="error">{item.icon}</Badge> : item.icon}
+        </ListItemIcon>
+        {!(sidebarCollapsed && isDesktop) && (
           <ListItemText
             primary={item.text}
             primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 600 : 500, letterSpacing: '-0.01em' }}
           />
-          {item.disabled && (
-            <Tooltip title="Enterprise feature — upgrade to unlock">
-              <Lock sx={{ fontSize: 12, color: 'text.disabled', opacity: 0.6 }} />
-            </Tooltip>
-          )}
-        </ListItemButton>
+        )}
+        {!(sidebarCollapsed && isDesktop) && item.disabled && (
+          <Tooltip title="Enterprise feature — upgrade to unlock">
+            <Lock sx={{ fontSize: 12, color: 'text.disabled', opacity: 0.6 }} />
+          </Tooltip>
+        )}
+      </ListItemButton>
+    );
+    return (
+      <ListItem key={item.path} disablePadding sx={{ mb: dense ? 0 : 0.125, px: 1.5 }}>
+        {sidebarCollapsed && isDesktop ? (
+          <Tooltip title={item.text} placement="right">{button}</Tooltip>
+        ) : button}
       </ListItem>
     );
   };
@@ -193,8 +230,20 @@ const Layout: React.FC = () => {
           borderRadius: '0 4px 4px 0',
         }}
       />
-      <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', position: 'relative', flexShrink: 0 }}>
-        <BrandLogo compact dark />
+      <Box sx={{ px: sidebarCollapsed && isDesktop ? 1 : 2, py: 1.5, display: 'flex', alignItems: 'center', position: 'relative', flexShrink: 0, justifyContent: 'space-between', gap: 1 }}>
+        {!(sidebarCollapsed && isDesktop) && <BrandLogo compact dark />}
+        {isDesktop && (
+          <Tooltip title={sidebarCollapsed ? 'Expand navigation' : 'Collapse navigation'}>
+            <IconButton
+              size="small"
+              onClick={() => setSidebarCollapsed((v) => !v)}
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              sx={{ color: designSystem.proBlue.textSecondary, ml: sidebarCollapsed ? 0 : 'auto' }}
+            >
+              {sidebarCollapsed ? <ChevronRight sx={{ fontSize: 18 }} /> : <ChevronLeft sx={{ fontSize: 18 }} />}
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
 
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
@@ -210,7 +259,7 @@ const Layout: React.FC = () => {
       >
         <Box sx={{ flexShrink: 0, py: 0.75 }}>
           <List sx={{ px: 0, py: 0 }}>
-            <Typography variant="caption" sx={sidebarSectionLabelSx}>
+            <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
               Workspace
             </Typography>
             {navigationItems.map((item) => renderNavItem(item))}
@@ -219,7 +268,7 @@ const Layout: React.FC = () => {
           <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
 
           <List sx={{ px: 0, py: 0 }}>
-            <Typography variant="caption" sx={sidebarSectionLabelSx}>
+            <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
               Enterprise
             </Typography>
             {enterpriseNav.map((item) => renderNavItem(item))}
@@ -271,7 +320,7 @@ const Layout: React.FC = () => {
 
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
 
-      <Box sx={{ p: 1, position: 'relative', flexShrink: 0 }}>
+      <Box sx={{ p: 1, position: 'relative', flexShrink: 0, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
         <Stack spacing={0.75}>
           {!isPaidEdition(edition) && (
             <Chip
@@ -320,8 +369,9 @@ const Layout: React.FC = () => {
         elevation={0}
         sx={{
           zIndex: (t) => t.zIndex.drawer + 1,
-          width: { lg: `calc(100% - ${DRAWER_WIDTH}px)` },
-          ml: { lg: `${DRAWER_WIDTH}px` },
+          width: { lg: `calc(100% - ${desktopWidth}px)` },
+          ml: { lg: `${desktopWidth}px` },
+          transition: reduceMotion ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), margin 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           ...appBarPaperSx(mode),
         }}
       >
@@ -421,7 +471,7 @@ const Layout: React.FC = () => {
             <Chip
               size="small"
               label={edition.charAt(0).toUpperCase() + edition.slice(1)}
-              sx={appBarEditionChipSx(mode, edition === 'enterprise')}
+              sx={{ ...appBarEditionChipSx(mode, edition === 'enterprise'), display: { xs: 'none', sm: 'inline-flex' } }}
             />
 
             <IconButton
@@ -492,11 +542,13 @@ const Layout: React.FC = () => {
         variant="permanent"
         sx={{
           display: isDesktop ? 'block' : 'none',
-          width: DRAWER_WIDTH,
+          width: desktopWidth,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: DRAWER_WIDTH,
+            width: desktopWidth,
             boxSizing: 'border-box',
+            overflowX: 'hidden',
+            transition: reduceMotion ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             ...sidebarPaperSx,
           },
         }}
@@ -508,18 +560,21 @@ const Layout: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { lg: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { lg: `calc(100% - ${desktopWidth}px)` },
           mt: { xs: 7.5, lg: 7.5 },
+          pb: { xs: 8, sm: 0 },
           minHeight: '100vh',
           minWidth: 0,
           overflowX: 'hidden',
           bgcolor: 'background.default',
+          transition: reduceMotion ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          '& .MuiTableContainer-root': { overflowX: 'auto' },
         }}
       >
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: reduceMotion ? 0 : 0.25 }}
           style={{ minWidth: 0 }}
         >
           <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: { xs: 2, md: 3 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
@@ -527,6 +582,36 @@ const Layout: React.FC = () => {
           </Box>
         </motion.div>
       </Box>
+      {isMobile && (
+        <Paper
+          elevation={8}
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: (t) => t.zIndex.appBar,
+            display: { xs: 'block', sm: 'none' },
+            borderTop: 1,
+            borderColor: 'divider',
+            pb: 'env(safe-area-inset-bottom)',
+          }}
+        >
+          <BottomNavigation
+            showLabels
+            value={navigationItems.findIndex((it) => isActive(it.path))}
+            onChange={(_, idx) => {
+              const item = navigationItems[idx];
+              if (item) handleNavigation(item.path);
+            }}
+            sx={{ height: 56 }}
+          >
+            {navigationItems.slice(0, 4).map((item) => (
+              <BottomNavigationAction key={item.path} label={item.text.split(' ')[0]} icon={item.icon} />
+            ))}
+          </BottomNavigation>
+        </Paper>
+      )}
       <RivicQAssistant />
     </Box>
   );

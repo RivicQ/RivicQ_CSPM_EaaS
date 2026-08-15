@@ -29,7 +29,13 @@ interface AuthContextValue {
   supabaseEnabled: boolean;
   backendReachable: boolean;
   login: (email: string, password: string, edition: Edition) => Promise<LoginResult>;
-  register: (name: string, email: string, password: string, edition: Edition) => Promise<RegisterResult>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    edition: Edition,
+    extras?: { first_name?: string; last_name?: string; organisation?: string; job_title?: string; country?: string; industry?: string; organisation_size?: string; accept_terms?: boolean },
+  ) => Promise<RegisterResult>;
   supabaseLogin: (email: string, password: string, edition: Edition) => Promise<void>;
   supabaseRegister: (name: string, email: string, password: string, edition: Edition) => Promise<RegisterResult>;
   demoLogin: (edition: Edition) => Promise<void>;
@@ -176,9 +182,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     throw new Error('No authentication provider is available on this deployment.');
   }, [backendReachable, completeAuth, persist]);
 
-  const register = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition): Promise<RegisterResult> => {
+  const register = React.useCallback(async (
+    name: string,
+    email: string,
+    password: string,
+    nextEdition: Edition,
+    extras?: { first_name?: string; last_name?: string; organisation?: string; job_title?: string; country?: string; industry?: string; organisation_size?: string; accept_terms?: boolean },
+  ): Promise<RegisterResult> => {
     if (backendReachable) {
-      const response = await authService.register({ name, email, password, edition: nextEdition });
+      const response = await authService.register({ name, email, password, edition: nextEdition, ...extras });
       const data = response.data;
       if (data?.mfa_required) {
         return { requiresConfirmation: true, email, mfaRequired: true, mfaSession: data.mfa_session };

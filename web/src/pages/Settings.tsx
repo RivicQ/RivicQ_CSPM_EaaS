@@ -1,10 +1,11 @@
 import React from 'react';
 import { Avatar, Box, Button, Chip, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import { Save, Security, Notifications, Person, Cloud, WorkspacePremium } from '@mui/icons-material';
+import { Save, Security, Notifications, Person, Cloud, WorkspacePremium, GitHub } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { isEnterpriseEdition } from '../config/editions';
 import PageFrame from '../components/PageFrame';
 import { GlassCard } from '../components/ui';
+import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 import designSystem from '../theme/designSystem';
 
 const Settings: React.FC = () => {
@@ -91,6 +92,20 @@ const Settings: React.FC = () => {
                   Upgrade to Enterprise
                 </Button>
               )}
+            </Stack>
+          </GlassCard>
+        </Grid>
+        <Grid item xs={12}>
+          <GlassCard delay={4}>
+            <Stack spacing={1.5}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <GitHub color="primary" fontSize="small" />
+                <Typography variant="subtitle1" fontWeight={700}>GitHub</Typography>
+              </Stack>
+              <Typography variant="body2" color="text.secondary">
+                Connect an authorized repository. Scans use GitHub Contents APIs when GITHUB_TOKEN is set; otherwise DEMO_MODE serves the synthetic fixture.
+              </Typography>
+              <GitHubRepoScanPanel />
             </Stack>
           </GlassCard>
         </Grid>

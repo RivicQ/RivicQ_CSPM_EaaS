@@ -170,7 +170,7 @@ const Home: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <Chip
               icon={<Shield />}
-              label="Complete Cloud & Cyber Security Posture"
+              label="Cryptographic Security Posture Management"
               sx={{
                 mb: 3,
                 bgcolor: isDark ? 'rgba(99,102,241,0.14)' : 'rgba(99,102,241,0.08)',
@@ -192,7 +192,7 @@ const Home: React.FC = () => {
               </Box>
             </Typography>
             <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 720, mx: 'auto', mb: 4, fontWeight: 400 }}>
-              CryptoBOM unifies cloud posture management, cryptographic inventory, PQC migration, and compliance automation — in one security platform.
+              RivicQ Cryptographic Security Posture Management unifies cloud posture, cryptographic inventory, PQC migration, and compliance automation — in one security platform.
             </Typography>
           </motion.div>
 

@@ -21,6 +21,8 @@ import {
   ToggleButtonGroup,
   Typography,
   useTheme,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import {
   ArrowForward,
@@ -135,15 +137,24 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const [mfaCode, setMfaCode] = React.useState('');
   const [form, setForm] = React.useState({
     name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirm: '',
+    organisation: '',
+    jobTitle: '',
+    country: '',
+    industry: '',
+    orgSize: '',
+    acceptTerms: false,
   });
   const [googleRedirectUri, setGoogleRedirectUri] = React.useState('');
 
   const strength = React.useMemo(() => passwordStrength(form.password), [form.password]);
+  const displayName = [form.firstName, form.lastName].filter(Boolean).join(' ').trim() || form.name.trim();
   const canSubmit = form.email.includes('@') && form.password.length >= 8 &&
-    (mode === 'login' || (form.name.trim() !== '' && form.password === form.confirm));
+    (mode === 'login' || (displayName !== '' && form.password === form.confirm && form.acceptTerms));
 
   const editionLabel = edition === 'enterprise' ? 'Enterprise' : edition === 'professional' ? 'Professional' : 'Community';
 
@@ -179,7 +190,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
     try {
       const result = mode === 'register'
-        ? await register(form.name || form.email.split('@')[0], form.email, form.password, edition)
+        ? await register(displayName || form.email.split('@')[0], form.email, form.password, edition, {
+            first_name: form.firstName,
+            last_name: form.lastName,
+            organisation: form.organisation,
+            job_title: form.jobTitle,
+            country: form.country,
+            industry: form.industry,
+            organisation_size: form.orgSize,
+            accept_terms: form.acceptTerms,
+          })
         : await login(form.email, form.password, edition);
 
       if (result?.mfaRequired) {
@@ -297,8 +317,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
               <CardContent sx={{ p: 4.5, height: '100%' }}>
                 <Stack spacing={3} sx={{ height: '100%' }}>
                   <Box>
-                    <Typography variant="overline" sx={{ display: 'block', letterSpacing: 4, fontWeight: 700 }}>
-                      CryptoBOM EaaS
+                    <Typography variant="overline" sx={{ display: 'block', letterSpacing: 2, fontWeight: 700 }}>
+                      Cryptographic Security Posture Management
                     </Typography>
                     <Typography variant="h3" fontWeight={900} sx={{ mt: 1, lineHeight: 1.02, letterSpacing: '-0.02em' }}>
                       {mode === 'register' ? 'Start building your crypto inventory.' : 'Secure access to your workspace.'}
@@ -476,17 +496,30 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                     <form onSubmit={handleSubmit}>
                       <Stack spacing={2.25}>
                         {mode === 'register' && (
-                          <TextField
-                            label="Full name"
-                            value={form.name}
-                            onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                            InputProps={{ startAdornment: <InputAdornment position="start"><Person /></InputAdornment> }}
-                            fullWidth
-                            required
-                          />
+                          <Grid container spacing={1.5}>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                label="First name"
+                                value={form.firstName}
+                                onChange={(e) => setForm((prev) => ({ ...prev, firstName: e.target.value }))}
+                                InputProps={{ startAdornment: <InputAdornment position="start"><Person /></InputAdornment> }}
+                                fullWidth
+                                required
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField
+                                label="Last name"
+                                value={form.lastName}
+                                onChange={(e) => setForm((prev) => ({ ...prev, lastName: e.target.value }))}
+                                fullWidth
+                                required
+                              />
+                            </Grid>
+                          </Grid>
                         )}
                         <TextField
-                          label="Email"
+                          label={mode === 'register' ? 'Work email' : 'Email'}
                           type="email"
                           value={form.email}
                           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
@@ -550,6 +583,31 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                             fullWidth
                             required
                           />
+                        )}
+                        {mode === 'register' && (
+                          <Grid container spacing={1.5}>
+                            <Grid item xs={12} sm={6}>
+                              <TextField fullWidth size="small" label="Organisation" value={form.organisation} onChange={(e) => setForm((p) => ({ ...p, organisation: e.target.value }))} />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField fullWidth size="small" label="Job title" value={form.jobTitle} onChange={(e) => setForm((p) => ({ ...p, jobTitle: e.target.value }))} />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField fullWidth size="small" label="Country" value={form.country} onChange={(e) => setForm((p) => ({ ...p, country: e.target.value }))} />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <TextField fullWidth size="small" label="Industry" value={form.industry} onChange={(e) => setForm((p) => ({ ...p, industry: e.target.value }))} />
+                            </Grid>
+                            <Grid item xs={12}>
+                              <TextField fullWidth size="small" label="Organisation size" placeholder="e.g. 50–200" value={form.orgSize} onChange={(e) => setForm((p) => ({ ...p, orgSize: e.target.value }))} />
+                            </Grid>
+                            <Grid item xs={12}>
+                              <FormControlLabel
+                                control={<Checkbox checked={form.acceptTerms} onChange={(e) => setForm((p) => ({ ...p, acceptTerms: e.target.checked }))} />}
+                                label="I agree to the terms of service and privacy policy"
+                              />
+                            </Grid>
+                          </Grid>
                         )}
 
                         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>

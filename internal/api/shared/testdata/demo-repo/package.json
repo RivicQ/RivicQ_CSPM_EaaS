@@ -1,0 +1,9 @@
+{
+  "name": "rivicq-demo-vulnerable-app",
+  "version": "0.1.0",
+  "description": "SYNTHETIC DEMO — intentionally weak dependencies for scanner acceptance tests",
+  "dependencies": {
+    "lodash": "4.17.20",
+    "jsonwebtoken": "8.5.1"
+  }
+}

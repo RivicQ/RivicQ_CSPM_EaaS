@@ -1,0 +1,13 @@
+# SYNTHETIC DEMO — OpenAPI spec without security schemes for API analysis tests.
+openapi: 3.0.3
+info:
+  title: RivicQ Demo Vulnerable API
+  version: 0.1.0
+  description: SYNTHETIC DEMO — intentionally missing authentication.
+paths:
+  /crypto/keys:
+    get:
+      summary: List keys without authentication
+      responses:
+        "200":
+          description: OK

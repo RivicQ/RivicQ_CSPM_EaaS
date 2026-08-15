@@ -383,9 +383,9 @@ const Dashboard: React.FC = () => {
   return (
     <Box sx={dashboardDesign.layout.page}>
       <DashboardHero
-        eyebrow="Command Center"
+        eyebrow="Cryptographic Security Posture Management"
         title="Security Command Center"
-        subtitle="Unified cryptographic posture across cloud accounts, workloads, CBOM inventory, and PQC migration readiness."
+        subtitle="Welcome to Cryptographic Security Posture Management (RivicQ CSPM) — unified cryptographic posture across cloud accounts, workloads, CBOM inventory, and PQC migration readiness."
         meta={
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             {['AWS', 'Azure', 'GCP', 'K8s'].map((c) => (

@@ -2,6 +2,7 @@ package shared
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -11,10 +12,18 @@ import (
 )
 
 type authRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Edition  string `json:"edition"`
+	Name           string `json:"name"`
+	FirstName      string `json:"first_name"`
+	LastName       string `json:"last_name"`
+	Email          string `json:"email"`
+	Password       string `json:"password"`
+	Edition        string `json:"edition"`
+	Organisation   string `json:"organisation"`
+	JobTitle       string `json:"job_title"`
+	Country        string `json:"country"`
+	Industry       string `json:"industry"`
+	OrganisationSz string `json:"organisation_size"`
+	AcceptTerms    bool   `json:"accept_terms"`
 }
 
 type authUserResponse struct {
@@ -70,13 +79,26 @@ func authProvidersHandler() gin.HandlerFunc {
 
 func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if !demoModeEnabled() {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Demo access is disabled (DEMO_MODE=false)"})
+			return
+		}
 		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
+
+		email := strings.TrimSpace(os.Getenv("DEMO_CISO_EMAIL"))
+		if email == "" {
+			email = "demo-ciso@demo.rivicq.local"
+		}
+		name := strings.TrimSpace(os.Getenv("DEMO_CISO_NAME"))
+		if name == "" {
+			name = "Demo CISO"
+		}
 
 		demoUser := &auth.User{
 			ID:       "demo-user",
-			TenantID: "tenant-1",
-			Email:    "demo@rivicq.com",
-			Name:     "Demo User",
+			TenantID: "tenant-demo",
+			Email:    email,
+			Name:     name,
 			Role:     "admin",
 		}
 
@@ -106,8 +128,8 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 			"refresh_token": refreshToken,
 			"user": authUserDisplay{
 				ID:    "demo-user",
-				Name:  "Demo User",
-				Email: "demo@rivicq.com",
+				Name:  name,
+				Email: email,
 				Role:  "admin",
 			},
 			"edition":   edition,
@@ -173,6 +195,9 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 		if !auth.EmailDomainAllowed(req.Email, allowedDomains) {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Work email domain not allowed"})
 			return
+		}
+		if strings.TrimSpace(req.Name) == "" {
+			req.Name = strings.TrimSpace(req.FirstName + " " + req.LastName)
 		}
 		if strings.TrimSpace(req.Name) == "" {
 			req.Name = strings.Split(strings.TrimSpace(req.Email), "@")[0]
