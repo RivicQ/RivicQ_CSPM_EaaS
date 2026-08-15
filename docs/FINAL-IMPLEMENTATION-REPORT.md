@@ -41,11 +41,12 @@ This work **extends** the existing RivicQ platform. No existing routes, pages, A
 
 ## Desktop UX
 
-- Persistent sidebar on `lg+` (1280px+)
+- Persistent sidebar on `lg+` (1280px+) with a **CSPM Enterprise** caption
 - Collapse/expand to a 76px icon rail with tooltips
+- Command Center title is **Cryptographic Security Posture Management**, with GitHub scan CTA and a six-module capability strip
+- GitHub scan console is a two-pane analyzer (pipeline + evidence cards) on large screens
 - Width animation respects `prefers-reduced-motion`
 - Collapse state stored in `localStorage` (`rivicq.sidebar.collapsed`)
-- Multi-column dashboards unchanged; tables scroll inside containers
 
 ## Tablet UX
 
