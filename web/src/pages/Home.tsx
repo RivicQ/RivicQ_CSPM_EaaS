@@ -4,12 +4,15 @@ import {
   Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, LinearProgress, TextField, InputAdornment, Avatar, Divider, useTheme,
 } from '@mui/material';
 import {
-  ArrowForward, CheckCircle, CloudQueue, GitHub, Search, Shield, GppGood, Memory, Psychology, FactCheck, Insights, Language, Lock, WorkspacePremium, VerifiedUser,
+  ArrowForward, CheckCircle, CloudQueue, GitHub, Search, Shield, GppGood, Memory, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
+  Api, Terminal, MenuBook, EnhancedEncryption, Key,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { cbomService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
+import QubitField from '../components/home/QubitField';
+import EncryptionLayerVisual from '../components/home/EncryptionLayerVisual';
 import { tokens } from '../theme/tokens';
 import designSystem, { glassSurface } from '../theme/designSystem';
 
@@ -26,38 +29,52 @@ const PACKAGES = [
 
 const FEATURES = [
   {
-    icon: <GppGood />, title: 'Cloud Posture Management', color: tokens.colors.rivicq[600],
-    desc: 'Continuously assess every account and workload against CIS, NIST, SOC 2, and PCI DSS. See your posture score per account with instant remediation.',
+    icon: <EnhancedEncryption />, title: 'Encryption as a Service', color: tokens.colors.rivicq[600],
+    desc: 'A managed encryption intelligence layer that wires repositories, cloud KMS, HSMs, and certificates into one living cryptographic model — discover, protect, and govern keys from a single API.',
   },
   {
     icon: <Memory />, title: 'Crypto & CBOM Inventory', color: tokens.colors.crypto.quantum,
-    desc: 'Automatic discovery of cryptographic assets, algorithms, and keys across code, cloud, and infrastructure. Generate Quantum Bills of Materials.',
+    desc: 'Automatic discovery of cryptographic assets, algorithms, and keys across code, cloud, and infrastructure. Generate CycloneDX/SPDX Cryptographic Bills of Materials.',
   },
   {
     icon: <Psychology />, title: 'Quantum & PQC Readiness', color: tokens.colors.gold[600],
-    desc: 'Quantify your risk against quantum-era attacks. Plan and execute migrations to ML-KEM and post-quantum cryptography with auditable attestations.',
+    desc: 'Quantify harvest-now-decrypt-later exposure and plan migrations to ML-KEM and ML-DSA post-quantum cryptography with auditable, qubit-era attestations.',
+  },
+  {
+    icon: <Memory />, title: 'HSM & Key Lifecycle', color: tokens.colors.crypto.info,
+    desc: 'Unified visibility into AWS CloudHSM, IBM HPCS, and cloud KMS. Track rotation, wrapping, attestation, and PQC-hybrid key hygiene across every provider.',
+  },
+  {
+    icon: <GppGood />, title: 'Cloud Posture Management', color: tokens.colors.crypto.high,
+    desc: 'Continuously assess every account and workload against CIS, NIST, SOC 2, and PCI DSS, with posture scores per account and instant remediation.',
   },
   {
     icon: <FactCheck />, title: 'Compliance Automation', color: tokens.colors.crypto.low,
-    desc: 'Continuous conformance checks, audit-ready evidence, and executive reports for ISO 27001, SOC 2, DORA, GDPR, and the EU AI Act.',
+    desc: 'Continuous conformance checks and audit-ready evidence for ISO 27001, SOC 2, DORA, NIS2, GDPR, the EU AI Act, and the EU Cyber Resilience Act.',
   },
-  {
-    icon: <Insights />, title: 'Threat Detection & Analytics', color: tokens.colors.crypto.high,
-    desc: 'ML-assisted anomaly detection on cryptographic operations, real-time security events, and executive analytics across your whole estate.',
-  },
-  {
-    icon: <Language />, title: 'Multi-Cloud Coverage', color: tokens.colors.crypto.info,
-    desc: 'AWS, Azure, GCP, and IBM Cloud in one pane of glass. HSM status, KMS key hygiene, and CloudTrail audit events per provider.',
-  },
+];
+
+const EAAS_CAPABILITIES = [
+  { icon: <EnhancedEncryption />, title: 'Encrypt / Decrypt API', desc: 'Envelope encryption, tokenization, and signing through a single REST/gRPC endpoint backed by your HSM or KMS.' },
+  { icon: <Key />, title: 'Key lifecycle', desc: 'Generate, rotate, wrap, and revoke keys with policy — including PQC-hybrid ML-KEM key exchange.' },
+  { icon: <Shield />, title: 'PQC-hybrid channels', desc: 'Quantum-safe TLS and messaging using classical + ML-KEM/ML-DSA hybrids, with fallbacks.' },
+  { icon: <VerifiedUser />, title: 'Attestation & evidence', desc: 'Signed CBOM and quantum-readiness attestations you can hand to auditors and regulators.' },
+];
+
+const DOCS = [
+  { icon: <MenuBook />, title: 'Documentation', desc: 'Architecture, EaaS concepts, CBOM & PQC guides.', href: 'docs/index.html' },
+  { icon: <Api />, title: 'API Reference', desc: 'OpenAPI/ReDoc reference for the RivicQ platform API.', href: 'api/index.html' },
+  { icon: <Terminal />, title: 'SDKs', desc: 'Python, TypeScript, Rust, Java, and .NET client libraries.', href: 'docs/sdks/README.md' },
+  { icon: <GitHub />, title: 'GitHub', desc: 'Source, issues, and the OSS CryptoBOM scanner.', href: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
 ];
 
 const STEPS = [
-  { step: '01', title: 'Connect', desc: 'Link cloud accounts, repositories, and clusters in minutes. No agents required for inventory.', color: tokens.colors.rivicq[600] },
-  { step: '02', title: 'Assess', desc: 'Continuous scanning finds misconfigurations, weak crypto, and posture drift against your conformance packs.', color: tokens.colors.gold[600] },
-  { step: '03', title: 'Remediate', desc: 'Prioritized findings with one-click remediation plans, drift prevention, and full audit trails.', color: tokens.colors.crypto.low },
+  { step: '01', title: 'Connect', desc: 'Link repositories, cloud accounts, HSMs, and clusters in minutes. No agents required for inventory.', color: tokens.colors.rivicq[600] },
+  { step: '02', title: 'Assess', desc: 'The EaaS engine discovers crypto, builds your CBOM, and quantifies quantum exposure against conformance packs.', color: tokens.colors.gold[600] },
+  { step: '03', title: 'Protect', desc: 'Encrypt through the API, migrate to PQC, and enforce policy with prioritized remediation and full audit trails.', color: tokens.colors.crypto.low },
 ];
 
-const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'SOC 2', 'ISO 27001', 'PCI DSS 4.0', 'DORA', 'GDPR', 'EU AI Act'];
+const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', 'SOC 2', 'ISO 27001', 'PCI DSS 4.0', 'DORA', 'NIS2', 'EU CRA', 'eIDAS 2.0'];
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -104,6 +121,15 @@ const Home: React.FC = () => {
     if (status === 'done') return <CheckCircle sx={{ color: tokens.colors.crypto.low }} />;
     if (status === 'scanning') return <Box sx={{ color: tokens.colors.rivicq[600], animation: 'spin 1s linear infinite' }}><Search /></Box>;
     return <Box sx={{ color: tokens.colors.text.muted }}><Lock /></Box>;
+  };
+
+  const scrollToId = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const openExternal = (href: string) => {
+    const url = href.startsWith('http') ? href : `${process.env.PUBLIC_URL || ''}/${href.replace(/^\//, '')}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const heroBg = isDark
@@ -155,102 +181,119 @@ const Home: React.FC = () => {
           }}
         >
           <BrandLogo dark={isDark} />
-          <Stack direction="row" spacing={1}>
-            <Button variant="text" sx={{ color: 'text.secondary' }} onClick={() => navigate('/login')}>Features</Button>
-            <Button variant="text" sx={{ color: 'text.secondary' }} onClick={() => navigate('/login')}>Product</Button>
-            <Button variant="text" sx={{ color: 'text.secondary' }} onClick={() => navigate('/login')}>Pricing</Button>
-            <Button variant="text" sx={{ color: 'text.secondary' }} onClick={() => navigate('/login')}>Docs</Button>
-            <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('features')}>Features</Button>
+            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('eaas')}>Platform</Button>
+            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('pricing')}>Pricing</Button>
+            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'inline-flex' } }} onClick={() => openExternal('docs/index.html')}>Docs</Button>
+            <Divider orientation="vertical" flexItem sx={{ mx: 1, display: { xs: 'none', sm: 'block' } }} />
             <Button variant="outlined" onClick={() => navigate('/login')} sx={{ color: 'text.primary' }}>Sign In</Button>
             <Button variant="contained" onClick={() => navigate('/register')}>Get Started</Button>
           </Stack>
         </Box>
 
-        <Box sx={{ textAlign: 'center', mb: 10 }}>
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <Chip
-              icon={<Shield />}
-              label="Cryptographic Security Posture Management"
-              sx={{
-                mb: 3,
-                bgcolor: isDark ? 'rgba(99,102,241,0.14)' : 'rgba(99,102,241,0.08)',
-                color: 'primary.main',
-                border: 1,
-                borderColor: 'primary.main',
-                fontWeight: 600,
-              }}
-            />
-            <Typography
-              variant="h2"
-              fontWeight={900}
-              sx={{ mb: 2, lineHeight: 1.08, fontSize: { xs: '2.1rem', md: '3.8rem' }, letterSpacing: '-0.03em' }}
-            >
-              Your entire security posture.
-              <br />
-              <Box component="span" sx={{ background: tokens.colors.brandGradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Continuously assessed.
-              </Box>
-            </Typography>
-            <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 720, mx: 'auto', mb: 4, fontWeight: 400 }}>
-              RivicQ Cryptographic Security Posture Management unifies cloud posture, cryptographic inventory, PQC migration, and compliance automation — in one security platform.
-            </Typography>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <Card
-              sx={{
-                maxWidth: 700,
-                mx: 'auto',
-                mb: 3,
-                p: 0.5,
-                bgcolor: cardBg,
-                border: 1,
-                borderColor: isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.2)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Stack spacing={2}>
-                  <TextField
-                    fullWidth
-                    placeholder="Paste public GitHub repo URL for a free CBOM scan..."
-                    value={repoUrl}
-                    onChange={(e) => setRepoUrl(e.target.value)}
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start"><GitHub sx={{ color: 'text.muted' }} /></InputAdornment>,
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        bgcolor: isDark ? 'rgba(15,23,42,0.5)' : 'rgba(241,245,249,0.8)',
-                        borderRadius: 2,
-                      },
-                    }}
-                  />
-                  <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-                    <Button
-                      size="large"
-                      variant="contained"
-                      endIcon={<ArrowForward />}
-                      onClick={handleScan}
-                      disabled={scanStatus === 'scanning' || !repoUrl.trim()}
-                      sx={{ py: 1.5, fontSize: '1rem', flexGrow: 1 }}
-                    >
-                      {scanStatus === 'scanning' ? 'Scanning...' : 'Scan for Crypto Risk'}
-                    </Button>
-                    <Button
-                      size="large"
-                      variant="outlined"
-                      onClick={() => navigate('/switcher')}
-                      startIcon={<WorkspacePremium />}
-                      sx={{ py: 1.5, fontSize: '1rem', color: 'tertiary.main', borderColor: 'tertiary.main' }}
-                    >
-                      Explore Enterprise
-                    </Button>
+        <Box sx={{ position: 'relative', mb: { xs: 6, md: 10 } }}>
+          <QubitField dark={isDark} />
+          <Grid container spacing={{ xs: 4, md: 5 }} alignItems="center" sx={{ position: 'relative' }}>
+            <Grid item xs={12} md={6}>
+              <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                <Chip
+                  icon={<EnhancedEncryption />}
+                  label="Encryption as a Service · Quantum-safe CSPM"
+                  sx={{
+                    mb: 3,
+                    bgcolor: isDark ? 'rgba(99,102,241,0.14)' : 'rgba(99,102,241,0.08)',
+                    color: 'primary.main',
+                    border: 1,
+                    borderColor: 'primary.main',
+                    fontWeight: 600,
+                  }}
+                />
+                <Typography
+                  variant="h2"
+                  fontWeight={900}
+                  sx={{ mb: 2, lineHeight: 1.06, fontSize: { xs: '2rem', md: '3.4rem' }, letterSpacing: '-0.03em' }}
+                >
+                  Your business already runs on encryption.
+                  <br />
+                  <Box component="span" sx={{ background: tokens.colors.brandGradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    Now it needs intelligence.
                   </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </Typography>
+                <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 620, mb: 3, fontWeight: 400, fontSize: { xs: '1rem', md: '1.15rem' } }}>
+                  RivicQ is the Encryption-as-a-Service intelligence layer — wiring repositories, cloud KMS, HSMs, and
+                  certificates into one living cryptographic model that discovers keys, quantifies quantum risk, and
+                  automates PQC migration and compliance.
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.disabled', mb: 3, fontStyle: 'italic' }}>
+                  Not a dashboard. Not a report mill. The cryptographic decision layer security never had.
+                </Typography>
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+                <Card
+                  sx={{
+                    mb: 2,
+                    p: 0.5,
+                    bgcolor: cardBg,
+                    border: 1,
+                    borderColor: isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.2)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+                    <Stack spacing={2}>
+                      <TextField
+                        fullWidth
+                        placeholder="Paste a public GitHub repo URL for a free CBOM scan…"
+                        value={repoUrl}
+                        onChange={(e) => setRepoUrl(e.target.value)}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start"><GitHub sx={{ color: 'text.muted' }} /></InputAdornment>,
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            bgcolor: isDark ? 'rgba(15,23,42,0.5)' : 'rgba(241,245,249,0.8)',
+                            borderRadius: 2,
+                          },
+                        }}
+                      />
+                      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                        <Button
+                          size="large"
+                          variant="contained"
+                          endIcon={<ArrowForward />}
+                          onClick={handleScan}
+                          disabled={scanStatus === 'scanning' || !repoUrl.trim()}
+                          sx={{ py: 1.5, fontSize: '1rem', flexGrow: 1 }}
+                        >
+                          {scanStatus === 'scanning' ? 'Scanning…' : 'Scan for Crypto Risk'}
+                        </Button>
+                        <Button
+                          size="large"
+                          variant="outlined"
+                          onClick={() => navigate('/register')}
+                          startIcon={<WorkspacePremium />}
+                          sx={{ py: 1.5, fontSize: '1rem', color: 'tertiary.main', borderColor: 'tertiary.main' }}
+                        >
+                          Book a demo
+                        </Button>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </motion.div>
+              <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+                Your encryption intelligence, wherever you go — desktop, tablet, and mobile.
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.15 }}>
+                <EncryptionLayerVisual dark={isDark} />
+              </motion.div>
+            </Grid>
+          </Grid>
         </Box>
 
         {scanStatus !== 'idle' && (
@@ -294,9 +337,55 @@ const Home: React.FC = () => {
           </Grid>
         </Box>
 
-        <Box sx={{ mb: 10 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>One platform for complete security</Typography>
-          <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, textAlign: 'center' }}>From cloud posture to post-quantum cryptography — everything your security team needs.</Typography>
+        <Box id="eaas" sx={{ mb: 10, position: 'relative', scrollMarginTop: 80 }}>
+          <Box
+            sx={{
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: `${designSystem.radius.xl}px`,
+              p: { xs: 3, md: 5 },
+              border: 1,
+              borderColor: isDark ? 'rgba(96,165,250,0.2)' : 'rgba(37,99,235,0.14)',
+              background: isDark ? designSystem.proBlue.commandCenter : 'linear-gradient(135deg, #ffffff 0%, #eff6ff 100%)',
+            }}
+          >
+            <QubitField dark={isDark} density={0.6} />
+            <Box sx={{ position: 'relative' }}>
+              <Chip icon={<EnhancedEncryption />} label="Encryption as a Service" color="primary" variant="outlined" sx={{ fontWeight: 700, mb: 2 }} />
+              <Typography variant="h4" fontWeight={800} sx={{ mb: 1.5, letterSpacing: '-0.02em', maxWidth: 720 }}>
+                One API for encryption, keys, and post-quantum readiness
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, maxWidth: 720 }}>
+                RivicQ EaaS abstracts your HSMs and cloud KMS behind a single, policy-driven service. Encrypt data,
+                manage the full key lifecycle, and roll out PQC-hybrid cryptography without rewriting applications.
+              </Typography>
+              <Grid container spacing={2.5}>
+                {EAAS_CAPABILITIES.map((c, i) => (
+                  <Grid item xs={12} sm={6} md={3} key={c.title}>
+                    <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.06 }}>
+                      <Card sx={{ height: '100%', bgcolor: cardBg, border: 1, borderColor: cardBorder }}>
+                        <CardContent sx={{ p: 2.5 }}>
+                          <Avatar sx={{ bgcolor: `${tokens.colors.rivicq[500]}1a`, color: tokens.colors.rivicq[500], mb: 1.5, width: 42, height: 42 }}>{c.icon}</Avatar>
+                          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.5 }}>{c.title}</Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>{c.desc}</Typography>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </Grid>
+                ))}
+              </Grid>
+              <Stack direction="row" spacing={1.5} sx={{ mt: 3 }} flexWrap="wrap" useFlexGap>
+                <Button variant="contained" endIcon={<ArrowForward />} onClick={() => navigate('/register')}>Start with EaaS</Button>
+                <Button variant="outlined" startIcon={<MenuBook />} onClick={() => openExternal('docs/index.html')}>Read the docs</Button>
+                <Button variant="text" startIcon={<Api />} onClick={() => openExternal('api/index.html')}>API reference</Button>
+              </Stack>
+            </Box>
+          </Box>
+        </Box>
+
+        <Box id="features" sx={{ mb: 10, scrollMarginTop: 80 }}>
+          <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>One platform for complete cryptographic security</Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, textAlign: 'center' }}>From Encryption-as-a-Service and HSM key hygiene to post-quantum cryptography — everything your security team needs.</Typography>
           <Grid container spacing={3}>
             {FEATURES.map((f) => (
               <Grid item xs={12} sm={6} md={4} key={f.title}>
@@ -331,6 +420,32 @@ const Home: React.FC = () => {
           </Grid>
         </Box>
 
+        <Box id="docs" sx={{ mb: 10, scrollMarginTop: 80 }}>
+          <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>Documentation &amp; developers</Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, textAlign: 'center' }}>Everything you need to build on the RivicQ encryption intelligence layer.</Typography>
+          <Grid container spacing={3}>
+            {DOCS.map((d, i) => (
+              <Grid item xs={12} sm={6} md={3} key={d.title}>
+                <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.06 }} whileHover={{ y: -6 }}>
+                  <Card
+                    onClick={() => openExternal(d.href)}
+                    sx={{ height: '100%', cursor: 'pointer', bgcolor: cardBg, border: 1, borderColor: cardBorder, transition: 'border-color .2s', '&:hover': { borderColor: 'primary.main' } }}
+                  >
+                    <CardContent sx={{ p: 3 }}>
+                      <Avatar sx={{ bgcolor: `${tokens.colors.rivicq[500]}1a`, color: tokens.colors.rivicq[500], mb: 2, width: 44, height: 44 }}>{d.icon}</Avatar>
+                      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 0.5 }}>
+                        <Typography variant="h6" fontWeight={700}>{d.title}</Typography>
+                        <ArrowForward sx={{ fontSize: 15, color: 'text.disabled' }} />
+                      </Stack>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>{d.desc}</Typography>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
         <Box sx={{ mb: 10, textAlign: 'center' }}>
           <Typography variant="caption" sx={{ color: 'text.disabled', letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600 }}>Built for</Typography>
           <Stack direction="row" spacing={1.5} justifyContent="center" flexWrap="wrap" useFlexGap sx={{ mt: 2 }}>
@@ -340,7 +455,7 @@ const Home: React.FC = () => {
           </Stack>
         </Box>
 
-        <Box sx={{ mb: 10 }}>
+        <Box id="pricing" sx={{ mb: 10, scrollMarginTop: 80 }}>
           <Typography variant="h4" fontWeight={800} sx={{ mb: 4, textAlign: 'center', letterSpacing: '-0.02em' }}>Pricing</Typography>
           <Grid container spacing={3} maxWidth={900} sx={{ mx: 'auto' }}>
             {[
@@ -394,7 +509,7 @@ const Home: React.FC = () => {
         <Box sx={{ textAlign: 'center', py: 4, borderTop: 1, borderColor: 'divider' }}>
           <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" flexWrap="wrap" useFlexGap>
             <BrandLogo compact />
-            <Typography variant="body2" sx={{ color: 'text.muted' }}>© 2026 RivicQ · Cloud & Cyber Security Posture Management</Typography>
+            <Typography variant="body2" sx={{ color: 'text.muted' }}>© 2026 RivicQ · Encryption as a Service &amp; Quantum-safe Cryptographic Security Posture Management</Typography>
           </Stack>
         </Box>
       </Container>

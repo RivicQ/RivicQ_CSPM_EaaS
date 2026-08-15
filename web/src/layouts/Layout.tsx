@@ -322,87 +322,78 @@ const Layout: React.FC = () => {
         </Box>
       )}
 
+      {/* Single scroll container so every nav item (Workspace, Enterprise,
+          and expanded Security Modules) is always reachable on short screens. */}
       <Box
         sx={{
           flex: 1,
           minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
+          py: 0.75,
+          ...sidebarScrollSx,
         }}
       >
-        <Box sx={{ flexShrink: 0, py: 0.75, ...(navQuery ? sidebarScrollSx : {}) }}>
-          {workspaceMatches.length > 0 && (
-            <List sx={{ px: 0, py: 0 }}>
-              <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
-                Workspace
-              </Typography>
-              {workspaceMatches.map((item) => renderNavItem(item))}
-            </List>
-          )}
-
-          <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
-
-          {enterpriseMatches.length > 0 && (
-            <List sx={{ px: 0, py: 0 }}>
-              <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
-                Enterprise
-              </Typography>
-              {enterpriseMatches.map((item) => renderNavItem(item))}
-            </List>
-          )}
-
-          {navQuery && workspaceMatches.length === 0 && enterpriseMatches.length === 0 && (
-            <Typography variant="caption" sx={{ px: 2.5, py: 1, display: 'block', color: designSystem.proBlue.textMuted }}>
-              No navigation matches “{navQuery}”.
+        {workspaceMatches.length > 0 && (
+          <List sx={{ px: 0, py: 0 }}>
+            <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
+              Workspace
             </Typography>
-          )}
+            {workspaceMatches.map((item) => renderNavItem(item))}
+          </List>
+        )}
 
-          {!navQuery && (
-            <>
-              <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
+        <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
 
-              <List sx={{ px: 0, py: 0 }}>
-                <ListItem disablePadding sx={{ px: 1.5, mb: 0.125 }}>
-                  <ListItemButton
-                    onClick={() => setModulesOpen((v) => !v)}
-                    disabled={!isPaidEdition(edition)}
-                    sx={{
-                      ...sidebarNavItemButtonSx(false, !isPaidEdition(edition)),
-                      py: 0.5,
-                      minHeight: 32,
-                    }}
-                  >
-                    <ListItemIcon sx={{ color: 'inherit', minWidth: 32, '& svg': { fontSize: 18 } }}>
-                      <Category />
-                    </ListItemIcon>
-                    <ListItemText primary="Security Modules" primaryTypographyProps={{ fontSize: 13, fontWeight: 500 }} />
-                    {isPaidEdition(edition) ? (
-                      modulesOpen ? <ExpandMore sx={{ fontSize: 16 }} /> : <ChevronRight sx={{ fontSize: 16 }} />
-                    ) : (
-                      <Tooltip title="Paid edition feature — upgrade to enable">
-                        <Lock sx={{ fontSize: 12, color: 'text.disabled' }} />
-                      </Tooltip>
-                    )}
-                  </ListItemButton>
-                </ListItem>
-              </List>
-            </>
-          )}
-        </Box>
+        {enterpriseMatches.length > 0 && (
+          <List sx={{ px: 0, py: 0 }}>
+            <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
+              Enterprise
+            </Typography>
+            {enterpriseMatches.map((item) => renderNavItem(item))}
+          </List>
+        )}
 
-        {modulesOpen && !navQuery && (
-          <Box
-            sx={{
-              flex: 1,
-              minHeight: 0,
-              ...sidebarScrollSx,
-            }}
-          >
-            <List disablePadding sx={{ pl: 1, pr: 0.5, pb: 0.5 }}>
-              {modulesNav.map((item) => renderNavItem(item, true))}
+        {navQuery && workspaceMatches.length === 0 && enterpriseMatches.length === 0 && (
+          <Typography variant="caption" sx={{ px: 2.5, py: 1, display: 'block', color: designSystem.proBlue.textMuted }}>
+            No navigation matches “{navQuery}”.
+          </Typography>
+        )}
+
+        {!navQuery && (
+          <>
+            <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
+
+            <List sx={{ px: 0, py: 0 }}>
+              <ListItem disablePadding sx={{ px: 1.5, mb: 0.125 }}>
+                <ListItemButton
+                  onClick={() => setModulesOpen((v) => !v)}
+                  disabled={!isPaidEdition(edition)}
+                  sx={{
+                    ...sidebarNavItemButtonSx(false, !isPaidEdition(edition)),
+                    py: 0.5,
+                    minHeight: 32,
+                  }}
+                >
+                  <ListItemIcon sx={{ color: 'inherit', minWidth: 32, '& svg': { fontSize: 18 } }}>
+                    <Category />
+                  </ListItemIcon>
+                  <ListItemText primary="Security Modules" primaryTypographyProps={{ fontSize: 13, fontWeight: 500 }} />
+                  {isPaidEdition(edition) ? (
+                    modulesOpen ? <ExpandMore sx={{ fontSize: 16 }} /> : <ChevronRight sx={{ fontSize: 16 }} />
+                  ) : (
+                    <Tooltip title="Paid edition feature — upgrade to enable">
+                      <Lock sx={{ fontSize: 12, color: 'text.disabled' }} />
+                    </Tooltip>
+                  )}
+                </ListItemButton>
+              </ListItem>
             </List>
-          </Box>
+
+            {modulesOpen && (
+              <List disablePadding sx={{ pl: 1, pr: 0.5, pb: 0.5 }}>
+                {modulesNav.map((item) => renderNavItem(item, true))}
+              </List>
+            )}
+          </>
         )}
       </Box>
 
