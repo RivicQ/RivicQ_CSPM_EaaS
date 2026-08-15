@@ -50,7 +50,8 @@ function buildLocalSummary(ctx: WorkspaceContext): string {
   if (ctx.compliance?.overallScore != null) {
     lines.push(`• Overall compliance: **${ctx.compliance.overallScore}%** across ${ctx.compliance.frameworks?.length ?? 0} frameworks`);
   }
-  lines.push(`\n_Scanned ${new Date(ctx.scannedAt).toLocaleTimeString()} · ${ctx.edition} edition · page ${ctx.page}_`);
+  const source = ctx.demoMode ? 'demo dataset' : 'live workspace scan';
+  lines.push(`\n_Source: ${source} · ${new Date(ctx.scannedAt).toLocaleTimeString()} · ${ctx.edition} edition_`);
   return lines.join('\n');
 }
 

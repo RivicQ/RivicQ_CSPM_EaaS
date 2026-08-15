@@ -11,6 +11,7 @@ export interface WorkspaceContext {
   scannedAt: string;
   page: string;
   edition: string;
+  demoMode?: boolean;
   inventory?: {
     totalAssets?: number;
     complianceScore?: number;

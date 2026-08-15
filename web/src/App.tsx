@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
+import { MotionConfig } from 'framer-motion';
 import designSystem from './theme/designSystem';
 
 import Layout from './layouts/Layout';
@@ -88,6 +89,7 @@ const App: React.FC = () => {
         <AuthProvider>
           <ThemeModeProvider mode={mode} toggleMode={toggleMode}>
             <ThemeProvider theme={theme}>
+              <MotionConfig reducedMotion="user">
               <CssBaseline />
             <GlobalStyles
               styles={(theme) => ({
@@ -160,6 +162,7 @@ const App: React.FC = () => {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>
+              </MotionConfig>
             </ThemeProvider>
           </ThemeModeProvider>
         </AuthProvider>

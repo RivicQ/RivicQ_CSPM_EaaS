@@ -97,7 +97,7 @@ const RivicQAssistant: React.FC = () => {
           {
             id: 'scan-ready',
             role: 'system',
-            content: `Workspace scanned · ${context.inventory?.totalAssets ?? '—'} assets · ${context.cloud?.totalResources ?? '—'} cloud resources`,
+            content: `${context.demoMode ? 'Demo dataset loaded' : 'Workspace scanned'} · ${context.inventory?.totalAssets ?? '—'} assets · ${context.cloud?.totalResources ?? '—'} cloud resources`,
             timestamp: Date.now(),
           },
         ];

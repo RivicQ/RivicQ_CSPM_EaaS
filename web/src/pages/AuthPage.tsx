@@ -46,6 +46,7 @@ import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
+import CryptoQuantumBackdrop from '../components/auth/CryptoQuantumBackdrop';
 import designSystem, { commandCenterCardSx, proBlueContainedButtonSx } from '../theme/designSystem';
 
 const authHeroPanelSx = {
@@ -301,6 +302,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           pointerEvents: 'none',
         }}
       />
+
+      <CryptoQuantumBackdrop dark={isDark} />
 
       <Container maxWidth="lg" sx={{ position: 'relative' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>

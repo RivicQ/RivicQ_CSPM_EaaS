@@ -10,6 +10,12 @@ import {
 } from '../services/api';
 import { Edition, isPaidEdition } from '../config/editions';
 import type { WorkspaceContext } from '../types/assistant';
+import {
+  DEMO_ANALYTICS_INSIGHTS,
+  DEMO_ASSETS,
+  DEMO_INVENTORY_SUMMARY,
+  DEMO_SCAN_FINDINGS,
+} from '../data/workspaceDemo';
 
 function pick<T>(result: PromiseSettledResult<unknown>, fallback?: T): T | undefined {
   if (result.status !== 'fulfilled') return fallback;
@@ -46,25 +52,37 @@ export function useWorkspaceContext(edition: Edition) {
         analyticsService.getInsights(),
       ]);
 
-      const summary = pick<any>(summaryRes);
+      const summaryRaw = pick<any>(summaryRes);
       const assetsPayload = pick<any>(assetsRes);
       const cloud = pick<any>(cloudRes);
       const eventsPayload = pick<any>(eventsRes);
       const compliancePayload = pick<any>(complianceRes);
       const cspm = pick<any>(cspmRes);
-      const insights = pick<any>(insightsRes);
+      const insights = pick<any>(insightsRes) ?? DEMO_ANALYTICS_INSIGHTS;
 
-      const assets = Array.isArray(assetsPayload?.assets)
+      const liveAssets = Array.isArray(assetsPayload?.assets)
         ? assetsPayload.assets
         : Array.isArray(assetsPayload)
           ? assetsPayload
           : [];
 
-      const events = Array.isArray(eventsPayload?.events)
+      // On static deployments (GitHub Pages) or empty tenants the live APIs
+      // return nothing — fall back to labelled demo data so the assistant can
+      // still answer with concrete numbers rather than "no data available".
+      const usingDemo = liveAssets.length === 0;
+      const assets = usingDemo ? DEMO_ASSETS : liveAssets;
+      const summary = summaryRaw && (summaryRaw.total_assets ?? summaryRaw.totalAssets)
+        ? summaryRaw
+        : DEMO_INVENTORY_SUMMARY;
+
+      const liveEvents = Array.isArray(eventsPayload?.events)
         ? eventsPayload.events
         : Array.isArray(eventsPayload)
           ? eventsPayload
           : [];
+      const events = liveEvents.length
+        ? liveEvents
+        : DEMO_SCAN_FINDINGS.map((f) => ({ severity: f.severity, message: f.title, title: f.title }));
 
       const frameworks = Array.isArray(compliancePayload?.dashboards)
         ? compliancePayload.dashboards
@@ -95,6 +113,7 @@ export function useWorkspaceContext(edition: Edition) {
           algorithm: a.algorithm ?? a.crypto_algorithm,
           cloud_provider: a.cloud_provider ?? a.cloudProvider,
         })),
+        demoMode: usingDemo,
         cloud: cloud
           ? {
               totalResources: cloud.total_resources ?? cloud.totalResources,
@@ -103,7 +122,13 @@ export function useWorkspaceContext(edition: Edition) {
               scanCoverage: cloud.scan_coverage ?? cloud.scanCoverage,
               scansToday: cloud.scans_today ?? cloud.scansToday,
             }
-          : undefined,
+          : {
+              totalResources: 150,
+              byProvider: DEMO_INVENTORY_SUMMARY.by_cloud_provider,
+              securityFindings: { critical: 2, high: 8, medium: 15, low: 25 },
+              scanCoverage: 94,
+              scansToday: 18,
+            },
         security: {
           events: events.slice(0, 8).map((e: any) => ({
             severity: e.severity,

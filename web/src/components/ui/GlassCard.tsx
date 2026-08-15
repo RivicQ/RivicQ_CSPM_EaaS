@@ -27,9 +27,11 @@ const GlassCard: React.FC<GlassCardProps> = ({
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: delay * 0.07, ease: [0.4, 0, 0.2, 1] }}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.45, delay: delay * 0.06, ease: [0.4, 0, 0.2, 1] }}
+      whileHover={hover ? { y: -3 } : undefined}
       onClick={onClick}
       sx={{
         ...glassSurface(theme, true),

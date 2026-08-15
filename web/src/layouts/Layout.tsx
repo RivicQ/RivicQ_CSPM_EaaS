@@ -26,6 +26,7 @@ import {
   Paper,
   BottomNavigation,
   BottomNavigationAction,
+  Collapse,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -101,6 +102,9 @@ const Layout: React.FC = () => {
   const [notifications] = React.useState(5);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [modulesOpen, setModulesOpen] = React.useState(false);
+  const [navQuery, setNavQuery] = React.useState('');
+  const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
+  const [topSearch, setTopSearch] = React.useState('');
   const { mode, toggleMode } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
@@ -118,15 +122,19 @@ const Layout: React.FC = () => {
     }
   }, [sidebarCollapsed]);
 
+  // Workspace, reordered by daily operator priority. Settings is pinned to the
+  // sidebar footer instead of living in the middle of the list.
   const navigationItems: NavItem[] = [
     { text: 'Command Center', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Assets', icon: <Storage />, path: '/assets' },
     { text: 'Scanner', icon: <Security />, path: '/scanner' },
+    { text: 'Assets', icon: <Storage />, path: '/assets' },
     { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
     { text: 'DevSecOps Tools', icon: <Category />, path: '/tools' },
     { text: 'RivicQ Ecosystem', icon: <CloudQueue />, path: '/ecosystem' },
-    { text: 'Settings', icon: <Settings />, path: '/settings' },
   ];
+
+  const settingsItem: NavItem = { text: 'Settings', icon: <Settings />, path: '/settings' };
+  const allWorkspaceItems = [...navigationItems, settingsItem];
 
   const enterpriseItems: NavItem[] = [
     { text: 'Cloud Posture', icon: <GppGood />, path: '/enterprise/cloud-posture', section: 'Enterprise' },
@@ -142,6 +150,11 @@ const Layout: React.FC = () => {
 
   const enterpriseNav = enterpriseItems.map((it) => ({ ...it, disabled: !isPaidEdition(edition) }));
 
+  const navMatch = (item: NavItem) => item.text.toLowerCase().includes(navQuery.trim().toLowerCase());
+  const workspaceSource = navQuery ? allWorkspaceItems : navigationItems;
+  const workspaceMatches = navQuery ? workspaceSource.filter(navMatch) : workspaceSource;
+  const enterpriseMatches = navQuery ? enterpriseNav.filter(navMatch) : enterpriseNav;
+
   const modulesNav: NavItem[] = [
     { text: 'All Modules', icon: <Category />, path: '/modules', section: 'Security Modules' },
     ...MODULES.map((m) => {
@@ -153,6 +166,8 @@ const Layout: React.FC = () => {
   const handleNavigation = (path: string) => {
     navigate(path);
     setDrawerOpen(false);
+    setNavQuery('');
+    setMobileSearchOpen(false);
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -168,7 +183,7 @@ const Layout: React.FC = () => {
   const isDarkMode = mode === 'dark';
 
   const currentTitle = React.useMemo(() => {
-    const all = [...navigationItems, ...enterpriseItems, ...modulesNav];
+    const all = [...allWorkspaceItems, ...enterpriseItems, ...modulesNav];
     const active = all.find((it) => it.path !== '/modules' && isActive(it.path));
     if (location.pathname.startsWith('/modules/') && location.pathname !== '/modules') {
       const m = MODULES.find((x) => x.id === location.pathname.split('/')[2]);
@@ -267,6 +282,46 @@ const Layout: React.FC = () => {
 
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
 
+      {!(sidebarCollapsed && isDesktop) && (
+        <Box sx={{ px: 1.5, pt: 1.25, pb: 0.5, flexShrink: 0 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 1.25,
+              py: 0.6,
+              borderRadius: `${designSystem.radius.md}px`,
+              bgcolor: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              transition: designSystem.motion.smooth,
+              '&:focus-within': {
+                bgcolor: 'rgba(255,255,255,0.1)',
+                borderColor: designSystem.proBlue.accent,
+              },
+            }}
+          >
+            <Search sx={{ fontSize: 17, color: designSystem.proBlue.textMuted }} />
+            <InputBase
+              value={navQuery}
+              onChange={(e) => setNavQuery(e.target.value)}
+              placeholder="Search navigation…"
+              sx={{
+                flexGrow: 1,
+                fontSize: '0.8125rem',
+                color: designSystem.proBlue.textPrimary,
+                '& input::placeholder': { color: designSystem.proBlue.textMuted, opacity: 1 },
+              }}
+            />
+            {navQuery && (
+              <IconButton size="small" onClick={() => setNavQuery('')} sx={{ color: designSystem.proBlue.textMuted, p: 0.25 }}>
+                <ChevronRight sx={{ fontSize: 16, transform: 'rotate(45deg)' }} />
+              </IconButton>
+            )}
+          </Box>
+        </Box>
+      )}
+
       <Box
         sx={{
           flex: 1,
@@ -276,53 +331,67 @@ const Layout: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ flexShrink: 0, py: 0.75 }}>
-          <List sx={{ px: 0, py: 0 }}>
-            <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
-              Workspace
-            </Typography>
-            {navigationItems.map((item) => renderNavItem(item))}
-          </List>
+        <Box sx={{ flexShrink: 0, py: 0.75, ...(navQuery ? sidebarScrollSx : {}) }}>
+          {workspaceMatches.length > 0 && (
+            <List sx={{ px: 0, py: 0 }}>
+              <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
+                Workspace
+              </Typography>
+              {workspaceMatches.map((item) => renderNavItem(item))}
+            </List>
+          )}
 
           <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
 
-          <List sx={{ px: 0, py: 0 }}>
-            <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
-              Enterprise
+          {enterpriseMatches.length > 0 && (
+            <List sx={{ px: 0, py: 0 }}>
+              <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
+                Enterprise
+              </Typography>
+              {enterpriseMatches.map((item) => renderNavItem(item))}
+            </List>
+          )}
+
+          {navQuery && workspaceMatches.length === 0 && enterpriseMatches.length === 0 && (
+            <Typography variant="caption" sx={{ px: 2.5, py: 1, display: 'block', color: designSystem.proBlue.textMuted }}>
+              No navigation matches “{navQuery}”.
             </Typography>
-            {enterpriseNav.map((item) => renderNavItem(item))}
-          </List>
+          )}
 
-          <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
+          {!navQuery && (
+            <>
+              <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
 
-          <List sx={{ px: 0, py: 0 }}>
-            <ListItem disablePadding sx={{ px: 1.5, mb: 0.125 }}>
-              <ListItemButton
-                onClick={() => setModulesOpen((v) => !v)}
-                disabled={!isPaidEdition(edition)}
-                sx={{
-                  ...sidebarNavItemButtonSx(false, !isPaidEdition(edition)),
-                  py: 0.5,
-                  minHeight: 32,
-                }}
-              >
-                <ListItemIcon sx={{ color: 'inherit', minWidth: 32, '& svg': { fontSize: 18 } }}>
-                  <Category />
-                </ListItemIcon>
-                <ListItemText primary="Security Modules" primaryTypographyProps={{ fontSize: 13, fontWeight: 500 }} />
-                {isPaidEdition(edition) ? (
-                  modulesOpen ? <ExpandMore sx={{ fontSize: 16 }} /> : <ChevronRight sx={{ fontSize: 16 }} />
-                ) : (
-                  <Tooltip title="Paid edition feature — upgrade to enable">
-                    <Lock sx={{ fontSize: 12, color: 'text.disabled' }} />
-                  </Tooltip>
-                )}
-              </ListItemButton>
-            </ListItem>
-          </List>
+              <List sx={{ px: 0, py: 0 }}>
+                <ListItem disablePadding sx={{ px: 1.5, mb: 0.125 }}>
+                  <ListItemButton
+                    onClick={() => setModulesOpen((v) => !v)}
+                    disabled={!isPaidEdition(edition)}
+                    sx={{
+                      ...sidebarNavItemButtonSx(false, !isPaidEdition(edition)),
+                      py: 0.5,
+                      minHeight: 32,
+                    }}
+                  >
+                    <ListItemIcon sx={{ color: 'inherit', minWidth: 32, '& svg': { fontSize: 18 } }}>
+                      <Category />
+                    </ListItemIcon>
+                    <ListItemText primary="Security Modules" primaryTypographyProps={{ fontSize: 13, fontWeight: 500 }} />
+                    {isPaidEdition(edition) ? (
+                      modulesOpen ? <ExpandMore sx={{ fontSize: 16 }} /> : <ChevronRight sx={{ fontSize: 16 }} />
+                    ) : (
+                      <Tooltip title="Paid edition feature — upgrade to enable">
+                        <Lock sx={{ fontSize: 12, color: 'text.disabled' }} />
+                      </Tooltip>
+                    )}
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </>
+          )}
         </Box>
 
-        {modulesOpen && (
+        {modulesOpen && !navQuery && (
           <Box
             sx={{
               flex: 1,
@@ -338,6 +407,10 @@ const Layout: React.FC = () => {
       </Box>
 
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
+
+      <List sx={{ px: 0, py: 0.5, flexShrink: 0 }}>
+        {renderNavItem(settingsItem)}
+      </List>
 
       <Box sx={{ p: 1, position: 'relative', flexShrink: 0, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
         <Stack spacing={0.75}>
@@ -442,6 +515,8 @@ const Layout: React.FC = () => {
               }}
             />
             <InputBase
+              value={topSearch}
+              onChange={(e) => setTopSearch(e.target.value)}
               placeholder="Search CSPM, GitHub, findings…"
               sx={{
                 fontSize: '0.8125rem',
@@ -460,10 +535,20 @@ const Layout: React.FC = () => {
           <Box sx={{ flexGrow: { xs: 1, md: 0 }, display: { xs: 'block', md: 'none' } }} />
 
           <Stack direction="row" spacing={0.75} alignItems="center">
+            <Tooltip title="Search">
+              <IconButton
+                onClick={() => setMobileSearchOpen((v) => !v)}
+                aria-label="Search"
+                sx={{ ...appBarIconButtonSx(mode), display: { xs: 'inline-flex', md: 'none' } }}
+              >
+                <Search sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+
             <ThemeToggle mode={mode} onToggle={toggleMode} compact />
 
             <Tooltip title="Refresh">
-              <IconButton sx={appBarIconButtonSx(mode)}>
+              <IconButton sx={{ ...appBarIconButtonSx(mode), display: { xs: 'none', sm: 'inline-flex' } }}>
                 <Refresh sx={{ fontSize: 18 }} />
               </IconButton>
             </Tooltip>
@@ -538,6 +623,30 @@ const Layout: React.FC = () => {
             </MenuItem>
           </Menu>
         </Toolbar>
+
+        <Collapse in={mobileSearchOpen && !isDesktop} timeout={reduceMotion ? 0 : 220} unmountOnExit>
+          <Box sx={{ px: 1.5, pb: 1.25, pt: 0.25 }}>
+            <Box sx={{ ...appBarSearchSx(mode), display: 'flex', width: '100%' }}>
+              <Search sx={{ fontSize: 18, color: isDarkMode ? blue.textMuted : blue.royal, mr: 1, opacity: 0.85 }} />
+              <InputBase
+                autoFocus
+                value={topSearch}
+                onChange={(e) => setTopSearch(e.target.value)}
+                placeholder="Search CSPM, GitHub, findings…"
+                sx={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  flexGrow: 1,
+                  color: isDarkMode ? blue.textPrimary : blue.navyMid,
+                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : 'rgba(26,68,128,0.55)', opacity: 1 },
+                }}
+              />
+              <IconButton size="small" onClick={() => setMobileSearchOpen(false)} aria-label="Close search">
+                <ChevronLeft sx={{ fontSize: 18, color: isDarkMode ? blue.textMuted : blue.royal }} />
+              </IconButton>
+            </Box>
+          </Box>
+        </Collapse>
       </AppBar>
 
       <Drawer
