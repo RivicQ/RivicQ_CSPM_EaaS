@@ -154,7 +154,23 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
             textTransform: 'none',
             fontWeight: 600,
             padding: '8px 20px',
-            transition: designSystem.motion.smooth,
+            transition: 'transform 0.18s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease',
+            willChange: 'transform',
+            // Additive micro-interactions — enhance existing styles, never replace.
+            '&:hover': {
+              transform: 'translateY(-1px)',
+            },
+            '&:active': {
+              transform: 'translateY(0) scale(0.985)',
+            },
+            '&.Mui-focusVisible': {
+              boxShadow: `0 0 0 3px ${designSystem.proBlue.accent}33`,
+            },
+            '@media (prefers-reduced-motion: reduce)': {
+              transition: 'background-color 0.2s ease, border-color 0.2s ease',
+              '&:hover': { transform: 'none' },
+              '&:active': { transform: 'none' },
+            },
           },
           containedPrimary: {
             ...proBlueContainedButtonSx,

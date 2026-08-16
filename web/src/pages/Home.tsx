@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, LinearProgress, TextField, InputAdornment, Avatar, Divider, useTheme,
+  Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, TextField, InputAdornment, Avatar, Divider, useTheme,
 } from '@mui/material';
 import {
-  ArrowForward, CheckCircle, CloudQueue, GitHub, Search, Shield, GppGood, Memory, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
+  ArrowForward, CheckCircle, CloudQueue, GitHub, Shield, GppGood, Memory, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
   Api, Terminal, MenuBook, EnhancedEncryption, Key,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -13,19 +13,13 @@ import { cbomService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
 import QubitField from '../components/home/QubitField';
 import EncryptionLayerVisual from '../components/home/EncryptionLayerVisual';
+import ClientWorkflow from '../components/home/ClientWorkflow';
+import HomeScanReport, { HomeScanReportData } from '../components/home/HomeScanReport';
+import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
 import designSystem, { glassSurface } from '../theme/designSystem';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
-
-const PACKAGES = [
-  { name: 'axios', status: 'done' as const },
-  { name: 'express', status: 'scanning' as const },
-  { name: 'lodash', status: 'done' as const },
-  { name: 'jsonwebtoken', status: 'pending' as const },
-  { name: 'crypto-js', status: 'pending' as const },
-  { name: 'node-forge', status: 'pending' as const },
-];
 
 const FEATURES = [
   {
@@ -84,6 +78,7 @@ const Home: React.FC = () => {
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
   const [progress, setProgress] = React.useState(0);
+  const [report, setReport] = React.useState<HomeScanReportData | null>(null);
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -91,21 +86,52 @@ const Home: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  const buildReport = (target: string, data: any): HomeScanReportData => {
+    const findings = data?.findings || data?.summary || {};
+    return {
+      target,
+      score: data?.security_score ?? data?.score ?? findings?.score,
+      severity: {
+        critical: findings.critical ?? data?.critical,
+        high: findings.high ?? data?.high,
+        medium: findings.medium ?? data?.medium,
+        low: findings.low ?? data?.low,
+      },
+      quantumRisk: data?.quantum_risk ?? data?.quantumRisk,
+      algorithms: (data?.algorithms || data?.crypto_findings || [])
+        .slice(0, 12)
+        .map((a: any) => ({ name: a.name || a.algorithm, count: a.count, quantumSafe: a.quantum_safe ?? a.quantumSafe })),
+    };
+  };
+
   const handleScan = async () => {
     if (!repoUrl.trim()) return;
     setScanStatus('scanning');
     setProgress(0);
+    setReport(null);
     try {
       const resp = await cbomService.triggerScan(repoUrl.trim(), 'cbom');
       const scanId = resp.data.scan_id;
+      let ticks = 0;
       const interval = setInterval(async () => {
+        ticks += 1;
         try {
           const statusResp = await cbomService.getScanStatus(scanId);
           const status = statusResp.data;
-          setProgress(status.progress || 0);
+          setProgress(status.progress || Math.min(90, ticks * 12));
           if (status.status === 'completed' || status.status === 'failed') {
             clearInterval(interval);
-            setScanStatus(status.status === 'completed' ? 'complete' : 'error');
+            if (status.status === 'completed') {
+              try {
+                const reportResp = await cbomService.getScanReport(scanId);
+                setReport(buildReport(repoUrl.trim(), reportResp.data || status));
+              } catch {
+                setReport(buildReport(repoUrl.trim(), status));
+              }
+              setScanStatus('complete');
+            } else {
+              setScanStatus('error');
+            }
           }
         } catch {
           clearInterval(interval);
@@ -113,14 +139,10 @@ const Home: React.FC = () => {
         }
       }, 1500);
     } catch {
+      // No reachable backend (e.g. the static public site) — show an honest
+      // state instead of fabricated findings.
       setScanStatus('error');
     }
-  };
-
-  const statusIcon = (status: string) => {
-    if (status === 'done') return <CheckCircle sx={{ color: tokens.colors.crypto.low }} />;
-    if (status === 'scanning') return <Box sx={{ color: tokens.colors.rivicq[600], animation: 'spin 1s linear infinite' }}><Search /></Box>;
-    return <Box sx={{ color: tokens.colors.text.muted }}><Lock /></Box>;
   };
 
   const scrollToId = (id: string) => {
@@ -184,6 +206,7 @@ const Home: React.FC = () => {
           <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
             <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('features')}>Features</Button>
             <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('eaas')}>Platform</Button>
+            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', lg: 'inline-flex' } }} onClick={() => scrollToId('workflows')}>Workflows</Button>
             <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('pricing')}>Pricing</Button>
             <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'inline-flex' } }} onClick={() => openExternal('docs/index.html')}>Docs</Button>
             <Divider orientation="vertical" flexItem sx={{ mx: 1, display: { xs: 'none', sm: 'block' } }} />
@@ -259,16 +282,18 @@ const Home: React.FC = () => {
                         }}
                       />
                       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-                        <Button
+                        <LoadingButton
                           size="large"
                           variant="contained"
                           endIcon={<ArrowForward />}
                           onClick={handleScan}
-                          disabled={scanStatus === 'scanning' || !repoUrl.trim()}
+                          loading={scanStatus === 'scanning'}
+                          loadingText="Scanning…"
+                          disabled={!repoUrl.trim()}
                           sx={{ py: 1.5, fontSize: '1rem', flexGrow: 1 }}
                         >
-                          {scanStatus === 'scanning' ? 'Scanning…' : 'Scan for Crypto Risk'}
-                        </Button>
+                          Scan for Crypto Risk
+                        </LoadingButton>
                         <Button
                           size="large"
                           variant="outlined"
@@ -297,26 +322,13 @@ const Home: React.FC = () => {
         </Box>
 
         {scanStatus !== 'idle' && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-            <Card sx={{ mb: 6, bgcolor: cardBg, border: 1, borderColor: 'rgba(99,102,241,0.2)' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Live Scan Visualization</Typography>
-                <LinearProgress variant="determinate" value={progress} sx={{ height: 8, mb: 3 }} />
-                <Grid container spacing={2}>
-                  {PACKAGES.map((pkg) => (
-                    <Grid item xs={4} sm={2} key={pkg.name}>
-                      <Card sx={{ bgcolor: isDark ? '#1e293b' : '#f8fafc', borderColor: 'divider', textAlign: 'center' }}>
-                        <CardContent sx={{ p: 2 }}>
-                          <Box sx={{ fontSize: 28, mb: 1 }}>{statusIcon(pkg.status)}</Box>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{pkg.name}</Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <HomeScanReport
+            status={scanStatus}
+            progress={progress}
+            report={report}
+            onOpenApp={() => navigate('/register')}
+            onRegister={() => navigate('/register')}
+          />
         )}
 
         <Box sx={{ mb: 10, textAlign: 'center' }}>
@@ -382,6 +394,8 @@ const Home: React.FC = () => {
             </Box>
           </Box>
         </Box>
+
+        <ClientWorkflow />
 
         <Box id="features" sx={{ mb: 10, scrollMarginTop: 80 }}>
           <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>One platform for complete cryptographic security</Typography>

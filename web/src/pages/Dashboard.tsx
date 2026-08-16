@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Box, Button, Chip, CircularProgress, Grid, Stack, ToggleButton, ToggleButtonGroup, Typography, useMediaQuery, useTheme,
+  Box, Button, Chip, CircularProgress, Grid, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography, useMediaQuery, useTheme,
 } from '@mui/material';
 import {
   ArrowForward, AutoGraph, GitHub, GppGood, Lock, Memory, NotificationsActive, Security, TrendingUp,
@@ -375,8 +375,22 @@ const Dashboard: React.FC = () => {
 
   if (summaryLoading && !summaryData) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 480 }}>
-        <CircularProgress size={36} thickness={3} />
+      <Box sx={dashboardDesign.layout.page}>
+        <Skeleton variant="rounded" height={168} sx={{ borderRadius: 3, mb: 1.5 }} />
+        <Grid container spacing={dashboardDesign.layout.gridSpacing} sx={{ mb: 1.5 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Grid item xs={12} sm={6} md={3} key={i}>
+              <Skeleton variant="rounded" height={128} sx={{ borderRadius: 3 }} />
+            </Grid>
+          ))}
+        </Grid>
+        <Grid container spacing={dashboardDesign.layout.gridSpacing}>
+          <Grid item xs={12} md={8}><Skeleton variant="rounded" height={320} sx={{ borderRadius: 3 }} /></Grid>
+          <Grid item xs={12} md={4}><Skeleton variant="rounded" height={320} sx={{ borderRadius: 3 }} /></Grid>
+        </Grid>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <CircularProgress size={22} thickness={4} aria-label="Loading dashboard" />
+        </Box>
       </Box>
     );
   }
