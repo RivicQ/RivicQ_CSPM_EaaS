@@ -2,7 +2,7 @@ name: Deploy GitHub Pages
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, cursor/beta-client-ready-dd72 ]
   workflow_dispatch:
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: web/package-lock.json
 
@@ -61,6 +61,10 @@ jobs:
           cp docs/sdks/java.md web/build/docs/sdks/
           cp docs/sdks/dotnet.md web/build/docs/sdks/
           cp docs/index.html web/build/docs/index.html
+          cp docs/BETA_READY.md web/build/docs/BETA_READY.md
+          cp docs/KNOWN_LIMITATIONS.md web/build/docs/KNOWN_LIMITATIONS.md
+          cp docs/STATUS.md web/build/docs/STATUS.md
+          cp docs/README.md web/build/docs/README.md
           mkdir -p web/build/media
           cp -r media/. web/build/media/
           mkdir -p web/build/marketing

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [1.4.0] - 2026-08-16
 
+### Fixed
+- GitHub Actions: golangci-lint v2 for Go 1.25, frontend ESLint CI, integration/production health waits, Postgres SSL mode in CI, Syft SBOM action, and docs/Pages web build.
+- Integration test treated `edition: "Open Source"` as a failure because the assertion looked for lowercase `"open"`.
+
 ### Added
 - Public GitHub CBOM analyzer on the homepage so GitHub Pages always returns a readable report (algorithms, key sizes, quantum risk, BSI/DORA/eIDAS mapping) without fabricating findings.
 - JSON + simple PDF export for Community inventory and scan findings.

@@ -58,7 +58,7 @@ start_oss() {
     nohup ./bin/cryptobom-oss > server-oss.log 2>&1 &
     
     echo -e "${YELLOW}⏳ Waiting for OSS server to start...${NC}"
-    for i in {1..10}; do
+    for i in {1..30}; do
         if check_server 8080; then
             echo -e "${GREEN}✅ OSS Server is running!${NC}"
             break
@@ -85,7 +85,7 @@ start_enterprise() {
     nohup ./bin/cryptobom-enterprise > server-enterprise.log 2>&1 &
     
     echo -e "${YELLOW}⏳ Waiting for Enterprise server to start...${NC}"
-    for i in {1..10}; do
+    for i in {1..30}; do
         if check_server 9090; then
             echo -e "${GREEN}✅ Enterprise Server is running!${NC}"
             break

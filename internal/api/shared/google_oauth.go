@@ -72,10 +72,12 @@ func initGoogleOAuthConfig() *oauth2.Config {
 	return googleOAuthConfig
 }
 
-func generateOAuthState() string {
+func generateOAuthState() (string, error) {
 	b := make([]byte, 32)
-	rand.Read(b)
-	return hex.EncodeToString(b)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }
 
 func GoogleLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
@@ -89,7 +91,12 @@ func GoogleLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
 			return
 		}
 
-		state := generateOAuthState()
+		state, err := generateOAuthState()
+		if err != nil {
+			logger.WithError(err).Error("Failed to generate OAuth state")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start Google login"})
+			return
+		}
 		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
 		oauthStateMap[state] = edition
 
@@ -199,11 +206,11 @@ func completeGoogleOAuth(
 	}
 
 	if !googleUser.EmailVerified {
-		return nil, fmt.Errorf("Google email not verified")
+		return nil, fmt.Errorf("google email not verified")
 	}
 
 	if len(allowedDomains) > 0 && !workEmailAllowed(googleUser.Email, allowedDomains) {
-		return nil, fmt.Errorf("Email domain not allowed")
+		return nil, fmt.Errorf("email domain not allowed")
 	}
 
 	existingUser, err := service.GetUserByEmail(googleUser.Email)

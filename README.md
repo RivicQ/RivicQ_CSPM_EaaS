@@ -8,7 +8,7 @@ Cryptographic Bill of Materials (CBOM) platform for discovering, inventorying, a
 
 **Live app:** https://rivicq.github.io/RivicQ_CSPM_EaaS/
 
-Design-partner beta: [BETA_PROGRAM.md](BETA_PROGRAM.md) · [Known limitations](docs/KNOWN_LIMITATIONS.md) · [Beta checklist](docs/BETA_READY.md)
+Design-partner beta: [BETA_PROGRAM.md](BETA_PROGRAM.md) · [Live outcome](docs/STATUS.md) · [Known limitations](docs/KNOWN_LIMITATIONS.md) · [Beta checklist](docs/BETA_READY.md)
 
 ---
 

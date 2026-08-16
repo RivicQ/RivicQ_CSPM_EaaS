@@ -3,6 +3,7 @@
 ## Getting started
 
 - [CBOM Quickstart](../QUICKSTART_CBOM.md) — first CBOM in 10 minutes
+- [Live outcome / status](STATUS.md)
 - [Beta ready checklist](BETA_READY.md)
 - [Known limitations](KNOWN_LIMITATIONS.md)
 - [Deployment](DEPLOYMENT.md) — Docker, Kubernetes, production config

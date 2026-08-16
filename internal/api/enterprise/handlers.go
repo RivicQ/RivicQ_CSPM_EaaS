@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -249,22 +248,6 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 
 	// AI intelligence
 	SetupAIRoutes(router, db, logger)
-}
-
-func allowedDomainsFromEnv() []string {
-	raw := strings.TrimSpace(os.Getenv("AUTH_ALLOWED_DOMAINS"))
-	if raw == "" {
-		return nil
-	}
-	parts := strings.Split(raw, ",")
-	domains := make([]string, 0, len(parts))
-	for _, part := range parts {
-		domain := strings.ToLower(strings.TrimSpace(part))
-		if domain != "" {
-			domains = append(domains, domain)
-		}
-	}
-	return domains
 }
 
 // IBMQ API Handlers

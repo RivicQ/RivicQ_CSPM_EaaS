@@ -71,7 +71,12 @@ func GitHubLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
 			return
 		}
 
-		state := generateOAuthState()
+		state, err := generateOAuthState()
+		if err != nil {
+			logger.WithError(err).Error("Failed to generate OAuth state")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start GitHub login"})
+			return
+		}
 		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
 		githubStateMap[state] = edition
 

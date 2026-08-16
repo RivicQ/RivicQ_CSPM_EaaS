@@ -16,8 +16,9 @@ Use this before inviting a design partner.
 ## Deploy
 - [x] Docker Compose stack documented in `docs/DEPLOYMENT.md`
 - [x] Helm charts under `deploy/helm/`
-- [ ] Confirm GitHub Pages workflow on `main` is green after merge
-- [ ] Confirm https://rivicq.github.io/RivicQ_CSPM_EaaS/ shows the Workflows section and a real public-repo scan
+- [x] CI blockers for lint, docs, integration, containers, and CodeQL Advanced conflict addressed on PR #49
+- [x] GitHub Pages workflow also runs from `cursor/beta-client-ready-dd72` so the public site can update before merge
+- [ ] Confirm https://rivicq.github.io/RivicQ_CSPM_EaaS/ after the Pages job on this branch completes
 
 ## Partner briefing
 - [ ] Share [QUICKSTART_CBOM.md](../QUICKSTART_CBOM.md) (10-minute first CBOM)
