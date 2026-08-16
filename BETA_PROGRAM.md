@@ -1,6 +1,6 @@
 # CryptoBOM Enterprise Beta Program
 
-> **Version**: 1.0.0-beta1 · **Status**: Open · **Launch date**: March 2026
+> **Version**: 1.4.0-beta · **Status**: Open · **Launch date**: August 2026
 
 ---
 
@@ -137,7 +137,7 @@ After your request is approved:
 | SBOM ↔ CBOM correlation | Roadmap | ✅ |
 | Hardware attestation (TPM/SGX) | Roadmap | Post-GA |
 
-**Target GA date**: Q3 2026
+**Target GA date**: Q4 2026
 
 ---
 

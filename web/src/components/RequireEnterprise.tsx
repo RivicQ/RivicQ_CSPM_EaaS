@@ -23,10 +23,13 @@ const RequireEnterprise: React.FC<{ children: React.ReactElement }> = ({ childre
                 This area is reserved for Professional and Enterprise workspaces. Community still gives you CBOM, scanner, analytics, and local workflows.
               </Typography>
               <Alert severity="info" sx={{ width: '100%' }}>
-                Switch to Enterprise from the edition selector when your workspace is provisioned and approved.
+                Switch to Enterprise from the edition selector when your workspace is provisioned and approved, or request beta access.
               </Alert>
               <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
-                <Button variant="contained" startIcon={<WorkspacePremium />} onClick={() => navigate('/switcher')}>
+                <Button variant="contained" startIcon={<WorkspacePremium />} onClick={() => navigate('/beta')}>
+                  Request Enterprise access
+                </Button>
+                <Button variant="outlined" startIcon={<WorkspacePremium />} onClick={() => navigate('/switcher')}>
                   Choose edition
                 </Button>
                 <Button variant="outlined" endIcon={<ArrowForward />} onClick={() => navigate('/dashboard')}>

@@ -17,10 +17,7 @@ import designSystem from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
 import PostureTrendChart from '../components/dashboard/PostureTrendChart';
 import ChartTooltipBox from '../components/dashboard/ChartTooltip';
-import {
-  DEMO_ANALYTICS_INSIGHTS, DEMO_FORECAST, DEMO_POSTURE_TREND, DEMO_REPORTS,
-  normalizeAssets, normalizeSummary,
-} from '../data/workspaceDemo';
+import { normalizeAssets, normalizeSummary } from '../data/workspaceDemo';
 
 const Analytics: React.FC = () => {
   const theme = useTheme();
@@ -57,25 +54,23 @@ const Analytics: React.FC = () => {
   const byCategory = summary.by_category;
   const categoryData = Object.entries(byCategory).map(([name, value]) => ({ name, assets: value }));
 
-  const trendRaw = insightsData?.posture_trend ?? insightsData?.trend ?? DEMO_POSTURE_TREND;
-  const trendData = (Array.isArray(trendRaw) ? trendRaw : DEMO_POSTURE_TREND).map((p: any) => ({
+  const trendRaw = insightsData?.posture_trend ?? insightsData?.trend;
+  const trendData = (Array.isArray(trendRaw) ? trendRaw : []).map((p: any) => ({
     label: p.label ?? p.name,
     score: p.score ?? p.value ?? 0,
   }));
 
-  const insights = insightsData?.insights?.length
-    ? insightsData.insights.map((i: any, idx: number) => ({
-        ...DEMO_ANALYTICS_INSIGHTS[idx % DEMO_ANALYTICS_INSIGHTS.length],
-        ...i,
-        description: i.description ?? DEMO_ANALYTICS_INSIGHTS[idx % DEMO_ANALYTICS_INSIGHTS.length]?.description,
-      }))
-    : DEMO_ANALYTICS_INSIGHTS;
+  const insights = insightsData?.insights?.length ? insightsData.insights : [];
 
-  const reports = reportsData?.reports?.length ? reportsData.reports : DEMO_REPORTS;
+  const reports = reportsData?.reports?.length ? reportsData.reports : [];
   const complianceScore = summary.compliance_score;
   const pqcPct = summary.total_assets
     ? Math.round((summary.quantum_safe_count / summary.total_assets) * 100)
-    : 62;
+    : 0;
+
+  const forecast = (insightsData as any)?.forecast?.length
+    ? (insightsData as any).forecast
+    : [];
 
   return (
     <PageFrame eyebrow="Insights" title="Analytics" subtitle="Executive trends, ML intelligence, compliance reports, and PQC forecasts." badge="Live">
@@ -160,33 +155,41 @@ const Analytics: React.FC = () => {
       </TabPanel>
 
       <TabPanel value={tab} index={1}>
-        <DashboardPanel title="Posture Trend" subtitle="7-day security posture score movement" delay={0}>
-          <PostureTrendChart data={trendData} height={320} baseline={80} />
-        </DashboardPanel>
+        {trendData.length === 0 ? (
+          <EmptyState title="No trend data yet" description="Posture history appears after scheduled scans write analytics." />
+        ) : (
+          <DashboardPanel title="Posture Trend" subtitle="7-day security posture score movement" delay={0}>
+            <PostureTrendChart data={trendData} height={320} baseline={80} />
+          </DashboardPanel>
+        )}
       </TabPanel>
 
       <TabPanel value={tab} index={2}>
-        <Grid container spacing={2}>
-          {insights.map((insight: any, idx: number) => (
-            <Grid item xs={12} md={6} key={idx}>
-              <Box sx={{ p: 2.5, borderRadius: `${designSystem.radius.lg}px`, border: 1, borderColor: 'divider', height: '100%', bgcolor: 'action.hover' }}>
-                <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                  <Chip
-                    label={(insight.severity || 'info').toUpperCase()}
-                    size="small"
-                    color={insight.severity === 'critical' ? 'error' : insight.severity === 'high' ? 'warning' : 'default'}
-                  />
-                  <Chip label={insight.type || 'insight'} size="small" variant="outlined" />
-                </Stack>
-                <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.75 }}>{insight.title}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65 }}>{insight.description}</Typography>
-                <Typography variant="caption" color="primary.main" sx={{ mt: 1.5, display: 'block', fontWeight: 600 }}>
-                  Confidence {Math.round((insight.confidence ?? 0.85) * 100)}%
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+        {insights.length === 0 ? (
+          <EmptyState icon={<Psychology />} title="No ML insights" description="Insights generate from live inventory and scan findings — nothing is seeded." />
+        ) : (
+          <Grid container spacing={2}>
+            {insights.map((insight: any, idx: number) => (
+              <Grid item xs={12} md={6} key={idx}>
+                <Box sx={{ p: 2.5, borderRadius: `${designSystem.radius.lg}px`, border: 1, borderColor: 'divider', height: '100%', bgcolor: 'action.hover' }}>
+                  <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                    <Chip
+                      label={(insight.severity || 'info').toUpperCase()}
+                      size="small"
+                      color={insight.severity === 'critical' ? 'error' : insight.severity === 'high' ? 'warning' : 'default'}
+                    />
+                    <Chip label={insight.type || 'insight'} size="small" variant="outlined" />
+                  </Stack>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.75 }}>{insight.title}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65 }}>{insight.description}</Typography>
+                  <Typography variant="caption" color="primary.main" sx={{ mt: 1.5, display: 'block', fontWeight: 600 }}>
+                    Confidence {Math.round((insight.confidence ?? 0) * 100)}%
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </TabPanel>
 
       <TabPanel value={tab} index={3}>
@@ -204,7 +207,6 @@ const Analytics: React.FC = () => {
                 </Box>
                 <Chip label={report.format || 'PDF'} size="small" variant="outlined" />
                 <Button size="small" variant="outlined">Download</Button>
-                <Button size="small">Share</Button>
               </Box>
             ))}
           </Stack>
@@ -212,28 +214,32 @@ const Analytics: React.FC = () => {
       </TabPanel>
 
       <TabPanel value={tab} index={4}>
-        <DashboardPanel title="PQC Migration Forecast" subtitle="Projected posture if current remediation velocity continues" delay={0}>
-          <Box sx={{ height: 260, mb: 3 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={DEMO_FORECAST}>
-                <CartesianGrid strokeDasharray="4 4" stroke={gridStroke} vertical={false} />
-                <XAxis dataKey="quarter" tick={{ fontSize: 10, fill: tickFill }} axisLine={false} tickLine={false} />
-                <YAxis domain={[70, 100]} tick={{ fontSize: 10, fill: tickFill }} axisLine={false} tickLine={false} />
-                <Tooltip />
-                <Line type="monotone" dataKey="projected_score" name="Posture score" stroke={chartTheme.pqc} strokeWidth={3} dot={{ r: 5, fill: chartTheme.pqc }} />
-                <Line type="monotone" dataKey="migration_pct" name="Migration %" stroke={tokens.colors.rivicq[500]} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 4, fill: tokens.colors.rivicq[500] }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </Box>
-          <Stack spacing={1.5}>
-            {DEMO_FORECAST.map((f) => (
-              <Box key={f.quarter} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
-                <Typography fontWeight={700}>{f.quarter}</Typography>
-                <Typography variant="body2" color="text.secondary">{f.note} — target score {f.projected_score}%, migration {f.migration_pct}%</Typography>
-              </Box>
-            ))}
-          </Stack>
-        </DashboardPanel>
+        {forecast.length === 0 ? (
+          <EmptyState icon={<Timeline />} title="No forecast yet" description="PQC migration forecast requires historical scan data from the analytics API." />
+        ) : (
+          <DashboardPanel title="PQC Migration Forecast" subtitle="Projected posture if current remediation velocity continues" delay={0}>
+            <Box sx={{ height: 260, mb: 3 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={forecast}>
+                  <CartesianGrid strokeDasharray="4 4" stroke={gridStroke} vertical={false} />
+                  <XAxis dataKey="quarter" tick={{ fontSize: 10, fill: tickFill }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: tickFill }} axisLine={false} tickLine={false} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="projected_score" name="Posture score" stroke={chartTheme.pqc} strokeWidth={3} dot={{ r: 5, fill: chartTheme.pqc }} />
+                  <Line type="monotone" dataKey="migration_pct" name="Migration %" stroke={tokens.colors.rivicq[500]} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 4, fill: tokens.colors.rivicq[500] }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+            <Stack spacing={1.5}>
+              {forecast.map((f: any) => (
+                <Box key={f.quarter} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
+                  <Typography fontWeight={700}>{f.quarter}</Typography>
+                  <Typography variant="body2" color="text.secondary">{f.note} — target score {f.projected_score}%, migration {f.migration_pct}%</Typography>
+                </Box>
+              ))}
+            </Stack>
+          </DashboardPanel>
+        )}
       </TabPanel>
     </PageFrame>
   );

@@ -18,6 +18,8 @@ import HomeScanReport, { HomeScanReportData } from '../components/home/HomeScanR
 import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
 import designSystem, { glassSurface } from '../theme/designSystem';
+import { normalizeEngineReport } from '../utils/cbomNormalize';
+import { PublicScanError, parseGitHubTarget, scanPublicGitHubRepo } from '../services/publicCbomScan';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -63,9 +65,9 @@ const DOCS = [
 ];
 
 const STEPS = [
-  { step: '01', title: 'Connect', desc: 'Link repositories, cloud accounts, HSMs, and clusters in minutes. No agents required for inventory.', color: tokens.colors.rivicq[600] },
-  { step: '02', title: 'Assess', desc: 'The EaaS engine discovers crypto, builds your CBOM, and quantifies quantum exposure against conformance packs.', color: tokens.colors.gold[600] },
-  { step: '03', title: 'Protect', desc: 'Encrypt through the API, migrate to PQC, and enforce policy with prioritized remediation and full audit trails.', color: tokens.colors.crypto.low },
+  { step: '01', title: 'Discover', desc: 'Connect a GitHub repo, container, cloud account, or cluster. RivicQ inventories cryptographic material without agents.', color: tokens.colors.rivicq[600] },
+  { step: '02', title: 'Analyze', desc: 'The CBOM engine classifies algorithms, key sizes, certificates, and libraries, then maps each finding to BSI, DORA, and eIDAS.', color: tokens.colors.gold[600] },
+  { step: '03', title: 'Quantify', desc: 'Get a quantum-exposure score, a PQC migration plan, and an evidence-backed compliance report you can hand to auditors.', color: tokens.colors.crypto.low },
 ];
 
 const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', 'SOC 2', 'ISO 27001', 'PCI DSS 4.0', 'DORA', 'NIS2', 'EU CRA', 'eIDAS 2.0'];
@@ -78,6 +80,8 @@ const Home: React.FC = () => {
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
   const [progress, setProgress] = React.useState(0);
+  const [scanStage, setScanStage] = React.useState('Connecting');
+  const [scanError, setScanError] = React.useState<string | null>(null);
   const [report, setReport] = React.useState<HomeScanReportData | null>(null);
 
   React.useEffect(() => {
@@ -86,31 +90,26 @@ const Home: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const buildReport = (target: string, data: any): HomeScanReportData => {
-    const findings = data?.findings || data?.summary || {};
-    return {
-      target,
-      score: data?.security_score ?? data?.score ?? findings?.score,
-      severity: {
-        critical: findings.critical ?? data?.critical,
-        high: findings.high ?? data?.high,
-        medium: findings.medium ?? data?.medium,
-        low: findings.low ?? data?.low,
-      },
-      quantumRisk: data?.quantum_risk ?? data?.quantumRisk,
-      algorithms: (data?.algorithms || data?.crypto_findings || [])
-        .slice(0, 12)
-        .map((a: any) => ({ name: a.name || a.algorithm, count: a.count, quantumSafe: a.quantum_safe ?? a.quantumSafe })),
-    };
+  const runPublicGitHubScan = async (target: string) => {
+    parseGitHubTarget(target);
+    const publicReport = await scanPublicGitHubRepo(target, (pct, stage) => {
+      setProgress(pct);
+      setScanStage(stage);
+    });
+    setReport(publicReport);
+    setScanStatus('complete');
   };
 
   const handleScan = async () => {
     if (!repoUrl.trim()) return;
     setScanStatus('scanning');
-    setProgress(0);
+    setProgress(6);
+    setScanStage('Connecting');
+    setScanError(null);
     setReport(null);
+    const target = repoUrl.trim();
     try {
-      const resp = await cbomService.triggerScan(repoUrl.trim(), 'cbom');
+      const resp = await cbomService.triggerScan(target, 'cbom');
       const scanId = resp.data.scan_id;
       let ticks = 0;
       const interval = setInterval(async () => {
@@ -119,29 +118,45 @@ const Home: React.FC = () => {
           const statusResp = await cbomService.getScanStatus(scanId);
           const status = statusResp.data;
           setProgress(status.progress || Math.min(90, ticks * 12));
+          setScanStage('Analyzing crypto');
           if (status.status === 'completed' || status.status === 'failed') {
             clearInterval(interval);
             if (status.status === 'completed') {
               try {
                 const reportResp = await cbomService.getScanReport(scanId);
-                setReport(buildReport(repoUrl.trim(), reportResp.data || status));
+                setReport(normalizeEngineReport(target, reportResp.data || status));
               } catch {
-                setReport(buildReport(repoUrl.trim(), status));
+                setReport(normalizeEngineReport(target, status));
               }
               setScanStatus('complete');
             } else {
-              setScanStatus('error');
+              try {
+                await runPublicGitHubScan(target);
+              } catch (err) {
+                setScanError(err instanceof PublicScanError ? err.message : 'Engine scan failed and the public GitHub fallback could not complete.');
+                setScanStatus('error');
+              }
             }
           }
         } catch {
           clearInterval(interval);
-          setScanStatus('error');
+          try {
+            await runPublicGitHubScan(target);
+          } catch (err) {
+            setScanError(err instanceof PublicScanError ? err.message : 'Could not reach the CBOM engine or GitHub.');
+            setScanStatus('error');
+          }
         }
       }, 1500);
     } catch {
-      // No reachable backend (e.g. the static public site) — show an honest
-      // state instead of fabricated findings.
-      setScanStatus('error');
+      // Static public site (GitHub Pages) has no Go engine — analyze the
+      // public repo in-browser instead of fabricating findings.
+      try {
+        await runPublicGitHubScan(target);
+      } catch (err) {
+        setScanError(err instanceof PublicScanError ? err.message : 'Enter a public GitHub repository URL to generate a CBOM on this site.');
+        setScanStatus('error');
+      }
     }
   };
 
@@ -325,7 +340,9 @@ const Home: React.FC = () => {
           <HomeScanReport
             status={scanStatus}
             progress={progress}
+            stage={scanStage}
             report={report}
+            errorMessage={scanError}
             onOpenApp={() => navigate('/register')}
             onRegister={() => navigate('/register')}
           />
@@ -418,17 +435,20 @@ const Home: React.FC = () => {
         </Box>
 
         <Box sx={{ mb: 10 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ mb: 4, textAlign: 'center', letterSpacing: '-0.02em' }}>How it works</Typography>
+          <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>Discover → Analyze → Quantify</Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, textAlign: 'center' }}>The core RivicQ loop — already in the hero scan, then deepened in the client workflow below.</Typography>
           <Grid container spacing={3}>
-            {STEPS.map((s) => (
+            {STEPS.map((s, i) => (
               <Grid item xs={12} md={4} key={s.step}>
-                <Card sx={{ height: '100%', bgcolor: cardBg, border: 1, borderColor: `${s.color}33` }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h2" fontWeight={900} sx={{ color: `${s.color}55`, mb: 1, letterSpacing: '-0.03em' }}>{s.step}</Typography>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>{s.title}</Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>{s.desc}</Typography>
-                  </CardContent>
-                </Card>
+                <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.08 }} whileHover={{ y: -4 }}>
+                  <Card sx={{ height: '100%', bgcolor: cardBg, border: 1, borderColor: `${s.color}33` }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="h2" fontWeight={900} sx={{ color: `${s.color}55`, mb: 1, letterSpacing: '-0.03em' }}>{s.step}</Typography>
+                      <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>{s.title}</Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>{s.desc}</Typography>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </Grid>
             ))}
           </Grid>
@@ -481,7 +501,7 @@ const Home: React.FC = () => {
               {
                 name: 'Enterprise', icon: <WorkspacePremium />, price: 'Custom', tagline: 'For security & compliance teams', color: tokens.colors.gold[600], featured: true,
                 features: ['Full CSPM & conformance packs', 'Quantum / PQC migration', 'Multi-cloud & HSM coverage', 'SSO, audit logs & SLA'],
-                cta: 'Request access', action: () => navigate('/switcher'),
+                cta: 'Request access', action: () => navigate('/beta'),
               },
             ].map((tier) => (
               <Grid item xs={12} md={6} key={tier.name}>

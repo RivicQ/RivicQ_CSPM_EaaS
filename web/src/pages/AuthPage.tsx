@@ -48,6 +48,7 @@ import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 import CryptoQuantumBackdrop from '../components/auth/CryptoQuantumBackdrop';
 import designSystem, { commandCenterCardSx, proBlueContainedButtonSx } from '../theme/designSystem';
+import { LoadingButton } from '../components/ui';
 
 const authHeroPanelSx = {
   ...commandCenterCardSx,
@@ -122,6 +123,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     supabaseRegister,
     demoLogin,
     verifyMfa,
+    requestPasswordReset,
     edition,
     setEdition,
     isAuthenticated,
@@ -136,6 +138,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const [confirmationSent, setConfirmationSent] = React.useState<{ email: string } | null>(null);
   const [mfaStep, setMfaStep] = React.useState<{ email: string; session: string } | null>(null);
   const [mfaCode, setMfaCode] = React.useState('');
+  const [forgotOpen, setForgotOpen] = React.useState(false);
+  const [resetSent, setResetSent] = React.useState(false);
   const [form, setForm] = React.useState({
     name: '',
     firstName: '',
@@ -182,6 +186,24 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       })
       .catch(() => {});
   }, [backendReachable]);
+
+  const handleForgot = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!form.email.includes('@')) {
+      setError('Enter the email for your workspace.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await requestPasswordReset(form.email);
+      setResetSent(true);
+    } catch (err: any) {
+      setError(err?.message || 'Password reset is available when Supabase is configured on this deployment.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -449,6 +471,34 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       </Alert>
                     )}
 
+                    {forgotOpen && (
+                      <form onSubmit={handleForgot}>
+                        <Stack spacing={2} sx={{ mb: 2 }}>
+                          {resetSent ? (
+                            <Alert severity="success">If that email exists, a reset link is on its way. Check your inbox, then sign in.</Alert>
+                          ) : (
+                            <Alert severity="info">We will send a reset link via Supabase when it is configured on this site.</Alert>
+                          )}
+                          <TextField
+                            fullWidth
+                            label="Work email"
+                            type="email"
+                            value={form.email}
+                            onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                            InputProps={{ startAdornment: <InputAdornment position="start"><Mail /></InputAdornment> }}
+                          />
+                          <Stack direction="row" spacing={1}>
+                            <LoadingButton type="submit" variant="contained" loading={loading} loadingText="Sending…">
+                              Send reset link
+                            </LoadingButton>
+                            <Button variant="text" onClick={() => { setForgotOpen(false); setResetSent(false); }}>
+                              Back to sign in
+                            </Button>
+                          </Stack>
+                        </Stack>
+                      </form>
+                    )}
+
                     {mfaStep && (
                       <form onSubmit={handleMfaSubmit}>
                         <Stack spacing={2.25}>
@@ -495,7 +545,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       </form>
                     )}
 
-                    {!mfaStep && (
+                    {!mfaStep && !forgotOpen && (
                     <form onSubmit={handleSubmit}>
                       <Stack spacing={2.25}>
                         {mode === 'register' && (
@@ -618,23 +668,31 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                             Current edition: <strong>{edition.toUpperCase()}</strong>
                           </Typography>
                           {mode === 'login' && (
-                            <Typography variant="body2" component="a" href="#forgot" sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                            <Typography
+                              variant="body2"
+                              component="button"
+                              type="button"
+                              onClick={() => { setForgotOpen(true); setError(''); }}
+                              sx={{ color: 'primary.main', textDecoration: 'none', background: 'none', border: 0, cursor: 'pointer', p: 0, '&:hover': { textDecoration: 'underline' } }}
+                            >
                               Forgot password?
                             </Typography>
                           )}
                         </Stack>
 
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-                          <Button
+                          <LoadingButton
                             type="submit"
                             variant="contained"
                             size="large"
-                            disabled={loading || !canSubmit}
+                            disabled={!canSubmit}
+                            loading={loading}
+                            loadingText="Please wait…"
                             endIcon={<ArrowForward />}
                             sx={{ py: 1.3, ...proBlueContainedButtonSx }}
                           >
-                            {loading ? 'Please wait...' : submitLabel}
-                          </Button>
+                            {submitLabel}
+                          </LoadingButton>
 
                           {backendReachable && (
                             <Button

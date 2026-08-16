@@ -24,6 +24,14 @@ const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity, compact }) => {
         bgcolor: `${color}16`,
         border: 1,
         borderColor: `${color}33`,
+        transition: 'transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease',
+        '&:hover': {
+          transform: 'translateY(-1px)',
+          boxShadow: `0 4px 12px ${color}22`,
+        },
+        '@media (prefers-reduced-motion: reduce)': {
+          '&:hover': { transform: 'none' },
+        },
       }}
     >
       <Typography

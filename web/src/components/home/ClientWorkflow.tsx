@@ -131,8 +131,24 @@ const ClientWorkflow: React.FC = () => {
                   ml: { xs: '-9px', md: 0 },
                 }}
               >
-                <ArrowForward sx={{ fontSize: 18, display: { xs: 'none', md: 'block' } }} />
-                <ArrowDownward sx={{ fontSize: 18, display: { xs: 'block', md: 'none' } }} />
+                <ArrowForward
+                  sx={{
+                    fontSize: 18,
+                    display: { xs: 'none', md: 'block' },
+                    animation: 'rivicqPulse 1.8s ease-in-out infinite',
+                    '@keyframes rivicqPulse': { '0%,100%': { opacity: 0.35 }, '50%': { opacity: 1 } },
+                    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+                  }}
+                />
+                <ArrowDownward
+                  sx={{
+                    fontSize: 18,
+                    display: { xs: 'block', md: 'none' },
+                    animation: 'rivicqPulse 1.8s ease-in-out infinite',
+                    '@keyframes rivicqPulse': { '0%,100%': { opacity: 0.35 }, '50%': { opacity: 1 } },
+                    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+                  }}
+                />
               </Box>
             )}
           </Box>

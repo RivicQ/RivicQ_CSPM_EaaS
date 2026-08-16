@@ -24,7 +24,10 @@ const SecurityFeedItem: React.FC<SecurityFeedItemProps> = ({ message, severity, 
         mx: -1,
         borderRadius: `${dashboardDesign.radius.sm}px`,
         transition: dashboardDesign.motion.transition,
-        '&:hover': { bgcolor: theme.palette.action.hover },
+        '&:hover': {
+          bgcolor: `${color}22`,
+          transform: 'translateY(-1px)',
+        },
         '&:not(:last-child)': { borderBottom: 1, borderColor: 'divider' },
       }}
     >

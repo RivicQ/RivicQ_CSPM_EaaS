@@ -13,11 +13,13 @@ import { useNavigate } from 'react-router-dom';
 import { inventoryService } from '../services/api';
 import PageFrame from '../components/PageFrame';
 import StatCard from '../components/dashboard/StatCard';
-import { GlassCard, EmptyState, DetailTabs, TabPanel } from '../components/ui';
+import { GlassCard, EmptyState, DetailTabs, TabPanel, LoadingButton } from '../components/ui';
 import { metricValueSx } from '../theme/designSystem';
 import { categoryColor } from '../theme/chartTheme';
 import { tokens } from '../theme/tokens';
 import { normalizeAssets, normalizeSummary } from '../data/workspaceDemo';
+import { assetsToReport, downloadCbomBundle } from '../utils/exportCbom';
+import { appendAudit } from '../utils/auditLog';
 
 const CATEGORY_META: Record<string, { color: string; desc: string }> = {
   cryptographic: { color: categoryColor('cryptographic'), desc: 'Keys, certs, TLS, and HSM material' },
@@ -35,7 +37,7 @@ const Assets: React.FC = () => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 25;
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['assets'],
     queryFn: () => inventoryService.getAssets().then((r) => r.data),
     retry: 1,
@@ -91,7 +93,12 @@ const Assets: React.FC = () => {
         </TableHead>
         <TableBody>
           {rows.map((asset) => (
-            <TableRow key={asset.id} hover selected={selectedAssets.includes(asset.id)}>
+            <TableRow
+              key={asset.id}
+              hover
+              selected={selectedAssets.includes(asset.id)}
+              sx={{ transition: 'background-color .18s ease, transform .18s ease', '&:hover': { transform: 'translateY(-1px)' } }}
+            >
               <TableCell padding="checkbox">
                 <input type="checkbox" checked={selectedAssets.includes(asset.id)} onChange={() => toggleSelect(asset.id)} />
               </TableCell>
@@ -128,6 +135,11 @@ const Assets: React.FC = () => {
       badge={`${summary.total_assets} tracked`}
       secondaryAction={<Button variant="outlined" startIcon={<Refresh />} onClick={() => refetch()}>Refresh</Button>}
     >
+      {isError && (
+        <Box sx={{ mb: 2.5, p: 1.5, borderRadius: 2, bgcolor: 'warning.main', color: 'warning.contrastText' }}>
+          <Typography variant="body2">Could not load inventory from the API. Showing an empty workspace — run a CBOM scan to populate assets.</Typography>
+        </Box>
+      )}
       <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         <Grid item xs={6} sm={3}><StatCard label="Total" value={summary.total_assets} icon={<Storage sx={{ fontSize: 20 }} />} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Quantum Safe" value={summary.quantum_safe_count} icon={<Security sx={{ fontSize: 20 }} />} accent={tokens.colors.crypto.low} delay={1} /></Grid>
@@ -158,9 +170,18 @@ const Assets: React.FC = () => {
               InputProps={{ startAdornment: <InputAdornment position="start"><Search /></InputAdornment> }}
               sx={{ flex: 1, minWidth: 200 }}
             />
-            <Button variant="outlined" startIcon={<Download />} disabled={!selectedAssets.length}>
-              Export ({selectedAssets.length})
-            </Button>
+            <LoadingButton
+              variant="outlined"
+              startIcon={<Download />}
+              disabled={!selectedAssets.length && !assets.length}
+              onClick={() => {
+                const rows = selectedAssets.length ? assets.filter((a) => selectedAssets.includes(a.id)) : assets;
+                downloadCbomBundle(assetsToReport('workspace-inventory', rows));
+                appendAudit('export_cbom', `${rows.length} assets`);
+              }}
+            >
+              Export JSON + PDF{selectedAssets.length ? ` (${selectedAssets.length})` : ''}
+            </LoadingButton>
           </Box>
           {paginatedAssets.length ? renderAssetTable(paginatedAssets) : (
             <EmptyState icon={<Storage />} title="No assets match" description="Adjust filters or run a CBOM scan." action={{ label: 'Open Scanner', onClick: () => navigate('/scanner') }} />

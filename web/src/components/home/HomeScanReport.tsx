@@ -2,32 +2,33 @@ import React from 'react';
 import {
   Alert, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Skeleton, Stack, Typography, useTheme,
 } from '@mui/material';
-import { CheckCircle, ErrorOutline, GitHub, Lock, ArrowForward, Shield } from '@mui/icons-material';
+import { CheckCircle, ErrorOutline, GitHub, Lock, ArrowForward, Shield, Download } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { tokens } from '../../theme/tokens';
 import designSystem from '../../theme/designSystem';
+import { LoadingButton } from '../ui';
+import type { NormalizedCbomReport } from '../../utils/cbomNormalize';
+import { downloadCbomBundle } from '../../utils/exportCbom';
 
 export type HomeScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
-export type HomeScanReportData = {
-  target?: string;
-  score?: number;
-  severity?: { critical?: number; high?: number; medium?: number; low?: number };
-  algorithms?: Array<{ name: string; count?: number; quantumSafe?: boolean }>;
-  quantumRisk?: string;
-};
+export type HomeScanReportData = NormalizedCbomReport;
 
 type HomeScanReportProps = {
   status: HomeScanStatus;
   progress: number;
+  stage?: string;
   report?: HomeScanReportData | null;
+  errorMessage?: string | null;
   onOpenApp: () => void;
   onRegister: () => void;
 };
 
 const STAGES = ['Connecting', 'Discovering files', 'Analyzing crypto', 'Building CBOM', 'Quantifying risk'];
 
-const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, report, onOpenApp, onRegister }) => {
+const HomeScanReport: React.FC<HomeScanReportProps> = ({
+  status, progress, stage, report, errorMessage, onOpenApp, onRegister,
+}) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const cardBg = isDark ? 'rgba(30,41,59,0.55)' : 'rgba(255,255,255,0.9)';
@@ -37,12 +38,14 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
     <Box component={motion.div} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} sx={{ mb: 6 }}>
       <Card sx={{ bgcolor: cardBg, border: 1, borderColor: 'rgba(99,102,241,0.2)' }}>
         <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }} flexWrap="wrap" useFlexGap>
             <GitHub sx={{ color: tokens.colors.rivicq[500] }} />
             <Typography variant="h6" fontWeight={800}>CBOM scan</Typography>
-            {status === 'scanning' && <Chip size="small" label="Running" color="primary" />}
+            {status === 'scanning' && <Chip size="small" label={stage || 'Running'} color="primary" />}
             {status === 'complete' && <Chip size="small" label="Completed" color="success" />}
-            {status === 'error' && <Chip size="small" label="Needs the RivicQ engine" />}
+            {status === 'error' && <Chip size="small" label="Could not complete" />}
+            {report?.source === 'public-github' && <Chip size="small" variant="outlined" label="Public GitHub analyzer" />}
+            {report?.source === 'engine' && <Chip size="small" variant="outlined" label="RivicQ engine" />}
           </Stack>
 
           {status === 'scanning' && (
@@ -97,33 +100,52 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
               {report.quantumRisk && (
                 <Alert icon={<Shield fontSize="inherit" />} severity="info" sx={{ mb: 2 }}>
                   Quantum exposure: <strong>{report.quantumRisk}</strong>
+                  {report.defaultBranch && <> · branch {report.defaultBranch}</>}
+                  {report.fileCount != null && <> · {report.fileCount} files analyzed</>}
                 </Alert>
               )}
-              {(report.algorithms?.length || 0) > 0 && (
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                  {report.algorithms!.slice(0, 10).map((a) => (
-                    <Chip
-                      key={a.name}
-                      size="small"
-                      icon={a.quantumSafe ? <CheckCircle sx={{ fontSize: 14 }} /> : <Lock sx={{ fontSize: 14 }} />}
-                      label={a.count ? `${a.name} · ${a.count}` : a.name}
-                      color={a.quantumSafe ? 'success' : 'default'}
-                      variant="outlined"
-                    />
-                  ))}
+              {(report.algorithms?.length || 0) > 0 ? (
+                <Stack spacing={1} sx={{ mb: 2 }}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    Cryptographic inventory
+                  </Typography>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    {report.algorithms.slice(0, 12).map((a) => (
+                      <Chip
+                        key={a.id || a.algorithm}
+                        size="small"
+                        icon={a.quantumSafe ? <CheckCircle sx={{ fontSize: 14 }} /> : <Lock sx={{ fontSize: 14 }} />}
+                        label={`${a.algorithm}${a.keySize ? ` · ${a.keySize}-bit` : ''} · ${a.riskLevel}`}
+                        color={a.quantumSafe ? 'success' : a.riskLevel === 'CRITICAL' || a.riskLevel === 'HIGH' ? 'warning' : 'default'}
+                        variant="outlined"
+                      />
+                    ))}
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary">
+                    Mapped to BSI TR-02102-1, DORA Art. 9, and eIDAS 2.0. Example:{' '}
+                    {report.algorithms[0].bsiRef} · {report.algorithms[0].doraRef} · {report.algorithms[0].eidasRef}
+                  </Typography>
                 </Stack>
+              ) : (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  No cryptographic material matched in the sampled public files. Sign in for a full engine scan of secrets, TLS, and dependencies.
+                </Alert>
               )}
-              <Button variant="contained" endIcon={<ArrowForward />} onClick={onOpenApp} sx={{ mt: 2, ...({ backgroundImage: designSystem.gradient.brand }) }}>
-                Open full report
-              </Button>
+              <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+                <Button variant="contained" endIcon={<ArrowForward />} onClick={onOpenApp} sx={{ backgroundImage: designSystem.gradient.brand }}>
+                  Open full report
+                </Button>
+                <LoadingButton variant="outlined" startIcon={<Download />} onClick={() => downloadCbomBundle(report)}>
+                  Export JSON + PDF
+                </LoadingButton>
+              </Stack>
             </Box>
           )}
 
           {status === 'error' && (
             <Stack spacing={2}>
-              <Alert severity="info" icon={<ErrorOutline fontSize="inherit" />}>
-                Live scanning runs against the RivicQ CBOM engine. On the public site the engine isn’t reachable — sign in
-                to run a real scan and get a full, evidence-backed report. We never show fabricated findings here.
+              <Alert severity="warning" icon={<ErrorOutline fontSize="inherit" />}>
+                {errorMessage || 'Live scanning could not finish. Paste a public GitHub URL, or sign in to run a full engine scan. We never show fabricated findings.'}
               </Alert>
               <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
                 <Button variant="contained" endIcon={<ArrowForward />} onClick={onRegister} sx={{ backgroundImage: designSystem.gradient.brand }}>

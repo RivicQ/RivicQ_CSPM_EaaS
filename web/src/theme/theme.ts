@@ -159,6 +159,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
             // Additive micro-interactions — enhance existing styles, never replace.
             '&:hover': {
               transform: 'translateY(-1px)',
+              boxShadow: `0 8px 22px ${designSystem.proBlue.accent}28`,
             },
             '&:active': {
               transform: 'translateY(0) scale(0.985)',

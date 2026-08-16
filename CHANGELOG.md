@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-08-16
+
+### Added
+- Public GitHub CBOM analyzer on the homepage so GitHub Pages always returns a readable report (algorithms, key sizes, quantum risk, BSI/DORA/eIDAS mapping) without fabricating findings.
+- JSON + simple PDF export for Community inventory and scan findings.
+- Password reset via Supabase, `/beta` Enterprise access request, and a local workspace id.
+- In-app beta feedback widget and Discover → Analyze → Quantify homepage copy (client workflow section kept).
+- Recurring scan schedules stored in the browser workspace; Enterprise audit log panel; DORA/BSI/eIDAS PDF download.
+- `docs/KNOWN_LIMITATIONS.md` and `docs/BETA_READY.md`.
+
+### Changed
+- User-facing Dashboard, Assets, Scanner, Analytics, and Multi-Cloud no longer inject seeded demo numbers when APIs are empty.
+- GitHub Pages default edition is Community. Loading/error/empty states added on core Community paths.
+- Additive button hover glow, page transitions, and `LoadingButton` on primary Scan / Sign in / Export actions.
+
 ## [1.3.0] - 2026-08-12
 
 ### Changed

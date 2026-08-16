@@ -2,6 +2,7 @@ import React from 'react';
 import { authService, syncAPIBaseURL } from '../services/api';
 import { setEditionPreference, getEditionFromBackend, normalizeEdition, Edition } from '../config/editions';
 import { supabaseAuthService, isSupabaseConfigured } from '../services/supabase';
+import { ensureWorkspace, readWorkspace, type Workspace } from '../utils/workspace';
 
 export interface AuthUser {
   id: string;
@@ -28,6 +29,7 @@ interface AuthContextValue {
   loading: boolean;
   supabaseEnabled: boolean;
   backendReachable: boolean;
+  workspace: Workspace | null;
   login: (email: string, password: string, edition: Edition) => Promise<LoginResult>;
   register: (
     name: string,
@@ -39,10 +41,12 @@ interface AuthContextValue {
   supabaseLogin: (email: string, password: string, edition: Edition) => Promise<void>;
   supabaseRegister: (name: string, email: string, password: string, edition: Edition) => Promise<RegisterResult>;
   demoLogin: (edition: Edition) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
   verifyMfa: (email: string, code: string, session: string, edition: Edition) => Promise<void>;
   logout: () => void;
   setEdition: (edition: Edition) => void;
   persistAuth: (payload: any) => void;
+  setWorkspaceName: (name: string) => void;
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
@@ -65,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = React.useState<AuthUser | null>(null);
   const [edition, setEditionState] = React.useState<Edition>('community');
   const [backendReachable, setBackendReachable] = React.useState(false);
+  const [workspace, setWorkspace] = React.useState<Workspace | null>(() => readWorkspace());
 
   React.useEffect(() => {
     let cancelled = false;
@@ -109,6 +114,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(sbToken ?? stored.token);
       setUser(sbUser ?? stored.user);
       setEditionState(detectedEdition);
+      const sessionUser = sbUser ?? stored.user;
+      if (sessionUser) {
+        setWorkspace(ensureWorkspace(sessionUser.name || sessionUser.email, detectedEdition));
+      }
       setLoading(false);
     };
 
@@ -146,18 +155,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const nextUser = payload.user;
     const nextEdition = normalizeEdition(payload?.edition || nextUser.edition || 'community');
     persist(nextToken, nextUser, nextEdition);
+    setWorkspace(ensureWorkspace(nextUser.name || nextUser.email, nextEdition));
   }, [persist]);
 
   const supabaseLogin = React.useCallback(async (email: string, password: string, nextEdition: Edition) => {
     const supabaseUser = await supabaseAuthService.signIn(email, password);
     const sbToken = await supabaseAuthService.getSessionToken();
-    persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
+    const ed = normalizeEdition(supabaseUser.edition || nextEdition);
+    persist(sbToken, supabaseUser, ed);
+    setWorkspace(ensureWorkspace(supabaseUser.name, ed));
   }, [persist]);
 
   const supabaseRegister = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition): Promise<RegisterResult> => {
     const { user: supabaseUser, session } = await supabaseAuthService.signUp(name, email, password, nextEdition);
     if (session?.access_token) {
       persist(session.access_token, supabaseUser, nextEdition);
+      setWorkspace(ensureWorkspace(name, nextEdition));
       return { requiresConfirmation: false };
     }
     return { requiresConfirmation: true, email: supabaseUser.email };
@@ -177,6 +190,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const supabaseUser = await supabaseAuthService.signIn(email, password);
       const sbToken = await supabaseAuthService.getSessionToken();
       persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
+      setWorkspace(ensureWorkspace(supabaseUser.name, normalizeEdition(supabaseUser.edition || nextEdition)));
       return { requiresConfirmation: false };
     }
     throw new Error('No authentication provider is available on this deployment.');
@@ -214,6 +228,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     completeAuth(response.data);
   }, [completeAuth]);
 
+  const requestPasswordReset = React.useCallback(async (email: string) => {
+    await supabaseAuthService.resetPassword(email);
+  }, []);
+
+  const setWorkspaceName = React.useCallback((name: string) => {
+    setWorkspace(ensureWorkspace(name, edition));
+  }, [edition]);
+
   const logout = React.useCallback(() => {
     if (backendReachable && token) {
       authService.logout().catch(() => undefined);
@@ -226,6 +248,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setEdition = React.useCallback((nextEdition: Edition) => {
     persist(token, user, nextEdition);
+    if (user) setWorkspace(ensureWorkspace(user.name || user.email, nextEdition));
   }, [persist, token, user]);
 
   const value = React.useMemo(() => ({
@@ -236,16 +259,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     supabaseEnabled: isSupabaseConfigured,
     backendReachable,
+    workspace,
     login,
     register,
     supabaseLogin,
     supabaseRegister,
     demoLogin,
+    requestPasswordReset,
     verifyMfa,
     logout,
     setEdition,
     persistAuth: completeAuth,
-  }), [edition, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, verifyMfa, logout, setEdition, token, user, completeAuth]);
+    setWorkspaceName,
+  }), [edition, loading, backendReachable, workspace, login, register, supabaseLogin, supabaseRegister, demoLogin, requestPasswordReset, verifyMfa, logout, setEdition, token, user, completeAuth, setWorkspaceName]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
