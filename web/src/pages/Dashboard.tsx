@@ -187,13 +187,15 @@ const Dashboard: React.FC = () => {
     });
   }, [timeRange]);
 
-  const feed = securityEvents?.events?.length
-    ? securityEvents.events.slice(0, 6).map((e: any) => ({
-      time: e.created_at || 'now',
-      severity: e.severity || 'low',
-      message: e.message || e.description || '',
-    }))
-    : [];
+  const feed = React.useMemo(() => (
+    securityEvents?.events?.length
+      ? securityEvents.events.slice(0, 6).map((e: any) => ({
+        time: e.created_at || 'now',
+        severity: e.severity || 'low',
+        message: e.message || e.description || '',
+      }))
+      : []
+  ), [securityEvents]);
 
   const complianceAvg = React.useMemo(() => {
     const dashboards = complianceDash?.dashboards;
@@ -355,6 +357,7 @@ const Dashboard: React.FC = () => {
     totalFindings,
     securityEvents,
     findings,
+    assets.length,
   ]);
 
   const riskTotal = riskData.reduce((s, d) => s + d.value, 0);

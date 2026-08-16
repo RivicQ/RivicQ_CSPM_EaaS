@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import SeverityBadge from './SeverityBadge';
 import dashboardDesign from '../../theme/dashboardDesign';
 
@@ -10,7 +10,6 @@ type SecurityFeedItemProps = {
 };
 
 const SecurityFeedItem: React.FC<SecurityFeedItemProps> = ({ message, severity, time }) => {
-  const theme = useTheme();
   const idx = ['low', 'medium', 'high', 'critical'].indexOf(severity.toLowerCase());
   const color = dashboardDesign.severity.palette[idx >= 0 ? idx : 0];
 
