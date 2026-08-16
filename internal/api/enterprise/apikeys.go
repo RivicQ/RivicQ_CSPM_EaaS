@@ -108,12 +108,16 @@ func (m *APIKeyManager) CreateKey(c *gin.Context) {
 		req.Role = "viewer"
 	}
 
-	rawKey := generateAPIKey()
+	rawKey, err := generateAPIKey()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate API key"})
+		return
+	}
 	keyHash := hashAPIKey(rawKey)
 	keyPrefix := rawKey[:8]
 
 	id := uuid.New().String()
-	_, err := m.db.Exec(`
+	_, err = m.db.Exec(`
 		INSERT INTO api_keys (id, tenant_id, name, key_prefix, key_hash, role, scopes, expires_at, status)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active')
 	`, id, tenantID, req.Name, keyPrefix, keyHash, req.Role, strings.Join(req.Scopes, ","), req.ExpiresAt)
@@ -218,10 +222,12 @@ func (m *APIKeyManager) APIKeyAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func generateAPIKey() string {
+func generateAPIKey() (string, error) {
 	bytes := make([]byte, 32)
-	rand.Read(bytes)
-	return "cb_" + hex.EncodeToString(bytes)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return "cb_" + hex.EncodeToString(bytes), nil
 }
 
 func hashAPIKey(key string) string {

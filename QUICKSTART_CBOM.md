@@ -1,6 +1,16 @@
-# CBOM Quickstart – Scan Your First Asset in 5 Minutes
+# CBOM Quickstart – First CBOM in 10 minutes
 
-> **Headline developer flow** – The fastest way to generate a Cryptographic Bill of Materials (CBOM) for any asset using CryptoBOM SaaS.
+> Public GitHub scan on the live site, or a full engine scan locally.
+
+## 10 minutes on GitHub Pages
+
+1. Open https://rivicq.github.io/RivicQ_CSPM_EaaS/
+2. Paste `https://github.com/<owner>/<repo>` (public only).
+3. Wait for Discovering files → Analyzing crypto → Building CBOM → Quantifying risk.
+4. Review score, severity, algorithm chips (key size + quantum + BSI/DORA/eIDAS), then **Export JSON + PDF**.
+5. Create a Community account to store scans in your workspace. Request Enterprise via **Request access**.
+
+Private repos, containers, and live endpoints need the engine below.
 
 ---
 

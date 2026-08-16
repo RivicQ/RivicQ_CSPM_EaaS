@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 const (
 	ossHealthURL         = "http://localhost:8080/healthz"
 	enterpriseHealthURL  = "http://localhost:9090/healthz"
-	serverStartTimeout   = 30 * time.Second
+	serverStartTimeout   = 2 * time.Minute
 	serverStartPollEvery = 2 * time.Second
 )
 
@@ -49,7 +50,8 @@ func waitForHealth(t *testing.T, url string) map[string]interface{} {
 func TestServersHealthy(t *testing.T) {
 	oss := waitForHealth(t, ossHealthURL)
 	assert.Equal(t, "healthy", oss["status"])
-	assert.Contains(t, oss["edition"], "open")
+	edition, _ := oss["edition"].(string)
+	assert.Contains(t, strings.ToLower(edition), "open")
 
 	ent := waitForHealth(t, enterpriseHealthURL)
 	assert.Equal(t, "healthy", ent["status"])

@@ -8,8 +8,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { Close, RocketLaunch } from '@mui/icons-material';
-
-const BETA_SIGN_UP_URL = 'https://github.com/rivic-q/cryptobom-saas/discussions';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * BetaBanner – shown to OSS users inviting them to join the Enterprise beta.
@@ -17,6 +16,7 @@ const BETA_SIGN_UP_URL = 'https://github.com/rivic-q/cryptobom-saas/discussions'
  * every page load.
  */
 const BetaBanner: React.FC = () => {
+  const navigate = useNavigate();
   const [visible, setVisible] = useState<boolean>(() => {
     try {
       return localStorage.getItem('betaBannerDismissed') !== 'true';
@@ -45,9 +45,7 @@ const BetaBanner: React.FC = () => {
             <Button
               size="small"
               variant="contained"
-              href={BETA_SIGN_UP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={() => navigate('/beta')}
               sx={{ whiteSpace: 'nowrap' }}
             >
               Join Beta

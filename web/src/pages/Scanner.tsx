@@ -1,20 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Box, Button, Chip, Grid, LinearProgress, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
+  Box, Button, Chip, Grid, LinearProgress, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography, Alert,
 } from '@mui/material';
 import { GitHub, PlayArrow, CheckCircle, Error as ErrorIcon, Schedule, Security, Refresh,
-  History, BugReport, Event, Speed,
+  History, BugReport, Event, Speed, Download,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { cbomService, benchmarkService } from '../services/api';
 import PageFrame from '../components/PageFrame';
 import StatCard from '../components/dashboard/StatCard';
-import { GlassCard, EmptyState, DetailTabs, TabPanel } from '../components/ui';
+import { GlassCard, EmptyState, DetailTabs, TabPanel, LoadingButton } from '../components/ui';
 import designSystem from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
-import { DEMO_SCAN_FINDINGS, DEMO_SCAN_SCHEDULES } from '../data/workspaceDemo';
 import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
+import { downloadJson, downloadSimplePdf } from '../utils/exportCbom';
+import { nextRunLabel, readScanSchedules, writeScanSchedules, type ScanSchedule } from '../utils/scanSchedules';
 
 interface ScanJob {
   id: string;
@@ -69,6 +70,8 @@ const Scanner: React.FC = () => {
   const [liveFindings, setLiveFindings] = useState<ScanFinding[]>([]);
   const [scanProgress, setScanProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [schedules, setSchedules] = useState<ScanSchedule[]>(() => readScanSchedules());
+  const [scheduleForm, setScheduleForm] = useState({ name: 'Nightly CBOM', cron: '0 2 * * *', target: './' });
   const pollTimerRef = useRef<number | null>(null);
   const pollAttemptsRef = useRef(0);
 
@@ -170,7 +173,7 @@ const Scanner: React.FC = () => {
       pollScanStatus(scanId, scanId);
     } catch {
       clearPolling(); setIsScanning(false);
-      setError('Could not reach the CBOM scan API. Start the backend on :9090 or use GitHub Pages demo mode.');
+      setError('Could not reach the CBOM scan API. Start the backend on :9090, or use a public GitHub URL on the homepage.');
       setScanJobs((prev) => prev.filter((j) => j.id !== newJob.id));
     }
   };
@@ -183,11 +186,11 @@ const Scanner: React.FC = () => {
   };
 
   const benchList = benchmarksRaw?.benchmarks ?? [];
-  const bench = benchList[0] ?? benchmarksRaw ?? { throughput_rps: 1240, p95_latency_ms: 182, scan_time_seconds: 8.4, coverage_pct: 94 };
+  const bench = benchList[0] ?? benchmarksRaw ?? {};
 
   const findings: ScanFinding[] = liveFindings.length
     ? liveFindings
-    : (findingsData?.source === 'cbom_scans' ? [] : DEMO_SCAN_FINDINGS as ScanFinding[]);
+    : (findingsData?.findings?.length ? findingsData.findings : []);
   const totalFindings = findings.length || scanJobs.reduce((s, j) => s + j.findings, 0);
   const completedScans = scanJobs.filter((j) => j.status === 'completed').length;
 
@@ -202,8 +205,8 @@ const Scanner: React.FC = () => {
       <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         <Grid item xs={6} sm={3}><StatCard label="Completed scans" value={completedScans} icon={<History />} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Findings" value={totalFindings} icon={<BugReport />} accent={tokens.colors.crypto.high} delay={1} /></Grid>
-        <Grid item xs={6} sm={3}><StatCard label="Coverage" value={`${bench.coverage_pct ?? 94}%`} icon={<Security />} accent={tokens.colors.crypto.low} delay={2} /></Grid>
-        <Grid item xs={6} sm={3}><StatCard label="Scan time" value={`${bench.scan_time_seconds ?? 8.4}s`} icon={<Speed />} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard label="Coverage" value={bench.coverage_pct != null ? `${bench.coverage_pct}%` : '—'} icon={<Security />} accent={tokens.colors.crypto.low} delay={2} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard label="Scan time" value={bench.scan_time_seconds != null ? `${bench.scan_time_seconds}s` : '—'} icon={<Speed />} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
       </Grid>
 
       <GlassCard glow={tokens.colors.rivicq[500]} delay={0}>
@@ -250,9 +253,9 @@ const Scanner: React.FC = () => {
             </Box>
           )}
           <Stack direction="row" spacing={1.5}>
-            <Button variant="contained" startIcon={<PlayArrow />} onClick={startScan} disabled={isScanning} size="large" sx={{ background: designSystem.gradient.brand, px: 3 }}>
-              {isScanning ? 'Scanning…' : 'Start CBOM Scan'}
-            </Button>
+            <LoadingButton variant="contained" startIcon={<PlayArrow />} onClick={startScan} loading={isScanning} loadingText="Scanning…" size="large" sx={{ background: designSystem.gradient.brand, px: 3 }}>
+              Start CBOM Scan
+            </LoadingButton>
             <Button variant="outlined" startIcon={<Refresh />} onClick={refreshScanData}>Refresh</Button>
           </Stack>
         </TabPanel>
@@ -284,8 +287,21 @@ const Scanner: React.FC = () => {
             <EmptyState icon={<BugReport />} title="No findings yet" description="Complete a CBOM scan to populate cryptographic findings from TLS, SSH, HTTP, and SBOM discovery." action={{ label: 'Run Scan', onClick: () => setTab(0) }} />
           ) : (
             <Stack spacing={1.5}>
+              <Stack direction="row" spacing={1} justifyContent="flex-end">
+                <LoadingButton
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Download />}
+                  onClick={() => {
+                    downloadJson('rivicq-scan-findings.json', findings);
+                    downloadSimplePdf('rivicq-scan-findings.pdf', 'RivicQ scan findings', findings.map((f) => `${(f.severity || '').toUpperCase()}  ${f.title}  ${f.asset || f.target_label || ''}`));
+                  }}
+                >
+                  Export JSON + PDF
+                </LoadingButton>
+              </Stack>
               {findings.map((f, idx) => (
-                <Box key={f.id ?? `finding-${idx}`} sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider', borderLeft: 4, borderLeftColor: f.severity === 'critical' ? 'error.main' : f.severity === 'high' ? 'warning.main' : 'info.main' }}>
+                <Box key={f.id ?? `finding-${idx}`} sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider', borderLeft: 4, borderLeftColor: f.severity === 'critical' ? 'error.main' : f.severity === 'high' ? 'warning.main' : 'info.main', transition: 'transform .18s ease, box-shadow .18s ease', '&:hover': { transform: 'translateY(-1px)', boxShadow: 1 } }}>
                   <Stack direction="row" spacing={1} alignItems="center" mb={0.5}>
                     <Chip label={(f.severity || 'info').toUpperCase()} size="small" color={f.severity === 'critical' ? 'error' : f.severity === 'high' ? 'warning' : 'default'} />
                     <Typography fontWeight={700}>{f.title}</Typography>
@@ -300,7 +316,36 @@ const Scanner: React.FC = () => {
 
         <TabPanel value={tab} index={3}>
           <Stack spacing={1.5}>
-            {DEMO_SCAN_SCHEDULES.map((sch) => (
+            <Alert severity="info">
+              Recurring scans are stored in this browser workspace until the engine scheduler is connected. Pause and enable persist locally.
+            </Alert>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+              <TextField size="small" label="Name" value={scheduleForm.name} onChange={(e) => setScheduleForm((p) => ({ ...p, name: e.target.value }))} />
+              <TextField size="small" label="Cron" value={scheduleForm.cron} onChange={(e) => setScheduleForm((p) => ({ ...p, cron: e.target.value }))} />
+              <TextField size="small" label="Target" value={scheduleForm.target} onChange={(e) => setScheduleForm((p) => ({ ...p, target: e.target.value }))} />
+              <Button
+                variant="contained"
+                onClick={() => {
+                  const next: ScanSchedule = {
+                    id: `sch-${Date.now()}`,
+                    name: scheduleForm.name.trim() || 'Scheduled CBOM',
+                    cron: scheduleForm.cron.trim() || '0 2 * * *',
+                    target: scheduleForm.target.trim() || scanTarget,
+                    type: scanType,
+                    status: 'active',
+                    nextRun: nextRunLabel(scheduleForm.cron),
+                  };
+                  const list = [next, ...schedules];
+                  setSchedules(list);
+                  writeScanSchedules(list);
+                }}
+              >
+                Add schedule
+              </Button>
+            </Stack>
+            {schedules.length === 0 ? (
+              <EmptyState icon={<Event />} title="No schedules yet" description="Add a cron target to run recurring CBOM scans from this workspace." />
+            ) : schedules.map((sch) => (
               <Box key={sch.id} sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider', display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
                 <Box sx={{ flex: 1, minWidth: 200 }}>
                   <Typography fontWeight={700}>{sch.name}</Typography>
@@ -309,7 +354,17 @@ const Scanner: React.FC = () => {
                 <Chip label={sch.type} size="small" variant="outlined" />
                 <Chip label={sch.status} size="small" color={sch.status === 'active' ? 'success' : 'default'} />
                 <Typography variant="caption" color="text.secondary">Next: {sch.nextRun}</Typography>
-                <Button size="small" variant="outlined">{sch.status === 'active' ? 'Pause' : 'Enable'}</Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => {
+                    const list = schedules.map((s) => (s.id === sch.id ? { ...s, status: s.status === 'active' ? 'paused' as const : 'active' as const } : s));
+                    setSchedules(list);
+                    writeScanSchedules(list);
+                  }}
+                >
+                  {sch.status === 'active' ? 'Pause' : 'Enable'}
+                </Button>
               </Box>
             ))}
           </Stack>
@@ -318,10 +373,10 @@ const Scanner: React.FC = () => {
         <TabPanel value={tab} index={4}>
           <Grid container spacing={2}>
             {[
-              { label: 'Throughput', value: `${bench.throughput_rps ?? 1240} req/s`, hint: 'Scanner API capacity' },
-              { label: 'P95 latency', value: `${bench.p95_latency_ms ?? 182} ms`, hint: 'End-to-end scan orchestration' },
-              { label: 'Scan duration', value: `${bench.scan_time_seconds ?? 8.4}s`, hint: 'Per reference asset set' },
-              { label: 'Coverage', value: `${bench.coverage_pct ?? 94}%`, hint: 'Connected targets' },
+              { label: 'Throughput', value: bench.throughput_rps != null ? `${bench.throughput_rps} req/s` : '—', hint: 'Scanner API capacity' },
+              { label: 'P95 latency', value: bench.p95_latency_ms != null ? `${bench.p95_latency_ms} ms` : '—', hint: 'End-to-end scan orchestration' },
+              { label: 'Scan duration', value: bench.scan_time_seconds != null ? `${bench.scan_time_seconds}s` : '—', hint: 'Per reference asset set' },
+              { label: 'Coverage', value: bench.coverage_pct != null ? `${bench.coverage_pct}%` : '—', hint: 'Connected targets' },
             ].map((item) => (
               <Grid item xs={12} sm={6} key={item.label}>
                 <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover' }}>

@@ -2,7 +2,10 @@
 
 ## Getting started
 
-- [CBOM Quickstart](../QUICKSTART_CBOM.md) — scan your first asset in 5 minutes
+- [CBOM Quickstart](../QUICKSTART_CBOM.md) — first CBOM in 10 minutes
+- [Live outcome / status](STATUS.md)
+- [Beta ready checklist](BETA_READY.md)
+- [Known limitations](KNOWN_LIMITATIONS.md)
 - [Deployment](DEPLOYMENT.md) — Docker, Kubernetes, production config
 - [Environment variables](DEPLOY_ENV.md) — required secrets and OAuth setup
 - [Editions](editions.md) — OSS vs Enterprise

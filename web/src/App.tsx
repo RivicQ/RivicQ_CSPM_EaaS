@@ -19,6 +19,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import EditionSwitcher from './pages/EditionSwitcher';
+import BetaAccess from './pages/BetaAccess';
 import Dashboard from './pages/Dashboard';
 import AssetDetails from './pages/AssetDetails';
 import Assets from './pages/Assets';
@@ -125,6 +126,7 @@ const App: React.FC = () => {
                 <Route path="/register" element={wrap(Register, 'Register')} />
                 <Route path="/oauth/callback" element={wrap(OAuthCallback, 'OAuthCallback')} />
                 <Route path="/switcher" element={wrap(EditionSwitcher, 'EditionSwitcher')} />
+                <Route path="/beta" element={wrap(BetaAccess, 'BetaAccess')} />
                 <Route path="/logout" element={<LogoutRedirect />} />
                 <Route
                   path="/"

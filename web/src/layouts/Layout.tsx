@@ -62,6 +62,7 @@ import { useThemeMode } from '../theme/ThemeContext';
 import ThemeToggle from '../theme/ThemeToggle';
 import BrandLogo from '../components/BrandLogo';
 import RivicQAssistant from '../components/assistant/RivicQAssistant';
+import FeedbackWidget from '../components/FeedbackWidget';
 import designSystem, {
   sidebarPaperSx,
   sidebarScrollSx,
@@ -691,6 +692,7 @@ const Layout: React.FC = () => {
         }}
       >
         <motion.div
+          key={location.pathname}
           initial={reduceMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduceMotion ? 0 : 0.25 }}
@@ -732,6 +734,7 @@ const Layout: React.FC = () => {
         </Paper>
       )}
       <RivicQAssistant />
+      <FeedbackWidget />
     </Box>
   );
 };

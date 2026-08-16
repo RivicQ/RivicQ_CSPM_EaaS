@@ -72,6 +72,13 @@ export const supabaseAuthService = {
     return data.session?.access_token ?? null;
   },
 
+  async resetPassword(email: string): Promise<void> {
+    if (!supabase) throw new Error('Password reset requires Supabase on this deployment.');
+    const redirectTo = `${window.location.origin}${process.env.PUBLIC_URL || '/platform'}/login`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw error;
+  },
+
   onAuthStateChange(callback: (event: string, session: any) => void) {
     if (!supabase) return () => undefined;
     const { data } = supabase.auth.onAuthStateChange((event, session) => callback(event, session));

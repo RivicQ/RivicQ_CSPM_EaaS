@@ -23,6 +23,7 @@ import {
   CheckCircle,
   Refresh,
   Sync,
+  Download,
 } from '@mui/icons-material';
 import {
   BarChart,
@@ -39,6 +40,7 @@ import {
   Radar,
 } from 'recharts';
 import { complianceService } from '../../services/api';
+import { downloadSimplePdf } from '../../utils/exportCbom';
 
 const FRAMEWORKS = [
   { id: 'iso27001', name: 'ISO 27001', color: '#10b981' },
@@ -173,6 +175,24 @@ const ComplianceDashboard: React.FC = () => {
           >
             Run Compliance Scan
           </Button>
+          <Button
+            variant="contained"
+            startIcon={<Download />}
+            onClick={() => {
+              const lines = [
+                'DORA Art. 9 · BSI TR-02102-1 · eIDAS 2.0',
+                `Generated: ${new Date().toISOString()}`,
+                `Overall score: ${overallScore}%`,
+                '',
+                ...dashboards.map((d) => `${d.framework}  score=${d.score}  passed=${d.passed_controls}  failed=${d.failed_controls}`),
+                '',
+                ...risks.slice(0, 12).map((r: any) => `${r.severity || 'info'}  ${r.title || r.name || r.description || 'risk'}`),
+              ];
+              downloadSimplePdf('rivicq-dora-bsi-eidas.pdf', 'RivicQ compliance report', lines);
+            }}
+          >
+            Download DORA / BSI / eIDAS
+          </Button>
           <Button variant="contained" startIcon={<Refresh />} onClick={loadDashboards}>
             Refresh
           </Button>
@@ -197,7 +217,7 @@ const ComplianceDashboard: React.FC = () => {
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Critical Findings</Typography>
               <Typography variant="h3" color="error.main">
-                {risks.filter(r => r.severity === 'critical').length || 3}
+                {risks.filter(r => r.severity === 'critical').length}
               </Typography>
             </CardContent>
           </Card>

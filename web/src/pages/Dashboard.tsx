@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Box, Button, Chip, CircularProgress, Grid, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography, useMediaQuery, useTheme,
+  Box, Button, Chip, CircularProgress, Grid, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography, useMediaQuery, useTheme, Alert,
 } from '@mui/material';
 import {
   ArrowForward, AutoGraph, GitHub, GppGood, Lock, Memory, NotificationsActive, Security, TrendingUp,
@@ -12,7 +12,7 @@ import {
   Cell, Pie, PieChart, ResponsiveContainer, Tooltip,
 } from 'recharts';
 import {
-  analyticsService, benchmarkService, cloudService, complianceService, inventoryService, postureService, securityService,
+  analyticsService, benchmarkService, cbomService, cloudService, complianceService, inventoryService, postureService, securityService,
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
@@ -34,21 +34,14 @@ import TopFindingsList from '../components/dashboard/TopFindingsList';
 import ScanActivityTimeline from '../components/dashboard/ScanActivityTimeline';
 import FindingsSeverityBar from '../components/dashboard/FindingsSeverityBar';
 import ThreatIntelStrip from '../components/dashboard/ThreatIntelStrip';
+import { EmptyState } from '../components/ui';
+import BetaBanner from '../components/BetaBanner';
 import dashboardDesign from '../theme/dashboardDesign';
 import { chartTheme } from '../theme/chartTheme';
 import designSystem, { heroPrimaryCtaSx, heroSecondaryCtaSx, metricValueSx } from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
 
-const DEMO_FEED = [
-  { time: '2m ago', severity: 'critical', message: 'Public S3 bucket (crypto-assets-prod) allows unauthenticated write access' },
-  { time: '9m ago', severity: 'high', message: 'Security group ssh-public-open exposes port 22 to 0.0.0.0/0' },
-  { time: '17m ago', severity: 'medium', message: 'GCS bucket lacks uniform bucket-level access control' },
-  { time: '26m ago', severity: 'low', message: 'KMS key rotation disabled for alias/aws/ebs' },
-  { time: '41m ago', severity: 'critical', message: 'IAM policy grants wildcard Action on KMS keys' },
-  { time: '1h ago', severity: 'medium', message: 'Azure Key Vault soft-delete purge protection disabled' },
-];
-
-const DEFAULT_FINDINGS = { critical: 2, high: 8, medium: 15, low: 25 };
+const EMPTY_FINDINGS = { critical: 0, high: 0, medium: 0, low: 0 };
 
 const ChartTooltipContent: React.FC<any> = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -84,7 +77,7 @@ const Dashboard: React.FC = () => {
   const [selectedAlgorithm, setSelectedAlgorithm] = React.useState<string | null>(null);
   const [selectedHeatmapCell, setSelectedHeatmapCell] = React.useState<string | null>(null);
 
-  const { data: summaryData, isLoading: summaryLoading } = useQuery({
+  const { data: summaryData, isLoading: summaryLoading, isError: summaryError, refetch: refetchSummary } = useQuery({
     queryKey: ['dashboard-summary'],
     queryFn: () => inventoryService.getInventorySummary().then((r) => r.data),
     retry: 1,
@@ -135,15 +128,21 @@ const Dashboard: React.FC = () => {
     refetchInterval: 60_000,
   });
 
+  const { data: scanList } = useQuery({
+    queryKey: ['dashboard-scans'],
+    queryFn: () => cbomService.listScans().then((r) => r.data).catch(() => null),
+    retry: 1,
+  });
+
   const assets = React.useMemo(() => {
     const list = Array.isArray(assetsData) ? assetsData : Array.isArray((assetsData as any)?.assets) ? (assetsData as any).assets : [];
     return list;
   }, [assetsData]);
 
-  const totalResources = resourcesSummary?.total_resources ?? (assets.length || 1427);
-  const healthScore = (cspmOverview as any)?.health_score ?? (summaryData as any)?.compliance_score ?? 78;
+  const totalResources = resourcesSummary?.total_resources ?? assets.length;
+  const healthScore = Number((cspmOverview as any)?.health_score ?? (summaryData as any)?.compliance_score ?? 0);
   const findings = React.useMemo(
-    () => resourcesSummary?.security_findings ?? DEFAULT_FINDINGS,
+    () => resourcesSummary?.security_findings ?? EMPTY_FINDINGS,
     [resourcesSummary],
   );
   const totalFindings = (Object.values(findings) as number[]).reduce((a, b) => a + b, 0);
@@ -156,13 +155,7 @@ const Dashboard: React.FC = () => {
     });
     return Object.keys(counts).length > 0
       ? Object.entries(counts).map(([name, value]) => ({ name, value }))
-      : [
-        { name: 'AES-256', value: 37 },
-        { name: 'RSA-2048', value: 28 },
-        { name: 'ML-KEM', value: 12 },
-        { name: 'ECDSA', value: 19 },
-        { name: '3DES', value: 8 },
-      ];
+      : [];
   }, [assets]);
 
   const riskData = React.useMemo(() => {
@@ -172,14 +165,12 @@ const Dashboard: React.FC = () => {
       value: assets.filter((a: any) => String(a.risk_level || a.riskLevel).toUpperCase() === level).length,
     }));
     return entries.some((e) => e.value > 0) ? entries : [
-      { name: 'LOW', value: 14 }, { name: 'MEDIUM', value: 9 }, { name: 'HIGH', value: 4 }, { name: 'CRITICAL', value: 2 },
+      { name: 'LOW', value: 0 }, { name: 'MEDIUM', value: 0 }, { name: 'HIGH', value: 0 }, { name: 'CRITICAL', value: 0 },
     ];
   }, [assets]);
 
   const heatmap = React.useMemo(() => {
-    const seed7 = [0, 0, 1, 0, 2, 0, 0, 1, 3, 0, 0, 2, 0, 0, 1, 0, 0, 2, 3, 1, 0, 0, 2, 0, 0, 1, 0, 0];
-    const seed30 = [0, 0, 0, 1, 0, 2, 0, 0, 1, 3, 0, 0, 1, 0, 0, 2, 0, 0, 0, 1, 3, 1, 0, 0, 2, 0, 0, 1, 0, 0];
-    const seed = timeRange === '7d' ? seed7 : seed30;
+    const seed = timeRange === '7d' ? Array(28).fill(0) : Array(30).fill(0);
     const counts = [0, 2, 5, 9, 14];
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return seed.map((risk, i) => {
@@ -196,13 +187,15 @@ const Dashboard: React.FC = () => {
     });
   }, [timeRange]);
 
-  const feed = securityEvents?.events?.length
-    ? securityEvents.events.slice(0, 6).map((e: any) => ({
-      time: e.created_at || 'now',
-      severity: e.severity || 'low',
-      message: e.message || e.description || '',
-    }))
-    : DEMO_FEED;
+  const feed = React.useMemo(() => (
+    securityEvents?.events?.length
+      ? securityEvents.events.slice(0, 6).map((e: any) => ({
+        time: e.created_at || 'now',
+        severity: e.severity || 'low',
+        message: e.message || e.description || '',
+      }))
+      : []
+  ), [securityEvents]);
 
   const complianceAvg = React.useMemo(() => {
     const dashboards = complianceDash?.dashboards;
@@ -219,11 +212,11 @@ const Dashboard: React.FC = () => {
     const labels = timeRange === '7d'
       ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       : ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12'];
-    return labels.slice(0, points).map((label, i) => ({
+    return labels.slice(0, points).map((label) => ({
       label,
-      score: Math.min(100, Math.max(48, Math.round(healthScore - (points - i - 1) * 1.2 + (i % 4) * 1.5))),
-      findings: Math.max(0, totalFindings - i * 2 + (i % 3)),
-      scans: 3 + (i % 5),
+      score: healthScore,
+      findings: totalFindings,
+      scans: 0,
     }));
   }, [analyticsInsights, timeRange, healthScore, totalFindings]);
 
@@ -236,10 +229,10 @@ const Dashboard: React.FC = () => {
       }));
     }
     return [
-      { name: 'AWS', value: 542 },
-      { name: 'Azure', value: 318 },
-      { name: 'GCP', value: 287 },
-      { name: 'K8s', value: 280 },
+      { name: 'AWS', value: 0 },
+      { name: 'Azure', value: 0 },
+      { name: 'GCP', value: 0 },
+      { name: 'K8s', value: 0 },
     ];
   }, [resourcesSummary]);
 
@@ -253,7 +246,7 @@ const Dashboard: React.FC = () => {
         inMigration: Math.max(1, Math.round(vuln * 0.18)),
       };
     }
-    return { quantumSafe: 892, vulnerable: 412, inMigration: 123 };
+    return { quantumSafe: 0, vulnerable: 0, inMigration: 0 };
   }, [assets]);
 
   const complianceFrameworks = React.useMemo(() => {
@@ -265,16 +258,7 @@ const Dashboard: React.FC = () => {
         score: d.score ?? d.compliance_score ?? 0,
       }));
     }
-    return [
-      { id: 'nist', name: 'NIST CSF', score: 82 },
-      { id: 'dora', name: 'DORA', score: 76 },
-      { id: 'nis2', name: 'NIS2', score: 71 },
-      { id: 'soc2', name: 'SOC 2', score: 88 },
-      { id: 'iso', name: 'ISO 27001', score: 79 },
-      { id: 'pci', name: 'PCI DSS', score: 74 },
-      { id: 'gdpr', name: 'GDPR', score: 85 },
-      { id: 'cra', name: 'EU CRA', score: 68 },
-    ];
+    return [];
   }, [complianceDash]);
 
   const topFindings = React.useMemo(() => (
@@ -287,19 +271,23 @@ const Dashboard: React.FC = () => {
     }))
   ), [feed]);
 
-  const scanEvents = React.useMemo(() => [
-    { id: '1', target: 'prod-api.example.com', status: 'completed' as const, time: '12m ago', findings: 3 },
-    { id: '2', target: 'k8s-cluster-west', status: 'running' as const, time: '28m ago' },
-    { id: '3', target: 's3://crypto-assets-prod', status: 'completed' as const, time: '1h ago', findings: 7 },
-    { id: '4', target: 'ssh bastion-host', status: 'failed' as const, time: '2h ago' },
-    { id: '5', target: 'azure-keyvault-prod', status: 'completed' as const, time: '3h ago', findings: 1 },
-  ], []);
+  const scanEvents = React.useMemo(() => {
+    const scans = (scanList as any)?.scans;
+    if (!Array.isArray(scans) || scans.length === 0) return [];
+    return scans.slice(0, 6).map((s: any, i: number) => ({
+      id: String(s.id ?? s.scan_id ?? i),
+      target: s.target || s.name || 'scan',
+      status: (s.status === 'failed' ? 'failed' : s.status === 'running' || s.status === 'pending' ? 'running' : 'completed') as 'completed' | 'running' | 'failed',
+      time: s.created_at || s.started_at || '',
+      findings: s.findings?.total ?? s.findings_count ?? 0,
+    }));
+  }, [scanList]);
 
   const threatMetrics = React.useMemo(() => [
-    { label: 'Active Threats', value: (resourcesSummary as any)?.active_threats ?? 12, trend: 'down' as const, severity: 'high' as const },
-    { label: 'Exposed Keys', value: (cspmOverview as any)?.exposed_keys ?? 4, trend: 'up' as const, severity: 'critical' as const },
-    { label: 'MTTR', value: '4.2h', trend: 'down' as const, severity: 'low' as const },
-    { label: 'Scan Coverage', value: `${(cspmOverview as any)?.scan_coverage ?? 94}%`, severity: 'low' as const },
+    { label: 'Active Threats', value: (resourcesSummary as any)?.active_threats ?? 0, trend: 'down' as const, severity: 'high' as const },
+    { label: 'Exposed Keys', value: (cspmOverview as any)?.exposed_keys ?? 0, trend: 'up' as const, severity: 'critical' as const },
+    { label: 'MTTR', value: (cspmOverview as any)?.mttr || '—', trend: 'down' as const, severity: 'low' as const },
+    { label: 'Scan Coverage', value: `${(cspmOverview as any)?.scan_coverage ?? (resourcesSummary as any)?.scan_coverage ?? 0}%`, severity: 'low' as const },
   ], [resourcesSummary, cspmOverview]);
 
   const quickActions = React.useMemo(() => (
@@ -309,12 +297,12 @@ const Dashboard: React.FC = () => {
   ), [edition]);
 
   const liveScanMetrics = React.useMemo((): LiveScanMetric[] => {
-    const activeScans = scanEvents.filter((e) => e.status === 'running').length || 2;
-    const completedToday = (benchmarkData as any)?.scans_today ?? (analyticsInsights as any)?.scans_24h ?? 18;
-    const scanCoverage = (cspmOverview as any)?.scan_coverage ?? (resourcesSummary as any)?.scan_coverage ?? 94;
-    const avgScanSec = (benchmarkData as any)?.scan_time_seconds ?? (benchmarkData as any)?.benchmarks?.[0]?.scan_time_seconds ?? 6.8;
+    const activeScans = scanEvents.filter((e) => e.status === 'running').length;
+    const completedToday = (benchmarkData as any)?.scans_today ?? (analyticsInsights as any)?.scans_24h ?? scanEvents.filter((e) => e.status === 'completed').length;
+    const scanCoverage = (cspmOverview as any)?.scan_coverage ?? (resourcesSummary as any)?.scan_coverage ?? (assets.length ? 100 : 0);
+    const avgScanSec = (benchmarkData as any)?.scan_time_seconds ?? (benchmarkData as any)?.benchmarks?.[0]?.scan_time_seconds;
     const targetsScanned = (summaryData as any)?.scanned_targets ?? totalResources;
-    const findings24h = totalFindings || (securityEvents as any)?.events?.length || 24;
+    const findings24h = totalFindings || (securityEvents as any)?.events?.length || 0;
 
     return [
       {
@@ -354,7 +342,7 @@ const Dashboard: React.FC = () => {
       {
         id: 'latency',
         label: 'Avg Scan Time',
-        value: `${avgScanSec}s`,
+        value: avgScanSec != null ? `${avgScanSec}s` : '—',
         hint: 'Per 10k asset set',
       },
     ];
@@ -369,6 +357,7 @@ const Dashboard: React.FC = () => {
     totalFindings,
     securityEvents,
     findings,
+    assets.length,
   ]);
 
   const riskTotal = riskData.reduce((s, d) => s + d.value, 0);
@@ -397,6 +386,16 @@ const Dashboard: React.FC = () => {
 
   return (
     <Box sx={dashboardDesign.layout.page}>
+      {!isPaidEdition(edition) && <BetaBanner />}
+      {summaryError && (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          action={<Button color="inherit" size="small" onClick={() => refetchSummary()}>Retry</Button>}
+        >
+          Inventory API is unreachable. Showing empty workspace data — run a CBOM scan once the engine is connected. Nothing here is seeded.
+        </Alert>
+      )}
       <DashboardHero
         eyebrow="Security Command Center"
         title="Cryptographic Security Posture Management"
@@ -494,10 +493,10 @@ const Dashboard: React.FC = () => {
             label="Cloud Resources" value={totalResources.toLocaleString()} hint="Connected accounts" icon={<Memory />} accent={tokens.colors.rivicq[500]} delay={1} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard label="Open Findings" value={totalFindings} hint={`${findings.critical} critical · ${findings.high} high`} trend={{ value: '-5 resolved', positive: true }} icon={<NotificationsActive />} accent={dashboardDesign.severity.high} delay={2} />
+          <StatCard label="Open Findings" value={totalFindings} hint={`${findings.critical ?? 0} critical · ${findings.high ?? 0} high`} icon={<NotificationsActive />} accent={dashboardDesign.severity.high} delay={2} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard label="At-Risk Objects" value={(assets.length || (cspmOverview as any)?.at_risk_data || 847).toLocaleString()} hint={complianceAvg ? `Compliance ${complianceAvg}%` : 'Across environments'} icon={<Lock />} accent={dashboardDesign.severity.critical} delay={3} />
+          <StatCard label="At-Risk Objects" value={Number((cspmOverview as any)?.at_risk_data ?? assets.filter((a: any) => !(a.quantum_safe || a.quantumSafe)).length).toLocaleString()} hint={complianceAvg ? `Compliance ${complianceAvg}%` : 'From live inventory'} icon={<Lock />} accent={dashboardDesign.severity.critical} delay={3} />
         </Grid>
       </Grid>
 
@@ -566,6 +565,9 @@ const Dashboard: React.FC = () => {
               selected={selectedAlgorithm}
               onSelect={setSelectedAlgorithm}
             />
+            {algorithmData.length === 0 && (
+              <EmptyState icon={<Security />} title="No CBOM inventory yet" description="Run a scan to populate algorithm distribution." action={{ label: 'Open Scanner', onClick: () => navigate('/scanner') }} />
+            )}
           </DashboardPanel>
         </Grid>
       </Grid>
@@ -624,7 +626,9 @@ const Dashboard: React.FC = () => {
             }
           >
             <Box sx={{ maxHeight: dashboardDesign.layout.feedMaxHeight, overflowY: 'auto', overflowX: 'hidden', pr: 0.5 }}>
-              {feed.map((evt: any, i: number) => (
+              {feed.length === 0 ? (
+                <EmptyState icon={<Security />} title="No security events" description="Events appear after a live scan or connected cloud account." />
+              ) : feed.map((evt: any, i: number) => (
                 <SecurityFeedItem key={i} message={evt.message} severity={evt.severity} time={evt.time} />
               ))}
             </Box>
@@ -645,7 +649,11 @@ const Dashboard: React.FC = () => {
             delay={6}
             action={<Chip size="small" label={`${complianceFrameworks.length} active`} variant="outlined" sx={{ fontSize: '0.6875rem', height: 24 }} />}
           >
-            <ComplianceScoreGrid frameworks={complianceFrameworks} />
+            {complianceFrameworks.length === 0 ? (
+              <EmptyState title="No compliance scores yet" description="Connect a paid workspace or generate a DORA / BSI / eIDAS report after your first scan." />
+            ) : (
+              <ComplianceScoreGrid frameworks={complianceFrameworks} />
+            )}
           </DashboardPanel>
         </Grid>
       </Grid>
@@ -662,7 +670,11 @@ const Dashboard: React.FC = () => {
               </Button>
             }
           >
-            <TopFindingsList findings={topFindings} />
+            {topFindings.length === 0 ? (
+              <EmptyState icon={<Security />} title="No findings" description="Complete a CBOM scan to list priority issues." action={{ label: 'Run CBOM Scan', onClick: () => navigate('/scanner') }} />
+            ) : (
+              <TopFindingsList findings={topFindings} />
+            )}
           </DashboardPanel>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -672,7 +684,11 @@ const Dashboard: React.FC = () => {
             delay={8}
             action={<Chip size="small" icon={<Timeline sx={{ fontSize: 14 }} />} label="Live" variant="outlined" sx={{ fontSize: '0.6875rem', height: 24 }} />}
           >
-            <ScanActivityTimeline events={scanEvents} />
+            {scanEvents.length === 0 ? (
+              <EmptyState icon={<Timeline />} title="No scans yet" description="History fills in after you run your first CBOM scan." action={{ label: 'New Scan', onClick: () => navigate('/scanner') }} />
+            ) : (
+              <ScanActivityTimeline events={scanEvents} />
+            )}
           </DashboardPanel>
         </Grid>
       </Grid>
@@ -719,7 +735,7 @@ const Dashboard: React.FC = () => {
           </Box>
         </Stack>
         <Stack direction="row" spacing={1}>
-          <Chip icon={<TrendingUp sx={{ fontSize: 14 }} />} label="PQC 67%" size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
+          <Chip icon={<TrendingUp sx={{ fontSize: 14 }} />} label={`PQC ${assets.length ? Math.round((pqcStats.quantumSafe / Math.max(assets.length, 1)) * 100) : 0}%`} size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
           <Chip label="NIST CSF" size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
           <Chip label="SOC 2" size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
         </Stack>

@@ -60,27 +60,38 @@ export const DEMO_FORECAST = [
 
 export function normalizeAssets(data: unknown): any[] {
   const list = Array.isArray(data) ? data : ((data as any)?.assets ?? (data as any)?.items ?? []);
-  if (list.length) return list;
-  if ((data as any)?.source === 'cbom_scans') return [];
-  if ((data as any)?.demo_mode === true) return DEMO_ASSETS;
-  return DEMO_ASSETS;
+  return Array.isArray(list) ? list : [];
 }
 
-export function normalizeSummary(data: unknown): typeof DEMO_INVENTORY_SUMMARY {
-  if (!data || typeof data !== 'object') return DEMO_INVENTORY_SUMMARY;
+export function normalizeSummary(data: unknown): {
+  total_assets: number;
+  compliance_score: number;
+  by_category: Record<string, number>;
+  by_cloud_provider: Record<string, number>;
+  quantum_safe_count: number;
+  non_quantum_safe: number;
+  vulnerable_assets: number;
+} {
+  const empty = {
+    total_assets: 0,
+    compliance_score: 0,
+    by_category: {} as Record<string, number>,
+    by_cloud_provider: {} as Record<string, number>,
+    quantum_safe_count: 0,
+    non_quantum_safe: 0,
+    vulnerable_assets: 0,
+  };
+  if (!data || typeof data !== 'object') return empty;
   const d = data as Record<string, unknown>;
-  if (d.source === 'cbom_scans' && Number(d.total_assets ?? 0) === 0) {
-    return { ...DEMO_INVENTORY_SUMMARY, total_assets: 0, quantum_safe_count: 0, non_quantum_safe: 0, vulnerable_assets: 0, compliance_score: 0 };
-  }
   const rawCategory = (d.by_category ?? d.byCategory ?? {}) as Record<string, number>;
   const rawCloud = (d.by_cloud_provider ?? d.byCloudProvider ?? {}) as Record<string, number>;
   return {
-    total_assets: Number(d.total_assets ?? d.totalAssets ?? DEMO_INVENTORY_SUMMARY.total_assets),
-    compliance_score: Number(d.compliance_score ?? d.complianceScore ?? DEMO_INVENTORY_SUMMARY.compliance_score),
-    by_category: { ...DEMO_INVENTORY_SUMMARY.by_category, ...rawCategory },
-    by_cloud_provider: { ...DEMO_INVENTORY_SUMMARY.by_cloud_provider, ...rawCloud },
-    quantum_safe_count: Number(d.quantum_safe_count ?? d.quantumSafeCount ?? DEMO_INVENTORY_SUMMARY.quantum_safe_count),
-    non_quantum_safe: Number(d.non_quantum_safe ?? d.nonQuantumSafe ?? DEMO_INVENTORY_SUMMARY.non_quantum_safe),
-    vulnerable_assets: Number(d.vulnerable_assets ?? d.vulnerableAssets ?? DEMO_INVENTORY_SUMMARY.vulnerable_assets),
+    total_assets: Number(d.total_assets ?? d.totalAssets ?? 0),
+    compliance_score: Number(d.compliance_score ?? d.complianceScore ?? 0),
+    by_category: { ...rawCategory },
+    by_cloud_provider: { ...rawCloud },
+    quantum_safe_count: Number(d.quantum_safe_count ?? d.quantumSafeCount ?? 0),
+    non_quantum_safe: Number(d.non_quantum_safe ?? d.nonQuantumSafe ?? 0),
+    vulnerable_assets: Number(d.vulnerable_assets ?? d.vulnerableAssets ?? 0),
   };
 }

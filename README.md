@@ -8,6 +8,8 @@ Cryptographic Bill of Materials (CBOM) platform for discovering, inventorying, a
 
 **Live app:** https://rivicq.github.io/RivicQ_CSPM_EaaS/
 
+Design-partner beta: [BETA_PROGRAM.md](BETA_PROGRAM.md) · [Live outcome](docs/STATUS.md) · [Known limitations](docs/KNOWN_LIMITATIONS.md) · [Beta checklist](docs/BETA_READY.md)
+
 ---
 
 ## What is a CBOM?
@@ -16,7 +18,19 @@ A **Cryptographic Bill of Materials** inventories every cryptographic component 
 
 ---
 
-## Quick start — scan in 5 minutes
+## Quick start — first CBOM in 10 minutes
+
+1. Open https://rivicq.github.io/RivicQ_CSPM_EaaS/
+2. Paste a **public** GitHub URL (for example `https://github.com/owner/repo`) and click **Scan for Crypto Risk**.
+3. Read the CBOM: algorithms, key sizes, quantum exposure, BSI / DORA / eIDAS mapping. Export JSON + PDF.
+4. Register (Community) to keep scan history, inventory, and workspace settings.
+5. For containers, private repos, or live TLS: run the engine locally (`make dev-stack`) and use `/scanner`.
+
+Full CLI/API guide: [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md)
+
+---
+
+## Local engine (CLI)
 
 ```bash
 git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git

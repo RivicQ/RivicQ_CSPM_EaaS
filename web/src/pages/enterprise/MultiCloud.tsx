@@ -8,6 +8,7 @@ import {
   Chip,
   Button,
   LinearProgress,
+  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -75,11 +76,12 @@ const MultiCloud: React.FC = () => {
     } catch (error) {
       console.error('Failed to load cloud data:', error);
       setSummary({
-        total_resources: 1604,
-        by_provider: { aws: 847, gcp: 523, ibm_cloud: 234 },
-        by_service: { ec2: 120, s3: 85, compute: 95, storage: 65, vsi: 45 },
-        security_findings: { critical: 2, high: 8, medium: 15, low: 22 },
-        compliance: { iso27001: '85%', nist: '78%', pqc: '65%' },
+        total_resources: 0,
+        by_provider: {},
+        by_service: {},
+        security_findings: { critical: 0, high: 0, medium: 0, low: 0 },
+        compliance: {},
+        error: 'Cloud credentials are not configured. Connect AWS, Azure, GCP, or IBM to populate inventory.',
       });
     } finally {
       setLoading(false);
@@ -99,23 +101,13 @@ const MultiCloud: React.FC = () => {
   const barData = summary?.by_provider ? Object.entries(summary.by_provider).map(([name, value]) => ({
     name: name.toUpperCase(),
     resources: value,
-  })) : [
-    { name: 'AWS', resources: 847 },
-    { name: 'GCP', resources: 523 },
-    { name: 'IBM', resources: 234 },
-  ];
+  })) : [];
 
   const serviceData = summary?.by_service ? Object.entries(summary.by_service).map(([name, value]) => ({
     name,
     count: value,
-  })) : [
-    { name: 'EC2', count: 120 },
-    { name: 'S3', count: 85 },
-    { name: 'RDS', count: 45 },
-    { name: 'Compute', count: 95 },
-    { name: 'Storage', count: 65 },
-    { name: 'VSI', count: 45 },
-  ];
+  })) : [];
+  const svc = (key: string) => Number(summary?.by_service?.[key] ?? 0);
 
   return (
     <Box>
@@ -134,13 +126,16 @@ const MultiCloud: React.FC = () => {
       </Box>
 
       {loading && <LinearProgress sx={{ mb: 2 }} />}
+      {summary?.error && (
+        <Alert severity="info" sx={{ mb: 2 }}>{summary.error}</Alert>
+      )}
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Total Resources</Typography>
-              <Typography variant="h3">{summary?.total_resources || '1,604'}</Typography>
+              <Typography variant="h3">{summary?.total_resources ?? 0}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -148,7 +143,7 @@ const MultiCloud: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>AWS Resources</Typography>
-              <Typography variant="h4" sx={{ color: CLOUD_COLORS.aws }}>{summary?.by_provider?.aws || '847'}</Typography>
+              <Typography variant="h4" sx={{ color: CLOUD_COLORS.aws }}>{summary?.by_provider?.aws ?? 0}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -156,7 +151,7 @@ const MultiCloud: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>GCP Resources</Typography>
-              <Typography variant="h4" sx={{ color: CLOUD_COLORS.gcp }}>{summary?.by_provider?.gcp || '523'}</Typography>
+              <Typography variant="h4" sx={{ color: CLOUD_COLORS.gcp }}>{summary?.by_provider?.gcp ?? 0}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -164,7 +159,7 @@ const MultiCloud: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Security Findings</Typography>
-              <Typography variant="h4" color="error.main">{summary?.security_findings?.critical || '2'}</Typography>
+              <Typography variant="h4" color="error.main">{summary?.security_findings?.critical ?? 0}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -222,11 +217,11 @@ const MultiCloud: React.FC = () => {
           {activeTab === 0 && (
             <Grid container spacing={2}>
               {[
-                { type: 'EC2', count: 120, icon: <Dns /> },
-                { type: 'S3 Buckets', count: 85, icon: <Storage /> },
-                { type: 'RDS', count: 45, icon: <Dns /> },
-                { type: 'EKS Clusters', count: 8, icon: <Cloud /> },
-                { type: 'Security Groups', count: 120, icon: <Security /> },
+                { type: 'EC2', count: svc('ec2'), icon: <Dns /> },
+                { type: 'S3 Buckets', count: svc('s3'), icon: <Storage /> },
+                { type: 'RDS', count: svc('rds'), icon: <Dns /> },
+                { type: 'EKS Clusters', count: svc('eks'), icon: <Cloud /> },
+                { type: 'Security Groups', count: svc('security_groups'), icon: <Security /> },
               ].map((item) => (
                 <Grid item xs={12} sm={6} md={4} key={item.type}>
                   <Card variant="outlined">
@@ -245,11 +240,11 @@ const MultiCloud: React.FC = () => {
           {activeTab === 1 && (
             <Grid container spacing={2}>
               {[
-                { type: 'Compute Instances', count: 95, icon: <Dns /> },
-                { type: 'Storage Buckets', count: 65, icon: <Storage /> },
-                { type: 'Cloud SQL', count: 30, icon: <Dns /> },
-                { type: 'GKE Clusters', count: 6, icon: <Cloud /> },
-                { type: 'Firewall Rules', count: 85, icon: <Security /> },
+                { type: 'Compute Instances', count: svc('compute'), icon: <Dns /> },
+                { type: 'Storage Buckets', count: svc('storage'), icon: <Storage /> },
+                { type: 'Cloud SQL', count: svc('cloudsql'), icon: <Dns /> },
+                { type: 'GKE Clusters', count: svc('gke'), icon: <Cloud /> },
+                { type: 'Firewall Rules', count: svc('firewall'), icon: <Security /> },
               ].map((item) => (
                 <Grid item xs={12} sm={6} md={4} key={item.type}>
                   <Card variant="outlined">
@@ -268,11 +263,11 @@ const MultiCloud: React.FC = () => {
           {activeTab === 2 && (
             <Grid container spacing={2}>
               {[
-                { type: 'VSI Instances', count: 45, icon: <Dns /> },
-                { type: 'COS Buckets', count: 25, icon: <Storage /> },
-                { type: 'DB2', count: 15, icon: <Dns /> },
-                { type: 'IKS Clusters', count: 4, icon: <Cloud /> },
-                { type: 'Quantum Instances', count: 3, icon: <Cloud /> },
+                { type: 'VSI Instances', count: svc('vsi'), icon: <Dns /> },
+                { type: 'COS Buckets', count: svc('cos'), icon: <Storage /> },
+                { type: 'DB2', count: svc('db2'), icon: <Dns /> },
+                { type: 'IKS Clusters', count: svc('iks'), icon: <Cloud /> },
+                { type: 'Quantum Instances', count: svc('quantum'), icon: <Cloud /> },
               ].map((item) => (
                 <Grid item xs={12} sm={6} md={4} key={item.type}>
                   <Card variant="outlined">

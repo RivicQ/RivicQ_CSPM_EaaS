@@ -12,8 +12,11 @@ env:
 
 jobs:
   # CodeQL Analysis
+  # Default GitHub CodeQL setup is enabled on this repo. Advanced SARIF
+  # uploads are rejected with "cannot be processed when the default setup is enabled".
   codeql-analysis:
     name: CodeQL Analysis
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -58,10 +61,10 @@ jobs:
         continue-on-error: true
 
       - name: Golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: latest
-          args: --timeout=5m --out-format=github-actions
+          version: v2.4.0
+          args: --timeout=5m
         continue-on-error: true
 
       - name: Trivy Vulnerability Scanner
@@ -156,7 +159,7 @@ jobs:
 
       - name: Run Unit Tests
         env:
-          DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_test?sslmode=require
+          DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_test?sslmode=disable
         run: |
           go test -v -race -coverprofile=coverage.out ./...
           go tool cover -html=coverage.out -o coverage.html
@@ -201,6 +204,11 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: cryptobom
           POSTGRES_DB: cryptobom_integration
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 5432:5432
 
@@ -213,19 +221,18 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Download dependencies
+        run: go mod download
+
       - name: Start OSS Server
-        run: |
-          ./run-edition.sh oss start &
-          sleep 5
+        run: ./run-edition.sh oss start
 
       - name: Start Enterprise Server
-        run: |
-          ./run-edition.sh enterprise start &
-          sleep 5
+        run: ./run-edition.sh enterprise start
 
       - name: Run Integration Tests
         env:
-          DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_integration?sslmode=require
+          DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_integration?sslmode=disable
         run: |
           go test -v -tags=integration ./tests/integration/...
 
@@ -244,7 +251,7 @@ jobs:
       contents: read
 
     env:
-      DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_validation?sslmode=require
+      DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_validation?sslmode=disable
       JWT_SECRET: production-validation-secret-please-replace
       KUBE_CONFIG_STAGING: dummy
       KUBE_CONFIG_PROD: dummy
@@ -274,9 +281,15 @@ jobs:
           helm lint deploy/helm/cryptobom-oss
           helm lint deploy/helm/cryptobom-saas
 
+      - name: Download modules
+        run: go mod download
+
+      - name: Build OSS server
+        run: go build -o /tmp/cryptobom-oss ./cmd/server/oss/main.go
+
       - name: Start OSS server
         run: |
-          go run ./cmd/server/oss/main.go > /tmp/cryptobom-oss.log 2>&1 &
+          /tmp/cryptobom-oss > /tmp/cryptobom-oss.log 2>&1 &
           echo $! > /tmp/cryptobom-oss.pid
           for _ in $(seq 1 30); do
             if curl -sf http://localhost:8080/healthz >/dev/null; then
@@ -290,9 +303,12 @@ jobs:
       - name: Validate OSS production readiness
         run: API_URL=http://localhost:8080/api/v1 ./scripts/production-readiness.sh --strict
 
+      - name: Build Enterprise server
+        run: go build -tags enterprise -o /tmp/cryptobom-enterprise ./cmd/server/enterprise/main.go
+
       - name: Start Enterprise server
         run: |
-          go run -tags enterprise ./cmd/server/enterprise/main.go > /tmp/cryptobom-enterprise.log 2>&1 &
+          /tmp/cryptobom-enterprise > /tmp/cryptobom-enterprise.log 2>&1 &
           echo $! > /tmp/cryptobom-enterprise.pid
           for _ in $(seq 1 30); do
             if curl -sf http://localhost:9090/healthz >/dev/null; then
@@ -396,6 +412,7 @@ jobs:
           context: .
           file: ./deploy/docker/Dockerfile.${{ matrix.edition }}
           push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: |
             ${{ steps.img.outputs.path }}:${{ matrix.edition }}-latest
             ${{ steps.img.outputs.path }}:${{ matrix.edition }}-${{ github.sha }}
@@ -403,10 +420,11 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Generate SBOM (Syft)
-        uses: anchore/syft-action@v0.11.0
+        uses: anchore/sbom-action@v0
         with:
           image: ${{ steps.img.outputs.path }}:${{ matrix.edition }}-${{ github.sha }}
-          output: sbom.json
+          format: cyclonedx-json
+          output-file: sbom.json
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
@@ -748,20 +766,22 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: web/package-lock.json
 
-      - name: Install Dependencies
-        run: |
-          cd docs/
-          npm ci
+      - name: Install frontend dependencies
+        working-directory: web
+        run: npm ci
 
-      - name: Build Documentation
-        run: |
-          cd docs/
-          npm run build
+      - name: Build documentation site
+        working-directory: web
+        run: npm run build
+        env:
+          REACT_APP_EDITION: community
 
       - name: Deploy Documentation to GitHub Pages
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build
+          publish_dir: ./web/build
           destination_dir: docs
