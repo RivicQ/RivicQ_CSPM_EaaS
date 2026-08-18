@@ -1,0 +1,55 @@
+name: RivicQ Security Gate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rivicq-scan:
+    name: RivicQ self-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: Build RivicQ CLI
+        run: |
+          mkdir -p bin
+          go build -o bin/rivicq ./cmd/rivicq
+
+      - name: Run RivicQ repository scan
+        run: |
+          ./bin/rivicq scan . --format json --fail-on BLOCK | tee rivicq-report.json
+
+      - name: Upload intelligence report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rivicq-intelligence-report
+          path: rivicq-report.json
+
+      - name: Optional Syft SBOM
+        continue-on-error: true
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: syft-sbom.json
+
+      - name: Upload optional Syft SBOM
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: syft-sbom
+          path: syft-sbom.json

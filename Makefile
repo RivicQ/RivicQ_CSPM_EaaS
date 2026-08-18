@@ -12,7 +12,7 @@
 #   make clean        – remove build artifacts
 
 .PHONY: all dev dev-core dev-backend dev-enterprise dev-frontend build build-core build-oss build-enterprise \
-        test lint migrate seed docker-up docker-down clean help
+        build-rivicq rivicq-scan test lint migrate seed docker-up docker-down clean help
 
 GO        ?= go
 GOFLAGS   ?=
@@ -47,7 +47,7 @@ dev-frontend:
 
 # ── Build ───────────────────────────────────────────────────────────────────
 ## Build all binaries
-build: build-core build-oss build-enterprise
+build: build-core build-oss build-enterprise build-rivicq
 
 build-core:
 	@mkdir -p $(BIN_DIR)
@@ -60,6 +60,15 @@ build-oss:
 build-enterprise:
 	@mkdir -p $(BIN_DIR)
 	$(GO) build $(GOFLAGS) -tags enterprise -o $(BIN_DIR)/cryptobom-enterprise ./cmd/server/enterprise/
+
+## Build the RivicQ community CLI (`rivicq scan`)
+build-rivicq:
+	@mkdir -p $(BIN_DIR)
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/rivicq ./cmd/rivicq
+
+## Run a repository scan with the community CLI (fixtures/testdata excluded)
+rivicq-scan: build-rivicq
+	./$(BIN_DIR)/rivicq scan . --fail-on BLOCK
 
 # ── Tests ───────────────────────────────────────────────────────────────────
 ## Run Go unit tests with race detector

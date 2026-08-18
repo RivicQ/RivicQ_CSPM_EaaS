@@ -57,6 +57,12 @@ func TestMaskSecret(t *testing.T) {
 	require.NotContains(t, masked, "demoSynthetic")
 }
 
+func TestIsPlaceholderSecret(t *testing.T) {
+	require.True(t, isPlaceholderSecret(`password: ${{ secrets.GITHUB_TOKEN }}`))
+	require.True(t, isPlaceholderSecret(`JWT_SECRET: "REPLACE_WITH_ACTUAL_SECRET"`))
+	require.False(t, isPlaceholderSecret(`password: "hunter2-not-a-template-value"`))
+}
+
 func TestSplitRepo(t *testing.T) {
 	owner, name, ok := splitRepo("https://github.com/rivicq/demo-vulnerable-app.git")
 	require.True(t, ok)

@@ -1,0 +1,30 @@
+name: 'RivicQ Security Scan'
+description: 'Run the RivicQ intelligence CLI (SBOM, CBOM, SCA, secrets, SAST, IaC, policy gate) against this repository.'
+inputs:
+  path:
+    description: 'Path to scan'
+    required: false
+    default: '.'
+  fail-on:
+    description: 'Policy gate level that fails the job (BLOCK or WARN)'
+    required: false
+    default: 'BLOCK'
+  format:
+    description: 'CLI output format'
+    required: false
+    default: 'json'
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+        cache: true
+    - name: Build RivicQ CLI
+      shell: bash
+      run: |
+        mkdir -p bin
+        go build -o bin/rivicq ./cmd/rivicq
+    - name: Scan
+      shell: bash
+      run: ./bin/rivicq scan "${{ inputs.path }}" --format "${{ inputs.format }}" --fail-on "${{ inputs.fail-on }}" | tee rivicq-report.json

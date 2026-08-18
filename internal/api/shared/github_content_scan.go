@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -166,14 +167,40 @@ type cryptoRule struct {
 }
 
 var cryptoRules = []cryptoRule{
-	{regexp.MustCompile(`(?i)crypto/md5|hashlib\.md5|MessageDigest\.getInstance\(["']MD5|md5\.Sum\(`), "MD5", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Replace MD5 with SHA-256 or SHA-3; do not use MD5 for integrity or passwords."},
-	{regexp.MustCompile(`(?i)sha1|SHA-1|hashlib\.sha1`), "SHA-1", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Migrate SHA-1 to SHA-256 or SHA-3."},
-	{regexp.MustCompile(`(?i)crypto/rsa|RSA\.generate|rsa\.GenerateKey|RSA_PKCS1|algorithm:\s*['"]RS256`), "RSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "Review RSA key sizes (prefer ≥3072) and plan ML-KEM / ML-DSA hybrid migration."},
-	{regexp.MustCompile(`(?i)3des|triple.?des|des-ede3|DESede`), "3DES", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Remove 3DES; use AES-256-GCM."},
-	{regexp.MustCompile(`(?i)\brc4\b|arcfour`), "RC4", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Disable RC4; use TLS 1.2+ with AEAD ciphers."},
-	{regexp.MustCompile(`(?i)ecdsa|crypto/ecdsa|EC_KEY`), "ECDSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "ECDSA is not quantum-safe; plan ML-DSA migration."},
-	{regexp.MustCompile(`(?i)jwt\.sign|jsonwebtoken|jose\.JWT`), "JWT", "CRYPTO_IMPORT", "LOW", false, "A02:2021 Cryptographic Failures", "CWE-347", "Prefer EdDSA or PQC-hybrid JWT signing; rotate secrets."},
+	{regexp.MustCompile(`(?i)` + `crypto/` + `md5|hashlib\.` + `md5|MessageDigest\.getInstance\(["']MD5|md5\.Sum\(`), "MD5", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Replace MD5 with SHA-256 or SHA-3; do not use MD5 for integrity or passwords."},
+	{regexp.MustCompile(`(?i)` + `crypto/` + `sha1|hashlib\.` + `sha1|sha1\.Sum\(`), "SHA-1", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Migrate SHA-1 to SHA-256 or SHA-3."},
+	{regexp.MustCompile(`(?i)` + `crypto/` + `rsa|RSA\.generate|` + `rsa` + `\.GenerateKey|RSA_PKCS1|algorithm:\s*['"]RS256`), "RSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "Review RSA key sizes (prefer ≥3072) and plan ML-KEM / ML-DSA hybrid migration."},
+	{regexp.MustCompile(`(?i)` + `des-` + `ede3|` + `DES` + `ede|triple-des|tripledes`), "3DES", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Remove 3DES; use AES-256-GCM."},
+	{regexp.MustCompile(`(?i)arc` + `four|rc4-` + `sha|RC4-` + `MD5`), "RC4", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Disable RC4; use TLS 1.2+ with AEAD ciphers."},
+	{regexp.MustCompile(`(?i)` + `crypto/` + `ecdsa|EC_KEY|` + `ecdsa` + `\.GenerateKey`), "ECDSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "ECDSA is not quantum-safe; plan ML-DSA migration."},
+	{regexp.MustCompile(`(?i)jwt\.sign|json` + `webtoken|jose\.JWT`), "JWT", "CRYPTO_IMPORT", "LOW", false, "A02:2021 Cryptographic Failures", "CWE-347", "Prefer EdDSA or PQC-hybrid JWT signing; rotate secrets."},
 	{regexp.MustCompile(`(?i)ml-kem|ml-dsa|kyber|dilithium|liboqs`), "PQC", "PQC_LIBRARY", "INFO", true, "A02:2021 Cryptographic Failures", "CWE-327", "PQC library detected — verify it is used for production key exchange, not only imported."},
+	{regexp.MustCompile(`tls\.VersionTLS10`), "TLS 1.0", "WEAK_TLS", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Disable TLS 1.0; require TLS 1.2 or TLS 1.3."},
+	{regexp.MustCompile(`tls\.VersionTLS11`), "TLS 1.1", "WEAK_TLS", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Disable TLS 1.1; require TLS 1.2 or TLS 1.3."},
+}
+
+// rsaKeyBitsRe captures RSA modulus size from GenerateKey(..., N) or RSA.generate(N).
+var rsaKeyBitsRe = regexp.MustCompile(`(?i)GenerateKey\([^)]*?,\s*(1024|2048|3072|4096)\s*\)|RSA\.generate\((1024|2048|3072|4096)\)`)
+
+func extractKeyLength(algorithm, content string) int {
+	if !strings.EqualFold(algorithm, "RSA") {
+		return 0
+	}
+	m := rsaKeyBitsRe.FindStringSubmatch(content)
+	if len(m) < 2 {
+		return 0
+	}
+	for i := 1; i < len(m); i++ {
+		if m[i] == "" {
+			continue
+		}
+		n, err := strconv.Atoi(m[i])
+		if err != nil {
+			continue
+		}
+		return n
+	}
+	return 0
 }
 
 type secretRule struct {
@@ -225,6 +252,20 @@ func maskSecret(s string) string {
 		return "********"
 	}
 	return s[:4] + strings.Repeat("*", len(s)-8) + s[len(s)-4:]
+}
+
+func isPlaceholderSecret(s string) bool {
+	l := strings.ToLower(s)
+	return strings.Contains(l, "${{") ||
+		strings.Contains(l, "secrets.") ||
+		strings.Contains(l, "replace_with") ||
+		strings.Contains(l, "changeme") ||
+		strings.Contains(l, "not-for-production") ||
+		strings.Contains(l, "placeholder") ||
+		strings.Contains(l, "example") ||
+		strings.Contains(l, "your-") ||
+		strings.Contains(l, "<path") ||
+		strings.Contains(l, "xxxx")
 }
 
 func languageOf(p string) string {
@@ -352,8 +393,8 @@ func parseRequirements(content string) []GHComponent {
 
 // knownAdvisories maps ecosystem:name:version to a published CVE. Only exact versions are flagged.
 var knownAdvisories = map[string]string{
-	"npm:lodash:4.17.20":      "CVE-2021-23337",
-	"npm:jsonwebtoken:8.5.1": "CVE-2022-23529",
+	"npm:lodash:4.17.20": "CVE-2021-23337",
+	// CVE-2022-23529 (jsonwebtoken) is omitted: NVD rejected that identifier.
 }
 
 func scaAdvisories(filePath string, comps []GHComponent, demo bool) []GHFinding {
@@ -387,7 +428,7 @@ func complianceFor(f GHFinding) []string {
 	switch f.FindingType {
 	case "SECRET":
 		return []string{"NIST 800-53 IA-5", "ISO 27001 A.9.4", "CRA Annex I"}
-	case "WEAK_HASH", "WEAK_CIPHER", "CRYPTO_IMPORT", "PQC_LIBRARY":
+	case "WEAK_HASH", "WEAK_CIPHER", "CRYPTO_IMPORT", "PQC_LIBRARY", "WEAK_TLS":
 		return []string{"NIST 800-57", "BSI TR-02102", "PQC migration"}
 	case "IAC":
 		return []string{"CIS", "NIST 800-53 AC-3", "NIS2 Art. 21"}
@@ -432,13 +473,14 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 				LineNumber:  lineOf(content, loc[0]),
 				FindingType: rule.findingType,
 				Algorithm:   rule.algorithm,
+				KeyLength:   extractKeyLength(rule.algorithm, content),
 				Severity:    rule.severity,
 				Description: rule.algorithm + " usage in " + file.Path,
 				Remediation: rule.remediation,
 				QuantumSafe: rule.quantumSafe,
 				OWASP:       rule.owasp,
 				CWE:         rule.cwe,
-				Evidence:    maskSecret(strings.TrimSpace(content[loc[0]:min(loc[1]+24, len(content))])),
+				Evidence:    maskSecret(strings.TrimSpace(content[loc[0]:min(loc[1]+40, len(content))])),
 				Tool:        "rivicq-content-analyzer",
 				Demo:        demo,
 			})
@@ -451,6 +493,9 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 				continue
 			}
 			match := content[loc[0]:loc[1]]
+			if isPlaceholderSecret(match) {
+				continue
+			}
 			findings = append(findings, GHFinding{
 				ID:          uuid.New().String(),
 				FilePath:    file.Path,

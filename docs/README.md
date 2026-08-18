@@ -11,6 +11,7 @@
 
 - [PQC Migration Guide](PQC_MIGRATION.md)
 - [OSS Architecture](oss-architecture.md)
+- [Security Intelligence Engine](security-intelligence.md)
 - [Security Control Matrix](SECURITY_CONTROL_MATRIX.md)
 - [Rollback Runbook](ROLLBACK_RUNBOOK.md)
 

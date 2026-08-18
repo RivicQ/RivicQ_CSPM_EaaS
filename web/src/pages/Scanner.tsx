@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Box, Button, Chip, Grid, LinearProgress, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
+  Alert, Box, Button, Chip, Grid, LinearProgress, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
 import { GitHub, PlayArrow, CheckCircle, Error as ErrorIcon, Schedule, Security, Refresh,
   History, BugReport, Event, Speed,
@@ -25,6 +25,13 @@ interface ScanJob {
   startedAt?: string;
   findings: number;
   progress: number;
+}
+
+interface PolicyGate {
+  decision?: string;
+  failed?: boolean;
+  reasons?: string[];
+  warnings?: string[];
 }
 
 interface ScanFinding {
@@ -67,6 +74,7 @@ const Scanner: React.FC = () => {
   const [scanTarget, setScanTarget] = useState('./');
   const [scanJobs, setScanJobs] = useState<ScanJob[]>([]);
   const [liveFindings, setLiveFindings] = useState<ScanFinding[]>([]);
+  const [policyGate, setPolicyGate] = useState<PolicyGate | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const pollTimerRef = useRef<number | null>(null);
@@ -145,6 +153,12 @@ const Scanner: React.FC = () => {
           clearPolling();
           setIsScanning(false);
           refreshScanData();
+          if (status === 'completed') {
+            cbomService.getScanIntelligence(scanId).then((intel) => {
+              const gate = intel.data?.gate;
+              if (gate) setPolicyGate(gate);
+            }).catch(() => undefined);
+          }
         }
       } catch {
         if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
@@ -280,6 +294,12 @@ const Scanner: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tab} index={2}>
+          {policyGate && (
+            <Alert severity={policyGate.failed ? 'error' : 'success'} sx={{ mb: 2 }}>
+              Policy gate: {policyGate.decision ?? 'ALLOW'}
+              {policyGate.reasons?.[0] ? ` — ${policyGate.reasons[0]}` : ''}
+            </Alert>
+          )}
           {findings.length === 0 ? (
             <EmptyState icon={<BugReport />} title="No findings yet" description="Complete a CBOM scan to populate cryptographic findings from TLS, SSH, HTTP, and SBOM discovery." action={{ label: 'Run Scan', onClick: () => setTab(0) }} />
           ) : (

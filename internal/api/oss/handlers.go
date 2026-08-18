@@ -129,6 +129,8 @@ func RegisterSupplementalRoutes(router *gin.RouterGroup, logger *logrus.Logger) 
 		coreGroup.GET("/services", getCoreServices(logger))
 		coreGroup.GET("/integrations/:name", getCoreIntegrationCheck(logger))
 	}
+
+	shared.SetupIntelligenceRoutes(router, logger)
 }
 
 func attestCBOMReportOSS(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {

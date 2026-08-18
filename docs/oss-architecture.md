@@ -25,7 +25,8 @@ internal/
   compliance/     NEW: OSS compliance engine (DORA, NIS2, NIST CSF, CRA, ENISA)
   config/         Configuration loader; enterprise-specific fields in oss.go
   database/       OSS DB layer (enterprise_database.go gated with //go:build enterprise)
-  discovery/      TLS, SSH, and HTTP protocol scanners
+  discovery/      TLS, SSH, HTTP, and SBOM protocol scanners
+  intelligence/   NEW: normalized findings, crypto risk, policy gate, CycloneDX CBOM
   observability/  OpenTelemetry structured audit logging
   quantum/
     attestation.go           Local PQC scan + attestation report generation

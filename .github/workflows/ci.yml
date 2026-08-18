@@ -26,6 +26,9 @@ jobs:
       - name: Build OSS
         run: go build -o /dev/null ./cmd/server/oss/
 
+      - name: Build RivicQ CLI
+        run: go build -o /dev/null ./cmd/rivicq
+
       - name: Build Enterprise
         run: go build -tags enterprise -o /dev/null ./cmd/server/enterprise/
 

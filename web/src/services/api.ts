@@ -428,6 +428,18 @@ export const cbomService = {
   getScanQBOM: (scanId: string) =>
     api.get(`/scans/${scanId}/qbom`),
 
+  getScanIntelligence: (scanId: string) =>
+    api.get(`/scans/${scanId}/intelligence`),
+
+  getScanCycloneDX: (scanId: string) =>
+    api.get(`/scans/${scanId}/cyclonedx`),
+
+  getPolicies: () =>
+    api.get('/policies'),
+
+  getNormalizedFindings: () =>
+    api.get('/findings'),
+
   // Get CBOM for a specific asset
   getAssetBOM: (assetId: string) =>
     api.get(`/assets/${assetId}/bom`),
