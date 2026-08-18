@@ -14,14 +14,17 @@ type Finding = {
 type TopFindingsListProps = {
   findings: Finding[];
   maxItems?: number;
+  onSelect?: (id: string) => void;
 };
 
-const TopFindingsList: React.FC<TopFindingsListProps> = ({ findings, maxItems = 5 }) => (
+const TopFindingsList: React.FC<TopFindingsListProps> = ({ findings, maxItems = 5, onSelect }) => (
   <Box>
     {findings.slice(0, maxItems).map((f, i) => (
       <Box
         key={f.id}
+        onClick={() => onSelect?.(f.id)}
         sx={{
+          cursor: onSelect ? 'pointer' : 'default',
           display: 'flex',
           gap: 1.5,
           py: 1.5,

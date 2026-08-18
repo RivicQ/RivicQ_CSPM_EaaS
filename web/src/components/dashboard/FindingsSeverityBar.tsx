@@ -12,17 +12,18 @@ type FindingsCounts = {
 
 type FindingsSeverityBarProps = {
   findings: FindingsCounts;
+  onSelect?: (severity: keyof FindingsCounts) => void;
 };
 
-const FindingsSeverityBar: React.FC<FindingsSeverityBarProps> = ({ findings }) => {
+const FindingsSeverityBar: React.FC<FindingsSeverityBarProps> = ({ findings, onSelect }) => {
   const theme = useTheme();
   const total = findings.critical + findings.high + findings.medium + findings.low || 1;
 
   const segments = [
-    { key: 'Critical', value: findings.critical, color: dashboardDesign.severity.palette[3] },
-    { key: 'High', value: findings.high, color: dashboardDesign.severity.palette[2] },
-    { key: 'Medium', value: findings.medium, color: dashboardDesign.severity.palette[1] },
-    { key: 'Low', value: findings.low, color: dashboardDesign.severity.palette[0] },
+    { key: 'Critical', sev: 'critical' as const, value: findings.critical, color: dashboardDesign.severity.palette[3] },
+    { key: 'High', sev: 'high' as const, value: findings.high, color: dashboardDesign.severity.palette[2] },
+    { key: 'Medium', sev: 'medium' as const, value: findings.medium, color: dashboardDesign.severity.palette[1] },
+    { key: 'Low', sev: 'low' as const, value: findings.low, color: dashboardDesign.severity.palette[0] },
   ];
 
   return (
@@ -32,11 +33,13 @@ const FindingsSeverityBar: React.FC<FindingsSeverityBarProps> = ({ findings }) =
           s.value > 0 && (
             <Box
               key={s.key}
+              onClick={() => onSelect?.(s.sev)}
               sx={{
                 width: `${(s.value / total) * 100}%`,
                 bgcolor: s.color,
                 transition: 'width 0.5s ease',
                 minWidth: s.value > 0 ? 4 : 0,
+                cursor: onSelect ? 'pointer' : 'default',
               }}
             />
           )
@@ -44,7 +47,7 @@ const FindingsSeverityBar: React.FC<FindingsSeverityBarProps> = ({ findings }) =
       </Box>
       <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
         {segments.map((s) => (
-          <Stack key={s.key} direction="row" spacing={1} alignItems="center">
+          <Stack key={s.key} direction="row" spacing={1} alignItems="center" onClick={() => onSelect?.(s.sev)} sx={{ cursor: onSelect ? 'pointer' : 'default' }}>
             <Box sx={{ width: 10, height: 10, borderRadius: 0.75, bgcolor: s.color }} />
             <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 500 }}>{s.key}</Typography>
             <Typography sx={{ ...metricValueSx, fontSize: '0.875rem', color: s.color }}>{s.value}</Typography>

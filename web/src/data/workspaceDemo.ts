@@ -1,32 +1,35 @@
-/** Rich demo payloads when live APIs return sparse or empty data. */
-export const DEMO_ASSETS = [
-  { id: 'asset-1', name: 'prod-api TLS cert', category: 'cryptographic', cloud_provider: 'aws', algorithm: 'RSA-2048', crypto_algorithm: 'RSA-2048', key_size: 2048, risk_level: 'HIGH', quantum_safe: false, discovered_at: new Date().toISOString(), location: 'us-east-1', owner: 'platform-team' },
-  { id: 'asset-2', name: 'azure-keyvault-prod', category: 'cryptographic', cloud_provider: 'azure', algorithm: 'AES-256', crypto_algorithm: 'AES-256', key_size: 256, risk_level: 'LOW', quantum_safe: true, discovered_at: new Date().toISOString(), location: 'westeurope', owner: 'security-ops' },
-  { id: 'asset-3', name: 'gcs-bucket-keys', category: 'cryptographic', cloud_provider: 'gcp', algorithm: 'ECDSA P-256', crypto_algorithm: 'ECDSA', key_size: 256, risk_level: 'MEDIUM', quantum_safe: false, discovered_at: new Date().toISOString(), location: 'europe-west1', owner: 'data-platform' },
-  { id: 'asset-4', name: 'k8s-secrets-tls', category: 'cryptographic', cloud_provider: 'kubernetes', algorithm: 'ML-KEM-768', crypto_algorithm: 'ML-KEM', key_size: 768, risk_level: 'LOW', quantum_safe: true, discovered_at: new Date().toISOString(), location: 'cluster-prod', owner: 'devops' },
-  { id: 'asset-5', name: 'legacy-3des-hsm', category: 'cryptographic', cloud_provider: 'aws', algorithm: '3DES', crypto_algorithm: '3DES', key_size: 168, risk_level: 'CRITICAL', quantum_safe: false, discovered_at: new Date().toISOString(), location: 'us-west-2', owner: 'payments' },
-  { id: 'asset-6', name: 'jwt-signing-key', category: 'cryptographic', cloud_provider: 'aws', algorithm: 'RSA-4096', crypto_algorithm: 'RSA-4096', key_size: 4096, risk_level: 'HIGH', quantum_safe: false, discovered_at: new Date().toISOString(), location: 'us-east-1', owner: 'identity' },
-  { id: 'asset-7', name: 'ibm-hpcs-master', category: 'hardware', cloud_provider: 'ibm_cloud', algorithm: 'AES-256-GCM', crypto_algorithm: 'AES-256-GCM', key_size: 256, risk_level: 'LOW', quantum_safe: true, discovered_at: new Date().toISOString(), location: 'eu-de', owner: 'crypto-services' },
-  { id: 'asset-8', name: 'ml-model-signing', category: 'ai', cloud_provider: 'gcp', algorithm: 'Ed25519', crypto_algorithm: 'Ed25519', key_size: 256, risk_level: 'MEDIUM', quantum_safe: false, discovered_at: new Date().toISOString(), location: 'us-central1', owner: 'ml-platform' },
-];
+/** Demo payloads when live APIs return sparse or empty data. Sourced from the labelled enterprise simulation. */
+import { getEnterpriseSimulation, simulationInventorySummary } from './enterprise/simulation';
 
-export const DEMO_INVENTORY_SUMMARY = {
-  total_assets: 150,
-  compliance_score: 74,
-  by_category: { cryptographic: 89, ai: 12, hardware: 24, software: 18, infrastructure: 7 },
-  by_cloud_provider: { aws: 80, gcp: 45, ibm_cloud: 20, azure: 5 },
-  quantum_safe_count: 94,
-  non_quantum_safe: 56,
-  vulnerable_assets: 23,
-};
+const sim = getEnterpriseSimulation();
 
-export const DEMO_SCAN_FINDINGS = [
-  { id: 'f-1', severity: 'critical', title: 'Weak TLS cipher suite', asset: 'prod-api TLS cert', recommendation: 'Disable RSA key exchange; enable TLS 1.3 with PFS.' },
-  { id: 'f-2', severity: 'critical', title: 'Legacy 3DES in HSM', asset: 'legacy-3des-hsm', recommendation: 'Migrate to AES-256 or ML-KEM wrapped keys.' },
-  { id: 'f-3', severity: 'high', title: 'JWT signing key size below policy', asset: 'jwt-signing-key', recommendation: 'Rotate to ML-DSA or ECDSA with HSM backing.' },
-  { id: 'f-4', severity: 'medium', title: 'ECDSA P-256 harvest risk', asset: 'gcs-bucket-keys', recommendation: 'Plan PQC hybrid migration for long-lived signatures.' },
-  { id: 'f-5', severity: 'low', title: 'Key rotation interval exceeded', asset: 'azure-keyvault-prod', recommendation: 'Enable automatic 90-day rotation.' },
-];
+export const DEMO_ASSETS = sim.assets.map((a) => ({
+  id: a.id,
+  name: a.name,
+  category: a.algorithm ? 'cryptographic' : a.type,
+  cloud_provider: a.provider,
+  algorithm: a.algorithm,
+  crypto_algorithm: a.algorithm,
+  risk_level: a.riskLevel,
+  quantum_safe: !!a.quantumSafe,
+  discovered_at: new Date().toISOString(),
+  location: a.region,
+  owner: a.identity,
+  internet_exposed: a.internetExposed,
+  data_kind: 'demo' as const,
+}));
+
+export const DEMO_INVENTORY_SUMMARY = simulationInventorySummary();
+
+export const DEMO_SCAN_FINDINGS = sim.openFindings.slice(0, 8).map((f) => ({
+  id: f.id,
+  severity: f.severity,
+  title: f.title,
+  asset: f.assetName,
+  recommendation: f.cveId
+    ? `Real CVE ${f.cveId} on a simulated asset — patch or isolate ${f.assetName}.`
+    : f.message,
+}));
 
 export const DEMO_SCAN_SCHEDULES = [
   { id: 'sch-1', name: 'Nightly full CBOM', cron: '0 2 * * *', target: 'all-connected-accounts', type: 'full', status: 'active', nextRun: 'Tonight 02:00 UTC' },
@@ -75,6 +78,7 @@ export function normalizeSummary(data: unknown): typeof DEMO_INVENTORY_SUMMARY {
   const rawCategory = (d.by_category ?? d.byCategory ?? {}) as Record<string, number>;
   const rawCloud = (d.by_cloud_provider ?? d.byCloudProvider ?? {}) as Record<string, number>;
   return {
+    ...DEMO_INVENTORY_SUMMARY,
     total_assets: Number(d.total_assets ?? d.totalAssets ?? DEMO_INVENTORY_SUMMARY.total_assets),
     compliance_score: Number(d.compliance_score ?? d.complianceScore ?? DEMO_INVENTORY_SUMMARY.compliance_score),
     by_category: { ...DEMO_INVENTORY_SUMMARY.by_category, ...rawCategory },

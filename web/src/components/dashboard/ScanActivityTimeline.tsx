@@ -14,6 +14,7 @@ type ScanEvent = {
 
 type ScanActivityTimelineProps = {
   events: ScanEvent[];
+  onSelect?: (id: string) => void;
 };
 
 const statusConfig = {
@@ -22,7 +23,7 @@ const statusConfig = {
   failed: { icon: <ErrorOutline sx={{ fontSize: 16 }} />, color: dashboardDesign.severity.critical, label: 'Failed' },
 };
 
-const ScanActivityTimeline: React.FC<ScanActivityTimelineProps> = ({ events }) => {
+const ScanActivityTimeline: React.FC<ScanActivityTimelineProps> = ({ events, onSelect }) => {
   const theme = useTheme();
 
   return (
@@ -41,7 +42,7 @@ const ScanActivityTimeline: React.FC<ScanActivityTimelineProps> = ({ events }) =
       {events.map((evt) => {
         const cfg = statusConfig[evt.status];
         return (
-          <Box key={evt.id} sx={{ position: 'relative', pb: 2, '&:last-child': { pb: 0 } }}>
+          <Box key={evt.id} onClick={() => onSelect?.(evt.id)} sx={{ position: 'relative', pb: 2, '&:last-child': { pb: 0 }, cursor: onSelect ? 'pointer' : 'default' }}>
             <Box
               sx={{
                 position: 'absolute',

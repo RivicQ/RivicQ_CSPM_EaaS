@@ -3,10 +3,11 @@ import { Box, Grid, Typography, useTheme } from '@mui/material';
 import dashboardDesign from '../../theme/dashboardDesign';
 import { metricValueSx } from '../../theme/designSystem';
 
-type Framework = { id: string; name: string; score: number };
+type Framework = { id: string; name: string; score: number; assessed?: number; passed?: number; failed?: number };
 
 type ComplianceScoreGridProps = {
   frameworks: Framework[];
+  onSelect?: (id: string) => void;
 };
 
 const scoreColor = (score: number) => {
@@ -15,7 +16,7 @@ const scoreColor = (score: number) => {
   return dashboardDesign.severity.critical;
 };
 
-const ComplianceScoreGrid: React.FC<ComplianceScoreGridProps> = ({ frameworks }) => {
+const ComplianceScoreGrid: React.FC<ComplianceScoreGridProps> = ({ frameworks, onSelect }) => {
   const theme = useTheme();
 
   return (
@@ -25,8 +26,13 @@ const ComplianceScoreGrid: React.FC<ComplianceScoreGridProps> = ({ frameworks })
         return (
           <Grid item xs={6} sm={4} md={3} key={fw.id}>
             <Box
+              role={onSelect ? 'button' : undefined}
+              tabIndex={onSelect ? 0 : undefined}
+              onClick={() => onSelect?.(fw.id)}
+              onKeyDown={onSelect ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(fw.id); } } : undefined}
               sx={{
                 p: 1.75,
+                cursor: onSelect ? 'pointer' : 'default',
                 borderRadius: `${dashboardDesign.radius.md}px`,
                 border: 1,
                 borderColor: 'divider',
@@ -50,6 +56,11 @@ const ComplianceScoreGrid: React.FC<ComplianceScoreGridProps> = ({ frameworks })
                 {fw.name}
               </Typography>
               <Typography sx={{ ...metricValueSx, fontSize: '1.5rem', color, mt: 0.5 }}>{fw.score}%</Typography>
+              {fw.assessed != null && (
+                <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', mt: 0.35 }}>
+                  {fw.passed ?? 0}/{fw.assessed} passed{fw.failed ? ` · ${fw.failed} failed` : ''}
+                </Typography>
+              )}
               <Box sx={{ mt: 1.25, height: 4, borderRadius: 2, bgcolor: theme.palette.mode === 'dark' ? 'rgba(148,163,184,0.1)' : 'rgba(100,116,139,0.08)', overflow: 'hidden' }}>
                 <Box sx={{ width: `${fw.score}%`, height: '100%', bgcolor: color, borderRadius: 2 }} />
               </Box>

@@ -13,6 +13,7 @@ type ThreatMetric = {
 
 type ThreatIntelStripProps = {
   metrics: ThreatMetric[];
+  onSelect?: (label: string) => void;
 };
 
 const severityColor = (s?: string) => {
@@ -22,7 +23,7 @@ const severityColor = (s?: string) => {
   return dashboardDesign.severity.low;
 };
 
-const ThreatIntelStrip: React.FC<ThreatIntelStripProps> = ({ metrics }) => (
+const ThreatIntelStrip: React.FC<ThreatIntelStripProps> = ({ metrics, onSelect }) => (
   <Box
     sx={{
       display: 'grid',
@@ -33,9 +34,11 @@ const ThreatIntelStrip: React.FC<ThreatIntelStripProps> = ({ metrics }) => (
     {metrics.map((m) => (
       <Box
         key={m.label}
+        onClick={() => onSelect?.(m.label)}
         sx={{
           minWidth: 0,
           p: 1.75,
+          cursor: onSelect ? 'pointer' : 'default',
           borderRadius: `${dashboardDesign.radius.md}px`,
           border: 1,
           borderColor: 'divider',

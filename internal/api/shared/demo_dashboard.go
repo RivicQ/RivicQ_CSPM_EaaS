@@ -64,14 +64,17 @@ func demoInventorySummary(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Debug("Serving demo inventory summary")
 		c.JSON(http.StatusOK, gin.H{
-			"total_assets":        150,
-			"compliance_score":    74,
-			"by_category":         gin.H{"cryptographic": 89, "ai": 12, "hardware": 24, "software": 18, "infrastructure": 7},
-			"by_cloud_provider":   gin.H{"aws": 80, "gcp": 45, "ibm_cloud": 20, "azure": 5},
-			"quantum_safe_count":  94,
-			"non_quantum_safe":    56,
-			"vulnerable_assets":   23,
+			"total_assets":        18742,
+			"compliance_score":    0,
+			"by_category":         gin.H{"cryptographic": 2140, "compute": 3214, "containers": 4860, "storage": 1280, "databases": 436, "identity": 12680},
+			"by_cloud_provider":   gin.H{"aws": 11480, "azure": 3880, "gcp": 3382},
+			"quantum_safe_count":  1391,
+			"non_quantum_safe":    749,
+			"vulnerable_assets":   842,
 			"last_scan_time":      time.Now().UTC().Format(time.RFC3339),
+			"source":              "enterprise_simulation",
+			"data_kind":           "demo",
+			"note":                "Deterministic enterprise simulation. Scores are calculated in the UI scoring engine, not hardcoded here.",
 		})
 	}
 }
@@ -80,21 +83,23 @@ func demoCloudResourcesSummary(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Debug("Serving demo cloud resources summary")
 		c.JSON(http.StatusOK, gin.H{
-			"total_resources": 150,
+			"total_resources": 18742,
 			"by_provider": gin.H{
-				"aws":       80,
-				"gcp":       45,
-				"ibm_cloud": 20,
-				"azure":     5,
+				"aws":   11480,
+				"azure": 3880,
+				"gcp":   3382,
 			},
 			"security_findings": gin.H{
-				"critical": 2,
-				"high":     8,
-				"medium":   15,
-				"low":      25,
+				"critical": 49,
+				"high":     279,
+				"medium":   874,
+				"low":      1040,
 			},
-			"scan_coverage": 94,
-			"scans_today":   18,
+			"scan_coverage":  94.7,
+			"scans_today":    14,
+			"active_threats": 14,
+			"source":         "enterprise_simulation",
+			"data_kind":      "demo",
 		})
 	}
 }

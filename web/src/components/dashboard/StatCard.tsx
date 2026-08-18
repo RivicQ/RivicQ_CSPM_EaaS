@@ -15,6 +15,7 @@ type StatCardProps = {
   featured?: boolean;
   children?: React.ReactNode;
   delay?: number;
+  onClick?: () => void;
 };
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -27,6 +28,7 @@ const StatCard: React.FC<StatCardProps> = ({
   featured,
   children,
   delay = 0,
+  onClick,
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -38,6 +40,10 @@ const StatCard: React.FC<StatCardProps> = ({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: delay * 0.05, ease: [0.4, 0, 0.2, 1] }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
       sx={{
         height: '100%',
         position: 'relative',
@@ -49,6 +55,7 @@ const StatCard: React.FC<StatCardProps> = ({
         borderColor: 'divider',
         borderRadius: `${dashboardDesign.radius.md}px`,
         transition: dashboardDesign.motion.transition,
+        cursor: onClick ? 'pointer' : 'default',
         '&::before': {
           content: '""',
           position: 'absolute',

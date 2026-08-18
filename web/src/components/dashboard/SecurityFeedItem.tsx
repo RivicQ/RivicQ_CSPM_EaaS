@@ -7,16 +7,19 @@ type SecurityFeedItemProps = {
   message: string;
   severity: string;
   time: string;
+  onClick?: () => void;
 };
 
-const SecurityFeedItem: React.FC<SecurityFeedItemProps> = ({ message, severity, time }) => {
+const SecurityFeedItem: React.FC<SecurityFeedItemProps> = ({ message, severity, time, onClick }) => {
   const theme = useTheme();
   const idx = ['low', 'medium', 'high', 'critical'].indexOf(severity.toLowerCase());
   const color = dashboardDesign.severity.palette[idx >= 0 ? idx : 0];
 
   return (
     <Box
+      onClick={onClick}
       sx={{
+        cursor: onClick ? 'pointer' : 'default',
         display: 'flex',
         gap: 1.5,
         py: 1.5,
