@@ -62,6 +62,9 @@ import { useThemeMode } from '../theme/ThemeContext';
 import ThemeToggle from '../theme/ThemeToggle';
 import BrandLogo from '../components/BrandLogo';
 import RivicQAssistant from '../components/assistant/RivicQAssistant';
+import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';
+import DemoTrailCoach from '../components/demo/DemoTrailCoach';
+import { useDemoTrail } from '../context/DemoTrailContext';
 import designSystem, {
   sidebarPaperSx,
   sidebarScrollSx,
@@ -90,7 +93,8 @@ const DRAWER_WIDTH_COLLAPSED = 76;
 const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, edition, logout } = useAuth();
+  const { user, edition, logout, isDemo } = useAuth();
+  const { active: trailActive } = useDemoTrail();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
     try {
@@ -126,6 +130,7 @@ const Layout: React.FC = () => {
   // sidebar footer instead of living in the middle of the list.
   const navigationItems: NavItem[] = [
     { text: 'Command Center', icon: <Dashboard />, path: '/dashboard' },
+    { text: isDemo ? 'Demo Trail' : 'Try Demo', icon: <Psychology />, path: '/demo' },
     { text: 'Scanner', icon: <Security />, path: '/scanner' },
     { text: 'Assets', icon: <Storage />, path: '/assets' },
     { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
@@ -681,7 +686,7 @@ const Layout: React.FC = () => {
           flexGrow: 1,
           width: { lg: `calc(100% - ${desktopWidth}px)` },
           mt: { xs: 7.5, lg: 7.5 },
-          pb: { xs: 8, sm: 0 },
+          pb: { xs: trailActive ? 28 : 8, sm: trailActive ? 22 : 0 },
           minHeight: '100vh',
           minWidth: 0,
           overflowX: 'hidden',
@@ -697,6 +702,7 @@ const Layout: React.FC = () => {
           style={{ minWidth: 0 }}
         >
           <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: { xs: 2, md: 3 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
+            <DemoEnvironmentBanner />
             <Outlet />
           </Box>
         </motion.div>
@@ -732,6 +738,7 @@ const Layout: React.FC = () => {
         </Paper>
       )}
       <RivicQAssistant />
+      <DemoTrailCoach />
     </Box>
   );
 };

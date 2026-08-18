@@ -43,6 +43,7 @@ import {
   Badge as BadgeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import { useDemoTrail } from '../context/DemoTrailContext';
 import { authService } from '../services/api';
 import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
@@ -128,6 +129,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     supabaseEnabled,
     backendReachable,
   } = useAuth();
+  const { start: startTrail } = useDemoTrail();
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -239,13 +241,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     }
   };
 
-  const handleDemo = async () => {
-    if (!backendReachable) return;
+  const handleDemo = async (withTrail = true) => {
     setLoading(true);
     setError('');
     try {
-      await demoLogin(edition);
-      navigate('/dashboard', { replace: true });
+      await demoLogin('enterprise');
+      if (withTrail) startTrail();
+      else navigate('/dashboard', { replace: true });
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || 'Demo access unavailable');
     } finally {
@@ -399,6 +401,30 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>
                     {title}
                   </Typography>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 3,
+                      border: 1,
+                      borderColor: 'primary.light',
+                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(59,130,246,0.12)' : 'rgba(239,246,255,0.9)'),
+                      backdropFilter: 'blur(12px)',
+                    }}
+                  >
+                    <Typography variant="subtitle1" fontWeight={800}>Want to explore first?</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                      Try the RivicQ Demo — no setup required. Sample data only; production authentication is unchanged.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<AutoAwesome />}
+                      disabled={loading}
+                      onClick={() => handleDemo(true)}
+                      aria-label="Try interactive demo"
+                    >
+                      Try Interactive Demo
+                    </Button>
+                  </Box>
                   <Tabs
                     value={mode}
                     onChange={(_, nextMode: 'login' | 'register') => {
@@ -540,7 +566,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                               startAdornment: <InputAdornment position="start"><Lock /></InputAdornment>,
                               endAdornment: (
                                 <InputAdornment position="end">
-                                  <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                                  <IconButton
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    edge="end"
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                  >
                                     {showPassword ? <VisibilityOff /> : <Visibility />}
                                   </IconButton>
                                 </InputAdornment>
@@ -575,7 +605,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                               startAdornment: <InputAdornment position="start"><Key /></InputAdornment>,
                               endAdornment: (
                                 <InputAdornment position="end">
-                                  <IconButton onClick={() => setShowConfirm((prev) => !prev)} edge="end">
+                                  <IconButton
+                                    onClick={() => setShowConfirm((prev) => !prev)}
+                                    edge="end"
+                                    aria-label={showConfirm ? 'Hide confirmation' : 'Show confirmation'}
+                                  >
                                     {showConfirm ? <VisibilityOff /> : <Visibility />}
                                   </IconButton>
                                 </InputAdornment>
@@ -618,9 +652,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                             Current edition: <strong>{edition.toUpperCase()}</strong>
                           </Typography>
                           {mode === 'login' && (
-                            <Typography variant="body2" component="a" href="#forgot" sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                            <Button
+                              size="small"
+                              variant="text"
+                              onClick={() => setError('Password reset is handled by your identity provider. Contact your administrator.')}
+                            >
                               Forgot password?
-                            </Typography>
+                            </Button>
                           )}
                         </Stack>
 
@@ -636,36 +674,30 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                             {loading ? 'Please wait...' : submitLabel}
                           </Button>
 
-                          {backendReachable && (
                             <Button
                               variant="outlined"
-                              color="success"
                               startIcon={<AutoAwesome />}
                               disabled={loading}
-                              onClick={handleDemo}
+                              onClick={() => handleDemo(true)}
                               sx={{ py: 1.1 }}
                             >
-                              Try the demo
+                              Try Demo
                             </Button>
-                          )}
-                        </Box>
-
-                        {backendReachable && !mfaStep && (
-                          <Box sx={{ p: 1.5, borderRadius: 2, border: 1, borderColor: 'divider', bgcolor: 'action.hover' }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                              Demo workspace credentials (password <strong>DemoPass123!</strong>):
-                            </Typography>
-                            <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
-                              Enterprise&nbsp;· admin@rivicq.com
-                            </Typography>
-                            <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
-                              Professional&nbsp;· operator@rivicq.com · analyst@rivicq.com
-                            </Typography>
-                            <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
-                              Community&nbsp;· sales@rivicq.com
-                            </Typography>
                           </Box>
-                        )}
+
+                          <Typography variant="body2" color="text.secondary">
+                            {mode === 'login' ? (
+                              <>Don&apos;t have an account yet?{' '}
+                                <Button size="small" onClick={() => setMode('register')}>Create Account</Button>
+                                {' '}or explore RivicQ with Demo Access.
+                              </>
+                            ) : (
+                              <>Already registered?{' '}
+                                <Button size="small" onClick={() => setMode('login')}>Sign In</Button>
+                              </>
+                            )}
+                          </Typography>
+
 
                         <Divider sx={{ my: 1 }}>OR CONTINUE WITH</Divider>
 

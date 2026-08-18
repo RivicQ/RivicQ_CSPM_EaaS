@@ -297,11 +297,11 @@ const Home: React.FC = () => {
                         <Button
                           size="large"
                           variant="outlined"
-                          onClick={() => navigate('/register')}
+                          onClick={() => navigate('/demo')}
                           startIcon={<WorkspacePremium />}
                           sx={{ py: 1.5, fontSize: '1rem', color: 'tertiary.main', borderColor: 'tertiary.main' }}
                         >
-                          Book a demo
+                          Try Interactive Demo
                         </Button>
                       </Box>
                     </Stack>

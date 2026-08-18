@@ -1,4 +1,8 @@
-# RivicQ CryptoBOM Documentation
+# RivicQ documentation
+
+Live app: [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) · Interactive demo: [Try the demo trail](https://rivicq.github.io/RivicQ_CSPM_EaaS/demo) · Company: [rivicq.com](https://rivicq.com) · Source: [RivicQ/RivicQ_CSPM_EaaS](https://github.com/RivicQ/RivicQ_CSPM_EaaS)
+
+The Pages site is a static DEMO workspace (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is only issued when `DEMO_MODE` is enabled.
 
 ## Getting started
 

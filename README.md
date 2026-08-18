@@ -1,76 +1,107 @@
-# RivicQ CryptoBOM SaaS
+# RivicQ — Encryption as a Service & CSPM
 
-Cryptographic Bill of Materials (CBOM) platform for discovering, inventorying, and assessing post-quantum crypto risk across cloud, Kubernetes, and code estates.
+Open-source-to-enterprise cybersecurity platform for **CSPM + CBOM + SBOM + DevSecOps + supply-chain security + crypto-agility + compliance**.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Pages](https://img.shields.io/github/actions/workflow/status/RivicQ/RivicQ_CSPM_EaaS/pages.yml?label=Pages)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions/workflows/pages.yml)
+[![Pages](https://img.shields.io/github/actions/workflow/status/RivicQ/RivicQ_CSPM_EaaS/pages.yml?label=GitHub%20Pages)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions/workflows/pages.yml)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/RivicQ/RivicQ_CSPM_EaaS)](https://golang.org/)
 
-**Live app:** https://rivicq.github.io/RivicQ_CSPM_EaaS/
+| Resource | URL |
+|----------|-----|
+| **Live app (GitHub Pages)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/ |
+| **Interactive demo trail** | https://rivicq.github.io/RivicQ_CSPM_EaaS/demo |
+| **Sign in / Try Demo** | https://rivicq.github.io/RivicQ_CSPM_EaaS/login |
+| **Docs hub (Pages)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/docs/ |
+| **Company** | https://rivicq.com |
+| **GitHub org** | https://github.com/RivicQ |
+| **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
+
+Pages is a static DEMO workspace (labeled sample data). It does not mix with customer estates. With a running API, **Try Interactive Demo** uses `GET /api/v1/auth/demo` (disabled when `DEMO_MODE=false`).
 
 ---
 
-## What is a CBOM?
+## What RivicQ does
 
-A **Cryptographic Bill of Materials** inventories every cryptographic component in your stack — algorithms, key sizes, libraries, certificates, and PQC readiness — so you can detect weak crypto, plan migration, and prove compliance.
+RivicQ is an **orchestrator**, not a pile of unrelated scanners.
+
+```text
+Cloud / code / CI
+        ↓
+Built-in scanners (TLS, SSH, HTTP, SBOM, GitHub content)
+        ↓
+Normalized findings
+        ↓
+Crypto risk + policy gate
+        ↓
+CLI / API / Dashboard / GitHub Action
+```
+
+- **CSPM** — cloud and cryptographic posture
+- **CBOM** — CycloneDX cryptographic bill of materials
+- **SBOM** — dependency inventory correlated with crypto usage
+- **DevSecOps** — `rivicq scan .` and GitHub Action policy gate
+- **EaaS** — encryption intelligence toward PQC migration
+
+RSA-2048 is **classified**, not automatically marked vulnerable.
 
 ---
 
-## Quick start — scan in 5 minutes
+## Quick start
 
 ```bash
 git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
 cd RivicQ_CSPM_EaaS
 
-# Start backend (OSS on :8080 or Enterprise on :9090)
-go run ./cmd/server/enterprise/main.go
-
-# Run CBOM scan against a repo or hostname
-chmod +x scripts/scan-cbom.sh
-./scripts/scan-cbom.sh ./ --output cbom-report.json
-
-# Or via REST API
-curl -s -X POST http://localhost:9090/api/v1/scans \
-  -H "Content-Type: application/json" \
-  -d '{"target": "./", "scan_type": "cbom"}' | jq .
+cp .env.example .env
+make dev-backend          # OSS API :8080 (demo mode, no DB required)
+# or: make dev-enterprise # Enterprise API :9090
+make dev-frontend         # React UI
 ```
 
-Full guide: [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md)
+Open http://localhost:3000/platform — **Try Interactive Demo** on Sign in, or `/demo`.
 
----
-
-## Dev stack (recommended)
+### CLI
 
 ```bash
-cp .env.example .env
-make dev-stack          # Enterprise API :9090 + React UI :3000
+make build-rivicq
+./bin/rivicq scan .
+./bin/rivicq scan . --format json --fail-on BLOCK
 ```
 
-Open **http://localhost:3000/platform/scanner** to run CBOM scans from the UI.
+### CBOM scan API
+
+```bash
+curl -s -X POST http://localhost:8080/api/v1/scans \
+  -H "Content-Type: application/json" \
+  -d '{"target": "./", "scan_type": "cbom"}'
+```
 
 ---
 
 ## Editions
 
-| Edition | Port | Use case |
+| Edition | Port | Includes |
 |---------|------|----------|
-| **OSS** | 8080 | CBOM discovery, basic dashboard, community |
-| **Enterprise** | 9090 | Full inventory, cloud integrations, SSO, compliance |
+| **Community / OSS** | 8080 | CLI, local/CBOM scan, GitHub Action, dashboard |
+| **Team** | — | Community + shared projects (same engine) |
+| **Enterprise** | 9090 | SSO, cloud connectors, compliance, RBAC |
 
-Details: [docs/editions.md](docs/editions.md) · Beta program: [BETA_PROGRAM.md](BETA_PROGRAM.md)
+Same security engine — feature flags, not a fork. Details: [docs/editions.md](docs/editions.md) · intelligence layer: [docs/security-intelligence.md](docs/security-intelligence.md)
 
 ---
 
 ## Repository layout
 
 ```
-cmd/server/          # OSS & Enterprise API servers
-internal/discovery/  # CBOM scan engine (TLS, SSH, HTTP, SBOM)
-internal/api/        # REST handlers
-web/                 # React SaaS frontend
-docs/                # Documentation & OpenAPI spec
-deploy/              # Docker, Helm, Terraform, migrations
-scripts/             # Dev stack, CBOM CLI, deploy helpers
+cmd/rivicq/          Community CLI
+cmd/server/          OSS & Enterprise API
+internal/discovery/  TLS, SSH, HTTP, SBOM scanners
+internal/intelligence/  Normalized findings, risk, policy, CycloneDX CBOM
+internal/api/        REST handlers (auth demo: GET /auth/demo)
+web/                 React SaaS (demo trail, command center)
+docs/                Architecture, SDKs, OpenAPI
+fixtures/            Deterministic CBOM / IaC test projects
+.github/workflows/rivicq-security.yml  Self-scan policy gate
 ```
 
 ---
@@ -79,13 +110,18 @@ scripts/             # Dev stack, CBOM CLI, deploy helpers
 
 | Topic | Link |
 |-------|------|
-| All docs | [docs/README.md](docs/README.md) |
+| Docs hub | [docs/README.md](docs/README.md) |
+| Security intelligence | [docs/security-intelligence.md](docs/security-intelligence.md) |
+| CBOM quickstart | [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md) |
 | Deployment | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| Environment variables | [docs/DEPLOY_ENV.md](docs/DEPLOY_ENV.md) |
 | API spec | [docs/openapi.yaml](docs/openapi.yaml) |
 | PQC migration | [docs/PQC_MIGRATION.md](docs/PQC_MIGRATION.md) |
+| SDKs | [docs/sdks/README.md](docs/sdks/README.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Security | [SECURITY.md](SECURITY.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Beta | [BETA_PROGRAM.md](BETA_PROGRAM.md) |
 
 ---
 

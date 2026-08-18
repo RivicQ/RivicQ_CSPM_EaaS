@@ -2,6 +2,7 @@ import React from 'react';
 import { authService, syncAPIBaseURL } from '../services/api';
 import { setEditionPreference, getEditionFromBackend, normalizeEdition, Edition } from '../config/editions';
 import { supabaseAuthService, isSupabaseConfigured } from '../services/supabase';
+import { CLIENT_DEMO_TOKEN, DEMO_STORAGE_KEY, TRAIL_ACTIVE_KEY, TRAIL_STEP_KEY, isClientDemoToken } from '../demo/constants';
 
 export interface AuthUser {
   id: string;
@@ -9,6 +10,7 @@ export interface AuthUser {
   email: string;
   role?: string;
   edition: Edition;
+  demo?: boolean;
 }
 
 export interface RegisterResult {
@@ -25,6 +27,7 @@ interface AuthContextValue {
   token: string | null;
   edition: Edition;
   isAuthenticated: boolean;
+  isDemo: boolean;
   loading: boolean;
   supabaseEnabled: boolean;
   backendReachable: boolean;
@@ -53,6 +56,8 @@ function readStoredAuth() {
     const userRaw = localStorage.getItem('auth_user');
     const edition = normalizeEdition(localStorage.getItem('app_edition')) || 'community';
     const user = userRaw ? JSON.parse(userRaw) : null;
+    const demo = Boolean(user?.demo) || localStorage.getItem(DEMO_STORAGE_KEY) === '1' || isClientDemoToken(token);
+    if (user) user.demo = demo;
     return { token, user, edition };
   } catch {
     return { token: null, user: null, edition: 'community' as Edition };
@@ -143,8 +148,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error('Authentication service returned an invalid response');
     }
     const nextToken = String(token);
-    const nextUser = payload.user;
-    const nextEdition = normalizeEdition(payload?.edition || nextUser.edition || 'community');
+    const nextEdition = normalizeEdition(payload?.edition || payload.user.edition || 'community');
+    const nextUser = {
+      ...payload.user,
+      edition: nextEdition,
+      demo: Boolean(payload?.demo_mode || payload?.user?.demo),
+    };
+    try {
+      if (nextUser.demo) localStorage.setItem(DEMO_STORAGE_KEY, '1');
+      else localStorage.removeItem(DEMO_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
     persist(nextToken, nextUser, nextEdition);
   }, [persist]);
 
@@ -210,16 +225,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [completeAuth]);
 
   const demoLogin = React.useCallback(async (nextEdition: Edition) => {
-    const response = await authService.demo(nextEdition);
-    completeAuth(response.data);
-  }, [completeAuth]);
+    if (backendReachable) {
+      const response = await authService.demo(nextEdition);
+      completeAuth({ ...response.data, demo_mode: true });
+      return;
+    }
+    // Isolated Pages/static demo — not a JWT, not mixed with customer data.
+    const demoUser: AuthUser = {
+      id: 'demo-user',
+      name: 'Demo CISO',
+      email: 'demo-ciso@demo.rivicq.local',
+      role: 'admin',
+      edition: nextEdition,
+      demo: true,
+    };
+    try {
+      localStorage.setItem(DEMO_STORAGE_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+    persist(CLIENT_DEMO_TOKEN, demoUser, nextEdition);
+  }, [backendReachable, completeAuth, persist]);
 
   const logout = React.useCallback(() => {
-    if (backendReachable && token) {
+    if (backendReachable && token && !isClientDemoToken(token)) {
       authService.logout().catch(() => undefined);
     }
     if (isSupabaseConfigured) {
       supabaseAuthService.signOut().catch(() => undefined);
+    }
+    try {
+      localStorage.removeItem(DEMO_STORAGE_KEY);
+      sessionStorage.removeItem(TRAIL_ACTIVE_KEY);
+      sessionStorage.removeItem(TRAIL_STEP_KEY);
+    } catch {
+      /* ignore */
     }
     persist(null, null, edition);
   }, [backendReachable, edition, persist, token]);
@@ -228,11 +268,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     persist(token, user, nextEdition);
   }, [persist, token, user]);
 
+  const isDemo = Boolean(user?.demo) || isClientDemoToken(token);
+
   const value = React.useMemo(() => ({
     user,
     token,
     edition,
     isAuthenticated: Boolean(token),
+    isDemo,
     loading,
     supabaseEnabled: isSupabaseConfigured,
     backendReachable,
@@ -245,7 +288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     setEdition,
     persistAuth: completeAuth,
-  }), [edition, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, verifyMfa, logout, setEdition, token, user, completeAuth]);
+  }), [edition, isDemo, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, verifyMfa, logout, setEdition, token, user, completeAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

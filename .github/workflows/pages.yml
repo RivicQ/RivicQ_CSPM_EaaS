@@ -53,7 +53,8 @@ jobs:
           mkdir -p web/build/docs/sdks
           cp docs/quantum-sdk.md web/build/docs/
           cp docs/plugin-development.md web/build/docs/
-          cp docs/enterprise-sdk.md web/build/docs/
+          cp docs/security-intelligence.md web/build/docs/
+          cp docs/README.md web/build/docs/README.md
           cp docs/sdks/README.md web/build/docs/sdks/
           cp docs/sdks/rust.md web/build/docs/sdks/
           cp docs/sdks/python.md web/build/docs/sdks/

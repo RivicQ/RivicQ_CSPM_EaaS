@@ -28,6 +28,8 @@ import Settings from './pages/Settings';
 import DevSecOpsTools from './pages/DevSecOpsTools';
 import RivicQEcosystem from './pages/RivicQEcosystem';
 import OAuthCallback from './pages/OAuthCallback';
+import DemoWelcome from './pages/DemoWelcome';
+import { DemoTrailProvider } from './context/DemoTrailContext';
 
 import Inventory from './pages/enterprise/Inventory';
 import Compliance from './pages/enterprise/Compliance';
@@ -119,8 +121,10 @@ const App: React.FC = () => {
               })}
             />
             <BrowserRouter basename={process.env.PUBLIC_URL || '/platform'}>
+              <DemoTrailProvider>
               <Routes>
                 <Route path="/" element={wrap(Home, 'Home')} />
+                <Route path="/demo" element={wrap(DemoWelcome, 'Demo')} />
                 <Route path="/login" element={wrap(Login, 'Login')} />
                 <Route path="/register" element={wrap(Register, 'Register')} />
                 <Route path="/oauth/callback" element={wrap(OAuthCallback, 'OAuthCallback')} />
@@ -161,6 +165,7 @@ const App: React.FC = () => {
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              </DemoTrailProvider>
             </BrowserRouter>
               </MotionConfig>
             </ThemeProvider>

@@ -1,7 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Box, Button, Chip, Grid, Skeleton, Stack, Typography,
+  Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Skeleton, Stack, Typography,
 } from '@mui/material';
 import { Warning, Cloud, Dns, Security, Assessment, Storage } from '@mui/icons-material';
 import { providerColor } from '../theme/chartTheme';
@@ -11,16 +12,28 @@ import StatCard from '../components/dashboard/StatCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import PostureRing from '../components/dashboard/PostureRing';
 import SeverityBadge from '../components/dashboard/SeverityBadge';
+import { EmptyState } from '../components/ui';
+import ProvenanceChip from '../components/dashboard/ProvenanceChip';
 import { cspmService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { buildDemoCspmOverview, remediationForFinding } from '../demo/demoViews';
+import type { SimulatedFinding } from '../data/enterprise/types';
 
 const CSPM: React.FC = () => {
-  const { data, isLoading } = useQuery({
+  const navigate = useNavigate();
+  const { isDemo } = useAuth();
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['cspm-overview'],
     queryFn: () => cspmService.getOverview().then((r) => r.data),
     refetchInterval: 30_000,
+    retry: 1,
   });
+  const [selectedFinding, setSelectedFinding] = React.useState<SimulatedFinding | null>(null);
 
-  if (isLoading) {
+  const demoFallback = React.useMemo(() => (isDemo ? buildDemoCspmOverview() : null), [isDemo]);
+  const view = data ?? demoFallback;
+
+  if (isLoading && !view) {
     return (
       <PageFrame eyebrow="Posture" title="Cryptographic Security Posture Management" subtitle="Loading CSPM data...">
         <Grid container spacing={2.5}>
@@ -34,24 +47,31 @@ const CSPM: React.FC = () => {
     );
   }
 
-  const healthScore = data?.health_score ?? 74;
-  const totalAssets = data?.total_assets ?? 1427;
-  const outdatedAlgs = data?.outdated_algorithms ?? 23;
-  const atRisk = data?.at_risk_data ?? 847;
-  const algorithms = data?.risk_breakdown ?? [
-    { name: 'AES-256-GCM', usage: 142, risk_level: 'low', quantum_safe: true, migration: 'Monitored' },
-    { name: 'RSA-2048', usage: 89, risk_level: 'high', quantum_safe: false, migration: 'Migrate →' },
-    { name: 'Triple DES', usage: 23, risk_level: 'critical', quantum_safe: false, migration: 'Migrate →' },
-    { name: 'ChaCha20-Poly1305', usage: 56, risk_level: 'low', quantum_safe: true, migration: 'Monitored' },
-    { name: 'ECDSA P-384', usage: 34, risk_level: 'medium', quantum_safe: false, migration: 'Plan →' },
-    { name: 'ML-KEM-768', usage: 12, risk_level: 'low', quantum_safe: true, migration: 'Monitored' },
-  ];
-  const topology = data?.topology ?? [
-    { from: 'AWS KMS', to: 'S3', encrypted: true, provider: 'aws' },
-    { from: 'Azure Key Vault', to: 'Blob', encrypted: true, provider: 'azure' },
-    { from: 'GCP KMS', to: 'GCS', encrypted: true, provider: 'gcp' },
-    { from: 'K8s Pod', to: 'Pod', encrypted: true, provider: 'kubernetes' },
-  ];
+  if (!view) {
+    return (
+      <PageFrame eyebrow="Posture" title="Cryptographic Security Posture Management" subtitle="Cloud cryptographic posture">
+        <EmptyState
+          icon={<Cloud />}
+          title={isError ? 'Unable to retrieve CSPM results' : 'No CSPM snapshot yet'}
+          description="Please retry or check the API connection."
+          action={{
+            label: 'Retry',
+            onClick: () => refetch(),
+          }}
+        />
+      </PageFrame>
+    );
+  }
+
+  const usingDemo = Boolean(!data && demoFallback);
+  const healthScore = view.health_score;
+  const totalAssets = view.total_assets;
+  const outdatedAlgs = view.outdated_algorithms;
+  const atRisk = view.at_risk_data;
+  const algorithms = view.risk_breakdown ?? [];
+  const topology = view.topology ?? [];
+  const findings: SimulatedFinding[] = Array.isArray((view as any).findings) ? (view as any).findings : [];
+  const selectedGuide = selectedFinding ? remediationForFinding(selectedFinding) : null;
 
   const providerChipColor = (provider: string) => providerColor(provider);
 
@@ -60,7 +80,8 @@ const CSPM: React.FC = () => {
       eyebrow="Posture"
       title="Cryptographic Security Posture Management"
       subtitle="Monitor, assess, and improve your cryptographic security posture across all environments."
-      badge={`Score ${healthScore}`}
+      badge={healthScore != null ? `Score ${healthScore}` : undefined}
+      action={usingDemo || isDemo ? <ProvenanceChip kind="demo" label="DEMO ENVIRONMENT" /> : undefined}
     >
       <Grid container spacing={2.5} sx={{ mb: 0.5 }}>
         <Grid item xs={12} sm={6} md={3}>
@@ -75,10 +96,10 @@ const CSPM: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             label="Active Crypto Assets"
-            value={totalAssets.toLocaleString()}
+            value={Number(totalAssets || 0).toLocaleString()}
             icon={<Storage sx={{ fontSize: 20 }} />}
             accent={tokens.colors.rivicq[500]}
-            trend={{ value: `${data?.quantum_safe_pct ?? 62}% quantum safe`, positive: true }}
+            trend={view.quantum_safe_pct != null ? { value: `${view.quantum_safe_pct}% quantum safe`, positive: true } : undefined}
             delay={1}
           />
         </Grid>
@@ -88,17 +109,15 @@ const CSPM: React.FC = () => {
             value={outdatedAlgs}
             icon={<Assessment sx={{ fontSize: 20 }} />}
             accent={tokens.colors.crypto.high}
-            trend={{ value: '3 critical', positive: false }}
             delay={2}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             label="At-Risk Data Objects"
-            value={atRisk.toLocaleString()}
+            value={Number(atRisk || 0).toLocaleString()}
             icon={<Warning sx={{ fontSize: 20 }} />}
             accent={tokens.colors.crypto.critical}
-            trend={{ value: '12 exposed', positive: false }}
             delay={3}
           />
         </Grid>
@@ -190,6 +209,11 @@ const CSPM: React.FC = () => {
                           variant={alg.migration?.includes('Migrate') ? 'contained' : 'outlined'}
                           color={alg.migration?.includes('Migrate') ? 'warning' : 'inherit'}
                           sx={{ minWidth: 100 }}
+                          onClick={() => {
+                            const match = findings.find((f) => (f.title || '').includes(alg.name) || (f.message || '').includes(alg.name));
+                            if (match) setSelectedFinding(match);
+                            else if (findings[0]) setSelectedFinding(findings[0]);
+                          }}
                         >
                           {alg.migration || 'Monitored'}
                         </Button>
@@ -202,6 +226,73 @@ const CSPM: React.FC = () => {
           </DashboardPanel>
         </Grid>
       </Grid>
+
+      {findings.length > 0 && (
+        <Box sx={{ mt: 2.5 }}>
+          <DashboardPanel title="Misconfigurations & findings" delay={2}>
+            <Stack spacing={1.25}>
+              {findings.slice(0, 8).map((finding) => (
+                <Box
+                  key={finding.id}
+                  component="button"
+                  type="button"
+                  onClick={() => setSelectedFinding(finding)}
+                  sx={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    p: 1.5,
+                    borderRadius: 2,
+                    border: 1,
+                    borderColor: 'divider',
+                    bgcolor: 'transparent',
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: 'action.hover' },
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' },
+                  }}
+                >
+                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                    <SeverityBadge severity={finding.severity} />
+                    <Typography fontWeight={700}>{finding.title || finding.message}</Typography>
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary">
+                    {finding.assetName} · {finding.provider}/{finding.region}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          </DashboardPanel>
+        </Box>
+      )}
+
+      <Dialog open={Boolean(selectedFinding)} onClose={() => setSelectedFinding(null)} fullWidth maxWidth="sm">
+        <DialogTitle>Finding detail</DialogTitle>
+        <DialogContent>
+          {selectedFinding && selectedGuide && (
+            <Stack spacing={1.5} sx={{ mt: 0.5 }}>
+              {usingDemo && <ProvenanceChip kind="demo" label="DEMO DATA" />}
+              <Typography variant="subtitle2">What happened</Typography>
+              <Typography variant="body2">{selectedGuide.what}</Typography>
+              <Typography variant="subtitle2">Why it matters</Typography>
+              <Typography variant="body2">{selectedGuide.why}</Typography>
+              <Typography variant="subtitle2">Severity</Typography>
+              <SeverityBadge severity={selectedFinding.severity} />
+              <Typography variant="subtitle2">Business impact</Typography>
+              <Typography variant="body2">{selectedGuide.business}</Typography>
+              <Typography variant="subtitle2">Technical impact</Typography>
+              <Typography variant="body2">{selectedGuide.technical}</Typography>
+              <Typography variant="subtitle2">Affected asset</Typography>
+              <Typography variant="body2">{selectedFinding.assetName}</Typography>
+              <Typography variant="subtitle2">Recommended remediation</Typography>
+              <Typography variant="body2">{selectedGuide.remediation}</Typography>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => navigate('/dashboard')}>Open command center</Button>
+          <Button variant="contained" onClick={() => setSelectedFinding(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </PageFrame>
   );
 };

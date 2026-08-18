@@ -93,6 +93,17 @@ const tools = [
   },
 ];
 
+const rivicqPipeline = [
+  { label: 'Developer', detail: 'Commit code and infrastructure changes.' },
+  { label: 'Git Repository', detail: 'Source of truth for applications and IaC.' },
+  { label: 'CI/CD', detail: 'GitHub Actions (or equivalent) runs the pipeline.' },
+  { label: 'RivicQ Security Scan', detail: '`rivicq scan .` — secrets, SAST, SCA, SBOM, CBOM, IaC.' },
+  { label: 'CSPM + SCA + CryptoBOM', detail: 'Normalized findings feed one intelligence layer.' },
+  { label: 'Risk Analysis', detail: 'Explainable crypto risk and policy gate (BLOCK / WARN).' },
+  { label: 'Remediation', detail: 'Fix the finding, attach evidence, re-scan.' },
+  { label: 'Secure Deployment', detail: 'Ship only after the gate is green.' },
+];
+
 const pipelineSteps = [
   'GitHub Actions runs CI, security scans, and deploy steps.',
   'Terraform manages repeatable cloud and Kubernetes infrastructure.',
@@ -144,6 +155,51 @@ const DevSecOpsTools: React.FC = () => {
           </Grid>
         ))}
       </Grid>
+
+      <Box sx={{ mb: 2.5 }}>
+      <GlassCard hover={false} delay={0}>
+        <Typography variant="overline" color="primary" fontWeight={800}>
+          How RivicQ fits the pipeline
+        </Typography>
+        <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+          Guided DevSecOps flow
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          This is a product explanation, not a live attach to your CI. The real CLI is <Box component="code" sx={{ fontFamily: tokens.typography.mono }}>rivicq scan .</Box>
+        </Typography>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={1}
+          divider={
+            <Typography color="primary" sx={{ display: { xs: 'none', md: 'block' }, px: 0.5 }} aria-hidden>
+              ↓
+            </Typography>
+          }
+          sx={{ flexWrap: 'wrap', alignItems: { md: 'stretch' } }}
+        >
+          {rivicqPipeline.map((step, i) => (
+            <Box
+              key={step.label}
+              sx={{
+                flex: 1,
+                minWidth: { xs: '100%', md: 110 },
+                p: 1.25,
+                borderRadius: `${tokens.borderRadius.md}px`,
+                bgcolor: 'action.hover',
+                border: 1,
+                borderColor: 'divider',
+              }}
+            >
+              <Typography variant="caption" color="primary" fontWeight={800}>
+                {String(i + 1).padStart(2, '0')}
+              </Typography>
+              <Typography variant="subtitle2" fontWeight={800}>{step.label}</Typography>
+              <Typography variant="caption" color="text.secondary">{step.detail}</Typography>
+            </Box>
+          ))}
+        </Stack>
+      </GlassCard>
+      </Box>
 
       <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         <Grid item xs={12} md={7}>

@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import {
   CheckCircle,
+  GppGood,
   Refresh,
   Sync,
 } from '@mui/icons-material';
@@ -39,11 +40,17 @@ import {
   Radar,
 } from 'recharts';
 import { complianceService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { buildDemoComplianceDashboards, buildDemoRisks } from '../../demo/demoViews';
+import ProvenanceChip from '../../components/dashboard/ProvenanceChip';
+import { EmptyState } from '../../components/ui';
 
 const FRAMEWORKS = [
   { id: 'iso27001', name: 'ISO 27001', color: '#10b981' },
+  { id: 'nis2', name: 'NIS2', color: '#0ea5e9' },
   { id: 'dora', name: 'DORA', color: '#f59e0b' },
   { id: 'gdpr', name: 'GDPR', color: '#3b82f6' },
+  { id: 'bsi', name: 'BSI TR-02102', color: '#64748b' },
   { id: 'eu_ai_act', name: 'EU AI Act', color: '#8b5cf6' },
   { id: 'soc2', name: 'SOC 2', color: '#0f62fe' },
   { id: 'nist', name: 'NIST', color: '#f59e0b' },
@@ -58,17 +65,28 @@ interface Dashboard {
   passed_controls: number;
   failed_controls: number;
   pending_controls: number;
+  controls?: Array<{
+    id: string;
+    title: string;
+    status: string;
+    critical: boolean;
+    evidence: string;
+  }>;
+  note?: string;
 }
 
 const ComplianceDashboard: React.FC = () => {
+  const { isDemo } = useAuth();
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [delveStatus, setDelveStatus] = useState<any>(null);
   const [kertosStatus, setKertosStatus] = useState<any>(null);
   const [risks, setRisks] = useState<any[]>([]);
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
   const [selectedFramework, setSelectedFramework] = useState('');
   const [scanning, setScanning] = useState(false);
+  const [openFramework, setOpenFramework] = useState<Dashboard | null>(null);
 
   useEffect(() => {
     loadDashboards();
@@ -79,12 +97,18 @@ const ComplianceDashboard: React.FC = () => {
 
   const loadDashboards = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const response = await complianceService.getAllDashboards();
-      setDashboards(response.data.dashboards || []);
-    } catch (error) {
-      console.error('Failed to load dashboards:', error);
-      setDashboards([]);
+      const rows = response.data.dashboards || [];
+      setDashboards(rows.length ? rows : (isDemo ? buildDemoComplianceDashboards() : []));
+    } catch {
+      if (isDemo) {
+        setDashboards(buildDemoComplianceDashboards());
+      } else {
+        setDashboards([]);
+        setLoadError('Unable to retrieve compliance results. Please retry or check the API connection.');
+      }
     } finally {
       setLoading(false);
     }
@@ -108,17 +132,26 @@ const ComplianceDashboard: React.FC = () => {
   const loadRisks = async () => {
     try {
       const response = await complianceService.getRisks();
-      setRisks(response.data.risks || []);
-    } catch (error) {
-      setRisks([]);
+      const rows = response.data.risks || [];
+      if (rows.length) {
+        setRisks(rows);
+        return;
+      }
+    } catch {
+      /* fall through to demo or empty */
     }
+    setRisks(isDemo ? buildDemoRisks() : []);
   };
 
   const handleScan = async () => {
     setScanning(true);
     try {
-      await complianceService.scanCompliance(selectedFramework);
-      await loadDashboards();
+      if (isDemo) {
+        setDashboards(buildDemoComplianceDashboards());
+      } else {
+        await complianceService.scanCompliance(selectedFramework);
+        await loadDashboards();
+      }
     } catch (error) {
       console.error('Scan failed:', error);
     } finally {
@@ -162,9 +195,16 @@ const ComplianceDashboard: React.FC = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold">
-          Compliance Dashboard
-        </Typography>
+        <Box>
+          <Typography variant="h4" fontWeight="bold">
+            Compliance Dashboard
+          </Typography>
+          {isDemo && (
+            <Box sx={{ mt: 1 }}>
+              <ProvenanceChip kind="demo" label="DEMO control results — not a certification" />
+            </Box>
+          )}
+        </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             variant="outlined"
@@ -180,6 +220,28 @@ const ComplianceDashboard: React.FC = () => {
       </Box>
 
       {loading && <LinearProgress sx={{ mb: 2 }} />}
+
+      {loadError && !dashboards.length && (
+        <Box sx={{ mb: 2 }}>
+          <EmptyState
+            icon={<GppGood />}
+            title="Unable to retrieve compliance results"
+            description={loadError}
+            action={{ label: 'Retry', onClick: loadDashboards }}
+          />
+        </Box>
+      )}
+
+      {!loading && !loadError && !dashboards.length && (
+        <Box sx={{ mb: 2 }}>
+          <EmptyState
+            icon={<GppGood />}
+            title="No compliance mappings yet"
+            description="Connect a workspace or run a compliance scan to populate control results."
+            action={{ label: 'Retry', onClick: loadDashboards }}
+          />
+        </Box>
+      )}
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
@@ -197,7 +259,7 @@ const ComplianceDashboard: React.FC = () => {
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Critical Findings</Typography>
               <Typography variant="h3" color="error.main">
-                {risks.filter(r => r.severity === 'critical').length || 3}
+                {risks.filter(r => r.severity === 'critical').length}
               </Typography>
             </CardContent>
           </Card>
@@ -274,7 +336,19 @@ const ComplianceDashboard: React.FC = () => {
           const framework = FRAMEWORKS.find(f => f.id === dashboard.framework);
           return (
             <Grid item xs={12} sm={6} md={4} key={dashboard.framework}>
-              <Card sx={{ borderLeft: `4px solid ${framework?.color || '#667eea'}` }}>
+              <Card
+                sx={{ borderLeft: `4px solid ${framework?.color || '#667eea'}`, cursor: 'pointer' }}
+                onClick={() => setOpenFramework(dashboard)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setOpenFramework(dashboard);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open ${framework?.name || dashboard.framework} controls`}
+              >
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h6">{framework?.name || dashboard.framework}</Typography>
@@ -354,6 +428,44 @@ const ComplianceDashboard: React.FC = () => {
           </Table>
         </TableContainer>
       </Card>
+
+      <Dialog open={Boolean(openFramework)} onClose={() => setOpenFramework(null)} fullWidth maxWidth="sm">
+        <DialogTitle>{FRAMEWORKS.find((f) => f.id === openFramework?.framework)?.name || openFramework?.framework}</DialogTitle>
+        <DialogContent>
+          {openFramework && (
+            <Box sx={{ mt: 1 }}>
+              {isDemo && (
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+                  DEMO mapping. Scores are sample control results — RivicQ does not certify this estate.
+                </Typography>
+              )}
+              <Typography variant="body2" sx={{ mb: 1.5 }}>
+                Score {openFramework.score}% · {openFramework.passed_controls} passed · {openFramework.failed_controls} failed
+              </Typography>
+              {(openFramework.controls || []).slice(0, 12).map((ctrl) => (
+                <Box key={ctrl.id} sx={{ mb: 1.25, p: 1.25, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                  <Typography variant="subtitle2">{ctrl.id} — {ctrl.title}</Typography>
+                  <Chip size="small" label={ctrl.status} sx={{ mr: 1, mt: 0.5 }} />
+                  {ctrl.critical && <Chip size="small" color="error" label="critical" sx={{ mt: 0.5 }} />}
+                  {ctrl.evidence && (
+                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.75 }}>
+                      Evidence: {ctrl.evidence}
+                    </Typography>
+                  )}
+                  {ctrl.status === 'failed' && (
+                    <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                      Recommended action: remediate {ctrl.id}, attach evidence, and re-evaluate.
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenFramework(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={scanDialogOpen} onClose={() => setScanDialogOpen(false)}>
         <DialogTitle>Run Compliance Scan</DialogTitle>

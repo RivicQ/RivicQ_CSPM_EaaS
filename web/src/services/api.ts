@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getAPIBaseURL, setAPIBaseURL, Edition } from '../config/editions';
+import { isClientDemoToken, DEMO_STORAGE_KEY } from '../demo/constants';
 
 const api = axios.create({
   baseURL: getAPIBaseURL(),
@@ -21,7 +22,7 @@ export { setAPIBaseURL, getAPIBaseURL };
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
-  if (token) {
+  if (token && !isClientDemoToken(token)) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -31,15 +32,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const url = error?.config?.url || '';
-    // Auth endpoints fail with 401/403 for invalid credentials — do NOT treat
-    // those as an expired session. Letting the interceptor redirect here would
-    // reload the page mid-login and swallow the real error message.
     const isAuthCall = /\/auth\/(login|register|mfa|refresh|demo|me)/.test(url);
-    if (error.response?.status === 401 && !isAuthCall) {
+    const demoSession = localStorage.getItem(DEMO_STORAGE_KEY) === '1' || isClientDemoToken(localStorage.getItem('auth_token'));
+    if (error.response?.status === 401 && !isAuthCall && !demoSession) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
-      // Redirect to the login route under the app's router basename so it
-      // works both in dev (/platform) and on GitHub Pages (/CSPM/).
       const base = process.env.PUBLIC_URL || '/platform';
       window.location.href = `${window.location.origin}${base}/login`;
     }
