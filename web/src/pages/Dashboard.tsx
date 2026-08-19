@@ -14,6 +14,7 @@ import {
   analyticsService, benchmarkService, cloudService, complianceService, inventoryService, postureService, securityService,
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { EmptyState } from '../components/ui';
 import { isPaidEdition } from '../config/editions';
 import { buildDashboardViewModel } from '../data/enterprise/adapter';
 import type { DrilldownKind } from '../data/enterprise/types';
@@ -64,7 +65,7 @@ const ChartTooltipContent: React.FC<any> = ({ active, payload, label }) => {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { edition } = useAuth();
+  const { edition, isDemo } = useAuth();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const isCompact = useMediaQuery(theme.breakpoints.down('sm'));
@@ -211,6 +212,35 @@ const Dashboard: React.FC = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
           <CircularProgress size={22} thickness={4} aria-label="Loading dashboard" />
         </Box>
+      </Box>
+    );
+  }
+
+  const communityOnboarding = !isPaidEdition(edition) && !isDemo && model.dataMode === 'demo';
+  if (communityOnboarding) {
+    return (
+      <Box sx={dashboardDesign.layout.page}>
+        <DashboardHero
+          eyebrow="Community edition"
+          title="Your cryptographic command center"
+          subtitle="Community shows inventory from scans you run in this workspace. Enterprise simulation data is not mixed in."
+          action={
+            <Stack spacing={1} sx={{ minWidth: { sm: 180 } }}>
+              <Button variant="contained" disableElevation endIcon={<ArrowForward />} onClick={() => navigate('/scanner')} sx={heroPrimaryCtaSx}>
+                Run CBOM scan
+              </Button>
+              <Button variant="outlined" onClick={() => navigate('/demo')} sx={heroSecondaryCtaSx}>
+                Try labeled demo
+              </Button>
+            </Stack>
+          }
+        />
+        <EmptyState
+          icon={<Security />}
+          title="No scan results yet"
+          description="Point the scanner at a repository or hostname, or use the CLI: rivicq scan ."
+          action={{ label: 'Open scanner', onClick: () => navigate('/scanner') }}
+        />
       </Box>
     );
   }

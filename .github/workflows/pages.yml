@@ -55,6 +55,10 @@ jobs:
           cp docs/plugin-development.md web/build/docs/
           cp docs/security-intelligence.md web/build/docs/
           cp docs/README.md web/build/docs/README.md
+          cp docs/KNOWN_LIMITATIONS.md web/build/docs/KNOWN_LIMITATIONS.md
+          cp docs/LAUNCH_CHECKLIST.md web/build/docs/LAUNCH_CHECKLIST.md
+          cp DATASETS.md web/build/docs/DATASETS.md
+          cp LEGAL.md web/build/docs/LEGAL.md
           cp docs/sdks/README.md web/build/docs/sdks/
           cp docs/sdks/rust.md web/build/docs/sdks/
           cp docs/sdks/python.md web/build/docs/sdks/

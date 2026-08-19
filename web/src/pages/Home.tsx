@@ -9,7 +9,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { cbomService } from '../services/api';
+import { cbomService, gitHubScanService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
 import QubitField from '../components/home/QubitField';
 import EncryptionLayerVisual from '../components/home/EncryptionLayerVisual';
@@ -109,8 +109,49 @@ const Home: React.FC = () => {
     setScanStatus('scanning');
     setProgress(0);
     setReport(null);
+    const target = repoUrl.trim();
+    const githubSpec = (() => {
+      const m = target.match(/github\.com[:/]+([^/]+)\/([^/#\s]+)/i);
+      if (m) return `${m[1]}/${m[2].replace(/\.git$/, '')}`;
+      if (/^[\w.-]+\/[\w.-]+$/.test(target)) return target;
+      return '';
+    })();
     try {
-      const resp = await cbomService.triggerScan(repoUrl.trim(), 'cbom');
+      if (githubSpec) {
+        const resp = await gitHubScanService.scanRepos([githubSpec], 'full', false);
+        const scanId = resp.data.scan_id;
+        let ticks = 0;
+        const interval = setInterval(async () => {
+          ticks += 1;
+          try {
+            const statusResp = await gitHubScanService.getScanStatus(scanId);
+            const status = statusResp.data;
+            setProgress(Math.min(95, ticks * 12));
+            const done = ['completed', 'failed', 'completed_with_warnings', 'partial'].includes(status.status);
+            if (done || ticks > 40) {
+              clearInterval(interval);
+              if (status.status === 'failed') {
+                setScanStatus('error');
+                return;
+              }
+              const repo = status.repos?.[0] || status;
+              setReport(buildReport(githubSpec, {
+                findings: repo.summary,
+                algorithms: repo.cbom,
+                quantum_risk: repo.pqc_readiness != null ? 100 - repo.pqc_readiness : undefined,
+                score: repo.pqc_readiness,
+              }));
+              setScanStatus('complete');
+              setProgress(100);
+            }
+          } catch {
+            clearInterval(interval);
+            setScanStatus('error');
+          }
+        }, 1500);
+        return;
+      }
+      const resp = await cbomService.triggerScan(target, 'cbom');
       const scanId = resp.data.scan_id;
       let ticks = 0;
       const interval = setInterval(async () => {
@@ -124,9 +165,9 @@ const Home: React.FC = () => {
             if (status.status === 'completed') {
               try {
                 const reportResp = await cbomService.getScanReport(scanId);
-                setReport(buildReport(repoUrl.trim(), reportResp.data || status));
+                setReport(buildReport(target, reportResp.data || status));
               } catch {
-                setReport(buildReport(repoUrl.trim(), status));
+                setReport(buildReport(target, status));
               }
               setScanStatus('complete');
             } else {
@@ -139,8 +180,6 @@ const Home: React.FC = () => {
         }
       }, 1500);
     } catch {
-      // No reachable backend (e.g. the static public site) — show an honest
-      // state instead of fabricated findings.
       setScanStatus('error');
     }
   };

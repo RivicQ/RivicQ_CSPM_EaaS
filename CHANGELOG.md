@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-08-19
+
+### Added
+- IBM Carbon visual language (Blue 60, Gray 100, Green 50) and IBM Plex Sans/Mono.
+- Community vs Enterprise edition cards on Sign-In / Registration.
+- Community command center onboarding (no simulated enterprise estate).
+- Inventory sort + JSON/PDF export (print-to-PDF, no extra npm dependency).
+- Homepage GitHub content scan path; Discover → Analyze → Quantify workflow copy.
+- `datasets/` expected-results harness and `make analyze-datasets`.
+- `RequireRole` RBAC helper; audit events record JWT tenant and actor.
+- LEGAL.md, NOTICE, docs/KNOWN_LIMITATIONS.md, DATASETS.md.
+
+### Changed
+- Tenant isolation: Enterprise audit APIs no longer accept spoofable `X-Tenant-ID`.
+- Auth forms: field-level email/password validation.
+
+### Security
+- Production authentication unchanged. Demo tokens are not JWTs on Pages.
+
 ## [1.3.0] - 2026-08-12
 
 ### Changed

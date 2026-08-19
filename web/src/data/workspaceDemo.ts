@@ -61,17 +61,48 @@ export const DEMO_FORECAST = [
   { quarter: 'Q1 2027', projected_score: 91, migration_pct: 85, note: 'Target for NIST PQC cutover' },
 ];
 
+const EMPTY_INVENTORY_SUMMARY = {
+  ...DEMO_INVENTORY_SUMMARY,
+  total_assets: 0,
+  quantum_safe_count: 0,
+  non_quantum_safe: 0,
+  vulnerable_assets: 0,
+  compliance_score: 0,
+  by_category: {
+    cryptographic: 0,
+    compute: 0,
+    containers: 0,
+    storage: 0,
+    databases: 0,
+    identity: 0,
+  },
+  source: 'empty',
+} as unknown as typeof DEMO_INVENTORY_SUMMARY;
+
+export function isDemoSession(): boolean {
+  try {
+    return localStorage.getItem('rivicq.demo') === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function normalizeAssets(data: unknown): any[] {
   const list = Array.isArray(data) ? data : ((data as any)?.assets ?? (data as any)?.items ?? []);
   if (list.length) return list;
   if ((data as any)?.source === 'cbom_scans') return [];
-  if ((data as any)?.demo_mode === true) return DEMO_ASSETS;
-  return DEMO_ASSETS;
+  if ((data as any)?.demo_mode === true || isDemoSession()) return DEMO_ASSETS;
+  return [];
 }
 
 export function normalizeSummary(data: unknown): typeof DEMO_INVENTORY_SUMMARY {
-  if (!data || typeof data !== 'object') return DEMO_INVENTORY_SUMMARY;
+  if (!data || typeof data !== 'object') {
+    return isDemoSession() ? DEMO_INVENTORY_SUMMARY : EMPTY_INVENTORY_SUMMARY;
+  }
   const d = data as Record<string, unknown>;
+  if (!isDemoSession() && d.demo_mode !== true && d.source !== 'cbom_scans' && d.total_assets == null && d.totalAssets == null) {
+    return EMPTY_INVENTORY_SUMMARY;
+  }
   if (d.source === 'cbom_scans' && Number(d.total_assets ?? 0) === 0) {
     return { ...DEMO_INVENTORY_SUMMARY, total_assets: 0, quantum_safe_count: 0, non_quantum_safe: 0, vulnerable_assets: 0, compliance_score: 0 };
   }

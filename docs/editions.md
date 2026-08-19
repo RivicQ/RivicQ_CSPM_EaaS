@@ -1,4 +1,16 @@
-# OSS vs Enterprise Editions
+# Community vs Enterprise
+
+The **same CBOM / intelligence engine** is used in both editions. Enterprise is a commercial entitlement (SSO, RBAC, cloud connectors, compliance packs), not a second scanner.
+
+| | Community | Enterprise |
+|--|-----------|------------|
+| License | Apache-2.0 | Commercial (RivicQ GmbH) |
+| CLI + GitHub Action | Yes | Yes |
+| Dashboard / scanner / inventory | Yes | Yes |
+| Multi-cloud, SSO, audit viewer | No | Yes |
+| Compliance PDFs (DORA / BSI / eIDAS mappings) | No | Yes — not a certification |
+
+See [LEGAL.md](../LEGAL.md) and the comparison table in [README.md](../README.md).
 
 ## Open Source (OSS)
 

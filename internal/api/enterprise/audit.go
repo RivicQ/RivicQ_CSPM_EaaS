@@ -53,7 +53,8 @@ func (v *AuditViewer) ListEvents(c *gin.Context) {
 	}
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = c.GetHeader("X-Tenant-ID")
+		c.JSON(http.StatusForbidden, gin.H{"error": "tenant context required"})
+		return
 	}
 
 	eventType := c.Query("event_type")
@@ -148,7 +149,8 @@ func (v *AuditViewer) GetSummary(c *gin.Context) {
 	}
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = c.GetHeader("X-Tenant-ID")
+		c.JSON(http.StatusForbidden, gin.H{"error": "tenant context required"})
+		return
 	}
 	days := c.DefaultQuery("days", "30")
 	since := time.Now().AddDate(0, 0, -parseInt(days, 30))
@@ -179,7 +181,8 @@ func (v *AuditViewer) ExportEvents(c *gin.Context) {
 	}
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = c.GetHeader("X-Tenant-ID")
+		c.JSON(http.StatusForbidden, gin.H{"error": "tenant context required"})
+		return
 	}
 	var req struct {
 		Format string `json:"format"`

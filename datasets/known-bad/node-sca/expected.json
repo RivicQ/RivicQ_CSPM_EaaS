@@ -1,0 +1,11 @@
+{
+  "id": "vulnerable-node",
+  "title": "Node dependency sample",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/vulnerable-node",
+  "must_match": [],
+  "must_not_match": ["customer"],
+  "min_findings": 0,
+  "notes": "Known outdated package versions for SCA overlay tests. Exact-version CVE mapping only."
+}

@@ -57,7 +57,9 @@ func Audit(logger *logrus.Logger, db *database.DB) gin.HandlerFunc {
 			} else if status >= 400 {
 				eventType = "client_error"
 			}
-			_ = db.Queries.InsertAuditEvent("", eventType, rid, method, path, status, latencyMs, ip, ua, "")
+			tenantID := c.GetString("tenant_id")
+			actorID := c.GetString("user_id")
+			_ = db.Queries.InsertAuditEvent(tenantID, eventType, rid, method, path, status, latencyMs, ip, ua, actorID)
 		}
 	}
 }

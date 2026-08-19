@@ -1,0 +1,11 @@
+{
+  "id": "crypto-go-weak",
+  "title": "Go weak crypto patterns",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/crypto-test",
+  "must_match": ["md5", "rsa"],
+  "must_not_match": ["aws_secret", "ghp_"],
+  "min_findings": 1,
+  "notes": "Known-bad fixture. RSA-1024 / MD5 / TLS 1.0 are intentional."
+}

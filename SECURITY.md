@@ -23,4 +23,4 @@ Public Disclosure
 PGP Key
 - Optional: include PGP-signed email for sensitive reports.
 
-Thank you for helping keep CryptoBOM SaaS secure.
+Thank you for helping keep RivicQ secure.

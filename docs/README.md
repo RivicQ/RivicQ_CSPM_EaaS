@@ -1,8 +1,10 @@
 # RivicQ documentation
 
-Live app: [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) · Interactive demo: [Try the demo trail](https://rivicq.github.io/RivicQ_CSPM_EaaS/demo) · Company: [rivicq.com](https://rivicq.com) · Source: [RivicQ/RivicQ_CSPM_EaaS](https://github.com/RivicQ/RivicQ_CSPM_EaaS)
+Live app: [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) · Demo: [interactive trail](https://rivicq.github.io/RivicQ_CSPM_EaaS/demo) · Company: [rivicq.com](https://rivicq.com)
 
-The Pages site is a static DEMO workspace (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is only issued when `DEMO_MODE` is enabled.
+Legal: [LEGAL.md](../LEGAL.md) · Limitations: [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) · Datasets: [DATASETS.md](../DATASETS.md)
+
+The Pages site is a static DEMO workspace (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled.
 
 ## Getting started
 

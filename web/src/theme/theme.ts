@@ -19,13 +19,13 @@ declare module '@mui/material/Chip' {
 }
 
 const LIGHT_PRIMARY = {
-  50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
-  500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1a4480', 900: '#0c2340',
+  50: '#edf5ff', 100: '#d0e2ff', 200: '#a6c8ff', 300: '#78a9ff', 400: '#4589ff',
+  500: '#0f62fe', 600: '#0f62fe', 700: '#0043ce', 800: '#002d9c', 900: '#001141',
 };
 
 const DARK_PRIMARY = {
-  50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
-  500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1a4480', 900: '#0c2340',
+  50: '#edf5ff', 100: '#d0e2ff', 200: '#a6c8ff', 300: '#78a9ff', 400: '#4589ff',
+  500: '#4589ff', 600: '#0f62fe', 700: '#0043ce', 800: '#002d9c', 900: '#001141',
 };
 
 const LIGHT_GOLD = {
@@ -82,7 +82,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
       },
       action: {
         hover: isDark ? 'rgba(148,163,184,0.08)' : 'rgba(100,116,139,0.06)',
-        selected: isDark ? 'rgba(59,130,246,0.14)' : 'rgba(37,99,235,0.08)',
+        selected: isDark ? 'rgba(15,98,254,0.22)' : 'rgba(15,98,254,0.1)',
       },
       divider: border,
     },
@@ -213,7 +213,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
         styleOverrides: {
           root: {
             '&.Mui-selected': {
-              backgroundColor: isDark ? 'rgba(59,130,246,0.14)' : 'rgba(37,99,235,0.08)',
+              backgroundColor: isDark ? 'rgba(15,98,254,0.18)' : 'rgba(15,98,254,0.1)',
             },
           },
         },
@@ -282,7 +282,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
             borderColor: border,
             borderRadius: `${tokens.borderRadius.md}px !important`,
             '&.Mui-selected': {
-              background: isDark ? 'rgba(59,130,246,0.18)' : 'rgba(37,99,235,0.1)',
+              background: isDark ? 'rgba(15,98,254,0.22)' : 'rgba(15,98,254,0.12)',
               color: primary[600],
               borderColor: `${primary[500]}44`,
             },

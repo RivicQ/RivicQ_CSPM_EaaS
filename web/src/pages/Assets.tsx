@@ -11,6 +11,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { inventoryService } from '../services/api';
+import { downloadJSON, printBrandedReport } from '../utils/reportExport';
 import PageFrame from '../components/PageFrame';
 import StatCard from '../components/dashboard/StatCard';
 import { GlassCard, EmptyState, DetailTabs, TabPanel } from '../components/ui';
@@ -31,6 +32,7 @@ const Assets: React.FC = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState<'name' | 'risk' | 'algorithm'>('risk');
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const rowsPerPage = 25;
@@ -50,10 +52,19 @@ const Assets: React.FC = () => {
   const assets = useMemo(() => normalizeAssets(data), [data]);
   const summary = useMemo(() => normalizeSummary(summaryRaw), [summaryRaw]);
 
-  const filteredAssets = assets.filter((asset) =>
-    (asset.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (asset.algorithm || asset.crypto_algorithm || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAssets = assets
+    .filter((asset) =>
+      (asset.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (asset.algorithm || asset.crypto_algorithm || '').toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .slice()
+    .sort((a, b) => {
+      if (sortKey === 'name') return String(a.name || '').localeCompare(String(b.name || ''));
+      if (sortKey === 'algorithm') return String(a.algorithm || a.crypto_algorithm || '').localeCompare(String(b.algorithm || b.crypto_algorithm || ''));
+      const rank: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+      return (rank[String(a.risk_level || a.riskLevel || '').toUpperCase()] ?? 9)
+        - (rank[String(b.risk_level || b.riskLevel || '').toUpperCase()] ?? 9);
+    });
   const paginatedAssets = filteredAssets.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.max(1, Math.ceil(filteredAssets.length / rowsPerPage));
 
@@ -158,8 +169,38 @@ const Assets: React.FC = () => {
               InputProps={{ startAdornment: <InputAdornment position="start"><Search /></InputAdornment> }}
               sx={{ flex: 1, minWidth: 200 }}
             />
-            <Button variant="outlined" startIcon={<Download />} disabled={!selectedAssets.length}>
-              Export ({selectedAssets.length})
+            <TextField
+              select
+              size="small"
+              label="Sort"
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
+              SelectProps={{ native: true }}
+              sx={{ width: 140 }}
+            >
+              <option value="risk">Risk</option>
+              <option value="name">Name</option>
+              <option value="algorithm">Algorithm</option>
+            </TextField>
+            <Button
+              variant="outlined"
+              startIcon={<Download />}
+              disabled={!assets.length}
+              onClick={() => {
+                const rows = selectedAssets.length
+                  ? assets.filter((a) => selectedAssets.includes(a.id))
+                  : filteredAssets;
+                downloadJSON('rivicq-inventory.json', { source: 'community_inventory', generated_at: new Date().toISOString(), assets: rows });
+                printBrandedReport({
+                  title: 'RivicQ cryptographic inventory',
+                  subtitle: `${rows.length} assets`,
+                  bodyHtml: `<table><thead><tr><th>Name</th><th>Algorithm</th><th>Risk</th><th>PQC</th></tr></thead><tbody>${
+                    rows.slice(0, 80).map((a) => `<tr><td>${a.name || ''}</td><td>${a.algorithm || a.crypto_algorithm || ''}</td><td>${a.risk_level || a.riskLevel || ''}</td><td>${a.quantum_safe || a.quantumSafe ? 'Ready' : 'Migrate'}</td></tr>`).join('')
+                  }</tbody></table>`,
+                });
+              }}
+            >
+              Export JSON + PDF
             </Button>
           </Box>
           {paginatedAssets.length ? renderAssetTable(paginatedAssets) : (

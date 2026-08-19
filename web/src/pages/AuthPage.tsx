@@ -17,8 +17,6 @@ import {
   Tab,
   Tabs,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
   useTheme,
   FormControlLabel,
@@ -156,7 +154,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
   const strength = React.useMemo(() => passwordStrength(form.password), [form.password]);
   const displayName = [form.firstName, form.lastName].filter(Boolean).join(' ').trim() || form.name.trim();
-  const canSubmit = form.email.includes('@') && form.password.length >= 8 &&
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+  const canSubmit = emailValid && form.password.length >= 8 &&
     (mode === 'login' || (displayName !== '' && form.password === form.confirm && form.acceptTerms));
 
   const editionLabel = edition === 'enterprise' ? 'Enterprise' : edition === 'professional' ? 'Professional' : 'Community';
@@ -375,19 +374,43 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   </Stack>
 
                   <Box sx={{ mt: 'auto' }}>
-                    <Typography variant="body2">
-                      Select your edition before authenticating.
+                    <Typography variant="overline" sx={{ letterSpacing: '0.12em', fontWeight: 700 }}>
+                      Edition
                     </Typography>
-                    <ToggleButtonGroup
-                      exclusive
-                      value={edition}
-                      onChange={(_, value: Edition | null) => value && setEdition(value)}
-                      sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}
-                    >
-                      <ToggleButton value="community">Community</ToggleButton>
-                      <ToggleButton value="professional">Professional</ToggleButton>
-                      <ToggleButton value="enterprise">Enterprise</ToggleButton>
-                    </ToggleButtonGroup>
+                    <Typography variant="body2" sx={{ mb: 1.5, mt: 0.5 }}>
+                      Community is Apache-2.0. Enterprise is a commercial license with SSO, RBAC, and cloud connectors.
+                    </Typography>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                      {([
+                        { id: 'community' as Edition, title: 'Community', body: 'CLI, CBOM scan, dashboard, GitHub Action' },
+                        { id: 'enterprise' as Edition, title: 'Enterprise', body: 'SSO, RBAC, multi-cloud, compliance reports' },
+                      ]).map((opt) => {
+                        const selected = edition === opt.id || (opt.id === 'enterprise' && edition === 'professional');
+                        return (
+                          <Button
+                            key={opt.id}
+                            variant={selected ? 'contained' : 'outlined'}
+                            onClick={() => setEdition(opt.id)}
+                            sx={{
+                              flex: 1,
+                              py: 1.5,
+                              px: 2,
+                              justifyContent: 'flex-start',
+                              textAlign: 'left',
+                              borderRadius: 1,
+                              borderWidth: 2,
+                            }}
+                          >
+                            <Box>
+                              <Typography fontWeight={700}>{opt.title}</Typography>
+                              <Typography variant="caption" sx={{ display: 'block', opacity: 0.9, whiteSpace: 'normal' }}>
+                                {opt.body}
+                              </Typography>
+                            </Box>
+                          </Button>
+                        );
+                      })}
+                    </Stack>
                   </Box>
                 </Stack>
               </CardContent>
@@ -553,8 +576,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                           value={form.email}
                           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                           InputProps={{ startAdornment: <InputAdornment position="start"><Mail /></InputAdornment> }}
+                          helperText={form.email && !emailValid ? 'Enter a valid work email' : 'We never share your address.'}
+                          error={Boolean(form.email && !emailValid)}
                           fullWidth
                           required
+                          autoComplete="email"
                         />
                         <Box>
                           <TextField
@@ -576,6 +602,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                                 </InputAdornment>
                               ),
                             }}
+                            helperText={form.password && form.password.length < 8 ? 'Use at least 8 characters' : ' '}
+                            error={Boolean(form.password && form.password.length < 8)}
+                            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                             fullWidth
                             required
                           />

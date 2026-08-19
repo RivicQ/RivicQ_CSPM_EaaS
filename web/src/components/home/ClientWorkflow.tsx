@@ -62,10 +62,10 @@ const ClientWorkflow: React.FC = () => {
         <Chip label="How it works" color="primary" variant="outlined" sx={{ fontWeight: 700 }} />
       </Stack>
       <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>
-        The RivicQ client workflow
+        Discover → Analyze → Quantify
       </Typography>
-      <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, textAlign: 'center', maxWidth: 720, mx: 'auto' }}>
-        From first connection to continuous remediation — one guided path from cryptographic discovery to quantum-safe compliance.
+      <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3, textAlign: 'center', maxWidth: 720, mx: 'auto' }}>
+        Scan cryptographic material, analyze risk and quantum exposure, then quantify what to fix first. The path below is the full client journey — scan → inventory → risk → report → migration planning.
       </Typography>
 
       <Box

@@ -70,7 +70,11 @@ build-rivicq:
 rivicq-scan: build-rivicq
 	./$(BIN_DIR)/rivicq scan . --fail-on BLOCK
 
-# ── Tests ───────────────────────────────────────────────────────────────────
+## Run dataset analysis (CBOM accuracy vs expected.json)
+analyze-datasets: build-rivicq
+	python3 scripts/analyze-datasets.py
+
+.PHONY: analyze-datasets
 ## Run Go unit tests with race detector
 test:
 	$(GO) test -race -count=1 ./...

@@ -1,4 +1,6 @@
-# Contributing to CryptoBOM SaaS
+# Contributing to RivicQ
+
+Thank you for contributing to **RivicQ CSPM / CryptoBOM**. Community source is Apache-2.0. Do not commit secrets, customer data, or live credentials. Dataset contributions: [DATASETS.md](DATASETS.md). Legal: [LEGAL.md](LEGAL.md).
 
 **Welcome!** We're excited that you're interested in contributing to CryptoBOM SaaS. This document provides guidelines for contributing to this project.
 

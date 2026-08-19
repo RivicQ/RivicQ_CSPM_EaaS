@@ -1,48 +1,40 @@
-/** Professional dashboard typography — Plus Jakarta Sans UI, mono reserved for code */
+/** IBM Plex — the IBM Carbon type family used across IBM Cloud / security tools. */
 export const appTypography = {
-  fontFamily:
-    '"Plus Jakarta Sans", "Inter", "SF Pro Text", system-ui, -apple-system, sans-serif',
-  fontFamilyMono:
-    '"IBM Plex Mono", "SF Mono", ui-monospace, monospace',
+  fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif',
+  fontFamilyMono: '"IBM Plex Mono", "SF Mono", ui-monospace, monospace',
 
-  /** Page & section titles (Security Command Center, etc.) */
   display: {
-    fontFamily:
-      '"Plus Jakarta Sans", "Inter", "SF Pro Text", system-ui, -apple-system, sans-serif',
+    fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif',
     fontWeight: 600,
-    letterSpacing: '-0.022em',
-    lineHeight: 1.18,
-    fontFeatureSettings: '"ss01"',
+    letterSpacing: '0',
+    lineHeight: 1.2,
+    fontFeatureSettings: '"ss02"',
   },
 
-  /** KPI numbers, scores, chart values */
   metric: {
-    fontFamily:
-      '"Plus Jakarta Sans", "Inter", "SF Pro Text", system-ui, -apple-system, sans-serif',
-    fontWeight: 700,
-    letterSpacing: '-0.025em',
+    fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif',
+    fontWeight: 600,
+    letterSpacing: '-0.02em',
     fontVariantNumeric: 'tabular-nums' as const,
-    fontFeatureSettings: '"tnum", "ss01"',
+    fontFeatureSettings: '"tnum"',
   },
 
-  /** Small caps labels (Command Center, Inventory, etc.) */
   eyebrow: {
     fontWeight: 600,
-    letterSpacing: '0.06em',
+    letterSpacing: '0.16em',
     textTransform: 'uppercase' as const,
-    fontSize: '0.6875rem',
+    fontSize: '0.75rem',
   },
 
-  /** Panel & card headings */
   heading: {
     fontWeight: 600,
-    letterSpacing: '-0.015em',
-    lineHeight: 1.35,
+    letterSpacing: '0',
+    lineHeight: 1.3,
   },
 
   body: {
     fontWeight: 400,
-    lineHeight: 1.6,
+    lineHeight: 1.5,
   },
 } as const;
 

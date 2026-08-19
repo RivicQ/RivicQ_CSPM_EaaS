@@ -1,0 +1,11 @@
+{
+  "id": "terraform-weak",
+  "title": "Terraform crypto / secrets patterns",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/terraform-test",
+  "must_match": [],
+  "must_not_match": ["AKIAIOSFODNN7EXAMPLE"],
+  "min_findings": 0,
+  "notes": "IaC fixture. Placeholder credentials must not be treated as live secrets when clearly fake."
+}

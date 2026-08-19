@@ -1,0 +1,10 @@
+{
+  "id": "container-dockerfile",
+  "title": "Container image with crypto tooling",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/vulnerable-container",
+  "must_match": [],
+  "must_not_match": [],
+  "min_findings": 0
+}

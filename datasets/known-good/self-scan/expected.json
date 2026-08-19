@@ -1,0 +1,13 @@
+{
+  "id": "this-repo-self-scan",
+  "title": "RivicQ repository (fixtures excluded)",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": ".",
+  "include_fixtures": false,
+  "must_match": [],
+  "must_not_match": ["AKIA", "ghp_live"],
+  "min_findings": 0,
+  "max_block": true,
+  "notes": "Known-good: default CLI self-scan must not BLOCK."
+}

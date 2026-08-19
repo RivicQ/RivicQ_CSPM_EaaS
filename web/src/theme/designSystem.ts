@@ -12,20 +12,20 @@ export const designSystem = {
   },
   gradient: {
     brand: tokens.colors.brandGradient,
-    brandSoft: 'linear-gradient(135deg, rgba(12,35,64,0.08) 0%, rgba(59,130,246,0.08) 50%, rgba(96,165,250,0.05) 100%)',
-    heroLight: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.12), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(26,68,128,0.08), transparent)',
-    heroDark: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.2), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(26,68,128,0.15), transparent)',
-    sidebar: 'linear-gradient(180deg, rgba(59,130,246,0.06) 0%, transparent 40%)',
-    sidebarDark: 'linear-gradient(180deg, rgba(59,130,246,0.1) 0%, transparent 40%)',
+    brandSoft: 'linear-gradient(135deg, rgba(0,29,108,0.08) 0%, rgba(15,98,254,0.08) 50%, rgba(36,161,72,0.05) 100%)',
+    heroLight: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(15,98,254,0.12), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0,67,206,0.08), transparent)',
+    heroDark: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(15,98,254,0.22), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0,29,108,0.18), transparent)',
+    sidebar: 'linear-gradient(180deg, rgba(15,98,254,0.06) 0%, transparent 40%)',
+    sidebarDark: 'linear-gradient(180deg, rgba(15,98,254,0.12) 0%, transparent 40%)',
     meshLight: `
-      radial-gradient(at 20% 0%, rgba(59,130,246,0.06) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, rgba(26,68,128,0.04) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgba(37,99,235,0.03) 0px, transparent 50%)
+      radial-gradient(at 20% 0%, rgba(15,98,254,0.07) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, rgba(36,161,72,0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, rgba(0,67,206,0.04) 0px, transparent 50%)
     `,
     meshDark: `
-      radial-gradient(at 20% 0%, rgba(59,130,246,0.1) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, rgba(26,68,128,0.08) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgba(37,99,235,0.06) 0px, transparent 50%)
+      radial-gradient(at 20% 0%, rgba(15,98,254,0.14) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, rgba(0,29,108,0.16) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, rgba(36,161,72,0.06) 0px, transparent 50%)
     `,
   },
   shadow: {
@@ -38,25 +38,25 @@ export const designSystem = {
     spring: '0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
     smooth: '0.25s cubic-bezier(0.4, 0, 0.2, 1)',
   },
-  /** Enterprise navy-blue — sidebar & command center */
+  /** IBM Carbon command surface — Gray 100 + Blue 60 */
   proBlue: {
-    navy: '#0c2340',
-    navyMid: '#0f2744',
-    navyLight: '#163352',
-    royal: '#1a4480',
-    accent: '#3b82f6',
-    accentLight: '#60a5fa',
-    accentMuted: '#93c5fd',
-    sidebar: 'linear-gradient(180deg, #0a1f38 0%, #0f2744 38%, #163352 100%)',
-    commandCenter: 'linear-gradient(135deg, #0a1f38 0%, #0f2744 45%, #1a4480 100%)',
-    commandGlow: 'radial-gradient(ellipse 70% 60% at 95% 5%, rgba(59,130,246,0.32), transparent 68%)',
-    border: 'rgba(96,165,250,0.2)',
-    textPrimary: '#f8fafc',
-    textSecondary: 'rgba(226,232,240,0.82)',
-    textMuted: 'rgba(148,163,184,0.75)',
-    navActive: 'rgba(255,255,255,0.14)',
-    navHover: 'rgba(255,255,255,0.07)',
-    shadow: '0 16px 48px rgba(12,35,64,0.28), 0 4px 16px rgba(15,39,68,0.2)',
+    navy: '#161616',
+    navyMid: '#262626',
+    navyLight: '#393939',
+    royal: '#0043ce',
+    accent: '#0f62fe',
+    accentLight: '#4589ff',
+    accentMuted: '#78a9ff',
+    sidebar: 'linear-gradient(180deg, #161616 0%, #1c1c1c 40%, #262626 100%)',
+    commandCenter: 'linear-gradient(135deg, #161616 0%, #001d6c 55%, #0f62fe 140%)',
+    commandGlow: 'radial-gradient(ellipse 70% 60% at 95% 5%, rgba(15,98,254,0.38), transparent 68%)',
+    border: 'rgba(69,137,255,0.28)',
+    textPrimary: '#f4f4f4',
+    textSecondary: 'rgba(244,244,244,0.82)',
+    textMuted: 'rgba(198,198,198,0.72)',
+    navActive: 'rgba(15,98,254,0.28)',
+    navHover: 'rgba(255,255,255,0.06)',
+    shadow: '0 16px 48px rgba(0,0,0,0.36), 0 4px 16px rgba(15,98,254,0.12)',
   },
 } as const;
 

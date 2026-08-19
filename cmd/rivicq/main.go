@@ -47,20 +47,23 @@ Usage:
 
 Flags:
   --format table|json     output format (default table)
-  --fail-on BLOCK|WARN    exit 1 when the policy gate reaches this level (default BLOCK)
-  --json                  shortcut for --format json
+  --fail-on BLOCK|WARN|NONE  policy gate (default BLOCK; NONE never fails)
+  --include-fixtures         include fixtures/testdata (dataset analysis)
+  --json                     shortcut for --format json
 
 Examples:
   rivicq scan .
   rivicq cbom ./src --format json
+  rivicq scan fixtures/crypto-test --include-fixtures --fail-on NONE --format json
 `)
 }
 
 func runScan(mode string, args []string) error {
 	fs := flag.NewFlagSet("rivicq "+mode, flag.ContinueOnError)
 	format := fs.String("format", "table", "table|json")
-	failOn := fs.String("fail-on", "BLOCK", "BLOCK|WARN")
+	failOn := fs.String("fail-on", "BLOCK", "BLOCK|WARN|NONE")
 	asJSON := fs.Bool("json", false, "json output")
+	includeFixtures := fs.Bool("include-fixtures", false, "scan fixtures/ and testdata/ (dataset analysis only)")
 	flagArgs, positional := splitCLIArgs(args)
 	if err := fs.Parse(flagArgs); err != nil {
 		return err
@@ -79,7 +82,7 @@ func runScan(mode string, args []string) error {
 		*format = "json"
 	}
 
-	files, err := walkRepo(abs)
+	files, err := walkRepo(abs, *includeFixtures)
 	if err != nil {
 		return err
 	}
@@ -121,7 +124,9 @@ func runScan(mode string, args []string) error {
 	}
 
 	failed := rep.Gate.Failed
-	if strings.EqualFold(*failOn, "WARN") && len(rep.Gate.Warnings) > 0 {
+	if strings.EqualFold(*failOn, "NONE") || *failOn == "" {
+		failed = false
+	} else if strings.EqualFold(*failOn, "WARN") && len(rep.Gate.Warnings) > 0 {
 		failed = true
 	}
 	if failed {
@@ -197,10 +202,15 @@ func splitCLIArgs(args []string) (flags []string, positional []string) {
 	return flags, positional
 }
 
-func walkRepo(root string) ([]shared.RepoFile, error) {
+func walkRepo(root string, includeFixtures bool) ([]shared.RepoFile, error) {
 	skipDir := map[string]bool{
 		".git": true, "node_modules": true, "vendor": true,
-		"testdata": true, "fixtures": true, "dist": true, "coverage": true, "bin": true,
+		"dist": true, "coverage": true, "bin": true,
+	}
+	if !includeFixtures {
+		skipDir["testdata"] = true
+		skipDir["fixtures"] = true
+		skipDir["datasets"] = true
 	}
 	var out []shared.RepoFile
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -211,7 +221,7 @@ func walkRepo(root string) ([]shared.RepoFile, error) {
 		rel = filepath.ToSlash(rel)
 		if info.IsDir() {
 			base := info.Name()
-			if skipDir[base] || rel == "web/build" || strings.Contains(rel, "/testdata/") {
+			if skipDir[base] || rel == "web/build" || (!includeFixtures && strings.Contains(rel, "/testdata/")) {
 				return filepath.SkipDir
 			}
 			return nil
