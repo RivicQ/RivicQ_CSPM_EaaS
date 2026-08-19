@@ -14,13 +14,17 @@ You may refer to RivicQ in factual descriptions (for example, “compatible with
 
 Nominative fair use remains available under applicable trademark law.
 
-## Third-party marks (interoperability only)
+## Product visual identity
 
-The following names appear because RivicQ integrates with or visually references those ecosystems. **No affiliation or endorsement is implied.**
+The console uses **RivicQ violet** from [rivicq.com](https://rivicq.com) (`#8251f3` and plum `#301233`) with **Outfit** and **JetBrains Mono** (open fonts). That identity is independent of IBM.
+
+## IBM trademarks (required notice)
+
+**IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.**
 
 | Mark | Owner (indicative) |
 |------|--------------------|
-| IBM, IBM Cloud, IBM Quantum, IBM Plex, Carbon (design system) | International Business Machines Corporation |
+| IBM, IBM Cloud, IBM Quantum, IBM Plex, Carbon (design system), IBM Hyper Protect Crypto Services | International Business Machines Corporation |
 | AWS, Amazon, CloudHSM, KMS | Amazon.com, Inc. or affiliates |
 | Microsoft, Azure | Microsoft Corporation |
 | Google Cloud, GCP, GKE | Google LLC |
@@ -30,15 +34,17 @@ The following names appear because RivicQ integrates with or visually references
 | OpenID, OIDC | OpenID Foundation |
 | Other product names | Their respective owners |
 
-## IBM Carbon and IBM Plex
+RivicQ may optionally **integrate with** IBM Cloud or IBM Quantum when a customer supplies their own credentials. That is interoperability only:
 
-The Community and Enterprise UIs adopt **IBM Carbon color tokens** (including Blue 60 `#0f62fe`, Gray 100 `#161616`, Green 50 `#24a148`, Red 60 `#da1e28`) and **IBM Plex** typefaces so the console is familiar to operators of IBM Cloud and similar enterprise tools.
+- RivicQ is **not** an IBM product, IBM Security product, or IBM-certified offering
+- RivicQ is **not** affiliated with, endorsed by, or sponsored by IBM
+- Do not describe this repository as IBM software
+- Do not use IBM Carbon or IBM Plex as RivicQ’s product design system
+- Mentions of IBM Quantum (including ambassador or network relationships) do **not** transfer IBM trademarks to RivicQ
 
-- IBM Plex fonts are used under the **SIL Open Font License**.
-- Carbon colors are a **visual reference**, not a license to IBM’s product identity, pictograms, or “IBM” word mark as your own brand.
-- **RivicQ is not an IBM product.** Do not describe this repository as IBM software, IBM Security, or IBM-certified.
+Control mappings in the product (ISO, NIS2, DORA, BSI, NIST, and others) are **engineering mappings for operators**. They are not an audit opinion or a certification of RivicQ GmbH or of the customer.
 
-See [NOTICE](NOTICE) and [LEGAL.md](LEGAL.md).
+See [LEGAL.md](LEGAL.md) and [NOTICE](NOTICE).
 
 ## Reporting misuse
 

@@ -4,30 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RivicQ — Community (Open Source) &amp; Enterprise docs</title>
-  <meta name="description" content="RivicQ documentation hub: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, legal notices, and IBM Carbon visual language. Not an IBM product." />
+  <meta name="description" content="RivicQ documentation hub: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, legal notices, and RivicQ violet theme. Not an IBM product." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --blue-60:   #0f62fe;
-      --blue-70:   #0043ce;
-      --blue-80:   #002d9c;
-      --gray-100:  #161616;
+      --blue-60:   #8251f3;
+      --blue-70:   #6b3de0;
+      --blue-80:   #5529c4;
+      --gray-100:  #0d0d0d;
       --gray-90:   #262626;
       --gray-10:   #f4f4f4;
       --green-50:  #24a148;
       --red-60:    #da1e28;
       --yellow-30: #f1c21b;
       --card-bg:   rgba(255,255,255,0.06);
-      --card-border: rgba(69,137,255,0.28);
+      --card-border: rgba(156,114,246,0.32);
     }
 
     body {
-      font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #161616 0%, #001d6c 52%, #0f62fe 100%);
+      font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #0d0d0d 0%, #301233 52%, #8251f3 100%);
       color: #f4f4f4;
       min-height: 100vh;
     }
@@ -35,7 +35,7 @@
     header {
       background: rgba(22,22,22,0.92);
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(69,137,255,0.22);
+      border-bottom: 1px solid rgba(156,114,246,0.22);
       position: sticky; top: 0; z-index: 100;
       padding: 0.9rem 2rem;
       display: flex; justify-content: space-between; align-items: center;
@@ -55,9 +55,9 @@
     .hero { text-align: center; padding: 5rem 2rem 4rem; }
     .hero-eyebrow {
       display: inline-block;
-      background: rgba(15,98,254,0.2);
-      border: 1px solid rgba(15,98,254,0.45);
-      color: #78a9ff;
+      background: rgba(130,81,243,0.2);
+      border: 1px solid rgba(130,81,243,0.45);
+      color: #b89af9;
       font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
       text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 2px;
       margin-bottom: 1.5rem;
@@ -96,7 +96,7 @@
       gap: 2.5rem; padding: 0 2rem 4rem;
     }
     .stat { text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 700; color: #78a9ff; font-family: 'IBM Plex Mono', monospace; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #b89af9; font-family: 'JetBrains Mono', monospace; }
     .stat-label { font-size: 0.8rem; color: #8d8d8d; margin-top: 0.2rem; letter-spacing: 0.04em; text-transform: uppercase; }
 
     section { max-width: 1200px; margin: 0 auto; padding: 0 2rem 5rem; }
@@ -113,17 +113,17 @@
       height: 140px;
       display: flex; align-items: center; justify-content: center;
       font-size: 2.4rem; font-weight: 700;
-      font-family: 'IBM Plex Mono', monospace;
+      font-family: 'JetBrains Mono', monospace;
     }
-    .thumb-enterprise { background: linear-gradient(135deg, #001d6c, #0f62fe); }
-    .thumb-oss        { background: linear-gradient(135deg, #161616, #198038); }
+    .thumb-enterprise { background: linear-gradient(135deg, #301233, #8251f3); }
+    .thumb-oss        { background: linear-gradient(135deg, #0d0d0d, #198038); }
     .thumb-legal      { background: linear-gradient(135deg, #262626, #525252); }
     .preview-body { padding: 1.25rem 1.5rem 1.5rem; }
     .preview-edition {
       font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
       text-transform: uppercase; margin-bottom: 0.4rem;
     }
-    .edition-enterprise { color: #78a9ff; }
+    .edition-enterprise { color: #b89af9; }
     .edition-oss        { color: var(--green-50); }
     .edition-legal      { color: var(--yellow-30); }
     .preview-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
@@ -187,7 +187,7 @@
   <p>
     CSPM, CryptoBOM, SBOM, and DevSecOps on one engine. Community is Apache License 2.0.
     Enterprise is a commercial license (SSO, RBAC, cloud connectors, support).
-    The UI uses IBM Carbon colors and IBM Plex — RivicQ is not an IBM product.
+    The UI uses RivicQ violet from rivicq.com. IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.
   </p>
   <div class="hero-actions">
     <a class="btn btn-primary" href="/RivicQ_CSPM_EaaS/demo">Interactive demo</a>
@@ -236,7 +236,7 @@
         <div class="preview-edition edition-legal">Legal pack</div>
         <div class="preview-title">License, privacy, trademarks</div>
         <div class="preview-desc">
-          Dual licensing, warranty disclaimer, privacy for Pages vs self-host, and IBM Carbon / Plex trademark notice.
+          Dual licensing, warranty disclaimer, privacy for Pages vs self-host, and IBM / IBM Plex / Carbon trademark notice.
         </div>
         <a class="preview-link" href="/RivicQ_CSPM_EaaS/docs/LEGAL.md">Open LEGAL.md →</a>
       </div>

@@ -18,6 +18,7 @@ import {
 import { Psychology, Shield, Assessment } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { quantumAttestationService } from '../../services/api';
+import TrademarkNotice from '../../components/TrademarkNotice';
 
 const QuantumAttestation: React.FC = () => {
   const { data: assessmentData, isLoading, error } = useQuery({
@@ -42,8 +43,8 @@ const QuantumAttestation: React.FC = () => {
     );
   }
 
-  const riskScore = (assessmentData as any)?.risk_score ?? 72;
-  const pqcReadiness = (assessmentData as any)?.pqc_readiness ?? 45;
+  const riskScore = (assessmentData as any)?.risk_score ?? null;
+  const pqcReadiness = (assessmentData as any)?.pqc_readiness ?? null;
   const assetsAtRisk = (assessmentData as any)?.assets_at_risk ?? 0;
 
   return (
@@ -51,9 +52,10 @@ const QuantumAttestation: React.FC = () => {
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         Quantum Attestation
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Post-quantum cryptography readiness assessment and migration roadmap
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        Post-quantum cryptography readiness from this workspace. Optional IBM Quantum hooks require your own API key and are never a hard dependency.
       </Typography>
+      <TrademarkNotice sx={{ mb: 3 }} />
 
       {error && (
         <Alert severity="info" sx={{ mb: 3 }}>
@@ -66,13 +68,13 @@ const QuantumAttestation: React.FC = () => {
           <Card>
             <CardContent>
               <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <Psychology sx={{ color: '#0f62fe' }} />
+                <Psychology sx={{ color: '#8251f3' }} />
                 <Typography variant="body2" color="text.secondary">Quantum Risk Score</Typography>
               </Box>
-              <Typography variant="h4" fontWeight="bold" color="#da1e28">{riskScore}</Typography>
+              <Typography variant="h4" fontWeight="bold" color="#dc2626">{riskScore ?? '—'}</Typography>
               <LinearProgress
                 variant="determinate"
-                value={riskScore}
+                value={typeof riskScore === 'number' ? riskScore : 0}
                 sx={{ mt: 1, height: 6, borderRadius: 3 }}
                 color="error"
               />
@@ -86,10 +88,10 @@ const QuantumAttestation: React.FC = () => {
                 <Shield sx={{ color: '#24a148' }} />
                 <Typography variant="body2" color="text.secondary">PQC Readiness</Typography>
               </Box>
-              <Typography variant="h4" fontWeight="bold" color="#24a148">{pqcReadiness}%</Typography>
+              <Typography variant="h4" fontWeight="bold" color="#16a34a">{pqcReadiness == null ? '—' : `${pqcReadiness}%`}</Typography>
               <LinearProgress
                 variant="determinate"
-                value={pqcReadiness}
+                value={typeof pqcReadiness === 'number' ? pqcReadiness : 0}
                 sx={{ mt: 1, height: 6, borderRadius: 3 }}
                 color="success"
               />
@@ -175,7 +177,7 @@ const QuantumAttestation: React.FC = () => {
       <Box mt={3}>
         <Button
           variant="contained"
-          sx={{ background: 'linear-gradient(45deg, #0f62fe, #8a3ffc)', mr: 2 }}
+          sx={{ background: 'linear-gradient(45deg, #8251f3, #8251f3)', mr: 2 }}
           onClick={() => quantumAttestationService.scanForPQCAlgorithms(['all'])}
         >
           Start PQC Scan (All Assets)

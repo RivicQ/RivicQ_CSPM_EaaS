@@ -18,7 +18,9 @@ RivicQ is an Encryption-as-a-Service (EaaS) platform for **CSPM**, **CBOM**, **S
 | **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
 | **Legal pack** | [LEGAL.md](LEGAL.md) · [LICENSE](LICENSE) · [NOTICE](NOTICE) · [PRIVACY.md](PRIVACY.md) · [TRADEMARKS.md](TRADEMARKS.md) · [SECURITY.md](SECURITY.md) |
 
-The web UI uses the **IBM Carbon** color system (Blue 60 `#0f62fe`, Gray 100 `#161616`, Green 50 `#24a148`) and **IBM Plex Sans / Plex Mono**. That visual language is used so the console matches the enterprise tools operators already know. **RivicQ is not an IBM product**, is not affiliated with IBM, and IBM does not certify this software. See [TRADEMARKS.md](TRADEMARKS.md).
+The web UI uses **RivicQ violet** from [rivicq.com](https://rivicq.com) (`#8251f3`, plum `#301233`) with Outfit and JetBrains Mono.
+
+**IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.** Optional IBM Cloud / IBM Quantum connectors are interoperability only and require the customer’s own credentials. See [TRADEMARKS.md](TRADEMARKS.md).
 
 ---
 
@@ -79,7 +81,7 @@ cd RivicQ_CSPM_EaaS
 cp .env.example .env
 make dev-backend          # Community API :8080
 # or: make dev-enterprise # Enterprise API :9090
-make dev-frontend         # React UI (IBM Carbon / Plex) → :3000
+make dev-frontend         # React UI (RivicQ violet / Outfit) → :3000
 ```
 
 Open http://localhost:3000/platform — choose **Community** or **Enterprise** on Sign in, or open `/demo`.
@@ -149,7 +151,7 @@ cmd/server/             OSS (:8080) and Enterprise (:9090) API
 internal/discovery/     TLS, SSH, HTTP, SBOM scanners
 internal/intelligence/  Findings, risk, policy, CycloneDX
 internal/auth/          JWT, MFA, RBAC helpers
-web/                    React SaaS (IBM Carbon visual language)
+web/                    React SaaS (RivicQ violet theme)
 datasets/               Expected results for fixture scans
 fixtures/               Synthetic known-bad / known-good samples
 deploy/helm/            OSS and Enterprise charts
@@ -164,7 +166,7 @@ Copyright © 2026 RivicQ GmbH, Berlin.
 - **Community source:** Apache License 2.0 — [LICENSE](LICENSE)
 - **Enterprise:** commercial license — contact [rivicq.com](https://rivicq.com)
 - **Attribution / third-party:** [NOTICE](NOTICE)
-- **Trademarks (including IBM Carbon / IBM Plex):** [TRADEMARKS.md](TRADEMARKS.md)
+- **Trademarks (IBM, IBM Plex, Carbon, IBM Quantum):** [TRADEMARKS.md](TRADEMARKS.md)
 - **Privacy:** [PRIVACY.md](PRIVACY.md)
 - **Warranty:** software is provided as described in Apache-2.0 §7–8 and [LEGAL.md](LEGAL.md). No certification, audit opinion, or legal advice is implied.
 

@@ -46,6 +46,7 @@ import { authService } from '../services/api';
 import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 import CryptoQuantumBackdrop from '../components/auth/CryptoQuantumBackdrop';
+import TrademarkNotice from '../components/TrademarkNotice';
 import designSystem, { commandCenterCardSx, proBlueContainedButtonSx } from '../theme/designSystem';
 
 const authHeroPanelSx = {
@@ -368,7 +369,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
                   <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
                     <Chip icon={<Storage sx={{ fontSize: 14 }} />} label="Community" size="small" variant="outlined" />
-                    <Chip icon={<WorkspacePremium sx={{ fontSize: 14 }} />} label="Professional" size="small" variant="outlined" />
                     <Chip icon={<WorkspacePremium sx={{ fontSize: 14 }} />} label="Enterprise" size="small" variant="outlined" />
                     <Chip icon={<Shield sx={{ fontSize: 14 }} />} label="Demo access" size="small" variant="outlined" />
                   </Stack>
@@ -785,9 +785,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                         </Stack>
 
                         <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
-                          By continuing you agree to the <a href="#terms" style={{ color: 'inherit' }}>Terms of Service</a> and{' '}
-                          <a href="#privacy" style={{ color: 'inherit' }}>Privacy Policy</a>. Authentication is handled by {providerName}.
+                          By continuing you agree to the{' '}
+                          <a href={`${process.env.PUBLIC_URL || ''}/docs/LEGAL.md`} style={{ color: 'inherit' }}>legal terms</a>
+                          {' '}and{' '}
+                          <a href={`${process.env.PUBLIC_URL || ''}/docs/PRIVACY.md`} style={{ color: 'inherit' }}>privacy notice</a>.
+                          Authentication is handled by {providerName}.
                         </Typography>
+                        <TrademarkNotice compact sx={{ textAlign: 'center', mx: 'auto' }} />
                       </Stack>
                     </form>
                     )}

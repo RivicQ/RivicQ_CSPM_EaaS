@@ -21,14 +21,18 @@ go.sum, web/package.json, and web/package-lock.json.
 
 Fonts
 -----
-IBM Plex Sans and IBM Plex Mono are licensed under the SIL Open Font
-License, Version 1.1 (https://github.com/IBM/plex).
+Outfit (UI) and JetBrains Mono are licensed under the SIL Open Font License.
+
+IBM trademarks
+--------------
+IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM
+product. Control mappings are not certifications. Mentions of IBM Cloud
+or IBM Quantum are interoperability descriptions only.
 
 Visual design
 -------------
-IBM Carbon color tokens are used as a visual reference for enterprise
-readability. This software is not an IBM product and is not endorsed
-by International Business Machines Corporation.
+The product theme is RivicQ violet (#8251f3 / #301233) from rivicq.com.
+It is not an IBM Carbon theme.
 
 Other names
 -----------

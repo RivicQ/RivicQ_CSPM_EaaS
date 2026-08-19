@@ -60,7 +60,11 @@ This repository includes cryptographic inventory, scanning, and related document
 
 “RivicQ”, the RivicQ logo, and “CryptoBOM” product names are trademarks of RivicQ GmbH.
 
-IBM, IBM Cloud, IBM Plex, IBM Carbon, and related names are trademarks of International Business Machines Corporation. RivicQ **uses IBM Carbon color tokens and IBM Plex fonts as a visual reference** for enterprise readability. **This software is not an IBM product and is not endorsed by IBM.**
+IBM, IBM Cloud, IBM Plex, IBM Carbon, IBM Quantum, and related names are trademarks of International Business Machines Corporation. **RivicQ is not an IBM product and is not endorsed by IBM.** Optional connectors to IBM Cloud or IBM Quantum are interoperability features that use the customer’s own credentials.
+
+The RivicQ console visual identity is **RivicQ violet** (`#8251f3`) from rivicq.com. It does **not** use IBM Carbon or IBM Plex as the product design system.
+
+Control mappings are not certifications, audit opinions, or legal advice.
 
 AWS, Azure, Google Cloud, GitHub, CycloneDX, and other vendor names are trademarks of their respective owners. Use of those names is for interoperability description only.
 
@@ -80,7 +84,7 @@ Full list: [TRADEMARKS.md](TRADEMARKS.md).
 
 Go modules, npm packages, fonts, and other dependencies retain their own licenses. See [NOTICE](NOTICE) and the lockfiles (`go.mod` / `go.sum`, `web/package-lock.json`).
 
-IBM Plex is licensed under the SIL Open Font License.
+IBM Plex, if referenced in documentation, is a trademark of IBM and is licensed separately under the SIL Open Font License. This product does not ship IBM Plex as its UI typeface.
 
 ---
 

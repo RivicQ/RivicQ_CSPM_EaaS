@@ -125,12 +125,17 @@ func (v *AuditViewer) GetEvent(c *gin.Context) {
 		return
 	}
 	id := c.Param("id")
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "tenant context required"})
+		return
+	}
 	var e AuditEvent
 	var metadata *string
 	err := v.db.QueryRow(`
 		SELECT id, tenant_id, event_type, request_id, method, path, status, latency_ms, ip, user_agent, actor_id, metadata, created_at
-		FROM audit_events WHERE id = $1
-	`, id).Scan(&e.ID, &e.TenantID, &e.EventType, &e.RequestID, &e.Method, &e.Path,
+		FROM audit_events WHERE id = $1 AND tenant_id = $2
+	`, id, tenantID).Scan(&e.ID, &e.TenantID, &e.EventType, &e.RequestID, &e.Method, &e.Path,
 		&e.Status, &e.LatencyMs, &e.IP, &e.UserAgent, &e.ActorID, &metadata, &e.CreatedAt)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})

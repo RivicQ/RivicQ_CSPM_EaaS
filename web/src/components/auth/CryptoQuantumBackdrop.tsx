@@ -139,7 +139,7 @@ const CryptoQuantumBackdrop: React.FC<CryptoQuantumBackdropProps> = ({ dark = tr
             borderRadius: 999,
             border: `1px solid ${accentSoft}`,
             color: glyphColor,
-            fontFamily: '"IBM Plex Mono", ui-monospace, monospace',
+            fontFamily: '"JetBrains Mono", ui-monospace, monospace',
             fontSize: '0.7rem',
             letterSpacing: '0.04em',
             fontWeight: 600,

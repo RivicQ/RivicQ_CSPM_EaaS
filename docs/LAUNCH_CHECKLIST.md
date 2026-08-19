@@ -1,7 +1,7 @@
 # Full product ready checklist
 
 - [x] Community CLI `rivicq scan .` and GitHub Action policy gate
-- [x] IBM Carbon / IBM Plex UI on auth, dashboard, and docs hub
+- [x] RivicQ violet / Outfit UI on auth, dashboard, and docs hub (rivicq.com)
 - [x] Sign-In / Register: Community vs Enterprise, validation, demo access, Supabase on Pages
 - [x] Community dashboard does not mix simulated enterprise estates (unless Demo)
 - [x] Inventory search, sort, JSON + print-to-PDF export

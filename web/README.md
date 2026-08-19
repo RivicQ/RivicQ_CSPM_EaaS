@@ -6,18 +6,19 @@ Live static build: https://rivicq.github.io/RivicQ_CSPM_EaaS/
 
 ## Visual language
 
-The UI follows **IBM Carbon** color tokens and **IBM Plex Sans / Plex Mono**:
+The UI follows **rivicq.com** violet — not IBM Carbon:
 
 | Token | Hex | Role |
 |-------|-----|------|
-| Blue 60 | `#0f62fe` | Interactive / primary |
-| Blue 70 | `#0043ce` | Primary hover / brand dark |
-| Gray 100 | `#161616` | Command sidebar / dark surfaces |
-| Gray 10 | `#f4f4f4` | Light canvas |
-| Green 50 | `#24a148` | Success / healthy |
-| Red 60 | `#da1e28` | Critical |
+| Violet | `#8251f3` | Interactive / primary (rivicq.com) |
+| Violet deep | `#6b3de0` | Hover |
+| Plum | `#301233` | Command surfaces |
+| Ink | `#0d0d0d` | Sidebar |
+| Cyan | `#0099ff` | Occasional highlight (rivicq.com `#09f`) |
 
-RivicQ is **not** an IBM product. See [TRADEMARKS.md](../TRADEMARKS.md).
+Type: **Outfit** + **JetBrains Mono**.
+
+**IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.**
 
 Tokens live in `src/theme/tokens.ts`. Theme assembly: `src/theme/theme.ts`.
 

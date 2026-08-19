@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { cbomService, gitHubScanService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
+import TrademarkNotice from '../components/TrademarkNotice';
 import QubitField from '../components/home/QubitField';
 import EncryptionLayerVisual from '../components/home/EncryptionLayerVisual';
 import ClientWorkflow from '../components/home/ClientWorkflow';
@@ -373,10 +374,10 @@ const Home: React.FC = () => {
         <Box sx={{ mb: 10, textAlign: 'center' }}>
           <Grid container spacing={3}>
             {[
-              { value: '150k+', label: 'Assets assessed' },
-              { value: '5', label: 'Cloud providers' },
-              { value: '8+', label: 'Compliance frameworks' },
-              { value: '99.95%', label: 'Platform uptime' },
+              { value: 'CBOM', label: 'CycloneDX crypto inventory' },
+              { value: 'CLI', label: 'rivicq scan .' },
+              { value: 'OSS + Ent', label: 'Same security engine' },
+              { value: 'Mappings', label: 'Not certifications' },
             ].map((s) => (
               <Grid item xs={6} md={3} key={s.label}>
                 <Typography variant="h3" fontWeight={900} sx={{ background: tokens.colors.brandGradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>
@@ -560,9 +561,12 @@ const Home: React.FC = () => {
         </Box>
 
         <Box sx={{ textAlign: 'center', py: 4, borderTop: 1, borderColor: 'divider' }}>
-          <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" flexWrap="wrap" useFlexGap>
-            <BrandLogo compact />
-            <Typography variant="body2" sx={{ color: 'text.muted' }}>© 2026 RivicQ · Encryption as a Service &amp; Quantum-safe Cryptographic Security Posture Management</Typography>
+          <Stack spacing={1.25} alignItems="center">
+            <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" flexWrap="wrap" useFlexGap>
+              <BrandLogo compact />
+              <Typography variant="body2" sx={{ color: 'text.muted' }}>© 2026 RivicQ GmbH · Encryption as a Service</Typography>
+            </Stack>
+            <TrademarkNotice />
           </Stack>
         </Box>
       </Container>

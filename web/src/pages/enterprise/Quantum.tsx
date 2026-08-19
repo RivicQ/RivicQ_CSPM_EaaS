@@ -44,19 +44,12 @@ import {
   Cell,
 } from 'recharts';
 import { quantumService } from '../../services/api';
+import TrademarkNotice from '../../components/TrademarkNotice';
 
 const ALGORITHMS = [
-  { name: 'CRYSTALS-Kyber', type: 'KEM', status: 'Standardized', security_level: 5 },
-  { name: 'CRYSTALS-Dilithium', type: 'Signature', status: 'Standardized', security_level: 5 },
-  { name: 'FALCON', type: 'Signature', status: 'Standardized', security_level: 5 },
-  { name: 'SPHINCS+', type: 'Signature', status: 'Standardized', security_level: 5 },
-  { name: 'ML-KEM', type: 'KEM', status: 'Standardized', security_level: 5 },
-];
-
-const QUANTUM_NETWORKS = [
-  { id: 'ibmq_brisbane', name: 'IBM Quantum Brisbane', qubits: 127, error_rate: 0.001, fidelity: 0.99, region: 'au-syd' },
-  { id: 'ibmq_sherbrooke', name: 'IBM Quantum Sherbrooke', qubits: 127, error_rate: 0.001, fidelity: 0.99, region: 'ca-montreal' },
-  { id: 'ibm_washington', name: 'IBM Quantum Washington', qubits: 127, error_rate: 0.001, fidelity: 0.99, region: 'us-east' },
+  { name: 'ML-KEM (FIPS 203)', type: 'KEM', status: 'NIST standard', security_level: 5 },
+  { name: 'ML-DSA (FIPS 204)', type: 'Signature', status: 'NIST standard', security_level: 5 },
+  { name: 'SLH-DSA (FIPS 205)', type: 'Signature', status: 'NIST standard', security_level: 5 },
 ];
 
 const COLORS = ['#24a148', '#ff832b', '#da1e28'];
@@ -91,19 +84,15 @@ const QuantumReadiness: React.FC = () => {
     } catch (error) {
       console.error('Failed to load quantum data:', error);
       setReadiness({
-        overall_score: 35,
-        quantum_safe_assets: 35,
-        at_risk_assets: 65,
-        migration_progress: 35,
-        recommendations: [
-          'Migrate RSA-2048 to CRYSTALS-Kyber',
-          'Migrate ECDSA to CRYSTALS-Dilithium',
-          'Implement hybrid classical-quantum key exchange',
-        ],
-        by_category: { symmetric_encryption: 80, asymmetric_encryption: 45, digital_signatures: 40 },
-        by_algorithm: { RSA: 30, ECDSA: 40, AES256: 85 },
+        overall_score: 0,
+        quantum_safe_assets: 0,
+        at_risk_assets: 0,
+        migration_progress: 0,
+        recommendations: [],
+        by_category: {},
+        by_algorithm: {},
       });
-      setNetworks(QUANTUM_NETWORKS);
+      setNetworks([]);
       setAlgorithms(ALGORITHMS);
     } finally {
       setLoading(false);
@@ -132,16 +121,14 @@ const QuantumReadiness: React.FC = () => {
     { month: 'Jun', quantum_safe: 35, at_risk: 65 },
   ];
 
-  const categoryData = readiness?.by_category ? Object.entries(readiness.by_category).map(([name, value]) => ({ name, value })) : [
-    { name: 'Symmetric', value: 80 },
-    { name: 'Asymmetric', value: 45 },
-    { name: 'Signatures', value: 40 },
-    { name: 'Hash', value: 90 },
-  ];
+  const categoryData = readiness?.by_category
+    ? Object.entries(readiness.by_category).map(([name, value]) => ({ name, value }))
+    : [];
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
         <Typography variant="h4" fontWeight="bold">
           Quantum Readiness
         </Typography>
@@ -153,6 +140,8 @@ const QuantumReadiness: React.FC = () => {
             Migrate Algorithm
           </Button>
         </Box>
+        </Box>
+        <TrademarkNotice />
       </Box>
 
       {loading && <LinearProgress sx={{ mb: 2 }} />}
@@ -163,7 +152,7 @@ const QuantumReadiness: React.FC = () => {
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Overall Readiness</Typography>
               <Typography variant="h3" color={readiness?.overall_score >= 70 ? 'success.main' : 'warning.main'}>
-                {readiness?.overall_score || 35}%
+                {readiness?.overall_score ?? 0}%
               </Typography>
             </CardContent>
           </Card>
@@ -172,7 +161,7 @@ const QuantumReadiness: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Quantum Safe</Typography>
-              <Typography variant="h3" color="success.main">{readiness?.quantum_safe_assets || 35}%</Typography>
+              <Typography variant="h3" color="success.main">{readiness?.quantum_safe_assets ?? 0}%</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -180,7 +169,7 @@ const QuantumReadiness: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>At Risk</Typography>
-              <Typography variant="h3" color="error.main">{readiness?.at_risk_assets || 65}%</Typography>
+              <Typography variant="h3" color="error.main">{readiness?.at_risk_assets ?? 0}%</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -188,17 +177,18 @@ const QuantumReadiness: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>Migration Progress</Typography>
-              <Typography variant="h3" color="info.main">{readiness?.migration_progress || 35}%</Typography>
+              <Typography variant="h3" color="info.main">{readiness?.migration_progress ?? 0}%</Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
+      {(readiness?.at_risk_assets ?? 0) > 0 && (
       <Alert severity="warning" sx={{ mb: 3 }}>
-        <AlertTitle>Quantum Threat Warning</AlertTitle>
-        CRYPTOGRAPHY IS AT RISK: 65% of your cryptographic assets are vulnerable to quantum attacks.
-        Current RSA and ECDSA algorithms can be broken by sufficiently powerful quantum computers.
+        <AlertTitle>Quantum-era exposure</AlertTitle>
+        {readiness.at_risk_assets}% of inventoried cryptographic assets in this workspace are classified as quantum-era risk. RSA-2048 is classified, not automatically marked vulnerable.
       </Alert>
+      )}
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={6}>
@@ -278,6 +268,11 @@ const QuantumReadiness: React.FC = () => {
       </Card>
 
       <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>Quantum Networks</Typography>
+      {networks.length === 0 && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          No backends connected. IBM Quantum is an optional customer-credentialed integration. IBM is a trademark of IBM. RivicQ is not an IBM product.
+        </Typography>
+      )}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {networks.map((network) => (
           <Grid item xs={12} md={4} key={network.id}>
@@ -285,7 +280,7 @@ const QuantumReadiness: React.FC = () => {
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6">{network.name}</Typography>
-                  <Chip icon={<CheckCircle />} label="Online" color="success" size="small" />
+                  <Chip label={network.status || 'Configured'} size="small" variant="outlined" />
                 </Box>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>

@@ -19,14 +19,14 @@ export function printBrandedReport(opts: {
   const win = window.open('', '_blank', 'noopener,noreferrer');
   if (!win) return;
   const disclaimer = opts.disclaimer
-    || 'RivicQ Community report. Not a certification. Generated locally in the browser.';
+    || 'RivicQ Community report. Not a certification. IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product.';
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/>
 <title>${escapeHtml(opts.title)}</title>
 <style>
-  body { font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif; color: #161616; margin: 32px; }
-  h1 { color: #0f62fe; font-size: 22px; margin: 0 0 8px; }
+  body { font-family: "Outfit", Helvetica, Arial, sans-serif; color: #161616; margin: 32px; }
+  h1 { color: #8251f3; font-size: 22px; margin: 0 0 8px; }
   .sub { color: #525252; margin-bottom: 16px; }
-  .disclaimer { background: #edf5ff; border-left: 4px solid #0f62fe; padding: 12px 16px; margin: 16px 0; font-size: 13px; }
+  .disclaimer { background: #f5f0ff; border-left: 4px solid #8251f3; padding: 12px 16px; margin: 16px 0; font-size: 13px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e0e0e0; }
   th { background: #f4f4f4; }

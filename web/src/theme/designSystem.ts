@@ -12,20 +12,20 @@ export const designSystem = {
   },
   gradient: {
     brand: tokens.colors.brandGradient,
-    brandSoft: 'linear-gradient(135deg, rgba(0,29,108,0.08) 0%, rgba(15,98,254,0.08) 50%, rgba(36,161,72,0.05) 100%)',
-    heroLight: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(15,98,254,0.12), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0,67,206,0.08), transparent)',
-    heroDark: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(15,98,254,0.22), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0,29,108,0.18), transparent)',
-    sidebar: 'linear-gradient(180deg, rgba(15,98,254,0.06) 0%, transparent 40%)',
-    sidebarDark: 'linear-gradient(180deg, rgba(15,98,254,0.12) 0%, transparent 40%)',
+    brandSoft: 'linear-gradient(135deg, rgba(48,18,51,0.08) 0%, rgba(130,81,243,0.10) 50%, rgba(0,153,255,0.04) 100%)',
+    heroLight: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(130,81,243,0.14), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(107,61,224,0.08), transparent)',
+    heroDark: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(130,81,243,0.28), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(48,18,51,0.4), transparent)',
+    sidebar: 'linear-gradient(180deg, rgba(130,81,243,0.08) 0%, transparent 40%)',
+    sidebarDark: 'linear-gradient(180deg, rgba(130,81,243,0.16) 0%, transparent 40%)',
     meshLight: `
-      radial-gradient(at 20% 0%, rgba(15,98,254,0.07) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, rgba(36,161,72,0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgba(0,67,206,0.04) 0px, transparent 50%)
+      radial-gradient(at 20% 0%, rgba(130,81,243,0.09) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, rgba(0,153,255,0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, rgba(48,18,51,0.04) 0px, transparent 50%)
     `,
     meshDark: `
-      radial-gradient(at 20% 0%, rgba(15,98,254,0.14) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, rgba(0,29,108,0.16) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgba(36,161,72,0.06) 0px, transparent 50%)
+      radial-gradient(at 20% 0%, rgba(130,81,243,0.18) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, rgba(48,18,51,0.22) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, rgba(0,153,255,0.06) 0px, transparent 50%)
     `,
   },
   shadow: {
@@ -38,25 +38,25 @@ export const designSystem = {
     spring: '0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
     smooth: '0.25s cubic-bezier(0.4, 0, 0.2, 1)',
   },
-  /** IBM Carbon command surface — Gray 100 + Blue 60 */
+  /** RivicQ command surface — plum #301233 + violet #8251f3 (rivicq.com) */
   proBlue: {
-    navy: '#161616',
-    navyMid: '#262626',
-    navyLight: '#393939',
-    royal: '#0043ce',
-    accent: '#0f62fe',
-    accentLight: '#4589ff',
-    accentMuted: '#78a9ff',
-    sidebar: 'linear-gradient(180deg, #161616 0%, #1c1c1c 40%, #262626 100%)',
-    commandCenter: 'linear-gradient(135deg, #161616 0%, #001d6c 55%, #0f62fe 140%)',
-    commandGlow: 'radial-gradient(ellipse 70% 60% at 95% 5%, rgba(15,98,254,0.38), transparent 68%)',
-    border: 'rgba(69,137,255,0.28)',
-    textPrimary: '#f4f4f4',
-    textSecondary: 'rgba(244,244,244,0.82)',
-    textMuted: 'rgba(198,198,198,0.72)',
-    navActive: 'rgba(15,98,254,0.28)',
+    navy: '#0d0d0d',
+    navyMid: '#1a1220',
+    navyLight: '#301233',
+    royal: '#5529c4',
+    accent: '#8251f3',
+    accentLight: '#9c72f6',
+    accentMuted: '#b89af9',
+    sidebar: 'linear-gradient(180deg, #0d0d0d 0%, #1a1220 40%, #301233 100%)',
+    commandCenter: 'linear-gradient(135deg, #0d0d0d 0%, #301233 48%, #8251f3 140%)',
+    commandGlow: 'radial-gradient(ellipse 70% 60% at 95% 5%, rgba(130,81,243,0.42), transparent 68%)',
+    border: 'rgba(156,114,246,0.32)',
+    textPrimary: '#f7f5fb',
+    textSecondary: 'rgba(247,245,251,0.82)',
+    textMuted: 'rgba(184,154,249,0.72)',
+    navActive: 'rgba(130,81,243,0.32)',
     navHover: 'rgba(255,255,255,0.06)',
-    shadow: '0 16px 48px rgba(0,0,0,0.36), 0 4px 16px rgba(15,98,254,0.12)',
+    shadow: '0 16px 48px rgba(0,0,0,0.4), 0 4px 16px rgba(130,81,243,0.18)',
   },
 } as const;
 
@@ -351,7 +351,7 @@ export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolea
   color: isEnterprise
     ? mode === 'dark'
       ? '#ddd6fe'
-      : '#6d28d9'
+      : '#8251f3'
     : mode === 'dark'
       ? designSystem.proBlue.accentMuted
       : designSystem.proBlue.royal,

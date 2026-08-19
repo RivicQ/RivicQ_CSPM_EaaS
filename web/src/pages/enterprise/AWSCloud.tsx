@@ -77,7 +77,7 @@ const AWSCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <VpnKey sx={{ color: '#0f62fe', fontSize: 40 }} />
+              <VpnKey sx={{ color: '#8251f3', fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>{kmsKeys.length}</Typography>
               <Typography variant="caption" color="text.secondary">KMS Keys</Typography>
             </CardContent>

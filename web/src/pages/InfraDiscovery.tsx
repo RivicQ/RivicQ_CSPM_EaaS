@@ -243,7 +243,7 @@ function SeverityBadge({ severity }: { severity: SeverityLevel }) {
 }
 
 function ProtocolBadge({ protocol }: { protocol: string }) {
-  const colors: Record<string, string> = { tls: '#0f62fe', ssh: '#8a3ffc', http: '#24a148' };
+  const colors: Record<string, string> = { tls: '#8251f3', ssh: '#8251f3', http: '#24a148' };
   return (
     <Chip
       label={protocol.toUpperCase()}
@@ -575,7 +575,7 @@ function ScanButton({ onScanComplete }: ScanButtonProps) {
         onClick={handleScan}
         disabled={scanning}
         sx={{
-          background: 'linear-gradient(45deg, #0f62fe 30%, #8a3ffc 90%)',
+          background: 'linear-gradient(45deg, #8251f3 30%, #8251f3 90%)',
           color: 'white',
           fontWeight: 'bold',
           px: 3,
@@ -619,7 +619,7 @@ const InfraDiscovery: React.FC = () => {
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Box display="flex" alignItems="center" gap={1} sx={{ mb: 0.5 }}>
-          <NetworkCheck sx={{ color: '#0f62fe', fontSize: 32 }} />
+          <NetworkCheck sx={{ color: '#8251f3', fontSize: 32 }} />
           <Typography variant="h4" fontWeight="bold">
             Infrastructure Discovery — Weak Cryptography
           </Typography>

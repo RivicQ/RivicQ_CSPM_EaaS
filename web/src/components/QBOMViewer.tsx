@@ -162,7 +162,7 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
                   qbom.quantum_readiness_score >= 80
                     ? 'linear-gradient(90deg, #24a148, #198038)'
                     : qbom.quantum_readiness_score >= 60
-                    ? 'linear-gradient(90deg, #0f62fe, #1e40af)'
+                    ? 'linear-gradient(90deg, #8251f3, #1e40af)'
                     : qbom.quantum_readiness_score >= 40
                     ? 'linear-gradient(90deg, #ff832b, #d97706)'
                     : 'linear-gradient(90deg, #da1e28, #a2191f)',

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.2] - 2026-08-19
+
+### Changed
+- Product theme is RivicQ violet (`#8251f3` / `#301233`) matching rivicq.com, with Outfit + JetBrains Mono.
+- Stopped using IBM Carbon colors and IBM Plex as the product design system (IBM ambassador / trademark hygiene).
+- Homepage stats no longer claim unproven asset counts or uptime.
+- IBM Cloud HPCS no longer defaults status to “Connected”; quantum attestation no longer invents 72/45 scores.
+
+### Security
+- Enterprise audit `GetEvent` is scoped to the JWT tenant.
+
+### Legal
+- TRADEMARKS.md, LEGAL.md, NOTICE, and in-app notices: IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.
+
 ## [1.5.1] - 2026-08-19
 
 ### Added

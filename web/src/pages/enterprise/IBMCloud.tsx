@@ -16,6 +16,7 @@ import {
 import { Security, Key, Storage } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { ibmCloudService } from '../../services/api';
+import TrademarkNotice from '../../components/TrademarkNotice';
 
 const IBMCloud: React.FC = () => {
   const { data: statusData, isLoading: statusLoading, error: statusError } = useQuery({
@@ -52,9 +53,10 @@ const IBMCloud: React.FC = () => {
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         IBM Cloud HPCS
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        IBM Hyper Protect Crypto Services – HSM-backed key management
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        Optional connector to IBM Hyper Protect Crypto Services. Requires customer IBM Cloud credentials.
       </Typography>
+      <TrademarkNotice sx={{ mb: 3 }} />
 
       {statusError && (
         <Alert severity="info" sx={{ mb: 3 }}>
@@ -66,9 +68,9 @@ const IBMCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Security sx={{ color: '#0f62fe', fontSize: 40 }} />
+              <Security sx={{ color: '#8251f3', fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>
-                {(statusData as any)?.status || 'Connected'}
+                {(statusData as any)?.status || (statusError ? 'Not connected' : 'Unknown')}
               </Typography>
               <Typography variant="caption" color="text.secondary">HPCS Status</Typography>
             </CardContent>
@@ -86,7 +88,7 @@ const IBMCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Storage sx={{ color: '#8a3ffc', fontSize: 40 }} />
+              <Storage sx={{ color: '#8251f3', fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>{buckets.length}</Typography>
               <Typography variant="caption" color="text.secondary">COS Buckets</Typography>
             </CardContent>

@@ -1,20 +1,20 @@
-/** IBM Plex — the IBM Carbon type family used across IBM Cloud / security tools. */
+/** RivicQ type — Outfit (UI) + JetBrains Mono. Not IBM Plex. */
 export const appTypography = {
-  fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif',
-  fontFamilyMono: '"IBM Plex Mono", "SF Mono", ui-monospace, monospace',
+  fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
+  fontFamilyMono: '"JetBrains Mono", "SF Mono", ui-monospace, monospace',
 
   display: {
-    fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif',
+    fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
     fontWeight: 600,
-    letterSpacing: '0',
+    letterSpacing: '-0.02em',
     lineHeight: 1.2,
-    fontFeatureSettings: '"ss02"',
+    fontFeatureSettings: '"ss01"',
   },
 
   metric: {
-    fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif',
+    fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
     fontWeight: 600,
-    letterSpacing: '-0.02em',
+    letterSpacing: '-0.03em',
     fontVariantNumeric: 'tabular-nums' as const,
     fontFeatureSettings: '"tnum"',
   },
@@ -28,7 +28,7 @@ export const appTypography = {
 
   heading: {
     fontWeight: 600,
-    letterSpacing: '0',
+    letterSpacing: '-0.02em',
     lineHeight: 1.3,
   },
 

@@ -64,6 +64,7 @@ import BrandLogo from '../components/BrandLogo';
 import RivicQAssistant from '../components/assistant/RivicQAssistant';
 import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';
 import DemoTrailCoach from '../components/demo/DemoTrailCoach';
+import TrademarkNotice from '../components/TrademarkNotice';
 import { useDemoTrail } from '../context/DemoTrailContext';
 import designSystem, {
   sidebarPaperSx,
@@ -439,11 +440,15 @@ const Layout: React.FC = () => {
               justifyContent: 'flex-start',
               fontWeight: 600,
               fontSize: '0.75rem',
-              bgcolor: 'rgba(124,58,237,0.2)',
+              bgcolor: 'rgba(130,81,243,0.2)',
               color: '#ddd6fe',
               border: 1,
               borderColor: 'rgba(196,181,253,0.25)',
             }}
+          />
+          <TrademarkNotice
+            compact
+            sx={{ color: 'rgba(247,245,251,0.45)', px: 0.5 }}
           />
         </Stack>
       </Box>
