@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/sirupsen/logrus"
 )
@@ -42,9 +43,9 @@ func (m *APIKeyManager) SetupRoutes(router *gin.RouterGroup, authMW gin.HandlerF
 	keys.Use(authMW)
 	{
 		keys.GET("", m.ListKeys)
-		keys.POST("", m.CreateKey)
-		keys.DELETE("/:id", m.RevokeKey)
-		keys.PUT("/:id", m.UpdateKey)
+		keys.POST("", auth.RequireRole("admin"), m.CreateKey)
+		keys.DELETE("/:id", auth.RequireRole("admin"), m.RevokeKey)
+		keys.PUT("/:id", auth.RequireRole("admin"), m.UpdateKey)
 	}
 }
 
@@ -54,9 +55,9 @@ func (m *APIKeyManager) ListKeys(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenant_id")
-	if tenantID == "" {
-		tenantID = c.GetHeader("X-Tenant-ID")
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
 	}
 
 	rows, err := m.db.Query(`
@@ -88,9 +89,9 @@ func (m *APIKeyManager) CreateKey(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenant_id")
-	if tenantID == "" {
-		tenantID = c.GetHeader("X-Tenant-ID")
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
 	}
 
 	var req struct {
@@ -137,8 +138,12 @@ func (m *APIKeyManager) RevokeKey(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
 		return
 	}
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
+	}
 	id := c.Param("id")
-	_, err := m.db.Exec(`UPDATE api_keys SET status = 'revoked' WHERE id = $1`, id)
+	_, err := m.db.Exec(`UPDATE api_keys SET status = 'revoked' WHERE id = $1 AND tenant_id = $2`, id, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke key"})
 		return
@@ -149,6 +154,10 @@ func (m *APIKeyManager) RevokeKey(c *gin.Context) {
 func (m *APIKeyManager) UpdateKey(c *gin.Context) {
 	if m.db == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+		return
+	}
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
 		return
 	}
 	id := c.Param("id")
@@ -164,8 +173,8 @@ func (m *APIKeyManager) UpdateKey(c *gin.Context) {
 
 	_, err := m.db.Exec(`
 		UPDATE api_keys SET name = COALESCE(NULLIF($1,''), name), role = COALESCE(NULLIF($2,''), role),
-		scopes = COALESCE(NULLIF($3,''), scopes) WHERE id = $4
-	`, req.Name, req.Role, strings.Join(req.Scopes, ","), id)
+		scopes = COALESCE(NULLIF($3,''), scopes) WHERE id = $4 AND tenant_id = $5
+	`, req.Name, req.Role, strings.Join(req.Scopes, ","), id, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update key"})
 		return

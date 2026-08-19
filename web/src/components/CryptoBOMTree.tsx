@@ -35,10 +35,10 @@ interface CryptoBOMTreeProps {
 }
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  asset: <AccountTree fontSize="small" style={{ color: '#667eea' }} />,
-  library: <Lock fontSize="small" style={{ color: '#764ba2' }} />,
-  algorithm: <Lock fontSize="small" style={{ color: '#f59e0b' }} />,
-  key: <Lock fontSize="small" style={{ color: '#10b981' }} />,
+  asset: <AccountTree fontSize="small" style={{ color: '#0f62fe' }} />,
+  library: <Lock fontSize="small" style={{ color: '#8a3ffc' }} />,
+  algorithm: <Lock fontSize="small" style={{ color: '#ff832b' }} />,
+  key: <Lock fontSize="small" style={{ color: '#24a148' }} />,
 };
 
 const CryptoBOMTree: React.FC<CryptoBOMTreeProps> = ({ root, depth = 0 }) => {
@@ -78,8 +78,8 @@ const CryptoBOMTree: React.FC<CryptoBOMTreeProps> = ({ root, depth = 0 }) => {
               )}
               {root.quantumSafe !== undefined && (
                 root.quantumSafe
-                  ? <CheckCircle style={{ fontSize: 14, color: '#10b981' }} />
-                  : <Warning style={{ fontSize: 14, color: '#f59e0b' }} />
+                  ? <CheckCircle style={{ fontSize: 14, color: '#24a148' }} />
+                  : <Warning style={{ fontSize: 14, color: '#ff832b' }} />
               )}
             </Box>
           }

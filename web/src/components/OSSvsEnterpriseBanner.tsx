@@ -14,7 +14,7 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
 }) => (
   <Box
     sx={{
-      background: `linear-gradient(135deg, rgba(15,98,254,0.14), rgba(212,175,55,0.14))`,
+      background: `linear-gradient(135deg, rgba(15,98,254,0.14), rgba(241,194,27,0.14))`,
       border: `1px solid ${tokens.colors.rivicq[200]}`,
       borderRadius: 4,
       p: 3,
@@ -22,7 +22,7 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
     }}
   >
     <Stack spacing={1.5} alignItems="center">
-      <Lock sx={{ fontSize: 42, color: '#d4af37' }} />
+      <Lock sx={{ fontSize: 42, color: tokens.colors.brand.gold }} />
       <Typography variant="h6" fontWeight="bold">
         {featureName}
       </Typography>
@@ -35,8 +35,8 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
     <Button
       variant="contained"
       startIcon={<Upgrade />}
-      sx={{ background: 'linear-gradient(45deg, #0f62fe, #d4af37)' }}
-      href="https://cryptobom.io/enterprise"
+      sx={{ background: 'linear-gradient(45deg, #0f62fe, #f1c21b)' }}
+      href="https://rivicq.com"
       target="_blank"
       rel="noopener noreferrer"
     >

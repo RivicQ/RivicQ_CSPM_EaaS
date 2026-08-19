@@ -39,7 +39,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'CISO-level controls, PQC / quantum attestation, HSM, SSO, and executive reporting.',
       icon: <WorkspacePremium sx={{ fontSize: 34 }} />,
       edition: 'enterprise' as Edition,
-      accent: '#059669',
+      accent: '#198038',
       highlights: ['Quantum & HSM (IBM/HPCS)', 'SSO, audit & RBAC', 'Terraform & IaC scanning', 'Executive analytics'],
       action: 'Continue with Enterprise',
     },

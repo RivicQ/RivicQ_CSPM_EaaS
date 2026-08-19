@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2026-08-19
+
+### Added
+- Production legal pack: expanded README (OSS vs Enterprise), LEGAL.md, PRIVACY.md, TRADEMARKS.md, NOTICE, web/README.md.
+- IBM Carbon color sweep on remaining UI accents (Green 50 / Blue 60 / Red 60).
+- `RequireRole("admin")` on Enterprise SSO and cloud-connector POST routes.
+- JWT-only tenant context for API keys and webhooks (no spoofable `X-Tenant-ID`).
+
+### Changed
+- CONTRIBUTING.md and docs hub copy: no certification claims for RivicQ itself.
+- Docs hub uses Carbon Gray 100 / Blue 60 and honest feature descriptions.
+
+### Security
+- API key and webhook mutations scoped to JWT tenant.
+
 ## [1.5.0] - 2026-08-19
 
 ### Added

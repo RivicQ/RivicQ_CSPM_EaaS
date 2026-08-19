@@ -46,15 +46,15 @@ import ProvenanceChip from '../../components/dashboard/ProvenanceChip';
 import { EmptyState } from '../../components/ui';
 
 const FRAMEWORKS = [
-  { id: 'iso27001', name: 'ISO 27001', color: '#10b981' },
+	{ id: 'iso27001', name: 'ISO 27001', color: '#24a148' },
   { id: 'nis2', name: 'NIS2', color: '#0ea5e9' },
-  { id: 'dora', name: 'DORA', color: '#f59e0b' },
-  { id: 'gdpr', name: 'GDPR', color: '#3b82f6' },
+  { id: 'dora', name: 'DORA', color: '#ff832b' },
+  { id: 'gdpr', name: 'GDPR', color: '#0f62fe' },
   { id: 'bsi', name: 'BSI TR-02102', color: '#64748b' },
   { id: 'eu_ai_act', name: 'EU AI Act', color: '#8b5cf6' },
   { id: 'soc2', name: 'SOC 2', color: '#0f62fe' },
-  { id: 'nist', name: 'NIST', color: '#f59e0b' },
-  { id: 'pqc', name: 'PQC', color: '#ef4444' },
+  { id: 'nist', name: 'NIST', color: '#ff832b' },
+  { id: 'pqc', name: 'PQC', color: '#da1e28' },
 ];
 
 interface Dashboard {
@@ -306,8 +306,8 @@ const ComplianceDashboard: React.FC = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="score" fill="#667eea" name="Score" />
-                  <Bar dataKey="failed" fill="#ef4444" name="Failed" />
+                  <Bar dataKey="score" fill="#0f62fe" name="Score" />
+                  <Bar dataKey="failed" fill="#da1e28" name="Failed" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -322,7 +322,7 @@ const ComplianceDashboard: React.FC = () => {
                   <PolarGrid />
                   <PolarAngleAxis dataKey="framework" />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                  <Radar name="Score" dataKey="score" stroke="#667eea" fill="#667eea" fillOpacity={0.6} />
+                  <Radar name="Score" dataKey="score" stroke="#0f62fe" fill="#0f62fe" fillOpacity={0.6} />
                 </RadarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -337,7 +337,7 @@ const ComplianceDashboard: React.FC = () => {
           return (
             <Grid item xs={12} sm={6} md={4} key={dashboard.framework}>
               <Card
-                sx={{ borderLeft: `4px solid ${framework?.color || '#667eea'}`, cursor: 'pointer' }}
+                sx={{ borderLeft: `4px solid ${framework?.color || '#0f62fe'}`, cursor: 'pointer' }}
                 onClick={() => setOpenFramework(dashboard)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {

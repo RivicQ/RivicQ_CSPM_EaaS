@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/api/oss"
 	"github.com/rivic-q/cryptobom-saas/internal/api/shared"
+	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/awscloud"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
@@ -139,21 +140,29 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 		dashboardGroup.GET("/quantum", getQuantumMetrics(db, logger, cfg))
 	}
 
-	// Multi-Cloud Integration
+	// Multi-Cloud Integration — mutating connectors require Admin
 	cloudGroup := router.Group("/cloud")
 	{
 		cloudGroup.GET("/providers", listCloudProviders(db, logger, cfg))
-		cloudGroup.POST("/aws", configureAWSIntegration(db, logger, cfg))
-		cloudGroup.POST("/gcp", configureGCPIntegration(db, logger, cfg))
-		cloudGroup.POST("/azure", configureAzureIntegration(db, logger, cfg))
+		cloudWrite := cloudGroup.Group("")
+		cloudWrite.Use(enterpriseAuth, auth.RequireRole("admin"))
+		{
+			cloudWrite.POST("/aws", configureAWSIntegration(db, logger, cfg))
+			cloudWrite.POST("/gcp", configureGCPIntegration(db, logger, cfg))
+			cloudWrite.POST("/azure", configureAzureIntegration(db, logger, cfg))
+		}
 	}
 
-	// Enterprise SSO
+	// Enterprise SSO — configuration requires Admin
 	ssoGroup := router.Group("/sso")
 	{
 		ssoGroup.GET("/providers", listSSOProviders(db, logger, cfg))
-		ssoGroup.POST("/saml", configureSAMLIntegration(db, logger, cfg))
-		ssoGroup.POST("/ldap", configureLDAPIntegration(db, logger, cfg))
+		ssoWrite := ssoGroup.Group("")
+		ssoWrite.Use(enterpriseAuth, auth.RequireRole("admin"))
+		{
+			ssoWrite.POST("/saml", configureSAMLIntegration(db, logger, cfg))
+			ssoWrite.POST("/ldap", configureLDAPIntegration(db, logger, cfg))
+		}
 	}
 
 	// Advanced Analytics

@@ -1,26 +1,46 @@
 # Security Policy
 
-Responsible disclosure is important. If you discover a vulnerability in this
-project, please follow the steps below.
+RivicQ GmbH takes the security of the Community and Enterprise products seriously. This policy covers the software in https://github.com/RivicQ/RivicQ_CSPM_EaaS.
 
-1. Send an email to security@rivicq.com with a clear title and reproduction steps.
-2. Do not create a public GitHub issue for a security vulnerability.
-3. Include an impact assessment, steps to reproduce, and any PoC code or artifacts.
-4. We will acknowledge receipt within 48 hours and coordinate a timeline for
-   remediation and disclosure.
+## Scope
 
-Severity & Response Targets
-- Critical (remote code execution, data exfiltration): acknowledge within 24h,
-  mitigation or hotfix within 7 days
-- High (privilege escalation, sensitive data exposure): acknowledge within
-  48h, mitigation within 14 days
-- Medium/Low: acknowledgement within 72h, remediation prioritized by severity
+In scope: the Go APIs, CLI, scanners, intelligence engine, React console, GitHub Action, Helm/Compose charts, and documentation as shipped in this repository.
 
-Public Disclosure
-- We will coordinate public disclosure with the reporter. If you prefer
-  anonymous disclosure, say so in your email.
+Out of scope for bounty-style reports (still welcome privately if severe): third-party SaaS you connect (GitHub, cloud providers, identity providers), issues that require a already-compromised admin JWT, and theoretical findings without a practical impact.
 
-PGP Key
-- Optional: include PGP-signed email for sensitive reports.
+## Reporting a vulnerability
+
+1. Email **security@rivicq.com** with a clear title and reproduction steps.
+2. **Do not** create a public GitHub issue for an exploitable vulnerability.
+3. Include impact, steps to reproduce, and artifacts. Do not attach live customer data.
+4. We will acknowledge receipt within 48 hours and coordinate remediation and disclosure.
+
+## Severity and response targets
+
+| Severity | Examples | Acknowledge | Mitigation target |
+|----------|----------|-------------|-------------------|
+| Critical | Remote code execution, cross-tenant data read | 24 hours | 7 days |
+| High | Privilege escalation, secret leakage in logs | 48 hours | 14 days |
+| Medium / Low | Hardening, info disclosure | 72 hours | Prioritized by severity |
+
+## Public disclosure
+
+We coordinate public disclosure with the reporter. Request anonymity in the email if needed.
+
+Optional: PGP-signed mail for sensitive reports.
+
+## Safe harbor
+
+We will not pursue legal action against researchers who:
+
+- report in good faith to security@rivicq.com
+- avoid privacy violations, destruction of data, and social engineering of RivicQ staff
+- give us a reasonable window before publication
+
+## Product notes
+
+- GitHub Pages is static. A client demo session is **not** a production credential.
+- Do not log secrets. Do not commit credentials.
+- Tenant identity on Enterprise mutating APIs must come from authenticated context (JWT / API key), not spoofable headers.
 
 Thank you for helping keep RivicQ secure.

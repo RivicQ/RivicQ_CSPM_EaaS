@@ -40,11 +40,11 @@ const FEATURES = [
   },
   {
     icon: <GppGood />, title: 'Cloud Posture Management', color: tokens.colors.crypto.high,
-    desc: 'Continuously assess every account and workload against CIS, NIST, SOC 2, and PCI DSS, with posture scores per account and instant remediation.',
+    desc: 'Assess accounts and workloads against CIS, NIST, and similar operator mappings — posture scores where connectors are configured, not a certification of RivicQ.',
   },
   {
     icon: <FactCheck />, title: 'Compliance Automation', color: tokens.colors.crypto.low,
-    desc: 'Continuous conformance checks and audit-ready evidence for ISO 27001, SOC 2, DORA, NIS2, GDPR, the EU AI Act, and the EU Cyber Resilience Act.',
+    desc: 'Conformance checks and evidence packs mapped to ISO 27001, DORA, NIS2, GDPR, the EU AI Act, and the EU CRA. Mappings are not audit opinions or certifications.',
   },
 ];
 
@@ -500,7 +500,7 @@ const Home: React.FC = () => {
         </Box>
 
         <Box sx={{ mb: 10, textAlign: 'center' }}>
-          <Typography variant="caption" sx={{ color: 'text.disabled', letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600 }}>Built for</Typography>
+          <Typography variant="caption" sx={{ color: 'text.disabled', letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600 }}>Control mappings (not certifications)</Typography>
           <Stack direction="row" spacing={1.5} justifyContent="center" flexWrap="wrap" useFlexGap sx={{ mt: 2 }}>
             {STANDARDS.map((s) => (
               <Chip key={s} icon={<VerifiedUser sx={{ fontSize: 14 }} />} label={s} variant="outlined" sx={{ color: 'text.secondary' }} />
@@ -513,13 +513,13 @@ const Home: React.FC = () => {
           <Grid container spacing={3} maxWidth={900} sx={{ mx: 'auto' }}>
             {[
               {
-                name: 'OSS', icon: <Lock />, price: '$0', tagline: 'For open source teams', color: tokens.colors.rivicq[600],
-                features: ['CBOM scanning', 'Crypto inventory', 'Dashboard & analytics', 'GitHub & CI integration'],
-                cta: 'Start free', action: () => navigate('/register'),
+                name: 'Community', icon: <Lock />, price: 'Apache-2.0', tagline: 'Open source · this GitHub project', color: tokens.colors.rivicq[600],
+                features: ['CBOM scanning', 'Crypto inventory', 'Dashboard & analytics', 'GitHub Action policy gate'],
+                cta: 'Use Community', action: () => navigate('/register'),
               },
               {
-                name: 'Enterprise', icon: <WorkspacePremium />, price: 'Custom', tagline: 'For security & compliance teams', color: tokens.colors.gold[600], featured: true,
-                features: ['Full CSPM & conformance packs', 'Quantum / PQC migration', 'Multi-cloud & HSM coverage', 'SSO, audit logs & SLA'],
+                name: 'Enterprise', icon: <WorkspacePremium />, price: 'Commercial', tagline: 'Licensed by RivicQ GmbH', color: tokens.colors.gold[600], featured: true,
+                features: ['SSO, RBAC, audit viewer', 'Multi-cloud connectors', 'Compliance mappings (not certs)', 'Contracted support'],
                 cta: 'Request access', action: () => navigate('/switcher'),
               },
             ].map((tier) => (

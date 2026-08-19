@@ -1,192 +1,123 @@
 # Contributing to RivicQ
 
-Thank you for contributing to **RivicQ CSPM / CryptoBOM**. Community source is Apache-2.0. Do not commit secrets, customer data, or live credentials. Dataset contributions: [DATASETS.md](DATASETS.md). Legal: [LEGAL.md](LEGAL.md).
+Thank you for contributing to **RivicQ CSPM / CryptoBOM**. Community source is licensed under Apache License 2.0. Enterprise features are commercially licensed and are not “unlocked” by a Community pull request.
 
-**Welcome!** We're excited that you're interested in contributing to CryptoBOM SaaS. This document provides guidelines for contributing to this project.
+By contributing you agree that your patch is provided under Apache-2.0 (see [LEGAL.md](LEGAL.md)). Read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating.
 
----
-
-## 📋 Code of Conduct
-
-By participating in this project, you agree to abide by our Code of Conduct. We are committed to providing a welcoming and inclusive environment for all contributors.
-
-**Key Principles:**
-- Be respectful and inclusive
-- Welcome newcomers and mentors
-- Accept constructive criticism gracefully
-- Focus on what is best for the community
+**Do not commit secrets, customer data, live credentials, or personal data of third parties.** Dataset rules: [DATASETS.md](DATASETS.md).
 
 ---
 
-## 🏛️ License & Intellectual Property
+## Principles
 
-CryptoBOM SaaS is licensed under the Apache License, Version 2.0. By contributing,
-you agree that your contributions will be made available under the project's
-license. See the root `LICENSE` file for full terms.
-
-If you are contributing on behalf of an employer, ensure you have the right to
-contribute under the project's license and follow your employer's contribution
-policy.
+- **Preserve the working CBOM engine.** Extend scanners, APIs, and CLI behaviour; do not replace working scan JSON contracts (`GetCBOMScanReport` shape stays stable).
+- **No fake production data.** Do not invent CVEs, EPSS scores, scan progress, or hardcoded production passwords. Community dashboards must not show unlabeled enterprise simulations.
+- **RSA-2048 is classified, not auto-vulnerable.**
+- **Honesty in copy.** Framework names are control mappings, not certifications of RivicQ GmbH.
 
 ---
 
-## 🚀 Getting Started
+## Prerequisites
 
-### Prerequisites
+- Go 1.25.x (see `go.mod`)
+- Node.js 18+ and npm (frontend)
+- Make, Git
+- Docker (optional, for Compose / Helm checks)
 
-- Go 1.21+ (for backend)
-- Node.js 18+ and npm (for web frontend)
-- Docker & Kubernetes (for deployment testing)
-- Git
-
-### Development Setup
+## Development setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git
-cd cryptobom-saas
+cd RivicQ_CSPM_EaaS
 
-# Install Go dependencies
+cp .env.example .env
 go mod download
+cd web && npm ci && cd ..
 
-# Install frontend dependencies
-cd web && npm install
+make dev-backend    # Community API :8080
+make dev-frontend   # http://localhost:3000
+```
 
-# Run tests
-go test ./...
-npm test
+Enterprise API: `make dev-enterprise` (port **9090**).
 
-# Start development server
-./run
+---
+
+## How to contribute
+
+1. Fork the repository (or push a feature branch if you have write access).
+2. Create a branch: `git checkout -b cursor/<short-description>`.
+3. Make the change with tests.
+4. Run the relevant suites (below).
+5. Open a pull request that states **what**, **why**, and **how it was tested**.
+
+### Bug reports
+
+Use GitHub Issues with reproduction steps, expected vs actual behaviour, and versions (OS, Go, Node). **Do not** file public issues for exploitable vulnerabilities — use [SECURITY.md](SECURITY.md).
+
+### Dataset contributions
+
+Add synthetic fixtures only. Point `datasets/**/expected.json` at `fixtures/`. Run `make analyze-datasets`. Never duplicate a nested Go module under `datasets/` (breaks `embed`).
+
+---
+
+## Tests you should run
+
+```bash
+# Go (engine, auth, intelligence)
+go test -count=1 -short ./internal/auth/ ./internal/api/shared/ ./internal/intelligence/ ./internal/api/enterprise/ ./tests/
+
+# Frontend
+cd web
+npx tsc --noEmit
+CI=true npm test -- --watchAll=false
+CI=true npm run build
+
+# Dataset harness
+make analyze-datasets
+```
+
+- Format Go: `gofmt -w` on edited files.
+- Frontend: `CI=true npm run build` treats ESLint warnings as errors.
+
+---
+
+## Architecture notes (do not regress)
+
+- `internal/intelligence` must **not** import `internal/api/shared` (import cycle).
+- Do not register GitHub scan routes twice (Enterprise already calls `SetupGitHubScanningRoutes`).
+- Default `rivicq scan .` skips `testdata`, `fixtures`, `datasets`, and scanner implementation files.
+- Client demo tokens must never look like JWTs (no `.` segments).
+- Tenant isolation: do not reintroduce spoofable `X-Tenant-ID` as the source of truth on Enterprise mutating APIs.
+
+Layout of this repo (not a separate `core-engine/` tree):
+
+```
+cmd/                    CLI and API entrypoints
+internal/               Go services (discovery, intelligence, auth, api)
+web/                    React (Create React App) SaaS UI
+datasets/ + fixtures/   Synthetic accuracy harness
+deploy/                 Helm / Compose
+docs/                   Operator and developer documentation
 ```
 
 ---
 
-## 🎯 Ways to Contribute
+## Enterprise vs Community in PRs
 
-### 🐛 Bug Reports
-- Use GitHub Issues to report bugs
-- Include reproduction steps, expected vs actual behavior
-- Specify environment (OS, Go version, etc.)
+This repository contains **Community (OSS)** code and **Enterprise** packages used under a commercial license.
 
-### 💡 Feature Requests
-- Open an Issue with the "enhancement" tag
-- Describe the feature and its use case
-- Explain how it should work
+- Community PRs should keep Enterprise-only routes gated and documented.
+- Do not claim SOC 2, ISO 27001, PCI DSS, HIPAA, FedRAMP, or TÜV certification in UI copy or docs.
+- Licensed Enterprise capabilities: SSO, enforced RBAC, multi-cloud connectors, compliance report packs, contracted support — [docs/editions.md](docs/editions.md).
 
-### 📖 Documentation
-- Improve README, API docs, and guides
-- Add code examples
-- Translate documentation
-
-### 💻 Code Contributions
-
-**Workflow:**
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests (coverage must not decrease)
-5. Commit with clear messages
-6. Push to your fork
-7. Submit a Pull Request
+Commercial inquiries: https://rivicq.com
 
 ---
 
-## 📝 Pull Request Guidelines
+## Help
 
-### Before Submitting
+- Issues: https://github.com/RivicQ/RivicQ_CSPM_EaaS/issues
+- Security: security@rivicq.com
+- Conduct: conduct@rivicq.com
 
-- [ ] Tests pass (`go test ./...` and `npm test`)
-- [ ] Code is formatted (`go fmt`, `npm run format`)
-- [ ] Linting passes (`go vet`, `npm run lint`)
-- [ ] No new warnings introduced
-- [ ] Documentation updated
-
-### PR Description
-
-Must include:
-- **What** - What does this PR change?
-- **Why** - Why is this change needed?
-- **How** - How does it work?
-- **Testing** - How was it tested?
-
-### Commit Messages
-
-Use clear, descriptive commit messages:
-```
-feat: add quantum vulnerability scanner
-fix: resolve IBMQ connection timeout
-docs: update API documentation
-test: add enterprise authentication tests
-```
-
----
-
-## 🧪 Testing Requirements
-
-### Unit Tests
-- Minimum 80% code coverage required
-- Test edge cases and error conditions
-- Use table-driven tests where appropriate
-
-### Integration Tests
-- Test API endpoints with real HTTP calls
-- Include mock quantum providers
-- Test with actual Kubernetes clusters (optional)
-
-### Enterprise Tests
-- Test SSO integration
-- Test IBM Quantum connection (if credentials provided)
-- Test compliance framework exports
-
----
-
-## 📦 Package Structure
-
-```
-cryptobom-saas/
-├── core-engine/          # Core engine implementations
-│   ├── api/             # API handlers
-│   ├── engine/          # Engine implementations
-│   │   ├── classical/  # Classical cryptography
-│   │   └── quantum/     # Quantum computing
-│   └── providers/       # Quantum providers
-├── web/                 # Frontend React application
-├── deploy/              # Deployment configurations
-│   ├── oss/             # Open Source edition
-│   ├── enterprise/      # Enterprise edition
-│   └── helm/           # Kubernetes Helm charts
-├── tests/              # Integration tests
-├── examples/           # Usage examples
-└── docs/               # Documentation
-```
-
----
-
-## 🏢 Enterprise Features
-
-This is the **Open Source Edition**. Enterprise features include:
-
-- Real IBM Quantum integration
-- Multi-language SDKs (Python, Java, Rust, C++, C, Ruby)
-- TÜV-certified German engineering
-- 24/7 Enterprise Support
-- SOC 2, PCI DSS, HIPAA, FedRAMP compliance
-- Full NIST PQC algorithm support
-- Advanced analytics and ML features
-
-**For Enterprise Edition:** https://rivicq.com/enterprise
-
----
-
-## 📞 Getting Help
-
-- **Issues:** https://github.com/RivicQ/RivicQ_CSPM_EaaS/issues
-- **Discussions:** https://github.com/RivicQ/RivicQ_CSPM_EaaS/discussions
-- **Enterprise Support:** enterprise@rivicq.com
-
----
-
-**Thank you for contributing to CryptoBOM SaaS!**
-
-_Made with ❤️ in Berlin, Germany_
+Thank you for helping build an honest cryptographic inventory tool.

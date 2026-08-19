@@ -8,11 +8,11 @@ interface QuantumRiskScoreProps {
 }
 
 function getRiskColor(score: number): string {
-  if (score >= 80) return '#ef4444'; // red – CRITICAL
+  if (score >= 80) return '#da1e28'; // red – CRITICAL
   if (score >= 60) return '#f97316'; // orange – HIGH
-  if (score >= 30) return '#f59e0b'; // amber – MEDIUM
+  if (score >= 30) return '#ff832b'; // amber – MEDIUM
   if (score > 0) return '#eab308';   // yellow – LOW
-  return '#10b981';                  // green – SAFE
+  return '#24a148';                  // green – SAFE
 }
 
 function getRiskLabel(score: number): string {

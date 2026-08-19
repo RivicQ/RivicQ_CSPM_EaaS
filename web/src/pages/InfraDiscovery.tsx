@@ -212,7 +212,7 @@ const SEED_SUMMARY: ScanSummary = {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const SEVERITY_COLORS: Record<SeverityLevel, string> = {
-  CRITICAL: '#ef4444',
+  CRITICAL: '#da1e28',
   HIGH: '#f97316',
   MEDIUM: '#eab308',
   LOW: '#22c55e',
@@ -243,7 +243,7 @@ function SeverityBadge({ severity }: { severity: SeverityLevel }) {
 }
 
 function ProtocolBadge({ protocol }: { protocol: string }) {
-  const colors: Record<string, string> = { tls: '#667eea', ssh: '#764ba2', http: '#10b981' };
+  const colors: Record<string, string> = { tls: '#0f62fe', ssh: '#8a3ffc', http: '#24a148' };
   return (
     <Chip
       label={protocol.toUpperCase()}
@@ -575,7 +575,7 @@ function ScanButton({ onScanComplete }: ScanButtonProps) {
         onClick={handleScan}
         disabled={scanning}
         sx={{
-          background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+          background: 'linear-gradient(45deg, #0f62fe 30%, #8a3ffc 90%)',
           color: 'white',
           fontWeight: 'bold',
           px: 3,
@@ -619,7 +619,7 @@ const InfraDiscovery: React.FC = () => {
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Box display="flex" alignItems="center" gap={1} sx={{ mb: 0.5 }}>
-          <NetworkCheck sx={{ color: '#667eea', fontSize: 32 }} />
+          <NetworkCheck sx={{ color: '#0f62fe', fontSize: 32 }} />
           <Typography variant="h4" fontWeight="bold">
             Infrastructure Discovery — Weak Cryptography
           </Typography>

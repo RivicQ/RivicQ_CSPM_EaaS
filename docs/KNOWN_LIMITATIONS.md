@@ -23,7 +23,8 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Cloud inventory needs real credentials; disconnected connectors show empty states.
 - SAML configuration can be stored; a complete IdP ACS handshake is an operations task with your identity provider.
 - Compliance PDFs and dashboards are **control mappings**, not certifications.
-- RBAC roles: Admin, Operator, Analyst, Viewer — enforced on JWT permissions / `RequireRole`.
+- RBAC roles: Admin, Operator, Analyst, Viewer. Mutating SSO and cloud-connector APIs require **Admin**. `RequireRole` is enforced on those routes.
+- API keys and webhooks require a JWT (or API-key) **tenant claim**. The `X-Tenant-ID` header is not a source of truth.
 
 ## Datasets
 

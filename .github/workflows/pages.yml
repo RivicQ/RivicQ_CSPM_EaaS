@@ -59,6 +59,11 @@ jobs:
           cp docs/LAUNCH_CHECKLIST.md web/build/docs/LAUNCH_CHECKLIST.md
           cp DATASETS.md web/build/docs/DATASETS.md
           cp LEGAL.md web/build/docs/LEGAL.md
+          cp PRIVACY.md web/build/docs/PRIVACY.md
+          cp TRADEMARKS.md web/build/docs/TRADEMARKS.md
+          cp NOTICE web/build/docs/NOTICE
+          cp CONTRIBUTING.md web/build/docs/CONTRIBUTING.md
+          cp SECURITY.md web/build/docs/SECURITY.md
           cp docs/sdks/README.md web/build/docs/sdks/
           cp docs/sdks/rust.md web/build/docs/sdks/
           cp docs/sdks/python.md web/build/docs/sdks/

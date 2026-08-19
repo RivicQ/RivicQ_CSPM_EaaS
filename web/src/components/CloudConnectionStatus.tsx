@@ -50,18 +50,18 @@ const CloudConnectionStatus: React.FC<CloudConnectionStatusProps> = ({
         size="small"
         icon={
           connected ? (
-            <CheckCircle style={{ fontSize: 14, color: '#10b981' }} />
+            <CheckCircle style={{ fontSize: 14, color: '#24a148' }} />
           ) : isError ? (
-            <Cancel style={{ fontSize: 14, color: '#ef4444' }} />
+            <Cancel style={{ fontSize: 14, color: '#da1e28' }} />
           ) : (
-            <HelpOutline style={{ fontSize: 14, color: '#f59e0b' }} />
+            <HelpOutline style={{ fontSize: 14, color: '#ff832b' }} />
           )
         }
         label={label}
         variant="outlined"
         style={{
-          borderColor: connected ? '#10b981' : isError ? '#ef4444' : '#f59e0b',
-          color: connected ? '#10b981' : isError ? '#ef4444' : '#f59e0b',
+          borderColor: connected ? '#24a148' : isError ? '#da1e28' : '#ff832b',
+          color: connected ? '#24a148' : isError ? '#da1e28' : '#ff832b',
           fontSize: '0.7rem',
           height: 24,
         }}

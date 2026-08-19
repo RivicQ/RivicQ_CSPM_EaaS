@@ -39,13 +39,13 @@ const ComplianceBadge: React.FC<ComplianceBadgeProps> = ({
         icon={
           compliant
             ? <CheckCircle style={{ fontSize: 13, color: colors.text }} />
-            : <Cancel style={{ fontSize: 13, color: '#ef4444' }} />
+            : <Cancel style={{ fontSize: 13, color: '#da1e28' }} />
         }
         label={label}
         style={{
           backgroundColor: compliant ? colors.bg : '#fee2e2',
-          color: compliant ? colors.text : '#ef4444',
-          borderColor: compliant ? colors.text : '#ef4444',
+          color: compliant ? colors.text : '#da1e28',
+          borderColor: compliant ? colors.text : '#da1e28',
           fontSize: '0.68rem',
           height: 22,
           fontWeight: 600,

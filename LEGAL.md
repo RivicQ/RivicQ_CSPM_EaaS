@@ -1,35 +1,104 @@
 # Legal information — RivicQ
 
-**Copyright © 2026 RivicQ GmbH, Berlin.**
+**Copyright © 2026 RivicQ GmbH, Berlin, Germany.**
 
-## Dual licensing
+This document is informational. It does not replace the Apache License 2.0 text in [LICENSE](LICENSE) or a signed Enterprise agreement. For binding commercial terms, contact [rivicq.com](https://rivicq.com).
+
+---
+
+## 1. Dual licensing
 
 | Edition | License | What you may do |
 |---------|---------|-----------------|
-| **Community (Open Source)** | [Apache License 2.0](LICENSE) | Use, modify, and distribute the Community source under Apache-2.0. |
-| **Enterprise** | Commercial license from RivicQ GmbH | SSO, RBAC, multi-cloud connectors, compliance report packs, and support. Contact [rivicq.com](https://rivicq.com). |
+| **Community (Open Source)** | [Apache License 2.0](LICENSE) | Use, modify, and distribute the Community source under Apache-2.0, including the obligation to preserve copyright, license, and [NOTICE](NOTICE) attributions. |
+| **Enterprise** | Written commercial license from RivicQ GmbH | Access licensed control-plane features (SSO, RBAC enforcement, multi-cloud connectors, compliance report packs, contracted support). Enterprise rights are **not** granted by cloning this repository. |
 
-The same CBOM / intelligence **engine** powers both editions. Enterprise is a licensed feature set and support entitlement, not a fork of the scanner.
+The same CBOM / intelligence **engine** powers both editions. Enterprise is a licensed feature set and support entitlement, not a public fork of the scanner.
 
-## Trademarks
+If you combine Community code with proprietary modules, Apache-2.0 still applies to the Community portions. Do not remove license headers.
 
-“RivicQ”, the RivicQ logo, and “CryptoBOM” product names are trademarks of RivicQ GmbH. IBM, IBM Cloud, IBM Plex, and Carbon are trademarks of International Business Machines Corporation. AWS, Azure, Google Cloud, and other vendor names are trademarks of their respective owners. Use of those names is for interoperability description only and does not imply endorsement.
+---
 
-## No certification claims
+## 2. Contributions
 
-Control mappings (ISO 27001, NIS2, DORA, GDPR, BSI TR-02102, eIDAS 2.0, NIST) are **engineering mappings for operators**. They are not an audit opinion, certification, or legal advice.
+By submitting a pull request or patch to this repository you agree that your contribution is licensed to RivicQ GmbH and recipients under the same Apache License 2.0 that covers Community source, unless a different inbound license is agreed in writing.
 
-## Privacy
+Do not contribute material you do not have the right to license (including customer data, secrets, or third-party code without a compatible license). See [CONTRIBUTING.md](CONTRIBUTING.md) and [DATASETS.md](DATASETS.md).
 
-- Do not submit production secrets, personal data, or customer telemetry in issues, PRs, or datasets.
-- GitHub Pages is a **static demo**. Authentication on Pages uses the configured identity provider (Supabase) or isolated demo access. See [SECURITY.md](SECURITY.md).
+---
 
-## Third-party notices
+## 3. No warranty; limitation of liability
 
-See [NOTICE](NOTICE) for attribution. Dependencies retain their own licenses (Go modules, npm packages).
+Community software is provided **on an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND**, as stated in Apache-2.0 sections 7 and 8.
+
+RivicQ GmbH does not warrant that scans are complete, that findings match any regulator’s interpretation, or that use of the software will make you compliant with any law. Operators remain responsible for their own security programme, vendor due diligence, and legal obligations.
+
+---
+
+## 4. No certification, audit, or legal advice
+
+Control mappings shown in the product (including ISO/IEC 27001, NIS2, DORA, GDPR, BSI TR-02102, eIDAS 2.0, NIST CSF, CIS, SOC 2 TSC, PCI DSS, HIPAA, FedRAMP, EU AI Act, and EU CRA) are **engineering mappings for operators**.
+
+They are **not**:
+
+- an audit opinion
+- a certification of RivicQ or of the customer
+- evidence that RivicQ GmbH itself is SOC 2, ISO 27001, PCI DSS, FedRAMP, HIPAA, or TÜV certified
+- legal, regulatory, or cryptographic advice
+
+Do not represent GitHub Pages, the labeled demo, or sample datasets as a live customer estate.
+
+---
+
+## 5. Cryptography and export
+
+This repository includes cryptographic inventory, scanning, and related documentation. Cryptographic software can be subject to export, import, and dual-use rules (including EU dual-use regulation and U.S. EAR). **You** are responsible for determining whether your download, use, or distribution is lawful in your jurisdiction. RivicQ GmbH does not provide export-control advice.
+
+---
+
+## 6. Trademarks and IBM visual language
+
+“RivicQ”, the RivicQ logo, and “CryptoBOM” product names are trademarks of RivicQ GmbH.
+
+IBM, IBM Cloud, IBM Plex, IBM Carbon, and related names are trademarks of International Business Machines Corporation. RivicQ **uses IBM Carbon color tokens and IBM Plex fonts as a visual reference** for enterprise readability. **This software is not an IBM product and is not endorsed by IBM.**
+
+AWS, Azure, Google Cloud, GitHub, CycloneDX, and other vendor names are trademarks of their respective owners. Use of those names is for interoperability description only.
+
+Full list: [TRADEMARKS.md](TRADEMARKS.md).
+
+---
+
+## 7. Privacy and data
+
+- Do not submit production secrets, personal data, or customer telemetry in issues, pull requests, or datasets.
+- GitHub Pages hosts a **static demo**. See [PRIVACY.md](PRIVACY.md).
+- If you self-host RivicQ, you determine the processing of data in your deployment.
+
+---
+
+## 8. Third-party software
+
+Go modules, npm packages, fonts, and other dependencies retain their own licenses. See [NOTICE](NOTICE) and the lockfiles (`go.mod` / `go.sum`, `web/package-lock.json`).
+
+IBM Plex is licensed under the SIL Open Font License.
+
+---
+
+## 9. Security reports
+
+Report vulnerabilities privately per [SECURITY.md](SECURITY.md). Do not open a public issue for an exploitable defect.
+
+---
+
+## 10. Governing law
+
+Unless a signed Enterprise agreement states otherwise, disputes relating to Community use of this repository are governed by the laws applicable to RivicQ GmbH in Berlin, Germany, without prejudice to mandatory consumer protections.
+
+---
 
 ## Contact
 
-- Security: security@rivicq.com (see [SECURITY.md](SECURITY.md))
+- Security: security@rivicq.com ([SECURITY.md](SECURITY.md))
+- Conduct: conduct@rivicq.com ([CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md))
 - Commercial / Enterprise: https://rivicq.com
 - Source: https://github.com/RivicQ/RivicQ_CSPM_EaaS

@@ -1,22 +1,20 @@
-CBOM Scanner (Demo)
-===================
+# CBOM scanner client
 
-This is a minimal scanner client that posts scan requests to the CryptoBOM
-API. It's a demo scaffold for integrating a scanner worker into the platform.
+Minimal worker that posts scan requests to a RivicQ **Community** (`:8080`) or **Enterprise** (`:9090`) API.
 
-Build and run locally:
+This is a scaffold for integrating a scanner worker. Prefer the supported CLI:
+
+```bash
+make build-rivicq
+./bin/rivicq scan .
+```
+
+Build this worker:
 
 ```bash
 cd cmd/scanner
 go build -o scanner ./
-SCANNER_API_BASE=http://localhost:5000/api/v1 ./scanner -target=localhost
+SCANNER_API_BASE=http://localhost:8080/api/v1 ./scanner -target=localhost
 ```
 
-Docker (build & run):
-
-```bash
-docker build -t cryptobom-scanner:demo -f cmd/scanner/Dockerfile .
-docker run --rm -e SCANNER_API_BASE=http://host.docker.internal:5000/api/v1 cryptobom-scanner:demo -target localhost
-```
-
-Replace `SCANNER_API_BASE` with the staging or production API when available.
+License: Apache-2.0 with the rest of the Community tree. See [LEGAL.md](../../LEGAL.md).

@@ -8,7 +8,7 @@
 - [x] Homepage GitHub scan path + Discover → Analyze → Quantify
 - [x] Dataset harness (`make analyze-datasets`) — 5/5 passing
 - [x] Enterprise: JWT RBAC helper, audit tenant from JWT only (no `X-Tenant-ID` spoof)
-- [x] Legal pack: LICENSE (Apache-2.0 Community), LEGAL.md, NOTICE, SECURITY.md
+- [x] Legal pack: LICENSE (Apache-2.0 Community), LEGAL.md, NOTICE, PRIVACY.md, TRADEMARKS.md, SECURITY.md, CONTRIBUTING.md
 - [x] Known limitations documented (Pages has no API; mappings are not certifications)
 - [x] Helm / Compose charts remain in `deploy/` (air-gapped packaging)
 - [x] GitHub Pages deploy from `main`

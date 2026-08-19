@@ -40,7 +40,7 @@ const tools = [
     category: 'Runtime',
     description: 'Deploy and manage containers with policies, autoscaling, and observability.',
     icon: <Cloud />,
-    accent: '#10b981',
+    accent: '#24a148',
     docs: 'https://kubernetes.io/docs',
   },
   {
@@ -48,7 +48,7 @@ const tools = [
     category: 'Observability',
     description: 'Scrape metrics and alert on security and platform health.',
     icon: <Analytics />,
-    accent: '#f59e0b',
+    accent: '#ff832b',
     docs: 'https://prometheus.io/docs/introduction/overview/',
   },
   {
@@ -64,7 +64,7 @@ const tools = [
     category: 'Security',
     description: 'Scan containers, filesystems, and IaC for vulnerabilities.',
     icon: <Security />,
-    accent: '#ef4444',
+    accent: '#da1e28',
     docs: 'https://aquasecurity.github.io/trivy/',
   },
   {

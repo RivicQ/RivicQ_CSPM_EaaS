@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/sirupsen/logrus"
 )
@@ -46,10 +47,10 @@ func (w *WebhookManager) SetupRoutes(router *gin.RouterGroup, authMW gin.Handler
 	wh.Use(authMW)
 	{
 		wh.GET("", w.ListWebhooks)
-		wh.POST("", w.CreateWebhook)
-		wh.PUT("/:id", w.UpdateWebhook)
-		wh.DELETE("/:id", w.DeleteWebhook)
-		wh.POST("/:id/test", w.TestWebhook)
+		wh.POST("", auth.RequireRole("operator"), w.CreateWebhook)
+		wh.PUT("/:id", auth.RequireRole("operator"), w.UpdateWebhook)
+		wh.DELETE("/:id", auth.RequireRole("admin"), w.DeleteWebhook)
+		wh.POST("/:id/test", auth.RequireRole("operator"), w.TestWebhook)
 		wh.GET("/deliveries", w.ListDeliveries)
 	}
 }
@@ -59,9 +60,9 @@ func (w *WebhookManager) ListWebhooks(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"webhooks": []Webhook{}})
 		return
 	}
-	tenantID := c.GetString("tenant_id")
-	if tenantID == "" {
-		tenantID = c.GetHeader("X-Tenant-ID")
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
 	}
 
 	rows, err := w.db.Query(`SELECT id, tenant_id, name, url, events, status, created_at FROM webhooks WHERE tenant_id = $1`, tenantID)
@@ -89,9 +90,9 @@ func (w *WebhookManager) CreateWebhook(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
 		return
 	}
-	tenantID := c.GetString("tenant_id")
-	if tenantID == "" {
-		tenantID = c.GetHeader("X-Tenant-ID")
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
 	}
 
 	var req struct {
@@ -134,6 +135,10 @@ func (w *WebhookManager) UpdateWebhook(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
 		return
 	}
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
+	}
 	id := c.Param("id")
 	var req struct {
 		Name   string   `json:"name"`
@@ -148,8 +153,8 @@ func (w *WebhookManager) UpdateWebhook(c *gin.Context) {
 	eventsJSON, _ := json.Marshal(req.Events)
 	_, err := w.db.Exec(`
 		UPDATE webhooks SET name = COALESCE(NULLIF($1,''), name), url = COALESCE(NULLIF($2,''), url),
-		events = COALESCE(NULLIF($3,''), events::text) WHERE id = $4
-	`, req.Name, req.URL, string(eventsJSON), id)
+		events = COALESCE(NULLIF($3,''), events::text) WHERE id = $4 AND tenant_id = $5
+	`, req.Name, req.URL, string(eventsJSON), id, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update webhook"})
 		return
@@ -162,8 +167,12 @@ func (w *WebhookManager) DeleteWebhook(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
 		return
 	}
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
+	}
 	id := c.Param("id")
-	_, err := w.db.Exec(`DELETE FROM webhooks WHERE id = $1`, id)
+	_, err := w.db.Exec(`DELETE FROM webhooks WHERE id = $1 AND tenant_id = $2`, id, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete webhook"})
 		return
@@ -176,10 +185,14 @@ func (w *WebhookManager) TestWebhook(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
 		return
 	}
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
+	}
 	id := c.Param("id")
 	var wh Webhook
 	var eventsStr string
-	err := w.db.QueryRow(`SELECT id, tenant_id, name, url, secret, events FROM webhooks WHERE id = $1`, id).
+	err := w.db.QueryRow(`SELECT id, tenant_id, name, url, secret, events FROM webhooks WHERE id = $1 AND tenant_id = $2`, id, tenantID).
 		Scan(&wh.ID, &wh.TenantID, &wh.Name, &wh.URL, &wh.Secret, &eventsStr)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Webhook not found"})
@@ -204,9 +217,9 @@ func (w *WebhookManager) ListDeliveries(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"deliveries": []interface{}{}})
 		return
 	}
-	tenantID := c.GetString("tenant_id")
-	if tenantID == "" {
-		tenantID = c.GetHeader("X-Tenant-ID")
+	tenantID, ok := jwtTenantOrAbort(c)
+	if !ok {
+		return
 	}
 
 	rows, err := w.db.Query(`

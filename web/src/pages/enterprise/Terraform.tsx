@@ -176,9 +176,9 @@ const TerraformIaC: React.FC = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#ef4444">
+                  <Bar dataKey="count" fill="#da1e28">
                     {severityData.map((_entry, index) => (
-                      <Cell key={`bar-${index}`} fill={index === 0 ? '#ef4444' : index === 1 ? '#f59e0b' : '#3b82f6'} />
+                      <Cell key={`bar-${index}`} fill={index === 0 ? '#da1e28' : index === 1 ? '#ff832b' : '#0f62fe'} />
                     ))}
                   </Bar>
                 </BarChart>

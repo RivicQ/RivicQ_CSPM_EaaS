@@ -1,12 +1,39 @@
 RivicQ CSPM / CryptoBOM
-Copyright 2026 RivicQ GmbH
+Copyright 2026 RivicQ GmbH, Berlin
 
 This product includes software developed by RivicQ GmbH and third-party
-open source projects. Community source is licensed under the Apache
-License, Version 2.0. Enterprise features are commercially licensed.
+open source projects.
 
-IBM Plex is licensed under the SIL Open Font License.
+Community source is licensed under the Apache License, Version 2.0.
+A copy of the license is in the LICENSE file at the root of this
+repository. You must retain this NOTICE and applicable copyright
+notices when you redistribute Community source, as required by
+Apache-2.0.
+
+Enterprise features (SSO, enforced RBAC, multi-cloud connectors,
+compliance report packs, and contracted support) are commercially
+licensed by RivicQ GmbH and are not granted by Apache-2.0 alone.
+
+Third-party software
+--------------------
+Go modules and npm packages retain their own licenses. Consult go.mod,
+go.sum, web/package.json, and web/package-lock.json.
+
+Fonts
+-----
+IBM Plex Sans and IBM Plex Mono are licensed under the SIL Open Font
+License, Version 1.1 (https://github.com/IBM/plex).
+
+Visual design
+-------------
 IBM Carbon color tokens are used as a visual reference for enterprise
-readability; this software is not an IBM product.
+readability. This software is not an IBM product and is not endorsed
+by International Business Machines Corporation.
 
+Other names
+-----------
 CycloneDX is a trademark of the CycloneDX Core Team / OWASP.
+AWS, Azure, Google Cloud, GitHub, Kubernetes, and other product names
+are trademarks of their respective owners.
+
+Additional legal information: LEGAL.md, TRADEMARKS.md, PRIVACY.md.

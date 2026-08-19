@@ -223,7 +223,7 @@ const Inventory: React.FC = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="value" fill="#667eea" />
+                  <Bar dataKey="value" fill="#0f62fe" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

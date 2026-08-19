@@ -1,75 +1,13 @@
-# Tests Directory
+# Tests
 
-This directory contains comprehensive test suites for CryptoBOM SaaS.
+Go tests for the Community engine and Enterprise packages. They do **not** certify ISO/SOC/TÜV; they check software behaviour.
 
-## 📁 Structure
-
-```
-tests/
-├── api_test.go           # Main API tests (existing)
-├── integration/          # Integration tests
-├── unit/                 # Unit tests
-├── enterprise/          # Enterprise-specific tests
-├── compliance/          # Compliance framework tests
-└── mocks/               # Mock implementations
-```
-
-## 🧪 Running Tests
-
-### All Tests
 ```bash
-go test ./tests/... -v
+go test -count=1 -short ./internal/auth/ ./internal/api/shared/ ./internal/intelligence/ ./internal/api/enterprise/ ./tests/
 ```
 
-### Unit Tests Only
-```bash
-go test ./tests/unit/... -v
-```
+Frontend: `cd web && CI=true npm test -- --watchAll=false`
 
-### Integration Tests
-```bash
-go test ./tests/integration/... -v
-```
+Dataset harness: `make analyze-datasets`
 
-### With Coverage
-```bash
-go test ./tests/... -coverprofile=coverage.out
-go tool cover -html=coverage.out
-```
-
-### Enterprise Tests
-```bash
-go test ./tests/enterprise/... -v -tags=enterprise
-```
-
-## 📋 Test Categories
-
-### API Tests (`api_test.go`)
-- Health endpoint tests
-- CBOM CRUD operations
-- Asset management
-- Authentication
-- Quantum integration
-- Metrics and benchmarks
-
-### Integration Tests (`integration/`)
-- End-to-end workflows
-- Database integration
-- Kubernetes integration
-- DevSecOps pipeline tests
-
-### Unit Tests (`unit/`)
-- Core engine tests
-- Algorithm analysis
-- Compliance validation
-- Asset discovery
-
-### Enterprise Tests (`enterprise/`)
-- IBM Quantum integration
-- SSO/SAML authentication
-- Advanced compliance
-- TÜV certification tests
-
----
-
-**© 2026 RivicQ GmbH. All Rights Reserved.**
+Do not commit live credentials into testdata. See [CONTRIBUTING.md](../CONTRIBUTING.md) and [DATASETS.md](../DATASETS.md).

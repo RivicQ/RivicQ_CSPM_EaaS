@@ -31,14 +31,14 @@ const HSMStatusBadge: React.FC<HSMStatusBadgeProps> = ({
         size="small"
         icon={
           healthy
-            ? <VpnKey style={{ fontSize: 14, color: '#667eea' }} />
-            : <Warning style={{ fontSize: 14, color: '#ef4444' }} />
+            ? <VpnKey style={{ fontSize: 14, color: '#0f62fe' }} />
+            : <Warning style={{ fontSize: 14, color: '#da1e28' }} />
         }
         label={label}
         variant="outlined"
         style={{
-          borderColor: healthy ? '#667eea' : '#ef4444',
-          color: healthy ? '#667eea' : '#ef4444',
+          borderColor: healthy ? '#0f62fe' : '#da1e28',
+          color: healthy ? '#0f62fe' : '#da1e28',
           fontSize: '0.7rem',
           height: 24,
         }}

@@ -66,10 +66,10 @@ const QuantumAttestation: React.FC = () => {
           <Card>
             <CardContent>
               <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <Psychology sx={{ color: '#667eea' }} />
+                <Psychology sx={{ color: '#0f62fe' }} />
                 <Typography variant="body2" color="text.secondary">Quantum Risk Score</Typography>
               </Box>
-              <Typography variant="h4" fontWeight="bold" color="#ef4444">{riskScore}</Typography>
+              <Typography variant="h4" fontWeight="bold" color="#da1e28">{riskScore}</Typography>
               <LinearProgress
                 variant="determinate"
                 value={riskScore}
@@ -83,10 +83,10 @@ const QuantumAttestation: React.FC = () => {
           <Card>
             <CardContent>
               <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <Shield sx={{ color: '#10b981' }} />
+                <Shield sx={{ color: '#24a148' }} />
                 <Typography variant="body2" color="text.secondary">PQC Readiness</Typography>
               </Box>
-              <Typography variant="h4" fontWeight="bold" color="#10b981">{pqcReadiness}%</Typography>
+              <Typography variant="h4" fontWeight="bold" color="#24a148">{pqcReadiness}%</Typography>
               <LinearProgress
                 variant="determinate"
                 value={pqcReadiness}
@@ -100,10 +100,10 @@ const QuantumAttestation: React.FC = () => {
           <Card>
             <CardContent>
               <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <Assessment sx={{ color: '#f59e0b' }} />
+                <Assessment sx={{ color: '#ff832b' }} />
                 <Typography variant="body2" color="text.secondary">Assets at Risk</Typography>
               </Box>
-              <Typography variant="h4" fontWeight="bold" color="#f59e0b">{assetsAtRisk}</Typography>
+              <Typography variant="h4" fontWeight="bold" color="#ff832b">{assetsAtRisk}</Typography>
               <Typography variant="caption" color="text.secondary">Quantum-vulnerable assets</Typography>
             </CardContent>
           </Card>
@@ -175,7 +175,7 @@ const QuantumAttestation: React.FC = () => {
       <Box mt={3}>
         <Button
           variant="contained"
-          sx={{ background: 'linear-gradient(45deg, #667eea, #764ba2)', mr: 2 }}
+          sx={{ background: 'linear-gradient(45deg, #0f62fe, #8a3ffc)', mr: 2 }}
           onClick={() => quantumAttestationService.scanForPQCAlgorithms(['all'])}
         >
           Start PQC Scan (All Assets)

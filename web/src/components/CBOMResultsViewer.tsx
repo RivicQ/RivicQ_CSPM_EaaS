@@ -82,15 +82,15 @@ interface CBOMResultsViewerProps {
 const getSeverityIcon = (severity: string) => {
   switch (severity) {
     case 'critical':
-      return <Error sx={{ color: '#ef4444' }} />;
+      return <Error sx={{ color: '#da1e28' }} />;
     case 'high':
       return <Warning sx={{ color: '#f97316' }} />;
     case 'medium':
       return <Warning sx={{ color: '#eab308' }} />;
     case 'low':
-      return <Info sx={{ color: '#3b82f6' }} />;
+      return <Info sx={{ color: '#0f62fe' }} />;
     default:
-      return <Info sx={{ color: '#6366f1' }} />;
+      return <Info sx={{ color: '#0f62fe' }} />;
   }
 };
 

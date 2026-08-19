@@ -66,7 +66,7 @@ const IBMCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Security sx={{ color: '#667eea', fontSize: 40 }} />
+              <Security sx={{ color: '#0f62fe', fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>
                 {(statusData as any)?.status || 'Connected'}
               </Typography>
@@ -77,7 +77,7 @@ const IBMCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Key sx={{ color: '#10b981', fontSize: 40 }} />
+              <Key sx={{ color: '#24a148', fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>{keys.length}</Typography>
               <Typography variant="caption" color="text.secondary">Managed Keys</Typography>
             </CardContent>
@@ -86,7 +86,7 @@ const IBMCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Storage sx={{ color: '#764ba2', fontSize: 40 }} />
+              <Storage sx={{ color: '#8a3ffc', fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>{buckets.length}</Typography>
               <Typography variant="caption" color="text.secondary">COS Buckets</Typography>
             </CardContent>

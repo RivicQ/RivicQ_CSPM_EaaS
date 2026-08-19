@@ -59,7 +59,7 @@ const QUANTUM_NETWORKS = [
   { id: 'ibm_washington', name: 'IBM Quantum Washington', qubits: 127, error_rate: 0.001, fidelity: 0.99, region: 'us-east' },
 ];
 
-const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
+const COLORS = ['#24a148', '#ff832b', '#da1e28'];
 
 const QuantumReadiness: React.FC = () => {
   const [readiness, setReadiness] = useState<any>(null);
@@ -211,8 +211,8 @@ const QuantumReadiness: React.FC = () => {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="quantum_safe" stroke="#10b981" strokeWidth={2} name="Quantum Safe %" />
-                  <Line type="monotone" dataKey="at_risk" stroke="#ef4444" strokeWidth={2} name="At Risk %" />
+                  <Line type="monotone" dataKey="quantum_safe" stroke="#24a148" strokeWidth={2} name="Quantum Safe %" />
+                  <Line type="monotone" dataKey="at_risk" stroke="#da1e28" strokeWidth={2} name="At Risk %" />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>

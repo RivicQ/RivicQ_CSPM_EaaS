@@ -160,12 +160,12 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
                 borderRadius: 4,
                 background:
                   qbom.quantum_readiness_score >= 80
-                    ? 'linear-gradient(90deg, #10b981, #059669)'
+                    ? 'linear-gradient(90deg, #24a148, #198038)'
                     : qbom.quantum_readiness_score >= 60
-                    ? 'linear-gradient(90deg, #3b82f6, #1e40af)'
+                    ? 'linear-gradient(90deg, #0f62fe, #1e40af)'
                     : qbom.quantum_readiness_score >= 40
-                    ? 'linear-gradient(90deg, #f59e0b, #d97706)'
-                    : 'linear-gradient(90deg, #ef4444, #b91c1c)',
+                    ? 'linear-gradient(90deg, #ff832b, #d97706)'
+                    : 'linear-gradient(90deg, #da1e28, #a2191f)',
               },
             }}
           />
@@ -308,10 +308,10 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
                       '& .MuiLinearProgress-bar': {
                         background:
                           algo.quantum_score >= 60
-                            ? '#10b981'
+                            ? '#24a148'
                             : algo.quantum_score >= 40
-                            ? '#f59e0b'
-                            : '#ef4444',
+                            ? '#ff832b'
+                            : '#da1e28',
                       },
                     }}
                   />
