@@ -281,7 +281,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         position: 'relative',
         overflow: 'hidden',
         py: 5,
-        background: isDark ? designSystem.proBlue.commandCenter : '#f6f6f7',
+        background: isDark ? designSystem.proBlue.commandCenter : '#ffffff',
       }}
     >
       <Box
@@ -296,7 +296,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         sx={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: 'linear-gradient(rgba(90,82,104,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(90,82,104,0.05) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(14,165,233,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.05) 1px, transparent 1px)',
           backgroundSize: '72px 72px',
           opacity: isDark ? 0.35 : 0.25,
           pointerEvents: 'none',
@@ -428,7 +428,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       borderRadius: 1,
                       border: 1,
                       borderColor: 'divider',
-                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(90,82,104,0.16)' : 'rgba(245,244,247,0.95)'),
+                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(14,165,233,0.16)' : 'rgba(245,244,247,0.95)'),
                       backdropFilter: 'none',
                     }}
                   >

@@ -66,6 +66,6 @@ export const chartGridStroke = (theme: Theme) =>
 export const chartTickFill = (theme: Theme) => theme.palette.text.secondary;
 
 export const chartCursorFill = (theme: Theme) =>
-  theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(90,82,104,0.05)';
+  theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(14,165,233,0.05)';
 
 export default chartTheme;

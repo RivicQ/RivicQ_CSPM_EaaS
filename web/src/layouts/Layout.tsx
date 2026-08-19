@@ -440,7 +440,7 @@ const Layout: React.FC = () => {
               justifyContent: 'flex-start',
               fontWeight: 600,
               fontSize: '0.75rem',
-              bgcolor: 'rgba(90,82,104,0.2)',
+              bgcolor: 'rgba(14,165,233,0.2)',
               color: '#ddd6fe',
               border: 1,
               borderColor: 'rgba(196,181,253,0.25)',
@@ -526,7 +526,7 @@ const Layout: React.FC = () => {
                 color: isDarkMode ? blue.textPrimary : blue.navyMid,
                 '& input': { py: 0.25 },
                 '& input::placeholder': {
-                  color: isDarkMode ? blue.textMuted : 'rgba(90,82,104,0.55)',
+                  color: isDarkMode ? blue.textMuted : 'rgba(14,165,233,0.55)',
                   opacity: 1,
                 },
               }}
@@ -639,7 +639,7 @@ const Layout: React.FC = () => {
                   fontWeight: 500,
                   flexGrow: 1,
                   color: isDarkMode ? blue.textPrimary : blue.navyMid,
-                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : 'rgba(90,82,104,0.55)', opacity: 1 },
+                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : 'rgba(14,165,233,0.55)', opacity: 1 },
                 }}
               />
               <IconButton size="small" onClick={() => setMobileSearchOpen(false)} aria-label="Close search">

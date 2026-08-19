@@ -21,7 +21,7 @@ const DemoEnvironmentBanner: React.FC = () => {
         mb: 2.5,
         borderRadius: `${designSystem.radius.lg}px`,
         backdropFilter: 'none',
-        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(90,82,104,0.22)' : 'rgba(245,244,247,0.96)'),
+        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(14,165,233,0.22)' : 'rgba(245,244,247,0.96)'),
         border: 1,
         borderColor: 'info.light',
       }}

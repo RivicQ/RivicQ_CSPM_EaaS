@@ -62,7 +62,7 @@ This repository includes cryptographic inventory, scanning, and related document
 
 IBM, IBM Cloud, IBM Plex, IBM Carbon, IBM Quantum, and related names are trademarks of International Business Machines Corporation. **RivicQ is not an IBM product and is not endorsed by IBM.** Optional connectors to IBM Cloud or IBM Quantum are interoperability features that use the customer’s own credentials.
 
-The RivicQ console visual identity is a **quiet dusty violet** (`#5a5268`) from the rivicq.com family. It does **not** use IBM Carbon or IBM Plex as the product design system.
+The RivicQ console visual identity is a **clear sky-blue and white** theme (`#0284c7` on `#ffffff`). It does **not** use IBM Carbon or IBM Plex as the product design system.
 
 Control mappings are not certifications, audit opinions, or legal advice.
 

@@ -133,8 +133,8 @@ const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({
           sx={{
             p: 2,
             borderRadius: `${designSystem.radius.md}px`,
-            bgcolor: isDark ? 'rgba(90,82,104,0.12)' : 'rgba(90,82,104,0.06)',
-            border: `1px solid ${isDark ? 'rgba(90,82,104,0.28)' : 'rgba(90,82,104,0.2)'}`,
+            bgcolor: isDark ? 'rgba(14,165,233,0.12)' : 'rgba(14,165,233,0.06)',
+            border: `1px solid ${isDark ? 'rgba(14,165,233,0.28)' : 'rgba(14,165,233,0.2)'}`,
           }}
         >
           <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.primary', fontWeight: 700 }}>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RivicQ — Community (Open Source) &amp; Enterprise docs</title>
-  <meta name="description" content="RivicQ documentation hub: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, legal notices, and a quiet dusty-violet theme. Not an IBM product." />
+  <meta name="description" content="RivicQ documentation hub: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, legal notices, and a clear sky-blue and white theme. Not an IBM product." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
@@ -12,34 +12,35 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --blue-60:   #5a5268;
-      --blue-70:   #4a4456;
-      --blue-80:   #4a4456;
-      --gray-100:  #0d0d0d;
-      --gray-90:   #262626;
-      --gray-10:   #f4f4f4;
-      --green-50:  #24a148;
-      --red-60:    #da1e28;
-      --yellow-30: #f1c21b;
-      --card-bg:   rgba(255,255,255,0.06);
-      --card-border: rgba(90,82,104,0.32);
+      --blue-60:   #0284c7;
+      --blue-70:   #0369a1;
+      --blue-80:   #075985;
+      --sky-50:    #f0f9ff;
+      --gray-100:  #0f172a;
+      --gray-90:   #334155;
+      --gray-10:   #f8fafc;
+      --green-50:  #059669;
+      --red-60:    #dc2626;
+      --yellow-30: #d97706;
+      --card-bg:   #ffffff;
+      --card-border: rgba(14,165,233,0.18);
     }
 
     body {
       font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
-      background: #1c1b1f;
-      color: #f4f4f4;
+      background: #ffffff;
+      color: #0f172a;
       min-height: 100vh;
     }
 
     header {
-      background: #161616;
-      border-bottom: 1px solid rgba(90,82,104,0.22);
+      background: #ffffff;
+      border-bottom: 1px solid rgba(14,165,233,0.16);
       position: sticky; top: 0; z-index: 100;
       padding: 0.9rem 2rem;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.15rem; }
+    .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.15rem; color: #082f49; }
     .logo-badge {
       background: var(--blue-60);
       color: #fff; font-size: 0.7rem; font-weight: 600;
@@ -47,16 +48,16 @@
     }
     .header-links { display: flex; gap: 1rem; flex-wrap: wrap; }
     .header-links a {
-      color: #c6c6c6; text-decoration: none; font-size: 0.875rem; font-weight: 500;
+      color: #475569; text-decoration: none; font-size: 0.875rem; font-weight: 500;
     }
-    .header-links a:hover { color: #fff; }
+    .header-links a:hover { color: var(--blue-60); }
 
-    .hero { text-align: center; padding: 5rem 2rem 4rem; }
+    .hero { text-align: center; padding: 5rem 2rem 4rem; background: #f7fbff; }
     .hero-eyebrow {
       display: inline-block;
-      background: rgba(90,82,104,0.2);
-      border: 1px solid rgba(90,82,104,0.45);
-      color: #b9b3c4;
+      background: rgba(14,165,233,0.08);
+      border: 1px solid rgba(14,165,233,0.28);
+      color: var(--blue-70);
       font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
       text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 2px;
       margin-bottom: 1.5rem;
@@ -65,10 +66,11 @@
       font-size: clamp(2rem, 5vw, 3.2rem);
       font-weight: 700; line-height: 1.15;
       margin-bottom: 1.25rem;
+      color: #0f172a;
     }
     .hero p {
       max-width: 680px; margin: 0 auto 2.5rem;
-      font-size: 1.05rem; color: #c6c6c6; line-height: 1.7;
+      font-size: 1.05rem; color: #475569; line-height: 1.7;
     }
     .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
     .btn {
@@ -80,27 +82,28 @@
     .btn-primary { background: var(--blue-60); color: #fff; }
     .btn-primary:hover { background: var(--blue-70); }
     .btn-outline {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.28);
-      color: #f4f4f4;
+      background: #ffffff;
+      border: 1px solid rgba(14,165,233,0.35);
+      color: var(--blue-70);
     }
     .btn-secondary {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.18);
-      color: #f4f4f4;
+      background: #f0f9ff;
+      border: 1px solid rgba(14,165,233,0.18);
+      color: #0f172a;
     }
 
     .stats {
       display: flex; justify-content: center; flex-wrap: wrap;
-      gap: 2.5rem; padding: 0 2rem 4rem;
+      gap: 2.5rem; padding: 2rem 2rem 4rem;
+      background: #ffffff;
     }
     .stat { text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 700; color: #b9b3c4; font-family: 'JetBrains Mono', monospace; }
-    .stat-label { font-size: 0.8rem; color: #8d8d8d; margin-top: 0.2rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--blue-60); font-family: 'JetBrains Mono', monospace; }
+    .stat-label { font-size: 0.8rem; color: #64748b; margin-top: 0.2rem; letter-spacing: 0.04em; text-transform: uppercase; }
 
     section { max-width: 1200px; margin: 0 auto; padding: 0 2rem 5rem; }
-    .section-title { font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 0.75rem; }
-    .section-sub { text-align: center; color: #8d8d8d; margin-bottom: 3rem; font-size: 0.95rem; }
+    .section-title { font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 0.75rem; color: #0f172a; }
+    .section-sub { text-align: center; color: #64748b; margin-bottom: 3rem; font-size: 0.95rem; }
 
     .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
     .preview-card {
@@ -113,20 +116,21 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 2.4rem; font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
     }
-    .thumb-enterprise { background: #2a2630; }
-    .thumb-oss        { background: #198038; }
-    .thumb-legal      { background: #393939; }
+    .thumb-enterprise { background: #0369a1; }
+    .thumb-oss        { background: #059669; }
+    .thumb-legal      { background: #64748b; }
     .preview-body { padding: 1.25rem 1.5rem 1.5rem; }
     .preview-edition {
       font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
       text-transform: uppercase; margin-bottom: 0.4rem;
     }
-    .edition-enterprise { color: #b9b3c4; }
+    .edition-enterprise { color: var(--blue-60); }
     .edition-oss        { color: var(--green-50); }
     .edition-legal      { color: var(--yellow-30); }
     .preview-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .preview-desc  { font-size: 0.875rem; color: #c6c6c6; line-height: 1.6; margin-bottom: 1.25rem; }
+    .preview-desc  { font-size: 0.875rem; color: #475569; line-height: 1.6; margin-bottom: 1.25rem; }
     .preview-link {
       color: var(--blue-60); font-weight: 600; font-size: 0.875rem;
       text-decoration: none;
@@ -138,7 +142,7 @@
       border-radius: 4px; padding: 1.25rem 1.5rem;
     }
     .feature-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
-    .feature-desc  { font-size: 0.825rem; color: #c6c6c6; line-height: 1.5; }
+    .feature-desc  { font-size: 0.825rem; color: #475569; line-height: 1.5; }
 
     .cloud-row {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 2rem;
@@ -148,16 +152,17 @@
       background: var(--card-bg); border: 1px solid var(--card-border);
       border-radius: 2px; padding: 0.6rem 1.2rem;
       font-size: 0.85rem; font-weight: 500;
+      color: #0f172a; text-decoration: none;
     }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-50); }
 
     footer {
       text-align: center; padding: 2.5rem 2rem;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      color: #8d8d8d; font-size: 0.825rem;
+      border-top: 1px solid rgba(14,165,233,0.16);
+      color: #64748b; font-size: 0.825rem;
     }
-    footer a { color: #a8a8a8; text-decoration: none; }
-    footer a:hover { color: #f4f4f4; }
+    footer a { color: var(--blue-60); text-decoration: none; }
+    footer a:hover { color: var(--blue-70); }
 
     @media (max-width: 600px) {
       .header-links { display: none; }
@@ -186,7 +191,7 @@
   <p>
     CSPM, CryptoBOM, SBOM, and DevSecOps on one engine. Community is Apache License 2.0.
     Enterprise is a commercial license (SSO, RBAC, cloud connectors, support).
-    The UI uses RivicQ violet from rivicq.com. IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.
+    The UI uses a clear sky-blue and white theme. IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.
   </p>
   <div class="hero-actions">
     <a class="btn btn-primary" href="/RivicQ_CSPM_EaaS/demo">Interactive demo</a>

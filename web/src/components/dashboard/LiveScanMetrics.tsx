@@ -49,7 +49,7 @@ const LiveScanMetrics: React.FC<LiveScanMetricsProps> = ({ metrics }) => {
             transition: dashboardDesign.motion.transition,
             '&:hover': {
               bgcolor: 'rgba(255,255,255,0.11)',
-              borderColor: 'rgba(90,82,104,0.35)',
+              borderColor: 'rgba(14,165,233,0.35)',
             },
           }}
         >

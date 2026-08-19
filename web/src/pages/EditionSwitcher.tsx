@@ -45,8 +45,8 @@ const EditionSwitcher: React.FC = () => {
     },
   ];
 
-  const pageBg = isDark ? '#1c1b1f' : '#f6f6f7';
-  const cardBg = isDark ? '#252429' : '#ffffff';
+  const pageBg = isDark ? '#082f49' : '#ffffff';
+  const cardBg = isDark ? '#0c4a6e' : '#ffffff';
 
   return (
     <Box sx={{ minHeight: '100vh', background: pageBg, py: 8 }}>

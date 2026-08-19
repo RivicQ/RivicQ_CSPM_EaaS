@@ -20,9 +20,9 @@ const QUBITS = [
  * a faint orbit ring, connected by entanglement links.
  */
 const QubitField: React.FC<QubitFieldProps> = ({ dark = false, density = 1 }) => {
-  const core = dark ? 'rgba(200,197,206,0.35)' : 'rgba(90,82,104,0.28)';
-  const ring = dark ? 'rgba(200,197,206,0.18)' : 'rgba(90,82,104,0.16)';
-  const link = dark ? 'rgba(200,197,206,0.08)' : 'rgba(90,82,104,0.08)';
+  const core = dark ? 'rgba(186,230,253,0.35)' : 'rgba(14,165,233,0.28)';
+  const ring = dark ? 'rgba(186,230,253,0.18)' : 'rgba(14,165,233,0.16)';
+  const link = dark ? 'rgba(186,230,253,0.08)' : 'rgba(14,165,233,0.08)';
   const qubits = QUBITS.slice(0, Math.max(3, Math.round(QUBITS.length * density)));
 
   return (

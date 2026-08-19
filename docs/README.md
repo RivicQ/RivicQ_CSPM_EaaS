@@ -11,7 +11,7 @@
 
 The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
 
-UI colors follow a **quiet dusty violet** (`#5a5268`) in the rivicq.com family. **IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.**
+UI colors follow a **clear sky-blue and white** theme (`#0284c7` on `#ffffff`). **IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.**
 
 ## Getting started
 

@@ -183,7 +183,7 @@ const RivicQAssistant: React.FC = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200,197,206,0.16)' : 'rgba(90,82,104,0.16)'}`,
+                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(186,230,253,0.16)' : 'rgba(14,165,233,0.16)'}`,
               }}
             >
               <Box
@@ -374,7 +374,7 @@ const RivicQAssistant: React.FC = () => {
             width: FAB_SIZE,
             height: FAB_SIZE,
             borderRadius: '50%',
-            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200,197,206,0.2)' : 'rgba(90,82,104,0.2)'}`,
+            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(186,230,253,0.2)' : 'rgba(14,165,233,0.2)'}`,
             cursor: 'pointer',
             p: 0,
             display: 'grid',
@@ -397,7 +397,7 @@ const RivicQAssistant: React.FC = () => {
                   size={FAB_SIZE + 8}
                   sx={{
                     position: 'absolute',
-                    color: 'rgba(90,82,104,0.28)',
+                    color: 'rgba(14,165,233,0.28)',
                   }}
                 />
               )}

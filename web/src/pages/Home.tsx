@@ -194,9 +194,9 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const heroBg = isDark ? designSystem.proBlue.commandCenter : '#f6f6f7';
-  const cardBg = isDark ? '#252429' : '#ffffff';
-  const cardBorder = isDark ? 'rgba(200,197,206,0.12)' : 'rgba(90,82,104,0.16)';
+  const heroBg = isDark ? designSystem.proBlue.commandCenter : '#ffffff';
+  const cardBg = isDark ? '#0c4a6e' : '#ffffff';
+  const cardBorder = isDark ? 'rgba(186,230,253,0.12)' : 'rgba(14,165,233,0.16)';
 
   return (
     <Box
@@ -212,7 +212,7 @@ const Home: React.FC = () => {
         sx={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: 'linear-gradient(rgba(90,82,104,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(90,82,104,0.06) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(14,165,233,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.06) 1px, transparent 1px)',
           backgroundSize: '72px 72px',
           pointerEvents: 'none',
           maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.5), transparent 70%)',
@@ -262,7 +262,7 @@ const Home: React.FC = () => {
                   label="Encryption as a Service · Quantum-safe CSPM"
                   sx={{
                     mb: 3,
-                    bgcolor: isDark ? 'rgba(90,82,104,0.18)' : 'rgba(90,82,104,0.08)',
+                    bgcolor: isDark ? 'rgba(14,165,233,0.18)' : 'rgba(14,165,233,0.08)',
                     color: 'primary.main',
                     border: 1,
                     borderColor: 'primary.main',
@@ -297,7 +297,7 @@ const Home: React.FC = () => {
                     p: 0.5,
                     bgcolor: cardBg,
                     border: 1,
-                    borderColor: isDark ? 'rgba(90,82,104,0.35)' : 'rgba(90,82,104,0.22)',
+                    borderColor: isDark ? 'rgba(14,165,233,0.35)' : 'rgba(14,165,233,0.22)',
                     backdropFilter: 'none',
                   }}
                 >
@@ -394,7 +394,7 @@ const Home: React.FC = () => {
               borderRadius: `${designSystem.radius.md}px`,
               p: { xs: 3, md: 5 },
               border: 1,
-              borderColor: isDark ? 'rgba(90,82,104,0.28)' : 'rgba(90,82,104,0.16)',
+              borderColor: isDark ? 'rgba(14,165,233,0.28)' : 'rgba(14,165,233,0.16)',
               background: isDark ? designSystem.proBlue.commandCenter : '#ffffff',
             }}
           >
@@ -525,9 +525,9 @@ const Home: React.FC = () => {
                 <Card
                   sx={{
                     height: '100%',
-                    bgcolor: tier.featured ? (isDark ? 'rgba(90,82,104,0.16)' : 'rgba(90,82,104,0.06)') : cardBg,
+                    bgcolor: tier.featured ? (isDark ? 'rgba(14,165,233,0.16)' : 'rgba(14,165,233,0.06)') : cardBg,
                     border: 1,
-                    borderColor: tier.featured ? 'rgba(90,82,104,0.4)' : cardBorder,
+                    borderColor: tier.featured ? 'rgba(14,165,233,0.4)' : cardBorder,
                   }}
                 >
                   <CardContent sx={{ p: 4 }}>

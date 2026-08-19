@@ -21,10 +21,10 @@ const GLYPHS = [
  * key-distribution orbits, and cryptographic algorithm glyphs.
  */
 const CryptoQuantumBackdrop: React.FC<CryptoQuantumBackdropProps> = ({ dark = true }) => {
-  const accent = dark ? 'rgba(200,197,206,0.28)' : 'rgba(90,82,104,0.22)';
-  const accentSoft = dark ? 'rgba(200,197,206,0.1)' : 'rgba(90,82,104,0.1)';
-  const glyphColor = dark ? 'rgba(200,197,206,0.32)' : 'rgba(74,68,86,0.4)';
-  const orbit = dark ? 'rgba(200,197,206,0.14)' : 'rgba(90,82,104,0.14)';
+  const accent = dark ? 'rgba(186,230,253,0.28)' : 'rgba(14,165,233,0.22)';
+  const accentSoft = dark ? 'rgba(186,230,253,0.1)' : 'rgba(14,165,233,0.1)';
+  const glyphColor = dark ? 'rgba(186,230,253,0.32)' : 'rgba(3,105,161,0.45)';
+  const orbit = dark ? 'rgba(186,230,253,0.14)' : 'rgba(14,165,233,0.14)';
 
   return (
     <Box aria-hidden sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
@@ -70,7 +70,7 @@ const CryptoQuantumBackdrop: React.FC<CryptoQuantumBackdropProps> = ({ dark = tr
           border: `1px solid ${accent}`,
           display: { xs: 'none', sm: 'grid' },
           placeItems: 'center',
-          background: dark ? 'rgba(28,27,31,0.7)' : 'rgba(255,255,255,0.82)',
+          background: dark ? 'rgba(15,23,42,0.7)' : 'rgba(255,255,255,0.82)',
         }}
       >
         <Box sx={{ position: 'relative', width: 52, height: 52, borderRadius: 1, border: `1px solid ${accent}` }}>
@@ -105,7 +105,7 @@ const CryptoQuantumBackdrop: React.FC<CryptoQuantumBackdropProps> = ({ dark = tr
             fontWeight: 500,
             whiteSpace: 'nowrap',
             display: { xs: g.delay > 1 ? 'none' : 'block', md: 'block' },
-            background: dark ? 'rgba(28,27,31,0.35)' : 'rgba(255,255,255,0.55)',
+            background: dark ? 'rgba(15,23,42,0.35)' : 'rgba(255,255,255,0.55)',
           }}
         >
           {g.label}

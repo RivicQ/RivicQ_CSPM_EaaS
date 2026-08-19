@@ -12,7 +12,7 @@ export const designSystem = {
   },
   gradient: {
     brand: tokens.colors.brandGradient,
-    brandSoft: 'linear-gradient(180deg, rgba(90,82,104,0.04) 0%, transparent 100%)',
+    brandSoft: 'linear-gradient(180deg, rgba(14,165,233,0.06) 0%, transparent 100%)',
     heroLight: 'none',
     heroDark: 'none',
     sidebar: 'none',
@@ -21,33 +21,33 @@ export const designSystem = {
     meshDark: 'none',
   },
   shadow: {
-    sm: '0 1px 2px rgba(28,27,31,0.04)',
-    md: '0 1px 3px rgba(28,27,31,0.06)',
-    lg: '0 4px 12px rgba(28,27,31,0.08)',
+    sm: '0 1px 2px rgba(15,23,42,0.04)',
+    md: '0 1px 3px rgba(15,23,42,0.06)',
+    lg: '0 4px 12px rgba(15,23,42,0.08)',
     glow: (_color: string) => 'none',
   },
   motion: {
     spring: '0.2s ease',
     smooth: '0.2s ease',
   },
-  /** Quiet command surface — charcoal with a hint of dusty violet */
+  /** Sky-navy command surface — used on dark chrome; light pages stay white */
   proBlue: {
-    navy: '#1c1b1f',
-    navyMid: '#252429',
-    navyLight: '#2a2630',
-    royal: '#4a4456',
-    accent: '#5a5268',
-    accentLight: '#8d859a',
-    accentMuted: '#b9b3c4',
-    sidebar: '#1c1b1f',
-    commandCenter: '#1c1b1f',
+    navy: '#082f49',
+    navyMid: '#0c4a6e',
+    navyLight: '#075985',
+    royal: '#0369a1',
+    accent: '#0ea5e9',
+    accentLight: '#38bdf8',
+    accentMuted: '#7dd3fc',
+    sidebar: '#082f49',
+    commandCenter: '#082f49',
     commandGlow: 'none',
-    border: 'rgba(200,197,206,0.12)',
-    textPrimary: '#f4f3f5',
-    textSecondary: 'rgba(244,243,245,0.78)',
-    textMuted: 'rgba(154,150,163,0.9)',
-    navActive: 'rgba(107,98,120,0.28)',
-    navHover: 'rgba(255,255,255,0.04)',
+    border: 'rgba(125,211,252,0.22)',
+    textPrimary: '#f8fafc',
+    textSecondary: 'rgba(248,250,252,0.82)',
+    textMuted: 'rgba(186,230,253,0.78)',
+    navActive: 'rgba(14,165,233,0.28)',
+    navHover: 'rgba(255,255,255,0.06)',
     shadow: 'none',
   },
 } as const;
@@ -59,7 +59,7 @@ export const meshBackground = (theme: Theme) => ({
 
 export const glassSurface = (theme: Theme, elevated = false) => ({
   background: theme.palette.mode === 'dark'
-    ? elevated ? theme.palette.background.paper : 'rgba(37,36,41,0.92)'
+    ? elevated ? theme.palette.background.paper : 'rgba(8,47,73,0.92)'
     : elevated ? '#ffffff' : 'rgba(255,255,255,0.96)',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
@@ -101,15 +101,15 @@ export const sidebarScrollSx = {
   overflowY: 'auto',
   overflowX: 'hidden',
   scrollbarWidth: 'thin',
-  scrollbarColor: 'rgba(90,82,104,0.35) transparent',
+  scrollbarColor: 'rgba(14,165,233,0.35) transparent',
   '&::-webkit-scrollbar': { width: 4 },
   '&::-webkit-scrollbar-track': { background: 'transparent' },
   '&::-webkit-scrollbar-thumb': {
-    background: 'rgba(90,82,104,0.28)',
+    background: 'rgba(14,165,233,0.28)',
     borderRadius: 99,
   },
   '&::-webkit-scrollbar-thumb:hover': {
-    background: 'rgba(90,82,104,0.42)',
+    background: 'rgba(14,165,233,0.42)',
   },
 };
 
@@ -183,7 +183,7 @@ export const heroPrimaryCtaSx = {
   backgroundColor: '#ffffff !important',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': { color: 'inherit' },
   '&:hover': {
-    backgroundColor: '#f4f3f5 !important',
+    backgroundColor: '#f8fafc !important',
     backgroundImage: 'none !important',
     boxShadow: 'none',
     transform: 'none',
@@ -277,11 +277,11 @@ export const proBlueBadgeSx = {
 
 /** Top app bar — aligns with pro-blue sidebar & command center */
 export const appBarPaperSx = (mode: 'light' | 'dark') => ({
-  bgcolor: mode === 'dark' ? '#1c1b1f' : '#ffffff',
+  bgcolor: mode === 'dark' ? '#082f49' : '#ffffff',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
   color: mode === 'dark' ? designSystem.proBlue.textPrimary : designSystem.proBlue.navyMid,
-  borderBottom: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(90,82,104,0.16)'}`,
+  borderBottom: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(14,165,233,0.16)'}`,
   boxShadow: 'none',
   backgroundImage: 'none',
 });
@@ -293,8 +293,8 @@ export const appBarSearchSx = (mode: 'light' | 'dark') => ({
   px: 1.5,
   py: 0.625,
   width: { md: 240, lg: 320 },
-  bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(28,27,31,0.04)',
-  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(90,82,104,0.16)'}`,
+  bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(14,165,233,0.06)',
+  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(14,165,233,0.16)'}`,
   transition: designSystem.motion.smooth,
   '&:focus-within': {
     bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.06)' : '#ffffff',
@@ -305,13 +305,13 @@ export const appBarSearchSx = (mode: 'light' | 'dark') => ({
 
 export const appBarIconButtonSx = (mode: 'light' | 'dark') => ({
   borderRadius: `${designSystem.radius.sm}px`,
-  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(90,82,104,0.16)'}`,
+  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(14,165,233,0.16)'}`,
   bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : '#ffffff',
   color: mode === 'dark' ? designSystem.proBlue.textSecondary : designSystem.proBlue.navyMid,
   width: 36,
   height: 36,
   '&:hover': {
-    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(90,82,104,0.08)',
+    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(14,165,233,0.08)',
     borderColor: mode === 'dark' ? designSystem.proBlue.accentMuted : designSystem.proBlue.accent,
   },
 });
@@ -324,26 +324,26 @@ export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolea
   display: { xs: 'none', sm: 'inline-flex' },
   bgcolor: isEnterprise
     ? mode === 'dark'
-      ? 'rgba(90,82,104,0.28)'
-      : 'rgba(90,82,104,0.08)'
+      ? 'rgba(14,165,233,0.28)'
+      : 'rgba(14,165,233,0.08)'
     : mode === 'dark'
-      ? 'rgba(90,82,104,0.18)'
-      : 'rgba(90,82,104,0.06)',
+      ? 'rgba(14,165,233,0.18)'
+      : 'rgba(14,165,233,0.06)',
   color: isEnterprise
     ? mode === 'dark'
-      ? '#d8d4de'
-      : '#5a5268'
+      ? '#e0f2fe'
+      : '#0369a1'
     : mode === 'dark'
       ? designSystem.proBlue.accentMuted
       : designSystem.proBlue.royal,
   border: `1px solid ${
     isEnterprise
       ? mode === 'dark'
-        ? 'rgba(185,179,196,0.28)'
-        : 'rgba(90,82,104,0.22)'
+        ? 'rgba(125,211,252,0.28)'
+        : 'rgba(14,165,233,0.22)'
       : mode === 'dark'
         ? designSystem.proBlue.border
-        : 'rgba(90,82,104,0.16)'
+        : 'rgba(14,165,233,0.16)'
   }`,
 });
 

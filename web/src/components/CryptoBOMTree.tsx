@@ -35,8 +35,8 @@ interface CryptoBOMTreeProps {
 }
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  asset: <AccountTree fontSize="small" style={{ color: '#5a5268' }} />,
-  library: <Lock fontSize="small" style={{ color: '#5a5268' }} />,
+  asset: <AccountTree fontSize="small" style={{ color: '#0284c7' }} />,
+  library: <Lock fontSize="small" style={{ color: '#0284c7' }} />,
   algorithm: <Lock fontSize="small" style={{ color: '#ff832b' }} />,
   key: <Lock fontSize="small" style={{ color: '#24a148' }} />,
 };

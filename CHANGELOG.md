@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.4] - 2026-08-19
+
+### Changed
+- Restored a **clear sky-blue and white** theme (`#0ea5e9` / `#0284c7` on `#ffffff`). Default mode is light.
+- Kept the quieter motion (no glow, blur, or hover-lift).
+- Still not IBM Carbon / IBM Plex. Trademark notice is unchanged.
+
 ## [1.5.3] - 2026-08-19
 
 ### Changed

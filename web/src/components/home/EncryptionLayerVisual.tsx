@@ -46,8 +46,8 @@ const Pill: React.FC<{ node: Node; align?: 'left' | 'right'; dark: boolean; acce
       px: { xs: 0.75, sm: 1.25 },
       py: { xs: 0.5, sm: 0.75 },
       borderRadius: 999,
-      border: `1px solid ${dark ? 'rgba(200,197,206,0.16)' : 'rgba(90,82,104,0.16)'}`,
-      bgcolor: dark ? 'rgba(37,36,41,0.92)' : '#ffffff',
+      border: `1px solid ${dark ? 'rgba(186,230,253,0.16)' : 'rgba(14,165,233,0.16)'}`,
+      bgcolor: dark ? 'rgba(8,47,73,0.92)' : '#ffffff',
       color: accent || (dark ? tokens.colors.textLight.secondary : tokens.colors.text.secondary),
       backdropFilter: 'none',
     }}
@@ -93,8 +93,8 @@ type EncryptionLayerVisualProps = { dark?: boolean };
 const EncryptionLayerVisual: React.FC<EncryptionLayerVisualProps> = ({ dark }) => {
   const theme = useTheme();
   const isDark = dark ?? theme.palette.mode === 'dark';
-  const mesh = isDark ? 'rgba(200,197,206,0.18)' : 'rgba(90,82,104,0.16)';
-  const flow = isDark ? 'rgba(200,197,206,0.45)' : 'rgba(90,82,104,0.4)';
+  const mesh = isDark ? 'rgba(186,230,253,0.18)' : 'rgba(14,165,233,0.16)';
+  const flow = isDark ? 'rgba(186,230,253,0.45)' : 'rgba(14,165,233,0.4)';
   const stacked = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
@@ -103,8 +103,8 @@ const EncryptionLayerVisual: React.FC<EncryptionLayerVisualProps> = ({ dark }) =
         position: 'relative',
         borderRadius: 1,
         p: { xs: 2, md: 3 },
-        border: `1px solid ${isDark ? 'rgba(200,197,206,0.14)' : 'rgba(90,82,104,0.16)'}`,
-        background: isDark ? '#252429' : '#ffffff',
+        border: `1px solid ${isDark ? 'rgba(186,230,253,0.14)' : 'rgba(14,165,233,0.16)'}`,
+        background: isDark ? '#0c4a6e' : '#ffffff',
         backdropFilter: 'none',
         overflow: 'hidden',
       }}
