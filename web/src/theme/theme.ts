@@ -19,21 +19,21 @@ declare module '@mui/material/Chip' {
 }
 
 const LIGHT_PRIMARY = {
-  50: '#f5f0ff', 100: '#ebe4fe', 200: '#d4c4fc', 300: '#b89af9', 400: '#9c72f6',
-  500: '#8251f3', 600: '#8251f3', 700: '#6b3de0', 800: '#5529c4', 900: '#301233',
+  50: '#f5f4f7', 100: '#eceaf0', 200: '#d8d4de', 300: '#b9b3c4', 400: '#8d859a',
+  500: '#6b6278', 600: '#5a5268', 700: '#4a4456', 800: '#353040', 900: '#2a2630',
 };
 
 const DARK_PRIMARY = {
-  50: '#f5f0ff', 100: '#ebe4fe', 200: '#d4c4fc', 300: '#b89af9', 400: '#9c72f6',
-  500: '#9c72f6', 600: '#8251f3', 700: '#6b3de0', 800: '#5529c4', 900: '#301233',
+  50: '#f5f4f7', 100: '#eceaf0', 200: '#d8d4de', 300: '#b9b3c4', 400: '#8d859a',
+  500: '#8d859a', 600: '#6b6278', 700: '#5a5268', 800: '#4a4456', 900: '#2a2630',
 };
 
 const LIGHT_GOLD = {
-  50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d', 400: '#fbbf24', 500: '#b45309', 600: '#92400e', 700: '#78350f', 800: '#5b3a06', 900: '#422a04',
+  50: '#f7f4ea', 100: '#efe6c8', 200: '#e0d09a', 300: '#c4ae6a', 400: '#a08a48', 500: '#7a6a38', 600: '#5c502c', 700: '#453c22', 800: '#2e2818', 900: '#1c1810',
 };
 
 const DARK_GOLD = {
-  50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d', 400: '#fbbf24', 500: '#f1c21b', 600: '#d97706', 700: '#b45309', 800: '#92400e', 900: '#78350f',
+  50: '#f7f4ea', 100: '#efe6c8', 200: '#e0d09a', 300: '#c4ae6a', 400: '#a08a48', 500: '#a08a48', 600: '#7a6a38', 700: '#5c502c', 800: '#453c22', 900: '#2e2818',
 };
 
 const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
@@ -57,15 +57,15 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
       },
       secondary: {
         main: tokens.colors.crypto.quantum,
-        light: '#be95ff',
-        dark: '#6929c4',
+        light: tokens.colors.rivicq[400],
+        dark: tokens.colors.rivicq[700],
         contrastText: '#ffffff',
       },
       tertiary: {
         main: gold[600],
         light: gold[400],
         dark: gold[700],
-        contrastText: isDark ? '#0b1220' : '#ffffff',
+        contrastText: isDark ? '#1c1b1f' : '#ffffff',
       },
       error: { main: tokens.colors.crypto.critical },
       warning: { main: tokens.colors.crypto.high },
@@ -82,7 +82,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
       },
       action: {
         hover: isDark ? 'rgba(148,163,184,0.08)' : 'rgba(100,116,139,0.06)',
-        selected: isDark ? 'rgba(130,81,243,0.28)' : 'rgba(130,81,243,0.12)',
+        selected: isDark ? 'rgba(90,82,104,0.28)' : 'rgba(90,82,104,0.08)',
       },
       divider: border,
     },
@@ -121,16 +121,16 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
       MuiCard: {
         styleOverrides: {
           root: {
-            background: isDark ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.92)',
-            backdropFilter: 'blur(16px) saturate(1.4)',
-            WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
-            border: `1px solid ${isDark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.12)'}`,
-            borderRadius: tokens.borderRadius.lg,
-            boxShadow: designSystem.shadow.sm,
+            background: isDark ? tokens.colors.surfaceLight[1] : '#ffffff',
+            backdropFilter: 'none',
+            WebkitBackdropFilter: 'none',
+            border: `1px solid ${isDark ? 'rgba(200,197,206,0.12)' : 'rgba(90,82,104,0.14)'}`,
+            borderRadius: tokens.borderRadius.md,
+            boxShadow: 'none',
             transition: designSystem.motion.smooth,
             '&:hover': {
-              boxShadow: designSystem.shadow.md,
-              borderColor: isDark ? 'rgba(148,163,184,0.2)' : 'rgba(100,116,139,0.18)',
+              boxShadow: 'none',
+              borderColor: isDark ? 'rgba(200,197,206,0.2)' : 'rgba(90,82,104,0.22)',
             },
           },
         },
@@ -154,22 +154,15 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
             textTransform: 'none',
             fontWeight: 600,
             padding: '8px 20px',
-            transition: 'transform 0.18s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease',
-            willChange: 'transform',
-            // Additive micro-interactions — enhance existing styles, never replace.
+            transition: 'background-color 0.15s ease, border-color 0.15s ease',
             '&:hover': {
-              transform: 'translateY(-1px)',
+              transform: 'none',
             },
             '&:active': {
-              transform: 'translateY(0) scale(0.985)',
+              transform: 'none',
             },
             '&.Mui-focusVisible': {
-              boxShadow: `0 0 0 3px ${designSystem.proBlue.accent}33`,
-            },
-            '@media (prefers-reduced-motion: reduce)': {
-              transition: 'background-color 0.2s ease, border-color 0.2s ease',
-              '&:hover': { transform: 'none' },
-              '&:active': { transform: 'none' },
+              boxShadow: `0 0 0 2px ${designSystem.proBlue.accent}33`,
             },
           },
           containedPrimary: {
@@ -213,7 +206,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
         styleOverrides: {
           root: {
             '&.Mui-selected': {
-              backgroundColor: isDark ? 'rgba(130,81,243,0.22)' : 'rgba(130,81,243,0.12)',
+              backgroundColor: isDark ? 'rgba(90,82,104,0.22)' : 'rgba(90,82,104,0.08)',
             },
           },
         },
@@ -221,9 +214,10 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
       MuiAppBar: {
         styleOverrides: {
           root: {
-            backgroundColor: `${surface[1]}f2`,
-            backdropFilter: 'blur(12px)',
+            backgroundColor: surface[1],
+            backdropFilter: 'none',
             borderBottom: `1px solid ${border}`,
+            boxShadow: 'none',
           },
         },
       },
@@ -282,7 +276,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
             borderColor: border,
             borderRadius: `${tokens.borderRadius.md}px !important`,
             '&.Mui-selected': {
-              background: isDark ? 'rgba(130,81,243,0.22)' : 'rgba(130,81,243,0.12)',
+              background: isDark ? 'rgba(90,82,104,0.22)' : 'rgba(90,82,104,0.1)',
               color: primary[600],
               borderColor: `${primary[500]}44`,
             },

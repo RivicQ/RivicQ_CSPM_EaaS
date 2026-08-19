@@ -40,7 +40,7 @@ const ComplianceScoreGrid: React.FC<ComplianceScoreGridProps> = ({ frameworks, o
                 position: 'relative',
                 overflow: 'hidden',
                 transition: dashboardDesign.motion.transition,
-                '&:hover': { borderColor: `${color}44`, transform: 'translateY(-1px)' },
+                '&:hover': { borderColor: `${color}44`, transform: 'none' },
                 '&::before': {
                   content: '""',
                   position: 'absolute',

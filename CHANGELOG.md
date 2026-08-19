@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.3] - 2026-08-19
+
+### Changed
+- Quieted the product theme: dusty violet (`#5a5268` / `#6b6278`) on charcoal surfaces, less saturation than rivicq.com neon.
+- Removed glass blur, neon glow, hover-lift, and bouncing motion from the console, homepage, auth, and docs hub.
+- IBM trademark notice is unchanged. RivicQ is still not an IBM product.
+
 ## [1.5.2] - 2026-08-19
 
 ### Changed

@@ -60,11 +60,9 @@ const QuickActionCard: React.FC<{
         },
         '&:hover': {
           borderColor: `${action.accent}44`,
-          bgcolor: isDark ? 'rgba(30,41,59,0.85)' : '#fff',
-          transform: 'translateY(-1px)',
-          boxShadow: isDark
-            ? `0 6px 20px rgba(0,0,0,0.28), 0 0 0 1px ${action.accent}22`
-            : `0 4px 16px rgba(15,23,42,0.06), 0 0 0 1px ${action.accent}18`,
+          bgcolor: isDark ? 'rgba(37,36,41,0.92)' : '#fff',
+          transform: 'none',
+          boxShadow: 'none',
           '& .qa-arrow': { opacity: 1 },
           '& .qa-icon': { bgcolor: `${action.accent}20`, color: action.accent },
         },

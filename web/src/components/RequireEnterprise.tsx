@@ -12,7 +12,7 @@ const RequireEnterprise: React.FC<{ children: React.ReactElement }> = ({ childre
   if (!isPaidEdition(edition)) {
     return (
       <Box sx={{ minHeight: '70vh', display: 'grid', placeItems: 'center', px: 2 }}>
-        <Card sx={{ maxWidth: 720, width: '100%', border: '1px solid rgba(130,81,243,0.30)' }}>
+        <Card sx={{ maxWidth: 720, width: '100%', border: '1px solid rgba(90,82,104,0.30)' }}>
           <CardContent sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={2} alignItems="flex-start">
               <Lock sx={{ fontSize: 42, color: 'primary.main' }} />

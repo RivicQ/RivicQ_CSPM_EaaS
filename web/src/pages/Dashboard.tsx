@@ -620,7 +620,7 @@ const Dashboard: React.FC = () => {
           borderRadius: `${dashboardDesign.radius.lg}px`,
           border: 1,
           borderColor: 'divider',
-          bgcolor: isDark ? 'rgba(37,99,235,0.08)' : 'rgba(37,99,235,0.04)',
+          bgcolor: isDark ? 'rgba(90,82,104,0.1)' : 'rgba(90,82,104,0.05)',
           display: 'flex',
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',

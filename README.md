@@ -18,7 +18,7 @@ RivicQ is an Encryption-as-a-Service (EaaS) platform for **CSPM**, **CBOM**, **S
 | **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
 | **Legal pack** | [LEGAL.md](LEGAL.md) · [LICENSE](LICENSE) · [NOTICE](NOTICE) · [PRIVACY.md](PRIVACY.md) · [TRADEMARKS.md](TRADEMARKS.md) · [SECURITY.md](SECURITY.md) |
 
-The web UI uses **RivicQ violet** from [rivicq.com](https://rivicq.com) (`#8251f3`, plum `#301233`) with Outfit and JetBrains Mono.
+The web UI uses a **quiet dusty violet** from the [rivicq.com](https://rivicq.com) family (`#5a5268`, charcoal `#1c1b1f`) with Outfit and JetBrains Mono. No neon glow.
 
 **IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.** Optional IBM Cloud / IBM Quantum connectors are interoperability only and require the customer’s own credentials. See [TRADEMARKS.md](TRADEMARKS.md).
 
@@ -81,7 +81,7 @@ cd RivicQ_CSPM_EaaS
 cp .env.example .env
 make dev-backend          # Community API :8080
 # or: make dev-enterprise # Enterprise API :9090
-make dev-frontend         # React UI (RivicQ violet / Outfit) → :3000
+make dev-frontend         # React UI (quiet dusty violet / Outfit) → :3000
 ```
 
 Open http://localhost:3000/platform — choose **Community** or **Enterprise** on Sign in, or open `/demo`.
@@ -151,7 +151,7 @@ cmd/server/             OSS (:8080) and Enterprise (:9090) API
 internal/discovery/     TLS, SSH, HTTP, SBOM scanners
 internal/intelligence/  Findings, risk, policy, CycloneDX
 internal/auth/          JWT, MFA, RBAC helpers
-web/                    React SaaS (RivicQ violet theme)
+web/                    React SaaS (quiet dusty-violet theme)
 datasets/               Expected results for fixture scans
 fixtures/               Synthetic known-bad / known-good samples
 deploy/helm/            OSS and Enterprise charts

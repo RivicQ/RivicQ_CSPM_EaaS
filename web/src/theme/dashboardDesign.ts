@@ -3,10 +3,10 @@ import { tokens } from './tokens';
 /** Designer-level dashboard design tokens */
 export const dashboardDesign = {
   radius: {
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 20,
+    sm: 4,
+    md: 6,
+    lg: 8,
+    xl: 10,
   },
   spacing: {
     page: 24,
@@ -35,14 +35,14 @@ export const dashboardDesign = {
     labels: ['Low', 'Medium', 'High', 'Critical'],
   },
   motion: {
-    hoverLift: 'translateY(-2px)',
-    transition: '0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    hoverLift: 'none',
+    transition: '0.15s ease',
   },
   hero: {
-    light: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(238,242,255,0.6) 50%, rgba(240,253,244,0.4) 100%)',
-    dark: 'linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(30,41,59,0.95) 50%, rgba(15,23,42,0.98) 100%)',
-    glow: 'radial-gradient(ellipse 60% 80% at 100% 0%, rgba(59,130,246,0.12), transparent 70%)',
-    glowDark: 'radial-gradient(ellipse 60% 80% at 100% 0%, rgba(59,130,246,0.18), transparent 70%)',
+    light: '#ffffff',
+    dark: '#1c1b1f',
+    glow: 'none',
+    glowDark: 'none',
   },
   layout: {
     /** Root dashboard page — prevents horizontal overflow in flex layouts */

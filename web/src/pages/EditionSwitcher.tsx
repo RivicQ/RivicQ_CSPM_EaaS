@@ -45,11 +45,8 @@ const EditionSwitcher: React.FC = () => {
     },
   ];
 
-  const pageBg = isDark
-    ? 'radial-gradient(circle at top, rgba(99,102,241,0.2), transparent 26%), linear-gradient(180deg, #0b1220 0%, #0f172a 100%)'
-    : 'radial-gradient(circle at top, rgba(99,102,241,0.1), transparent 26%), linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)';
-
-  const cardBg = isDark ? 'linear-gradient(180deg, #1e293b, #0f172a)' : 'linear-gradient(180deg, #ffffff, #f8fafc)';
+  const pageBg = isDark ? '#1c1b1f' : '#f6f6f7';
+  const cardBg = isDark ? '#252429' : '#ffffff';
 
   return (
     <Box sx={{ minHeight: '100vh', background: pageBg, py: 8 }}>
@@ -73,11 +70,11 @@ const EditionSwitcher: React.FC = () => {
               <Card
                 sx={{
                   height: '100%',
-                  borderRadius: 3,
+                  borderRadius: 1,
                   border: `1px solid ${card.accent}44`,
                   background: cardBg,
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': { transform: 'translateY(-4px)', boxShadow: `0 16px 40px ${card.accent}22` },
+                  transition: 'border-color 0.15s ease',
+                  '&:hover': { transform: 'none', boxShadow: 'none', borderColor: `${card.accent}88` },
                 }}
               >
                 <CardContent sx={{ p: 4 }}>

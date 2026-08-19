@@ -16,7 +16,7 @@ Nominative fair use remains available under applicable trademark law.
 
 ## Product visual identity
 
-The console uses **RivicQ violet** from [rivicq.com](https://rivicq.com) (`#8251f3` and plum `#301233`) with **Outfit** and **JetBrains Mono** (open fonts). That identity is independent of IBM.
+The console uses a **quiet dusty violet** from the [rivicq.com](https://rivicq.com) family (`#5a5268` on charcoal `#1c1b1f`) with **Outfit** and **JetBrains Mono** (open fonts). That identity is independent of IBM.
 
 ## IBM trademarks (required notice)
 

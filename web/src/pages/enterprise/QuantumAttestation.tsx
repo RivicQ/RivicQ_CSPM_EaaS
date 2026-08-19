@@ -68,7 +68,7 @@ const QuantumAttestation: React.FC = () => {
           <Card>
             <CardContent>
               <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <Psychology sx={{ color: '#8251f3' }} />
+                <Psychology sx={{ color: '#5a5268' }} />
                 <Typography variant="body2" color="text.secondary">Quantum Risk Score</Typography>
               </Box>
               <Typography variant="h4" fontWeight="bold" color="#dc2626">{riskScore ?? '—'}</Typography>
@@ -177,7 +177,7 @@ const QuantumAttestation: React.FC = () => {
       <Box mt={3}>
         <Button
           variant="contained"
-          sx={{ background: 'linear-gradient(45deg, #8251f3, #8251f3)', mr: 2 }}
+          sx={{ background: 'linear-gradient(45deg, #5a5268, #5a5268)', mr: 2 }}
           onClick={() => quantumAttestationService.scanForPQCAlgorithms(['all'])}
         >
           Start PQC Scan (All Assets)

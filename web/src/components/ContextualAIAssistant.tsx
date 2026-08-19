@@ -203,8 +203,8 @@ const ContextualAIAssistant: React.FC<AssistantProps> = ({ contextKey, edition, 
           sx={{
             p: 2,
             borderRadius: `${designSystem.radius.md}px`,
-            bgcolor: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(59,130,246,0.06)',
-            border: `1px solid ${isDark ? 'rgba(96,165,250,0.28)' : 'rgba(59,130,246,0.2)'}`,
+            bgcolor: isDark ? 'rgba(90,82,104,0.12)' : 'rgba(90,82,104,0.06)',
+            border: `1px solid ${isDark ? 'rgba(90,82,104,0.28)' : 'rgba(90,82,104,0.2)'}`,
           }}
         >
           <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.primary', fontWeight: 700 }}>

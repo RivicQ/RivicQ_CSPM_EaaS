@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { GitHub, Cloud, Memory, Lock, Key, Dns, Hub, VerifiedUser, Shield, FactCheck, AutoAwesome } from '@mui/icons-material';
-import { motion } from 'framer-motion';
 import { tokens } from '../../theme/tokens';
 
 type Node = { label: string; icon: React.ReactNode };
@@ -29,20 +28,14 @@ const OUTPUTS: Node[] = [
   { label: 'Automation', icon: <AutoAwesome sx={{ fontSize: 15 }} /> },
 ];
 
-const Pill: React.FC<{ node: Node; align?: 'left' | 'right'; dark: boolean; accent?: string; delay?: number; fullWidth?: boolean }> = ({
+const Pill: React.FC<{ node: Node; align?: 'left' | 'right'; dark: boolean; accent?: string; fullWidth?: boolean }> = ({
   node,
   align = 'left',
   dark,
   accent,
-  delay = 0,
   fullWidth = true,
 }) => (
   <Box
-    component={motion.div}
-    initial={{ opacity: 0, x: align === 'left' ? -12 : 12 }}
-    whileInView={{ opacity: 1, x: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.4, delay }}
     sx={{
       display: 'inline-flex',
       flexDirection: align === 'right' ? 'row-reverse' : 'row',
@@ -53,10 +46,10 @@ const Pill: React.FC<{ node: Node; align?: 'left' | 'right'; dark: boolean; acce
       px: { xs: 0.75, sm: 1.25 },
       py: { xs: 0.5, sm: 0.75 },
       borderRadius: 999,
-      border: `1px solid ${dark ? 'rgba(148,163,184,0.22)' : 'rgba(26,68,128,0.16)'}`,
-      bgcolor: dark ? 'rgba(15,39,68,0.6)' : 'rgba(255,255,255,0.9)',
+      border: `1px solid ${dark ? 'rgba(200,197,206,0.16)' : 'rgba(90,82,104,0.16)'}`,
+      bgcolor: dark ? 'rgba(37,36,41,0.92)' : '#ffffff',
       color: accent || (dark ? tokens.colors.textLight.secondary : tokens.colors.text.secondary),
-      backdropFilter: 'blur(4px)',
+      backdropFilter: 'none',
     }}
   >
     <Box sx={{ display: 'grid', placeItems: 'center', flexShrink: 0, color: accent || tokens.colors.rivicq[500] }}>{node.icon}</Box>
@@ -66,28 +59,25 @@ const Pill: React.FC<{ node: Node; align?: 'left' | 'right'; dark: boolean; acce
   </Box>
 );
 
-const EngineNodes: React.FC<{ dark: boolean; reduceMotion: boolean; flow: string; row?: boolean }> = ({ dark, reduceMotion, flow, row }) => (
+const EngineNodes: React.FC<{ flow: string; row?: boolean }> = ({ flow, row }) => (
   <Stack direction={row ? 'row' : 'column'} spacing={row ? 1 : 1.5} alignItems="center" justifyContent="center">
-    {ENGINE.map((n, i) => (
+    {ENGINE.map((n) => (
       <Box
         key={n.label}
-        component={motion.div}
-        animate={reduceMotion ? undefined : { boxShadow: [`0 0 0 0 ${flow}22`, `0 0 22px 4px ${flow}22`, `0 0 0 0 ${flow}22`] }}
-        transition={reduceMotion ? undefined : { duration: 3, repeat: Infinity, delay: i * 0.5 }}
         sx={{
           width: { xs: 84, md: 92 },
           height: { xs: 48, md: 56 },
-          borderRadius: 2,
+          borderRadius: 1,
           display: 'grid',
           placeItems: 'center',
           gap: 0.25,
           color: '#fff',
-          background: tokens.colors.brandGradient,
+          background: tokens.colors.rivicq[700],
           border: `1px solid ${flow}`,
         }}
       >
         <Box sx={{ display: 'grid', placeItems: 'center' }}>{n.icon}</Box>
-        <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.04em' }}>{n.label}</Typography>
+        <Typography sx={{ fontSize: '0.6rem', fontWeight: 600, letterSpacing: '0.04em' }}>{n.label}</Typography>
       </Box>
     ))}
   </Stack>
@@ -96,27 +86,26 @@ const EngineNodes: React.FC<{ dark: boolean; reduceMotion: boolean; flow: string
 type EncryptionLayerVisualProps = { dark?: boolean };
 
 /**
- * Animated "encryption intelligence layer" diagram: security signals flow into
+ * Quiet "encryption intelligence layer" diagram: security signals connect into
  * the RivicQ Encryption-as-a-Service engine (Discover → Analyze → Quantify) and
- * out to protected posture outputs. The mesh connectors carry flowing pulses.
+ * out to protected posture outputs.
  */
 const EncryptionLayerVisual: React.FC<EncryptionLayerVisualProps> = ({ dark }) => {
   const theme = useTheme();
   const isDark = dark ?? theme.palette.mode === 'dark';
-  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
-  const mesh = isDark ? 'rgba(96,165,250,0.28)' : 'rgba(37,99,235,0.22)';
-  const flow = isDark ? 'rgba(96,165,250,0.9)' : 'rgba(37,99,235,0.85)';
+  const mesh = isDark ? 'rgba(200,197,206,0.18)' : 'rgba(90,82,104,0.16)';
+  const flow = isDark ? 'rgba(200,197,206,0.45)' : 'rgba(90,82,104,0.4)';
   const stacked = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
     <Box
       sx={{
         position: 'relative',
-        borderRadius: 4,
+        borderRadius: 1,
         p: { xs: 2, md: 3 },
-        border: `1px solid ${isDark ? 'rgba(148,163,184,0.16)' : 'rgba(26,68,128,0.12)'}`,
-        background: isDark ? 'rgba(10,31,56,0.5)' : 'rgba(255,255,255,0.7)',
-        backdropFilter: 'blur(8px)',
+        border: `1px solid ${isDark ? 'rgba(200,197,206,0.14)' : 'rgba(90,82,104,0.16)'}`,
+        background: isDark ? '#252429' : '#ffffff',
+        backdropFilter: 'none',
         overflow: 'hidden',
       }}
     >
@@ -135,15 +124,15 @@ const EncryptionLayerVisual: React.FC<EncryptionLayerVisualProps> = ({ dark }) =
           <Box>
             <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled', mb: 0.75 }}>SIGNALS</Typography>
             <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-              {SIGNALS.map((n, i) => (
-                <Pill key={n.label} node={n} dark={isDark} delay={i * 0.04} fullWidth={false} />
+              {SIGNALS.map((n) => (
+                <Pill key={n.label} node={n} dark={isDark} fullWidth={false} />
               ))}
             </Stack>
           </Box>
 
           <Stack alignItems="center" spacing={0.5}>
             <Box sx={{ color: 'text.disabled', fontSize: 18, lineHeight: 1 }}>↓</Box>
-            <EngineNodes dark={isDark} reduceMotion={reduceMotion} flow={flow} row />
+            <EngineNodes flow={flow} row />
             <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: tokens.colors.rivicq[500] }}>RivicQ EaaS</Typography>
             <Box sx={{ color: 'text.disabled', fontSize: 18, lineHeight: 1 }}>↓</Box>
           </Stack>
@@ -151,8 +140,8 @@ const EncryptionLayerVisual: React.FC<EncryptionLayerVisualProps> = ({ dark }) =
           <Box>
             <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled', mb: 0.75 }}>OUTPUTS</Typography>
             <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-              {OUTPUTS.map((n, i) => (
-                <Pill key={n.label} node={n} dark={isDark} accent={tokens.colors.crypto.low} delay={i * 0.04} fullWidth={false} />
+              {OUTPUTS.map((n) => (
+                <Pill key={n.label} node={n} dark={isDark} accent={tokens.colors.crypto.low} fullWidth={false} />
               ))}
             </Stack>
           </Box>
@@ -172,16 +161,6 @@ const EncryptionLayerVisual: React.FC<EncryptionLayerVisualProps> = ({ dark }) =
             {[110, 180, 250].map((y, i) => (
               <path key={`r-${i}`} d={`M 500 180 C 620 180, 640 ${y}, 790 ${y}`} fill="none" stroke={mesh} strokeWidth={1} />
             ))}
-            {!reduceMotion && [0, 1, 2].map((i) => (
-              <motion.circle
-                key={`f-${i}`}
-                r={3}
-                fill={flow}
-                initial={{ opacity: 0 }}
-                animate={{ cx: [210, 500, 790], cy: [130 + i * 60, 180, 110 + i * 70], opacity: [0, 1, 0] }}
-                transition={{ duration: 3.4, repeat: Infinity, delay: i * 0.9, ease: 'easeInOut' }}
-              />
-            ))}
           </Box>
 
           <Box
@@ -195,20 +174,20 @@ const EncryptionLayerVisual: React.FC<EncryptionLayerVisualProps> = ({ dark }) =
           >
             <Stack spacing={1} alignItems="stretch" sx={{ minWidth: 0 }}>
               <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled' }}>SIGNALS</Typography>
-              {SIGNALS.map((n, i) => (
-                <Pill key={n.label} node={n} dark={isDark} delay={i * 0.05} />
+              {SIGNALS.map((n) => (
+                <Pill key={n.label} node={n} dark={isDark} />
               ))}
             </Stack>
 
             <Stack spacing={1.5} alignItems="center">
-              <EngineNodes dark={isDark} reduceMotion={reduceMotion} flow={flow} />
+              <EngineNodes flow={flow} />
               <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: tokens.colors.rivicq[500], mt: 0.5 }}>RivicQ EaaS</Typography>
             </Stack>
 
             <Stack spacing={1} alignItems="stretch" sx={{ minWidth: 0 }}>
               <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', color: 'text.disabled', textAlign: 'right' }}>OUTPUTS</Typography>
-              {OUTPUTS.map((n, i) => (
-                <Pill key={n.label} node={n} align="right" dark={isDark} accent={tokens.colors.crypto.low} delay={i * 0.05} />
+              {OUTPUTS.map((n) => (
+                <Pill key={n.label} node={n} align="right" dark={isDark} accent={tokens.colors.crypto.low} />
               ))}
             </Stack>
           </Box>

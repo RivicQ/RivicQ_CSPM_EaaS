@@ -58,7 +58,7 @@ const PlatformModules: React.FC = () => {
                       height: '100%',
                       cursor: locked ? 'not-allowed' : 'pointer',
                       transition: 'transform 0.2s, box-shadow 0.2s',
-                      '&:hover': locked ? {} : { transform: 'translateY(-4px)', boxShadow: '0 12px 32px rgba(79,70,229,0.14)' },
+                      '&:hover': locked ? {} : { transform: 'none', boxShadow: 'none', borderColor: 'divider' },
                     }}
                     onClick={() => !locked && navigate(`/modules/${m.id}`)}
                   >

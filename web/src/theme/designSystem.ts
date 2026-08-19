@@ -4,7 +4,7 @@ import appTypography from './typography';
 
 /** Creative professional design system — shared across the entire product */
 export const designSystem = {
-  radius: { sm: 8, md: 12, lg: 16, xl: 20, pill: 9999 },
+  radius: { sm: 4, md: 6, lg: 8, xl: 10, pill: 9999 },
   font: {
     display: appTypography.fontFamily,
     mono: appTypography.fontFamilyMono,
@@ -12,51 +12,43 @@ export const designSystem = {
   },
   gradient: {
     brand: tokens.colors.brandGradient,
-    brandSoft: 'linear-gradient(135deg, rgba(48,18,51,0.08) 0%, rgba(130,81,243,0.10) 50%, rgba(0,153,255,0.04) 100%)',
-    heroLight: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(130,81,243,0.14), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(107,61,224,0.08), transparent)',
-    heroDark: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(130,81,243,0.28), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(48,18,51,0.4), transparent)',
-    sidebar: 'linear-gradient(180deg, rgba(130,81,243,0.08) 0%, transparent 40%)',
-    sidebarDark: 'linear-gradient(180deg, rgba(130,81,243,0.16) 0%, transparent 40%)',
-    meshLight: `
-      radial-gradient(at 20% 0%, rgba(130,81,243,0.09) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, rgba(0,153,255,0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgba(48,18,51,0.04) 0px, transparent 50%)
-    `,
-    meshDark: `
-      radial-gradient(at 20% 0%, rgba(130,81,243,0.18) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, rgba(48,18,51,0.22) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgba(0,153,255,0.06) 0px, transparent 50%)
-    `,
+    brandSoft: 'linear-gradient(180deg, rgba(90,82,104,0.04) 0%, transparent 100%)',
+    heroLight: 'none',
+    heroDark: 'none',
+    sidebar: 'none',
+    sidebarDark: 'none',
+    meshLight: 'none',
+    meshDark: 'none',
   },
   shadow: {
-    sm: '0 1px 2px rgba(15,23,42,0.04), 0 2px 8px rgba(15,23,42,0.04)',
-    md: '0 4px 16px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04)',
-    lg: '0 12px 40px rgba(12,35,64,0.1), 0 4px 12px rgba(15,23,42,0.06)',
-    glow: (color: string) => `0 0 0 1px ${color}22, 0 8px 32px ${color}18`,
+    sm: '0 1px 2px rgba(28,27,31,0.04)',
+    md: '0 1px 3px rgba(28,27,31,0.06)',
+    lg: '0 4px 12px rgba(28,27,31,0.08)',
+    glow: (_color: string) => 'none',
   },
   motion: {
-    spring: '0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
-    smooth: '0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+    spring: '0.2s ease',
+    smooth: '0.2s ease',
   },
-  /** RivicQ command surface — plum #301233 + violet #8251f3 (rivicq.com) */
+  /** Quiet command surface — charcoal with a hint of dusty violet */
   proBlue: {
-    navy: '#0d0d0d',
-    navyMid: '#1a1220',
-    navyLight: '#301233',
-    royal: '#5529c4',
-    accent: '#8251f3',
-    accentLight: '#9c72f6',
-    accentMuted: '#b89af9',
-    sidebar: 'linear-gradient(180deg, #0d0d0d 0%, #1a1220 40%, #301233 100%)',
-    commandCenter: 'linear-gradient(135deg, #0d0d0d 0%, #301233 48%, #8251f3 140%)',
-    commandGlow: 'radial-gradient(ellipse 70% 60% at 95% 5%, rgba(130,81,243,0.42), transparent 68%)',
-    border: 'rgba(156,114,246,0.32)',
-    textPrimary: '#f7f5fb',
-    textSecondary: 'rgba(247,245,251,0.82)',
-    textMuted: 'rgba(184,154,249,0.72)',
-    navActive: 'rgba(130,81,243,0.32)',
-    navHover: 'rgba(255,255,255,0.06)',
-    shadow: '0 16px 48px rgba(0,0,0,0.4), 0 4px 16px rgba(130,81,243,0.18)',
+    navy: '#1c1b1f',
+    navyMid: '#252429',
+    navyLight: '#2a2630',
+    royal: '#4a4456',
+    accent: '#5a5268',
+    accentLight: '#8d859a',
+    accentMuted: '#b9b3c4',
+    sidebar: '#1c1b1f',
+    commandCenter: '#1c1b1f',
+    commandGlow: 'none',
+    border: 'rgba(200,197,206,0.12)',
+    textPrimary: '#f4f3f5',
+    textSecondary: 'rgba(244,243,245,0.78)',
+    textMuted: 'rgba(154,150,163,0.9)',
+    navActive: 'rgba(107,98,120,0.28)',
+    navHover: 'rgba(255,255,255,0.04)',
+    shadow: 'none',
   },
 } as const;
 
@@ -67,18 +59,15 @@ export const meshBackground = (theme: Theme) => ({
 
 export const glassSurface = (theme: Theme, elevated = false) => ({
   background: theme.palette.mode === 'dark'
-    ? elevated ? 'rgba(30,41,59,0.85)' : 'rgba(15,23,42,0.72)'
-    : elevated ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.78)',
-  backdropFilter: 'blur(16px) saturate(1.4)',
-  WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
-  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.12)'}`,
+    ? elevated ? theme.palette.background.paper : 'rgba(37,36,41,0.92)'
+    : elevated ? '#ffffff' : 'rgba(255,255,255,0.96)',
+  backdropFilter: 'none',
+  WebkitBackdropFilter: 'none',
+  border: `1px solid ${theme.palette.divider}`,
 });
 
 export const gradientTextSx = {
-  background: designSystem.gradient.brand,
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  backgroundClip: 'text',
+  color: tokens.colors.rivicq[700],
 };
 
 export const displayTitleSx = {
@@ -112,15 +101,15 @@ export const sidebarScrollSx = {
   overflowY: 'auto',
   overflowX: 'hidden',
   scrollbarWidth: 'thin',
-  scrollbarColor: 'rgba(96,165,250,0.35) transparent',
+  scrollbarColor: 'rgba(90,82,104,0.35) transparent',
   '&::-webkit-scrollbar': { width: 4 },
   '&::-webkit-scrollbar-track': { background: 'transparent' },
   '&::-webkit-scrollbar-thumb': {
-    background: 'rgba(96,165,250,0.22)',
+    background: 'rgba(90,82,104,0.28)',
     borderRadius: 99,
   },
   '&::-webkit-scrollbar-thumb:hover': {
-    background: 'rgba(96,165,250,0.42)',
+    background: 'rgba(90,82,104,0.42)',
   },
 };
 
@@ -182,22 +171,22 @@ export const heroPrimaryCtaSx = {
   px: 3,
   py: 1.15,
   minHeight: 42,
-  borderRadius: `${designSystem.radius.pill}px`,
+  borderRadius: `${designSystem.radius.md}px`,
   fontWeight: 600,
   fontSize: '0.875rem',
   letterSpacing: '-0.01em',
   textTransform: 'none',
   color: `${designSystem.proBlue.navyMid} !important`,
   border: 'none',
-  boxShadow: '0 2px 10px rgba(0,0,0,0.16)',
+  boxShadow: 'none',
   backgroundImage: 'none !important',
   backgroundColor: '#ffffff !important',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': { color: 'inherit' },
   '&:hover': {
-    backgroundColor: '#f8fafc !important',
+    backgroundColor: '#f4f3f5 !important',
     backgroundImage: 'none !important',
-    boxShadow: '0 4px 18px rgba(0,0,0,0.2)',
-    transform: 'translateY(-1px)',
+    boxShadow: 'none',
+    transform: 'none',
   },
 };
 
@@ -206,7 +195,7 @@ export const heroSecondaryCtaSx = {
   px: 3,
   py: 1.15,
   minHeight: 42,
-  borderRadius: `${designSystem.radius.pill}px`,
+  borderRadius: `${designSystem.radius.md}px`,
   fontWeight: 600,
   fontSize: '0.875rem',
   letterSpacing: '-0.01em',
@@ -214,10 +203,10 @@ export const heroSecondaryCtaSx = {
   color: `${designSystem.proBlue.textPrimary} !important`,
   backgroundImage: 'none !important',
   backgroundColor: 'rgba(255,255,255,0.08) !important',
-  border: '1px solid rgba(255,255,255,0.32)',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255,255,255,0.22)',
+  boxShadow: 'none',
+  backdropFilter: 'none',
+  WebkitBackdropFilter: 'none',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': { color: 'inherit' },
   '&:hover': {
     backgroundColor: 'rgba(255,255,255,0.14) !important',
@@ -229,25 +218,23 @@ export const heroSecondaryCtaSx = {
 /** Primary CTA — matches command-center / auth hero navy gradient */
 export const proBlueContainedButtonSx = {
   backgroundColor: designSystem.proBlue.navyMid,
-  backgroundImage: designSystem.proBlue.commandCenter,
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: '100% 100%',
+  backgroundImage: 'none',
   color: `${designSystem.proBlue.textPrimary} !important`,
   border: `1px solid ${designSystem.proBlue.border}`,
-  boxShadow: '0 4px 16px rgba(12,35,64,0.22)',
+  boxShadow: 'none',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': {
     color: 'inherit',
   },
   '&:hover': {
     backgroundColor: designSystem.proBlue.navyLight,
-    backgroundImage: `linear-gradient(135deg, ${designSystem.proBlue.navyMid} 0%, ${designSystem.proBlue.navyLight} 48%, ${designSystem.proBlue.royal} 100%)`,
+    backgroundImage: 'none',
     color: `${designSystem.proBlue.textPrimary} !important`,
-    boxShadow: designSystem.proBlue.shadow,
-    transform: 'translateY(-1px)',
+    boxShadow: 'none',
+    transform: 'none',
   },
   '&.Mui-disabled': {
     backgroundColor: `${designSystem.proBlue.navyMid} !important`,
-    backgroundImage: `linear-gradient(135deg, rgba(10,31,56,0.72) 0%, rgba(15,39,68,0.72) 45%, rgba(26,68,128,0.72) 100%) !important`,
+    backgroundImage: 'none !important',
     color: 'rgba(248,250,252,0.72) !important',
     borderColor: designSystem.proBlue.border,
     boxShadow: 'none',
@@ -260,8 +247,8 @@ export const proBlueActionStackSx = {
     bgcolor: '#fff',
     color: designSystem.proBlue.navyMid,
     fontWeight: 600,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-    '&:hover': { bgcolor: 'rgba(255,255,255,0.92)', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' },
+    boxShadow: 'none',
+    '&:hover': { bgcolor: 'rgba(255,255,255,0.92)', boxShadow: 'none' },
   },
   '& .MuiButton-outlined': {
     color: designSystem.proBlue.textPrimary,
@@ -279,7 +266,7 @@ export const proBlueActionStackSx = {
 export const proBlueBadgeSx = {
   px: 1.25,
   py: 0.35,
-  borderRadius: `${designSystem.radius.pill}px`,
+  borderRadius: `${designSystem.radius.md}px`,
   bgcolor: 'rgba(255,255,255,0.1)',
   color: designSystem.proBlue.textPrimary,
   fontSize: '0.6875rem',
@@ -290,19 +277,13 @@ export const proBlueBadgeSx = {
 
 /** Top app bar — aligns with pro-blue sidebar & command center */
 export const appBarPaperSx = (mode: 'light' | 'dark') => ({
-  bgcolor: mode === 'dark' ? 'rgba(10,31,56,0.97)' : 'rgba(255,255,255,0.96)',
-  backdropFilter: 'blur(16px) saturate(1.2)',
-  WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
+  bgcolor: mode === 'dark' ? '#1c1b1f' : '#ffffff',
+  backdropFilter: 'none',
+  WebkitBackdropFilter: 'none',
   color: mode === 'dark' ? designSystem.proBlue.textPrimary : designSystem.proBlue.navyMid,
-  borderBottom: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(59,130,246,0.14)'}`,
-  boxShadow:
-    mode === 'dark'
-      ? '0 1px 0 rgba(96,165,250,0.08)'
-      : '0 1px 0 rgba(59,130,246,0.06), 0 8px 32px rgba(12,35,64,0.04)',
-  backgroundImage:
-    mode === 'dark'
-      ? 'linear-gradient(180deg, rgba(15,39,68,0.98) 0%, rgba(10,31,56,0.95) 100%)'
-      : 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.94) 100%)',
+  borderBottom: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(90,82,104,0.16)'}`,
+  boxShadow: 'none',
+  backgroundImage: 'none',
 });
 
 export const appBarSearchSx = (mode: 'light' | 'dark') => ({
@@ -312,25 +293,25 @@ export const appBarSearchSx = (mode: 'light' | 'dark') => ({
   px: 1.5,
   py: 0.625,
   width: { md: 240, lg: 320 },
-  bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(12,35,64,0.04)',
-  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(59,130,246,0.12)'}`,
+  bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(28,27,31,0.04)',
+  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(90,82,104,0.16)'}`,
   transition: designSystem.motion.smooth,
   '&:focus-within': {
-    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.95)',
+    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.06)' : '#ffffff',
     borderColor: designSystem.proBlue.accent,
-    boxShadow: `0 0 0 3px ${designSystem.proBlue.accent}22`,
+    boxShadow: 'none',
   },
 });
 
 export const appBarIconButtonSx = (mode: 'light' | 'dark') => ({
   borderRadius: `${designSystem.radius.sm}px`,
-  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(59,130,246,0.14)'}`,
-  bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.85)',
+  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(90,82,104,0.16)'}`,
+  bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : '#ffffff',
   color: mode === 'dark' ? designSystem.proBlue.textSecondary : designSystem.proBlue.navyMid,
   width: 36,
   height: 36,
   '&:hover': {
-    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(59,130,246,0.08)',
+    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(90,82,104,0.08)',
     borderColor: mode === 'dark' ? designSystem.proBlue.accentMuted : designSystem.proBlue.accent,
   },
 });
@@ -343,26 +324,26 @@ export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolea
   display: { xs: 'none', sm: 'inline-flex' },
   bgcolor: isEnterprise
     ? mode === 'dark'
-      ? 'rgba(124,58,237,0.22)'
-      : 'rgba(124,58,237,0.08)'
+      ? 'rgba(90,82,104,0.28)'
+      : 'rgba(90,82,104,0.08)'
     : mode === 'dark'
-      ? 'rgba(59,130,246,0.18)'
-      : 'rgba(59,130,246,0.08)',
+      ? 'rgba(90,82,104,0.18)'
+      : 'rgba(90,82,104,0.06)',
   color: isEnterprise
     ? mode === 'dark'
-      ? '#ddd6fe'
-      : '#8251f3'
+      ? '#d8d4de'
+      : '#5a5268'
     : mode === 'dark'
       ? designSystem.proBlue.accentMuted
       : designSystem.proBlue.royal,
   border: `1px solid ${
     isEnterprise
       ? mode === 'dark'
-        ? 'rgba(196,181,253,0.3)'
-        : 'rgba(124,58,237,0.25)'
+        ? 'rgba(185,179,196,0.28)'
+        : 'rgba(90,82,104,0.22)'
       : mode === 'dark'
         ? designSystem.proBlue.border
-        : 'rgba(59,130,246,0.22)'
+        : 'rgba(90,82,104,0.16)'
   }`,
 });
 

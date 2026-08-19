@@ -51,8 +51,8 @@ import designSystem, { commandCenterCardSx, proBlueContainedButtonSx } from '../
 
 const authHeroPanelSx = {
   ...commandCenterCardSx,
-  backdropFilter: 'blur(16px)',
-  borderRadius: 4,
+  backdropFilter: 'none',
+  borderRadius: 1,
   '& .MuiTypography-overline': {
     color: designSystem.proBlue.accentMuted,
   },
@@ -281,16 +281,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         position: 'relative',
         overflow: 'hidden',
         py: 5,
-        background: isDark
-          ? `${designSystem.proBlue.commandCenter}`
-          : 'linear-gradient(180deg, #f8fafc 0%, #eff6ff 50%, #f8fafc 100%)',
+        background: isDark ? designSystem.proBlue.commandCenter : '#f6f6f7',
       }}
     >
       <Box
         sx={{
           position: 'absolute',
           inset: 0,
-          background: isDark ? designSystem.proBlue.commandGlow : designSystem.gradient.meshLight,
+          background: isDark ? 'transparent' : 'transparent',
           pointerEvents: 'none',
         }}
       />
@@ -298,7 +296,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         sx={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: 'linear-gradient(rgba(59,130,246,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(90,82,104,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(90,82,104,0.05) 1px, transparent 1px)',
           backgroundSize: '72px 72px',
           opacity: isDark ? 0.35 : 0.25,
           pointerEvents: 'none',
@@ -322,10 +320,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
               <CardContent sx={{ p: 4.5, height: '100%' }}>
                 <Stack spacing={3} sx={{ height: '100%' }}>
                   <Box>
-                    <Typography variant="overline" sx={{ display: 'block', letterSpacing: 1.6, fontWeight: 800, fontSize: '0.7rem' }}>
+                    <Typography variant="overline" sx={{ display: 'block', letterSpacing: 1.2, fontWeight: 600, fontSize: '0.7rem' }}>
                       Cryptographic Security Posture Management
                     </Typography>
-                    <Typography variant="h3" fontWeight={900} sx={{ mt: 1, lineHeight: 1.02, letterSpacing: '-0.02em' }}>
+                    <Typography variant="h3" fontWeight={600} sx={{ mt: 1, lineHeight: 1.12, letterSpacing: '-0.02em' }}>
                       {mode === 'register' ? 'Start building your crypto inventory.' : 'Secure access to your workspace.'}
                     </Typography>
                     <Typography sx={{ mt: 2, maxWidth: 540 }}>
@@ -335,7 +333,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   </Box>
 
                   <Stack spacing={2}>
-                    <Card sx={{ borderRadius: 3 }}>
+                    <Card sx={{ borderRadius: 1 }}>
                       <CardContent sx={{ p: 2.2 }}>
                         <Stack direction="row" spacing={1.5} alignItems="flex-start">
                           <Security sx={{ color: designSystem.proBlue.accentLight }} />
@@ -350,7 +348,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                         </Stack>
                       </CardContent>
                     </Card>
-                    <Card sx={{ bgcolor: 'rgba(16,185,129,0.12) !important', border: 1, borderColor: 'success.main', borderRadius: 3 }}>
+                    <Card sx={{ bgcolor: 'rgba(59,125,74,0.12) !important', border: 1, borderColor: 'success.main', borderRadius: 1 }}>
                       <CardContent sx={{ p: 2.2 }}>
                         <Stack direction="row" spacing={1.5} alignItems="flex-start">
                           <BadgeIcon sx={{ color: 'success.light' }} />
@@ -418,7 +416,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           </Grid>
 
           <Grid item xs={12} md={7}>
-            <Card sx={{ height: '100%', borderRadius: 3 }}>
+            <Card sx={{ height: '100%', borderRadius: 1 }}>
               <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                 <Stack spacing={2} sx={{ mb: 3 }}>
                   <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>
@@ -427,14 +425,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                   <Box
                     sx={{
                       p: 2,
-                      borderRadius: 3,
+                      borderRadius: 1,
                       border: 1,
-                      borderColor: 'primary.light',
-                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(59,130,246,0.12)' : 'rgba(239,246,255,0.9)'),
-                      backdropFilter: 'blur(12px)',
+                      borderColor: 'divider',
+                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(90,82,104,0.16)' : 'rgba(245,244,247,0.95)'),
+                      backdropFilter: 'none',
                     }}
                   >
-                    <Typography variant="subtitle1" fontWeight={800}>Want to explore first?</Typography>
+                    <Typography variant="subtitle1" fontWeight={600}>Want to explore first?</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                       Try the RivicQ Demo — no setup required. Sample data only; production authentication is unchanged.
                     </Typography>

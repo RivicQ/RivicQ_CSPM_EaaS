@@ -109,7 +109,7 @@ const Analytics: React.FC = () => {
                     <XAxis dataKey="name" tick={{ fontSize: 10, fill: tickFill }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 10, fill: tickFill }} axisLine={false} tickLine={false} />
                     <Tooltip
-                      cursor={{ fill: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(37,99,235,0.05)' }}
+                      cursor={{ fill: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(90,82,104,0.05)' }}
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null;
                         const item = payload[0].payload as { name: string; assets: number };

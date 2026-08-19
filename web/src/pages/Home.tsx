@@ -194,12 +194,9 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const heroBg = isDark
-    ? designSystem.proBlue.commandCenter
-    : 'linear-gradient(180deg, #ffffff 0%, #eff6ff 55%, #f8fafc 100%)';
-
-  const cardBg = isDark ? 'rgba(30,41,59,0.55)' : 'rgba(255,255,255,0.85)';
-  const cardBorder = isDark ? 'rgba(148,163,184,0.14)' : 'rgba(100,116,139,0.14)';
+  const heroBg = isDark ? designSystem.proBlue.commandCenter : '#f6f6f7';
+  const cardBg = isDark ? '#252429' : '#ffffff';
+  const cardBorder = isDark ? 'rgba(200,197,206,0.12)' : 'rgba(90,82,104,0.16)';
 
   return (
     <Box
@@ -215,7 +212,7 @@ const Home: React.FC = () => {
         sx={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: 'linear-gradient(rgba(59,130,246,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.05) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(90,82,104,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(90,82,104,0.06) 1px, transparent 1px)',
           backgroundSize: '72px 72px',
           pointerEvents: 'none',
           maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.5), transparent 70%)',
@@ -232,7 +229,7 @@ const Home: React.FC = () => {
             flexWrap: 'wrap',
             mb: 10,
             p: 1.5,
-            borderRadius: `${designSystem.radius.xl}px`,
+            borderRadius: `${designSystem.radius.md}px`,
             ...(isDark
               ? {
                 background: designSystem.proBlue.commandCenter,
@@ -259,13 +256,13 @@ const Home: React.FC = () => {
           <QubitField dark={isDark} />
           <Grid container spacing={{ xs: 4, md: 5 }} alignItems="center" sx={{ position: 'relative' }}>
             <Grid item xs={12} md={6}>
-              <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
                 <Chip
                   icon={<EnhancedEncryption />}
                   label="Encryption as a Service · Quantum-safe CSPM"
                   sx={{
                     mb: 3,
-                    bgcolor: isDark ? 'rgba(99,102,241,0.14)' : 'rgba(99,102,241,0.08)',
+                    bgcolor: isDark ? 'rgba(90,82,104,0.18)' : 'rgba(90,82,104,0.08)',
                     color: 'primary.main',
                     border: 1,
                     borderColor: 'primary.main',
@@ -274,12 +271,12 @@ const Home: React.FC = () => {
                 />
                 <Typography
                   variant="h2"
-                  fontWeight={900}
-                  sx={{ mb: 2, lineHeight: 1.06, fontSize: { xs: '2rem', md: '3.4rem' }, letterSpacing: '-0.03em' }}
+                  fontWeight={600}
+                  sx={{ mb: 2, lineHeight: 1.12, fontSize: { xs: '1.85rem', md: '2.6rem' }, letterSpacing: '-0.02em' }}
                 >
                   Your business already runs on encryption.
                   <br />
-                  <Box component="span" sx={{ background: tokens.colors.brandGradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  <Box component="span" sx={{ color: 'text.primary' }}>
                     Now it needs intelligence.
                   </Box>
                 </Typography>
@@ -293,15 +290,15 @@ const Home: React.FC = () => {
                 </Typography>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25, delay: 0.05 }}>
                 <Card
                   sx={{
                     mb: 2,
                     p: 0.5,
                     bgcolor: cardBg,
                     border: 1,
-                    borderColor: isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.2)',
-                    backdropFilter: 'blur(10px)',
+                    borderColor: isDark ? 'rgba(90,82,104,0.35)' : 'rgba(90,82,104,0.22)',
+                    backdropFilter: 'none',
                   }}
                 >
                   <CardContent sx={{ p: { xs: 2, md: 3 } }}>
@@ -354,7 +351,7 @@ const Home: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.15 }}>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
                 <EncryptionLayerVisual dark={isDark} />
               </motion.div>
             </Grid>
@@ -380,7 +377,7 @@ const Home: React.FC = () => {
               { value: 'Mappings', label: 'Not certifications' },
             ].map((s) => (
               <Grid item xs={6} md={3} key={s.label}>
-                <Typography variant="h3" fontWeight={900} sx={{ background: tokens.colors.brandGradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>
+                <Typography variant="h3" fontWeight={600} sx={{ color: 'text.primary', letterSpacing: '-0.02em' }}>
                   {s.value}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>{s.label}</Typography>
@@ -394,17 +391,17 @@ const Home: React.FC = () => {
             sx={{
               position: 'relative',
               overflow: 'hidden',
-              borderRadius: `${designSystem.radius.xl}px`,
+              borderRadius: `${designSystem.radius.md}px`,
               p: { xs: 3, md: 5 },
               border: 1,
-              borderColor: isDark ? 'rgba(96,165,250,0.2)' : 'rgba(37,99,235,0.14)',
-              background: isDark ? designSystem.proBlue.commandCenter : 'linear-gradient(135deg, #ffffff 0%, #eff6ff 100%)',
+              borderColor: isDark ? 'rgba(90,82,104,0.28)' : 'rgba(90,82,104,0.16)',
+              background: isDark ? designSystem.proBlue.commandCenter : '#ffffff',
             }}
           >
             <QubitField dark={isDark} density={0.6} />
             <Box sx={{ position: 'relative' }}>
               <Chip icon={<EnhancedEncryption />} label="Encryption as a Service" color="primary" variant="outlined" sx={{ fontWeight: 700, mb: 2 }} />
-              <Typography variant="h4" fontWeight={800} sx={{ mb: 1.5, letterSpacing: '-0.02em', maxWidth: 720 }}>
+              <Typography variant="h4" fontWeight={600} sx={{ mb: 1.5, letterSpacing: '-0.02em', maxWidth: 720 }}>
                 One API for encryption, keys, and post-quantum readiness
               </Typography>
               <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, maxWidth: 720 }}>
@@ -412,9 +409,9 @@ const Home: React.FC = () => {
                 manage the full key lifecycle, and roll out PQC-hybrid cryptography without rewriting applications.
               </Typography>
               <Grid container spacing={2.5}>
-                {EAAS_CAPABILITIES.map((c, i) => (
+                {EAAS_CAPABILITIES.map((c) => (
                   <Grid item xs={12} sm={6} md={3} key={c.title}>
-                    <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.06 }}>
+                    <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.25 }}>
                       <Card sx={{ height: '100%', bgcolor: cardBg, border: 1, borderColor: cardBorder }}>
                         <CardContent sx={{ p: 2.5 }}>
                           <Avatar sx={{ bgcolor: `${tokens.colors.rivicq[500]}1a`, color: tokens.colors.rivicq[500], mb: 1.5, width: 42, height: 42 }}>{c.icon}</Avatar>
@@ -438,12 +435,12 @@ const Home: React.FC = () => {
         <ClientWorkflow />
 
         <Box id="features" sx={{ mb: 10, scrollMarginTop: 80 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>One platform for complete cryptographic security</Typography>
+          <Typography variant="h4" fontWeight={600} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>One platform for complete cryptographic security</Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, textAlign: 'center' }}>From Encryption-as-a-Service and HSM key hygiene to post-quantum cryptography — everything your security team needs.</Typography>
           <Grid container spacing={3}>
             {FEATURES.map((f) => (
               <Grid item xs={12} sm={6} md={4} key={f.title}>
-                <motion.div whileHover={{ y: -6 }}>
+                <motion.div>
                   <Card sx={{ height: '100%', bgcolor: cardBg, border: 1, borderColor: cardBorder }}>
                     <CardContent sx={{ p: 3 }}>
                       <Avatar sx={{ bgcolor: `${f.color}1a`, color: f.color, mb: 2, width: 48, height: 48 }}>{f.icon}</Avatar>
@@ -458,13 +455,13 @@ const Home: React.FC = () => {
         </Box>
 
         <Box sx={{ mb: 10 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ mb: 4, textAlign: 'center', letterSpacing: '-0.02em' }}>How it works</Typography>
+          <Typography variant="h4" fontWeight={600} sx={{ mb: 4, textAlign: 'center', letterSpacing: '-0.02em' }}>How it works</Typography>
           <Grid container spacing={3}>
             {STEPS.map((s) => (
               <Grid item xs={12} md={4} key={s.step}>
                 <Card sx={{ height: '100%', bgcolor: cardBg, border: 1, borderColor: `${s.color}33` }}>
                   <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h2" fontWeight={900} sx={{ color: `${s.color}55`, mb: 1, letterSpacing: '-0.03em' }}>{s.step}</Typography>
+                    <Typography variant="h2" fontWeight={600} sx={{ color: 'text.disabled', mb: 1, letterSpacing: '-0.03em' }}>{s.step}</Typography>
                     <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>{s.title}</Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>{s.desc}</Typography>
                   </CardContent>
@@ -475,12 +472,12 @@ const Home: React.FC = () => {
         </Box>
 
         <Box id="docs" sx={{ mb: 10, scrollMarginTop: 80 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>Documentation &amp; developers</Typography>
+          <Typography variant="h4" fontWeight={600} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>Documentation &amp; developers</Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4, textAlign: 'center' }}>Everything you need to build on the RivicQ encryption intelligence layer.</Typography>
           <Grid container spacing={3}>
-            {DOCS.map((d, i) => (
+                {DOCS.map((d) => (
               <Grid item xs={12} sm={6} md={3} key={d.title}>
-                <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.06 }} whileHover={{ y: -6 }}>
+                <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.25 }}>
                   <Card
                     onClick={() => openExternal(d.href)}
                     sx={{ height: '100%', cursor: 'pointer', bgcolor: cardBg, border: 1, borderColor: cardBorder, transition: 'border-color .2s', '&:hover': { borderColor: 'primary.main' } }}
@@ -510,7 +507,7 @@ const Home: React.FC = () => {
         </Box>
 
         <Box id="pricing" sx={{ mb: 10, scrollMarginTop: 80 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ mb: 4, textAlign: 'center', letterSpacing: '-0.02em' }}>Pricing</Typography>
+          <Typography variant="h4" fontWeight={600} sx={{ mb: 4, textAlign: 'center', letterSpacing: '-0.02em' }}>Pricing</Typography>
           <Grid container spacing={3} maxWidth={900} sx={{ mx: 'auto' }}>
             {[
               {
@@ -528,19 +525,19 @@ const Home: React.FC = () => {
                 <Card
                   sx={{
                     height: '100%',
-                    bgcolor: tier.featured ? (isDark ? 'rgba(245,158,11,0.08)' : 'rgba(245,158,11,0.05)') : cardBg,
-                    border: tier.featured ? 1 : 1,
-                    borderColor: tier.featured ? 'rgba(245,158,11,0.4)' : cardBorder,
+                    bgcolor: tier.featured ? (isDark ? 'rgba(90,82,104,0.16)' : 'rgba(90,82,104,0.06)') : cardBg,
+                    border: 1,
+                    borderColor: tier.featured ? 'rgba(90,82,104,0.4)' : cardBorder,
                   }}
                 >
                   <CardContent sx={{ p: 4 }}>
                     <Stack spacing={2}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <CloudQueue sx={{ color: tier.color }} />
-                        <Typography variant="h6" fontWeight={800}>{tier.name}</Typography>
+                        <Typography variant="h6" fontWeight={600}>{tier.name}</Typography>
                       </Box>
                       <Box>
-                        <Typography variant="h3" fontWeight={900} sx={{ letterSpacing: '-0.02em' }}>{tier.price}</Typography>
+                        <Typography variant="h3" fontWeight={600} sx={{ letterSpacing: '-0.02em' }}>{tier.price}</Typography>
                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>{tier.tagline}</Typography>
                       </Box>
                       {tier.features.map((f) => (

@@ -41,7 +41,7 @@ const LiveScanMetrics: React.FC<LiveScanMetricsProps> = ({ metrics }) => {
             borderRadius: `${dashboardDesign.radius.md}px`,
             bgcolor: 'rgba(255,255,255,0.07)',
             border: `1px solid ${blue.border}`,
-            backdropFilter: 'blur(8px)',
+            backdropFilter: 'none',
             minHeight: 72,
             display: 'flex',
             flexDirection: 'column',
@@ -49,7 +49,7 @@ const LiveScanMetrics: React.FC<LiveScanMetricsProps> = ({ metrics }) => {
             transition: dashboardDesign.motion.transition,
             '&:hover': {
               bgcolor: 'rgba(255,255,255,0.11)',
-              borderColor: 'rgba(96,165,250,0.35)',
+              borderColor: 'rgba(90,82,104,0.35)',
             },
           }}
         >

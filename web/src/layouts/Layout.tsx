@@ -247,7 +247,7 @@ const Layout: React.FC = () => {
           top: 0,
           bottom: 0,
           width: 3,
-          background: `linear-gradient(180deg, ${designSystem.proBlue.accentLight}, ${designSystem.proBlue.accent})`,
+          background: designSystem.proBlue.accent,
           borderRadius: '0 4px 4px 0',
         }}
       />
@@ -440,7 +440,7 @@ const Layout: React.FC = () => {
               justifyContent: 'flex-start',
               fontWeight: 600,
               fontSize: '0.75rem',
-              bgcolor: 'rgba(130,81,243,0.2)',
+              bgcolor: 'rgba(90,82,104,0.2)',
               color: '#ddd6fe',
               border: 1,
               borderColor: 'rgba(196,181,253,0.25)',
@@ -492,7 +492,7 @@ const Layout: React.FC = () => {
                 width: 3,
                 height: 32,
                 borderRadius: 1,
-                background: `linear-gradient(180deg, ${blue.accentLight}, ${blue.accent})`,
+                background: blue.accent,
                 flexShrink: 0,
               }}
             />
@@ -526,7 +526,7 @@ const Layout: React.FC = () => {
                 color: isDarkMode ? blue.textPrimary : blue.navyMid,
                 '& input': { py: 0.25 },
                 '& input::placeholder': {
-                  color: isDarkMode ? blue.textMuted : 'rgba(26,68,128,0.55)',
+                  color: isDarkMode ? blue.textMuted : 'rgba(90,82,104,0.55)',
                   opacity: 1,
                 },
               }}
@@ -593,12 +593,12 @@ const Layout: React.FC = () => {
                 sx={{
                   width: 32,
                   height: 32,
-                  background: `linear-gradient(135deg, ${blue.accent} 0%, ${blue.royal} 100%)`,
+                  background: blue.accent,
                   color: '#fff',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: '0.8125rem',
-                  border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.9)'}`,
-                  boxShadow: '0 2px 8px rgba(37,99,235,0.35)',
+                  border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.9)'}`,
+                  boxShadow: 'none',
                 }}
               >
                 {user?.name?.charAt(0) || 'A'}
@@ -639,7 +639,7 @@ const Layout: React.FC = () => {
                   fontWeight: 500,
                   flexGrow: 1,
                   color: isDarkMode ? blue.textPrimary : blue.navyMid,
-                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : 'rgba(26,68,128,0.55)', opacity: 1 },
+                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : 'rgba(90,82,104,0.55)', opacity: 1 },
                 }}
               />
               <IconButton size="small" onClick={() => setMobileSearchOpen(false)} aria-label="Close search">

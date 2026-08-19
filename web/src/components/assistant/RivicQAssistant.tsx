@@ -178,12 +178,12 @@ const RivicQAssistant: React.FC = () => {
               sx={{
                 ...glassSurface(theme, true),
                 height: '100%',
-                borderRadius: `${designSystem.radius.xl}px`,
-                boxShadow: designSystem.shadow.lg,
+                borderRadius: `${designSystem.radius.md}px`,
+                boxShadow: 'none',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(96,165,250,0.2)' : 'rgba(59,130,246,0.15)'}`,
+                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200,197,206,0.16)' : 'rgba(90,82,104,0.16)'}`,
               }}
             >
               <Box
@@ -374,7 +374,7 @@ const RivicQAssistant: React.FC = () => {
             width: FAB_SIZE,
             height: FAB_SIZE,
             borderRadius: '50%',
-            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(148,163,184,0.25)' : 'rgba(59,130,246,0.2)'}`,
+            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(200,197,206,0.2)' : 'rgba(90,82,104,0.2)'}`,
             cursor: 'pointer',
             p: 0,
             display: 'grid',
@@ -383,7 +383,7 @@ const RivicQAssistant: React.FC = () => {
             boxShadow: designSystem.shadow.lg,
             transition: designSystem.motion.smooth,
             '&:hover': {
-              boxShadow: `${designSystem.shadow.lg}, 0 0 0 4px rgba(59,130,246,0.12)`,
+              boxShadow: designSystem.shadow.md,
             },
           }}
         >
@@ -397,7 +397,7 @@ const RivicQAssistant: React.FC = () => {
                   size={FAB_SIZE + 8}
                   sx={{
                     position: 'absolute',
-                    color: 'rgba(26,68,128,0.25)',
+                    color: 'rgba(90,82,104,0.28)',
                   }}
                 />
               )}

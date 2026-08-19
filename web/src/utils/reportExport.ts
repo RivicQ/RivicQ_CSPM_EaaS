@@ -24,9 +24,9 @@ export function printBrandedReport(opts: {
 <title>${escapeHtml(opts.title)}</title>
 <style>
   body { font-family: "Outfit", Helvetica, Arial, sans-serif; color: #161616; margin: 32px; }
-  h1 { color: #8251f3; font-size: 22px; margin: 0 0 8px; }
+  h1 { color: #5a5268; font-size: 22px; margin: 0 0 8px; }
   .sub { color: #525252; margin-bottom: 16px; }
-  .disclaimer { background: #f5f0ff; border-left: 4px solid #8251f3; padding: 12px 16px; margin: 16px 0; font-size: 13px; }
+  .disclaimer { background: #f5f0ff; border-left: 4px solid #5a5268; padding: 12px 16px; margin: 16px 0; font-size: 13px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e0e0e0; }
   th { background: #f4f4f4; }

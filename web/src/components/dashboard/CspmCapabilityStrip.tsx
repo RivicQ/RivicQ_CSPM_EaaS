@@ -73,7 +73,7 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
               px: 1.5,
               py: 1.25,
               border: 1,
-              borderColor: isDark ? 'rgba(148,163,184,0.14)' : 'rgba(26,68,128,0.12)',
+              borderColor: isDark ? 'rgba(200,197,206,0.14)' : 'rgba(90,82,104,0.14)',
               borderRadius: `${designSystem.radius.md}px`,
               bgcolor: isDark ? 'rgba(15,39,68,0.55)' : 'rgba(255,255,255,0.92)',
               cursor: 'pointer',
@@ -83,8 +83,8 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
               transition: designSystem.motion.smooth,
               '&:hover': {
                 borderColor: `${item.accent}66`,
-                transform: 'translateY(-2px)',
-                boxShadow: designSystem.shadow.glow(item.accent),
+                transform: 'none',
+                boxShadow: 'none',
               },
             }}
           >

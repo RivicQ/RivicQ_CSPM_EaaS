@@ -21,8 +21,8 @@ const ThemeToggle: React.FC<Props> = ({ mode, onToggle, compact = false }) => {
                 border: (theme) =>
                   `1px solid ${
                     theme.palette.mode === 'dark'
-                      ? 'rgba(96,165,250,0.2)'
-                      : 'rgba(59,130,246,0.14)'
+                      ? 'rgba(90,82,104,0.28)'
+                      : 'rgba(90,82,104,0.16)'
                   }`,
                 bgcolor: (theme) =>
                   theme.palette.mode === 'dark'
@@ -36,7 +36,7 @@ const ThemeToggle: React.FC<Props> = ({ mode, onToggle, compact = false }) => {
                   bgcolor: (theme) =>
                     theme.palette.mode === 'dark'
                       ? 'rgba(255,255,255,0.12)'
-                      : 'rgba(59,130,246,0.08)',
+                      : 'rgba(90,82,104,0.08)',
                 },
               }
             : {

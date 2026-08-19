@@ -26,7 +26,7 @@ const BenchmarkPanel: React.FC<BenchmarkPanelProps> = ({ data }) => {
   };
 
   return (
-    <Card sx={{ border: '1px solid rgba(130,81,243,0.22)' }}>
+    <Card sx={{ border: '1px solid rgba(90,82,104,0.22)' }}>
       <CardContent>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
           <Speed color="secondary" />
@@ -49,7 +49,7 @@ const BenchmarkPanel: React.FC<BenchmarkPanelProps> = ({ data }) => {
             </Box>
           </Grid>
           <Grid item xs={12} sm={4}>
-            <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'rgba(130,81,243,0.10)' }}>
+            <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'rgba(90,82,104,0.10)' }}>
               <Typography variant="overline" color="text.secondary">p95 Latency</Typography>
               <Typography variant="h4" fontWeight={800}>{benchmark.p95_latency_ms} ms</Typography>
               <Typography variant="body2" color="text.secondary">API responsiveness</Typography>

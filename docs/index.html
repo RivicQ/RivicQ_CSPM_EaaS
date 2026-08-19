@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RivicQ — Community (Open Source) &amp; Enterprise docs</title>
-  <meta name="description" content="RivicQ documentation hub: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, legal notices, and RivicQ violet theme. Not an IBM product." />
+  <meta name="description" content="RivicQ documentation hub: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, legal notices, and a quiet dusty-violet theme. Not an IBM product." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
@@ -12,9 +12,9 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --blue-60:   #8251f3;
-      --blue-70:   #6b3de0;
-      --blue-80:   #5529c4;
+      --blue-60:   #5a5268;
+      --blue-70:   #4a4456;
+      --blue-80:   #4a4456;
       --gray-100:  #0d0d0d;
       --gray-90:   #262626;
       --gray-10:   #f4f4f4;
@@ -22,20 +22,19 @@
       --red-60:    #da1e28;
       --yellow-30: #f1c21b;
       --card-bg:   rgba(255,255,255,0.06);
-      --card-border: rgba(156,114,246,0.32);
+      --card-border: rgba(90,82,104,0.32);
     }
 
     body {
       font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #0d0d0d 0%, #301233 52%, #8251f3 100%);
+      background: #1c1b1f;
       color: #f4f4f4;
       min-height: 100vh;
     }
 
     header {
-      background: rgba(22,22,22,0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(156,114,246,0.22);
+      background: #161616;
+      border-bottom: 1px solid rgba(90,82,104,0.22);
       position: sticky; top: 0; z-index: 100;
       padding: 0.9rem 2rem;
       display: flex; justify-content: space-between; align-items: center;
@@ -55,9 +54,9 @@
     .hero { text-align: center; padding: 5rem 2rem 4rem; }
     .hero-eyebrow {
       display: inline-block;
-      background: rgba(130,81,243,0.2);
-      border: 1px solid rgba(130,81,243,0.45);
-      color: #b89af9;
+      background: rgba(90,82,104,0.2);
+      border: 1px solid rgba(90,82,104,0.45);
+      color: #b9b3c4;
       font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
       text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 2px;
       margin-bottom: 1.5rem;
@@ -96,7 +95,7 @@
       gap: 2.5rem; padding: 0 2rem 4rem;
     }
     .stat { text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 700; color: #b89af9; font-family: 'JetBrains Mono', monospace; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #b9b3c4; font-family: 'JetBrains Mono', monospace; }
     .stat-label { font-size: 0.8rem; color: #8d8d8d; margin-top: 0.2rem; letter-spacing: 0.04em; text-transform: uppercase; }
 
     section { max-width: 1200px; margin: 0 auto; padding: 0 2rem 5rem; }
@@ -115,15 +114,15 @@
       font-size: 2.4rem; font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
     }
-    .thumb-enterprise { background: linear-gradient(135deg, #301233, #8251f3); }
-    .thumb-oss        { background: linear-gradient(135deg, #0d0d0d, #198038); }
-    .thumb-legal      { background: linear-gradient(135deg, #262626, #525252); }
+    .thumb-enterprise { background: #2a2630; }
+    .thumb-oss        { background: #198038; }
+    .thumb-legal      { background: #393939; }
     .preview-body { padding: 1.25rem 1.5rem 1.5rem; }
     .preview-edition {
       font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
       text-transform: uppercase; margin-bottom: 0.4rem;
     }
-    .edition-enterprise { color: #b89af9; }
+    .edition-enterprise { color: #b9b3c4; }
     .edition-oss        { color: var(--green-50); }
     .edition-legal      { color: var(--yellow-30); }
     .preview-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }

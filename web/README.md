@@ -6,15 +6,15 @@ Live static build: https://rivicq.github.io/RivicQ_CSPM_EaaS/
 
 ## Visual language
 
-The UI follows **rivicq.com** violet — not IBM Carbon:
+The UI follows a **quiet dusty violet** in the rivicq.com family — not IBM Carbon, not neon:
 
 | Token | Hex | Role |
 |-------|-----|------|
-| Violet | `#8251f3` | Interactive / primary (rivicq.com) |
-| Violet deep | `#6b3de0` | Hover |
-| Plum | `#301233` | Command surfaces |
-| Ink | `#0d0d0d` | Sidebar |
-| Cyan | `#0099ff` | Occasional highlight (rivicq.com `#09f`) |
+| Dusty violet | `#5a5268` | Interactive / primary |
+| Dusty violet mid | `#6b6278` | Hover / secondary |
+| Charcoal | `#1c1b1f` | Command surfaces |
+| Ink | `#141316` | Sidebar / deep |
+| Muted gold | `#a08a48` | Occasional highlight |
 
 Type: **Outfit** + **JetBrains Mono**.
 

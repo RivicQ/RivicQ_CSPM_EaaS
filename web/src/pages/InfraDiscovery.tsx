@@ -243,7 +243,7 @@ function SeverityBadge({ severity }: { severity: SeverityLevel }) {
 }
 
 function ProtocolBadge({ protocol }: { protocol: string }) {
-  const colors: Record<string, string> = { tls: '#8251f3', ssh: '#8251f3', http: '#24a148' };
+  const colors: Record<string, string> = { tls: '#5a5268', ssh: '#5a5268', http: '#24a148' };
   return (
     <Chip
       label={protocol.toUpperCase()}
@@ -263,7 +263,7 @@ function CompliancePills({ bsiRef, doraRef, eidasRef }: { bsiRef: string; doraRe
       )}
       {doraRef && (
         <Tooltip title={doraRef}>
-          <Chip label="DORA Art.9" size="small" sx={{ bgcolor: '#7c3aed', color: 'white', fontSize: '0.6rem', height: 20 }} />
+          <Chip label="DORA Art.9" size="small" sx={{ bgcolor: '#5a5268', color: 'white', fontSize: '0.6rem', height: 20 }} />
         </Tooltip>
       )}
       {eidasRef && (
@@ -282,7 +282,7 @@ function ScanSummaryBar({ summary }: { summary: ScanSummary }) {
     { label: 'Targets Scanned', value: summary.scanned_targets, icon: '🌐', bg: '#eff6ff', color: '#1d4ed8' },
     { label: 'CRITICAL Findings', value: summary.critical, icon: '🔴', bg: '#fef2f2', color: '#dc2626' },
     { label: 'HIGH Findings', value: summary.high, icon: '🟠', bg: '#fff7ed', color: '#ea580c' },
-    { label: 'Quantum-Unsafe Assets', value: summary.quantum_unsafe, icon: '⚛', bg: '#faf5ff', color: '#7c3aed' },
+    { label: 'Quantum-Unsafe Assets', value: summary.quantum_unsafe, icon: '⚛', bg: '#f5f4f7', color: '#5a5268' },
   ];
 
   return (
@@ -575,7 +575,7 @@ function ScanButton({ onScanComplete }: ScanButtonProps) {
         onClick={handleScan}
         disabled={scanning}
         sx={{
-          background: 'linear-gradient(45deg, #8251f3 30%, #8251f3 90%)',
+          background: 'linear-gradient(45deg, #5a5268 30%, #5a5268 90%)',
           color: 'white',
           fontWeight: 'bold',
           px: 3,
@@ -619,7 +619,7 @@ const InfraDiscovery: React.FC = () => {
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Box display="flex" alignItems="center" gap={1} sx={{ mb: 0.5 }}>
-          <NetworkCheck sx={{ color: '#8251f3', fontSize: 32 }} />
+          <NetworkCheck sx={{ color: '#5a5268', fontSize: 32 }} />
           <Typography variant="h4" fontWeight="bold">
             Infrastructure Discovery — Weak Cryptography
           </Typography>

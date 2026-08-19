@@ -14,7 +14,7 @@ const STANDARD_COLORS: Record<ComplianceStandard, { bg: string; text: string }> 
   'FIPS-140-3':    { bg: '#dbeafe', text: '#1d4ed8' },
   'BSI-TR-02102':  { bg: '#dcfce7', text: '#15803d' },
   'DORA':          { bg: '#fce7f3', text: '#be185d' },
-  'eIDAS':         { bg: '#ede9fe', text: '#7c3aed' },
+  'eIDAS':         { bg: '#eceaf0', text: '#5a5268' },
   'NIST-PQC':      { bg: '#fef3c7', text: '#92400e' },
 };
 

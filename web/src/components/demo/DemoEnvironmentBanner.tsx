@@ -20,8 +20,8 @@ const DemoEnvironmentBanner: React.FC = () => {
       sx={{
         mb: 2.5,
         borderRadius: `${designSystem.radius.lg}px`,
-        backdropFilter: 'blur(16px)',
-        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(14, 116, 144, 0.22)' : 'rgba(224, 242, 254, 0.88)'),
+        backdropFilter: 'none',
+        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(90,82,104,0.22)' : 'rgba(245,244,247,0.96)'),
         border: 1,
         borderColor: 'info.light',
       }}
