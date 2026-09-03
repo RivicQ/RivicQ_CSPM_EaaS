@@ -5,9 +5,9 @@ export const appTypography = {
 
   display: {
     fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
-    fontWeight: 600,
-    letterSpacing: '-0.02em',
-    lineHeight: 1.2,
+    fontWeight: 700,
+    letterSpacing: '-0.03em',
+    lineHeight: 1.12,
     fontFeatureSettings: '"ss01"',
   },
 

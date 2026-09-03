@@ -36,8 +36,8 @@ export const tokens = {
       gold: '#f59e0b',
       cyan: '#38bdf8',
     },
-    navy: { 0: '#f7fbff', 1: '#ffffff', 2: '#eef8ff', 3: '#e0f2fe' },
-    surface: { 0: '#f7fbff', 1: '#ffffff', 2: '#eef8ff', 3: '#e0f2fe' },
+    navy: { 0: '#f4f9fd', 1: '#ffffff', 2: '#eef8ff', 3: '#e0f2fe' },
+    surface: { 0: '#f4f9fd', 1: '#ffffff', 2: '#eef8ff', 3: '#e0f2fe' },
     surfaceLight: { 0: '#082f49', 1: '#0c4a6e', 2: '#075985', 3: '#0369a1' },
     text: { primary: '#0f172a', secondary: '#475569', muted: '#64748b' },
     textLight: { primary: '#f8fafc', secondary: '#e0f2fe', muted: '#7dd3fc' },
@@ -59,7 +59,7 @@ export const tokens = {
     glowPurple: 'none',
     glowBlue: 'none',
     glowGold: 'none',
-    panel: '0 1px 2px rgba(15,23,42,0.04), 0 8px 24px rgba(8,47,73,0.06)',
+    panel: '0 1px 2px rgba(8,47,73,0.04), 0 12px 32px rgba(14,165,233,0.10)',
   },
 };
 

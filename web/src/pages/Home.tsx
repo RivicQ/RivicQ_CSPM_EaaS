@@ -17,6 +17,8 @@ import EncryptionLayerVisual from '../components/home/EncryptionLayerVisual';
 import ClientWorkflow from '../components/home/ClientWorkflow';
 import HomeScanReport, { HomeScanReportData } from '../components/home/HomeScanReport';
 import FiveBomStrip from '../components/bom/FiveBomStrip';
+import BomLetterRow from '../components/bom/BomLetterRow';
+import HorizonCanvas from '../components/brand/HorizonCanvas';
 import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
 import designSystem, { glassSurface } from '../theme/designSystem';
@@ -236,31 +238,21 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const heroBg = isDark ? designSystem.proBlue.commandCenter : '#ffffff';
+  const heroBg = isDark ? designSystem.proBlue.commandCenter : undefined;
   const cardBg = isDark ? '#0c4a6e' : '#ffffff';
   const cardBorder = isDark ? 'rgba(186,230,253,0.12)' : 'rgba(14,165,233,0.16)';
 
   return (
+    <HorizonCanvas dark={isDark}>
     <Box
       sx={{
         minHeight: '100vh',
-        background: heroBg,
+        background: heroBg || 'transparent',
         position: 'relative',
         overflow: 'hidden',
         color: isDark ? '#e2e8f0' : '#0f172a',
       }}
     >
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: 'linear-gradient(rgba(14,165,233,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.06) 1px, transparent 1px)',
-          backgroundSize: '72px 72px',
-          pointerEvents: 'none',
-          maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.5), transparent 70%)',
-        }}
-      />
-
       <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4 }, position: 'relative' }}>
         <Box
           sx={{
@@ -269,16 +261,20 @@ const Home: React.FC = () => {
             alignItems: 'center',
             gap: 2,
             flexWrap: 'wrap',
-            mb: 10,
-            p: 1.5,
-            borderRadius: `${designSystem.radius.md}px`,
+            mb: { xs: 6, md: 8 },
+            px: 1.75,
+            py: 1.25,
+            borderRadius: 999,
             ...(isDark
               ? {
-                background: designSystem.proBlue.commandCenter,
+                background: 'rgba(8,47,73,0.72)',
                 border: `1px solid ${designSystem.proBlue.border}`,
-                boxShadow: designSystem.proBlue.shadow,
               }
-              : glassSurface(theme, true)),
+              : {
+                ...glassSurface(theme, true),
+                borderRadius: 999,
+                boxShadow: designSystem.shadow.sm,
+              }),
           }}
         >
           <BrandLogo dark={isDark} />
@@ -300,34 +296,38 @@ const Home: React.FC = () => {
             <Grid item xs={12} md={6}>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
                 <Chip
-                  icon={<EnhancedEncryption />}
-                  label="Encryption as a Service · Security Cloud"
+                  icon={<AccountTree />}
+                  label="Five-BOM · Security Cloud"
                   sx={{
                     mb: 3,
                     bgcolor: isDark ? 'rgba(14,165,233,0.18)' : 'rgba(14,165,233,0.08)',
                     color: 'primary.main',
                     border: 1,
                     borderColor: 'primary.main',
-                    fontWeight: 600,
+                    fontWeight: 700,
+                    borderRadius: 999,
                   }}
                 />
                 <Typography
                   variant="h2"
-                  fontWeight={600}
-                  sx={{ mb: 2, lineHeight: 1.12, fontSize: { xs: '1.85rem', md: '2.6rem' }, letterSpacing: '-0.02em' }}
+                  fontWeight={800}
+                  sx={{ mb: 2, lineHeight: 1.08, fontSize: { xs: '2.05rem', md: '3.15rem' }, letterSpacing: '-0.035em' }}
                 >
-                  Your business already runs on encryption.
+                  Cryptographic security,
                   <br />
-                  <Box component="span" sx={{ color: 'text.primary' }}>
-                    Now it needs a security platform.
+                  <Box component="span" sx={{ color: tokens.colors.rivicq[600] }}>
+                    five bills of materials.
                   </Box>
                 </Typography>
-                <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 620, mb: 3, fontWeight: 400, fontSize: { xs: '1rem', md: '1.15rem' } }}>
-                  RivicQ Security Cloud is the cryptographic SaaS layer for CSPM, CBOM, and PQC — one platform to
-                  discover keys, quantify quantum risk, and run enterprise posture from a single control plane.
+                <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 620, mb: 2.5, fontWeight: 400, fontSize: { xs: '1rem', md: '1.15rem' } }}>
+                  RivicQ Security Cloud is the cryptographic SaaS layer for QBOM, AIBOM, SBOM, IBOM, and CBOM —
+                  discover keys, score PQC exposure, and run posture from one engine.
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'text.disabled', mb: 3, fontStyle: 'italic' }}>
-                  Not a dashboard. Not a report mill. The cryptographic decision layer security never had.
+                <Box sx={{ mb: 3 }}>
+                  <BomLetterRow dark={isDark} />
+                </Box>
+                <Typography variant="body2" sx={{ color: 'text.disabled', mb: 3 }}>
+                  Community is the limited scan engine. Enterprise unlocks AIBOM, IBOM, HSM connectors, and the evidence pack.
                 </Typography>
               </motion.div>
 
@@ -613,6 +613,7 @@ const Home: React.FC = () => {
         </Box>
       </Container>
     </Box>
+    </HorizonCanvas>
   );
 };
 

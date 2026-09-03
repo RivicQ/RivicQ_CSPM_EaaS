@@ -4,6 +4,7 @@ import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typograph
 import { ArrowForward, Lock, Security, WorkspacePremium, CloudQueue, Psychology, Storage, Shield } from '@mui/icons-material';
 import { setEditionPreference, Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
+import designSystem from '../theme/designSystem';
 
 const EditionSwitcher: React.FC = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const EditionSwitcher: React.FC = () => {
     },
   ];
 
-  const pageBg = isDark ? '#082f49' : '#ffffff';
+  const pageBg = isDark ? designSystem.gradient.meshDark : designSystem.gradient.meshLight;
   const cardBg = isDark ? '#0c4a6e' : '#ffffff';
 
   return (
@@ -70,7 +71,7 @@ const EditionSwitcher: React.FC = () => {
               <Card
                 sx={{
                   height: '100%',
-                  borderRadius: 1,
+                  borderRadius: 3,
                   border: `1px solid ${card.accent}44`,
                   background: cardBg,
                   transition: 'border-color 0.15s ease',

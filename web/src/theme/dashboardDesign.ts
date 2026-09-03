@@ -3,10 +3,10 @@ import { tokens } from './tokens';
 /** Designer-level dashboard design tokens */
 export const dashboardDesign = {
   radius: {
-    sm: 4,
-    md: 6,
-    lg: 8,
-    xl: 10,
+    sm: 6,
+    md: 10,
+    lg: 14,
+    xl: 20,
   },
   spacing: {
     page: 24,

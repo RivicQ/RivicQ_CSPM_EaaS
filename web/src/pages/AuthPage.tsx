@@ -52,7 +52,7 @@ import designSystem, { commandCenterCardSx, proBlueContainedButtonSx } from '../
 const authHeroPanelSx = {
   ...commandCenterCardSx,
   backdropFilter: 'none',
-  borderRadius: 1,
+  borderRadius: `${designSystem.radius.xl}px`,
   '& .MuiTypography-overline': {
     color: designSystem.proBlue.accentMuted,
   },
@@ -283,14 +283,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         position: 'relative',
         overflow: 'hidden',
         py: 5,
-        background: isDark ? designSystem.proBlue.commandCenter : '#ffffff',
+        background: isDark ? designSystem.proBlue.commandCenter : designSystem.gradient.meshLight,
       }}
     >
       <Box
         sx={{
           position: 'absolute',
           inset: 0,
-          background: isDark ? 'transparent' : 'transparent',
+          background: isDark ? designSystem.proBlue.commandGlow : designSystem.horizon.wash,
           pointerEvents: 'none',
         }}
       />
@@ -325,7 +325,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                     <Typography variant="overline" sx={{ display: 'block', letterSpacing: 1.2, fontWeight: 600, fontSize: '0.7rem' }}>
                       RivicQ Security Cloud
                     </Typography>
-                    <Typography variant="h3" fontWeight={600} sx={{ mt: 1, lineHeight: 1.12, letterSpacing: '-0.02em' }}>
+                    <Typography variant="h3" fontWeight={700} sx={{ mt: 1, lineHeight: 1.12, letterSpacing: '-0.03em' }}>
                       {mode === 'register' ? 'Stand up your security workspace.' : 'Sign in to the security platform.'}
                     </Typography>
                     <Typography sx={{ mt: 2, maxWidth: 540 }}>
@@ -419,7 +419,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           </Grid>
 
           <Grid item xs={12} md={7}>
-            <Card sx={{ height: '100%', borderRadius: 1 }}>
+            <Card sx={{ height: '100%', borderRadius: `${designSystem.radius.xl}px` }}>
               <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                 <Stack spacing={2} sx={{ mb: 3 }}>
                   <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>

@@ -88,10 +88,10 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
     },
     typography: {
       fontFamily: appTypography.fontFamily,
-      h1: { fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.15 },
-      h2: { fontWeight: 600, letterSpacing: '-0.022em', lineHeight: 1.18 },
-      h3: { fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.22 },
-      h4: { fontWeight: 600, letterSpacing: '-0.018em', lineHeight: 1.25, fontSize: '1.625rem' },
+      h1: { fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.1 },
+      h2: { fontWeight: 700, letterSpacing: '-0.028em', lineHeight: 1.12 },
+      h3: { fontWeight: 700, letterSpacing: '-0.024em', lineHeight: 1.18 },
+      h4: { fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.22, fontSize: '1.625rem' },
       h5: { fontWeight: 600, letterSpacing: '-0.01em' },
       h6: { fontWeight: 600, letterSpacing: '-0.008em' },
       subtitle1: { fontWeight: 600, letterSpacing: '-0.01em' },
@@ -125,7 +125,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
             backdropFilter: 'none',
             WebkitBackdropFilter: 'none',
             border: `1px solid ${isDark ? 'rgba(186,230,253,0.18)' : 'rgba(14,165,233,0.14)'}`,
-            borderRadius: tokens.borderRadius.md,
+            borderRadius: tokens.borderRadius.lg,
             boxShadow: isDark ? 'none' : tokens.shadows.panel,
             transition: designSystem.motion.smooth,
             '&:hover': {

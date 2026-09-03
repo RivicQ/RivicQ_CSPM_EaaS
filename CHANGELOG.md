@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.5.7] - 2026-09-03
+## [1.5.8] - 2026-09-03
+
+### Changed
+- **Horizon** core UX: sky canvas, pill nav, five-BOM letter tiles, sky primary CTAs, navy chrome with a horizon band.
+- Home, workspace, auth, edition switcher, and docs hub share the same visual system ([docs/UX_DESIGN.md](docs/UX_DESIGN.md)).
+
+
 
 ### Added
 - Five-BOM DevSecOps framework: QBOM, AIBOM, SBOM, IBOM, CBOM ([docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md)).

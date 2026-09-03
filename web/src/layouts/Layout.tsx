@@ -76,6 +76,7 @@ import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';
 import DemoTrailCoach from '../components/demo/DemoTrailCoach';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { useDemoTrail } from '../context/DemoTrailContext';
+import BomLetterRow from '../components/bom/BomLetterRow';
 import designSystem, {
   sidebarPaperSx,
   sidebarScrollSx,
@@ -751,7 +752,8 @@ const Layout: React.FC = () => {
           minHeight: '100vh',
           minWidth: 0,
           overflowX: 'hidden',
-          bgcolor: 'background.default',
+          bgcolor: 'transparent',
+          background: mode === 'dark' ? designSystem.gradient.meshDark : designSystem.gradient.meshLight,
           transition: reduceMotion ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           '& .MuiTableContainer-root': { overflowX: 'auto' },
         }}
@@ -764,6 +766,9 @@ const Layout: React.FC = () => {
         >
           <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: { xs: 2, md: 3 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />
+            <Box sx={{ mb: 2, display: { xs: 'none', md: 'block' } }}>
+              <BomLetterRow compact />
+            </Box>
             <Outlet />
           </Box>
         </motion.div>

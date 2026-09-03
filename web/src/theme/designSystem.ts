@@ -12,18 +12,22 @@ export const designSystem = {
   },
   gradient: {
     brand: tokens.colors.brandGradient,
-    brandSoft: 'linear-gradient(180deg, rgba(14,165,233,0.08) 0%, rgba(247,251,255,0) 42%)',
-    heroLight: 'none',
-    heroDark: 'none',
-    sidebar: 'none',
-    sidebarDark: 'none',
-    meshLight: 'none',
-    meshDark: 'none',
+    brandSoft: 'linear-gradient(180deg, rgba(14,165,233,0.12) 0%, rgba(244,249,253,0) 48%)',
+    heroLight: 'linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%)',
+    heroDark: 'linear-gradient(180deg, #082f49 0%, #0c4a6e 100%)',
+    sidebar: 'linear-gradient(180deg, #082f49 0%, #0b3a5c 100%)',
+    sidebarDark: 'linear-gradient(180deg, #071f33 0%, #082f49 100%)',
+    meshLight: 'linear-gradient(180deg, #ffffff 0%, #f4f9fd 38%, #e8f4fc 100%)',
+    meshDark: 'linear-gradient(180deg, #071f33 0%, #082f49 100%)',
+  },
+  horizon: {
+    wash: 'radial-gradient(1200px 420px at 50% -12%, rgba(14,165,233,0.22), transparent 58%)',
+    band: 'linear-gradient(90deg, #38bdf8 0%, #0ea5e9 42%, #0284c7 100%)',
   },
   shadow: {
-    sm: '0 1px 2px rgba(15,23,42,0.04)',
-    md: '0 1px 3px rgba(15,23,42,0.06)',
-    lg: '0 4px 12px rgba(15,23,42,0.08), 0 18px 40px rgba(8,47,73,0.06)',
+    sm: '0 1px 2px rgba(8,47,73,0.05)',
+    md: '0 8px 24px rgba(8,47,73,0.08)',
+    lg: '0 18px 40px rgba(8,47,73,0.10)',
     glow: (_color: string) => 'none',
   },
   motion: {
@@ -41,7 +45,7 @@ export const designSystem = {
     accentMuted: '#7dd3fc',
     sidebar: '#082f49',
     commandCenter: '#082f49',
-    commandGlow: 'radial-gradient(1200px 280px at 12% -10%, rgba(14,165,233,0.22), transparent 55%)',
+    commandGlow: 'radial-gradient(900px 280px at 18% -20%, rgba(56,189,248,0.38), transparent 58%)',
     border: 'rgba(125,211,252,0.22)',
     textPrimary: '#f8fafc',
     textSecondary: 'rgba(248,250,252,0.82)',
@@ -89,7 +93,7 @@ export const panelTitleSx = {
 };
 
 export const sidebarPaperSx = {
-  background: designSystem.proBlue.sidebar,
+  background: designSystem.gradient.sidebar,
   borderRight: `1px solid ${designSystem.proBlue.border}`,
   color: designSystem.proBlue.textPrimary,
   overflow: 'hidden',
@@ -152,8 +156,18 @@ export const commandCenterCardSx = {
   overflow: 'hidden' as const,
   background: designSystem.proBlue.commandCenter,
   border: `1px solid ${designSystem.proBlue.border}`,
-  boxShadow: designSystem.proBlue.shadow,
+  boxShadow: designSystem.shadow.md,
   color: designSystem.proBlue.textPrimary,
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    background: designSystem.horizon.band,
+    pointerEvents: 'none',
+  },
 };
 
 export const commandCenterEyebrowSx = {
@@ -217,26 +231,26 @@ export const heroSecondaryCtaSx = {
 
 /** Primary CTA — matches command-center / auth hero navy gradient */
 export const proBlueContainedButtonSx = {
-  backgroundColor: designSystem.proBlue.navyMid,
+  backgroundColor: tokens.colors.rivicq[600],
   backgroundImage: 'none',
-  color: `${designSystem.proBlue.textPrimary} !important`,
-  border: `1px solid ${designSystem.proBlue.border}`,
-  boxShadow: 'none',
+  color: '#ffffff !important',
+  border: '1px solid transparent',
+  boxShadow: '0 8px 20px rgba(14,165,233,0.22)',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': {
     color: 'inherit',
   },
   '&:hover': {
-    backgroundColor: designSystem.proBlue.navyLight,
+    backgroundColor: tokens.colors.rivicq[700],
     backgroundImage: 'none',
-    color: `${designSystem.proBlue.textPrimary} !important`,
-    boxShadow: 'none',
+    color: '#ffffff !important',
+    boxShadow: '0 10px 24px rgba(3,105,161,0.24)',
     transform: 'none',
   },
   '&.Mui-disabled': {
-    backgroundColor: `${designSystem.proBlue.navyMid} !important`,
+    backgroundColor: `${tokens.colors.rivicq[300]} !important`,
     backgroundImage: 'none !important',
-    color: 'rgba(248,250,252,0.72) !important',
-    borderColor: designSystem.proBlue.border,
+    color: '#ffffff !important',
+    borderColor: 'transparent',
     boxShadow: 'none',
   },
 };

@@ -249,7 +249,7 @@ const Dashboard: React.FC = () => {
     <Box sx={dashboardDesign.layout.page}>
       <DashboardHero
         eyebrow="Security Command Center"
-        title="Cryptographic Security Posture Management"
+        title="Five-BOM cryptographic posture"
         subtitle="Welcome to RivicQ Security Cloud — five-BOM intelligence (QBOM, AIBOM, SBOM, IBOM, CBOM) with cryptographic posture, PQC migration, and DevSecOps evidence."
         meta={
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>

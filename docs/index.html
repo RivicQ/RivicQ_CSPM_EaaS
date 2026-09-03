@@ -28,13 +28,13 @@
 
     body {
       font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
-      background: #f7fbff;
+      background: linear-gradient(180deg, #ffffff 0%, #f4f9fd 40%, #e8f4fc 100%);
       color: #0f172a;
       min-height: 100vh;
     }
 
     header {
-      background: #ffffff;
+      background: rgba(255,255,255,0.92);
       border-bottom: 1px solid rgba(14,165,233,0.16);
       position: sticky; top: 0; z-index: 100;
       padding: 0.9rem 2rem;
@@ -44,7 +44,7 @@
     .logo-badge {
       background: var(--blue-60);
       color: #fff; font-size: 0.7rem; font-weight: 600;
-      padding: 0.15rem 0.5rem; border-radius: 2px; letter-spacing: 0.04em;
+      padding: 0.15rem 0.5rem; border-radius: 999px; letter-spacing: 0.04em;
     }
     .header-links { display: flex; gap: 1rem; flex-wrap: wrap; }
     .header-links a {
@@ -53,22 +53,23 @@
     .header-links a:hover { color: var(--blue-60); }
 
     .hero { text-align: center; padding: 5rem 2rem 4rem; background:
-      radial-gradient(900px 240px at 50% -20%, rgba(14,165,233,0.16), transparent 60%),
-      #ffffff; }
+      radial-gradient(1100px 320px at 50% -18%, rgba(14,165,233,0.22), transparent 58%),
+      linear-gradient(180deg, #ffffff 0%, #f4f9fd 100%); }
     .hero-eyebrow {
       display: inline-block;
       background: rgba(14,165,233,0.08);
       border: 1px solid rgba(14,165,233,0.28);
       color: var(--blue-70);
       font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
-      text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 2px;
+      text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 999px;
       margin-bottom: 1.5rem;
     }
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      font-weight: 700; line-height: 1.15;
+      font-size: clamp(2.1rem, 5vw, 3.4rem);
+      font-weight: 800; line-height: 1.1;
       margin-bottom: 1.25rem;
       color: #0f172a;
+      letter-spacing: -0.03em;
     }
     .hero p {
       max-width: 680px; margin: 0 auto 2.5rem;
@@ -77,7 +78,7 @@
     .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
     .btn {
       display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.75rem 1.75rem; border-radius: 2px;
+      padding: 0.75rem 1.75rem; border-radius: 999px;
       font-weight: 600; font-size: 0.95rem; text-decoration: none;
       border: none;
     }
@@ -111,7 +112,7 @@
     .preview-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 4px; overflow: hidden;
+      border-radius: 16px; overflow: hidden;
     }
     .preview-thumb {
       height: 140px;
@@ -141,7 +142,7 @@
     .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
     .feature-card {
       background: var(--card-bg); border: 1px solid var(--card-border);
-      border-radius: 4px; padding: 1.25rem 1.5rem;
+      border-radius: 16px; padding: 1.25rem 1.5rem;
     }
     .feature-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
     .feature-desc  { font-size: 0.825rem; color: #475569; line-height: 1.5; }
@@ -152,7 +153,7 @@
     .cloud-badge {
       display: flex; align-items: center; gap: 0.5rem;
       background: var(--card-bg); border: 1px solid var(--card-border);
-      border-radius: 2px; padding: 0.6rem 1.2rem;
+      border-radius: 999px; padding: 0.6rem 1.2rem;
       font-size: 0.85rem; font-weight: 500;
       color: #0f172a; text-decoration: none;
     }
@@ -189,7 +190,7 @@
 
 <div class="hero">
   <span class="hero-eyebrow">Security SaaS · Apache-2.0 Community · Commercial Enterprise</span>
-  <h1>Cryptographic security platform<br/>for CSPM, five-BOM, and PQC</h1>
+  <h1>Cryptographic security,<br/>five bills of materials</h1>
   <p>
     One intelligence engine for posture, QBOM / AIBOM / SBOM / IBOM / CBOM, and DevSecOps. Community is a <strong>limited</strong> Apache-2.0 scan engine
     (website, host, IP, server, declared pods, local QBOM). Enterprise is a commercial control plane (SSO, RBAC, HSM connectors, DORA pack).
@@ -303,6 +304,7 @@
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/KNOWN_LIMITATIONS.md"><span class="dot"></span> Limitations</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/ARCHITECTURE.md"><span class="dot"></span> Architecture</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/CLIENT_ARCHITECTURE.md"><span class="dot"></span> Client architecture</a>
+    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/UX_DESIGN.md"><span class="dot"></span> Horizon UX</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/BOM_FRAMEWORK.md"><span class="dot"></span> Five-BOM</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/ROADMAP.md"><span class="dot"></span> Roadmap</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/QISKIT_PIPELINE.md"><span class="dot"></span> Qiskit pipeline</a>
