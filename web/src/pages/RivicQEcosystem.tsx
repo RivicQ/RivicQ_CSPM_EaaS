@@ -120,7 +120,7 @@ const RivicQEcosystem: React.FC = () => {
           ))}
         </Stack>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.25 }}>
-          Founder: revansai.ande@rivicq.com. admin@ is private. Most addresses start as aliases, not paid mailboxes.
+          Founder: revansai.ande@rivicq.com. Extra aliases stay unpublished. admin@ is private.
         </Typography>
       </GlassCard>
       </Box>

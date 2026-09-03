@@ -3,7 +3,6 @@ import { Alert, Box, Button, Chip, Grid, Stack, Typography } from '@mui/material
 import PageFrame from '../components/PageFrame';
 import { GlassCard } from '../components/ui';
 import {
-  CONTACTS,
   ECOSYSTEM_AREAS,
   contactsByArea,
   publishedPriorityContacts,
@@ -12,17 +11,16 @@ import {
 
 const ContactHub: React.FC = () => {
   const publishedPriority = publishedPriorityContacts();
-  const privateAdmin = CONTACTS.find((c) => c.email === 'admin@rivicq.com');
 
   return (
     <PageFrame
       eyebrow="RivicQ GmbH"
       title="Contact directory"
-      subtitle="One domain: @rivicq.com. Shared inboxes and aliases — not thirty separate mailboxes. admin@ is not published."
-      badge="Zoho-centralised"
+      subtitle="One domain: @rivicq.com. Shared inboxes and aliases — not thirty paid mailboxes."
+      badge="rivicq.com"
     >
       <Alert severity="info" sx={{ mb: 3 }}>
-        Partner and grant addresses do not imply signed alliances or certifications. Domain administration stays private with MFA. Configure SPF, DKIM, and DMARC on rivicq.com before high-volume mail.
+        Partner and grant addresses do not imply signed alliances or certifications. Domain administration is private.
       </Alert>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -54,11 +52,6 @@ const ContactHub: React.FC = () => {
             <Button size="small" href={mailto(c.email)}>Email</Button>
           </Stack>
         ))}
-        {privateAdmin && (
-          <Typography variant="caption" color="text.secondary">
-            {privateAdmin.label} is reserved and unpublished. Future staff: firstname.lastname@rivicq.com.
-          </Typography>
-        )}
       </Stack>
 
       {ECOSYSTEM_AREAS.map((area) => {
@@ -66,7 +59,7 @@ const ContactHub: React.FC = () => {
         if (extras.length === 0) return null;
         return (
           <Box key={area.id} sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1 }}>{area.title} aliases</Typography>
+            <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1 }}>{area.title}</Typography>
             <Stack spacing={1}>
               {extras.map((c) => (
                 <Stack
@@ -89,12 +82,9 @@ const ContactHub: React.FC = () => {
         );
       })}
 
-      <GlassCard hover={false} padding={2}>
-        <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 0.75 }}>Operator setup</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Create the twelve priority addresses first. Keep other functions as Zoho aliases or TeamInbox rules so every message has an owner, status, and follow-up date. Finance stays with the founder and accountant; security stays with security leadership; grants stay with the founder and operations. Automated mail uses noreply@.
-        </Typography>
-      </GlassCard>
+      <Typography variant="caption" color="text.secondary">
+        Future staff: firstname.lastname@rivicq.com. Extra functions (demo@, regional aliases, noreply@) stay as Zoho forwards — see docs/CONTACT.md.
+      </Typography>
     </PageFrame>
   );
 };

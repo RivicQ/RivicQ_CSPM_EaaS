@@ -27,6 +27,9 @@ describe('rivicq.com contact directory', () => {
     expect(published).toContain('privacy@rivicq.com');
     expect(published).not.toContain('admin@rivicq.com');
     expect(published).not.toContain('noreply@rivicq.com');
+    expect(published).not.toContain('demo@rivicq.com');
+    expect(published).not.toContain('europe@rivicq.com');
+    expect(published.length).toBeLessThanOrEqual(22);
     expect(publishedPriorityContacts()).toHaveLength(11);
     expect(priorityContacts().some((c) => c.email === 'admin@rivicq.com' && !c.publish)).toBe(true);
   });

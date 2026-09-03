@@ -21,10 +21,10 @@ Partner names (cloud, quantum, research institutes) are optional relationships. 
 | Area | Published addresses | Purpose |
 |---|---|---|
 | **Company** | hello@, info@, contact@, operations@, legal@, finance@, billing@, investors@ | Company communication, contracts, bookkeeping, fundraising |
-| **Product** | sales@, support@, security@, privacy@, product@, success@, demo@, enterprise@, solutions@, pqc@, cryptography@, compliance@, trust@ | CryptoBOM / five-BOM platform, customers, disclosures, commercial pipeline |
-| **Research** | research@, grants@, rnd@, academia@ | Fraunhofer AISEC, TU Berlin, university MoUs, BSS / EXIST / ZIM / EU funding |
-| **Innovation Hub** | innovationhub@, community@, events@, programs@, mentors@, opensource@, developers@ | Programmes, mentors, workshops, open-source engagement |
-| **Partnerships & expansion** | partnerships@, alliances@, government@, publicsector@, press@, marketing@, brand@, social@, careers@, talent@, advisors@, europe@, india@, usa@, asia@, estonia@ | Strategic partners, media, hiring, regional coordination |
+| **Product** | sales@, support@, security@, privacy@ | CryptoBOM / five-BOM platform, customers, disclosures, commercial pipeline |
+| **Research** | research@, grants@ | University MoUs, BSS / EXIST / ZIM / EU funding. Names of institutes are optional relationships, not certifications. |
+| **Innovation Hub** | innovationhub@, community@, events@ | Programmes, workshops, open-source engagement |
+| **Partnerships & expansion** | partnerships@, press@, careers@ | Strategic partners, media, hiring. Regional aliases stay unpublished until needed. |
 
 Leadership: **revansai.ande@rivicq.com** (Revan Sai Ande, Founder & CEO). Future staff: `firstname.lastname@rivicq.com`. Optional `firstname@` only for leadership or public-facing roles.
 
@@ -60,7 +60,9 @@ As volume grows, convert sales, support, finance, research, and Innovation Hub i
 | investors@ | Founder |
 | All other public aliases | Forward into the matching priority inbox |
 
-## Recommended aliases (forward — do not buy mailboxes)
+## Operator aliases (forward — do not publish, do not buy mailboxes)
+
+These exist only as Zoho forwards. They are **not** listed on `/contact` or marketing pages.
 
 | Address | Forwards toward | Use |
 |---|---|---|
