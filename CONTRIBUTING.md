@@ -118,6 +118,8 @@ Commercial inquiries: https://rivicq.com
 
 - Issues: https://github.com/RivicQ/RivicQ_CSPM_EaaS/issues
 - Security: security@rivicq.com
-- Conduct: conduct@rivicq.com
+- Conduct / legal: legal@rivicq.com
+- Community: community@rivicq.com
+- Directory: [docs/CONTACT.md](docs/CONTACT.md)
 
 Thank you for helping build an honest cryptographic inventory tool.

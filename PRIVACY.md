@@ -1,6 +1,6 @@
 # Privacy notice — RivicQ Community project
 
-**Effective:** 19 August 2026 · **Controller (this GitHub project):** RivicQ GmbH, Berlin
+**Effective:** 3 September 2026 · **Controller (this GitHub project):** RivicQ GmbH, Berlin
 
 This notice describes how the **public Community repository and GitHub Pages demo** relate to personal data. It is not a customer Data Processing Agreement. Enterprise customers receive contractual privacy terms with their commercial license.
 
@@ -47,7 +47,7 @@ If a report must include personal data to demonstrate impact, send it to securit
 
 ## Your rights
 
-For data RivicQ GmbH stores about you as a Community contributor (for example, an email you send to security@ or conduct@), you may request access or deletion at those addresses, subject to legal retention (including security incident records).
+Data-subject requests: **privacy@rivicq.com**. For data RivicQ GmbH stores about you as a Community contributor (for example, an email you send to security@ or legal@), you may request access or deletion at those addresses, subject to legal retention (including security incident records).
 
 GitHub account data is controlled by GitHub.
 

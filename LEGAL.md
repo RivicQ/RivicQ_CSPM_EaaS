@@ -98,7 +98,19 @@ Unless a signed Enterprise agreement states otherwise, disputes relating to Comm
 
 ## Contact
 
+Public directory: [docs/CONTACT.md](docs/CONTACT.md). Domain: **@rivicq.com**.
+
+- General: hello@rivicq.com
+- Sales / Enterprise: sales@rivicq.com
+- Support: support@rivicq.com
 - Security: security@rivicq.com ([SECURITY.md](SECURITY.md))
-- Conduct: conduct@rivicq.com ([CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md))
-- Commercial / Enterprise: https://rivicq.com
+- Privacy / GDPR: privacy@rivicq.com
+- Legal and conduct: legal@rivicq.com ([CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md))
+- Partnerships: partnerships@rivicq.com
+- Research / grants: research@rivicq.com · grants@rivicq.com
+- Innovation Hub: innovationhub@rivicq.com
+- Investors: investors@rivicq.com
+- Company: https://rivicq.com
 - Source: https://github.com/RivicQ/RivicQ_CSPM_EaaS
+
+`admin@rivicq.com` is not a public mailbox.

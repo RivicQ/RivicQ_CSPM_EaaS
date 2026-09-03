@@ -59,6 +59,7 @@ import AiSecurity from './pages/AiSecurity';
 import HsmQuantum from './pages/HsmQuantum';
 import GovernanceHub from './pages/GovernanceHub';
 import MigrationHub from './pages/MigrationHub';
+import ContactHub from './pages/ContactHub';
 
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
@@ -162,6 +163,7 @@ const App: React.FC = () => {
                 <Route path="/verify-email" element={wrap(VerifyEmail, 'VerifyEmail')} />
                 <Route path="/oauth/callback" element={wrap(OAuthCallback, 'OAuthCallback')} />
                 <Route path="/switcher" element={wrap(EditionSwitcher, 'EditionSwitcher')} />
+                <Route path="/contact" element={wrap(ContactHub, 'ContactHub')} />
                 <Route path="/logout" element={<LogoutRedirect />} />
                 <Route
                   path="/"
@@ -189,6 +191,7 @@ const App: React.FC = () => {
                   <Route path="connectors/hsm" element={wrap(HsmQuantum, 'HsmQuantum')} />
                   <Route path="governance" element={wrap(GovernanceHub, 'GovernanceHub')} />
                   <Route path="migration" element={wrap(MigrationHub, 'MigrationHub')} />
+                  <Route path="contact" element={wrap(ContactHub, 'ContactHub')} />
 
                   <Route path="enterprise/inventory" element={<RequireEnterprise>{wrap(Inventory, 'Inventory')}</RequireEnterprise>} />
                   <Route path="enterprise/compliance" element={<RequireEnterprise>{wrap(Compliance, 'Compliance')}</RequireEnterprise>} />

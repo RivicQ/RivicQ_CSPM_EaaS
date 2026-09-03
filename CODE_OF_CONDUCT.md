@@ -8,7 +8,7 @@ We pledge to make participation in the RivicQ Community a harassment-free experi
 
 ## Enforcement
 
-Report violations to **conduct@rivicq.com**. All reports are handled confidentially.
+Report violations to **legal@rivicq.com** (alias: conduct@rivicq.com). All reports are handled confidentially.
 
 Security vulnerabilities are **not** conduct reports — use [SECURITY.md](SECURITY.md) / security@rivicq.com.
 

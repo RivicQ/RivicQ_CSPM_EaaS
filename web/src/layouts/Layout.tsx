@@ -61,6 +61,7 @@ import {
   VpnKey,
   Policy,
   SwapHoriz,
+  MailOutline,
 } from '@mui/icons-material';
 import BomRibbon from '../components/bom/BomRibbon';
 import { motion } from 'framer-motion';
@@ -149,6 +150,7 @@ const Layout: React.FC = () => {
     { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
     { text: 'DevSecOps Tools', icon: <Category />, path: '/tools' },
     { text: 'RivicQ Ecosystem', icon: <CloudQueue />, path: '/ecosystem' },
+    { text: 'Contact', icon: <MailOutline />, path: '/contact' },
   ];
 
   const bomItems: NavItem[] = [

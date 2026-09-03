@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.9] - 2026-09-03
+
+### Added
+- Central `@rivicq.com` contact directory for the five ecosystem areas ([docs/CONTACT.md](docs/CONTACT.md), `/contact`, `/ecosystem`).
+- Priority inboxes: founder, hello, sales, partnerships, research, grants, support, security, finance, investors, innovationhub. `admin@` stays private.
+- Additional functions are documented as Zoho aliases, not separate paid mailboxes.
+
 ## [1.5.8] - 2026-09-03
 
 ### Changed

@@ -15,6 +15,8 @@ Out of scope for bounty-style reports (still welcome privately if severe): third
 3. Include impact, steps to reproduce, and artifacts. Do not attach live customer data.
 4. We will acknowledge receipt within 48 hours and coordinate remediation and disclosure.
 
+Privacy requests go to **privacy@rivicq.com**. Support tickets go to **support@rivicq.com**. Full directory: [docs/CONTACT.md](docs/CONTACT.md).
+
 ## Severity and response targets
 
 | Severity | Examples | Acknowledge | Mitigation target |

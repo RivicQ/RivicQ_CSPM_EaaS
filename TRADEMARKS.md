@@ -42,5 +42,6 @@ See [LEGAL.md](LEGAL.md) and [NOTICE](NOTICE).
 
 ## Reporting misuse
 
-Trademark questions: https://rivicq.com  
-Security-related impersonation: security@rivicq.com
+Trademark questions: legal@rivicq.com · https://rivicq.com  
+Security-related impersonation: security@rivicq.com  
+Press: press@rivicq.com

@@ -606,7 +606,15 @@ const Home: React.FC = () => {
           <Stack spacing={1.25} alignItems="center">
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" flexWrap="wrap" useFlexGap>
               <BrandLogo compact />
-              <Typography variant="body2" sx={{ color: 'text.muted' }}>© 2026 RivicQ GmbH · Encryption as a Service</Typography>
+              <Typography variant="body2" sx={{ color: 'text.muted' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
+            </Stack>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">
+              <Button size="small" href="mailto:hello@rivicq.com">hello@</Button>
+              <Button size="small" href="mailto:sales@rivicq.com">sales@</Button>
+              <Button size="small" href="mailto:support@rivicq.com">support@</Button>
+              <Button size="small" href="mailto:security@rivicq.com">security@</Button>
+              <Button size="small" href="mailto:privacy@rivicq.com">privacy@</Button>
+              <Button size="small" onClick={() => navigate('/contact')}>Directory</Button>
             </Stack>
             <TrademarkNotice />
           </Stack>

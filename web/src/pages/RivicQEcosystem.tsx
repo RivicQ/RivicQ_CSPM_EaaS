@@ -20,12 +20,14 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { Search, GitHub, OpenInNew, Category } from '@mui/icons-material';
+import { Search, GitHub, OpenInNew, Category, MailOutline } from '@mui/icons-material';
 import PageFrame from '../components/PageFrame';
 import { GlassCard, EmptyState } from '../components/ui';
 import { ecosystemService } from '../services/api';
 import { tokens } from '../theme/tokens';
 import designSystem from '../theme/designSystem';
+import { ECOSYSTEM_AREAS, publishedPriorityContacts, mailto } from '../data/contacts';
+import { useNavigate } from 'react-router-dom';
 
 interface EcosystemTool {
   id: string;
@@ -58,6 +60,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const RivicQEcosystem: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [tools, setTools] = useState<EcosystemTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('all');
@@ -92,11 +95,36 @@ const RivicQEcosystem: React.FC = () => {
 
   return (
     <PageFrame
-      eyebrow="Platform"
+      eyebrow="Ecosystem"
       title="RivicQ Ecosystem"
-      subtitle="Open source tools, SDKs, and services spanning OSS to Enterprise — scan, inventory, attest, and migrate cryptographic assets."
+      subtitle="Five connected areas on one domain (@rivicq.com): company, product, research, Innovation Hub, and partnerships — plus the OSS/Enterprise tool catalog."
       badge={`${tools.length} tools`}
+      action={<Button variant="contained" startIcon={<MailOutline />} onClick={() => navigate('/contact')}>Contact directory</Button>}
     >
+      <Grid container spacing={2} sx={{ mb: 2.5 }}>
+        {ECOSYSTEM_AREAS.map((area) => (
+          <Grid item xs={12} sm={6} md key={area.id}>
+            <GlassCard>
+              <Typography variant="overline" color="primary" fontWeight={800}>{area.title}</Typography>
+              <Typography variant="body2" color="text.secondary">{area.blurb}</Typography>
+            </GlassCard>
+          </Grid>
+        ))}
+      </Grid>
+      <Box sx={{ mb: 2 }}>
+      <GlassCard hover={false} padding={2}>
+        <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1.5 }}>Priority @rivicq.com inboxes</Typography>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          {publishedPriorityContacts().filter((c) => c.email !== 'revansai.ande@rivicq.com').map((c) => (
+            <Chip key={c.email} component="a" href={mailto(c.email)} clickable label={c.email} size="small" />
+          ))}
+        </Stack>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.25 }}>
+          Founder: revansai.ande@rivicq.com. admin@ is private. Most addresses start as aliases, not paid mailboxes.
+        </Typography>
+      </GlassCard>
+      </Box>
+
       <GlassCard hover={false} padding={2} delay={0}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
           <TextField
@@ -238,14 +266,13 @@ const RivicQEcosystem: React.FC = () => {
             </TableHead>
             <TableBody>
               {[
-                { category: 'CBOM Scanning', oss: 'Core TLS/SSH/HTTP/SBOM scanning', ent: 'Full + ML-based threat detection' },
-                { category: 'Compliance', oss: 'DORA, NIS2, NIST-CSF, CRA, ENISA', ent: 'ISO 27001, SOC 2, PCI DSS, HIPAA, GDPR, FedRAMP' },
-                { category: 'Quantum', oss: 'PQC risk scoring, migration roadmap', ent: 'IBM Quantum attestation, ML-DSA/ML-KEM generation' },
-                { category: 'Cloud', oss: '—', ent: 'AWS CloudHSM, GCP KMS, IBM HPCS, Azure' },
-                { category: 'SSO / Auth', oss: 'JWT, Google OAuth, demo mode', ent: 'SAML, LDAP, OAuth, API keys, RBAC' },
-                { category: 'Monitoring', oss: 'Prometheus, Grafana, Jaeger', ent: '+ Splunk, Datadog' },
-                { category: 'SDKs', oss: 'Python (cryptobom-core)', ent: 'Java, Rust, C++, C, Ruby' },
-                { category: 'Kubernetes', oss: 'Cluster scanning, Cilium/eBPF', ent: 'Operator, Headlamp plugin, quantum scanning' },
+                { category: 'CBOM Scanning', oss: 'TLS / SSH / HTTP / SBOM + website/host/IP/pod', ent: 'Same engine + live kube attach when credentials exist' },
+                { category: 'Five-BOM', oss: 'CBOM, SBOM, local QBOM', ent: 'AIBOM, IBOM, HSM connector, GRC pack flag' },
+                { category: 'Compliance', oss: 'JSON mappings (DORA, NIS2, CRA, BSI)', ent: 'Same mappings + evidence pack — not a certification' },
+                { category: 'Quantum', oss: 'Local qiskitprofile taxonomy', ent: 'Same + optional runtime / HSM when a key exists' },
+                { category: 'Cloud', oss: 'Catalog only', ent: 'AWS / Azure / GCP / IBM Cloud when customer credentials exist' },
+                { category: 'SSO / Auth', oss: 'Login, register, MFA, OAuth', ent: 'SSO config, audit, API keys, RBAC' },
+                { category: 'Contact', oss: 'Public @rivicq.com directory (hello, support, security, community)', ent: 'Same domain + sales, partnerships, finance, billing aliases' },
               ].map((row) => (
                 <TableRow key={row.category} hover>
                   <TableCell><Typography variant="body2" fontWeight={600}>{row.category}</Typography></TableCell>
