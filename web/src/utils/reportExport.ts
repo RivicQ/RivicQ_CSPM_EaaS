@@ -19,7 +19,7 @@ export function printBrandedReport(opts: {
   const win = window.open('', '_blank', 'noopener,noreferrer');
   if (!win) return;
   const disclaimer = opts.disclaimer
-    || 'RivicQ Community report. Not a certification. IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product.';
+    || 'RivicQ Community report. Not a certification.';
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/>
 <title>${escapeHtml(opts.title)}</title>
 <style>

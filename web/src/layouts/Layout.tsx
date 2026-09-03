@@ -271,7 +271,7 @@ const Layout: React.FC = () => {
                 textTransform: 'uppercase',
               }}
             >
-              CSPM Enterprise
+              CSPM · Security Cloud
             </Typography>
           </Box>
         )}
@@ -436,7 +436,7 @@ const Layout: React.FC = () => {
             />
           )}
           <Chip
-            icon={<Psychology sx={{ fontSize: 14, color: '#c4b5fd !important' }} />}
+            icon={<Psychology sx={{ fontSize: 14, color: `${designSystem.proBlue.accentMuted} !important` }} />}
             label="PQC Ready"
             size="small"
             sx={{
@@ -445,9 +445,9 @@ const Layout: React.FC = () => {
               fontWeight: 600,
               fontSize: '0.75rem',
               bgcolor: 'rgba(14,165,233,0.2)',
-              color: '#ddd6fe',
+              color: designSystem.proBlue.accentMuted,
               border: 1,
-              borderColor: 'rgba(196,181,253,0.25)',
+              borderColor: 'rgba(125,211,252,0.28)',
             }}
           />
           <TrademarkNotice
@@ -522,7 +522,7 @@ const Layout: React.FC = () => {
             <InputBase
               value={topSearch}
               onChange={(e) => setTopSearch(e.target.value)}
-              placeholder="Search CSPM, GitHub, findings…"
+              placeholder="Search posture, scans, findings…"
               sx={{
                 fontSize: '0.8125rem',
                 fontWeight: 500,
@@ -657,7 +657,7 @@ const Layout: React.FC = () => {
                 autoFocus
                 value={topSearch}
                 onChange={(e) => setTopSearch(e.target.value)}
-                placeholder="Search CSPM, GitHub, findings…"
+                placeholder="Search posture, scans, findings…"
                 sx={{
                   fontSize: '0.8125rem',
                   fontWeight: 500,

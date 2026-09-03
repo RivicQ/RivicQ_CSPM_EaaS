@@ -12,7 +12,7 @@ export const designSystem = {
   },
   gradient: {
     brand: tokens.colors.brandGradient,
-    brandSoft: 'linear-gradient(180deg, rgba(14,165,233,0.06) 0%, transparent 100%)',
+    brandSoft: 'linear-gradient(180deg, rgba(14,165,233,0.08) 0%, rgba(247,251,255,0) 42%)',
     heroLight: 'none',
     heroDark: 'none',
     sidebar: 'none',
@@ -23,7 +23,7 @@ export const designSystem = {
   shadow: {
     sm: '0 1px 2px rgba(15,23,42,0.04)',
     md: '0 1px 3px rgba(15,23,42,0.06)',
-    lg: '0 4px 12px rgba(15,23,42,0.08)',
+    lg: '0 4px 12px rgba(15,23,42,0.08), 0 18px 40px rgba(8,47,73,0.06)',
     glow: (_color: string) => 'none',
   },
   motion: {
@@ -41,7 +41,7 @@ export const designSystem = {
     accentMuted: '#7dd3fc',
     sidebar: '#082f49',
     commandCenter: '#082f49',
-    commandGlow: 'none',
+    commandGlow: 'radial-gradient(1200px 280px at 12% -10%, rgba(14,165,233,0.22), transparent 55%)',
     border: 'rgba(125,211,252,0.22)',
     textPrimary: '#f8fafc',
     textSecondary: 'rgba(248,250,252,0.82)',

@@ -51,5 +51,3 @@ See [Product status](PRODUCT_STATUS.md) for what already ships and [Architecture
 | Python educational Aer companion | Shipped (`sdk/python/rivicq_qiskit`) |
 | IBM Quantum Runtime provider | Enterprise opt-in; unavailable without customer API key |
 | Hardware Shor/Grover attacks | Not a product feature |
-
-IBM, Qiskit, and IBM Quantum are trademarks of IBM. RivicQ is not an IBM product.

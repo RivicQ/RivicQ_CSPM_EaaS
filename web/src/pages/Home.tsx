@@ -37,7 +37,7 @@ const FEATURES = [
   },
   {
     icon: <Memory />, title: 'HSM & Key Lifecycle', color: tokens.colors.crypto.info,
-    desc: 'Unified visibility into AWS CloudHSM, IBM HPCS, and cloud KMS. Track rotation, wrapping, attestation, and PQC-hybrid key hygiene across every provider.',
+    desc: 'Unified visibility into cloud HSM and KMS providers. Track rotation, wrapping, attestation, and PQC-hybrid key hygiene across every connector.',
   },
   {
     icon: <GppGood />, title: 'Cloud Posture Management', color: tokens.colors.crypto.high,
@@ -296,7 +296,7 @@ const Home: React.FC = () => {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
                 <Chip
                   icon={<EnhancedEncryption />}
-                  label="Encryption as a Service · Quantum-safe CSPM"
+                  label="Encryption as a Service · Security Cloud"
                   sx={{
                     mb: 3,
                     bgcolor: isDark ? 'rgba(14,165,233,0.18)' : 'rgba(14,165,233,0.08)',
@@ -314,13 +314,12 @@ const Home: React.FC = () => {
                   Your business already runs on encryption.
                   <br />
                   <Box component="span" sx={{ color: 'text.primary' }}>
-                    Now it needs intelligence.
+                    Now it needs a security platform.
                   </Box>
                 </Typography>
                 <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 620, mb: 3, fontWeight: 400, fontSize: { xs: '1rem', md: '1.15rem' } }}>
-                  RivicQ is the Encryption-as-a-Service intelligence layer — wiring repositories, cloud KMS, HSMs, and
-                  certificates into one living cryptographic model that discovers keys, quantifies quantum risk, and
-                  automates PQC migration and compliance.
+                  RivicQ Security Cloud is the cryptographic SaaS layer for CSPM, CBOM, and PQC — one platform to
+                  discover keys, quantify quantum risk, and run enterprise posture from a single control plane.
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.disabled', mb: 3, fontStyle: 'italic' }}>
                   Not a dashboard. Not a report mill. The cryptographic decision layer security never had.

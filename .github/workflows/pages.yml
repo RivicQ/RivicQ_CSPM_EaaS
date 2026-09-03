@@ -57,6 +57,11 @@ jobs:
           cp docs/README.md web/build/docs/README.md
           cp docs/KNOWN_LIMITATIONS.md web/build/docs/KNOWN_LIMITATIONS.md
           cp docs/LAUNCH_CHECKLIST.md web/build/docs/LAUNCH_CHECKLIST.md
+          cp docs/PRODUCT_STATUS.md web/build/docs/PRODUCT_STATUS.md
+          cp docs/ROADMAP.md web/build/docs/ROADMAP.md
+          cp docs/QISKIT_PIPELINE.md web/build/docs/QISKIT_PIPELINE.md
+          cp docs/ARCHITECTURE.md web/build/docs/ARCHITECTURE.md
+          cp docs/editions.md web/build/docs/editions.md
           cp DATASETS.md web/build/docs/DATASETS.md
           cp LEGAL.md web/build/docs/LEGAL.md
           cp PRIVACY.md web/build/docs/PRIVACY.md

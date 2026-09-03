@@ -40,9 +40,9 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - RBAC roles: Admin, Operator, Analyst, Viewer. Mutating SSO and cloud-connector APIs require **Admin**. `RequireRole` is enforced on those routes.
 - API keys and webhooks require a JWT (or API-key) **tenant claim**. The `X-Tenant-ID` header is not a source of truth.
 
-## IBM trademarks
+## Third-party names
 
-IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications. Optional IBM Cloud / IBM Quantum connectors require customer credentials and are not IBM-endorsed.
+Optional cloud or quantum connectors use customer credentials. Control mappings are not certifications.
 
 ## Datasets
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.5] - 2026-09-03
+
+### Changed
+- Product identity is **RivicQ Security Cloud** (sky-blue/white cryptographic SaaS).
+- Removed IBM Plex / Carbon trademark banners from the console, docs hub, marketing, NOTICE, and LEGAL.
+- GitHub Pages copies product status, roadmap, architecture, and Qiskit pipeline docs.
+
 ## [1.5.4] - 2026-08-19
 
 ### Changed

@@ -23,16 +23,10 @@ Fonts
 -----
 Outfit (UI) and JetBrains Mono are licensed under the SIL Open Font License.
 
-IBM trademarks
---------------
-IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM
-product. Control mappings are not certifications. Mentions of IBM Cloud
-or IBM Quantum are interoperability descriptions only.
-
 Visual design
 -------------
-The product theme is RivicQ violet (#8251f3 / #301233) from rivicq.com.
-It is not an IBM Carbon theme.
+The product theme is RivicQ Security Cloud: sky-blue and white
+(#0ea5e9 / #0284c7 on #ffffff). Dark chrome uses sky navy (#082f49).
 
 Other names
 -----------

@@ -238,7 +238,7 @@ const Scanner: React.FC = () => {
   const completedScans = scanJobs.filter((j) => j.status === 'completed').length;
 
   return (
-    <PageFrame eyebrow="Cryptographic Security Posture Management" title="CBOM Scanner" subtitle="Detect cryptographic material via TLS, HTTPS websites, SSH, SBOM discovery, and authorized GitHub repository content analysis. Qiskit-aligned scores are local taxonomy — not IBM Quantum hardware." badge={isScanning ? 'Scanning' : 'Ready'}>
+    <PageFrame eyebrow="Security Cloud" title="CBOM Scanner" subtitle="Detect cryptographic material via TLS, HTTPS websites, SSH, SBOM discovery, and authorized GitHub repository content analysis. Scores use a local Qiskit-aligned taxonomy — not a hardware quantum measurement." badge={isScanning ? 'Scanning' : 'Ready'}>
       {error && (
         <Box sx={{ mb: 2.5, p: 1.5, borderRadius: `${designSystem.radius.md}px`, bgcolor: 'warning.main', color: 'warning.contrastText' }}>
           <Typography variant="body2">{error}</Typography>

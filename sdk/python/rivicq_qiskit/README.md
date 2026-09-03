@@ -32,5 +32,3 @@ Install Aer only if you want the educational simulator:
 ```bash
 pip install qiskit qiskit-aer
 ```
-
-IBM, Qiskit, and IBM Quantum are trademarks of IBM. RivicQ is not an IBM product.

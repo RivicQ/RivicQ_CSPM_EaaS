@@ -126,10 +126,10 @@ const getAppTheme = (mode: 'light' | 'dark' = 'light') => {
             WebkitBackdropFilter: 'none',
             border: `1px solid ${isDark ? 'rgba(186,230,253,0.18)' : 'rgba(14,165,233,0.14)'}`,
             borderRadius: tokens.borderRadius.md,
-            boxShadow: 'none',
+            boxShadow: isDark ? 'none' : tokens.shadows.panel,
             transition: designSystem.motion.smooth,
             '&:hover': {
-              boxShadow: 'none',
+              boxShadow: isDark ? 'none' : '0 8px 24px rgba(8,47,73,0.08)',
               borderColor: isDark ? 'rgba(186,230,253,0.28)' : 'rgba(14,165,233,0.28)',
             },
           },

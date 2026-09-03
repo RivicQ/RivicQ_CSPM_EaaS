@@ -18,7 +18,6 @@ import {
 import { Psychology, Shield, Assessment } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { quantumAttestationService } from '../../services/api';
-import TrademarkNotice from '../../components/TrademarkNotice';
 
 const QuantumAttestation: React.FC = () => {
   const { data: assessmentData, isLoading, error } = useQuery({
@@ -53,9 +52,8 @@ const QuantumAttestation: React.FC = () => {
         Quantum Attestation
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        Post-quantum cryptography readiness from this workspace. Optional IBM Quantum hooks require your own API key and are never a hard dependency.
+        Post-quantum cryptography readiness from this workspace. Optional quantum-provider hooks use your own API key and are never a hard dependency.
       </Typography>
-      <TrademarkNotice sx={{ mb: 3 }} />
 
       {error && (
         <Alert severity="info" sx={{ mb: 3 }}>

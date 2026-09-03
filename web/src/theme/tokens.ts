@@ -1,4 +1,4 @@
-/** RivicQ tokens — clear sky blue and white. Independent of IBM Carbon. */
+/** RivicQ Security Cloud tokens — sky blue and white. */
 export const tokens = {
   colors: {
     rivicq: {
@@ -59,7 +59,7 @@ export const tokens = {
     glowPurple: 'none',
     glowBlue: 'none',
     glowGold: 'none',
-    panel: '0 1px 2px rgba(15,23,42,0.06)',
+    panel: '0 1px 2px rgba(15,23,42,0.04), 0 8px 24px rgba(8,47,73,0.06)',
   },
 };
 

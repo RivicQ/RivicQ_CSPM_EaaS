@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RivicQ — Community (Open Source) &amp; Enterprise docs</title>
-  <meta name="description" content="RivicQ documentation hub: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, legal notices, and a clear sky-blue and white theme. Not an IBM product." />
+  <title>RivicQ Security Cloud — Community &amp; Enterprise docs</title>
+  <meta name="description" content="RivicQ Security Cloud documentation: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, and legal notices." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
@@ -28,7 +28,7 @@
 
     body {
       font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
-      background: #ffffff;
+      background: #f7fbff;
       color: #0f172a;
       min-height: 100vh;
     }
@@ -52,7 +52,9 @@
     }
     .header-links a:hover { color: var(--blue-60); }
 
-    .hero { text-align: center; padding: 5rem 2rem 4rem; background: #f7fbff; }
+    .hero { text-align: center; padding: 5rem 2rem 4rem; background:
+      radial-gradient(900px 240px at 50% -20%, rgba(14,165,233,0.16), transparent 60%),
+      #ffffff; }
     .hero-eyebrow {
       display: inline-block;
       background: rgba(14,165,233,0.08);
@@ -174,7 +176,7 @@
 <header>
   <div class="logo">
     <span>RivicQ</span>
-    <span class="logo-badge">EaaS</span>
+    <span class="logo-badge">Security Cloud</span>
   </div>
   <nav class="header-links">
     <a href="/RivicQ_CSPM_EaaS/demo">Demo</a>
@@ -186,12 +188,12 @@
 </header>
 
 <div class="hero">
-  <span class="hero-eyebrow">Apache-2.0 Community · Commercial Enterprise</span>
-  <h1>Cryptographic security posture,<br/>open source and enterprise</h1>
+  <span class="hero-eyebrow">Security SaaS · Apache-2.0 Community · Commercial Enterprise</span>
+  <h1>Cryptographic security platform<br/>for CSPM, CBOM, and PQC</h1>
   <p>
-    CSPM, CryptoBOM, SBOM, and DevSecOps on one engine. Community is Apache License 2.0.
-    Enterprise is a commercial license (SSO, RBAC, cloud connectors, support).
-    The UI uses a clear sky-blue and white theme. IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.
+    One intelligence engine for posture, CryptoBOM, SBOM, and DevSecOps. Community is Apache License 2.0.
+    Enterprise is a commercial control plane (SSO, RBAC, cloud connectors, support).
+    Control mappings are not certifications.
   </p>
   <div class="hero-actions">
     <a class="btn btn-primary" href="/RivicQ_CSPM_EaaS/demo">Interactive demo</a>
@@ -240,7 +242,7 @@
         <div class="preview-edition edition-legal">Legal pack</div>
         <div class="preview-title">License, privacy, trademarks</div>
         <div class="preview-desc">
-          Dual licensing, warranty disclaimer, privacy for Pages vs self-host, and IBM / IBM Plex / Carbon trademark notice.
+          Dual licensing, warranty disclaimer, privacy for Pages vs self-host, and RivicQ trademark policy.
         </div>
         <a class="preview-link" href="/RivicQ_CSPM_EaaS/docs/LEGAL.md">Open LEGAL.md →</a>
       </div>
@@ -266,11 +268,11 @@
     </div>
     <div class="feature-card">
       <div class="feature-title">PQC mapping</div>
-      <div class="feature-desc">Migration planning toward ML-KEM / ML-DSA. Optional IBM Quantum hooks when you supply an API key — never a hard dependency.</div>
+      <div class="feature-desc">Migration planning toward ML-KEM / ML-DSA. Optional quantum-provider hooks when you supply an API key — never a hard dependency.</div>
     </div>
     <div class="feature-card">
       <div class="feature-title">Cloud &amp; HSM connectors</div>
-      <div class="feature-desc">Enterprise inventory for AWS, Azure, GCP, and IBM Cloud when credentials are configured. Empty when disconnected.</div>
+      <div class="feature-desc">Enterprise inventory for AWS, Azure, GCP, and other cloud connectors when credentials are configured. Empty when disconnected.</div>
     </div>
     <div class="feature-card">
       <div class="feature-title">Compliance mappings</div>
@@ -295,7 +297,9 @@
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/PRIVACY.md"><span class="dot"></span> PRIVACY.md</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/TRADEMARKS.md"><span class="dot"></span> TRADEMARKS.md</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/KNOWN_LIMITATIONS.md"><span class="dot"></span> Limitations</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/DATASETS.md"><span class="dot"></span> Datasets</a>
+    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/PRODUCT_STATUS.md"><span class="dot"></span> Product status</a>
+    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/ROADMAP.md"><span class="dot"></span> Roadmap</a>
+    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/QISKIT_PIPELINE.md"><span class="dot"></span> Qiskit pipeline</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/SECURITY.md"><span class="dot"></span> Security</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/login"><span class="dot"></span> /login</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/demo"><span class="dot"></span> /demo</a>
@@ -311,7 +315,6 @@
     <a href="https://rivicq.com">rivicq.com</a>
   </p>
   <p style="margin-top:0.5rem;">
-    IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product.
     Control mappings are not certifications.
   </p>
 </footer>

@@ -312,7 +312,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           <BrandLogo dark={isDark} />
           <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
             <Chip label={`${edition.toUpperCase()} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
-            <Chip label="OSS + Enterprise" variant="outlined" sx={{ fontWeight: 600 }} />
+            <Chip label="Security Cloud" variant="outlined" sx={{ fontWeight: 600 }} />
           </Stack>
         </Box>
 
@@ -323,14 +323,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                 <Stack spacing={3} sx={{ height: '100%' }}>
                   <Box>
                     <Typography variant="overline" sx={{ display: 'block', letterSpacing: 1.2, fontWeight: 600, fontSize: '0.7rem' }}>
-                      Cryptographic Security Posture Management
+                      RivicQ Security Cloud
                     </Typography>
                     <Typography variant="h3" fontWeight={600} sx={{ mt: 1, lineHeight: 1.12, letterSpacing: '-0.02em' }}>
-                      {mode === 'register' ? 'Start building your crypto inventory.' : 'Secure access to your workspace.'}
+                      {mode === 'register' ? 'Stand up your security workspace.' : 'Sign in to the security platform.'}
                     </Typography>
                     <Typography sx={{ mt: 2, maxWidth: 540 }}>
-                      Discover, inventory, and govern cryptographic assets with automated CBOM generation, cloud posture
-                      checks, and post-quantum migration planning.
+                      Enterprise cryptographic SaaS — CBOM inventory, cloud posture, policy gates, and post-quantum
+                      migration planning in one control plane.
                     </Typography>
                   </Box>
 

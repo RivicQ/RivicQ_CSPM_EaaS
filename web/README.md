@@ -6,7 +6,7 @@ Live static build: https://rivicq.github.io/RivicQ_CSPM_EaaS/
 
 ## Visual language
 
-The UI follows a **clear sky-blue and white** theme — not IBM Carbon, not neon violet:
+**RivicQ Security Cloud** — sky-blue and white cryptographic SaaS:
 
 | Token | Hex | Role |
 |-------|-----|------|
@@ -16,9 +16,7 @@ The UI follows a **clear sky-blue and white** theme — not IBM Carbon, not neon
 | Ice | `#f7fbff` | Soft page wash |
 | Sky navy | `#082f49` | Dark chrome / sidebar |
 
-Type: **Outfit** + **JetBrains Mono**.
-
-**IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.**
+Type: **Outfit** + **JetBrains Mono**. Control mappings are not certifications.
 
 Tokens live in `src/theme/tokens.ts`. Theme assembly: `src/theme/theme.ts`.
 

@@ -1,8 +1,8 @@
-# RivicQ — Cryptographic Security Posture Management
+# RivicQ — Cryptographic Security Cloud
 
 **RivicQ GmbH** (Berlin) · Community **open source** (Apache License 2.0) and **Enterprise** (commercial)
 
-RivicQ is an Encryption-as-a-Service (EaaS) platform for **CSPM**, **CBOM**, **SBOM**, and DevSecOps. The same cryptographic intelligence engine powers both editions. Editions are **licenses and feature entitlements**, not a second scanner.
+RivicQ is a **security SaaS platform** for CSPM, CBOM, SBOM, and DevSecOps. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/github/actions/workflow/status/RivicQ/RivicQ_CSPM_EaaS/pages.yml?label=GitHub%20Pages)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions/workflows/pages.yml)
@@ -18,9 +18,7 @@ RivicQ is an Encryption-as-a-Service (EaaS) platform for **CSPM**, **CBOM**, **S
 | **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
 | **Legal pack** | [LEGAL.md](LEGAL.md) · [LICENSE](LICENSE) · [NOTICE](NOTICE) · [PRIVACY.md](PRIVACY.md) · [TRADEMARKS.md](TRADEMARKS.md) · [SECURITY.md](SECURITY.md) |
 
-The web UI uses a **clear sky-blue and white** theme (`#0ea5e9` / `#0284c7` on `#ffffff`) with Outfit and JetBrains Mono. Default is light mode.
-
-**IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.** Optional IBM Cloud / IBM Quantum connectors are interoperability only and require the customer’s own credentials. See [TRADEMARKS.md](TRADEMARKS.md).
+The web UI is the **RivicQ Security Cloud** — a sky-blue and white cryptographic SaaS theme (`#0ea5e9` / `#0284c7` on `#ffffff`) with Outfit and JetBrains Mono. Default is light mode. Control mappings are not certifications.
 
 ---
 
@@ -36,7 +34,7 @@ The web UI uses a **clear sky-blue and white** theme (`#0ea5e9` / `#0284c7` on `
 | CBOM / CycloneDX 1.6 export | Yes | Yes |
 | Dashboard, inventory, scanner | Yes | Yes |
 | Labeled demo trail | Yes (sample data only) | Yes |
-| Multi-cloud inventory (AWS, Azure, GCP, IBM Cloud) | — | Yes — **customer credentials required** |
+| Multi-cloud inventory (AWS, Azure, GCP, and other connectors) | — | Yes — **customer credentials required** |
 | SSO (OIDC; SAML configuration store) | — | Yes — ACS handshake is an operator task with your IdP |
 | RBAC (Viewer, Analyst, Operator, Admin) | Basic roles | Enforced server-side (`RequireRole`) |
 | Immutable audit log viewer | — | Yes — tenant taken from JWT, not spoofable headers |
@@ -166,7 +164,7 @@ Copyright © 2026 RivicQ GmbH, Berlin.
 - **Community source:** Apache License 2.0 — [LICENSE](LICENSE)
 - **Enterprise:** commercial license — contact [rivicq.com](https://rivicq.com)
 - **Attribution / third-party:** [NOTICE](NOTICE)
-- **Trademarks (IBM, IBM Plex, Carbon, IBM Quantum):** [TRADEMARKS.md](TRADEMARKS.md)
+- **Trademarks:** [TRADEMARKS.md](TRADEMARKS.md)
 - **Privacy:** [PRIVACY.md](PRIVACY.md)
 - **Warranty:** software is provided as described in Apache-2.0 §7–8 and [LEGAL.md](LEGAL.md). No certification, audit opinion, or legal advice is implied.
 

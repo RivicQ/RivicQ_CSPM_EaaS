@@ -35,7 +35,7 @@ You may use Community software in commercial products under Apache-2.0, provided
   - Multi-cloud inventory (AWS, GCP, Azure, IBM Cloud) when credentials are configured
   - Enterprise SSO, RBAC enforcement, audit log viewer
   - Compliance report packs (mappings)
-  - Optional IBM Quantum / HSM connectors when the customer supplies keys — **never a hard runtime dependency**
+  - Optional quantum / HSM connectors when the customer supplies keys — **never a hard runtime dependency**
 
 Enterprise is **not** granted by cloning this repo. Contact [rivicq.com](https://rivicq.com).
 

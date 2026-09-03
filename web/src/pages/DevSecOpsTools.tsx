@@ -256,7 +256,7 @@ const DevSecOpsTools: React.FC = () => {
               <Box sx={{ p: 2, borderRadius: `${tokens.borderRadius.md}px`, bgcolor: 'rgba(79,70,229,0.08)', border: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" fontWeight={700} sx={{ color: 'primary.main' }}>Enterprise</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  CISO, CSPM, compliance, IBM Quantum, AWS/GCP integrations, and advanced reporting.
+                  CISO, CSPM, compliance, quantum readiness, AWS/GCP integrations, and advanced reporting.
                 </Typography>
               </Box>
             </Stack>

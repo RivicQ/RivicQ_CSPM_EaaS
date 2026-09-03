@@ -16,7 +16,6 @@ import {
 import { Security, Key, Storage } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { ibmCloudService } from '../../services/api';
-import TrademarkNotice from '../../components/TrademarkNotice';
 
 const IBMCloud: React.FC = () => {
   const { data: statusData, isLoading: statusLoading, error: statusError } = useQuery({
@@ -54,9 +53,8 @@ const IBMCloud: React.FC = () => {
         IBM Cloud HPCS
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        Optional connector to IBM Hyper Protect Crypto Services. Requires customer IBM Cloud credentials.
+        Optional connector to IBM Hyper Protect Crypto Services. Requires customer cloud credentials.
       </Typography>
-      <TrademarkNotice sx={{ mb: 3 }} />
 
       {statusError && (
         <Alert severity="info" sx={{ mb: 3 }}>

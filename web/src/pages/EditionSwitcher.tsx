@@ -40,7 +40,7 @@ const EditionSwitcher: React.FC = () => {
       icon: <WorkspacePremium sx={{ fontSize: 34 }} />,
       edition: 'enterprise' as Edition,
       accent: '#198038',
-      highlights: ['Quantum & HSM (IBM/HPCS)', 'SSO, audit & RBAC', 'Terraform & IaC scanning', 'Executive analytics'],
+      highlights: ['Quantum & HSM connectors', 'SSO, audit & RBAC', 'Terraform & IaC scanning', 'Executive analytics'],
       action: 'Continue with Enterprise',
     },
   ];
@@ -145,7 +145,7 @@ const EditionSwitcher: React.FC = () => {
             What gets locked in Community
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Cloud posture, conformance packs, compliance, quantum attestation, IBM Cloud, AWS HSM, and multi-cloud executive reporting are available in Professional and Enterprise.
+            Cloud posture, conformance packs, compliance, quantum attestation, cloud HSM connectors, AWS HSM, and multi-cloud executive reporting are available in Professional and Enterprise.
           </Typography>
         </Box>
       </Container>

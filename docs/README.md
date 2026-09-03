@@ -6,12 +6,12 @@
 |-------|-----------------|
 | [LEGAL.md](../LEGAL.md) — dual license, warranty, export | [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) |
 | [PRIVACY.md](../PRIVACY.md) — Pages vs self-host | [DATASETS.md](../DATASETS.md) — synthetic samples only |
-| [TRADEMARKS.md](../TRADEMARKS.md) — IBM / IBM Plex / Carbon disclaimer | [editions.md](editions.md) — Community vs Enterprise |
+| [TRADEMARKS.md](../TRADEMARKS.md) — RivicQ marks and third-party names | [editions.md](editions.md) — Community vs Enterprise |
 | [NOTICE](../NOTICE) · [LICENSE](../LICENSE) | [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) |
 
 The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
 
-UI colors follow a **clear sky-blue and white** theme (`#0284c7` on `#ffffff`). **IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.**
+UI colors follow the **Security Cloud** sky-blue and white theme (`#0284c7` on `#ffffff`). Control mappings are not certifications.
 
 ## Getting started
 

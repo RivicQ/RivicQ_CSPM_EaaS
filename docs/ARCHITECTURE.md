@@ -115,7 +115,6 @@ Shipped or in progress:
 - GitHub Pages has **no production API**. Demo Access there is an isolated client marker, not a JWT.
 - Cloud inventory without credentials is empty, not simulated as a customer estate (except the labeled demo).
 - Compliance dashboards are **control mappings**, not ISO/SOC/NIST certifications.
-- IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product.
 - Firmware/hardware crypto visibility is inventory + static/package/config + connectors.
 
 ## Prioritized builds

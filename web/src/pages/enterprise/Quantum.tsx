@@ -44,7 +44,6 @@ import {
   Cell,
 } from 'recharts';
 import { quantumService } from '../../services/api';
-import TrademarkNotice from '../../components/TrademarkNotice';
 
 const ALGORITHMS = [
   { name: 'ML-KEM (FIPS 203)', type: 'KEM', status: 'NIST standard', security_level: 5 },
@@ -52,7 +51,7 @@ const ALGORITHMS = [
   { name: 'SLH-DSA (FIPS 205)', type: 'Signature', status: 'NIST standard', security_level: 5 },
 ];
 
-const COLORS = ['#24a148', '#ff832b', '#da1e28'];
+const COLORS = ['#059669', '#ea580c', '#dc2626'];
 
 const QuantumReadiness: React.FC = () => {
   const [readiness, setReadiness] = useState<any>(null);
@@ -141,7 +140,6 @@ const QuantumReadiness: React.FC = () => {
           </Button>
         </Box>
         </Box>
-        <TrademarkNotice />
       </Box>
 
       {loading && <LinearProgress sx={{ mb: 2 }} />}
@@ -270,7 +268,7 @@ const QuantumReadiness: React.FC = () => {
       <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>Quantum Networks</Typography>
       {networks.length === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          No backends connected. IBM Quantum is an optional customer-credentialed integration. IBM is a trademark of IBM. RivicQ is not an IBM product.
+          No backends connected. Optional quantum providers use customer credentials when configured.
         </Typography>
       )}
       <Grid container spacing={3} sx={{ mb: 3 }}>

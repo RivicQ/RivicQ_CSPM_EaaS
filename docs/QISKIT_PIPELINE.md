@@ -56,5 +56,3 @@ python3 sdk/python/rivicq_qiskit/pipeline.py
 ```
 
 See [sdk/python/rivicq_qiskit/README.md](../sdk/python/rivicq_qiskit/README.md).
-
-IBM, Qiskit, and IBM Quantum are trademarks of IBM. RivicQ is not an IBM product.

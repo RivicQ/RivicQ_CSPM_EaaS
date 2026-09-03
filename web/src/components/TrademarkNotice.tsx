@@ -1,12 +1,12 @@
 import React from 'react';
 import { Typography, TypographyProps } from '@mui/material';
 
-/**
- * Required trademark line for IBM Quantum / IBM Cloud interoperability screens.
- * IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product.
- */
-export const IBM_TRADEMARK_LINE =
-  'IBM, IBM Plex, and Carbon are trademarks of IBM. RivicQ is not an IBM product. Control mappings are not certifications.';
+/** Product honesty line — not a certification and not a third-party brand. */
+export const PRODUCT_NOTICE_LINE =
+  'RivicQ GmbH · cryptographic security platform. Control mappings are not certifications.';
+
+/** @deprecated Use PRODUCT_NOTICE_LINE */
+export const IBM_TRADEMARK_LINE = PRODUCT_NOTICE_LINE;
 
 const TrademarkNotice: React.FC<{ compact?: boolean; sx?: TypographyProps['sx'] }> = ({ compact, sx }) => (
   <Typography
@@ -21,7 +21,7 @@ const TrademarkNotice: React.FC<{ compact?: boolean; sx?: TypographyProps['sx'] 
       ...sx,
     }}
   >
-    {IBM_TRADEMARK_LINE}
+    {PRODUCT_NOTICE_LINE}
   </Typography>
 );
 

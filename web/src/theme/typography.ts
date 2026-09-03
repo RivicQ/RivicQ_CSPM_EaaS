@@ -1,4 +1,4 @@
-/** RivicQ type — Outfit (UI) + JetBrains Mono. Not IBM Plex. */
+/** RivicQ Security Cloud type — Outfit (UI) + JetBrains Mono. */
 export const appTypography = {
   fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
   fontFamilyMono: '"JetBrains Mono", "SF Mono", ui-monospace, monospace',
