@@ -231,7 +231,7 @@ const Scanner: React.FC = () => {
     const target = scanTarget.trim();
     if (!target) { setError('Specify a scan target (website, host, IP, server, pod://ns/name, or qsic://).'); return; }
     const looksLikeWebsite = /^(https?:\/\/|www\.)/i.test(target);
-    const looksLikeIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(target) || target.includes(':') && target.includes('.');
+    const looksLikeIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(target) || (target.includes(':') && target.includes('.'));
     let resolvedType = scanType;
     if (targetClass === 'website' || (looksLikeWebsite && targetClass === 'host')) resolvedType = 'website';
     else if (targetClass === 'ip' || (looksLikeIP && targetClass === 'host')) resolvedType = 'ip';
