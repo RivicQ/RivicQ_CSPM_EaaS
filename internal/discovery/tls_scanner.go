@@ -281,6 +281,27 @@ func (s *TLSScanner) checkCertificate(target Target, cert *x509.Certificate, now
 				QuantumSafe: false,
 				ScannedAt:   now,
 			})
+		} else {
+			findings = append(findings, Finding{
+				ID:          uuid.New().String(),
+				TargetID:    target.ID,
+				TargetLabel: target.Label,
+				Host:        target.Host,
+				Port:        target.Port,
+				Protocol:    "tls",
+				FindingType: "TLS_CERT_ALGORITHM",
+				Title:       fmt.Sprintf("TLS certificate uses ECDSA (P-%d)", bits),
+				Description: "Elliptic-curve certificate key recorded for CBOM and Qiskit scoring. P-256+ meets current classical minima and remains Shor-vulnerable for long-term confidentiality.",
+				Evidence:    fmt.Sprintf("Certificate public key: ECDSA P-%d", bits),
+				Severity:    SeverityInfo,
+				Algorithm:   "ECDSA",
+				KeyLength:   bits,
+				Remediation: "Keep P-256/P-384 for classical TLS; plan hybrid ML-KEM for harvest-now-decrypt-later exposure on long-lived data.",
+				BSIRef:      "BSI TR-02102-1, Section 3.6",
+				DORARef:     "DORA Art. 9(2)",
+				QuantumSafe: false,
+				ScannedAt:   now,
+			})
 		}
 	}
 

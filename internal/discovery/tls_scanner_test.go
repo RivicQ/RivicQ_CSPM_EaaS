@@ -203,10 +203,15 @@ func TestTLSScanner_TLS13_ECDHE_NoFindings(t *testing.T) {
 	require.NoError(t, err)
 
 	// TLS 1.3 with a good EC cert should produce no critical or high findings
+	var sawCert bool
 	for _, f := range findings {
 		assert.NotEqual(t, SeverityCritical, f.Severity, "unexpected CRITICAL finding: %s", f.Title)
 		assert.NotEqual(t, SeverityHigh, f.Severity, "unexpected HIGH finding: %s", f.Title)
+		if f.FindingType == "TLS_CERT_ALGORITHM" && f.Algorithm == "ECDSA" {
+			sawCert = true
+		}
 	}
+	assert.True(t, sawCert, "expected INFO ECDSA inventory finding for CBOM/Qiskit")
 }
 
 func TestTLSScanner_RSA2048_Medium(t *testing.T) {
