@@ -44,6 +44,12 @@ type Features struct {
 	SSOSAMIL             bool `json:"sso"`
 	AuditLog             bool `json:"auditLog"`
 	APIKeysWebhooks      bool `json:"apiKeysWebhooks"`
+	AIBOM                bool `json:"aibom"`
+	IBOM                 bool `json:"ibom"`
+	ApiSecurity          bool `json:"apiSecurity"`
+	AiSecurity           bool `json:"aiSecurity"`
+	HSMConnector         bool `json:"hsmConnector"`
+	DevSecOpsPipeline    bool `json:"devSecOpsPipeline"`
 	APIRateLimit         int  `json:"apiRateLimit"`
 }
 
@@ -94,6 +100,12 @@ func ossConfig() *Config {
 			SSOSAMIL:             false,
 			AuditLog:             false,
 			APIKeysWebhooks:      false,
+			AIBOM:                false,
+			IBOM:                 false,
+			ApiSecurity:          true,
+			AiSecurity:           false,
+			HSMConnector:         false,
+			DevSecOpsPipeline:    true,
 			APIRateLimit:         100,
 		},
 	}
@@ -133,6 +145,12 @@ func enterpriseConfig() *Config {
 			SSOSAMIL:             true,
 			AuditLog:             true,
 			APIKeysWebhooks:      true,
+			AIBOM:                true,
+			IBOM:                 true,
+			ApiSecurity:          true,
+			AiSecurity:           true,
+			HSMConnector:         true,
+			DevSecOpsPipeline:    true,
 			APIRateLimit:         rateLimit,
 		},
 	}
@@ -159,8 +177,15 @@ func (c *Config) Public() map[string]any {
 		"connectors": map[string]any{
 			"cloud":   c.Features.CloudConnectors,
 			"quantum": c.Features.QuantumConnector,
-			"hsm":     c.Features.AWSHSMIntegration,
+			"hsm":     c.Features.HSMConnector || c.Features.AWSHSMIntegration,
 			"note":    "Connectors are empty without customer credentials. Qiskit scores are local. QSIC is a research ASIC declaration.",
+		},
+		"bom_layers": map[string]any{
+			"cbom":  true,
+			"qbom":  c.Features.QiskitProfile,
+			"sbom":  c.Features.LocalSBOM,
+			"aibom": c.Features.AIBOM,
+			"ibom":  c.Features.IBOM,
 		},
 	}
 }

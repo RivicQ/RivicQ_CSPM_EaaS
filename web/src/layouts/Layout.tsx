@@ -54,7 +54,15 @@ import {
   Logout,
   Person,
   AdminPanelSettings,
+  AccountTree,
+  Hub,
+  Api,
+  Timeline,
+  VpnKey,
+  Policy,
+  SwapHoriz,
 } from '@mui/icons-material';
+import BomRibbon from '../components/bom/BomRibbon';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
@@ -135,10 +143,20 @@ const Layout: React.FC = () => {
     { text: 'Command Center', icon: <Dashboard />, path: '/dashboard' },
     { text: isDemo ? 'Demo Trail' : 'Try Demo', icon: <Psychology />, path: '/demo' },
     { text: 'Scanner', icon: <Security />, path: '/scanner' },
+    { text: 'BOM Intelligence', icon: <AccountTree />, path: '/bom' },
     { text: 'Assets', icon: <Storage />, path: '/assets' },
     { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
     { text: 'DevSecOps Tools', icon: <Category />, path: '/tools' },
     { text: 'RivicQ Ecosystem', icon: <CloudQueue />, path: '/ecosystem' },
+  ];
+
+  const bomItems: NavItem[] = [
+    { text: 'DevSecOps Pipeline', icon: <Timeline />, path: '/pipeline', section: 'Five-BOM' },
+    { text: 'API Security', icon: <Api />, path: '/security/api', section: 'Five-BOM' },
+    { text: 'AI Security', icon: <Hub />, path: '/security/ai', section: 'Five-BOM' },
+    { text: 'HSM & Quantum', icon: <VpnKey />, path: '/connectors/hsm', section: 'Five-BOM' },
+    { text: 'Governance', icon: <Policy />, path: '/governance', section: 'Five-BOM' },
+    { text: 'PQC Migration', icon: <SwapHoriz />, path: '/migration', section: 'Five-BOM' },
   ];
 
   const settingsItem: NavItem = { text: 'Settings', icon: <Settings />, path: '/settings' };
@@ -162,6 +180,7 @@ const Layout: React.FC = () => {
   const navMatch = (item: NavItem) => item.text.toLowerCase().includes(navQuery.trim().toLowerCase());
   const workspaceSource = navQuery ? allWorkspaceItems : navigationItems;
   const workspaceMatches = navQuery ? workspaceSource.filter(navMatch) : workspaceSource;
+  const bomMatches = navQuery ? bomItems.filter(navMatch) : bomItems;
   const enterpriseMatches = navQuery ? enterpriseNav.filter(navMatch) : enterpriseNav;
 
   const modulesNav: NavItem[] = [
@@ -182,6 +201,7 @@ const Layout: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const currentSection = React.useMemo(() => {
+    if (bomItems.some((it) => isActive(it.path)) || location.pathname === '/bom') return 'Five-BOM';
     if (enterpriseItems.some((it) => isActive(it.path))) return 'Enterprise';
     if (location.pathname.startsWith('/modules')) return 'Security Modules';
     return 'Workspace';
@@ -192,7 +212,7 @@ const Layout: React.FC = () => {
   const isDarkMode = mode === 'dark';
 
   const currentTitle = React.useMemo(() => {
-    const all = [...allWorkspaceItems, ...enterpriseItems, ...modulesNav];
+    const all = [...allWorkspaceItems, ...bomItems, ...enterpriseItems, ...modulesNav];
     const active = all.find((it) => it.path !== '/modules' && isActive(it.path));
     if (location.pathname.startsWith('/modules/') && location.pathname !== '/modules') {
       const m = MODULES.find((x) => x.id === location.pathname.split('/')[2]);
@@ -347,6 +367,15 @@ const Layout: React.FC = () => {
               Workspace
             </Typography>
             {workspaceMatches.map((item) => renderNavItem(item))}
+          </List>
+        )}
+
+        {bomMatches.length > 0 && (
+          <List sx={{ px: 0, py: 0 }}>
+            <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
+              Five-BOM
+            </Typography>
+            {bomMatches.map((item) => renderNavItem(item))}
           </List>
         )}
 
@@ -505,6 +534,9 @@ const Layout: React.FC = () => {
               <Typography noWrap sx={appBarPageTitleSx(mode)}>
                 {currentTitle}
               </Typography>
+            </Box>
+            <Box sx={{ display: { xs: 'none', xl: 'block' } }}>
+              <BomRibbon compact />
             </Box>
           </Stack>
 
@@ -753,14 +785,15 @@ const Layout: React.FC = () => {
         >
           <BottomNavigation
             showLabels
-            value={navigationItems.findIndex((it) => isActive(it.path))}
+            value={Math.max(0, [navigationItems[0], navigationItems[2], navigationItems[3], navigationItems[4]].findIndex((it) => isActive(it.path)))}
             onChange={(_, idx) => {
-              const item = navigationItems[idx];
+              const mobileNav = [navigationItems[0], navigationItems[2], navigationItems[3], navigationItems[4]];
+              const item = mobileNav[idx];
               if (item) handleNavigation(item.path);
             }}
             sx={{ height: 56 }}
           >
-            {navigationItems.slice(0, 4).map((item) => (
+            {[navigationItems[0], navigationItems[2], navigationItems[3], navigationItems[4]].map((item) => (
               <BottomNavigationAction key={item.path} label={item.text.split(' ')[0]} icon={item.icon} />
             ))}
           </BottomNavigation>

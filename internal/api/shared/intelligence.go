@@ -47,6 +47,7 @@ func SetupIntelligenceRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	router.GET("/scans/:id/cyclonedx", GetScanCycloneDX(logger))
 	router.GET("/architecture", PlatformArchitectureHandler(logger))
 	router.GET("/hardware/catalog", HardwareCatalogHandler(logger))
+	SetupBOMRoutes(router, logger)
 }
 
 func IntelligenceToolsHandler(logger *logrus.Logger) gin.HandlerFunc {

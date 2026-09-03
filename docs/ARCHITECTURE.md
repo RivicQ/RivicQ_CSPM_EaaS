@@ -7,7 +7,7 @@ This is not a certification, and it does not claim firmware reverse-engineering.
 
 ## Core SaaS layers
 
-Four-layer CBOM architecture (input → engine → PQC operationalization → outputs), with a client path of **discover → mitigate → report**. Details: [CLIENT_ARCHITECTURE.md](CLIENT_ARCHITECTURE.md).
+Four-layer CBOM architecture (input → engine → PQC operationalization → outputs), with a client path of **discover → mitigate → report**, plus the five-BOM DevSecOps overlay ([BOM_FRAMEWORK.md](BOM_FRAMEWORK.md)). Details: [CLIENT_ARCHITECTURE.md](CLIENT_ARCHITECTURE.md).
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -45,7 +45,7 @@ Live GitHub Pages demo is **Community-limited** (labeled sample data, no product
 | Surface | Who | Home |
 |---|---|---|
 | Public | Anonymous | Marketing home, free/local scan path, **limited Community** Interactive Demo |
-| Community | Authenticated OSS | Command Center, Scanner (website/host/IP/server/pod), Assets, Analytics, Settings |
+| Community | Authenticated OSS | Command Center, Scanner, **Five-BOM** (CBOM/SBOM/QBOM), Pipeline, API security, Assets, Analytics, Settings |
 | Enterprise | Authenticated paid workspace | Community surfaces + inventory, compliance, multi-cloud, quantum, admin |
 
 Fast path: visit → Demo or Register → Command Center → first CBOM in the scanner (CLI: `rivicq scan .`).
@@ -58,6 +58,7 @@ Shared by Community and Enterprise:
 
 - `internal/discovery` — TLS, SSH, HTTP(S) websites, SBOM/package cryptographic discovery
 - `internal/intelligence` — normalized findings, crypto risk, policy gate, Qiskit profile, audit score
+- `internal/bom` — five-BOM overlay (CBOM/QBOM/SBOM Community; AIBOM/IBOM Enterprise) without changing ScanResult
 - CycloneDX CBOM via `/scans/:id/cyclonedx` and the intelligence pipeline
 - Qiskit pipeline via `/scans/:id/qiskit` (local taxonomy; not IBM Quantum hardware)
 - Scan report JSON is `discovery.ScanResult` (`GetCBOMScanReport`)
@@ -118,6 +119,7 @@ Shipped or in progress:
 | Scan targets | Website, host, IP, server, declared pod, QSIC catalog | Same + live kube attach, cloud connectors |
 | Auth | Login, register, MFA, OAuth | + SSO config, audit, API keys, webhooks |
 | DORA / GRC | JSON mappings | Pack flag + control-plane evidence |
+| Five-BOM | CBOM + SBOM + local QBOM | + AIBOM + IBOM + HSM connector |
 | Workspaces | Single-tenant OSS default | JWT tenant isolation on control-plane APIs |
 | Demo on Pages | Limited Community session (`rivicq-demo-session`) | Same demo label; not a customer tenant |
 

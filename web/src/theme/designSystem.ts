@@ -4,7 +4,7 @@ import appTypography from './typography';
 
 /** Creative professional design system — shared across the entire product */
 export const designSystem = {
-  radius: { sm: 4, md: 6, lg: 8, xl: 10, pill: 9999 },
+  radius: { sm: 6, md: 10, lg: 14, xl: 20, pill: 9999 },
   font: {
     display: appTypography.fontFamily,
     mono: appTypography.fontFamilyMono,

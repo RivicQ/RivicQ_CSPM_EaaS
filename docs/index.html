@@ -189,10 +189,10 @@
 
 <div class="hero">
   <span class="hero-eyebrow">Security SaaS · Apache-2.0 Community · Commercial Enterprise</span>
-  <h1>Cryptographic security platform<br/>for CSPM, CBOM, and PQC</h1>
+  <h1>Cryptographic security platform<br/>for CSPM, five-BOM, and PQC</h1>
   <p>
-    One intelligence engine for posture, CryptoBOM, SBOM, and DevSecOps. Community is a <strong>limited</strong> Apache-2.0 scan engine
-    (website, host, IP, server, declared pods). Enterprise is a commercial control plane (SSO, RBAC, cloud connectors, DORA pack).
+    One intelligence engine for posture, QBOM / AIBOM / SBOM / IBOM / CBOM, and DevSecOps. Community is a <strong>limited</strong> Apache-2.0 scan engine
+    (website, host, IP, server, declared pods, local QBOM). Enterprise is a commercial control plane (SSO, RBAC, HSM connectors, DORA pack).
     Control mappings are not certifications. QSIC is declared research hardware.
   </p>
   <div class="hero-actions">
@@ -204,7 +204,7 @@
 
 <div class="stats">
   <div class="stat"><div class="stat-value">OSS + Ent</div><div class="stat-label">Same security engine</div></div>
-  <div class="stat"><div class="stat-value">CBOM</div><div class="stat-label">CycloneDX crypto inventory</div></div>
+  <div class="stat"><div class="stat-value">5 BOM</div><div class="stat-label">QBOM · AIBOM · SBOM · IBOM · CBOM</div></div>
   <div class="stat"><div class="stat-value">CLI</div><div class="stat-label">rivicq scan .</div></div>
   <div class="stat"><div class="stat-value">Demo</div><div class="stat-label">Labeled sample data</div></div>
   <div class="stat"><div class="stat-value">Mappings</div><div class="stat-label">Not certifications</div></div>
@@ -220,7 +220,7 @@
         <div class="preview-edition edition-oss">Community · Apache-2.0</div>
         <div class="preview-title">Open source edition</div>
         <div class="preview-desc">
-          Limited engine: CLI, GitHub Action, website/host/IP/server/pod CBOM, dashboard. Discover → mitigate → report as JSON. Apache-2.0 with NOTICE preserved.
+          Limited engine: CLI, GitHub Action, website/host/IP/server/pod CBOM, local QBOM, TLS API hygiene, pipeline stages 1–6. Discover → mitigate → report as JSON. Apache-2.0 with NOTICE preserved.
         </div>
         <a class="preview-link" href="/RivicQ_CSPM_EaaS/scanner">Open scanner →</a>
       </div>
@@ -254,6 +254,10 @@
   <h2 class="section-title">What is actually live</h2>
   <p class="section-sub">Honest capabilities. Cloud connectors and quantum APIs need customer credentials.</p>
   <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-title">Five-BOM intelligence</div>
+      <div class="feature-desc">QBOM, AIBOM, SBOM, IBOM, CBOM. Community runs CBOM, SBOM, and local QBOM. AIBOM and IBOM unlock with Enterprise. Partner APIs stay empty without credentials.</div>
+    </div>
     <div class="feature-card">
       <div class="feature-title">Discover → mitigate → report</div>
       <div class="feature-desc">Website, host, IP, server, declared Kubernetes pods, and QSIC/HSM catalog. PQC mapping to ML-KEM/ML-DSA. Community JSON; Enterprise DORA pack.</div>
@@ -299,6 +303,7 @@
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/KNOWN_LIMITATIONS.md"><span class="dot"></span> Limitations</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/ARCHITECTURE.md"><span class="dot"></span> Architecture</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/CLIENT_ARCHITECTURE.md"><span class="dot"></span> Client architecture</a>
+    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/BOM_FRAMEWORK.md"><span class="dot"></span> Five-BOM</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/ROADMAP.md"><span class="dot"></span> Roadmap</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/QISKIT_PIPELINE.md"><span class="dot"></span> Qiskit pipeline</a>
     <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/SECURITY.md"><span class="dot"></span> Security</a>

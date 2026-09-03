@@ -62,6 +62,8 @@ jobs:
           cp docs/QISKIT_PIPELINE.md web/build/docs/QISKIT_PIPELINE.md
           cp docs/ARCHITECTURE.md web/build/docs/ARCHITECTURE.md
           cp docs/CLIENT_ARCHITECTURE.md web/build/docs/CLIENT_ARCHITECTURE.md
+          cp docs/BOM_FRAMEWORK.md web/build/docs/BOM_FRAMEWORK.md
+          cp docs/PQC_MIGRATION.md web/build/docs/PQC_MIGRATION.md
           cp docs/editions.md web/build/docs/editions.md
           cp DATASETS.md web/build/docs/DATASETS.md
           cp LEGAL.md web/build/docs/LEGAL.md

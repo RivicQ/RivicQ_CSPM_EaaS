@@ -1,79 +1,60 @@
-Post-Quantum Cryptography (PQC) Migration Plan
-=============================================
+# Post-quantum cryptography migration
 
-Status overview
-- Project edition: Open Source (OSS) — server, tests, and frontend build pass.
-- Enterprise features (IBM Quantum-backed attestation) are implemented as a provider but currently mocked in `core-engine/providers/ibmq/ibm_quantum_client.go`.
-- Current completion: core infra and UX for PQC analysis exist; real IBM API calls and CI-safe tests are pending.
+Operator guide for shifting classical crypto to NIST PQC (FIPS 203/204/205).
+This is a **planning map**, not a key-rotation product and not a certification.
 
-Goals
-- Provide clear, executable plan to migrate cryptographic systems to post-quantum algorithms (PQC).
-- Deliver reproducible tooling, tests, and documentation for OSS and Enterprise users.
+Companion: [BOM_FRAMEWORK.md](BOM_FRAMEWORK.md) · [QISKIT_PIPELINE.md](QISKIT_PIPELINE.md) · [CLIENT_ARCHITECTURE.md](CLIENT_ARCHITECTURE.md)
 
-High-level phases
-1. Discovery & Assessment (done / partial)
-   - Inventory crypto algorithms and key sizes (implemented in discovery).
-   - Produce CBOM reports containing `IBMQuantumScore` field (exists).
-2. Risk Analysis & Recommendations (done / partial)
-   - Provider-based risk scoring (mocked IBM provider implemented).
-   - Generate recommended PQC algorithms and migration timelines (mocked logic in provider).
-3. Validation & Proof (in progress)
-   - Integrate with real IBM Quantum API to validate attestation results (requires `IBMQ_API_KEY`).
-   - Add CI mocks so PRs do not require live IBM credentials.
-4. Migration Toolkit (next)
-   - Scripts to rotate keys, replace RSA/ECC keys with PQC alternatives (Kyber, Dilithium), and validate interoperability.
-   - Migration playbooks for production HSMs (AWS CloudHSM, IBM HPCS, GCP KMS).
-5. Monitoring & Verification (next)
-   - Add runtime checks in health endpoints to surface PQC migration status.
-   - Continuous scans and CBOM regeneration to track migration progress.
+## What ships today
 
-Key deliverables (short-term)
-- `docs/PQC_MIGRATION.md` (this file)
-- CI mocks for IBMQ provider to allow PRs without secrets
-- Real IBMQ client implementation in `core-engine/providers/ibmq` (non-blocking: fall back to mocks)
-- Migration scripts and example playbooks in `scripts/` and `deploy/`
+1. **Discover** — CBOM + SBOM from website, host, IP, server, declared pod, and local path.
+2. **Score** — local `qiskitprofile` taxonomy (Shor / Grover / PQC). IBM Quantum Runtime is **not** invoked.
+3. **Map** — Shor-class → ML-KEM / ML-DSA (hybrid recommended); Grover-class → AES-256 / SHA-384+; PQC → keep parameter set.
+4. **Report** — intelligence `pqc_readiness` plus `/migration` in the console. Community is JSON. Enterprise adds the DORA pack flag.
 
-Required secrets & environment vars
-- `IBMQ_API_KEY` — required for live IBM Quantum calls (Enterprise only)
-- `IBM_CLOUD_API_KEY`, `IBM_HPCS_INSTANCE` — for IBM cloud/HSM features
-- `AUTH_ALLOWED_DOMAINS`, `JWT_SECRET` — for production auth enforcement
+The engine **does not rotate production keys**. Hybrid classical + PQC is the recommended cut-over.
 
-Immediate next actions (pick priority)
-- Priority A (OSS-focused):
-  - Remove remaining demo markers from frontend and docs (`web/` files).
-  - Document required auth env vars for CI/deploy (create `docs/DEPLOY_ENV.md`).
-- Priority B (Enterprise-focused):
-  - Implement real IBM API calls in `core-engine/providers/ibmq/ibm_quantum_client.go` and unit tests.
-  - Add CI mocks/stubs for IBMQ provider and add a workflow matrix for `ibmq: mock|real`.
+## Workbook layers → QBOM
 
-How to run locally with Enterprise+IBMQ (developer steps)
-1. Export IBM credentials locally (DO NOT commit):
+PQC Readiness Assessment layers:
 
-```bash
-export IBMQ_API_KEY="your_real_ibmq_api_key"
-export IBM_CLOUD_API_KEY="your_ibm_cloud_key"
-export IBM_HPCS_INSTANCE="your_hpcs_instance"
-export JWT_SECRET="change-this-in-prod"
-export AUTH_ALLOWED_DOMAINS="example.com"
+`SBOM / CBOM / HBOM / AIBOM` → synthesized **QBOM**
+
+| Input | Community | Enterprise |
+|---|---|---|
+| SBOM | Lockfiles / local path | Same + optional Syft/Trivy |
+| CBOM | Shared engine | Same |
+| HBOM | Declared HSM/TPM/QSIC catalog | Persistable inventory; PKCS#11 when a module path exists |
+| AIBOM | Locked | Declared model registry |
+| QBOM | Local taxonomy | Same + optional runtime / migration partner key |
+
+CRQC dates in third-party roadmaps are **not executed** here.
+
+## Shift phases
+
+| Phase | Community | Enterprise |
+|---|---|---|
+| Inventory | `rivicq scan .` / website TLS | Same + live kube attach / cloud connectors |
+| Classify | Attack class + replacement | Same |
+| Plan | JSON migration list | Same + GRC pack / partner confirmation |
+| Cut-over | Operator-owned | Optional HSM connector stores PQC keys you generate |
+| Verify | Re-scan CBOM | Continuous monitoring (pipeline stage 7) |
+
+## Connectors (empty without credentials)
+
+- `CRYPTONEXT_API_KEY` — optional PQC PKI confirmation
+- `PKCS11_MODULE` / `CRYPTO4A_API_KEY` — optional HSM
+- `IBMQ_API_KEY` — optional quantum runtime (never required for scores)
+- Cloud HSM IAM — optional
+
+FIPS 140-3 claims belong to the **customer module**, not RivicQ.
+
+## APIs
+
 ```
-
-2. Start enterprise edition and verify IBMQ status:
-
-```bash
-./run-edition.sh enterprise start
-./run-edition.sh status
-./validate.sh
+GET /api/v1/scans/:id/intelligence   # pqc_readiness + client_architecture
+GET /api/v1/scans/:id/qiskit         # local estate score
+GET /api/v1/bom/unified
+GET /api/v1/quantum/status
+GET /api/v1/hsm/status
 ```
-
-3. Run targeted IBMQ provider tests (when implemented):
-
-```bash
-go test ./core-engine/providers/ibmq -v
-```
-
-Ownership & contacts
-- Core maintainers: see `MAINTAINERS.md` and GitHub team.
-- For IBM integration assistance, coordinate with the Security Strategy lead (IBM Quantum contact in `Website` pages).
-
-Notes
-- The project is OSS-ready for production use without Enterprise IBM features. Enterprise enhancements are optional but recommended for hardware-backed attestation workflows.

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import {
-  FactCheck, GppGood, Hub, Memory, Psychology, GitHub,
+  FactCheck, Hub, Memory, Psychology, GitHub, AccountTree,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
@@ -17,12 +17,12 @@ type Capability = {
 };
 
 const CAPABILITIES: Capability[] = [
-  { label: 'GitHub Scan', hint: 'Real repository analysis', icon: <GitHub />, path: '/scanner?tab=github', accent: tokens.colors.rivicq[500] },
+  { label: 'Five-BOM', hint: 'QBOM · AIBOM · SBOM · IBOM · CBOM', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[500] },
+  { label: 'GitHub Scan', hint: 'Real repository analysis', icon: <GitHub />, path: '/scanner?tab=github', accent: tokens.colors.crypto.quantum },
   { label: 'CBOM', hint: 'Crypto bill of materials', icon: <Memory />, path: '/scanner', accent: tokens.colors.crypto.quantum },
-  { label: 'PQC', hint: 'Quantum readiness', icon: <Psychology />, path: '/enterprise/quantum', accent: tokens.colors.gold[500] },
-  { label: 'Compliance', hint: 'Control mapping', icon: <FactCheck />, path: '/enterprise/compliance', accent: tokens.colors.crypto.low },
-  { label: 'CSPM', hint: 'Posture command', icon: <GppGood />, path: '/enterprise/cspm', accent: tokens.colors.rivicq[700] },
-  { label: 'Graph', hint: 'Asset relationships', icon: <Hub />, path: '/analytics', accent: tokens.colors.crypto.info },
+  { label: 'PQC', hint: 'Quantum readiness', icon: <Psychology />, path: '/migration', accent: tokens.colors.gold[500] },
+  { label: 'Governance', hint: 'Control mapping', icon: <FactCheck />, path: '/governance', accent: tokens.colors.crypto.low },
+  { label: 'Pipeline', hint: 'Eight-stage DevSecOps', icon: <Hub />, path: '/pipeline', accent: tokens.colors.crypto.info },
 ];
 
 type CspmCapabilityStripProps = {
@@ -40,7 +40,7 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
           Cryptographic Security Posture Management
         </Typography>
         <Typography sx={{ color: 'text.secondary', fontSize: '0.6875rem' }}>
-          Enterprise command modules
+          Five-BOM workspace — Community layers unlocked
         </Typography>
       </Stack>
       <Box

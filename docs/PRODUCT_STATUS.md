@@ -4,7 +4,7 @@ Honest snapshot of what RivicQ ships today for operators who need **open-source 
 
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data; no production API).
 
-Companion docs: [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md)
+Companion docs: [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [Five-BOM](BOM_FRAMEWORK.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md)
 
 ## What is complete
 
@@ -13,6 +13,10 @@ The **cryptographic intelligence engine is shared**. Community (`:8080`) and Ent
 | Layer | Community (OSS, limited) | Enterprise |
 |---|---|---|
 | TLS / SSH / HTTP(S) / SBOM discovery | Yes | Same engine |
+| Five-BOM (CBOM / QBOM / SBOM) | Yes (local QBOM) | Same + AIBOM + IBOM |
+| API security (TLS/HTTPS surface) | Yes | Same + gateway inventory when connected |
+| DevSecOps pipeline | Stages 1–6 + JSON (stage 8) | Stage 7 continuous monitoring |
+| HSM / PKCS#11 | Declared QSIC/HSM catalog | Connector when `PKCS11_MODULE` or cloud IAM exists |
 | Website / host / IP / server | Yes | Same |
 | Kubernetes pod | Declared inventory (`pod://ns/name`) | Same + live attach when a credential exists |
 | Hardware / QSIC | Declared catalog | Persistable inventory; still not firmware RE |
@@ -56,6 +60,14 @@ GET  /api/v1/scans/:id/report          # discovery.ScanResult (do not break)
 GET  /api/v1/scans/:id/intelligence    # findings + gate + qiskit + audit_score
 GET  /api/v1/scans/:id/qiskit          # Qiskit pipeline + audit_score + resources
 GET  /api/v1/scans/:id/cyclonedx
+GET  /api/v1/bom/framework
+GET  /api/v1/bom/pipeline
+GET  /api/v1/bom/unified
+GET  /api/v1/governance/controls
+GET  /api/v1/hsm/status
+GET  /api/v1/quantum/status
+GET  /api/v1/security/api
+GET  /api/v1/security/ai
 ```
 
 ## Not complete (see roadmap)

@@ -473,6 +473,17 @@ export const cbomService = {
     api.get(`/assets/${assetId}/bom`),
 };
 
+export const bomService = {
+  getFramework: () => api.get('/bom/framework'),
+  getPipeline: () => api.get('/bom/pipeline'),
+  getUnified: (scanId?: string) => api.get('/bom/unified', { params: scanId ? { scan_id: scanId } : undefined }),
+  getGovernance: () => api.get('/governance/controls'),
+  getHsm: () => api.get('/hsm/status'),
+  getQuantum: () => api.get('/quantum/status'),
+  getApiSecurity: () => api.get('/security/api'),
+  getAiSecurity: () => api.get('/security/ai'),
+};
+
 export const benchmarkService = {
   getSummary: () => api.get('/benchmarks'),
 };

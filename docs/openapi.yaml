@@ -48,6 +48,8 @@ tags:
     description: Quantum computing integration (Enterprise)
   - name: DevSecOps
     description: CI/CD pipeline integration
+  - name: BOM
+    description: Five-BOM intelligence (QBOM, AIBOM, SBOM, IBOM, CBOM)
   - name: Compliance
     description: Compliance framework management
   - name: Health
@@ -331,6 +333,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuantumProviders'
+
+  /api/v1/bom/framework:
+    get:
+      tags: [BOM]
+      summary: Five-BOM catalog, pipeline, connectors, and honesty note
+      operationId: getBomFramework
+      responses:
+        '200':
+          description: Edition-aware BOM framework
+  /api/v1/bom/pipeline:
+    get:
+      tags: [BOM]
+      summary: Eight-stage DevSecOps pipeline
+      operationId: getBomPipeline
+      responses:
+        '200':
+          description: Pipeline stages
+  /api/v1/bom/unified:
+    get:
+      tags: [BOM]
+      summary: Unified BOM view over the latest completed scan
+      operationId: getUnifiedBom
+      parameters:
+        - name: scan_id
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: CBOM/QBOM/SBOM plus locked AIBOM/IBOM on Community
+  /api/v1/governance/controls:
+    get:
+      tags: [BOM]
+      summary: Operator control mappings (not certifications)
+      operationId: getGovernanceControls
+      responses:
+        '200':
+          description: Mapped controls
+  /api/v1/hsm/status:
+    get:
+      tags: [BOM]
+      summary: PKCS#11 / cloud HSM connector status
+      operationId: getHsmStatus
+      responses:
+        '200':
+          description: Disconnected unless customer credentials exist
+  /api/v1/quantum/status:
+    get:
+      tags: [BOM]
+      summary: Local QBOM scoring plus optional runtime
+      operationId: getQuantumStatus
+      responses:
+        '200':
+          description: Local taxonomy; runtime never required
+  /api/v1/security/api:
+    get:
+      tags: [BOM]
+      summary: API security from TLS/HTTPS scans
+      operationId: getApiSecurity
+      responses:
+        '200':
+          description: TLS hygiene findings
+  /api/v1/security/ai:
+    get:
+      tags: [BOM]
+      summary: AIBOM AI security layer
+      operationId: getAiSecurity
+      responses:
+        '200':
+          description: Declared AIBOM when Enterprise is licensed
 
   /api/v1/engine/migration-plan:
     post:

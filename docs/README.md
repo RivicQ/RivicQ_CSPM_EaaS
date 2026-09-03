@@ -24,6 +24,7 @@ UI colors follow the **Security Cloud** sky-blue and white theme (`#0284c7` on `
 ## Product
 
 - [Product status](PRODUCT_STATUS.md) — OSS vs Enterprise, audits, scores, website scan
+- [Five-BOM framework](BOM_FRAMEWORK.md) — QBOM, AIBOM, SBOM, IBOM, CBOM, pipeline, HSM
 - [Roadmap](ROADMAP.md) — Builds 2–5 and quantum track
 - [Qiskit pipeline](QISKIT_PIPELINE.md) — local profile vs optional Aer vs IBM Runtime
 - [PQC Migration Guide](PQC_MIGRATION.md)

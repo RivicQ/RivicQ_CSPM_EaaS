@@ -18,11 +18,11 @@ const EditionSwitcher: React.FC = () => {
   const cards = [
     {
       title: 'RivicQ Community',
-      subtitle: 'Limited CBOM engine: website, host/IP, server, declared pods, Qiskit scores, CLI, and GitHub Action.',
+      subtitle: 'Limited five-BOM engine: CBOM, SBOM, local QBOM, TLS API hygiene, pipeline stages 1–6, CLI, and GitHub Action.',
       icon: <Security sx={{ fontSize: 34 }} />,
       edition: 'community' as Edition,
-      accent: '#2563eb',
-      highlights: ['Website / host / IP / pod scan', 'Discover → mitigate → report', 'CycloneDX CBOM + Qiskit', 'No SSO, cloud, or DORA pack'],
+      accent: '#0284c7',
+      highlights: ['CBOM + SBOM + local QBOM', 'API security from TLS scans', 'Discover → mitigate → report', 'No AIBOM, IBOM, SSO, or DORA pack'],
       action: 'Continue with Community',
     },
     {
@@ -31,16 +31,16 @@ const EditionSwitcher: React.FC = () => {
       icon: <Shield sx={{ fontSize: 34 }} />,
       edition: 'professional' as Edition,
       accent: '#d97706',
-      highlights: ['CSPM & conformance packs', 'AI / Identity / Supply chain', 'Multi-cloud accounts', 'Threat & vuln management'],
+      highlights: ['CSPM & conformance packs', 'AIBOM / IBOM workspace', 'Multi-cloud accounts', 'Threat & vuln management'],
       action: 'Continue with Professional',
     },
     {
       title: 'RivicQ Enterprise',
-      subtitle: 'Licensed control plane: SSO, audit, DORA pack, multi-cloud/HSM/quantum connectors, declared QSIC inventory. Not granted by cloning GitHub.',
+      subtitle: 'Licensed control plane: SSO, audit, DORA pack, PKCS#11/HSM, optional quantum runtime, GRC connectors. Not granted by cloning GitHub.',
       icon: <WorkspacePremium sx={{ fontSize: 34 }} />,
       edition: 'enterprise' as Edition,
       accent: '#198038',
-      highlights: ['Quantum & HSM connectors', 'SSO, audit & RBAC', 'Terraform & IaC scanning', 'Executive analytics'],
+      highlights: ['HSM PKCS#11 + quantum connector', 'SSO, audit & RBAC', 'Governance evidence pack', 'Continuous production monitoring'],
       action: 'Continue with Enterprise',
     },
   ];
@@ -60,7 +60,7 @@ const EditionSwitcher: React.FC = () => {
             Choose your RivicQ workspace
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 900, mx: 'auto' }}>
-            Start free with Community (limited scan engine), grow into Professional for security modules, and license Enterprise for the control plane. QSIC is declared research hardware — not a shipped chip.
+            Start free with Community (CBOM, SBOM, local QBOM), grow into Professional for security modules, and license Enterprise for AIBOM, IBOM, HSM connectors, and the GRC pack. QSIC is declared research hardware — not a shipped chip.
           </Typography>
         </Stack>
 
@@ -145,7 +145,7 @@ const EditionSwitcher: React.FC = () => {
             What gets locked in Community
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Cloud posture, conformance packs, live Kubernetes attach, DORA evidence pack, quantum attestation, cloud HSM connectors, and multi-cloud reporting stay in Professional and Enterprise. Community still scans websites, hosts, IPs, servers, and declared pods.
+            Cloud posture, conformance packs, live Kubernetes attach, DORA evidence pack, AIBOM/IBOM connectors, PKCS#11 HSM, quantum runtime, and multi-cloud reporting stay in Professional and Enterprise. Community still scans websites, hosts, IPs, servers, and declared pods, and shows five-BOM layers with locked Enterprise tiles.
           </Typography>
         </Box>
       </Container>

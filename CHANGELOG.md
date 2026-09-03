@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.7] - 2026-09-03
+
+### Added
+- Five-BOM DevSecOps framework: QBOM, AIBOM, SBOM, IBOM, CBOM ([docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md)).
+- Shared APIs: `/bom/framework`, `/bom/pipeline`, `/bom/unified`, `/governance/controls`, `/hsm/status`, `/quantum/status`, `/security/api`, `/security/ai`.
+- Console routes: `/bom`, `/pipeline`, `/security/api`, `/security/ai`, `/connectors/hsm`, `/governance`, `/migration`.
+- Community: CBOM + SBOM + local QBOM, TLS API hygiene, pipeline stages 1–6. Enterprise: AIBOM, IBOM, PKCS#11/HSM connector, GRC pack flag.
+- Honest HSM and quantum status (disconnected without customer credentials). QSIC remains declared research hardware.
+
+### Changed
+- Sky-blue/white Security Cloud UX: slightly larger radii, five-BOM ribbon, pipeline and governance hubs.
+- PQC migration guide aligned to local Qiskit taxonomy and optional connectors (not a required IBM Quantum run).
+
 ## [1.5.6] - 2026-09-03
 
 ### Added

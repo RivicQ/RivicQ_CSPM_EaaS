@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
-import { ArrowForward, Assessment, Cloud, DocumentScanner, FactCheck, GitHub, Radar, Storage } from '@mui/icons-material';
+import { ArrowForward, Assessment, Cloud, DocumentScanner, FactCheck, GitHub, Radar, Storage, AccountTree } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
 import { chartTheme } from '../../theme/chartTheme';
@@ -165,6 +165,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ actions, onNavigate
 export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
   { label: 'GitHub Scan', description: 'Real repo analysis', icon: <GitHub />, path: '/scanner?tab=github', accent: tokens.colors.crypto.quantum },
   { label: 'Run Scan', description: 'CBOM discovery', icon: <DocumentScanner />, path: '/scanner', accent: chartTheme.quickActions[0] },
+  { label: 'Five-BOM', description: 'QBOM · AIBOM · SBOM · IBOM · CBOM', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[600] },
   { label: 'Assets', description: 'Crypto inventory', icon: <Storage />, path: '/assets', accent: chartTheme.quickActions[1] },
   { label: 'Analytics', description: 'Trends & reports', icon: <Assessment />, path: '/analytics', accent: chartTheme.quickActions[2] },
   { label: 'CSPM', description: 'Crypto posture', icon: <Radar />, path: '/enterprise/cspm', accent: chartTheme.quickActions[3] },

@@ -52,6 +52,13 @@ import SecurityModulePage from './pages/enterprise/SecurityModule';
 import PlatformModules from './pages/enterprise/PlatformModules';
 import CSPM from './pages/CSPM';
 import InfraDiscovery from './pages/InfraDiscovery';
+import BomIntelligence from './pages/BomIntelligence';
+import DevSecOpsPipeline from './pages/DevSecOpsPipeline';
+import ApiSecurity from './pages/ApiSecurity';
+import AiSecurity from './pages/AiSecurity';
+import HsmQuantum from './pages/HsmQuantum';
+import GovernanceHub from './pages/GovernanceHub';
+import MigrationHub from './pages/MigrationHub';
 
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
@@ -175,6 +182,13 @@ const App: React.FC = () => {
                   <Route path="tools" element={wrap(DevSecOpsTools, 'DevSecOpsTools')} />
                   <Route path="ecosystem" element={wrap(RivicQEcosystem, 'RivicQEcosystem')} />
                   <Route path="infrastructure" element={wrap(InfraDiscovery, 'InfraDiscovery')} />
+                  <Route path="bom" element={wrap(BomIntelligence, 'BomIntelligence')} />
+                  <Route path="pipeline" element={wrap(DevSecOpsPipeline, 'DevSecOpsPipeline')} />
+                  <Route path="security/api" element={wrap(ApiSecurity, 'ApiSecurity')} />
+                  <Route path="security/ai" element={wrap(AiSecurity, 'AiSecurity')} />
+                  <Route path="connectors/hsm" element={wrap(HsmQuantum, 'HsmQuantum')} />
+                  <Route path="governance" element={wrap(GovernanceHub, 'GovernanceHub')} />
+                  <Route path="migration" element={wrap(MigrationHub, 'MigrationHub')} />
 
                   <Route path="enterprise/inventory" element={<RequireEnterprise>{wrap(Inventory, 'Inventory')}</RequireEnterprise>} />
                   <Route path="enterprise/compliance" element={<RequireEnterprise>{wrap(Compliance, 'Compliance')}</RequireEnterprise>} />

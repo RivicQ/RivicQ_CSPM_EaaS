@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import {
   ArrowForward, CheckCircle, CloudQueue, GitHub, Shield, GppGood, Memory, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
-  Api, Terminal, MenuBook, EnhancedEncryption, Key,
+  Api, Terminal, MenuBook, EnhancedEncryption, Key, AccountTree,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +16,7 @@ import QubitField from '../components/home/QubitField';
 import EncryptionLayerVisual from '../components/home/EncryptionLayerVisual';
 import ClientWorkflow from '../components/home/ClientWorkflow';
 import HomeScanReport, { HomeScanReportData } from '../components/home/HomeScanReport';
+import FiveBomStrip from '../components/bom/FiveBomStrip';
 import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
 import designSystem, { glassSurface } from '../theme/designSystem';
@@ -23,6 +24,10 @@ import designSystem, { glassSurface } from '../theme/designSystem';
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
 const FEATURES = [
+  {
+    icon: <AccountTree />, title: 'Five-BOM intelligence', color: tokens.colors.rivicq[600],
+    desc: 'QBOM, AIBOM, SBOM, IBOM, and CBOM in one workspace. Community runs CBOM, SBOM, and local QBOM. AIBOM and IBOM unlock with Enterprise.',
+  },
   {
     icon: <EnhancedEncryption />, title: 'Encryption as a Service', color: tokens.colors.rivicq[600],
     desc: 'A managed encryption intelligence layer that wires repositories, cloud KMS, HSMs, and certificates into one living cryptographic model — discover, protect, and govern keys from a single API.',
@@ -33,19 +38,19 @@ const FEATURES = [
   },
   {
     icon: <Psychology />, title: 'Quantum & PQC Readiness', color: tokens.colors.gold[600],
-    desc: 'Quantify harvest-now-decrypt-later exposure and plan migrations to ML-KEM and ML-DSA post-quantum cryptography with auditable, qubit-era attestations.',
+    desc: 'Quantify harvest-now-decrypt-later exposure and plan migrations to ML-KEM and ML-DSA post-quantum cryptography. Qiskit scores are a local taxonomy — not IBM Quantum hardware.',
   },
   {
-    icon: <Memory />, title: 'HSM & Key Lifecycle', color: tokens.colors.crypto.info,
-    desc: 'Unified visibility into cloud HSM and KMS providers. Track rotation, wrapping, attestation, and PQC-hybrid key hygiene across every connector.',
+    icon: <Memory />, title: 'HSM & Quantum connectors', color: tokens.colors.crypto.info,
+    desc: 'PKCS#11 / cloud HSM and optional quantum runtime stay disconnected until you supply credentials. QSIC is a declared research ASIC, not a shipped FIPS module.',
   },
   {
-    icon: <GppGood />, title: 'Cloud Posture Management', color: tokens.colors.crypto.high,
-    desc: 'Assess accounts and workloads against CIS, NIST, and similar operator mappings — posture scores where connectors are configured, not a certification of RivicQ.',
+    icon: <GppGood />, title: 'API security & DevSecOps', color: tokens.colors.crypto.high,
+    desc: 'TLS/HTTPS API hygiene from website and host scans, plus an eight-stage pipeline view. Continuous production monitoring is Enterprise. The GitHub Action policy gate is unchanged.',
   },
   {
-    icon: <FactCheck />, title: 'Compliance Automation', color: tokens.colors.crypto.low,
-    desc: 'Conformance checks and evidence packs mapped to ISO 27001, DORA, NIS2, GDPR, the EU AI Act, and the EU CRA. Mappings are not audit opinions or certifications.',
+    icon: <FactCheck />, title: 'Governance mapping', color: tokens.colors.crypto.low,
+    desc: 'DORA, NIS2, EU AI Act, CRA, NIST Zero Trust, FIPS, and BSI operator mappings. Community is JSON. Enterprise enables the evidence pack. Mappings are not certifications.',
   },
 ];
 
@@ -407,7 +412,7 @@ const Home: React.FC = () => {
         <Box sx={{ mb: 10, textAlign: 'center' }}>
           <Grid container spacing={3}>
             {[
-              { value: 'CBOM', label: 'CycloneDX crypto inventory' },
+              { value: '5 BOM', label: 'QBOM · AIBOM · SBOM · IBOM · CBOM' },
               { value: 'CLI', label: 'rivicq scan .' },
               { value: 'OSS + Ent', label: 'Same security engine' },
               { value: 'Mappings', label: 'Not certifications' },
@@ -469,6 +474,10 @@ const Home: React.FC = () => {
         </Box>
 
         <ClientWorkflow />
+
+        <Box id="five-bom" sx={{ mb: 10, scrollMarginTop: 80 }}>
+          <FiveBomStrip />
+        </Box>
 
         <Box id="features" sx={{ mb: 10, scrollMarginTop: 80 }}>
           <Typography variant="h4" fontWeight={600} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>One platform for complete cryptographic security</Typography>

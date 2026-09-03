@@ -52,7 +52,7 @@ export const tokens = {
     fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
     mono: '"JetBrains Mono", "SF Mono", ui-monospace, monospace',
   },
-  borderRadius: { sm: 4, md: 6, lg: 8, xl: 10, full: 9999 },
+  borderRadius: { sm: 6, md: 10, lg: 14, xl: 20, full: 9999 },
   shadows: {
     glowGreen: 'none',
     glowRed: 'none',

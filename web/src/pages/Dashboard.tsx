@@ -250,10 +250,10 @@ const Dashboard: React.FC = () => {
       <DashboardHero
         eyebrow="Security Command Center"
         title="Cryptographic Security Posture Management"
-        subtitle="Welcome to RivicQ CSPM — unified cryptographic posture across cloud accounts, workloads, GitHub repositories, CBOM inventory, and PQC migration readiness."
+        subtitle="Welcome to RivicQ Security Cloud — five-BOM intelligence (QBOM, AIBOM, SBOM, IBOM, CBOM) with cryptographic posture, PQC migration, and DevSecOps evidence."
         meta={
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {['CSPM', 'CBOM', 'PQC', 'GitHub', 'AWS', 'Azure', 'GCP', 'K8s'].map((c) => (
+            {['Five-BOM', 'CBOM', 'QBOM', 'SBOM', 'PQC', 'GitHub', 'HSM', 'Governance'].map((c) => (
               <Chip
                 key={c}
                 label={c}
@@ -304,6 +304,14 @@ const Dashboard: React.FC = () => {
               sx={{ ...heroSecondaryCtaSx, maxWidth: { sm: 'none' } }}
             >
               Scan GitHub
+            </Button>
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={() => navigate('/bom')}
+              sx={{ ...heroSecondaryCtaSx, maxWidth: { sm: 'none' } }}
+            >
+              Five-BOM
             </Button>
           </Stack>
         }

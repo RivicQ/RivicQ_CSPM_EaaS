@@ -91,6 +91,42 @@ func TestHardwareCatalogRoute(t *testing.T) {
 	require.Greater(t, len(cat), 0)
 }
 
+func TestBOMFrameworkRoutes(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	g := r.Group("/api/v1")
+	SetupIntelligenceRoutes(g, logrus.New())
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/bom/framework", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+	var fw map[string]any
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &fw))
+	require.Equal(t, "RivicQ Security Cloud", fw["product"])
+	layers, ok := fw["layers"].([]any)
+	require.True(t, ok)
+	require.Equal(t, 5, len(layers))
+	pipe, ok := fw["pipeline"].([]any)
+	require.True(t, ok)
+	require.Equal(t, 8, len(pipe))
+
+	for _, path := range []string{
+		"/api/v1/bom/pipeline",
+		"/api/v1/bom/unified",
+		"/api/v1/governance/controls",
+		"/api/v1/hsm/status",
+		"/api/v1/quantum/status",
+		"/api/v1/security/api",
+		"/api/v1/security/ai",
+	} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		require.Equal(t, http.StatusOK, w.Code, path)
+	}
+}
+
 func TestAnalyzeRepositoryFiles_RSAKeyLength(t *testing.T) {
 	res := AnalyzeRepositoryFiles("fixture://rsa", []RepoFile{{
 		Path:    "keys.go",

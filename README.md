@@ -2,7 +2,7 @@
 
 **RivicQ GmbH** (Berlin) · Community **open source** (Apache License 2.0) and **Enterprise** (commercial)
 
-RivicQ is a **security SaaS platform** for CSPM, CBOM, SBOM, and DevSecOps. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
+RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AIBOM, SBOM, IBOM, CBOM), and DevSecOps. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/github/actions/workflow/status/RivicQ/RivicQ_CSPM_EaaS/pages.yml?label=GitHub%20Pages)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions/workflows/pages.yml)
@@ -32,6 +32,9 @@ The web UI is the **RivicQ Security Cloud** — a sky-blue and white cryptograph
 | CLI `rivicq scan .` | Yes | Yes |
 | GitHub Action policy gate | Yes | Yes |
 | CBOM / CycloneDX 1.6 export | Yes | Yes |
+| Five-BOM (QBOM / AIBOM / SBOM / IBOM / CBOM) | CBOM + SBOM + local QBOM | Same + AIBOM, IBOM, HSM connector |
+| API security (TLS/HTTPS hygiene) | Yes | Same + gateway inventory when a connector exists |
+| DevSecOps pipeline view | Stages 1–6 + JSON evidence | Stage 7 continuous monitoring |
 | Dashboard, inventory, scanner | Limited: website, host, IP, server, declared pod, QSIC catalog | Same engine + live kube attach, DORA pack |
 | Labeled demo trail | Community-limited (sample data only) | UI preference is not a license |
 | Multi-cloud inventory (AWS, Azure, GCP, and other connectors) | — | Yes — **customer credentials required** |
@@ -125,6 +128,8 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Known limitations | [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) |
 | Editions (OSS vs Enterprise) | [docs/editions.md](docs/editions.md) |
 | Client architecture | [docs/CLIENT_ARCHITECTURE.md](docs/CLIENT_ARCHITECTURE.md) |
+| Five-BOM framework | [docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md) |
+| PQC migration | [docs/PQC_MIGRATION.md](docs/PQC_MIGRATION.md) |
 | SaaS architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Legal | [LEGAL.md](LEGAL.md) |
 | Privacy | [PRIVACY.md](PRIVACY.md) |

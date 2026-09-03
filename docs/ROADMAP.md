@@ -10,6 +10,9 @@ See [Product status](PRODUCT_STATUS.md) for what already ships and [Architecture
 - Auth: login, register, MFA, OAuth, in-memory password reset, workspace roles
 - Discovery: TLS, SSH, HTTP**S** websites, SBOM, GitHub content
 - Intelligence: normalized findings, crypto risk, policy gate, CycloneDX CBOM
+- Five-BOM framework: CBOM, QBOM, SBOM (Community); AIBOM, IBOM (Enterprise)
+- DevSecOps pipeline view (stages 1–6 OSS; stage 7 Enterprise); API security from TLS scans
+- HSM / quantum status APIs (disconnected without credentials); governance mappings
 - Qiskit profile pipeline (local classical taxonomy) wired into intelligence + `/scans/:id/qiskit`
 - Honest docs: editions, limitations, Qiskit vs IBM Quantum Runtime
 
@@ -36,6 +39,7 @@ See [Product status](PRODUCT_STATUS.md) for what already ships and [Architecture
 2. Client-ready CLI docs; first CBOM in 10 minutes (`rivicq scan .`).
 3. Keep the dataset accuracy pipeline green (`make analyze-datasets`).
 4. Usable air-gapped Helm/Compose path (`docs/DEPLOYMENT.md`).
+5. Five-BOM pipeline evidence export (Community JSON; Enterprise pack) — **catalog shipped**; continuous production monitoring remains Enterprise.
 
 ## Build 5 — Demo confidence
 

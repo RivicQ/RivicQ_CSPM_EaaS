@@ -48,6 +48,7 @@ Every completed scan status includes `target_class`, `resources`, and `finding_i
 | Legal | Apache-2.0 | Commercial license (`CRYPTOBOM_LICENSE_KEY=ENT-…`) |
 | Engine | Full CBOM + Qiskit local taxonomy | Same engine |
 | Live demo (GitHub Pages) | **Limited Community workspace** | UI preference only — not a license |
+| Five-BOM | CBOM + SBOM + local QBOM | + AIBOM + IBOM |
 | DORA pack | JSON mappings | Pack flag enabled |
 | Multi-cloud / quantum / HSM connectors | Catalog only | Connectors when credentials exist |
 | QSIC | Declared research ASIC (not shipped, not FIPS certified) | Same honesty + persistable inventory |
@@ -58,6 +59,9 @@ Every completed scan status includes `target_class`, `resources`, and `finding_i
 The PQC Readiness Assessment workbook scores four inventory layers plus HNDL and compliance mapping:
 
 - **SBOM / CBOM / HBOM / AIBOM** → synthesized QBOM
+- Community synthesizes QBOM from CBOM + SBOM + declared hardware catalog
+- AIBOM contribution is Enterprise (declared inventory)
+- See [BOM_FRAMEWORK.md](BOM_FRAMEWORK.md) and [PQC_MIGRATION.md](PQC_MIGRATION.md)
 - **HNDL** — share of Shor-class findings
 - **DORA RTS Art. 9**, **DORA Art. 6**, **NIS2 Art. 21**, **BSI TR-02102**, **FIPS 203/204/205**
 - Community: JSON scores on `/scans/:id/intelligence` (`pqc_readiness`)

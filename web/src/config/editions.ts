@@ -69,7 +69,7 @@ export const COMMUNITY_CONFIG = {
     analytics: true,
     settings: true,
     cspm: false,
-    qbom: false,
+    qbom: true,
     eaas: false,
     recovery: false,
     integrations: false,
@@ -92,8 +92,13 @@ export const COMMUNITY_CONFIG = {
     dspm: false,
     threatIntel: false,
     vulnerability: false,
-    apiSecurity: false,
+    apiSecurity: true,
     incidentResponse: false,
+    aibom: false,
+    ibom: false,
+    fiveBom: true,
+    hsmConnector: false,
+    pipeline: true,
   },
 };
 
@@ -132,6 +137,11 @@ export const PROFESSIONAL_CONFIG = {
     vulnerability: true,
     apiSecurity: true,
     incidentResponse: true,
+    aibom: true,
+    ibom: true,
+    fiveBom: true,
+    hsmConnector: false,
+    pipeline: true,
   },
 };
 
@@ -170,6 +180,11 @@ export const ENTERPRISE_CONFIG = {
     vulnerability: true,
     apiSecurity: true,
     incidentResponse: true,
+    aibom: true,
+    ibom: true,
+    fiveBom: true,
+    hsmConnector: true,
+    pipeline: true,
   },
 };
 

@@ -8,6 +8,10 @@ RivicQ ships **one cryptographic intelligence engine** and two **legal editions*
 | **Distribution** | This public GitHub repository | Licensed binaries / charts / support |
 | **CLI + GitHub Action** | Yes | Yes |
 | **Dashboard / scanner / inventory** | Limited: website, host, IP, server, declared pod, QSIC catalog | Same engine + live kube attach |
+| **Five-BOM** | CBOM, SBOM, local QBOM | + AIBOM, IBOM |
+| **API security** | TLS/HTTPS scan surface | Same + gateway inventory when connected |
+| **DevSecOps pipeline** | Stages 1–6 + JSON evidence | Stage 7 continuous monitoring |
+| **HSM / quantum** | Declared catalog + local Qiskit | PKCS#11 / cloud HSM / optional runtime when credentials exist |
 | **Multi-cloud inventory** | No | Yes (customer cloud credentials) |
 | **SSO** | No | OIDC; SAML configuration store (IdP ACS is operational work) |
 | **RBAC** | Basic roles in the UI | Server-side `RequireRole` (Viewer &lt; Analyst &lt; Operator &lt; Admin) |
@@ -23,6 +27,8 @@ See [LEGAL.md](../LEGAL.md), [PRIVACY.md](../PRIVACY.md), [TRADEMARKS.md](../TRA
 - **CLI:** `cmd/rivicq` · `rivicq scan .`
 - **Limited engine:** website, host/IP, server, declared Kubernetes pod inventory, local SBOM
 - CBOM scan + GitHub content analysis + Qiskit-aligned scores (local taxonomy)
+- Five-BOM **view**: CBOM, SBOM, local QBOM; AIBOM/IBOM tiles locked
+- API security from TLS/HTTPS scans; pipeline stages 1–6
 - Discover → mitigate → report as JSON (no DORA pack, no SSO, no multi-cloud)
 - QSIC/HSM catalog is **declared inventory** (research ASIC, not a shipped chip)
 - Kubernetes and Cilium **hooks** (not a shipped eBPF program)
@@ -40,6 +46,8 @@ You may use Community software in commercial products under Apache-2.0, provided
   - Enterprise SSO, RBAC enforcement, audit log viewer
   - Compliance report packs (mappings)
   - Optional quantum / HSM connectors when the customer supplies keys — **never a hard runtime dependency**
+  - AIBOM (declared model inventory) and IBOM (directory / NHI) layers
+  - Governance evidence pack flag (still not a certification)
 
 Enterprise is **not** granted by cloning this repo. Contact [rivicq.com](https://rivicq.com).
 
@@ -56,7 +64,14 @@ GET  /api/v1/scans/:id/intelligence  # Normalized findings + policy gate + Qiski
 GET  /api/v1/scans/:id/qiskit        # Qiskit-aligned estate score (not IBM Quantum hardware)
 GET  /api/v1/architecture            # Four-layer SaaS map + edition catalog
 GET  /api/v1/hardware/catalog        # Declared HSM/TPM/QSIC inventory
-GET  /api/v1/scans/:id/qiskit        # Qiskit-aligned estate score (not IBM Quantum hardware)
+GET  /api/v1/bom/framework           # Five-BOM catalog + pipeline + connectors
+GET  /api/v1/bom/pipeline
+GET  /api/v1/bom/unified
+GET  /api/v1/governance/controls
+GET  /api/v1/hsm/status
+GET  /api/v1/quantum/status
+GET  /api/v1/security/api
+GET  /api/v1/security/ai
 GET  /api/v1/scans/:id/cyclonedx     # CycloneDX 1.6 cryptographic-asset BOM
 GET  /api/v1/findings           # Normalized findings across completed scans
 GET  /api/v1/policies           # Policy catalog
