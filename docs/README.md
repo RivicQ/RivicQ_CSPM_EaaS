@@ -25,6 +25,7 @@ UI colors follow a **clear sky-blue and white** theme (`#0284c7` on `#ffffff`). 
 
 - [PQC Migration Guide](PQC_MIGRATION.md)
 - [OSS Architecture](oss-architecture.md)
+- [Enterprise SaaS architecture](ARCHITECTURE.md) — client, control plane, hardware/firmware scope, honest boundaries
 - [Security Intelligence Engine](security-intelligence.md)
 - [Security Control Matrix](SECURITY_CONTROL_MATRIX.md) — mappings, not certifications
 - [Rollback Runbook](ROLLBACK_RUNBOOK.md)

@@ -1,6 +1,9 @@
 package auth
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"strings"
 	"sync"
@@ -103,6 +106,59 @@ func (s *MFASessionStore) Validate(id, email string) bool {
 	delete(s.sessions, id)
 
 	return sess.Email == strings.ToLower(strings.TrimSpace(email)) && time.Now().Before(sess.Expires)
+}
+
+// PasswordResetSession is a single-use reset challenge. Tokens are stored hashed.
+type PasswordResetSession struct {
+	Email   string
+	Expires time.Time
+}
+
+// PasswordResetStore keeps in-memory reset tokens (no mailbox product).
+type PasswordResetStore struct {
+	mu       sync.RWMutex
+	sessions map[string]*PasswordResetSession
+}
+
+func NewPasswordResetStore() *PasswordResetStore {
+	return &PasswordResetStore{sessions: make(map[string]*PasswordResetSession)}
+}
+
+func hashResetToken(raw string) string {
+	sum := sha256.Sum256([]byte(raw))
+	return hex.EncodeToString(sum[:])
+}
+
+// Create issues a raw token (caller may return it only in DEMO_MODE).
+func (s *PasswordResetStore) Create(email string) (string, error) {
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
+		return "", err
+	}
+	raw := hex.EncodeToString(buf)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.sessions[hashResetToken(raw)] = &PasswordResetSession{
+		Email:   strings.ToLower(strings.TrimSpace(email)),
+		Expires: time.Now().Add(30 * time.Minute),
+	}
+	return raw, nil
+}
+
+// Consume validates and deletes a reset token. Returns the bound email.
+func (s *PasswordResetStore) Consume(raw string) (string, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	key := hashResetToken(strings.TrimSpace(raw))
+	sess, ok := s.sessions[key]
+	if !ok {
+		return "", false
+	}
+	delete(s.sessions, key)
+	if time.Now().After(sess.Expires) {
+		return "", false
+	}
+	return sess.Email, true
 }
 
 // TokenManager handles JWT token generation and validation
@@ -317,6 +373,17 @@ type UserStore interface {
 	GetUserByID(id string) (*User, error)
 	CreateUser(user *User) error
 	UpdateUser(user *User) error
+	ListUsersByTenant(tenantID string) ([]*User, error)
+}
+
+const MinPasswordLength = 8
+
+// ValidatePassword enforces the workspace password policy.
+func ValidatePassword(password string) error {
+	if len(password) < MinPasswordLength {
+		return errors.New("password must be at least 8 characters")
+	}
+	return nil
 }
 
 // AuthService handles authentication logic
@@ -324,6 +391,7 @@ type AuthService struct {
 	tokenManager *TokenManager
 	userStore    UserStore
 	mfaSessions  *MFASessionStore
+	resetTokens  *PasswordResetStore
 }
 
 // NewAuthService creates a new authentication service
@@ -332,6 +400,7 @@ func NewAuthService(secretKey string, userStore UserStore) *AuthService {
 		tokenManager: NewTokenManager(secretKey),
 		userStore:    userStore,
 		mfaSessions:  NewMFASessionStore(),
+		resetTokens:  NewPasswordResetStore(),
 	}
 }
 
@@ -345,8 +414,73 @@ func (as *AuthService) GetUserByEmail(email string) (*User, error) {
 	return as.userStore.GetUserByEmail(email)
 }
 
-// UpdateUser persists a user (used for MFA enable/disable).
+// GetUserByID exposes lookup by id for workspace administration.
+func (as *AuthService) GetUserByID(id string) (*User, error) {
+	return as.userStore.GetUserByID(id)
+}
+
+// ListUsersByTenant returns workspace members (no password or MFA secret in JSON).
+func (as *AuthService) ListUsersByTenant(tenantID string) ([]*User, error) {
+	return as.userStore.ListUsersByTenant(tenantID)
+}
+
+// UpdateUser persists a user (used for MFA enable/disable and profile).
 func (as *AuthService) UpdateUser(user *User) error {
+	return as.userStore.UpdateUser(user)
+}
+
+// RequestPasswordReset creates a reset token if the email exists.
+// Callers must not reveal whether the account exists except in labeled demo mode.
+func (as *AuthService) RequestPasswordReset(email string) (token string, found bool, err error) {
+	user, lookupErr := as.userStore.GetUserByEmail(strings.ToLower(strings.TrimSpace(email)))
+	if lookupErr != nil || user == nil {
+		return "", false, nil
+	}
+	token, err = as.resetTokens.Create(user.Email)
+	if err != nil {
+		return "", true, err
+	}
+	return token, true, nil
+}
+
+// ResetPassword consumes a reset token and sets a new password.
+func (as *AuthService) ResetPassword(token, newPassword string) error {
+	if err := ValidatePassword(newPassword); err != nil {
+		return err
+	}
+	email, ok := as.resetTokens.Consume(token)
+	if !ok {
+		return errors.New("invalid or expired reset token")
+	}
+	user, err := as.userStore.GetUserByEmail(email)
+	if err != nil {
+		return errors.New("invalid or expired reset token")
+	}
+	hashed, err := HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+	user.Password = hashed
+	return as.userStore.UpdateUser(user)
+}
+
+// ChangePassword verifies the current password and sets a new one.
+func (as *AuthService) ChangePassword(email, current, next string) error {
+	if err := ValidatePassword(next); err != nil {
+		return err
+	}
+	user, err := as.userStore.GetUserByEmail(email)
+	if err != nil {
+		return errors.New("user not found")
+	}
+	if !checkPassword(current, user.Password) {
+		return errors.New("current password is incorrect")
+	}
+	hashed, err := HashPassword(next)
+	if err != nil {
+		return err
+	}
+	user.Password = hashed
 	return as.userStore.UpdateUser(user)
 }
 
@@ -419,6 +553,9 @@ func (as *AuthService) LoginWithEdition(email, password, edition string) (*Login
 
 // Register creates a new user and returns their ID
 func (as *AuthService) Register(user *User) error {
+	if err := ValidatePassword(user.Password); err != nil {
+		return err
+	}
 	return as.userStore.CreateUser(user)
 }
 

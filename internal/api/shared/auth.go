@@ -45,8 +45,19 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 		authGroup.POST("/mfa/setup", service.JWTAuthMiddleware(nil), mfaSetupHandler(service, logger))
 		authGroup.POST("/mfa/confirm", service.JWTAuthMiddleware(nil), mfaConfirmHandler(service, logger))
 		authGroup.POST("/mfa/disable", service.JWTAuthMiddleware(nil), mfaDisableHandler(service, logger))
-		authGroup.GET("/me", service.JWTAuthMiddleware(nil), meHandler())
+		authGroup.GET("/me", service.JWTAuthMiddleware(nil), meHandler(service))
+		authGroup.PATCH("/me", service.JWTAuthMiddleware(nil), patchMeHandler(service, logger))
+		authGroup.POST("/forgot-password", forgotPasswordHandler(service, logger))
+		authGroup.POST("/reset-password", resetPasswordHandler(service, logger))
+		authGroup.POST("/change-password", service.JWTAuthMiddleware(nil), changePasswordHandler(service, logger))
 		authGroup.GET("/editions", editionsHandler(allowedDomains))
+
+		workspace := authGroup.Group("/workspace")
+		workspace.Use(service.JWTAuthMiddleware(nil), auth.RequireRole("admin"))
+		{
+			workspace.GET("/users", listWorkspaceUsersHandler(service, logger))
+			workspace.PATCH("/users/:id/role", patchWorkspaceUserRoleHandler(service, logger))
+		}
 
 		// Google OAuth
 		authGroup.GET("/google/login", GoogleLoginHandler(logger))
@@ -225,7 +236,7 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 			logger.WithError(err).WithField("email", req.Email).Warn("registration login failed")
 			c.JSON(http.StatusCreated, gin.H{
 				"message": "Registration completed. Please log in with your new account.",
-				"user": authUserResponse{Email: user.Email, Name: user.Name, Role: user.Role},
+				"user":    authUserResponse{Email: user.Email, Name: user.Name, Role: user.Role},
 			})
 			return
 		}
@@ -250,15 +261,184 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 	}
 }
 
-func meHandler() gin.HandlerFunc {
+func meHandler(service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		email := c.GetString("email")
+		name := ""
+		mfaEnabled := false
+		if user, err := service.GetUserByEmail(email); err == nil && user != nil {
+			name = user.Name
+			mfaEnabled = user.MFAEnabled
+		}
 		c.JSON(http.StatusOK, gin.H{
+			"id":          c.GetString("user_id"),
 			"user_id":     c.GetString("user_id"),
 			"tenant_id":   c.GetString("tenant_id"),
-			"email":       c.GetString("email"),
+			"email":       email,
+			"name":        name,
 			"role":        c.GetString("role"),
 			"edition":     c.GetString("edition"),
+			"mfa_enabled": mfaEnabled,
 			"permissions": c.GetStringSlice("permissions"),
+		})
+	}
+}
+
+func patchMeHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Name string `json:"name"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+			return
+		}
+		email := c.GetString("email")
+		user, err := service.GetUserByEmail(email)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			return
+		}
+		name := strings.TrimSpace(req.Name)
+		if name == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Name is required"})
+			return
+		}
+		user.Name = name
+		if err := service.UpdateUser(user); err != nil {
+			logger.WithError(err).Error("profile update failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"user": authUserResponse{ID: user.ID, Name: user.Name, Email: user.Email, Role: user.Role},
+		})
+	}
+}
+
+func forgotPasswordHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Email string `json:"email"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil || strings.TrimSpace(req.Email) == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Email is required"})
+			return
+		}
+		token, found, err := service.RequestPasswordReset(req.Email)
+		if err != nil {
+			logger.WithError(err).Warn("password reset issue failed")
+		}
+		resp := gin.H{
+			"message": "If an account exists for that email, a reset link was issued. This product does not send mailbox mail; use the reset page with a token from your operator, or demo mode.",
+		}
+		// Labeled demo only — never disclose existence unless DEMO_MODE is explicitly on.
+		if explicitDemoMode() && found && token != "" {
+			resp["demo_mode"] = true
+			resp["reset_token"] = token
+		}
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
+func resetPasswordHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Token       string `json:"token"`
+			NewPassword string `json:"password"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "token and password are required"})
+			return
+		}
+		if err := service.ResetPassword(req.Token, req.NewPassword); err != nil {
+			logger.WithError(err).Warn("password reset failed")
+			status := http.StatusBadRequest
+			if strings.Contains(err.Error(), "invalid or expired") {
+				status = http.StatusUnauthorized
+			}
+			c.JSON(status, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Password updated. You can sign in with the new password."})
+	}
+}
+
+func changePasswordHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			CurrentPassword string `json:"current_password"`
+			NewPassword     string `json:"new_password"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "current_password and new_password are required"})
+			return
+		}
+		email := c.GetString("email")
+		if err := service.ChangePassword(email, req.CurrentPassword, req.NewPassword); err != nil {
+			logger.WithError(err).Warn("change password failed")
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Password changed"})
+	}
+}
+
+func listWorkspaceUsersHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tenantID := c.GetString("tenant_id")
+		users, err := service.ListUsersByTenant(tenantID)
+		if err != nil {
+			logger.WithError(err).Error("list workspace users failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list users"})
+			return
+		}
+		out := make([]authUserResponse, 0, len(users))
+		for _, user := range users {
+			out = append(out, authUserResponse{ID: user.ID, Name: user.Name, Email: user.Email, Role: user.Role})
+		}
+		c.JSON(http.StatusOK, gin.H{"users": out, "tenant_id": tenantID})
+	}
+}
+
+func patchWorkspaceUserRoleHandler(service *auth.AuthService, logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Role string `json:"role"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "role is required"})
+			return
+		}
+		raw := strings.ToLower(strings.TrimSpace(req.Role))
+		switch raw {
+		case "viewer", "analyst", "operator", "admin":
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "role must be viewer, analyst, operator, or admin"})
+			return
+		}
+		role := auth.NormalizeRole(raw)
+		target, err := service.GetUserByID(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		if target.TenantID != c.GetString("tenant_id") {
+			c.JSON(http.StatusForbidden, gin.H{"error": "User is not in this workspace"})
+			return
+		}
+		if target.ID == c.GetString("user_id") && role != "admin" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "You cannot remove your own admin role"})
+			return
+		}
+		target.Role = role
+		if err := service.UpdateUser(target); err != nil {
+			logger.WithError(err).Error("role update failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update role"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"user": authUserResponse{ID: target.ID, Name: target.Name, Email: target.Email, Role: target.Role},
 		})
 	}
 }
@@ -388,10 +568,10 @@ func mfaSetupHandler(service *auth.AuthService, logger *logrus.Logger) gin.Handl
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"secret":            secret,
-			"provisioning_uri":  provisioningURI,
-			"issuer":            "RivicQ CryptoBOM",
-			"account":           email,
+			"secret":           secret,
+			"provisioning_uri": provisioningURI,
+			"issuer":           "RivicQ CryptoBOM",
+			"account":          email,
 		})
 	}
 }
@@ -464,6 +644,11 @@ func mfaDisableHandler(service *auth.AuthService, logger *logrus.Logger) gin.Han
 
 		c.JSON(http.StatusOK, gin.H{"mfa_enabled": false, "message": "MFA disabled successfully"})
 	}
+}
+
+func explicitDemoMode() bool {
+	v := strings.ToLower(strings.TrimSpace(os.Getenv("DEMO_MODE")))
+	return v == "true" || v == "1" || v == "yes"
 }
 
 func editionForRole(role, requested string) string {

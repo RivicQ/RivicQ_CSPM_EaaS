@@ -32,7 +32,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const url = error?.config?.url || '';
-    const isAuthCall = /\/auth\/(login|register|mfa|refresh|demo|me)/.test(url);
+    const isAuthCall = /\/auth\/(login|register|mfa|refresh|demo|me|forgot-password|reset-password|providers|editions)/.test(url);
     const demoSession = localStorage.getItem(DEMO_STORAGE_KEY) === '1' || isClientDemoToken(localStorage.getItem('auth_token'));
     if (error.response?.status === 401 && !isAuthCall && !demoSession) {
       localStorage.removeItem('auth_token');
@@ -130,6 +130,28 @@ export const authService = {
   },
 
   me: () => api.get('/auth/me'),
+
+  patchMe: (data: { name: string }) => api.patch('/auth/me', data),
+
+  forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
+
+  resetPassword: (token: string, password: string) =>
+    api.post('/auth/reset-password', { token, password }),
+
+  changePassword: (current_password: string, new_password: string) =>
+    api.post('/auth/change-password', { current_password, new_password }),
+
+  mfaSetup: () => api.post('/auth/mfa/setup'),
+
+  mfaConfirm: (data: { secret: string; code: string }) =>
+    api.post('/auth/mfa/confirm', data),
+
+  mfaDisable: (code: string) => api.post('/auth/mfa/disable', { code }),
+
+  workspaceUsers: () => api.get('/auth/workspace/users'),
+
+  updateWorkspaceUserRole: (id: string, role: string) =>
+    api.patch(`/auth/workspace/users/${id}/role`, { role }),
 
   editions: () => api.get('/auth/editions'),
 
@@ -541,4 +563,18 @@ export const gcpService = {
   getCloudKMSKeys: () => api.get('/enterprise/gcp/kms/keys'),
   getGKEWorkloads: () => api.get('/enterprise/gcp/gke/workloads'),
   getHSMKeyRings: () => api.get('/enterprise/gcp/hsm/keyrings'),
+};
+
+export const adminService = {
+  auditEvents: (params?: { days?: number }) =>
+    api.get('/audit/events', { params }),
+  apiKeys: () => api.get('/api-keys'),
+  createApiKey: (data: { name: string; role?: string }) =>
+    api.post('/api-keys', data),
+  webhooks: () => api.get('/webhooks'),
+  createWebhook: (data: { name: string; url: string; events: string[] }) =>
+    api.post('/webhooks', data),
+  ssoProviders: () => api.get('/sso/providers'),
+  configureSaml: (data: { entity_id: string; acs_url: string; idp_metadata: string; enabled: boolean }) =>
+    api.post('/sso/saml', data),
 };

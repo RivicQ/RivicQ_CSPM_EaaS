@@ -53,10 +53,12 @@ import {
   ChevronLeft,
   Logout,
   Person,
+  AdminPanelSettings,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
+import { isAdminRole } from '../auth/roles';
 import { MODULES } from '../config/modules';
 import { useThemeMode } from '../theme/ThemeContext';
 import ThemeToggle from '../theme/ThemeToggle';
@@ -140,7 +142,8 @@ const Layout: React.FC = () => {
   ];
 
   const settingsItem: NavItem = { text: 'Settings', icon: <Settings />, path: '/settings' };
-  const allWorkspaceItems = [...navigationItems, settingsItem];
+  const adminItem: NavItem = { text: 'Admin', icon: <AdminPanelSettings />, path: '/admin' };
+  const allWorkspaceItems = [...navigationItems, settingsItem, ...(isAdminRole(user?.role) ? [adminItem] : [])];
 
   const enterpriseItems: NavItem[] = [
     { text: 'Cloud Posture', icon: <GppGood />, path: '/enterprise/cloud-posture', section: 'Enterprise' },
@@ -406,6 +409,7 @@ const Layout: React.FC = () => {
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
 
       <List sx={{ px: 0, py: 0.5, flexShrink: 0 }}>
+        {isAdminRole(user?.role) && renderNavItem(adminItem)}
         {renderNavItem(settingsItem)}
       </List>
 
@@ -606,12 +610,32 @@ const Layout: React.FC = () => {
             </IconButton>
           </Stack>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-            <MenuItem onClick={() => setAnchorEl(null)}>
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                navigate('/settings');
+              }}
+            >
               <Person sx={{ fontSize: 18, mr: 1.5 }} /> Profile
             </MenuItem>
-            <MenuItem onClick={() => setAnchorEl(null)}>
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                navigate('/settings');
+              }}
+            >
               <Settings sx={{ fontSize: 18, mr: 1.5 }} /> Account Settings
             </MenuItem>
+            {isAdminRole(user?.role) && (
+              <MenuItem
+                onClick={() => {
+                  setAnchorEl(null);
+                  navigate('/admin');
+                }}
+              >
+                <AdminPanelSettings sx={{ fontSize: 18, mr: 1.5 }} /> Admin console
+              </MenuItem>
+            )}
             <Divider />
             <MenuItem
               onClick={() => {

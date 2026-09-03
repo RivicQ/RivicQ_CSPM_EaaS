@@ -10,6 +10,7 @@ import Layout from './layouts/Layout';
 import { ThemeModeProvider } from './theme/ThemeContext';
 import RequireAuth from './components/RequireAuth';
 import RequireEnterprise from './components/RequireEnterprise';
+import RequireRole from './components/RequireRole';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PageErrorBoundary } from './components/PageErrorBoundary';
@@ -18,6 +19,9 @@ import { PageSkeleton } from './components/LoadingScreen';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 import EditionSwitcher from './pages/EditionSwitcher';
 import Dashboard from './pages/Dashboard';
 import AssetDetails from './pages/AssetDetails';
@@ -25,6 +29,7 @@ import Assets from './pages/Assets';
 import Scanner from './pages/Scanner';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import Admin from './pages/Admin';
 import DevSecOpsTools from './pages/DevSecOpsTools';
 import RivicQEcosystem from './pages/RivicQEcosystem';
 import OAuthCallback from './pages/OAuthCallback';
@@ -67,13 +72,31 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 );
 
 const App: React.FC = () => {
-  const [mode, setMode] = React.useState<'light' | 'dark'>('light');
+  const [mode, setMode] = React.useState<'light' | 'dark'>(() => {
+    try {
+      const stored = localStorage.getItem('rivicq.theme');
+      if (stored === 'dark' || stored === 'light') return stored;
+    } catch {
+      /* ignore */
+    }
+    return 'light';
+  });
   const theme = React.useMemo(() => {
     const { getAppTheme } = require('./theme/theme');
     return getAppTheme(mode);
   }, [mode]);
 
-  const toggleMode = React.useCallback(() => setMode((m) => (m === 'light' ? 'dark' : 'light')), []);
+  const toggleMode = React.useCallback(() => {
+    setMode((m) => {
+      const next = m === 'light' ? 'dark' : 'light';
+      try {
+        localStorage.setItem('rivicq.theme', next);
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -127,6 +150,9 @@ const App: React.FC = () => {
                 <Route path="/demo" element={wrap(DemoWelcome, 'Demo')} />
                 <Route path="/login" element={wrap(Login, 'Login')} />
                 <Route path="/register" element={wrap(Register, 'Register')} />
+                <Route path="/forgot-password" element={wrap(ForgotPassword, 'ForgotPassword')} />
+                <Route path="/reset-password" element={wrap(ResetPassword, 'ResetPassword')} />
+                <Route path="/verify-email" element={wrap(VerifyEmail, 'VerifyEmail')} />
                 <Route path="/oauth/callback" element={wrap(OAuthCallback, 'OAuthCallback')} />
                 <Route path="/switcher" element={wrap(EditionSwitcher, 'EditionSwitcher')} />
                 <Route path="/logout" element={<LogoutRedirect />} />
@@ -144,6 +170,7 @@ const App: React.FC = () => {
                   <Route path="scanner" element={wrap(Scanner, 'Scanner')} />
                   <Route path="analytics" element={wrap(Analytics, 'Analytics')} />
                   <Route path="settings" element={wrap(Settings, 'Settings')} />
+                  <Route path="admin" element={<RequireRole role="admin">{wrap(Admin, 'Admin')}</RequireRole>} />
                   <Route path="tools" element={wrap(DevSecOpsTools, 'DevSecOpsTools')} />
                   <Route path="ecosystem" element={wrap(RivicQEcosystem, 'RivicQEcosystem')} />
                   <Route path="infrastructure" element={wrap(InfraDiscovery, 'InfraDiscovery')} />

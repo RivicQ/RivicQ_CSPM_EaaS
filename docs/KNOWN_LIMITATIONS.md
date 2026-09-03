@@ -18,6 +18,14 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Detector source files (`tls_scanner.go`, etc.) and `fixtures/` / `testdata/` are skipped on default `rivicq scan .` so the engine does not fail its own self-scan.
 - eBPF / Cilium is an **optional integration**, not a shipped kernel program.
 
+## Authentication
+
+- Login, register, TOTP MFA, Google/GitHub OAuth, and JWT refresh are implemented on `/api/v1/auth`.
+- Password reset is **in-memory** (30-minute single-use token). There is no mailbox product. In `DEMO_MODE` the API may return a labeled `reset_token` so local demos can complete the flow. Production must never email-spoof.
+- `PATCH /auth/me` updates display name. Email is the sign-in identifier.
+- Workspace user listing and role changes require **Admin** (`GET /auth/workspace/users`).
+- SAML configuration can be stored; a complete IdP ACS handshake is an operations task with your identity provider.
+
 ## Enterprise
 
 - Cloud inventory needs real credentials; disconnected connectors show empty states.

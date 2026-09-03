@@ -238,7 +238,7 @@ const Dashboard: React.FC = () => {
         <EmptyState
           icon={<Security />}
           title="No scan results yet"
-          description="Point the scanner at a repository or hostname, or use the CLI: rivicq scan ."
+          description="Point the scanner at a repository or hostname, or use the CLI: rivicq scan . Settings holds MFA and password; Admin is available to workspace admins."
           action={{ label: 'Open scanner', onClick: () => navigate('/scanner') }}
         />
       </Box>

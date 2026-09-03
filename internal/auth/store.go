@@ -189,8 +189,18 @@ func (m *MockUserStore) CreateUser(user *User) error {
 }
 
 func (m *MockUserStore) UpdateUser(user *User) error {
-	m.users[user.Email] = user
+	m.users[strings.ToLower(user.Email)] = user
 	return nil
+}
+
+func (m *MockUserStore) ListUsersByTenant(tenantID string) ([]*User, error) {
+	out := make([]*User, 0, len(m.users))
+	for _, user := range m.users {
+		if tenantID == "" || user.TenantID == tenantID {
+			out = append(out, user)
+		}
+	}
+	return out, nil
 }
 
 // DatabaseUserStore methods
@@ -264,6 +274,15 @@ func (d *DatabaseUserStore) CreateUser(user *User) error {
 }
 
 func (d *DatabaseUserStore) UpdateUser(user *User) error {
+	if strings.TrimSpace(user.Password) != "" {
+		_, err := d.db.Exec(`
+			UPDATE users
+			SET name = $2, role = $3, mfa_enabled = $4, mfa_secret = $5, password = $6, updated_at = NOW()
+			WHERE id = $1`,
+			user.ID, user.Name, user.Role, user.MFAEnabled, user.MFASecret, user.Password,
+		)
+		return err
+	}
 	query := `
 		UPDATE users 
 		SET name = $2, role = $3, mfa_enabled = $4, mfa_secret = $5, updated_at = NOW()
@@ -271,6 +290,33 @@ func (d *DatabaseUserStore) UpdateUser(user *User) error {
 
 	_, err := d.db.Exec(query, user.ID, user.Name, user.Role, user.MFAEnabled, user.MFASecret)
 	return err
+}
+
+func (d *DatabaseUserStore) ListUsersByTenant(tenantID string) ([]*User, error) {
+	query := `
+		SELECT id, tenant_id, email, name, role, mfa_enabled
+		FROM users
+		WHERE tenant_id = $1
+		ORDER BY email`
+
+	rows, err := d.db.Query(query, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var users []*User
+	for rows.Next() {
+		user := &User{}
+		if err := rows.Scan(&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Role, &user.MFAEnabled); err != nil {
+			continue
+		}
+		users = append(users, user)
+	}
+	if users == nil {
+		users = []*User{}
+	}
+	return users, rows.Err()
 }
 
 func (w *WorkDomainUserStore) GetUserByEmail(email string) (*User, error) {
@@ -311,6 +357,16 @@ func (w *WorkDomainUserStore) CreateUser(user *User) error {
 func (w *WorkDomainUserStore) UpdateUser(user *User) error {
 	w.users[strings.ToLower(user.Email)] = user
 	return nil
+}
+
+func (w *WorkDomainUserStore) ListUsersByTenant(tenantID string) ([]*User, error) {
+	out := make([]*User, 0, len(w.users))
+	for _, user := range w.users {
+		if tenantID == "" || user.TenantID == tenantID {
+			out = append(out, user)
+		}
+	}
+	return out, nil
 }
 
 // CreateDefaultUsers creates bootstrap users from environment variable.

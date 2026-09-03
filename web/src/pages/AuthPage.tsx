@@ -212,8 +212,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       }
       if (mode === 'register' && result?.requiresConfirmation) {
         setConfirmationSent({ email: form.email });
+        navigate(`/verify-email?email=${encodeURIComponent(form.email)}`, { replace: true });
       } else {
-        navigate('/dashboard', { replace: true });
+        const from = (location.state as any)?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
       }
     } catch (err: any) {
       setError(
@@ -381,9 +383,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                       {([
                         { id: 'community' as Edition, title: 'Community', body: 'CLI, CBOM scan, dashboard, GitHub Action' },
-                        { id: 'enterprise' as Edition, title: 'Enterprise', body: 'SSO, RBAC, multi-cloud, compliance reports' },
+                        { id: 'professional' as Edition, title: 'Professional', body: 'CSPM modules, multi-cloud, compliance maps' },
+                        { id: 'enterprise' as Edition, title: 'Enterprise', body: 'SSO config, RBAC, audit, API keys, PQC packs' },
                       ]).map((opt) => {
-                        const selected = edition === opt.id || (opt.id === 'enterprise' && edition === 'professional');
+                        const selected = edition === opt.id;
                         return (
                           <Button
                             key={opt.id}
@@ -682,7 +685,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                             <Button
                               size="small"
                               variant="text"
-                              onClick={() => setError('Password reset is handled by your identity provider. Contact your administrator.')}
+                              onClick={() => navigate('/forgot-password')}
                             >
                               Forgot password?
                             </Button>

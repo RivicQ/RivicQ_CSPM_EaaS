@@ -9,6 +9,8 @@ export interface AuthUser {
   name: string;
   email: string;
   role?: string;
+  tenantId?: string;
+  mfaEnabled?: boolean;
   edition: Edition;
   demo?: boolean;
 }
@@ -43,6 +45,9 @@ interface AuthContextValue {
   supabaseRegister: (name: string, email: string, password: string, edition: Edition) => Promise<RegisterResult>;
   demoLogin: (edition: Edition) => Promise<void>;
   verifyMfa: (email: string, code: string, session: string, edition: Edition) => Promise<void>;
+  refreshMe: () => Promise<void>;
+  updateProfile: (name: string) => Promise<void>;
+  changePassword: (currentPassword: string, nextPassword: string) => Promise<void>;
   logout: () => void;
   setEdition: (edition: Edition) => void;
   persistAuth: (payload: any) => void;
@@ -111,9 +116,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setBackendReachable(Boolean(remote?.edition));
-      setToken(sbToken ?? stored.token);
-      setUser(sbUser ?? stored.user);
-      setEditionState(detectedEdition);
+      const nextToken = sbToken ?? stored.token;
+      let nextUser: AuthUser | null = sbUser ?? stored.user;
+      let nextEdition = detectedEdition;
+
+      if (nextToken && !isClientDemoToken(nextToken) && remote?.edition) {
+        try {
+          const me = await authService.me();
+          const data = me.data || {};
+          const syncedEdition = normalizeEdition(data.edition || nextEdition);
+          nextUser = {
+            id: String(data.id || data.user_id || nextUser?.id || ''),
+            name: String(data.name || nextUser?.name || ''),
+            email: String(data.email || nextUser?.email || ''),
+            role: String(data.role || nextUser?.role || 'viewer'),
+            tenantId: String(data.tenant_id || nextUser?.tenantId || ''),
+            mfaEnabled: Boolean(data.mfa_enabled),
+            edition: syncedEdition,
+            demo: false,
+          };
+          nextEdition = syncedEdition;
+          try {
+            localStorage.setItem('auth_user', JSON.stringify(nextUser));
+            setEditionPreference(syncedEdition);
+          } catch {
+            /* ignore */
+          }
+        } catch {
+          // Keep stored session if /auth/me is unreachable.
+        }
+      }
+      if (cancelled) return;
+
+      setToken(nextToken);
+      setUser(nextUser);
+      setEditionState(nextEdition);
       setLoading(false);
     };
 
@@ -151,6 +188,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const nextEdition = normalizeEdition(payload?.edition || payload.user.edition || 'community');
     const nextUser = {
       ...payload.user,
+      id: payload.user.id || payload.user.user_id,
+      tenantId: payload.user.tenant_id || payload.user.tenantId,
+      mfaEnabled: Boolean(payload.user.mfa_enabled ?? payload.user.mfaEnabled),
       edition: nextEdition,
       demo: Boolean(payload?.demo_mode || payload?.user?.demo),
     };
@@ -224,6 +264,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     completeAuth(response.data);
   }, [completeAuth]);
 
+  const refreshMe = React.useCallback(async () => {
+    if (!token || isClientDemoToken(token) || !backendReachable) return;
+    const me = await authService.me();
+    const data = me.data || {};
+    const nextEdition = normalizeEdition(data.edition || edition);
+    persist(token, {
+      id: String(data.id || data.user_id || user?.id || ''),
+      name: String(data.name || user?.name || ''),
+      email: String(data.email || user?.email || ''),
+      role: String(data.role || user?.role || 'viewer'),
+      tenantId: String(data.tenant_id || user?.tenantId || ''),
+      mfaEnabled: Boolean(data.mfa_enabled),
+      edition: nextEdition,
+      demo: Boolean(user?.demo),
+    }, nextEdition);
+  }, [backendReachable, edition, persist, token, user]);
+
+  const updateProfile = React.useCallback(async (name: string) => {
+    await authService.patchMe({ name });
+    await refreshMe();
+  }, [refreshMe]);
+
+  const changePassword = React.useCallback(async (currentPassword: string, nextPassword: string) => {
+    await authService.changePassword(currentPassword, nextPassword);
+  }, []);
+
   const demoLogin = React.useCallback(async (nextEdition: Edition) => {
     if (backendReachable) {
       const response = await authService.demo(nextEdition);
@@ -236,6 +302,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       name: 'Demo CISO',
       email: 'demo-ciso@demo.rivicq.local',
       role: 'admin',
+      tenantId: 'tenant-demo',
+      mfaEnabled: false,
       edition: nextEdition,
       demo: true,
     };
@@ -285,10 +353,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabaseRegister,
     demoLogin,
     verifyMfa,
+    refreshMe,
+    updateProfile,
+    changePassword,
     logout,
     setEdition,
     persistAuth: completeAuth,
-  }), [edition, isDemo, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, verifyMfa, logout, setEdition, token, user, completeAuth]);
+  }), [edition, isDemo, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, verifyMfa, refreshMe, updateProfile, changePassword, logout, setEdition, token, user, completeAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

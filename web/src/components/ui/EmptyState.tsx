@@ -20,7 +20,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description, actio
         textAlign: 'center',
         borderRadius: `${designSystem.radius.lg}px`,
         border: `1px dashed ${theme.palette.divider}`,
-        bgcolor: theme.palette.mode === 'dark' ? 'rgba(99,102,241,0.04)' : 'rgba(79,70,229,0.03)',
+        bgcolor: theme.palette.mode === 'dark' ? 'rgba(14,165,233,0.06)' : 'rgba(14,165,233,0.04)',
       }}
     >
       {icon && (
@@ -33,7 +33,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description, actio
             mb: 2,
             display: 'grid',
             placeItems: 'center',
-            bgcolor: theme.palette.mode === 'dark' ? 'rgba(99,102,241,0.12)' : 'rgba(79,70,229,0.08)',
+            bgcolor: theme.palette.mode === 'dark' ? 'rgba(14,165,233,0.14)' : 'rgba(14,165,233,0.10)',
             color: 'primary.main',
           }}
         >
