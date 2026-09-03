@@ -58,10 +58,11 @@ jobs:
         continue-on-error: true
 
       - name: Golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: latest
-          args: --timeout=5m --out-format=github-actions
+          version: v2.4.0
+          install-mode: goinstall
+          args: --timeout=5m --output.tab.path=stdout
         continue-on-error: true
 
       - name: Trivy Vulnerability Scanner
