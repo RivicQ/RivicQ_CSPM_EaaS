@@ -135,4 +135,19 @@ func TestBuildReportGate(t *testing.T) {
 	if len(rep.Findings) == 0 {
 		t.Fatal("expected findings")
 	}
+	if rep.Qiskit == nil {
+		t.Fatal("expected Qiskit pipeline result")
+	}
+	if rep.Qiskit.Engine == "" || rep.Qiskit.Backend != "local-classical" {
+		t.Fatalf("qiskit %+v", rep.Qiskit)
+	}
+	if rep.Findings[0].Labels["qiskit_attack_class"] == "" {
+		t.Fatal("expected qiskit attack class label")
+	}
+	if rep.AuditScore == nil || rep.AuditScore.Note == "" {
+		t.Fatal("expected audit score with honesty note")
+	}
+	if rep.AuditScore.Overall < 0 || rep.AuditScore.Overall > 100 {
+		t.Fatalf("audit overall=%d", rep.AuditScore.Overall)
+	}
 }

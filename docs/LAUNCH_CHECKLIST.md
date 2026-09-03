@@ -5,7 +5,9 @@
 - [x] Sign-In / Register: Community vs Enterprise, validation, demo access, Supabase on Pages
 - [x] Community dashboard does not mix simulated enterprise estates (unless Demo)
 - [x] Inventory search, sort, JSON + print-to-PDF export
-- [x] Homepage GitHub scan path + Discover → Analyze → Quantify
+- [x] Homepage GitHub **and website** scan path + Discover → Analyze → Quantify
+- [x] Qiskit-aligned estate / audit scores (`GET /scans/:id/qiskit`) — local taxonomy, not IBM hardware
+- [x] Product status, roadmap, and Qiskit pipeline documentation
 - [x] Dataset harness (`make analyze-datasets`) — 5/5 passing
 - [x] Enterprise: JWT RBAC helper, audit tenant from JWT only (no `X-Tenant-ID` spoof)
 - [x] Legal pack: LICENSE (Apache-2.0 Community), LEGAL.md, NOTICE, PRIVACY.md, TRADEMARKS.md, SECURITY.md, CONTRIBUTING.md

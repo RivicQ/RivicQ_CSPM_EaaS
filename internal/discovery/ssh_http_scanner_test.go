@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -86,9 +87,9 @@ func TestHTTPScanner_CheckSecurityHeaders_AllMissing(t *testing.T) {
 	target := Target{ID: "t1", Host: "localhost", Port: 5001, Protocol: "http", Label: "Test HTTP"}
 	headers := http.Header{}
 
-	findings := s.checkSecurityHeaders(target, headers, time.Now())
+	findings := s.checkSecurityHeaders(target, headers, time.Now(), "http", target.Port)
 
-	assert.Len(t, findings, 3)
+	assert.Len(t, findings, 4)
 
 	findingTypes := make(map[string]bool)
 	for _, f := range findings {
@@ -97,6 +98,7 @@ func TestHTTPScanner_CheckSecurityHeaders_AllMissing(t *testing.T) {
 	assert.True(t, findingTypes["MISSING_HSTS"])
 	assert.True(t, findingTypes["MISSING_XCTO"])
 	assert.True(t, findingTypes["MISSING_XFO"])
+	assert.True(t, findingTypes["MISSING_CSP"])
 }
 
 func TestHTTPScanner_CheckSecurityHeaders_HSTSPresent(t *testing.T) {
@@ -106,7 +108,7 @@ func TestHTTPScanner_CheckSecurityHeaders_HSTSPresent(t *testing.T) {
 		"Strict-Transport-Security": []string{"max-age=63072000"},
 	}
 
-	findings := s.checkSecurityHeaders(target, headers, time.Now())
+	findings := s.checkSecurityHeaders(target, headers, time.Now(), "http", target.Port)
 
 	for _, f := range findings {
 		assert.NotEqual(t, "MISSING_HSTS", f.FindingType)
@@ -120,9 +122,10 @@ func TestHTTPScanner_CheckSecurityHeaders_AllPresent(t *testing.T) {
 		"Strict-Transport-Security": []string{"max-age=63072000; includeSubDomains"},
 		"X-Content-Type-Options":    []string{"nosniff"},
 		"X-Frame-Options":           []string{"DENY"},
+		"Content-Security-Policy":   []string{"default-src 'self'"},
 	}
 
-	findings := s.checkSecurityHeaders(target, headers, time.Now())
+	findings := s.checkSecurityHeaders(target, headers, time.Now(), "http", target.Port)
 	assert.Empty(t, findings)
 }
 
@@ -224,6 +227,53 @@ func TestHTTPScanner_Scan_NoMD5Response(t *testing.T) {
 	for _, f := range findings {
 		assert.NotEqual(t, "MD5_HASH_USAGE", f.FindingType)
 	}
+}
+
+func TestHTTPScanner_HTTPSSchemeAndInsecureCookie(t *testing.T) {
+	srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Set-Cookie", "sid=abc")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"ok":true}`))
+	}))
+	defer srv.Close()
+
+	host, portStr, err := splitHostPort(strings.TrimPrefix(srv.URL, "https://"))
+	require.NoError(t, err)
+	var port int
+	_, err = parsePort(portStr, &port)
+	require.NoError(t, err)
+
+	scanner := &HTTPScanner{}
+	target := Target{ID: "t1", Host: host, Port: port, Protocol: "http", Scheme: "https", Label: "Test HTTPS"}
+	findings, err := scanner.Scan(context.Background(), target)
+	require.NoError(t, err)
+
+	var cookie, csp bool
+	for _, f := range findings {
+		if f.FindingType == "INSECURE_COOKIE" {
+			cookie = true
+		}
+		if f.FindingType == "MISSING_CSP" {
+			csp = true
+		}
+	}
+	assert.True(t, cookie, "HTTPS responses should flag cookies missing Secure/HttpOnly")
+	assert.True(t, csp, "expected CSP detection on HTTPS")
+}
+
+func TestHTTPScanner_CheckSecurityHeaders_HTTPSCookie(t *testing.T) {
+	s := &HTTPScanner{}
+	target := Target{ID: "t1", Host: "localhost", Port: 443, Protocol: "http", Scheme: "https"}
+	headers := http.Header{
+		"Strict-Transport-Security": []string{"max-age=1"},
+		"X-Content-Type-Options":    []string{"nosniff"},
+		"X-Frame-Options":           []string{"DENY"},
+		"Content-Security-Policy":   []string{"default-src 'self'"},
+		"Set-Cookie":                []string{"session=1"},
+	}
+	findings := s.checkSecurityHeaders(target, headers, time.Now(), "https", 443)
+	require.Len(t, findings, 1)
+	assert.Equal(t, "INSECURE_COOKIE", findings[0].FindingType)
 }
 
 // splitHostPort helper for tests

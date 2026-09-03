@@ -1,8 +1,8 @@
 # Multi-Language Quantum SDKs (Design)
 
 The Go SDK core (`internal/quantum/provider`) is the reference implementation.
-This directory specifies the bindings that mirror the same contract in other
-languages so provider plugins written in any language expose the same surface.
+Production CBOM/website scores use `internal/quantum/qiskitprofile` (local taxonomy).
+An educational Python companion lives at [`sdk/python/rivicq_qiskit`](../../sdk/python/rivicq_qiskit/README.md).
 
 ## Contract (language-agnostic)
 

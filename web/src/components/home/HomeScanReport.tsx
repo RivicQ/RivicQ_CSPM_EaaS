@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Alert, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Skeleton, Stack, Typography, useTheme,
 } from '@mui/material';
-import { CheckCircle, ErrorOutline, GitHub, Lock, ArrowForward, Shield } from '@mui/icons-material';
+import { CheckCircle, ErrorOutline, GitHub, Lock, ArrowForward, Shield, Language } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { tokens } from '../../theme/tokens';
 import designSystem from '../../theme/designSystem';
@@ -13,8 +13,13 @@ export type HomeScanReportData = {
   target?: string;
   score?: number;
   severity?: { critical?: number; high?: number; medium?: number; low?: number };
-  algorithms?: Array<{ name: string; count?: number; quantumSafe?: boolean }>;
-  quantumRisk?: string;
+  algorithms?: Array<{ name: string; count?: number; quantumSafe?: boolean; attackClass?: string }>;
+  quantumRisk?: string | number;
+  resources?: Record<string, boolean>;
+  detections?: Array<{ title: string; severity?: string; protocol?: string }>;
+  qiskitEstate?: number;
+  auditScore?: number;
+  policyGate?: string;
 };
 
 type HomeScanReportProps = {
@@ -38,7 +43,7 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
       <Card sx={{ bgcolor: cardBg, border: 1, borderColor: 'rgba(99,102,241,0.2)' }}>
         <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-            <GitHub sx={{ color: tokens.colors.rivicq[500] }} />
+            {/github/i.test(report?.target || '') ? <GitHub sx={{ color: tokens.colors.rivicq[500] }} /> : <Language sx={{ color: tokens.colors.rivicq[500] }} />}
             <Typography variant="h6" fontWeight={800}>CBOM scan</Typography>
             {status === 'scanning' && <Chip size="small" label="Running" color="primary" />}
             {status === 'complete' && <Chip size="small" label="Completed" color="success" />}
@@ -76,7 +81,7 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
                 <Grid item xs={6} sm={3}>
                   <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
                     <Typography variant="caption" color="text.secondary">Security score</Typography>
-                    <Typography variant="h5" fontWeight={900} sx={{ color: tokens.colors.rivicq[600] }}>{report.score ?? '—'}</Typography>
+                    <Typography variant="h5" fontWeight={900} sx={{ color: tokens.colors.rivicq[600] }}>{report.score ?? report.auditScore ?? '—'}</Typography>
                   </Box>
                 </Grid>
                 {[
@@ -94,10 +99,29 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
                   </Grid>
                 ))}
               </Grid>
-              {report.quantumRisk && (
+              {report.quantumRisk != null && report.quantumRisk !== '' && (
                 <Alert icon={<Shield fontSize="inherit" />} severity="info" sx={{ mb: 2 }}>
                   Quantum exposure: <strong>{report.quantumRisk}</strong>
+                  {report.qiskitEstate != null ? ` · Qiskit estate ${report.qiskitEstate}/100` : ''}
+                  {report.policyGate ? ` · Policy ${report.policyGate}` : ''}
                 </Alert>
+              )}
+              {report.resources && (
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+                  {Object.entries(report.resources).filter(([, on]) => on).map(([name]) => (
+                    <Chip key={name} size="small" color="success" label={`${name.toUpperCase()} enabled`} />
+                  ))}
+                </Stack>
+              )}
+              {(report.detections?.length || 0) > 0 && (
+                <Stack spacing={1} sx={{ mb: 2 }}>
+                  {report.detections!.slice(0, 8).map((d, i) => (
+                    <Typography key={`${d.title}-${i}`} variant="body2">
+                      <strong>{(d.severity || 'info').toUpperCase()}</strong>
+                      {d.protocol ? ` · ${d.protocol}` : ''} — {d.title}
+                    </Typography>
+                  ))}
+                </Stack>
               )}
               {(report.algorithms?.length || 0) > 0 && (
                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -106,7 +130,7 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
                       key={a.name}
                       size="small"
                       icon={a.quantumSafe ? <CheckCircle sx={{ fontSize: 14 }} /> : <Lock sx={{ fontSize: 14 }} />}
-                      label={a.count ? `${a.name} · ${a.count}` : a.name}
+                      label={a.count ? `${a.name} · ${a.count}` : a.attackClass ? `${a.name} · ${a.attackClass}` : a.name}
                       color={a.quantumSafe ? 'success' : 'default'}
                       variant="outlined"
                     />

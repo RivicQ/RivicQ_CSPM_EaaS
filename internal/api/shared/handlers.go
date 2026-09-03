@@ -793,6 +793,7 @@ func GetCBOMScanStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			}
 			resp["components"] = componentsToGin(r.Components)
 			resp["targets"] = r.Targets
+			resp["resources"] = discovery.ResourcesFromTargets(r.Targets)
 			resp["result_url"] = "/api/v1/scans/" + id + "/report"
 		}
 

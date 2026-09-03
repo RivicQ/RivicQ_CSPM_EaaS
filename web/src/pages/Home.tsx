@@ -89,21 +89,41 @@ const Home: React.FC = () => {
 
   const buildReport = (target: string, data: any): HomeScanReportData => {
     const findings = data?.findings || data?.summary || {};
+    const findingItems = data?.finding_items || data?.detections || data?.intel_findings || [];
+    const resources = data?.resources || {};
+    const qiskit = data?.qiskit || {};
+    const audit = data?.audit_score || {};
     return {
       target,
-      score: data?.security_score ?? data?.score ?? findings?.score,
+      score: data?.security_score ?? data?.score ?? audit.overall ?? findings?.score,
       severity: {
         critical: findings.critical ?? data?.critical,
         high: findings.high ?? data?.high,
         medium: findings.medium ?? data?.medium,
         low: findings.low ?? data?.low,
       },
-      quantumRisk: data?.quantum_risk ?? data?.quantumRisk,
-      algorithms: (data?.algorithms || data?.crypto_findings || [])
+      quantumRisk: data?.quantum_risk ?? data?.quantumRisk ?? audit.quantum_risk,
+      qiskitEstate: qiskit.estate_score ?? audit.qiskit_estate,
+      auditScore: audit.overall,
+      policyGate: data?.gate?.decision ?? audit.policy_gate,
+      resources,
+      detections: (Array.isArray(findingItems) ? findingItems : []).slice(0, 12).map((f: any) => ({
+        title: f.title || f.algorithm || f.finding_type || 'Finding',
+        severity: f.severity,
+        protocol: f.protocol || f.scanner,
+      })),
+      algorithms: (data?.algorithms || data?.crypto_findings || qiskit.algorithms || [])
         .slice(0, 12)
-        .map((a: any) => ({ name: a.name || a.algorithm, count: a.count, quantumSafe: a.quantum_safe ?? a.quantumSafe })),
+        .map((a: any) => ({
+          name: a.name || a.algorithm,
+          count: a.count,
+          quantumSafe: a.quantum_safe ?? a.quantumSafe,
+          attackClass: a.attack_class || a.attackClass,
+        })),
     };
   };
+
+  const isWebsiteTarget = (value: string) => /^(https?:\/\/|www\.)/i.test(value) || /^[\w.-]+\.[a-z]{2,}(:\d+)?(\/.*)?$/i.test(value);
 
   const handleScan = async () => {
     if (!repoUrl.trim()) return;
@@ -152,7 +172,7 @@ const Home: React.FC = () => {
         }, 1500);
         return;
       }
-      const resp = await cbomService.triggerScan(target, 'cbom');
+      const resp = await cbomService.triggerScan(target, isWebsiteTarget(target) ? 'website' : 'cbom');
       const scanId = resp.data.scan_id;
       let ticks = 0;
       const interval = setInterval(async () => {
@@ -165,8 +185,25 @@ const Home: React.FC = () => {
             clearInterval(interval);
             if (status.status === 'completed') {
               try {
-                const reportResp = await cbomService.getScanReport(scanId);
-                setReport(buildReport(target, reportResp.data || status));
+                const [reportResp, intelResp, qiskitResp] = await Promise.all([
+                  cbomService.getScanReport(scanId).catch(() => null),
+                  cbomService.getScanIntelligence(scanId).catch(() => null),
+                  cbomService.getScanQiskit(scanId).catch(() => null),
+                ]);
+                const reportData = reportResp?.data || status;
+                const intel = intelResp?.data || {};
+                const qiskitPayload = qiskitResp?.data || {};
+                setReport(buildReport(target, {
+                  ...status,
+                  ...reportData,
+                  findings: status.findings || intel.summary,
+                  finding_items: status.finding_items || reportData.findings,
+                  resources: status.resources || qiskitPayload.resources,
+                  qiskit: qiskitPayload.qiskit || intel.qiskit,
+                  audit_score: qiskitPayload.audit_score || intel.audit_score,
+                  gate: intel.gate,
+                  algorithms: (qiskitPayload.qiskit || intel.qiskit)?.algorithms,
+                }));
               } catch {
                 setReport(buildReport(target, status));
               }
@@ -305,7 +342,7 @@ const Home: React.FC = () => {
                     <Stack spacing={2}>
                       <TextField
                         fullWidth
-                        placeholder="Paste a public GitHub repo URL for a free CBOM scan…"
+                        placeholder="Paste a public GitHub repo, or a website URL (https://example.com)…"
                         value={repoUrl}
                         onChange={(e) => setRepoUrl(e.target.value)}
                         InputProps={{

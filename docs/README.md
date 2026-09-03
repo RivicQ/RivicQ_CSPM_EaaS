@@ -23,6 +23,9 @@ UI colors follow a **clear sky-blue and white** theme (`#0284c7` on `#ffffff`). 
 
 ## Product
 
+- [Product status](PRODUCT_STATUS.md) — OSS vs Enterprise, audits, scores, website scan
+- [Roadmap](ROADMAP.md) — Builds 2–5 and quantum track
+- [Qiskit pipeline](QISKIT_PIPELINE.md) — local profile vs optional Aer vs IBM Runtime
 - [PQC Migration Guide](PQC_MIGRATION.md)
 - [OSS Architecture](oss-architecture.md)
 - [Enterprise SaaS architecture](ARCHITECTURE.md) — client, control plane, hardware/firmware scope, honest boundaries

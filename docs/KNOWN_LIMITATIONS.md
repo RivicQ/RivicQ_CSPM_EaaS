@@ -26,6 +26,12 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Workspace user listing and role changes require **Admin** (`GET /auth/workspace/users`).
 - SAML configuration can be stored; a complete IdP ACS handshake is an operations task with your identity provider.
 
+## Scores and Qiskit
+
+- Qiskit estate / audit scores are a **local classical taxonomy** (`internal/quantum/qiskitprofile`). They do not run IBM Quantum hardware.
+- Optional Python Aer (`sdk/python/rivicq_qiskit`) is educational.
+- Compliance dashboards remain **control mappings**, not certifications.
+
 ## Enterprise
 
 - Cloud inventory needs real credentials; disconnected connectors show empty states.

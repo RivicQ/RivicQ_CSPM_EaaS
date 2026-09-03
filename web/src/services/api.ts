@@ -450,6 +450,9 @@ export const cbomService = {
   getScanIntelligence: (scanId: string) =>
     api.get(`/scans/${scanId}/intelligence`),
 
+  getScanQiskit: (scanId: string) =>
+    api.get(`/scans/${scanId}/qiskit`),
+
   getScanCycloneDX: (scanId: string) =>
     api.get(`/scans/${scanId}/cyclonedx`),
 

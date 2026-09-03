@@ -7,7 +7,8 @@ type Target struct {
 	ID       string `json:"id"`
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
-	Protocol string `json:"protocol"` // "tls", "ssh", "http", "sbom"
+	Protocol string `json:"protocol"`         // "tls", "ssh", "http", "sbom"
+	Scheme   string `json:"scheme,omitempty"` // "http" or "https" when Protocol == "http"
 	Label    string `json:"label"`
 	Path     string `json:"path,omitempty"` // local filesystem path when Protocol == "sbom"
 }

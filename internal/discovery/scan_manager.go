@@ -160,14 +160,25 @@ func (sm *ScanManager) ListScans() []*ScanJob {
 
 // buildTargets converts a scan target into the scanner work list. It supports
 // local repositories / files (SBOM scan), hostnames, host:port endpoints, and
-// URLs. The scan type adjusts the target set:
+// website URLs. The scan type adjusts the target set:
 //
-//	quick       – TLS + SSH only
-//	cbom        – TLS + SSH + HTTP (+ SBOM when target is a local path)
-//	full        – TLS + SSH + HTTP + SBOM
-//	compliance  – TLS + SSH + HTTP (+ SBOM when target is a local path)
+//	quick       – TLS + SSH only (TLS + HTTPS when the target is a website)
+//	website     – TLS + HTTP(S) on the URL port; SSH is skipped
+//	cbom        – TLS + SSH + HTTP, or TLS + HTTP(S) for website URLs
+//	full        – TLS + SSH + HTTP(S) (+ SBOM when the target is a local path)
+//	compliance  – same resource set as cbom
+//
+// Website URLs (http(s)://, www.*, or scan_type=website) enable HTTPS header
+// detection on port 443 instead of probing http://host:80. SSH is omitted
+// unless scan_type is "full", so a public website scan does not wait on :22.
 func buildTargets(target, scanType string) []Target {
 	host, port, path := normalizeTarget(target)
+	website := isWebsiteTarget(target, scanType)
+	scheme := httpSchemeFor(target, port)
+	rawLower := strings.ToLower(strings.TrimSpace(target))
+	if website && !strings.HasPrefix(rawLower, "http://") && scheme != "https" {
+		scheme = "https"
+	}
 
 	var targets []Target
 	idx := 0
@@ -179,7 +190,6 @@ func buildTargets(target, scanType string) []Target {
 	isLocal := path != "" && (isDir(path) || isFile(path))
 
 	if isLocal {
-		// Local repository or manifest file -> SBOM scan.
 		targets = append(targets, Target{
 			ID:       nextID(),
 			Host:     "local",
@@ -187,35 +197,107 @@ func buildTargets(target, scanType string) []Target {
 			Protocol: "sbom",
 			Label:    "SBOM Scan: " + target,
 		})
-		// "full" scans also probe localhost endpoints.
 		if scanType != "full" {
 			return targets
 		}
 		host = "localhost"
 		port = 0
+		website = false
+		scheme = "http"
 	}
 
 	if port == 0 {
-		port = 443
-	}
-
-	if host != "" {
-		switch scanType {
-		case "quick":
-			targets = append(targets,
-				Target{ID: nextID(), Host: host, Port: port, Protocol: "tls", Label: "TLS Scan: " + target},
-				Target{ID: nextID(), Host: host, Port: 22, Protocol: "ssh", Label: "SSH Scan: " + target},
-			)
-		default:
-			targets = append(targets,
-				Target{ID: nextID(), Host: host, Port: port, Protocol: "tls", Label: "TLS Scan: " + target},
-				Target{ID: nextID(), Host: host, Port: 22, Protocol: "ssh", Label: "SSH Scan: " + target},
-				Target{ID: nextID(), Host: host, Port: 80, Protocol: "http", Label: "HTTP Scan: " + target},
-			)
+		if scheme == "http" {
+			port = 80
+		} else {
+			port = 443
 		}
 	}
 
+	if host == "" {
+		return targets
+	}
+
+	includeSSH := !website || strings.EqualFold(scanType, "full")
+	includeHTTP := website || !strings.EqualFold(scanType, "quick")
+
+	tlsPort := port
+	if website && scheme == "http" && port == 80 {
+		tlsPort = 443
+	}
+
+	targets = append(targets, Target{
+		ID:       nextID(),
+		Host:     host,
+		Port:     tlsPort,
+		Protocol: "tls",
+		Label:    "TLS Scan: " + target,
+	})
+	if includeSSH {
+		targets = append(targets, Target{
+			ID:       nextID(),
+			Host:     host,
+			Port:     22,
+			Protocol: "ssh",
+			Label:    "SSH Scan: " + target,
+		})
+	}
+	if includeHTTP {
+		httpPort := 80
+		httpScheme := "http"
+		if website {
+			httpPort = port
+			httpScheme = scheme
+			if httpScheme == "" {
+				httpScheme = "https"
+			}
+		}
+		targets = append(targets, Target{
+			ID:       nextID(),
+			Host:     host,
+			Port:     httpPort,
+			Protocol: "http",
+			Scheme:   httpScheme,
+			Label:    strings.ToUpper(httpScheme) + " Scan: " + target,
+		})
+	}
+
 	return targets
+}
+
+func isWebsiteTarget(raw, scanType string) bool {
+	if strings.EqualFold(strings.TrimSpace(scanType), "website") {
+		return true
+	}
+	s := strings.ToLower(strings.TrimSpace(raw))
+	if strings.Contains(s, "://") || strings.HasPrefix(s, "www.") {
+		return true
+	}
+	return false
+}
+
+func httpSchemeFor(raw string, port int) string {
+	s := strings.ToLower(strings.TrimSpace(raw))
+	if strings.HasPrefix(s, "http://") {
+		return "http"
+	}
+	if strings.HasPrefix(s, "https://") || port == 443 {
+		return "https"
+	}
+	return "http"
+}
+
+// ResourcesFromTargets reports which discovery scanners were scheduled.
+func ResourcesFromTargets(targets []Target) map[string]bool {
+	out := map[string]bool{"tls": false, "http": false, "https": false, "ssh": false, "sbom": false}
+	for _, t := range targets {
+		p := strings.ToLower(t.Protocol)
+		out[p] = true
+		if p == "http" && strings.EqualFold(t.Scheme, "https") {
+			out["https"] = true
+		}
+	}
+	return out
 }
 
 // normalizeTarget strips scheme / trailing slashes and resolves a host, port and

@@ -4,7 +4,7 @@ import {
   Alert, Box, Button, Chip, Grid, LinearProgress, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
 import { GitHub, PlayArrow, CheckCircle, Error as ErrorIcon, Schedule, Security, Refresh,
-  History, BugReport, Event, Speed,
+  History, BugReport, Event, Speed, Language, Lock,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { cbomService, benchmarkService } from '../services/api';
@@ -50,10 +50,22 @@ const MAX_POLL_ATTEMPTS = 40;
 
 const SCAN_TYPE_INFO: Record<string, string> = {
   cbom: 'Full cryptographic bill of materials — keys, certs, libraries, configs.',
+  website: 'Public website: TLS on 443 plus HTTPS headers/cookies. SSH is skipped.',
   quick: 'Fast surface scan for known weak algorithms and expired certs.',
-  full: 'Deep scan including dependencies, containers, and IaC templates.',
-  compliance: 'Maps findings to ISO 27001, SOC 2, PCI-DSS, and PQC controls.',
+  full: 'Deep scan including SSH, HTTP(S), and (for local paths) SBOM.',
+  compliance: 'Maps findings to ISO 27001, SOC 2, PCI-DSS, and PQC controls (mappings, not certifications).',
 };
+
+const WEBSITE_PRESETS = ['https://example.com', 'https://www.wikipedia.org'];
+
+const RESOURCE_LABELS: Array<{ key: string; label: string }> = [
+  { key: 'tls', label: 'TLS' },
+  { key: 'https', label: 'HTTPS' },
+  { key: 'http', label: 'HTTP' },
+  { key: 'ssh', label: 'SSH' },
+  { key: 'sbom', label: 'SBOM' },
+  { key: 'qiskit', label: 'Qiskit score' },
+];
 
 const mapApiScan = (s: any): ScanJob => ({
   id: s.id ?? s.scan_id,
@@ -70,11 +82,14 @@ const Scanner: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(() => (searchParams.get('tab') === 'github' ? 5 : 0));
   const [isScanning, setIsScanning] = useState(false);
-  const [scanType, setScanType] = useState<'quick' | 'full' | 'compliance' | 'cbom'>('cbom');
-  const [scanTarget, setScanTarget] = useState('./');
+  const [scanType, setScanType] = useState<'quick' | 'full' | 'compliance' | 'cbom' | 'website'>('website');
+  const [scanTarget, setScanTarget] = useState('https://example.com');
   const [scanJobs, setScanJobs] = useState<ScanJob[]>([]);
   const [liveFindings, setLiveFindings] = useState<ScanFinding[]>([]);
   const [policyGate, setPolicyGate] = useState<PolicyGate | null>(null);
+  const [enabledResources, setEnabledResources] = useState<Record<string, boolean>>({});
+  const [qiskitEstate, setQiskitEstate] = useState<number | null>(null);
+  const [auditOverall, setAuditOverall] = useState<number | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const pollTimerRef = useRef<number | null>(null);
@@ -149,6 +164,9 @@ const Scanner: React.FC = () => {
         if (data.finding_items?.length) {
           setLiveFindings(data.finding_items);
         }
+        if (data.resources && typeof data.resources === 'object') {
+          setEnabledResources(data.resources);
+        }
         if (status === 'completed' || status === 'failed') {
           clearPolling();
           setIsScanning(false);
@@ -157,6 +175,17 @@ const Scanner: React.FC = () => {
             cbomService.getScanIntelligence(scanId).then((intel) => {
               const gate = intel.data?.gate;
               if (gate) setPolicyGate(gate);
+            }).catch(() => undefined);
+            cbomService.getScanQiskit(scanId).then((qiskitResp) => {
+              const payload = qiskitResp.data ?? {};
+              const q = payload.qiskit ?? payload;
+              if (typeof q.estate_score === 'number') setQiskitEstate(q.estate_score);
+              if (typeof payload.audit_score?.overall === 'number') setAuditOverall(payload.audit_score.overall);
+              setEnabledResources((prev) => ({
+                ...prev,
+                ...(payload.resources || q.resources || {}),
+                qiskit: true,
+              }));
             }).catch(() => undefined);
           }
         }
@@ -173,12 +202,15 @@ const Scanner: React.FC = () => {
   const startScan = async () => {
     const target = scanTarget.trim();
     if (!target) { setError('Specify a scan target (hostname, URL, or local path like ./).'); return; }
+    const looksLikeWebsite = /^(https?:\/\/|www\.)/i.test(target);
+    const resolvedType = looksLikeWebsite && scanType === 'cbom' ? 'website' : scanType;
     clearPolling(); setIsScanning(true); setError(null); setScanProgress(0);
-    const newJob: ScanJob = { id: `scan-${Date.now()}`, status: 'running', type: scanType, target, startedAt: new Date().toISOString(), findings: 0, progress: 0 };
+    setPolicyGate(null); setQiskitEstate(null); setAuditOverall(null); setEnabledResources({});
+    const newJob: ScanJob = { id: `scan-${Date.now()}`, status: 'running', type: resolvedType, target, startedAt: new Date().toISOString(), findings: 0, progress: 0 };
     setScanJobs((prev) => [newJob, ...prev]);
     setTab(1);
     try {
-      const response = await cbomService.triggerScan(target, scanType);
+      const response = await cbomService.triggerScan(target, resolvedType);
       const scanId = response.data?.scan_id ?? response.data?.scanId ?? newJob.id;
       updateJob(newJob.id, (job) => ({ ...job, scanId, id: scanId }));
       pollScanStatus(scanId, scanId);
@@ -206,7 +238,7 @@ const Scanner: React.FC = () => {
   const completedScans = scanJobs.filter((j) => j.status === 'completed').length;
 
   return (
-    <PageFrame eyebrow="Cryptographic Security Posture Management" title="CBOM Scanner" subtitle="Detect cryptographic material via TLS, SSH, HTTP, SBOM discovery, and authorized GitHub repository content analysis — results feed inventory, PQC, and analytics." badge={isScanning ? 'Scanning' : 'Ready'}>
+    <PageFrame eyebrow="Cryptographic Security Posture Management" title="CBOM Scanner" subtitle="Detect cryptographic material via TLS, HTTPS websites, SSH, SBOM discovery, and authorized GitHub repository content analysis. Qiskit-aligned scores are local taxonomy — not IBM Quantum hardware." badge={isScanning ? 'Scanning' : 'Ready'}>
       {error && (
         <Box sx={{ mb: 2.5, p: 1.5, borderRadius: `${designSystem.radius.md}px`, bgcolor: 'warning.main', color: 'warning.contrastText' }}>
           <Typography variant="body2">{error}</Typography>
@@ -239,21 +271,63 @@ const Scanner: React.FC = () => {
           <TextField
             fullWidth
             label="Scan Target"
-            placeholder="example.com, https://host:443, ./my-repo"
+            placeholder="https://example.com, example.com, or ./my-repo"
             value={scanTarget}
             onChange={(e) => setScanTarget(e.target.value)}
             disabled={isScanning}
-            sx={{ mb: 2 }}
-            helperText="Hostname, URL, local repo path (./), or filesystem path for SBOM crypto discovery"
+            sx={{ mb: 1.5 }}
+            helperText="Website URL enables TLS + HTTPS header detection (SSH skipped). Local path ./ runs SBOM crypto discovery."
           />
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+            {WEBSITE_PRESETS.map((url) => (
+              <Chip
+                key={url}
+                icon={<Language sx={{ fontSize: 16 }} />}
+                label={url}
+                clickable
+                disabled={isScanning}
+                variant={scanTarget === url ? 'filled' : 'outlined'}
+                color={scanTarget === url ? 'primary' : 'default'}
+                onClick={() => { setScanTarget(url); setScanType('website'); }}
+              />
+            ))}
+            <Chip
+              icon={<Lock sx={{ fontSize: 16 }} />}
+              label="./ local repo"
+              clickable
+              disabled={isScanning}
+              variant={scanTarget === './' ? 'filled' : 'outlined'}
+              onClick={() => { setScanTarget('./'); setScanType('cbom'); }}
+            />
+          </Stack>
           <ToggleButtonGroup exclusive value={scanType} onChange={(_, v) => v && setScanType(v)} size="small" sx={{ mb: 2, flexWrap: 'wrap' }}>
-            {(['cbom', 'quick', 'full', 'compliance'] as const).map((type) => (
+            {(['website', 'cbom', 'quick', 'full', 'compliance'] as const).map((type) => (
               <ToggleButton key={type} value={type} disabled={isScanning} sx={{ textTransform: 'capitalize' }}>
                 {type === 'cbom' ? 'CBOM' : type}
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{SCAN_TYPE_INFO[scanType]}</Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+            {RESOURCE_LABELS.map((r) => {
+              const on = Boolean(enabledResources[r.key]);
+              return (
+                <Chip
+                  key={r.key}
+                  size="small"
+                  label={r.label}
+                  color={on ? 'success' : 'default'}
+                  variant={on ? 'filled' : 'outlined'}
+                />
+              );
+            })}
+          </Stack>
+          {(qiskitEstate != null || auditOverall != null) && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              {qiskitEstate != null ? `Qiskit estate score: ${qiskitEstate}/100. ` : ''}
+              {auditOverall != null ? `Audit score: ${auditOverall}/100 (policy gate + Qiskit profile — not a certification).` : ''}
+            </Alert>
+          )}
           {isScanning && (
             <Box sx={{ mb: 2 }}>
               <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.75 }}>
@@ -300,8 +374,19 @@ const Scanner: React.FC = () => {
               {policyGate.reasons?.[0] ? ` — ${policyGate.reasons[0]}` : ''}
             </Alert>
           )}
+          {(qiskitEstate != null || auditOverall != null) && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              {qiskitEstate != null ? `Qiskit estate score ${qiskitEstate}/100. ` : ''}
+              {auditOverall != null ? `Audit score ${auditOverall}/100 (mappings, not a certification).` : ''}
+            </Alert>
+          )}
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+            {RESOURCE_LABELS.map((r) => (
+              <Chip key={r.key} size="small" label={r.label} color={enabledResources[r.key] ? 'success' : 'default'} variant={enabledResources[r.key] ? 'filled' : 'outlined'} />
+            ))}
+          </Stack>
           {findings.length === 0 ? (
-            <EmptyState icon={<BugReport />} title="No findings yet" description="Complete a CBOM scan to populate cryptographic findings from TLS, SSH, HTTP, and SBOM discovery." action={{ label: 'Run Scan', onClick: () => setTab(0) }} />
+            <EmptyState icon={<BugReport />} title="No findings yet" description="Complete a website or CBOM scan to populate TLS, HTTPS header, SSH, and SBOM detections." action={{ label: 'Run Scan', onClick: () => setTab(0) }} />
           ) : (
             <Stack spacing={1.5}>
               {findings.map((f, idx) => (

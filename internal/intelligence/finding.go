@@ -1,6 +1,10 @@
 package intelligence
 
-import "time"
+import (
+	"time"
+
+	"github.com/rivic-q/cryptobom-saas/internal/quantum/qiskitprofile"
+)
 
 // Finding is the single normalized security finding consumed by risk, policy,
 // API, CLI, and the dashboard. Scanner-specific types (discovery.Finding,
@@ -50,17 +54,30 @@ type Factor struct {
 }
 
 type Report struct {
-	Target      string            `json:"target"`
-	Asset       string            `json:"asset,omitempty"`
-	StartedAt   time.Time         `json:"started_at"`
-	CompletedAt time.Time         `json:"completed_at"`
-	Findings    []Finding         `json:"findings"`
-	Gate        GateResult        `json:"gate"`
-	Summary     ReportSummary     `json:"summary"`
-	CycloneDX   map[string]any    `json:"cyclonedx,omitempty"`
-	Tools       []ToolStatus      `json:"tools"`
-	Excludes    []string          `json:"excludes,omitempty"`
-	Metadata    map[string]string `json:"metadata,omitempty"`
+	Target      string                        `json:"target"`
+	Asset       string                        `json:"asset,omitempty"`
+	StartedAt   time.Time                     `json:"started_at"`
+	CompletedAt time.Time                     `json:"completed_at"`
+	Findings    []Finding                     `json:"findings"`
+	Gate        GateResult                    `json:"gate"`
+	Summary     ReportSummary                 `json:"summary"`
+	Qiskit      *qiskitprofile.PipelineResult `json:"qiskit,omitempty"`
+	AuditScore  *AuditScore                   `json:"audit_score,omitempty"`
+	CycloneDX   map[string]any                `json:"cyclonedx,omitempty"`
+	Tools       []ToolStatus                  `json:"tools"`
+	Excludes    []string                      `json:"excludes,omitempty"`
+	Metadata    map[string]string             `json:"metadata,omitempty"`
+}
+
+// AuditScore is a Community/Enterprise engine score. It is a policy-gate and
+// Qiskit-profile composite, not an ISO/SOC/NIST certification.
+type AuditScore struct {
+	Edition      string `json:"edition"`
+	Overall      int    `json:"overall"`
+	PolicyGate   string `json:"policy_gate"`
+	QiskitEstate int    `json:"qiskit_estate"`
+	QuantumRisk  int    `json:"quantum_risk"`
+	Note         string `json:"note"`
 }
 
 type ReportSummary struct {

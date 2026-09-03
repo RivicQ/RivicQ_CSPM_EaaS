@@ -48,6 +48,17 @@ func TestIntelligencePolicyRoutes(t *testing.T) {
 	require.Equal(t, "BLOCK", gate["decision"])
 }
 
+func TestGetScanQiskitNotFound(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	g := r.Group("/api/v1")
+	SetupIntelligenceRoutes(g, logrus.New())
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/scans/does-not-exist/qiskit", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusNotFound, w.Code)
+}
+
 func TestAnalyzeRepositoryFiles_RSAKeyLength(t *testing.T) {
 	res := AnalyzeRepositoryFiles("fixture://rsa", []RepoFile{{
 		Path:    "keys.go",

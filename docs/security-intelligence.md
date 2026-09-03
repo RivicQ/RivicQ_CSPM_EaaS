@@ -59,6 +59,7 @@ CLI / API / Dashboard / CI gate
 | Unified finding + risk + policy | `internal/intelligence/` |
 | CycloneDX 1.6 cryptographic-asset BOM | `GET /api/v1/scans/:id/cyclonedx` |
 | Intelligence report | `GET /api/v1/scans/:id/intelligence` |
+| Qiskit pipeline | `GET /api/v1/scans/:id/qiskit` (local Shor/Grover/PQC taxonomy) |
 | Policy catalog / evaluate | `GET /api/v1/policies`, `POST /api/v1/policies/evaluate` |
 | Community CLI | `cmd/rivicq` → `rivicq scan .` |
 | Self-scan CI | `.github/workflows/rivicq-security.yml` |

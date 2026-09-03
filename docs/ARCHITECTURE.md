@@ -18,7 +18,7 @@ This is not a certification, and it does not claim firmware reverse-engineering.
                            │ REST + JWT
 ┌──────────────────────────▼──────────────────────────────────┐
 │ 2. Data / intelligence plane (shared engine)                │
-│    Discovery → normalize → risk score → policy gate         │
+│    Discovery → normalize → risk → policy → Qiskit scores    │
 │    CycloneDX CBOM export (+ SBOM correlation where present) │
 └──────────────────────────┬──────────────────────────────────┘
                            │
@@ -47,9 +47,10 @@ Editions: **Community** (Apache-2.0), **Professional**, **Enterprise** (commerci
 
 Shared by Community and Enterprise:
 
-- `internal/discovery` — TLS, SSH, HTTP, SBOM/package cryptographic discovery
-- `internal/intelligence` — normalized findings, crypto risk, policy gate
+- `internal/discovery` — TLS, SSH, HTTP(S) websites, SBOM/package cryptographic discovery
+- `internal/intelligence` — normalized findings, crypto risk, policy gate, Qiskit profile, audit score
 - CycloneDX CBOM via `/scans/:id/cyclonedx` and the intelligence pipeline
+- Qiskit pipeline via `/scans/:id/qiskit` (local taxonomy; not IBM Quantum hardware)
 - Scan report JSON is `discovery.ScanResult` (`GetCBOMScanReport`)
 
 Do not change those contracts for UI or auth work.
@@ -119,6 +120,8 @@ Shipped or in progress:
 
 ## Prioritized builds
 
+Full list: [ROADMAP.md](ROADMAP.md). Product snapshot: [PRODUCT_STATUS.md](PRODUCT_STATUS.md). Qiskit wiring: [QISKIT_PIPELINE.md](QISKIT_PIPELINE.md).
+
 ### Build 1 — Client architecture + auth + admin (this delivery)
 
 1. Finalize login / register / edition selection (Community, Professional, Enterprise).
@@ -126,6 +129,7 @@ Shipped or in progress:
 3. Complete authentication: login, signup, MFA enroll/confirm/disable, forgot/reset password, profile, change password.
 4. Admin console: workspace users/roles, audit viewer, API keys, webhooks, SSO **config** (not live IdP login).
 5. Persist theme; enterprise-ready sky-blue/white UI; labeled demo only.
+6. Website HTTPS detection (TLS + headers/cookies; SSH skipped unless `full`) and Qiskit-aligned scores in the client.
 
 ### Build 2 — Enterprise SaaS control plane
 

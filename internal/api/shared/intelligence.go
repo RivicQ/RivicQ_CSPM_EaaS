@@ -41,6 +41,7 @@ func SetupIntelligenceRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	router.GET("/intelligence/policies", ListIntelligencePolicies(logger))
 	router.POST("/intelligence/evaluate", EvaluateIntelligencePolicies(logger))
 	router.GET("/scans/:id/intelligence", GetScanIntelligence(logger))
+	router.GET("/scans/:id/qiskit", GetScanQiskit(logger))
 	router.GET("/scans/:id/cyclonedx", GetScanCycloneDX(logger))
 }
 
@@ -117,6 +118,47 @@ func GetScanIntelligence(logger *logrus.Logger) gin.HandlerFunc {
 			"findings": len(rep.Findings),
 		}).Info("Built scan intelligence report")
 		c.JSON(http.StatusOK, rep)
+	}
+}
+
+func GetScanQiskit(logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		job, ok := discovery.GetScanManager().GetScan(id)
+		if !ok {
+			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
+			return
+		}
+		if job.Status != "completed" || job.Result == nil {
+			c.JSON(http.StatusConflict, gin.H{
+				"scan_id": job.ID,
+				"status":  job.Status,
+				"error":   "qiskit pipeline not ready",
+			})
+			return
+		}
+		rep := intelligence.BuildReport(intelligence.ScanInput{
+			Target:    job.Target,
+			Discovery: job.Result,
+		})
+		estate := 0
+		if rep.Qiskit != nil {
+			estate = rep.Qiskit.EstateScore
+		}
+		logger.WithFields(logrus.Fields{
+			"scan_id":      id,
+			"estate_score": estate,
+			"findings":     len(rep.Findings),
+		}).Info("Built Qiskit pipeline score")
+		c.JSON(http.StatusOK, gin.H{
+			"scan_id":     job.ID,
+			"target":      job.Target,
+			"qiskit":      rep.Qiskit,
+			"audit_score": rep.AuditScore,
+			"resources":   discovery.ResourcesFromTargets(job.Result.Targets),
+			"source":      "qiskitprofile",
+			"note":        "Local Qiskit-aligned scoring. IBM Quantum Runtime is not invoked.",
+		})
 	}
 }
 

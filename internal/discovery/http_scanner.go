@@ -2,41 +2,69 @@ package discovery
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-// HTTPScanner scans HTTP endpoints for weak cryptography usage and missing security headers
+// HTTPScanner scans HTTP/HTTPS websites for weak cryptography usage and missing security headers.
 type HTTPScanner struct{}
 
 var md5Regex = regexp.MustCompile(`^[0-9a-f]{32}$`)
 
-// Scan connects to an HTTP endpoint and returns findings
+func httpScheme(target Target) string {
+	if s := strings.ToLower(strings.TrimSpace(target.Scheme)); s == "http" || s == "https" {
+		return s
+	}
+	if target.Port == 443 {
+		return "https"
+	}
+	return "http"
+}
+
+// Scan connects to an HTTP or HTTPS endpoint and returns findings.
 func (s *HTTPScanner) Scan(ctx context.Context, target Target) ([]Finding, error) {
 	var findings []Finding
 	now := time.Now()
-
-	baseURL := fmt.Sprintf("http://%s:%d", target.Host, target.Port)
+	scheme := httpScheme(target)
+	port := target.Port
+	if port == 0 {
+		if scheme == "https" {
+			port = 443
+		} else {
+			port = 80
+		}
+	}
+	baseURL := fmt.Sprintf("%s://%s:%d", scheme, target.Host, port)
 
 	client := &http.Client{
 		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // scanner must still read headers on untrusted certs; TLS scanner reports cert issues
+		},
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= 5 {
+				return http.ErrUseLastResponse
+			}
+			return nil
+		},
 	}
 
-	// Probe for MD5 usage
-	md5URL := baseURL + "/?data=test"
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, md5URL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseURL+"/?data=test", nil)
 	if err != nil {
 		return nil, fmt.Errorf("build request: %w", err)
 	}
+	req.Header.Set("User-Agent", "RivicQ-CryptoBOM-Scanner/1.0")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("http get %s: %w", md5URL, err)
+		return nil, fmt.Errorf("http get %s: %w", baseURL, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
@@ -47,14 +75,13 @@ func (s *HTTPScanner) Scan(ctx context.Context, target Target) ([]Finding, error
 
 	bodyStr := string(body)
 
-	// Check if response looks like an MD5 hash
-	if md5Regex.MatchString(bodyStr) {
+	if md5Regex.MatchString(strings.TrimSpace(bodyStr)) {
 		findings = append(findings, Finding{
 			ID:          uuid.New().String(),
 			TargetID:    target.ID,
 			TargetLabel: target.Label,
 			Host:        target.Host,
-			Port:        target.Port,
+			Port:        port,
 			Protocol:    "http",
 			FindingType: "MD5_HASH_USAGE",
 			Title:       "MD5 Hash Usage Detected in API Response",
@@ -71,30 +98,26 @@ func (s *HTTPScanner) Scan(ctx context.Context, target Target) ([]Finding, error
 		})
 	}
 
-	// Check security headers
-	headerFindings := s.checkSecurityHeaders(target, resp.Header, now)
-	findings = append(findings, headerFindings...)
-
+	findings = append(findings, s.checkSecurityHeaders(target, resp.Header, now, scheme, port)...)
 	return findings, nil
 }
 
-func (s *HTTPScanner) checkSecurityHeaders(target Target, headers http.Header, now time.Time) []Finding {
+func (s *HTTPScanner) checkSecurityHeaders(target Target, headers http.Header, now time.Time, scheme string, port int) []Finding {
 	var findings []Finding
-
-	if headers.Get("Strict-Transport-Security") == "" {
+	add := func(findingType, title, desc, evidence, remediation string, sev SeverityLevel) {
 		findings = append(findings, Finding{
 			ID:          uuid.New().String(),
 			TargetID:    target.ID,
 			TargetLabel: target.Label,
 			Host:        target.Host,
-			Port:        target.Port,
+			Port:        port,
 			Protocol:    "http",
-			FindingType: "MISSING_HSTS",
-			Title:       "Missing HTTP Strict-Transport-Security Header",
-			Description: "The Strict-Transport-Security (HSTS) header is absent, allowing potential protocol downgrade attacks.",
-			Evidence:    "HTTP response missing 'Strict-Transport-Security' header",
-			Severity:    SeverityMedium,
-			Remediation: "Add 'Strict-Transport-Security: max-age=63072000; includeSubDomains; preload' to all HTTPS responses.",
+			FindingType: findingType,
+			Title:       title,
+			Description: desc,
+			Evidence:    evidence,
+			Severity:    sev,
+			Remediation: remediation,
 			BSIRef:      "BSI TR-02102-2, Section 3.6",
 			DORARef:     "DORA Art. 9(2)",
 			QuantumSafe: false,
@@ -102,48 +125,47 @@ func (s *HTTPScanner) checkSecurityHeaders(target Target, headers http.Header, n
 		})
 	}
 
+	if headers.Get("Strict-Transport-Security") == "" {
+		add("MISSING_HSTS", "Missing HTTP Strict-Transport-Security Header",
+			"The Strict-Transport-Security (HSTS) header is absent, allowing potential protocol downgrade attacks.",
+			"HTTP response missing 'Strict-Transport-Security' header",
+			"Add 'Strict-Transport-Security: max-age=63072000; includeSubDomains; preload' to all HTTPS responses.",
+			SeverityMedium)
+	}
 	if headers.Get("X-Content-Type-Options") == "" {
-		findings = append(findings, Finding{
-			ID:          uuid.New().String(),
-			TargetID:    target.ID,
-			TargetLabel: target.Label,
-			Host:        target.Host,
-			Port:        target.Port,
-			Protocol:    "http",
-			FindingType: "MISSING_XCTO",
-			Title:       "Missing X-Content-Type-Options Header",
-			Description: "The X-Content-Type-Options header is missing. This can allow MIME-sniffing attacks.",
-			Evidence:    "HTTP response missing 'X-Content-Type-Options' header",
-			Severity:    SeverityLow,
-			Remediation: "Add 'X-Content-Type-Options: nosniff' to all HTTP responses.",
-			BSIRef:      "BSI TR-03161, Section 4.1",
-			DORARef:     "DORA Art. 9(2)",
-			QuantumSafe: false,
-			ScannedAt:   now,
-		})
+		add("MISSING_XCTO", "Missing X-Content-Type-Options Header",
+			"The X-Content-Type-Options header is missing. This can allow MIME-sniffing attacks.",
+			"HTTP response missing 'X-Content-Type-Options' header",
+			"Add 'X-Content-Type-Options: nosniff' to all HTTP responses.",
+			SeverityLow)
 	}
-
-	if headers.Get("X-Frame-Options") == "" {
-		findings = append(findings, Finding{
-			ID:          uuid.New().String(),
-			TargetID:    target.ID,
-			TargetLabel: target.Label,
-			Host:        target.Host,
-			Port:        target.Port,
-			Protocol:    "http",
-			FindingType: "MISSING_XFO",
-			Title:       "Missing X-Frame-Options Header",
-			Description: "The X-Frame-Options header is missing, which may allow clickjacking attacks.",
-			Evidence:    "HTTP response missing 'X-Frame-Options' header",
-			Severity:    SeverityLow,
-			Remediation: "Add 'X-Frame-Options: DENY' or 'X-Frame-Options: SAMEORIGIN' to all HTTP responses.",
-			BSIRef:      "BSI TR-03161, Section 4.1",
-			DORARef:     "DORA Art. 9(2)",
-			QuantumSafe: false,
-			ScannedAt:   now,
-		})
+	if headers.Get("X-Frame-Options") == "" && headers.Get("Content-Security-Policy") == "" {
+		add("MISSING_XFO", "Missing X-Frame-Options Header",
+			"The X-Frame-Options header is missing, which may allow clickjacking attacks.",
+			"HTTP response missing 'X-Frame-Options' header",
+			"Add 'X-Frame-Options: DENY' or 'X-Frame-Options: SAMEORIGIN', or a CSP frame-ancestors directive.",
+			SeverityLow)
 	}
-
+	if headers.Get("Content-Security-Policy") == "" {
+		add("MISSING_CSP", "Missing Content-Security-Policy Header",
+			"No Content-Security-Policy header was returned. CSP reduces injection and mixed-content risk on websites.",
+			"HTTP response missing 'Content-Security-Policy' header",
+			"Add a CSP that disables mixed content and restricts script sources.",
+			SeverityLow)
+	}
+	if scheme == "https" {
+		for _, c := range headers.Values("Set-Cookie") {
+			low := strings.ToLower(c)
+			if !strings.Contains(low, "secure") || !strings.Contains(low, "httponly") {
+				add("INSECURE_COOKIE", "Cookie missing Secure or HttpOnly",
+					"A Set-Cookie header on HTTPS is missing the Secure and/or HttpOnly flags.",
+					truncate(c, 120),
+					"Set cookies with Secure; HttpOnly; SameSite=Lax (or Strict) on HTTPS sites.",
+					SeverityMedium)
+				break
+			}
+		}
+	}
 	return findings
 }
 

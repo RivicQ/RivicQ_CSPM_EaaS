@@ -2,6 +2,8 @@
 
 Mirrors `internal/quantum/provider` for Python plugin authoring and CLI tooling.
 
+**Shipped educational pipeline:** [`sdk/python/rivicq_qiskit`](../../sdk/python/rivicq_qiskit/README.md) — same Shor/Grover/PQC classes as Go `qiskitprofile`. Optional Qiskit Aer; does not call IBM Quantum.
+
 ## Core types
 
 ```python

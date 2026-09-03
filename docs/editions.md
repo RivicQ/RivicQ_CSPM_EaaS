@@ -48,7 +48,8 @@ POST /api/v1/scans              # Trigger CBOM scan
 GET  /api/v1/scans              # List scans
 GET  /api/v1/scans/:id          # Scan status & findings
 GET  /api/v1/scans/:id/report   # Unchanged ScanResult JSON
-GET  /api/v1/scans/:id/intelligence  # Normalized findings + policy gate
+GET  /api/v1/scans/:id/intelligence  # Normalized findings + policy gate + Qiskit/audit scores
+GET  /api/v1/scans/:id/qiskit        # Qiskit-aligned estate score (not IBM Quantum hardware)
 GET  /api/v1/scans/:id/cyclonedx     # CycloneDX 1.6 cryptographic-asset BOM
 GET  /api/v1/findings           # Normalized findings across completed scans
 GET  /api/v1/policies           # Policy catalog

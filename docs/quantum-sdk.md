@@ -33,6 +33,7 @@ vendor-neutral.
 | Registry + lifecycle + event stream | OSS | `internal/quantum/provider/registry.go` |
 | Plugin manifest + ed25519 signing + loader | OSS | `internal/quantum/provider/plugin.go` |
 | `local-pqc` — dependency-free local attestation | OSS | `internal/quantum/builtin` |
+| `qiskitprofile` — Shor/Grover/PQC estate scores (not hardware) | OSS | `internal/quantum/qiskitprofile` |
 | `oqs-engine` — Open Quantum Safe (software backend) | OSS | `internal/quantum/oqsengine` |
 | `nist-pqc` — FIPS 203/204/205 validation engine | OSS | `internal/quantum/nistpqc` |
 | `ibm-quantum` — opt-in cloud provider | Enterprise | `internal/quantum/ibmquantum` |
