@@ -22,6 +22,8 @@ describe('demo trail', () => {
   it('maps product routes back to trail steps', () => {
     expect(trailStepByPath('/dashboard')).toBeGreaterThan(0);
     expect(trailStepByPath('/scanner')).toBeGreaterThan(0);
+    expect(trailStepByPath('/cspm')).toBeGreaterThan(0);
+    expect(DEMO_TRAIL_STEPS[0].body.toLowerCase()).toContain('community');
     expect(trailStepByPath('/nope')).toBe(-1);
   });
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Card, CardContent, Chip, Stack, Typography, useTheme } from '@mui/material';
 import {
-  Cable, DocumentScanner, Inventory2, Assessment, TrackChanges, ArrowForward, ArrowDownward,
+  TravelExplore, Healing, Description, ArrowForward, ArrowDownward,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { tokens } from '../../theme/tokens';
@@ -18,38 +18,22 @@ type Step = {
 
 const STEPS: Step[] = [
   {
-    n: '01', title: 'Connect target', icon: <Cable />, accent: tokens.colors.rivicq[600],
-    desc: 'Point RivicQ at a GitHub repository, container image, cloud account, or Kubernetes cluster.',
-    tags: ['GitHub', 'Container', 'Cloud', 'Kubernetes'],
+    n: '01', title: 'Discover', icon: <TravelExplore />, accent: tokens.colors.rivicq[600],
+    desc: 'Point RivicQ at a website, host, IP, server, Kubernetes pod, or declared HSM/QSIC module. Community runs TLS/HTTPS/SSH/SBOM plus declared pod inventory.',
+    tags: ['Website', 'IP', 'Server', 'Pod', 'Hardware'],
   },
   {
-    n: '02', title: 'Run CBOM scan', icon: <DocumentScanner />, accent: tokens.colors.crypto.quantum,
-    desc: 'The engine discovers cryptographic material and builds a Cryptographic Bill of Materials.',
-    tags: ['SAST', 'SCA', 'TLS', 'Secrets'],
+    n: '02', title: 'Mitigate', icon: <Healing />, accent: tokens.colors.crypto.quantum,
+    desc: 'Map Shor/Grover-class algorithms to ML-KEM, ML-DSA, and SLH-DSA (FIPS 203/204/205). Hybrid classical + PQC is the migration path — this engine does not rotate production keys.',
+    tags: ['ML-KEM', 'ML-DSA', 'HNDL', 'Hybrid PQC'],
   },
   {
-    n: '03', title: 'Inventory + quantum risk', icon: <Inventory2 />, accent: tokens.colors.crypto.info,
-    desc: 'See algorithms, key sizes, certificates, and a quantum-exposure score across every asset.',
-    tags: ['Algorithms', 'Key sizes', 'PQC exposure'],
-  },
-  {
-    n: '04', title: 'Compliance & PQC report', icon: <Assessment />, accent: tokens.colors.gold[600],
-    desc: 'Generate an evidence-backed report mapped to BSI TR-02102, DORA Art. 9, and eIDAS 2.0, with a PQC migration plan.',
-    tags: ['BSI', 'DORA', 'eIDAS', 'Migration'],
-  },
-  {
-    n: '05', title: 'Track remediation', icon: <TrackChanges />, accent: tokens.colors.crypto.low,
-    desc: 'Assign fixes, rescan on each commit, and watch quantum risk trend down over time.',
-    tags: ['Rescan', 'Trends', 'Audit trail'],
+    n: '03', title: 'Report', icon: <Description />, accent: tokens.colors.gold[600],
+    desc: 'Every scan emits CycloneDX 1.6 CBOM, Qiskit/audit scores, and DORA RTS / NIS2 / BSI mappings. Community is JSON. Enterprise adds the DORA pack, SSO, and cloud connectors.',
+    tags: ['CBOM', 'DORA RTS', 'NIS2', 'BSI TR-02102'],
   },
 ];
 
-/**
- * Additive homepage section: an animated, step-by-step visualization of the
- * full RivicQ client workflow. Connect → Scan → Inventory + Risk → Report →
- * Remediation. Cards reveal on scroll and respect prefers-reduced-motion via
- * the app-level MotionConfig.
- */
 const ClientWorkflow: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -59,19 +43,19 @@ const ClientWorkflow: React.FC = () => {
   return (
     <Box id="workflows" sx={{ mb: 10, scrollMarginTop: 80 }}>
       <Stack alignItems="center" spacing={1} sx={{ mb: 1 }}>
-        <Chip label="How it works" color="primary" variant="outlined" sx={{ fontWeight: 700 }} />
+        <Chip label="Client architecture" color="primary" variant="outlined" sx={{ fontWeight: 700 }} />
       </Stack>
       <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: 'center', letterSpacing: '-0.02em' }}>
-        Discover → Analyze → Quantify
+        Discover → Mitigate → Report
       </Typography>
       <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3, textAlign: 'center', maxWidth: 720, mx: 'auto' }}>
-        Scan cryptographic material, analyze risk and quantum exposure, then quantify what to fix first. The path below is the full client journey — scan → inventory → risk → report → migration planning.
+        One cryptographic intelligence engine from open source to Enterprise. Community is limited to the scan engine. Enterprise enables the control plane, connectors, and evidence pack — without claiming shipped QSIC silicon or unlabeled demo estates.
       </Typography>
 
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(5, 1fr)' },
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
           gap: { xs: 2, md: 1.5 },
           alignItems: 'stretch',
         }}
@@ -112,7 +96,6 @@ const ClientWorkflow: React.FC = () => {
               </Card>
             </Box>
 
-            {/* Connector between steps */}
             {i < STEPS.length - 1 && (
               <Box
                 component={motion.div}
@@ -124,7 +107,6 @@ const ClientWorkflow: React.FC = () => {
                   position: 'absolute',
                   color: 'text.disabled',
                   zIndex: 1,
-                  // Horizontal arrow between columns on desktop, vertical on mobile.
                   right: { md: -10 }, top: { md: '50%' },
                   transform: { md: 'translateY(-50%)' },
                   left: { xs: '50%', md: 'auto' }, bottom: { xs: -16, md: 'auto' },

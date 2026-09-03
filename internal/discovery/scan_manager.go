@@ -159,11 +159,15 @@ func (sm *ScanManager) ListScans() []*ScanJob {
 }
 
 // buildTargets converts a scan target into the scanner work list. It supports
-// local repositories / files (SBOM scan), hostnames, host:port endpoints, and
-// website URLs. The scan type adjusts the target set:
+// local repositories / files (SBOM scan), hostnames, IP addresses, host:port
+// endpoints, website URLs, declared Kubernetes pods, and declared hardware
+// (HSM/TPM/QSIC). The scan type adjusts the target set:
 //
 //	quick       – TLS + SSH only (TLS + HTTPS when the target is a website)
 //	website     – TLS + HTTP(S) on the URL port; SSH is skipped
+//	host / ip / server – TLS + SSH + HTTP on the resolved address
+//	pod / k8s   – declared Kubernetes inventory; TLS/HTTPS if a host is given
+//	hardware    – declared HSM/TPM/QSIC inventory (not firmware RE)
 //	cbom        – TLS + SSH + HTTP, or TLS + HTTP(S) for website URLs
 //	full        – TLS + SSH + HTTP(S) (+ SBOM when the target is a local path)
 //	compliance  – same resource set as cbom
@@ -172,19 +176,49 @@ func (sm *ScanManager) ListScans() []*ScanJob {
 // detection on port 443 instead of probing http://host:80. SSH is omitted
 // unless scan_type is "full", so a public website scan does not wait on :22.
 func buildTargets(target, scanType string) []Target {
-	host, port, path := normalizeTarget(target)
-	website := isWebsiteTarget(target, scanType)
-	scheme := httpSchemeFor(target, port)
-	rawLower := strings.ToLower(strings.TrimSpace(target))
-	if website && !strings.HasPrefix(rawLower, "http://") && scheme != "https" {
-		scheme = "https"
-	}
-
+	class := ClassifyTarget(target, scanType)
 	var targets []Target
 	idx := 0
 	nextID := func() string {
 		idx++
 		return "target-" + strconv.Itoa(idx)
+	}
+
+	switch class {
+	case ClassHardware:
+		label := parseHardwareLabel(target)
+		return []Target{{
+			ID:       nextID(),
+			Host:     "declared",
+			Protocol: "hardware",
+			Kind:     string(ClassHardware),
+			Label:    "Hardware inventory: " + label,
+			Path:     label,
+		}}
+	case ClassPod:
+		spec := parsePodTarget(target)
+		targets = append(targets, Target{
+			ID:        nextID(),
+			Host:      spec.Host,
+			Protocol:  "k8s",
+			Kind:      string(ClassPod),
+			Label:     "K8s inventory: " + spec.Namespace + "/" + spec.Workload,
+			Namespace: spec.Namespace,
+			Workload:  spec.Workload,
+		})
+		if spec.Host != "" {
+			nested := buildTargets(spec.Host, "website")
+			targets = append(targets, nested...)
+		}
+		return targets
+	}
+
+	host, port, path := normalizeTarget(target)
+	website := class == ClassWebsite || isWebsiteTarget(target, scanType)
+	scheme := httpSchemeFor(target, port)
+	rawLower := strings.ToLower(strings.TrimSpace(target))
+	if website && !strings.HasPrefix(rawLower, "http://") && scheme != "https" {
+		scheme = "https"
 	}
 
 	isLocal := path != "" && (isDir(path) || isFile(path))
@@ -195,6 +229,7 @@ func buildTargets(target, scanType string) []Target {
 			Host:     "local",
 			Path:     path,
 			Protocol: "sbom",
+			Kind:     string(ClassPath),
 			Label:    "SBOM Scan: " + target,
 		})
 		if scanType != "full" {
@@ -218,7 +253,15 @@ func buildTargets(target, scanType string) []Target {
 		return targets
 	}
 
+	kind := string(class)
+	if kind == "" {
+		kind = string(ClassHost)
+	}
+
 	includeSSH := !website || strings.EqualFold(scanType, "full")
+	if class == ClassHost || class == ClassIP || class == ClassServer {
+		includeSSH = !strings.EqualFold(scanType, "website")
+	}
 	includeHTTP := website || !strings.EqualFold(scanType, "quick")
 
 	tlsPort := port
@@ -231,6 +274,7 @@ func buildTargets(target, scanType string) []Target {
 		Host:     host,
 		Port:     tlsPort,
 		Protocol: "tls",
+		Kind:     kind,
 		Label:    "TLS Scan: " + target,
 	})
 	if includeSSH {
@@ -239,6 +283,7 @@ func buildTargets(target, scanType string) []Target {
 			Host:     host,
 			Port:     22,
 			Protocol: "ssh",
+			Kind:     kind,
 			Label:    "SSH Scan: " + target,
 		})
 	}
@@ -258,6 +303,7 @@ func buildTargets(target, scanType string) []Target {
 			Port:     httpPort,
 			Protocol: "http",
 			Scheme:   httpScheme,
+			Kind:     kind,
 			Label:    strings.ToUpper(httpScheme) + " Scan: " + target,
 		})
 	}
@@ -289,7 +335,10 @@ func httpSchemeFor(raw string, port int) string {
 
 // ResourcesFromTargets reports which discovery scanners were scheduled.
 func ResourcesFromTargets(targets []Target) map[string]bool {
-	out := map[string]bool{"tls": false, "http": false, "https": false, "ssh": false, "sbom": false}
+	out := map[string]bool{
+		"tls": false, "http": false, "https": false, "ssh": false, "sbom": false,
+		"k8s": false, "hardware": false,
+	}
 	for _, t := range targets {
 		p := strings.ToLower(t.Protocol)
 		out[p] = true
@@ -342,8 +391,12 @@ func normalizeTarget(target string) (host string, port int, path string) {
 		}
 	}
 
-	// host:port.
-	if h, p, err := parseTargetHostPort(raw); err == nil {
+	if isIPHost(raw) {
+		return strings.Trim(raw, "[]"), 0, ""
+	}
+
+	// host:port or [ipv6]:port.
+	if h, p, err := splitHostPortFlexible(raw); err == nil {
 		return h, p, ""
 	}
 

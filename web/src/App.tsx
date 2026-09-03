@@ -168,6 +168,7 @@ const App: React.FC = () => {
                   <Route path="assets" element={wrap(Assets, 'Assets')} />
                   <Route path="assets/:id" element={wrap(AssetDetails, 'AssetDetails')} />
                   <Route path="scanner" element={wrap(Scanner, 'Scanner')} />
+                  <Route path="cspm" element={wrap(CSPM, 'CSPM')} />
                   <Route path="analytics" element={wrap(Analytics, 'Analytics')} />
                   <Route path="settings" element={wrap(Settings, 'Settings')} />
                   <Route path="admin" element={<RequireRole role="admin">{wrap(Admin, 'Admin')}</RequireRole>} />

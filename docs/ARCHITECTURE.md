@@ -7,41 +7,50 @@ This is not a certification, and it does not claim firmware reverse-engineering.
 
 ## Core SaaS layers
 
+Four-layer CBOM architecture (input → engine → PQC operationalization → outputs), with a client path of **discover → mitigate → report**. Details: [CLIENT_ARCHITECTURE.md](CLIENT_ARCHITECTURE.md).
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ 1. Client architecture                                      │
-│    Public marketing + free scan                             │
-│    Authenticated Community workspace                        │
-│    Authenticated Enterprise workspace                       │
-│    Command Center (dashboard) as operational home           │
+│ 1. Input                                                    │
+│    Website · host/IP · server · k8s pod · path · HSM/QSIC   │
 └──────────────────────────┬──────────────────────────────────┘
-                           │ REST + JWT
+                           │
 ┌──────────────────────────▼──────────────────────────────────┐
-│ 2. Data / intelligence plane (shared engine)                │
+│ 2. CBOM engine (shared, do not break ScanResult)            │
 │    Discovery → normalize → risk → policy → Qiskit scores    │
-│    CycloneDX CBOM export (+ SBOM correlation where present) │
+│    CycloneDX 1.6 CBOM                                       │
 └──────────────────────────┬──────────────────────────────────┘
                            │
         ┌──────────────────┼──────────────────┐
         ▼                  ▼                  ▼
 ┌───────────────┐  ┌───────────────┐  ┌─────────────────────┐
-│ 3. Control    │  │ 4. Delivery   │  │ 5. Hardware/firmware│
-│    plane      │  │    plane      │  │    extension        │
-│  (Enterprise) │  │               │  │    (practical)      │
+│ 3. Control    │  │ 4. Outputs    │  │ 5. Hardware/QSIC    │
+│    plane      │  │  Report       │  │  declared inventory │
+│  (Enterprise) │  │  + DORA pack  │  │  (not shipped chip) │
 └───────────────┘  └───────────────┘  └─────────────────────┘
 ```
+
+### Client path — discover / mitigate / report
+
+| Phase | Community (OSS, limited) | Enterprise |
+|---|---|---|
+| Discover | Website, host, IP, server, declared pod, local SBOM, QSIC catalog | Same + live kube attach and cloud/HSM connectors when credentials exist |
+| Mitigate | JSON PQC mapping to ML-KEM / ML-DSA / SLH-DSA | Same + DORA pack |
+| Report | `ScanResult` + intelligence + Qiskit/audit scores | Same JSON + licensed evidence pack, audit, API keys |
+
+Live GitHub Pages demo is **Community-limited** (labeled sample data, no production API).
 
 ### 1. Client architecture
 
 | Surface | Who | Home |
 |---|---|---|
-| Public | Anonymous | Marketing home, free/local scan path, labeled Interactive Demo |
-| Community | Authenticated OSS | Command Center, Scanner, Assets, Analytics, Settings |
+| Public | Anonymous | Marketing home, free/local scan path, **limited Community** Interactive Demo |
+| Community | Authenticated OSS | Command Center, Scanner (website/host/IP/server/pod), Assets, Analytics, Settings |
 | Enterprise | Authenticated paid workspace | Community surfaces + inventory, compliance, multi-cloud, quantum, admin |
 
 Fast path: visit → Demo or Register → Command Center → first CBOM in the scanner (CLI: `rivicq scan .`).
 
-Editions: **Community** (Apache-2.0), **Professional**, **Enterprise** (commercial control plane). UI edition preference is client-selected; license enforcement belongs on the Enterprise binary (`CRYPTOBOM_LICENSE_KEY`).
+Editions: **Community** (Apache-2.0, limited engine), **Professional**, **Enterprise** (commercial control plane). UI edition preference is client-selected; license enforcement belongs on the Enterprise binary (`CRYPTOBOM_LICENSE_KEY`).
 
 ### 2. Data / intelligence plane (do not break)
 
@@ -102,13 +111,15 @@ Shipped or in progress:
 
 ## Community vs Enterprise
 
-| | Community | Enterprise |
+| | Community (limited) | Enterprise |
 |---|---|---|
 | License | Apache-2.0 | Commercial |
 | Engine | Full CBOM discovery + CycloneDX | Same engine |
+| Scan targets | Website, host, IP, server, declared pod, QSIC catalog | Same + live kube attach, cloud connectors |
 | Auth | Login, register, MFA, OAuth | + SSO config, audit, API keys, webhooks |
+| DORA / GRC | JSON mappings | Pack flag + control-plane evidence |
 | Workspaces | Single-tenant OSS default | JWT tenant isolation on control-plane APIs |
-| Demo on Pages | Labeled client session (`rivicq-demo-session`) | Same demo label; not a customer tenant |
+| Demo on Pages | Limited Community session (`rivicq-demo-session`) | Same demo label; not a customer tenant |
 
 ## Current honest capability boundaries
 

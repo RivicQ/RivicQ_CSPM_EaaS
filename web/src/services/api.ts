@@ -456,6 +456,12 @@ export const cbomService = {
   getScanCycloneDX: (scanId: string) =>
     api.get(`/scans/${scanId}/cyclonedx`),
 
+  getArchitecture: () =>
+    api.get('/architecture'),
+
+  getHardwareCatalog: () =>
+    api.get('/hardware/catalog'),
+
   getPolicies: () =>
     api.get('/policies'),
 

@@ -26,7 +26,7 @@ const DemoWelcome: React.FC = () => {
     setError('');
     try {
       if (!isAuthenticated || !isDemo) {
-        await demoLogin('enterprise');
+        await demoLogin('community');
       }
       if (withTrail) {
         start();
@@ -59,15 +59,15 @@ const DemoWelcome: React.FC = () => {
             Welcome to RivicQ
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ textAlign: { sm: 'center' }, maxWidth: 640, fontWeight: 400 }}>
-            Continuous security visibility for your cloud, applications, dependencies and cryptographic posture.
+            Limited Community demo: discover cryptography, map PQC mitigations, and read the CBOM report. Enterprise connectors stay locked.
           </Typography>
         </Stack>
 
         <GlassCard hover={false} glow={designSystem.proBlue.accent}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {backendReachable
-              ? 'Demo access uses the existing GET /auth/demo token. It cannot see customer data.'
-              : 'This GitHub Pages build has no live API. You will explore an isolated DEMO workspace with labeled sample data — not a production login.'}
+              ? 'Demo access uses GET /auth/demo as a Community workspace. It cannot see customer data. Enterprise control-plane routes stay locked.'
+              : 'This GitHub Pages build has no live API. You will explore a limited Community DEMO workspace with labeled sample data — not a production login and not an Enterprise tenant.'}
           </Typography>
           {error && (
             <Typography role="alert" color="error" variant="body2" sx={{ mb: 2 }}>{error}</Typography>

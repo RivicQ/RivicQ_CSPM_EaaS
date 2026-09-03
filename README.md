@@ -32,8 +32,8 @@ The web UI is the **RivicQ Security Cloud** — a sky-blue and white cryptograph
 | CLI `rivicq scan .` | Yes | Yes |
 | GitHub Action policy gate | Yes | Yes |
 | CBOM / CycloneDX 1.6 export | Yes | Yes |
-| Dashboard, inventory, scanner | Yes | Yes |
-| Labeled demo trail | Yes (sample data only) | Yes |
+| Dashboard, inventory, scanner | Limited: website, host, IP, server, declared pod, QSIC catalog | Same engine + live kube attach, DORA pack |
+| Labeled demo trail | Community-limited (sample data only) | UI preference is not a license |
 | Multi-cloud inventory (AWS, Azure, GCP, and other connectors) | — | Yes — **customer credentials required** |
 | SSO (OIDC; SAML configuration store) | — | Yes — ACS handshake is an operator task with your IdP |
 | RBAC (Viewer, Analyst, Operator, Admin) | Basic roles | Enforced server-side (`RequireRole`) |
@@ -124,6 +124,8 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Docs hub | [docs/README.md](docs/README.md) |
 | Known limitations | [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) |
 | Editions (OSS vs Enterprise) | [docs/editions.md](docs/editions.md) |
+| Client architecture | [docs/CLIENT_ARCHITECTURE.md](docs/CLIENT_ARCHITECTURE.md) |
+| SaaS architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Legal | [LEGAL.md](LEGAL.md) |
 | Privacy | [PRIVACY.md](PRIVACY.md) |
 | Trademarks | [TRADEMARKS.md](TRADEMARKS.md) |

@@ -10,6 +10,7 @@ import (
 
 type ScanInput struct {
 	Target          string
+	ScanType        string
 	Discovery       *discovery.ScanResult
 	ContentFindings []ContentFinding
 	ContentRepo     string
@@ -41,18 +42,20 @@ func BuildReport(in ScanInput) *Report {
 	}
 	qiskit := attachQiskit(findings, in.Discovery)
 	return &Report{
-		Target:      in.Target,
-		Asset:       in.Target,
-		StartedAt:   started,
-		CompletedAt: completed,
-		Findings:    findings,
-		Gate:        gate,
-		Summary:     summary,
-		Qiskit:      &qiskit,
-		AuditScore:  buildAuditScore(gate, qiskit),
-		CycloneDX:   CycloneDXBOM(in.Target, components, findings),
-		Tools:       ProbeExternalTools(),
-		Excludes:    DefaultExcludes(),
+		Target:             in.Target,
+		Asset:              in.Target,
+		StartedAt:          started,
+		CompletedAt:        completed,
+		Findings:           findings,
+		Gate:               gate,
+		Summary:            summary,
+		Qiskit:             &qiskit,
+		AuditScore:         buildAuditScore(gate, qiskit),
+		ClientArchitecture: buildClientArchitecture(in, findings, qiskit),
+		PQCReadiness:       buildPQCReadiness(findings, in.Discovery),
+		CycloneDX:          CycloneDXBOM(in.Target, components, findings),
+		Tools:              ProbeExternalTools(),
+		Excludes:           DefaultExcludes(),
 		Metadata: map[string]string{
 			"engine":          "rivicq-intelligence",
 			"qiskit_pipeline": qiskitprofile.Engine,

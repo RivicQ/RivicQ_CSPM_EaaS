@@ -4,24 +4,22 @@ Honest snapshot of what RivicQ ships today for operators who need **open-source 
 
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data; no production API).
 
-Companion docs: [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md)
+Companion docs: [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md)
 
 ## What is complete
 
 The **cryptographic intelligence engine is shared**. Community (`:8080`) and Enterprise (`:9090`) run the same discovery, intelligence, Qiskit-aligned scoring, and CycloneDX CBOM export. Enterprise adds the licensed control plane (SSO config, audit viewer, API keys, webhooks, multi-cloud connectors) — not a second scanner.
 
-| Layer | Community (OSS) | Enterprise |
+| Layer | Community (OSS, limited) | Enterprise |
 |---|---|---|
 | TLS / SSH / HTTP(S) / SBOM discovery | Yes | Same engine |
-| Website scan (`scan_type=website` or `https://…`) | TLS + HTTPS headers/cookies; SSH skipped | Same |
+| Website / host / IP / server | Yes | Same |
+| Kubernetes pod | Declared inventory (`pod://ns/name`) | Same + live attach when a credential exists |
+| Hardware / QSIC | Declared catalog | Persistable inventory; still not firmware RE |
 | GitHub content scan | Yes (authorized) | Same |
 | Policy gate (BLOCK / WARN / ALLOW) | Yes | Same |
-| Qiskit-aligned estate score | Local taxonomy (`qiskitprofile`) | Same + optional IBM Quantum **connector** (API key, not required) |
-| Audit score | Policy gate + Qiskit estate (mappings) | Same score + control-plane evidence when configured |
-| CycloneDX 1.6 CBOM | `GET /scans/:id/cyclonedx` | Same JSON |
-| Auth (login, register, MFA, OAuth) | Yes | + SSO **config**, RBAC on mutating routes |
-| Admin console | Users/roles if authenticated | + audit, API keys, webhooks |
-| Compliance PDFs / packs | Control mappings in UI | Same honesty: **not ISO/SOC/NIST certification** |
+| Qiskit-aligned estate score | Local taxonomy (`qiskitprofile`) | Same + optional quantum **connector** (API key, not required) |
+| DORA pack | JSON mappings | Pack flag enabled (still not a certification) |
 | Multi-cloud inventory | No | Yes when credentials exist (empty otherwise) |
 
 ## Scores — what they mean

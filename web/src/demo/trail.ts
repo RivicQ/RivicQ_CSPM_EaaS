@@ -6,63 +6,63 @@ export type DemoTrailStep = {
   hint?: string;
 };
 
-/** Guided product walkthrough. Paths are real app routes — not a slideshow. */
+/** Guided product walkthrough. Community-limited on the live demo. Paths are real app routes. */
 export const DEMO_TRAIL_STEPS: DemoTrailStep[] = [
   {
     id: 'welcome',
-    title: 'Welcome to RivicQ',
-    body: 'Continuous security visibility for your cloud, applications, dependencies, and cryptographic posture. This tour uses labeled DEMO DATA — not customer telemetry.',
+    title: 'Welcome to RivicQ Community',
+    body: 'This live demo is the limited Community edition: CBOM scan, dashboard, and discover → mitigate → report. Multi-cloud, SSO, and the DORA pack stay on Enterprise. Sample data is labeled DEMO — not customer telemetry.',
     path: '/demo',
-    hint: 'Start the tour or jump straight into the command center.',
+    hint: 'Start the tour or jump into the command center.',
   },
   {
     id: 'overview',
     title: 'Security overview',
-    body: 'This is the command center. Read posture first, then critical risks, then what to fix. Every figure on this dashboard is labeled DEMO or LIVE.',
+    body: 'The command center is the operational home. Read posture first, then findings. Every figure is labeled DEMO or LIVE. Enterprise tiles stay locked until a licensed workspace is selected.',
     path: '/dashboard',
     hint: 'Click a score or finding to open evidence.',
   },
   {
-    id: 'cspm',
-    title: 'Cloud security posture',
-    body: 'CSPM correlates cloud assets, misconfigurations, and cryptographic exposure. Open a finding to see remediation — this is a simulated demo estate.',
-    path: '/enterprise/cspm',
-    hint: 'Review health score, then drill into at-risk algorithms.',
+    id: 'cbom',
+    title: 'Discover cryptography',
+    body: 'Scan a website, host, IP, server, or declared Kubernetes pod. Hardware/QSIC is a catalog declaration, not a shipped chip. Qiskit scores are a local taxonomy — not IBM Quantum hardware.',
+    path: '/scanner',
+    hint: 'Try https://example.com (website) or pod://prod/api (declared inventory).',
   },
   {
-    id: 'cbom',
-    title: 'CryptoBOM inventory',
-    body: 'Cryptographic assets, algorithms, libraries, and quantum-vulnerable primitives are inventoried as a CBOM. RSA-2048 is classified, not automatically “vulnerable”.',
+    id: 'assets',
+    title: 'Inventory',
+    body: 'Cryptographic assets, algorithms, and PQC status land in the CBOM inventory. RSA-2048 is classified (Shor family), not automatically “vulnerable”.',
     path: '/assets',
     hint: 'Open an asset to see algorithm, key size, and PQC status.',
   },
   {
-    id: 'vuln',
-    title: 'Vulnerability & dependency scanning',
-    body: 'Scan a repository or hostname. Built-in SAST, SCA, secrets, SBOM, CBOM, and IaC feed one policy gate. GitHub scans use a synthetic fixture unless a token is configured.',
-    path: '/scanner',
-    hint: 'Try the GitHub tab or run a CBOM scan against a hostname.',
-  },
-  {
     id: 'devsecops',
-    title: 'DevSecOps integration',
-    body: 'RivicQ sits in CI after commit: secrets, SAST, SCA, SBOM, CBOM, IaC, then policy. The CLI is `rivicq scan .` — this step is a guided explanation, not a live pipeline attach.',
+    title: 'CLI and GitHub Action',
+    body: 'Community includes `rivicq scan .` and the policy gate. The GitHub Action can fail CI on BLOCK findings. This step explains the path — it does not attach to your pipeline.',
     path: '/tools',
     hint: 'See how scanners map into the intelligence engine.',
   },
   {
-    id: 'compliance',
-    title: 'Compliance mapping',
-    body: 'Controls map to ISO 27001, NIS2, DORA, GDPR, and BSI-oriented crypto guidance. Scores are demo control results, not a certification claim.',
-    path: '/enterprise/compliance',
-    hint: 'Open a framework to see passed vs failed controls.',
+    id: 'cspm',
+    title: 'Limited posture view',
+    body: 'Community shows cryptographic posture from scans you run. Cloud account CSPM, conformance packs, and multi-cloud inventory are Enterprise and need customer credentials.',
+    path: '/cspm',
+    hint: 'This page stays honest when the API is empty.',
+  },
+  {
+    id: 'editions',
+    title: 'Enterprise is licensed',
+    body: 'SSO, audit, API keys, DORA pack, live Kubernetes attach, and cloud/HSM/quantum connectors are Enterprise. Switching edition on Pages is a UI preference, not a license grant.',
+    path: '/switcher',
+    hint: 'Read what Community locks before you evaluate Enterprise.',
   },
   {
     id: 'remediation',
-    title: 'Risk & remediation',
-    body: 'Every finding should explain what happened, why it matters, the affected asset, and a recommended fix. Use the drill-down drawer on the command center.',
+    title: 'Mitigate and report',
+    body: 'Intelligence maps findings to ML-KEM / ML-DSA / SLH-DSA and DORA RTS / NIS2 / BSI controls. Community exports JSON CBOM. Enterprise adds the evidence pack. Exit Demo when you are done.',
     path: '/dashboard',
-    hint: 'Click a critical finding, then Exit Demo when you are done.',
+    hint: 'Open a finding, then Exit Demo.',
   },
 ];
 

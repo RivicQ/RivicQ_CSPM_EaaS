@@ -139,11 +139,7 @@ func (s *Server) registerHealthRoutes() {
 	})
 
 	s.Engine.GET("/edition", func(c *gin.Context) {
-		editionCfg := edition.Detect()
-		c.JSON(200, gin.H{
-			"edition":  editionCfg.Edition,
-			"features": editionCfg.Features,
-		})
+		c.JSON(200, edition.Detect().Public())
 	})
 
 	s.registerOpenAPISpec()
@@ -174,12 +170,11 @@ func (s *Server) printOSSInfo(serviceName string) {
 	fmt.Printf("  Server running on port %s\n", s.Port)
 	fmt.Printf("  Health: http://localhost:%s/healthz\n", s.Port)
 	fmt.Printf("  API:    http://localhost:%s/api/v1\n", s.Port)
-	fmt.Print("\n  Open Source Edition Features:\n")
-	fmt.Printf("     eBPF cryptographic asset discovery\n")
-	fmt.Printf("     Basic CBOM management\n")
-	fmt.Printf("     Vulnerability detection\n")
-	fmt.Printf("     Kubernetes integration\n")
-	fmt.Printf("     Real-time monitoring dashboard\n")
+	fmt.Print("\n  Open Source Edition Features (limited):\n")
+	fmt.Printf("     Website, host/IP, server, and declared pod scans\n")
+	fmt.Printf("     CBOM + CycloneDX 1.6 + Qiskit-aligned scores\n")
+	fmt.Printf("     Discover → mitigate → report (JSON, not a DORA pack)\n")
+	fmt.Printf("     QSIC/HSM catalog is declared inventory only\n")
 	fmt.Print("\n  To enable Enterprise features:\n")
 	fmt.Printf("     export CRYPTOBOM_LICENSE_KEY=ENT-<your-key>\n\n")
 }
@@ -269,12 +264,9 @@ func (s *Server) printEnterpriseInfo(serviceName string) {
 	fmt.Printf("  Health: http://localhost:%s/healthz\n", s.Port)
 	fmt.Printf("  API:    http://localhost:%s/api/v1\n", s.Port)
 	fmt.Print("\n  Enterprise Edition Features:\n")
-	fmt.Printf("     IBM Quantum attestation & verification\n")
-	fmt.Printf("     Advanced threat detection with ML\n")
-	fmt.Printf("     Multi-cloud deployment support\n")
-	fmt.Printf("     Enterprise SSO (SAML/LDAP)\n")
-	fmt.Printf("     Quantum vulnerability assessment\n")
-	fmt.Printf("     Real-time quantum-safe monitoring\n")
-	fmt.Printf("     Advanced analytics & reporting\n")
-	fmt.Printf("     24/7 enterprise support\n\n")
+	fmt.Printf("     Community engine plus control plane (SSO config, audit, API keys)\n")
+	fmt.Printf("     Multi-cloud / HSM / quantum connectors when credentials exist\n")
+	fmt.Printf("     DORA pack mappings (not a certification)\n")
+	fmt.Printf("     Declared HSM/TPM/QSIC inventory (QSIC is research silicon)\n")
+	fmt.Printf("     Live Kubernetes attach when a cluster credential is configured\n\n")
 }

@@ -4,13 +4,16 @@ import "time"
 
 // Target represents a network endpoint or local path to scan
 type Target struct {
-	ID       string `json:"id"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	Protocol string `json:"protocol"`         // "tls", "ssh", "http", "sbom"
-	Scheme   string `json:"scheme,omitempty"` // "http" or "https" when Protocol == "http"
-	Label    string `json:"label"`
-	Path     string `json:"path,omitempty"` // local filesystem path when Protocol == "sbom"
+	ID        string `json:"id"`
+	Host      string `json:"host"`
+	Port      int    `json:"port"`
+	Protocol  string `json:"protocol"`         // "tls", "ssh", "http", "sbom", "k8s", "hardware"
+	Scheme    string `json:"scheme,omitempty"` // "http" or "https" when Protocol == "http"
+	Label     string `json:"label"`
+	Path      string `json:"path,omitempty"`      // local filesystem path when Protocol == "sbom"
+	Kind      string `json:"kind,omitempty"`      // website | host | ip | server | pod | path | hardware
+	Namespace string `json:"namespace,omitempty"` // kubernetes namespace when Protocol == "k8s"
+	Workload  string `json:"workload,omitempty"`  // pod/deployment name when Protocol == "k8s"
 }
 
 // SeverityLevel represents the severity of a finding

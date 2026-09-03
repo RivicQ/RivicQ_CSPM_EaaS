@@ -591,17 +591,38 @@ func GetClusterStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		logger.WithField("cluster_id", id).Info("Getting cluster status")
-		c.JSON(http.StatusOK, gin.H{"cluster_id": id, "status": "healthy"})
+		c.JSON(http.StatusOK, gin.H{
+			"cluster_id": id,
+			"status":     "declared",
+			"note":       "No live kube-apiserver probe. POST /kubernetes/clusters/:id/scan with a host to run TLS against the workload ingress.",
+		})
 	}
 }
 
 func ScanCluster(db *database.DB, logger *logrus.Logger, cfg interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		logger.WithField("cluster_id", id).Info("Scanning cluster")
+		target := "pod://default/" + id
+		var body struct {
+			Target string `json:"target"`
+			Host   string `json:"host"`
+		}
+		_ = c.ShouldBindJSON(&body)
+		if strings.TrimSpace(body.Target) != "" {
+			target = body.Target
+		} else if strings.TrimSpace(body.Host) != "" {
+			target = "pod://default/" + id + "@" + strings.TrimSpace(body.Host)
+		}
+		sm := discovery.GetScanManager()
+		job := sm.StartScan(target, "pod")
+		logger.WithFields(logrus.Fields{"cluster_id": id, "scan_id": job.ID, "target": target}).Info("Declared Kubernetes inventory scan")
 		c.JSON(http.StatusAccepted, gin.H{
 			"cluster_id":  id,
-			"scan_status": "started",
+			"scan_id":     job.ID,
+			"scan_type":   "pod",
+			"scan_status": "accepted",
+			"target":      target,
+			"note":        "Declared Kubernetes inventory. Live apiserver attach is Enterprise and requires a cluster credential.",
 		})
 	}
 }
@@ -794,6 +815,7 @@ func GetCBOMScanStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			resp["components"] = componentsToGin(r.Components)
 			resp["targets"] = r.Targets
 			resp["resources"] = discovery.ResourcesFromTargets(r.Targets)
+			resp["target_class"] = discovery.ClassifyTarget(job.Target, job.ScanType)
 			resp["result_url"] = "/api/v1/scans/" + id + "/report"
 		}
 

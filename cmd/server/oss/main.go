@@ -12,6 +12,7 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/api/oss"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
 	"github.com/rivic-q/cryptobom-saas/internal/middleware"
 	"github.com/sirupsen/logrus"
 )
@@ -48,25 +49,7 @@ func main() {
 
 	// Edition detection for frontend auto-config
 	router.GET("/edition", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"edition": "oss",
-			"features": gin.H{
-				"dashboard":           true,
-				"assetInventory":      true,
-				"scanner":             true,
-				"analytics":           true,
-				"authentication":      true,
-				"github_oauth":        os.Getenv("GITHUB_OAUTH_CLIENT_ID") != "",
-				"google_oauth":        os.Getenv("GOOGLE_OAUTH_CLIENT_ID") != "",
-				"ecosystem":           true,
-				"compliance":          true,
-				"benchmarks":          true,
-				"monitoring":          true,
-				"kubernetes":          true,
-				"agentic_security":    os.Getenv("AGENTIC_SECURITY_ENDPOINT") != "",
-				"protocol":            os.Getenv("RIVICQ_PROTOCOL_ENDPOINT") != "",
-			},
-		})
+		c.JSON(200, edition.Detect().Public())
 	})
 
 	// Simple health check

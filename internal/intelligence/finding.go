@@ -61,9 +61,11 @@ type Report struct {
 	Findings    []Finding                     `json:"findings"`
 	Gate        GateResult                    `json:"gate"`
 	Summary     ReportSummary                 `json:"summary"`
-	Qiskit      *qiskitprofile.PipelineResult `json:"qiskit,omitempty"`
-	AuditScore  *AuditScore                   `json:"audit_score,omitempty"`
-	CycloneDX   map[string]any                `json:"cyclonedx,omitempty"`
+	Qiskit             *qiskitprofile.PipelineResult `json:"qiskit,omitempty"`
+	AuditScore         *AuditScore                   `json:"audit_score,omitempty"`
+	ClientArchitecture *ClientArchitecture           `json:"client_architecture,omitempty"`
+	PQCReadiness       *PQCReadiness                 `json:"pqc_readiness,omitempty"`
+	CycloneDX          map[string]any                `json:"cyclonedx,omitempty"`
 	Tools       []ToolStatus                  `json:"tools"`
 	Excludes    []string                      `json:"excludes,omitempty"`
 	Metadata    map[string]string             `json:"metadata,omitempty"`

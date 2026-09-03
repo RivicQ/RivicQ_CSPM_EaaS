@@ -247,7 +247,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     setLoading(true);
     setError('');
     try {
-      await demoLogin('enterprise');
+      await demoLogin('community');
       if (withTrail) startTrail();
       else navigate('/dashboard', { replace: true });
     } catch (err: any) {
@@ -382,7 +382,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                     </Typography>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                       {([
-                        { id: 'community' as Edition, title: 'Community', body: 'CLI, CBOM scan, dashboard, GitHub Action' },
+                        { id: 'community' as Edition, title: 'Community', body: 'Limited CBOM engine: website, host, IP, pod inventory, CLI' },
                         { id: 'professional' as Edition, title: 'Professional', body: 'CSPM modules, multi-cloud, compliance maps' },
                         { id: 'enterprise' as Edition, title: 'Enterprise', body: 'SSO config, RBAC, audit, API keys, PQC packs' },
                       ]).map((opt) => {

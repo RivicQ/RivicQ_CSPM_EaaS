@@ -2,7 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.5.5] - 2026-09-03
+## [1.5.6] - 2026-09-03
+
+### Added
+- Client architecture **discover → mitigate → report** on scan intelligence (`client_architecture`, `pqc_readiness`).
+- Scan target classes: website, host, IP, server, declared Kubernetes pod (`pod://ns/name[@host]`), declared HSM/TPM/QSIC catalog.
+- `GET /api/v1/architecture` and `GET /api/v1/hardware/catalog`.
+- High-level SaaS design: [docs/CLIENT_ARCHITECTURE.md](docs/CLIENT_ARCHITECTURE.md).
+
+### Changed
+- Community / live GitHub Pages demo is **feature-limited** (no unlabeled Enterprise estate, no DORA pack, no live kube attach).
+- OSS edition flags no longer advertise Kubernetes/eBPF as shipped.
+- QSIC is declared research hardware inventory, not a shipped or certified module.
+
+
 
 ### Changed
 - Product identity is **RivicQ Security Cloud** (sky-blue/white cryptographic SaaS).

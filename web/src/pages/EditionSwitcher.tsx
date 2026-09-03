@@ -18,11 +18,11 @@ const EditionSwitcher: React.FC = () => {
   const cards = [
     {
       title: 'RivicQ Community',
-      subtitle: 'Core CBOM scanning, dashboard, auth, and local operations. Free for open source teams.',
+      subtitle: 'Limited CBOM engine: website, host/IP, server, declared pods, Qiskit scores, CLI, and GitHub Action.',
       icon: <Security sx={{ fontSize: 34 }} />,
       edition: 'community' as Edition,
       accent: '#2563eb',
-      highlights: ['CBOM scan basics', 'Dashboard & auth', 'GitHub & CI', 'Local workflows'],
+      highlights: ['Website / host / IP / pod scan', 'Discover → mitigate → report', 'CycloneDX CBOM + Qiskit', 'No SSO, cloud, or DORA pack'],
       action: 'Continue with Community',
     },
     {
@@ -36,7 +36,7 @@ const EditionSwitcher: React.FC = () => {
     },
     {
       title: 'RivicQ Enterprise',
-      subtitle: 'CISO-level controls, PQC / quantum attestation, HSM, SSO, and executive reporting.',
+      subtitle: 'Licensed control plane: SSO, audit, DORA pack, multi-cloud/HSM/quantum connectors, declared QSIC inventory. Not granted by cloning GitHub.',
       icon: <WorkspacePremium sx={{ fontSize: 34 }} />,
       edition: 'enterprise' as Edition,
       accent: '#198038',
@@ -60,7 +60,7 @@ const EditionSwitcher: React.FC = () => {
             Choose your RivicQ workspace
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 900, mx: 'auto' }}>
-            Start free with Community, grow into Professional for the full security module suite, and scale to Enterprise when you need quantum, HSM, and CISO-level controls.
+            Start free with Community (limited scan engine), grow into Professional for security modules, and license Enterprise for the control plane. QSIC is declared research hardware — not a shipped chip.
           </Typography>
         </Stack>
 
@@ -145,7 +145,7 @@ const EditionSwitcher: React.FC = () => {
             What gets locked in Community
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Cloud posture, conformance packs, compliance, quantum attestation, cloud HSM connectors, AWS HSM, and multi-cloud executive reporting are available in Professional and Enterprise.
+            Cloud posture, conformance packs, live Kubernetes attach, DORA evidence pack, quantum attestation, cloud HSM connectors, and multi-cloud reporting stay in Professional and Enterprise. Community still scans websites, hosts, IPs, servers, and declared pods.
           </Typography>
         </Box>
       </Container>

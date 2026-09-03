@@ -119,3 +119,16 @@ func TestScanAll_ConcurrentNoRace(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 3, result.Summary.TotalTargets)
 }
+
+func TestScanAll_DeclaredPodAndHardware(t *testing.T) {
+	scanner := NewScanner()
+	result, err := scanner.ScanAll(context.Background(), []Target{
+		{ID: "k1", Protocol: "k8s", Namespace: "prod", Workload: "api", Label: "pod", Kind: "pod"},
+		{ID: "h1", Protocol: "hardware", Label: "qsic", Path: "qsic", Kind: "hardware"},
+	})
+	require.NoError(t, err)
+	require.GreaterOrEqual(t, len(result.Findings), 2)
+	res := ResourcesFromTargets(result.Targets)
+	assert.True(t, res["k8s"])
+	assert.True(t, res["hardware"])
+}

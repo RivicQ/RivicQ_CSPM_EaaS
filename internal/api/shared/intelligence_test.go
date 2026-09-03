@@ -59,6 +59,38 @@ func TestGetScanQiskitNotFound(t *testing.T) {
 	require.Equal(t, http.StatusNotFound, w.Code)
 }
 
+func TestPlatformArchitectureRoute(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	g := r.Group("/api/v1")
+	SetupIntelligenceRoutes(g, logrus.New())
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/architecture", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+	var body map[string]any
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
+	require.Equal(t, "RivicQ Security Cloud", body["product"])
+	require.Contains(t, body["honesty"], "Community")
+}
+
+func TestHardwareCatalogRoute(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	g := r.Group("/api/v1")
+	SetupIntelligenceRoutes(g, logrus.New())
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/hardware/catalog", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+	var body map[string]any
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
+	require.Equal(t, "declared_inventory", body["engine"])
+	cat, ok := body["catalog"].([]any)
+	require.True(t, ok)
+	require.Greater(t, len(cat), 0)
+}
+
 func TestAnalyzeRepositoryFiles_RSAKeyLength(t *testing.T) {
 	res := AnalyzeRepositoryFiles("fixture://rsa", []RepoFile{{
 		Path:    "keys.go",

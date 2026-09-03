@@ -150,4 +150,10 @@ func TestBuildReportGate(t *testing.T) {
 	if rep.AuditScore.Overall < 0 || rep.AuditScore.Overall > 100 {
 		t.Fatalf("audit overall=%d", rep.AuditScore.Overall)
 	}
+	if rep.ClientArchitecture == nil || len(rep.ClientArchitecture.Phases) != 3 {
+		t.Fatal("expected discover/mitigate/report")
+	}
+	if rep.PQCReadiness == nil || rep.PQCReadiness.Layers["cbom"] == 0 {
+		t.Fatal("expected PQC readiness layers")
+	}
 }

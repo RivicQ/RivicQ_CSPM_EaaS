@@ -13,6 +13,7 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/rivic-q/cryptobom-saas/internal/discovery"
+	"github.com/rivic-q/cryptobom-saas/internal/hardware"
 	"github.com/sirupsen/logrus"
 )
 
@@ -608,11 +609,14 @@ func (h *InventoryHandler) ListHardwareAssets(c *gin.Context) {
 }
 
 func (h *InventoryHandler) DiscoverHardware(c *gin.Context) {
-	h.logger.Info("Starting hardware discovery")
+	h.logger.Info("Declared hardware inventory (not firmware reverse-engineering)")
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":  "discovery_started",
-		"message": "Hardware discovery initiated",
+		"status":  "declared_inventory",
+		"engine":  "not_firmware_re",
+		"message": hardware.Honesty,
+		"catalog": hardware.Catalog(),
+		"note":    "Enterprise can persist operator-declared HSM/TPM/QSIC metadata. QSIC is a research ASIC roadmap, not a shipped chip.",
 	})
 }
 

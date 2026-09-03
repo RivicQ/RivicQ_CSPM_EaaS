@@ -5,6 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/discovery"
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
+	"github.com/rivic-q/cryptobom-saas/internal/hardware"
 	"github.com/rivic-q/cryptobom-saas/internal/intelligence"
 	"github.com/sirupsen/logrus"
 )
@@ -43,6 +45,8 @@ func SetupIntelligenceRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	router.GET("/scans/:id/intelligence", GetScanIntelligence(logger))
 	router.GET("/scans/:id/qiskit", GetScanQiskit(logger))
 	router.GET("/scans/:id/cyclonedx", GetScanCycloneDX(logger))
+	router.GET("/architecture", PlatformArchitectureHandler(logger))
+	router.GET("/hardware/catalog", HardwareCatalogHandler(logger))
 }
 
 func IntelligenceToolsHandler(logger *logrus.Logger) gin.HandlerFunc {
@@ -110,6 +114,7 @@ func GetScanIntelligence(logger *logrus.Logger) gin.HandlerFunc {
 		}
 		rep := intelligence.BuildReport(intelligence.ScanInput{
 			Target:    job.Target,
+			ScanType:  job.ScanType,
 			Discovery: job.Result,
 		})
 		logger.WithFields(logrus.Fields{
@@ -139,6 +144,7 @@ func GetScanQiskit(logger *logrus.Logger) gin.HandlerFunc {
 		}
 		rep := intelligence.BuildReport(intelligence.ScanInput{
 			Target:    job.Target,
+			ScanType:  job.ScanType,
 			Discovery: job.Result,
 		})
 		estate := 0
@@ -195,4 +201,31 @@ func normalizedFindingsFromScans() []intelligence.Finding {
 		out = append(out, intelligence.FromDiscoveryResult(job.Result)...)
 	}
 	return out
+}
+
+func PlatformArchitectureHandler(logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cfg := edition.Detect()
+		logger.WithField("edition", cfg.Edition).Debug("Serving platform architecture")
+		c.JSON(http.StatusOK, gin.H{
+			"product":     "RivicQ Security Cloud",
+			"layers":      []string{"input", "cbom-engine", "pqc-operationalization", "outputs"},
+			"client_path": []string{"discover", "mitigate", "report"},
+			"edition":     cfg.Public(),
+			"honesty":     "Community is a limited CBOM engine. Enterprise enables the control plane and connectors when credentials exist. QSIC is declared research hardware, not a shipped chip.",
+		})
+	}
+}
+
+func HardwareCatalogHandler(logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cfg := edition.Detect()
+		c.JSON(http.StatusOK, gin.H{
+			"catalog": hardware.Catalog(),
+			"note":    hardware.Honesty,
+			"edition": cfg.Edition,
+			"persist": cfg.Features.HardwareInventory,
+			"engine":  "declared_inventory",
+		})
+	}
 }

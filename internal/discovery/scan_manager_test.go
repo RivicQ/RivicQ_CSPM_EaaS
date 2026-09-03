@@ -107,3 +107,81 @@ func TestIsWebsiteTarget(t *testing.T) {
 		t.Fatal("bare host is not a website unless scan_type=website")
 	}
 }
+
+func TestBuildTargetsIPIncludesTLSAndSSH(t *testing.T) {
+	got := buildTargets("192.0.2.10", "ip")
+	var tls, ssh, http bool
+	for _, tg := range got {
+		switch tg.Protocol {
+		case "tls":
+			tls = true
+			if tg.Kind != "ip" {
+				t.Fatalf("kind=%s", tg.Kind)
+			}
+		case "ssh":
+			ssh = true
+		case "http":
+			http = true
+		}
+	}
+	if !tls || !ssh || !http {
+		t.Fatalf("IP scan should enable TLS+SSH+HTTP, got %+v", got)
+	}
+}
+
+func TestBuildTargetsPodDeclaredOnly(t *testing.T) {
+	got := buildTargets("pod://prod/api", "pod")
+	if len(got) != 1 || got[0].Protocol != "k8s" {
+		t.Fatalf("expected declared k8s only, got %+v", got)
+	}
+	if got[0].Namespace != "prod" || got[0].Workload != "api" {
+		t.Fatalf("pod spec %+v", got[0])
+	}
+	res := ResourcesFromTargets(got)
+	if !res["k8s"] || res["ssh"] {
+		t.Fatalf("resources %+v", res)
+	}
+}
+
+func TestBuildTargetsPodWithHostAddsTLS(t *testing.T) {
+	got := buildTargets("pod://prod/api@example.com", "pod")
+	var k8s, tls, ssh bool
+	for _, tg := range got {
+		switch tg.Protocol {
+		case "k8s":
+			k8s = true
+		case "tls":
+			tls = true
+		case "ssh":
+			ssh = true
+		}
+	}
+	if !k8s || !tls {
+		t.Fatalf("pod@host should inventory + TLS, got %+v", got)
+	}
+	if ssh {
+		t.Fatal("nested website scan must skip SSH")
+	}
+}
+
+func TestBuildTargetsHardwareCatalog(t *testing.T) {
+	got := buildTargets("qsic://research", "hardware")
+	if len(got) != 1 || got[0].Protocol != "hardware" {
+		t.Fatalf("got %+v", got)
+	}
+}
+
+func TestClassifyTarget(t *testing.T) {
+	if ClassifyTarget("https://a.example", "cbom") != ClassWebsite {
+		t.Fatal("https")
+	}
+	if ClassifyTarget("10.0.0.8", "cbom") != ClassIP {
+		t.Fatal("ip")
+	}
+	if ClassifyTarget("api.internal", "server") != ClassServer {
+		t.Fatal("server")
+	}
+	if ClassifyTarget("pod://ns/name", "cbom") != ClassPod {
+		t.Fatal("pod uri")
+	}
+}

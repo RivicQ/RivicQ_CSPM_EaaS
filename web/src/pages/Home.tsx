@@ -64,9 +64,9 @@ const DOCS = [
 ];
 
 const STEPS = [
-  { step: '01', title: 'Connect', desc: 'Link repositories, cloud accounts, HSMs, and clusters in minutes. No agents required for inventory.', color: tokens.colors.rivicq[600] },
-  { step: '02', title: 'Assess', desc: 'The EaaS engine discovers crypto, builds your CBOM, and quantifies quantum exposure against conformance packs.', color: tokens.colors.gold[600] },
-  { step: '03', title: 'Protect', desc: 'Encrypt through the API, migrate to PQC, and enforce policy with prioritized remediation and full audit trails.', color: tokens.colors.crypto.low },
+  { step: '01', title: 'Discover', desc: 'Scan websites, hosts, IPs, servers, declared Kubernetes pods, and HSM/QSIC catalog entries. Community is the limited engine; no live cluster attach.', color: tokens.colors.rivicq[600] },
+  { step: '02', title: 'Mitigate', desc: 'Map Shor/Grover-class crypto to ML-KEM, ML-DSA, and SLH-DSA. Hybrid PQC is recommended; keys are not rotated by this platform.', color: tokens.colors.gold[600] },
+  { step: '03', title: 'Report', desc: 'Export CycloneDX CBOM, Qiskit/audit scores, and DORA/NIS2/BSI mappings. Community is JSON. Enterprise adds the evidence pack and connectors.', color: tokens.colors.crypto.low },
 ];
 
 const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', 'SOC 2', 'ISO 27001', 'PCI DSS 4.0', 'DORA', 'NIS2', 'EU CRA', 'eIDAS 2.0'];
