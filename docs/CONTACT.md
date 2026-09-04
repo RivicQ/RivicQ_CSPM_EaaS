@@ -1,5 +1,7 @@
 # RivicQ contact directory — @rivicq.com
 
+Designed page (GitHub Pages): **[contact.html](contact.html)** · In-app: `/contact`
+
 One professional domain for the full RivicQ ecosystem. Every function stays on **rivicq.com** and is centralised in Zoho so RivicQ GmbH owns the records, access, and continuity — not individual mailboxes on personal accounts.
 
 This file is the public directory. **`admin@rivicq.com` is not published.** It is reserved for domain and system ownership, with MFA and recovery details controlled by RivicQ.

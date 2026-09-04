@@ -5,86 +5,58 @@ import { GlassCard } from '../components/ui';
 import {
   ECOSYSTEM_AREAS,
   contactsByArea,
-  publishedPriorityContacts,
   mailto,
 } from '../data/contacts';
 
 const ContactHub: React.FC = () => {
-  const publishedPriority = publishedPriorityContacts();
-
   return (
     <PageFrame
       eyebrow="RivicQ GmbH"
       title="Contact directory"
-      subtitle="One domain: @rivicq.com. Shared inboxes and aliases — not thirty paid mailboxes."
-      badge="rivicq.com"
+      subtitle="One domain: @rivicq.com. Shared inboxes and aliases — not thirty paid mailboxes. admin@ is not published."
+      badge="@rivicq.com"
+      action={<Button variant="outlined" href={`${process.env.PUBLIC_URL || ''}/docs/contact.html`}>Docs page</Button>}
     >
       <Alert severity="info" sx={{ mb: 3 }}>
-        Partner and grant addresses do not imply signed alliances or certifications. Domain administration is private.
+        Partner and grant addresses do not imply signed alliances or certifications. Domain administration stays private with MFA.
       </Alert>
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        {ECOSYSTEM_AREAS.map((area) => (
-          <Grid item xs={12} md={6} lg key={area.id}>
-            <GlassCard>
-              <Typography variant="overline" color="primary" fontWeight={800}>{area.title}</Typography>
-              <Typography variant="body2" color="text.secondary">{area.blurb}</Typography>
-            </GlassCard>
-          </Grid>
-        ))}
+      <Grid container spacing={2}>
+        {ECOSYSTEM_AREAS.map((area) => {
+          const rows = contactsByArea(area.id);
+          return (
+            <Grid item xs={12} md={6} key={area.id}>
+              <GlassCard hover={false} padding={2.25}>
+                <Typography variant="overline" color="primary" fontWeight={800}>{area.title}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{area.blurb}</Typography>
+                <Stack spacing={1}>
+                  {rows.map((c) => (
+                    <Stack
+                      key={c.email}
+                      direction={{ xs: 'column', sm: 'row' }}
+                      spacing={1}
+                      alignItems={{ sm: 'center' }}
+                      sx={{ py: 0.75, borderTop: 1, borderColor: 'divider' }}
+                    >
+                      <Chip size="small" color={c.priority ? 'primary' : 'default'} label={c.label} />
+                      <Typography fontFamily="JetBrains Mono, monospace" fontWeight={700} sx={{ flex: 1 }}>
+                        {c.email}
+                      </Typography>
+                      <Button size="small" variant="contained" href={mailto(c.email)}>Email</Button>
+                    </Stack>
+                  ))}
+                </Stack>
+              </GlassCard>
+            </Grid>
+          );
+        })}
       </Grid>
 
-      <Typography variant="h6" fontWeight={800} sx={{ mb: 1.5 }}>Priority inboxes</Typography>
-      <Stack spacing={1.25} sx={{ mb: 3.5 }}>
-        {publishedPriority.map((c) => (
-          <Stack
-            key={c.email}
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={1}
-            alignItems={{ md: 'center' }}
-            sx={{ p: 1.5, border: 1, borderColor: 'divider', borderRadius: 2 }}
-          >
-            <Chip size="small" color="primary" label={c.label} />
-            <Typography fontFamily="JetBrains Mono, monospace" fontWeight={700} sx={{ minWidth: 280 }}>
-              {c.email}
-            </Typography>
-            <Typography sx={{ flex: 1 }} variant="body2" color="text.secondary">{c.purpose}</Typography>
-            <Button size="small" href={mailto(c.email)}>Email</Button>
-          </Stack>
-        ))}
-      </Stack>
-
-      {ECOSYSTEM_AREAS.map((area) => {
-        const extras = contactsByArea(area.id).filter((c) => !c.priority);
-        if (extras.length === 0) return null;
-        return (
-          <Box key={area.id} sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1 }}>{area.title}</Typography>
-            <Stack spacing={1}>
-              {extras.map((c) => (
-                <Stack
-                  key={c.email}
-                  direction={{ xs: 'column', md: 'row' }}
-                  spacing={1}
-                  alignItems={{ md: 'center' }}
-                  sx={{ p: 1.25, border: 1, borderColor: 'divider', borderRadius: 2 }}
-                >
-                  <Chip size="small" label={c.label} />
-                  <Typography fontFamily="JetBrains Mono, monospace" fontWeight={700} sx={{ minWidth: 280 }}>
-                    {c.email}
-                  </Typography>
-                  <Typography sx={{ flex: 1 }} variant="body2" color="text.secondary">{c.purpose}</Typography>
-                  <Button size="small" href={mailto(c.email)}>Email</Button>
-                </Stack>
-              ))}
-            </Stack>
-          </Box>
-        );
-      })}
-
-      <Typography variant="caption" color="text.secondary">
-        Future staff: firstname.lastname@rivicq.com. Extra functions (demo@, regional aliases, noreply@) stay as Zoho forwards — see docs/CONTACT.md.
-      </Typography>
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="caption" color="text.secondary">
+          Founder: revansai.ande@rivicq.com. Future staff: firstname.lastname@rivicq.com. Extra aliases (demo@, regional, noreply@) stay as Zoho forwards.
+        </Typography>
+      </Box>
     </PageFrame>
   );
 };

@@ -6,8 +6,9 @@
 |-------|-----------------|
 | [LEGAL.md](../LEGAL.md) — dual license, warranty, export | [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) |
 | [PRIVACY.md](../PRIVACY.md) — Pages vs self-host | [DATASETS.md](../DATASETS.md) — synthetic samples only |
-| [TRADEMARKS.md](../TRADEMARKS.md) — RivicQ marks and third-party names | [editions.md](editions.md) — Community vs Enterprise |
-| [NOTICE](../NOTICE) · [LICENSE](../LICENSE) | [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) |
+| [Contact directory](contact.html) — @rivicq.com | [editions.md](editions.md) — Community vs Enterprise |
+| [TRADEMARKS.md](../TRADEMARKS.md) — RivicQ marks and third-party names | [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) |
+| [NOTICE](../NOTICE) · [LICENSE](../LICENSE) | |
 
 The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
 
@@ -32,7 +33,7 @@ UI colors follow the **Security Cloud** sky-blue and white theme (`#0284c7` on `
 - [Enterprise SaaS architecture](ARCHITECTURE.md) — four-layer CBOM, control plane, hardware/QSIC scope
 - [Client architecture](CLIENT_ARCHITECTURE.md) — discover → mitigate → report from OSS to Enterprise
 - [Horizon UX / UI](UX_DESIGN.md) — core product visual system
-- [Contact directory](CONTACT.md) — @rivicq.com ecosystem inboxes
+- [Contact directory](contact.html) — designed @rivicq.com directory ([CONTACT.md](CONTACT.md))
 - [Security Intelligence Engine](security-intelligence.md)
 - [Security Control Matrix](SECURITY_CONTROL_MATRIX.md) — mappings, not certifications
 - [Rollback Runbook](ROLLBACK_RUNBOOK.md)

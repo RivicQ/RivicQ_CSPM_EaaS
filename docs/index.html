@@ -4,334 +4,209 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RivicQ Security Cloud — Community &amp; Enterprise docs</title>
-  <meta name="description" content="RivicQ Security Cloud documentation: Apache-2.0 Community edition, commercial Enterprise, CBOM/CSPM, and legal notices." />
+  <meta name="description" content="RivicQ Security Cloud documentation: Apache-2.0 Community, commercial Enterprise, five-BOM, and the @rivicq.com contact directory." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --blue-60:   #0284c7;
-      --blue-70:   #0369a1;
-      --blue-80:   #075985;
-      --sky-50:    #f0f9ff;
-      --gray-100:  #0f172a;
-      --gray-90:   #334155;
-      --gray-10:   #f8fafc;
-      --green-50:  #059669;
-      --red-60:    #dc2626;
-      --yellow-30: #d97706;
-      --card-bg:   #ffffff;
-      --card-border: rgba(14,165,233,0.18);
-    }
-
-    body {
-      font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(180deg, #ffffff 0%, #f4f9fd 40%, #e8f4fc 100%);
-      color: #0f172a;
-      min-height: 100vh;
-    }
-
-    header {
-      background: rgba(255,255,255,0.92);
-      border-bottom: 1px solid rgba(14,165,233,0.16);
-      position: sticky; top: 0; z-index: 100;
-      padding: 0.9rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.15rem; color: #082f49; }
-    .logo-badge {
-      background: var(--blue-60);
-      color: #fff; font-size: 0.7rem; font-weight: 600;
-      padding: 0.15rem 0.5rem; border-radius: 999px; letter-spacing: 0.04em;
-    }
-    .header-links { display: flex; gap: 1rem; flex-wrap: wrap; }
-    .header-links a {
-      color: #475569; text-decoration: none; font-size: 0.875rem; font-weight: 500;
-    }
-    .header-links a:hover { color: var(--blue-60); }
-
-    .hero { text-align: center; padding: 5rem 2rem 4rem; background:
-      radial-gradient(1100px 320px at 50% -18%, rgba(14,165,233,0.22), transparent 58%),
-      linear-gradient(180deg, #ffffff 0%, #f4f9fd 100%); }
-    .hero-eyebrow {
-      display: inline-block;
-      background: rgba(14,165,233,0.08);
-      border: 1px solid rgba(14,165,233,0.28);
-      color: var(--blue-70);
-      font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em;
-      text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 999px;
-      margin-bottom: 1.5rem;
-    }
-    .hero h1 {
-      font-size: clamp(2.1rem, 5vw, 3.4rem);
-      font-weight: 800; line-height: 1.1;
-      margin-bottom: 1.25rem;
-      color: #0f172a;
-      letter-spacing: -0.03em;
-    }
-    .hero p {
-      max-width: 680px; margin: 0 auto 2.5rem;
-      font-size: 1.05rem; color: #475569; line-height: 1.7;
-    }
-    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.75rem 1.75rem; border-radius: 999px;
-      font-weight: 600; font-size: 0.95rem; text-decoration: none;
-      border: none;
-    }
-    .btn-primary { background: var(--blue-60); color: #fff; }
-    .btn-primary:hover { background: var(--blue-70); }
-    .btn-outline {
-      background: #ffffff;
-      border: 1px solid rgba(14,165,233,0.35);
-      color: var(--blue-70);
-    }
-    .btn-secondary {
-      background: #f0f9ff;
-      border: 1px solid rgba(14,165,233,0.18);
-      color: #0f172a;
-    }
-
-    .stats {
-      display: flex; justify-content: center; flex-wrap: wrap;
-      gap: 2.5rem; padding: 2rem 2rem 4rem;
-      background: #ffffff;
-    }
-    .stat { text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--blue-60); font-family: 'JetBrains Mono', monospace; }
-    .stat-label { font-size: 0.8rem; color: #64748b; margin-top: 0.2rem; letter-spacing: 0.04em; text-transform: uppercase; }
-
-    section { max-width: 1200px; margin: 0 auto; padding: 0 2rem 5rem; }
-    .section-title { font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 0.75rem; color: #0f172a; }
-    .section-sub { text-align: center; color: #64748b; margin-bottom: 3rem; font-size: 0.95rem; }
-
-    .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    .preview-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px; overflow: hidden;
-    }
-    .preview-thumb {
-      height: 140px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.4rem; font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
-      color: #ffffff;
-    }
-    .thumb-enterprise { background: #0369a1; }
-    .thumb-oss        { background: #059669; }
-    .thumb-legal      { background: #64748b; }
-    .preview-body { padding: 1.25rem 1.5rem 1.5rem; }
-    .preview-edition {
-      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; margin-bottom: 0.4rem;
-    }
-    .edition-enterprise { color: var(--blue-60); }
-    .edition-oss        { color: var(--green-50); }
-    .edition-legal      { color: var(--yellow-30); }
-    .preview-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .preview-desc  { font-size: 0.875rem; color: #475569; line-height: 1.6; margin-bottom: 1.25rem; }
-    .preview-link {
-      color: var(--blue-60); font-weight: 600; font-size: 0.875rem;
-      text-decoration: none;
-    }
-
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
-    .feature-card {
-      background: var(--card-bg); border: 1px solid var(--card-border);
-      border-radius: 16px; padding: 1.25rem 1.5rem;
-    }
-    .feature-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
-    .feature-desc  { font-size: 0.825rem; color: #475569; line-height: 1.5; }
-
-    .cloud-row {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 2rem;
-    }
-    .cloud-badge {
-      display: flex; align-items: center; gap: 0.5rem;
-      background: var(--card-bg); border: 1px solid var(--card-border);
-      border-radius: 999px; padding: 0.6rem 1.2rem;
-      font-size: 0.85rem; font-weight: 500;
-      color: #0f172a; text-decoration: none;
-    }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-50); }
-
-    footer {
-      text-align: center; padding: 2.5rem 2rem;
-      border-top: 1px solid rgba(14,165,233,0.16);
-      color: #64748b; font-size: 0.825rem;
-    }
-    footer a { color: var(--blue-60); text-decoration: none; }
-    footer a:hover { color: var(--blue-70); }
-
-    @media (max-width: 600px) {
-      .header-links { display: none; }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/horizon-docs.css" />
 </head>
 <body>
+  <header class="site-header">
+    <a class="logo" href="index.html"><span>RivicQ</span><span class="logo-badge">Docs</span></a>
+    <nav class="header-links">
+      <a href="/RivicQ_CSPM_EaaS/">Home</a>
+      <a href="/RivicQ_CSPM_EaaS/demo">Demo</a>
+      <a href="contact.html">Contact</a>
+      <a href="LEGAL.md">Legal</a>
+      <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS">GitHub</a>
+      <a href="https://rivicq.com">rivicq.com</a>
+    </nav>
+  </header>
 
-<header>
-  <div class="logo">
-    <span>RivicQ</span>
-    <span class="logo-badge">Security Cloud</span>
+  <div class="hero">
+    <span class="hero-eyebrow">Security SaaS · Apache-2.0 Community · Commercial Enterprise</span>
+    <h1>Cryptographic security,<br />five bills of materials</h1>
+    <p>
+      One intelligence engine for posture, QBOM / AIBOM / SBOM / IBOM / CBOM, and DevSecOps.
+      Community is a limited Apache-2.0 scan engine. Enterprise is a commercial control plane.
+      Control mappings are not certifications.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="/RivicQ_CSPM_EaaS/demo">Interactive demo</a>
+      <a class="btn btn-outline" href="contact.html">Contact directory</a>
+      <a class="btn btn-ghost" href="/RivicQ_CSPM_EaaS/api/">API docs</a>
+    </div>
   </div>
-  <nav class="header-links">
-    <a href="/RivicQ_CSPM_EaaS/demo">Demo</a>
-    <a href="/RivicQ_CSPM_EaaS/contact">Contact</a>
-    <a href="/RivicQ_CSPM_EaaS/docs/LEGAL.md">Legal</a>
-    <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS">GitHub</a>
-    <a href="https://rivicq.com">rivicq.com</a>
-    <a href="/RivicQ_CSPM_EaaS/login">Sign in</a>
-  </nav>
-</header>
 
-<div class="hero">
-  <span class="hero-eyebrow">Security SaaS · Apache-2.0 Community · Commercial Enterprise</span>
-  <h1>Cryptographic security,<br/>five bills of materials</h1>
-  <p>
-    One intelligence engine for posture, QBOM / AIBOM / SBOM / IBOM / CBOM, and DevSecOps. Community is a <strong>limited</strong> Apache-2.0 scan engine
-    (website, host, IP, server, declared pods, local QBOM). Enterprise is a commercial control plane (SSO, RBAC, HSM connectors, DORA pack).
-    Control mappings are not certifications. QSIC is declared research hardware.
-  </p>
-  <div class="hero-actions">
-    <a class="btn btn-primary" href="/RivicQ_CSPM_EaaS/demo">Interactive demo</a>
-    <a class="btn btn-outline" href="/RivicQ_CSPM_EaaS/login">Sign in</a>
-    <a class="btn btn-secondary" href="/RivicQ_CSPM_EaaS/api/">API docs</a>
+  <div class="stats">
+    <div class="stat"><div class="stat-value">OSS + Ent</div><div class="stat-label">Same security engine</div></div>
+    <div class="stat"><div class="stat-value">5 BOM</div><div class="stat-label">QBOM · AIBOM · SBOM · IBOM · CBOM</div></div>
+    <div class="stat"><div class="stat-value">@rivicq.com</div><div class="stat-label">One contact domain</div></div>
+    <div class="stat"><div class="stat-value">CLI</div><div class="stat-label">rivicq scan .</div></div>
+    <div class="stat"><div class="stat-value">Mappings</div><div class="stat-label">Not certifications</div></div>
   </div>
-</div>
 
-<div class="stats">
-  <div class="stat"><div class="stat-value">OSS + Ent</div><div class="stat-label">Same security engine</div></div>
-  <div class="stat"><div class="stat-value">5 BOM</div><div class="stat-label">QBOM · AIBOM · SBOM · IBOM · CBOM</div></div>
-  <div class="stat"><div class="stat-value">CLI</div><div class="stat-label">rivicq scan .</div></div>
-  <div class="stat"><div class="stat-value">Demo</div><div class="stat-label">Labeled sample data</div></div>
-  <div class="stat"><div class="stat-value">Mappings</div><div class="stat-label">Not certifications</div></div>
-</div>
-
-<section>
-  <h2 class="section-title">Launch paths</h2>
-  <p class="section-sub">Pages is a static demo. Production scans need a running API or the CLI.</p>
-  <div class="preview-grid">
-    <div class="preview-card">
-      <div class="preview-thumb thumb-oss">OSS</div>
-      <div class="preview-body">
-        <div class="preview-edition edition-oss">Community · Apache-2.0</div>
-        <div class="preview-title">Open source edition</div>
-        <div class="preview-desc">
-          Limited engine: CLI, GitHub Action, website/host/IP/server/pod CBOM, local QBOM, TLS API hygiene, pipeline stages 1–6. Discover → mitigate → report as JSON. Apache-2.0 with NOTICE preserved.
+  <section>
+    <h2 class="section-title">Launch paths</h2>
+    <p class="section-sub">Pages is a static demo. Production scans need a running API or the CLI.</p>
+    <div class="preview-grid">
+      <article class="preview-card">
+        <div class="preview-thumb thumb-oss">OSS</div>
+        <div class="preview-body">
+          <div class="preview-kicker">Community · Apache-2.0</div>
+          <div class="preview-title">Open source edition</div>
+          <p class="preview-desc">Limited engine: CLI, GitHub Action, website/host/IP/server/pod CBOM, local QBOM, TLS API hygiene, pipeline stages 1–6.</p>
+          <a class="preview-link" href="/RivicQ_CSPM_EaaS/scanner">Open scanner →</a>
         </div>
-        <a class="preview-link" href="/RivicQ_CSPM_EaaS/scanner">Open scanner →</a>
+      </article>
+      <article class="preview-card">
+        <div class="preview-thumb thumb-ent">ENT</div>
+        <div class="preview-body">
+          <div class="preview-kicker">Enterprise · commercial</div>
+          <div class="preview-title">Enterprise edition</div>
+          <p class="preview-desc">Licensed SSO, RBAC, multi-cloud connectors, audit viewer, and compliance mappings. Not granted by cloning GitHub.</p>
+          <a class="preview-link" href="/RivicQ_CSPM_EaaS/enterprise/compliance">Open enterprise route →</a>
+        </div>
+      </article>
+      <article class="preview-card">
+        <div class="preview-thumb thumb-mail">@</div>
+        <div class="preview-body">
+          <div class="preview-kicker">Company · @rivicq.com</div>
+          <div class="preview-title">Contact directory</div>
+          <p class="preview-desc">Twelve priority inboxes on one domain. Shared aliases, not thirty mailboxes. admin@ stays private.</p>
+          <a class="preview-link" href="contact.html">Open directory →</a>
+        </div>
+      </article>
+      <article class="preview-card">
+        <div class="preview-thumb thumb-legal">LAW</div>
+        <div class="preview-body">
+          <div class="preview-kicker">Legal pack</div>
+          <div class="preview-title">License, privacy, trademarks</div>
+          <p class="preview-desc">Dual licensing, warranty disclaimer, privacy for Pages vs self-host, and RivicQ trademark policy.</p>
+          <a class="preview-link" href="LEGAL.md">Open LEGAL.md →</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">@rivicq.com directory</h2>
+    <p class="section-sub">Five connected areas. Create the twelve priority inboxes first. Regional aliases stay unpublished.</p>
+    <div class="area-grid">
+      <article class="area-card">
+        <h3>Company</h3>
+        <p>hello@ · info@ · legal@ · finance@ · investors@</p>
+        <div class="area-mails">
+          <a class="mail-chip" href="mailto:hello@rivicq.com">hello@</a>
+          <a class="mail-chip" href="mailto:investors@rivicq.com">investors@</a>
+        </div>
+      </article>
+      <article class="area-card">
+        <h3>Product</h3>
+        <p>sales@ · support@ · security@ · privacy@</p>
+        <div class="area-mails">
+          <a class="mail-chip" href="mailto:sales@rivicq.com">sales@</a>
+          <a class="mail-chip" href="mailto:security@rivicq.com">security@</a>
+        </div>
+      </article>
+      <article class="area-card">
+        <h3>Research</h3>
+        <p>research@ · grants@ — not a certification desk</p>
+        <div class="area-mails">
+          <a class="mail-chip" href="mailto:research@rivicq.com">research@</a>
+          <a class="mail-chip" href="mailto:grants@rivicq.com">grants@</a>
+        </div>
+      </article>
+      <article class="area-card">
+        <h3>Innovation Hub</h3>
+        <p>innovationhub@ · community@ · events@</p>
+        <div class="area-mails">
+          <a class="mail-chip" href="mailto:innovationhub@rivicq.com">innovationhub@</a>
+          <a class="mail-chip" href="mailto:community@rivicq.com">community@</a>
+        </div>
+      </article>
+      <article class="area-card">
+        <h3>Partnerships</h3>
+        <p>partnerships@ · press@ · careers@</p>
+        <div class="area-mails">
+          <a class="mail-chip" href="mailto:partnerships@rivicq.com">partnerships@</a>
+          <a class="mail-chip" href="mailto:press@rivicq.com">press@</a>
+        </div>
+      </article>
+    </div>
+    <p class="section-sub" style="margin-top:1.5rem;"><a class="btn btn-outline" href="contact.html">Full priority table</a></p>
+  </section>
+
+  <section>
+    <h2 class="section-title">What is actually live</h2>
+    <p class="section-sub">Honest capabilities. Cloud connectors and quantum APIs need customer credentials.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-title">Five-BOM intelligence</div>
+        <div class="feature-desc">Community runs CBOM, SBOM, and local QBOM. AIBOM and IBOM unlock with Enterprise. Partner APIs stay empty without credentials.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Discover → mitigate → report</div>
+        <div class="feature-desc">Website, host, IP, server, declared pods, and QSIC/HSM catalog. Community JSON; Enterprise DORA pack.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Policy gate</div>
+        <div class="feature-desc">CLI and GitHub Action can fail CI on BLOCK findings. RSA-2048 is classified, not auto-vulnerable.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Known limitations</div>
+        <div class="feature-desc">Pages has no production API. eBPF/Cilium is an optional integration, not a shipped kernel program.</div>
       </div>
     </div>
-    <div class="preview-card">
-      <div class="preview-thumb thumb-enterprise">ENT</div>
-      <div class="preview-body">
-        <div class="preview-edition edition-enterprise">Enterprise · commercial</div>
-        <div class="preview-title">Enterprise edition</div>
-        <div class="preview-desc">
-          Licensed SSO, RBAC, multi-cloud connectors, audit viewer, and compliance mappings. Not granted by cloning GitHub.
-        </div>
-        <a class="preview-link" href="/RivicQ_CSPM_EaaS/enterprise/compliance">Open enterprise route →</a>
-      </div>
-    </div>
-    <div class="preview-card">
-      <div class="preview-thumb thumb-legal">LAW</div>
-      <div class="preview-body">
-        <div class="preview-edition edition-legal">Legal pack</div>
-        <div class="preview-title">License, privacy, trademarks</div>
-        <div class="preview-desc">
-          Dual licensing, warranty disclaimer, privacy for Pages vs self-host, and RivicQ trademark policy.
-        </div>
-        <a class="preview-link" href="/RivicQ_CSPM_EaaS/docs/LEGAL.md">Open LEGAL.md →</a>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<section>
-  <h2 class="section-title">What is actually live</h2>
-  <p class="section-sub">Honest capabilities. Cloud connectors and quantum APIs need customer credentials.</p>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-title">Five-BOM intelligence</div>
-      <div class="feature-desc">QBOM, AIBOM, SBOM, IBOM, CBOM. Community runs CBOM, SBOM, and local QBOM. AIBOM and IBOM unlock with Enterprise. Partner APIs stay empty without credentials.</div>
+  <section>
+    <h2 class="section-title">Documents on this site</h2>
+    <p class="section-sub">Copied onto GitHub Pages with each deploy from main</p>
+    <div class="doc-groups">
+      <article class="doc-card">
+        <h3>Company &amp; legal</h3>
+        <ul>
+          <li><a href="contact.html">Contact directory</a></li>
+          <li><a href="CONTACT.md">CONTACT.md</a></li>
+          <li><a href="LEGAL.md">LEGAL.md</a></li>
+          <li><a href="PRIVACY.md">PRIVACY.md</a></li>
+          <li><a href="TRADEMARKS.md">TRADEMARKS.md</a></li>
+          <li><a href="SECURITY.md">SECURITY.md</a></li>
+        </ul>
+      </article>
+      <article class="doc-card">
+        <h3>Product</h3>
+        <ul>
+          <li><a href="BOM_FRAMEWORK.md">Five-BOM</a></li>
+          <li><a href="ARCHITECTURE.md">Architecture</a></li>
+          <li><a href="CLIENT_ARCHITECTURE.md">Client architecture</a></li>
+          <li><a href="UX_DESIGN.md">Horizon UX</a></li>
+          <li><a href="ROADMAP.md">Roadmap</a></li>
+          <li><a href="QISKIT_PIPELINE.md">Qiskit pipeline</a></li>
+        </ul>
+      </article>
+      <article class="doc-card">
+        <h3>Honesty</h3>
+        <ul>
+          <li><a href="KNOWN_LIMITATIONS.md">Known limitations</a></li>
+          <li><a href="editions.md">Community vs Enterprise</a></li>
+          <li><a href="PQC_MIGRATION.md">PQC migration</a></li>
+          <li><a href="/RivicQ_CSPM_EaaS/demo">/demo</a></li>
+          <li><a href="/RivicQ_CSPM_EaaS/login">/login</a></li>
+        </ul>
+      </article>
     </div>
-    <div class="feature-card">
-      <div class="feature-title">Discover → mitigate → report</div>
-      <div class="feature-desc">Website, host, IP, server, declared Kubernetes pods, and QSIC/HSM catalog. PQC mapping to ML-KEM/ML-DSA. Community JSON; Enterprise DORA pack.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-title">GitHub content scan</div>
-      <div class="feature-desc">SAST/secrets/SCA-style regex overlay and CBOM when an API is reachable. Pages fails honestly without an API.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-title">Policy gate</div>
-      <div class="feature-desc">CLI and GitHub Action can fail CI on BLOCK findings. RSA-2048 is classified, not auto-vulnerable.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-title">PQC mapping</div>
-      <div class="feature-desc">Migration planning toward ML-KEM / ML-DSA. Optional quantum-provider hooks when you supply an API key — never a hard dependency.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-title">Cloud &amp; HSM connectors</div>
-      <div class="feature-desc">Enterprise inventory for AWS, Azure, GCP, and other cloud connectors when credentials are configured. Empty when disconnected.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-title">Compliance mappings</div>
-      <div class="feature-desc">Operator mappings (ISO, NIS2, DORA, BSI, NIST, and others). Not an audit opinion or a certification of RivicQ GmbH.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-title">SSO &amp; RBAC</div>
-      <div class="feature-desc">Enterprise JWT roles (Viewer, Analyst, Operator, Admin). SAML ACS completion is an operations task with your IdP.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-title">Known limitations</div>
-      <div class="feature-desc">Pages has no production API. eBPF/Cilium is an optional integration, not a shipped kernel program.</div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<section>
-  <h2 class="section-title">Documents on this site</h2>
-  <p class="section-sub">Copied onto GitHub Pages with each deploy from main</p>
-  <div class="cloud-row">
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/LEGAL.md"><span class="dot"></span> LEGAL.md</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/PRIVACY.md"><span class="dot"></span> PRIVACY.md</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/TRADEMARKS.md"><span class="dot"></span> TRADEMARKS.md</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/KNOWN_LIMITATIONS.md"><span class="dot"></span> Limitations</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/ARCHITECTURE.md"><span class="dot"></span> Architecture</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/CLIENT_ARCHITECTURE.md"><span class="dot"></span> Client architecture</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/CONTACT.md"><span class="dot"></span> Contact</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/UX_DESIGN.md"><span class="dot"></span> Horizon UX</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/BOM_FRAMEWORK.md"><span class="dot"></span> Five-BOM</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/ROADMAP.md"><span class="dot"></span> Roadmap</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/QISKIT_PIPELINE.md"><span class="dot"></span> Qiskit pipeline</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/docs/SECURITY.md"><span class="dot"></span> Security</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/login"><span class="dot"></span> /login</a>
-    <a class="cloud-badge" href="/RivicQ_CSPM_EaaS/demo"><span class="dot"></span> /demo</a>
-  </div>
-</section>
-
-<footer>
-  <p>
-    <strong>RivicQ</strong> · © 2026 RivicQ GmbH, Berlin ·
-    <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/LICENSE">Apache-2.0 Community</a> ·
-    Enterprise commercial ·
-    <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS">GitHub</a> ·
-    <a href="https://rivicq.com">rivicq.com</a>
-  </p>
-  <p style="margin-top:0.5rem;">
-    Control mappings are not certifications.
-    · <a href="mailto:hello@rivicq.com">hello@rivicq.com</a>
-    · <a href="mailto:security@rivicq.com">security@</a>
-    · <a href="mailto:privacy@rivicq.com">privacy@</a>
-    · <a href="/RivicQ_CSPM_EaaS/docs/CONTACT.md">directory</a>
-  </p>
-</footer>
-
+  <footer class="site-footer">
+    <p><strong>RivicQ</strong> · © 2026 RivicQ GmbH, Berlin · Apache-2.0 Community · Enterprise commercial · Control mappings are not certifications.</p>
+    <p class="footer-mails">
+      <a href="mailto:hello@rivicq.com">hello@rivicq.com</a>
+      <a href="mailto:security@rivicq.com">security@</a>
+      <a href="mailto:privacy@rivicq.com">privacy@</a>
+      <a href="contact.html">directory</a>
+    </p>
+  </footer>
 </body>
 </html>

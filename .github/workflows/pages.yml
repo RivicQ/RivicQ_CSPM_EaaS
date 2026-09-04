@@ -65,6 +65,9 @@ jobs:
           cp docs/BOM_FRAMEWORK.md web/build/docs/BOM_FRAMEWORK.md
           cp docs/UX_DESIGN.md web/build/docs/UX_DESIGN.md
           cp docs/CONTACT.md web/build/docs/CONTACT.md
+          cp docs/contact.html web/build/docs/contact.html
+          mkdir -p web/build/docs/assets
+          cp docs/assets/horizon-docs.css web/build/docs/assets/horizon-docs.css
           cp docs/PQC_MIGRATION.md web/build/docs/PQC_MIGRATION.md
           cp docs/editions.md web/build/docs/editions.md
           cp DATASETS.md web/build/docs/DATASETS.md

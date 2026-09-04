@@ -98,7 +98,7 @@ Unless a signed Enterprise agreement states otherwise, disputes relating to Comm
 
 ## Contact
 
-Public directory: [docs/CONTACT.md](docs/CONTACT.md). Domain: **@rivicq.com**.
+Public directory: [docs/contact.html](docs/contact.html) ([CONTACT.md](docs/CONTACT.md)). Domain: **@rivicq.com**.
 
 - General: hello@rivicq.com
 - Sales / Enterprise: sales@rivicq.com

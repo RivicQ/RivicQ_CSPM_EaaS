@@ -38,12 +38,14 @@ Primary buttons on light pages are **sky fill** (`#0284c7`) with a soft sky shad
 
 ```
 Public
-  Home → Demo | Sign in | Docs
+  Home → Demo | Sign in | Docs | Contact
 Workspace (Community)
   Command Center → Scanner → Five-BOM
-  Pipeline · API security · AI security · HSM/Quantum · Governance · Migration
+  Pipeline · API security · AI security · HSM/Quantum · Governance · Migration · Contact
 Enterprise (licensed)
   Cloud posture · Conformance · Inventory · Compliance · Quantum · CSPM
+Docs hub
+  Launch paths · @rivicq.com directory · Legal / Product / Honesty lists
 ```
 
 Community can open every Five-BOM route. AIBOM, IBOM, HSM connectors, and the GRC pack stay locked until a paid edition.
@@ -56,7 +58,8 @@ Community can open every Five-BOM route. AIBOM, IBOM, HSM connectors, and the GR
 | **Auth / editions** | Split navy briefing + white form on sky canvas |
 | **Command Center** | Navy horizon hero, five-BOM strip, community-first actions |
 | **Five-BOM / pipeline / governance** | Shared `PageFrame` navy header + white evidence cards |
-| **Docs hub** | Same horizon, pill CTAs, 16px cards |
+| **Docs hub** | Same horizon, pill CTAs, 16px cards, grouped legal/product lists |
+| **Contact directory** | Five-area cards, complete priority table, sky mail chips; `admin@` has no mailto |
 
 ## Do not
 

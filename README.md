@@ -129,7 +129,7 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Editions (OSS vs Enterprise) | [docs/editions.md](docs/editions.md) |
 | Client architecture | [docs/CLIENT_ARCHITECTURE.md](docs/CLIENT_ARCHITECTURE.md) |
 | Horizon UX / UI | [docs/UX_DESIGN.md](docs/UX_DESIGN.md) |
-| Contact directory | [docs/CONTACT.md](docs/CONTACT.md) |
+| Contact directory | [docs/contact.html](docs/contact.html) · [CONTACT.md](docs/CONTACT.md) |
 | Five-BOM framework | [docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md) |
 | PQC migration | [docs/PQC_MIGRATION.md](docs/PQC_MIGRATION.md) |
 | SaaS architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
@@ -177,4 +177,4 @@ Copyright © 2026 RivicQ GmbH, Berlin.
 - **Privacy:** [PRIVACY.md](PRIVACY.md)
 - **Warranty:** software is provided as described in Apache-2.0 §7–8 and [LEGAL.md](LEGAL.md). No certification, audit opinion, or legal advice is implied.
 
-**Contact:** https://rivicq.com · hello@rivicq.com · sales@rivicq.com · security@rivicq.com · [contact directory](docs/CONTACT.md)
+**Contact:** https://rivicq.com · hello@rivicq.com · sales@rivicq.com · security@rivicq.com · [directory](docs/contact.html)

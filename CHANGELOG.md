@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Priority inboxes: founder, hello, sales, partnerships, research, grants, support, security, finance, investors, innovationhub. `admin@` stays private.
 - Additional functions are documented as Zoho aliases, not separate paid mailboxes.
 - Public `/contact` lists only the essential inboxes. Regional, demo, and product aliases stay unpublished.
+- Horizon docs hub and [docs/contact.html](docs/contact.html) show the five-area directory as designed pages, not raw markdown.
 
 ## [1.5.8] - 2026-09-03
 

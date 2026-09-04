@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import {
   ArrowForward, CheckCircle, CloudQueue, GitHub, Shield, GppGood, Memory, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
-  Api, Terminal, MenuBook, EnhancedEncryption, Key, AccountTree,
+  Api, MenuBook, EnhancedEncryption, Key, AccountTree, MailOutline,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -65,8 +65,8 @@ const EAAS_CAPABILITIES = [
 
 const DOCS = [
   { icon: <MenuBook />, title: 'Documentation', desc: 'Architecture, EaaS concepts, CBOM & PQC guides.', href: 'docs/index.html' },
+  { icon: <MailOutline />, title: 'Contact directory', desc: 'One domain: @rivicq.com. Priority inboxes and aliases.', href: 'docs/contact.html' },
   { icon: <Api />, title: 'API Reference', desc: 'OpenAPI/ReDoc reference for the RivicQ platform API.', href: 'api/index.html' },
-  { icon: <Terminal />, title: 'SDKs', desc: 'Python, TypeScript, Rust, Java, and .NET client libraries.', href: 'docs/sdks/README.md' },
   { icon: <GitHub />, title: 'GitHub', desc: 'Source, issues, and the OSS CryptoBOM scanner.', href: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
 ];
 
