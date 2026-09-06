@@ -38,58 +38,14 @@ import {
   Storage,
   Shield,
   Security,
-  Badge as BadgeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useDemoTrail } from '../context/DemoTrailContext';
 import { authService } from '../services/api';
 import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
-import CryptoQuantumBackdrop from '../components/auth/CryptoQuantumBackdrop';
 import TrademarkNotice from '../components/TrademarkNotice';
-import designSystem, { commandCenterCardSx, proBlueContainedButtonSx } from '../theme/designSystem';
-
-const authHeroPanelSx = {
-  ...commandCenterCardSx,
-  backdropFilter: 'none',
-  borderRadius: `${designSystem.radius.xl}px`,
-  '& .MuiTypography-overline': {
-    color: designSystem.proBlue.accentMuted,
-  },
-  '& .MuiTypography-h3': {
-    color: designSystem.proBlue.textPrimary,
-  },
-  '& .MuiTypography-subtitle2:not([class*="MuiTypography-color"])': {
-    color: designSystem.proBlue.textPrimary,
-  },
-  '& .MuiTypography-body2': {
-    color: designSystem.proBlue.textSecondary,
-  },
-  '& .MuiCard-root': {
-    bgcolor: 'rgba(255,255,255,0.06)',
-    borderColor: designSystem.proBlue.border,
-    color: designSystem.proBlue.textPrimary,
-  },
-  '& .MuiChip-root': {
-    color: designSystem.proBlue.textSecondary,
-    borderColor: designSystem.proBlue.border,
-    bgcolor: 'rgba(255,255,255,0.04)',
-    '& .MuiChip-icon': { color: designSystem.proBlue.accentMuted },
-    '& .MuiChip-label': { color: designSystem.proBlue.textSecondary },
-  },
-  '& .MuiToggleButtonGroup-root .MuiToggleButton-root': {
-    color: designSystem.proBlue.textSecondary,
-    borderColor: `${designSystem.proBlue.border} !important`,
-    textTransform: 'none',
-    fontWeight: 600,
-    '&.Mui-selected': {
-      color: designSystem.proBlue.textPrimary,
-      bgcolor: 'rgba(255,255,255,0.14)',
-      borderColor: `${designSystem.proBlue.accentMuted} !important`,
-    },
-    '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' },
-  },
-};
+import { proBlueContainedButtonSx } from '../theme/designSystem';
 
 interface AuthPageProps {
   defaultMode?: 'login' | 'register';
@@ -277,149 +233,32 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const providerName = backendReachable ? 'RivicQ Identity' : 'Supabase';
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        position: 'relative',
-        overflow: 'hidden',
-        py: 5,
-        background: isDark ? designSystem.proBlue.commandCenter : designSystem.gradient.meshLight,
-      }}
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          background: isDark ? designSystem.proBlue.commandGlow : designSystem.horizon.wash,
-          pointerEvents: 'none',
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: 'linear-gradient(rgba(14,165,233,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.05) 1px, transparent 1px)',
-          backgroundSize: '72px 72px',
-          opacity: isDark ? 0.35 : 0.25,
-          pointerEvents: 'none',
-        }}
-      />
-
-      <CryptoQuantumBackdrop dark={isDark} />
-
-      <Container maxWidth="lg" sx={{ position: 'relative' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: { xs: 4, md: 8 } }}>
+      <Container maxWidth="sm" sx={{ position: 'relative' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
           <BrandLogo dark={isDark} />
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-            <Chip label={`${edition.toUpperCase()} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
-            <Chip label="Security Cloud" variant="outlined" sx={{ fontWeight: 600 }} />
-          </Stack>
+          <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
         </Box>
-
-        <Grid container spacing={4} alignItems="stretch">
-          <Grid item xs={12} md={5}>
-            <Card sx={{ height: '100%', ...authHeroPanelSx }}>
-              <CardContent sx={{ p: 4.5, height: '100%' }}>
-                <Stack spacing={3} sx={{ height: '100%' }}>
-                  <Box>
-                    <Typography variant="overline" sx={{ display: 'block', letterSpacing: 1.2, fontWeight: 600, fontSize: '0.7rem' }}>
-                      RivicQ Security Cloud
-                    </Typography>
-                    <Typography variant="h3" fontWeight={700} sx={{ mt: 1, lineHeight: 1.12, letterSpacing: '-0.03em' }}>
-                      {mode === 'register' ? 'Stand up your security workspace.' : 'Sign in to the security platform.'}
-                    </Typography>
-                    <Typography sx={{ mt: 2, maxWidth: 540 }}>
-                      Enterprise cryptographic SaaS — CBOM inventory, cloud posture, policy gates, and post-quantum
-                      migration planning in one control plane.
-                    </Typography>
-                  </Box>
-
-                  <Stack spacing={2}>
-                    <Card sx={{ borderRadius: 1 }}>
-                      <CardContent sx={{ p: 2.2 }}>
-                        <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                          <Security sx={{ color: designSystem.proBlue.accentLight }} />
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ letterSpacing: 1, textTransform: 'uppercase', fontWeight: 700 }}>
-                              Command Center
-                            </Typography>
-                            <Typography variant="body2" sx={{ mt: 0.5 }}>
-                              Unified posture across cloud accounts, crypto inventory, and PQC readiness.
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </CardContent>
-                    </Card>
-                    <Card sx={{ bgcolor: 'rgba(59,125,74,0.12) !important', border: 1, borderColor: 'success.main', borderRadius: 1 }}>
-                      <CardContent sx={{ p: 2.2 }}>
-                        <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                          <BadgeIcon sx={{ color: 'success.light' }} />
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ color: 'success.light', letterSpacing: 1, textTransform: 'uppercase', fontWeight: 700 }}>
-                              Complete SaaS toolkit
-                            </Typography>
-                            <Typography variant="body2" sx={{ mt: 0.5 }}>
-                              Security modules, compliance frameworks, realtime monitoring, and enterprise governance.
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </CardContent>
-                    </Card>
-                  </Stack>
-
-                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                    <Chip icon={<Storage sx={{ fontSize: 14 }} />} label="Community" size="small" variant="outlined" />
-                    <Chip icon={<WorkspacePremium sx={{ fontSize: 14 }} />} label="Enterprise" size="small" variant="outlined" />
-                    <Chip icon={<Shield sx={{ fontSize: 14 }} />} label="Demo access" size="small" variant="outlined" />
-                  </Stack>
-
-                  <Box sx={{ mt: 'auto' }}>
-                    <Typography variant="overline" sx={{ letterSpacing: '0.12em', fontWeight: 700 }}>
-                      Edition
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1.5, mt: 0.5 }}>
-                      Community is Apache-2.0. Enterprise is a commercial license with SSO, RBAC, and cloud connectors.
-                    </Typography>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                      {([
-                        { id: 'community' as Edition, title: 'Community', body: 'Limited CBOM engine: website, host, IP, pod inventory, CLI' },
-                        { id: 'professional' as Edition, title: 'Professional', body: 'CSPM modules, multi-cloud, compliance maps' },
-                        { id: 'enterprise' as Edition, title: 'Enterprise', body: 'SSO config, RBAC, audit, API keys, PQC packs' },
-                      ]).map((opt) => {
-                        const selected = edition === opt.id;
-                        return (
-                          <Button
-                            key={opt.id}
-                            variant={selected ? 'contained' : 'outlined'}
-                            onClick={() => setEdition(opt.id)}
-                            sx={{
-                              flex: 1,
-                              py: 1.5,
-                              px: 2,
-                              justifyContent: 'flex-start',
-                              textAlign: 'left',
-                              borderRadius: 1,
-                              borderWidth: 2,
-                            }}
-                          >
-                            <Box>
-                              <Typography fontWeight={700}>{opt.title}</Typography>
-                              <Typography variant="caption" sx={{ display: 'block', opacity: 0.9, whiteSpace: 'normal' }}>
-                                {opt.body}
-                              </Typography>
-                            </Box>
-                          </Button>
-                        );
-                      })}
-                    </Stack>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={7}>
-            <Card sx={{ height: '100%', borderRadius: `${designSystem.radius.xl}px` }}>
+        <Typography sx={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'text.secondary' }}>
+          {mode === 'register' ? 'Create workspace' : 'Continue the operator loop'}
+        </Typography>
+        <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', mb: 2, mt: 0.5 }}>
+          {mode === 'register' ? 'Stand up a workspace.' : 'Sign in and pick up the loop.'}
+        </Typography>
+        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+          {([
+            { id: 'community' as Edition, title: 'Community' },
+            { id: 'professional' as Edition, title: 'Professional' },
+            { id: 'enterprise' as Edition, title: 'Enterprise' },
+          ]).map((opt) => (
+            <Button key={opt.id} size="small" variant={edition === opt.id ? 'contained' : 'outlined'} onClick={() => setEdition(opt.id)}>
+              {opt.title}
+            </Button>
+          ))}
+        </Stack>
+        <Grid container spacing={0}>
+          <Grid item xs={12}>
+            <Card sx={{ height: '100%', borderRadius: 2 }}>
               <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                 <Stack spacing={2} sx={{ mb: 3 }}>
                   <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>

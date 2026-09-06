@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, TextField, InputAdornment, Avatar, Divider, useTheme,
+  Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, TextField, InputAdornment, Avatar, useTheme,
 } from '@mui/material';
 import {
   ArrowForward, CheckCircle, CloudQueue, GitHub, Shield, GppGood, Memory, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
@@ -12,16 +12,14 @@ import { useAuth } from '../context/AuthContext';
 import { cbomService, gitHubScanService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
 import TrademarkNotice from '../components/TrademarkNotice';
-import QubitField from '../components/home/QubitField';
-import EncryptionLayerVisual from '../components/home/EncryptionLayerVisual';
 import ClientWorkflow from '../components/home/ClientWorkflow';
 import HomeScanReport, { HomeScanReportData } from '../components/home/HomeScanReport';
 import FiveBomStrip from '../components/bom/FiveBomStrip';
-import BomLetterRow from '../components/bom/BomLetterRow';
-import HorizonCanvas from '../components/brand/HorizonCanvas';
+import OperatorRail from '../components/home/OperatorRail';
+import FabricPreview from '../components/home/FabricPreview';
 import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
-import designSystem, { glassSurface } from '../theme/designSystem';
+import { MotionSection } from '../motion/primitives';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -87,6 +85,7 @@ const Home: React.FC = () => {
   const [repoUrl, setRepoUrl] = React.useState('');
   const [progress, setProgress] = React.useState(0);
   const [report, setReport] = React.useState<HomeScanReportData | null>(null);
+  const [workflowStep, setWorkflowStep] = React.useState(0);
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -170,6 +169,7 @@ const Home: React.FC = () => {
                 score: repo.pqc_readiness,
               }));
               setScanStatus('complete');
+              setWorkflowStep(1);
               setProgress(100);
             }
           } catch {
@@ -215,6 +215,7 @@ const Home: React.FC = () => {
                 setReport(buildReport(target, status));
               }
               setScanStatus('complete');
+              setWorkflowStep(1);
             } else {
               setScanStatus('error');
             }
@@ -238,176 +239,120 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const heroBg = isDark ? designSystem.proBlue.commandCenter : undefined;
-  const cardBg = isDark ? '#0c4a6e' : '#ffffff';
-  const cardBorder = isDark ? 'rgba(186,230,253,0.12)' : 'rgba(14,165,233,0.16)';
+  const cardBg = isDark ? '#18181b' : '#ffffff';
+  const cardBorder = isDark ? '#27272a' : '#e4e4e7';
 
   return (
-    <HorizonCanvas dark={isDark}>
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: heroBg || 'transparent',
-        position: 'relative',
-        overflow: 'hidden',
-        color: isDark ? '#e2e8f0' : '#0f172a',
-      }}
-    >
-      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4 }, position: 'relative' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 2,
-            flexWrap: 'wrap',
-            mb: { xs: 6, md: 8 },
-            px: 1.75,
-            py: 1.25,
-            borderRadius: 999,
-            ...(isDark
-              ? {
-                background: 'rgba(8,47,73,0.72)',
-                border: `1px solid ${designSystem.proBlue.border}`,
-              }
-              : {
-                ...glassSurface(theme, true),
-                borderRadius: 999,
-                boxShadow: designSystem.shadow.sm,
-              }),
-          }}
-        >
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }} flexWrap="wrap" useFlexGap>
           <BrandLogo dark={isDark} />
-          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('features')}>Features</Button>
-            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('eaas')}>Platform</Button>
-            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', lg: 'inline-flex' } }} onClick={() => scrollToId('workflows')}>Workflows</Button>
-            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'inline-flex' } }} onClick={() => scrollToId('pricing')}>Pricing</Button>
-            <Button variant="text" sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'inline-flex' } }} onClick={() => openExternal('docs/index.html')}>Docs</Button>
-            <Divider orientation="vertical" flexItem sx={{ mx: 1, display: { xs: 'none', sm: 'block' } }} />
-            <Button variant="outlined" onClick={() => navigate('/login')} sx={{ color: 'text.primary' }}>Sign In</Button>
-            <Button variant="contained" onClick={() => navigate('/register')}>Get Started</Button>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Button size="small" onClick={() => scrollToId('workflows')}>Workflow</Button>
+            <Button size="small" onClick={() => scrollToId('features')}>Capabilities</Button>
+            <Button size="small" onClick={() => scrollToId('pricing')}>Plans</Button>
+            <Button size="small" onClick={() => openExternal('docs/index.html')}>Docs</Button>
+            <Button variant="outlined" size="small" onClick={() => navigate('/login')}>Sign in</Button>
+            <Button variant="contained" size="small" onClick={() => navigate('/register')}>Open workspace</Button>
           </Stack>
-        </Box>
+        </Stack>
 
-        <Box sx={{ position: 'relative', mb: { xs: 6, md: 10 } }}>
-          <QubitField dark={isDark} />
-          <Grid container spacing={{ xs: 4, md: 5 }} alignItems="center" sx={{ position: 'relative' }}>
-            <Grid item xs={12} md={6}>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
-                <Chip
-                  icon={<AccountTree />}
-                  label="Five-BOM · Security Cloud"
-                  sx={{
-                    mb: 3,
-                    bgcolor: isDark ? 'rgba(14,165,233,0.18)' : 'rgba(14,165,233,0.08)',
-                    color: 'primary.main',
-                    border: 1,
-                    borderColor: 'primary.main',
-                    fontWeight: 700,
-                    borderRadius: 999,
+        <MotionSection>
+          <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary', mb: 1.5 }}>
+            Operator loop
+          </Typography>
+          <Typography sx={{ fontSize: { xs: '2rem', md: '3.25rem' }, fontWeight: 650, letterSpacing: '-0.04em', lineHeight: 1.05, mb: 1.5, maxWidth: 760 }}>
+            Run the estate like a workflow, not a brochure.
+          </Typography>
+          <Typography sx={{ color: 'text.secondary', maxWidth: 640, mb: 3 }}>
+            Discover assets, assess cryptographic and cloud risk, remediate with approval, then report evidence.
+            Community stays a limited scan engine. Enterprise unlocks connectors.
+          </Typography>
+          <OperatorRail
+            active={workflowStep}
+            onChange={(i) => {
+              setWorkflowStep(i);
+              if (i === 0) scrollToId('discover-console');
+              if (i === 1) scrollToId('assess-console');
+              if (i === 2) navigate('/demo');
+              if (i === 3) scrollToId('docs');
+            }}
+          />
+        </MotionSection>
+
+        <Box id="discover-console" sx={{ mt: 5, mb: 3, scrollMarginTop: 80 }}>
+          <MotionSection>
+            <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: cardBg, borderRadius: 1.5, p: { xs: 2, md: 2.5 } }}>
+              <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'text.secondary', mb: 1.5 }}>
+                discover · public target only
+              </Typography>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
+                <TextField
+                  fullWidth
+                  placeholder="github.com/org/repo or https://example.com"
+                  value={repoUrl}
+                  onChange={(e) => setRepoUrl(e.target.value)}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><GitHub sx={{ color: 'text.secondary' }} /></InputAdornment>,
                   }}
                 />
-                <Typography
-                  variant="h2"
-                  fontWeight={800}
-                  sx={{ mb: 2, lineHeight: 1.08, fontSize: { xs: '2.05rem', md: '3.15rem' }, letterSpacing: '-0.035em' }}
+                <LoadingButton
+                  variant="contained"
+                  endIcon={<ArrowForward />}
+                  onClick={handleScan}
+                  loading={scanStatus === 'scanning'}
+                  loadingText="Discovering…"
+                  disabled={!repoUrl.trim()}
+                  sx={{ minWidth: 180 }}
                 >
-                  Cryptographic security,
-                  <br />
-                  <Box component="span" sx={{ color: tokens.colors.rivicq[600] }}>
-                    five bills of materials.
-                  </Box>
-                </Typography>
-                <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 620, mb: 2.5, fontWeight: 400, fontSize: { xs: '1rem', md: '1.15rem' } }}>
-                  RivicQ Security Cloud is the cryptographic SaaS layer for QBOM, AIBOM, SBOM, IBOM, and CBOM —
-                  discover keys, score PQC exposure, and run posture from one engine.
-                </Typography>
-                <Box sx={{ mb: 3 }}>
-                  <BomLetterRow dark={isDark} />
-                </Box>
-                <Typography variant="body2" sx={{ color: 'text.disabled', mb: 3 }}>
-                  Community is the limited scan engine. Enterprise unlocks AIBOM, IBOM, HSM connectors, and the evidence pack.
-                </Typography>
-              </motion.div>
-
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25, delay: 0.05 }}>
-                <Card
-                  sx={{
-                    mb: 2,
-                    p: 0.5,
-                    bgcolor: cardBg,
-                    border: 1,
-                    borderColor: isDark ? 'rgba(14,165,233,0.35)' : 'rgba(14,165,233,0.22)',
-                    backdropFilter: 'none',
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-                    <Stack spacing={2}>
-                      <TextField
-                        fullWidth
-                        placeholder="Paste a public GitHub repo, or a website URL (https://example.com)…"
-                        value={repoUrl}
-                        onChange={(e) => setRepoUrl(e.target.value)}
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start"><GitHub sx={{ color: 'text.muted' }} /></InputAdornment>,
-                        }}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            bgcolor: isDark ? 'rgba(15,23,42,0.5)' : 'rgba(241,245,249,0.8)',
-                            borderRadius: 2,
-                          },
-                        }}
-                      />
-                      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-                        <LoadingButton
-                          size="large"
-                          variant="contained"
-                          endIcon={<ArrowForward />}
-                          onClick={handleScan}
-                          loading={scanStatus === 'scanning'}
-                          loadingText="Scanning…"
-                          disabled={!repoUrl.trim()}
-                          sx={{ py: 1.5, fontSize: '1rem', flexGrow: 1 }}
-                        >
-                          Scan for Crypto Risk
-                        </LoadingButton>
-                        <Button
-                          size="large"
-                          variant="outlined"
-                          onClick={() => navigate('/demo')}
-                          startIcon={<WorkspacePremium />}
-                          sx={{ py: 1.5, fontSize: '1rem', color: 'tertiary.main', borderColor: 'tertiary.main' }}
-                        >
-                          Try Interactive Demo
-                        </Button>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </motion.div>
-              <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-                Your encryption intelligence, wherever you go — desktop, tablet, and mobile.
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
-                <EncryptionLayerVisual dark={isDark} />
-              </motion.div>
-            </Grid>
-          </Grid>
+                  Start discovery
+                </LoadingButton>
+                <Button variant="outlined" onClick={() => navigate('/demo')}>Labeled demo</Button>
+              </Stack>
+            </Box>
+          </MotionSection>
         </Box>
 
-        {scanStatus !== 'idle' && (
-          <HomeScanReport
-            status={scanStatus}
-            progress={progress}
-            report={report}
-            onOpenApp={() => navigate('/register')}
-            onRegister={() => navigate('/register')}
-          />
-        )}
+        <Grid container spacing={2} sx={{ mb: 6 }}>
+          <Grid item xs={12} md={7}>
+            <FabricPreview />
+          </Grid>
+          <Grid item xs={12} md={5}>
+            <Stack spacing={1.25} sx={{ height: '100%' }}>
+              {['Scan a public repo or host', 'Read the security graph', 'Open a gated remediation', 'Export CBOM / mappings'].map((line, i) => (
+                <Box
+                  key={line}
+                  component={motion.div}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 + i * 0.08 }}
+                  sx={{
+                    border: '1px solid',
+                    borderColor: workflowStep === i ? 'primary.main' : 'divider',
+                    bgcolor: cardBg,
+                    borderRadius: 1,
+                    px: 1.5,
+                    py: 1.25,
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{line}</Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Grid>
+        </Grid>
+
+        <Box id="assess-console" sx={{ scrollMarginTop: 80 }}>
+          {scanStatus !== 'idle' && (
+            <HomeScanReport
+              status={scanStatus}
+              progress={progress}
+              report={report}
+              onOpenApp={() => { setWorkflowStep(2); navigate('/register'); }}
+              onRegister={() => { setWorkflowStep(2); navigate('/register'); }}
+            />
+          )}
+        </Box>
 
         <Box sx={{ mb: 10, textAlign: 'center' }}>
           <Grid container spacing={3}>
@@ -432,14 +377,13 @@ const Home: React.FC = () => {
             sx={{
               position: 'relative',
               overflow: 'hidden',
-              borderRadius: `${designSystem.radius.md}px`,
+              borderRadius: 1.5,
               p: { xs: 3, md: 5 },
               border: 1,
-              borderColor: isDark ? 'rgba(14,165,233,0.28)' : 'rgba(14,165,233,0.16)',
-              background: isDark ? designSystem.proBlue.commandCenter : '#ffffff',
+              borderColor: 'divider',
+              background: cardBg,
             }}
           >
-            <QubitField dark={isDark} density={0.6} />
             <Box sx={{ position: 'relative' }}>
               <Chip icon={<EnhancedEncryption />} label="Encryption as a Service" color="primary" variant="outlined" sx={{ fontWeight: 700, mb: 2 }} />
               <Typography variant="h4" fontWeight={600} sx={{ mb: 1.5, letterSpacing: '-0.02em', maxWidth: 720 }}>
@@ -570,9 +514,9 @@ const Home: React.FC = () => {
                 <Card
                   sx={{
                     height: '100%',
-                    bgcolor: tier.featured ? (isDark ? 'rgba(14,165,233,0.16)' : 'rgba(14,165,233,0.06)') : cardBg,
+                    bgcolor: cardBg,
                     border: 1,
-                    borderColor: tier.featured ? 'rgba(14,165,233,0.4)' : cardBorder,
+                    borderColor: tier.featured ? 'primary.main' : cardBorder,
                   }}
                 >
                   <CardContent sx={{ p: 4 }}>
@@ -621,7 +565,6 @@ const Home: React.FC = () => {
         </Box>
       </Container>
     </Box>
-    </HorizonCanvas>
   );
 };
 

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.2] - 2026-09-06
+
+### Changed
+- Public home, sign-in, and Command Center now use an **operator loop** (Discover → Assess → Remediate → Report) with motion, a fabric preview, and page transitions. Scan, auth, and dashboard APIs are unchanged.
+
 ## [1.6.1] - 2026-09-06
 
 ### Changed

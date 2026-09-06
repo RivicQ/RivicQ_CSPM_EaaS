@@ -1,6 +1,6 @@
 # RivicQ Security Cloud — core product UX / UI
 
-Dark-native zinc enterprise chrome (Linear/Raycast density). Light mode remains available. This is not IBM Carbon or IBM Plex. NEXUS at `/nexus` is a separate identity.
+Dark-native zinc enterprise chrome (Linear/Raycast density). Public home, sign-in, and Command Center share an operator loop: Discover → Assess → Remediate → Report, with motion that respects reduced-motion. Light mode remains available. This is not IBM Carbon or IBM Plex. NEXUS at `/nexus` is a separate identity.
 
 Live surfaces: public home, Community workspace, Five-BOM hubs, docs hub.
 

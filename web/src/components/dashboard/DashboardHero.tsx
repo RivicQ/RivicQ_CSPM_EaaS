@@ -1,15 +1,10 @@
 import React from 'react';
 import { Box, Chip, Stack, Typography } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
-import { chartTheme } from '../../theme/chartTheme';
-import designSystem, {
-  commandCenterCardSx,
-  commandCenterEyebrowSx,
-  commandCenterTitleSx,
-} from '../../theme/designSystem';
+import OperatorRail from '../home/OperatorRail';
+import { useNavigate } from 'react-router-dom';
 import LiveScanMetrics, { LiveScanMetric } from './LiveScanMetrics';
-import BrandLogo from '../BrandLogo';
 
 type DashboardHeroProps = {
   eyebrow: string;
@@ -30,162 +25,57 @@ const DashboardHero: React.FC<DashboardHeroProps> = ({
   children,
   liveScanMetrics,
 }) => {
-  const blue = designSystem.proBlue;
-
+  const navigate = useNavigate();
+  const reduce = useReducedMotion();
+  const [step, setStep] = React.useState(1);
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0, y: 10 }}
+      initial={reduce ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: 0.4 }}
       sx={{
-        ...commandCenterCardSx,
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: `${dashboardDesign.radius.xl}px`,
+        border: '1px solid',
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
+        borderRadius: `${dashboardDesign.radius.md}px`,
         mb: dashboardDesign.layout.sectionGap,
+        p: { xs: 2, md: 2.5 },
       }}
     >
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          background: blue.commandGlow,
-          pointerEvents: 'none',
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          opacity: 0.04,
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-          backgroundSize: '48px 48px',
-          pointerEvents: 'none',
-        }}
-      />
-
-      <Box sx={{ position: 'relative', p: { xs: 2, sm: 2.5, md: 3 } }}>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', lg: '1fr auto' },
-            gap: { xs: 2, md: 2.5, lg: 3 },
-            alignItems: { lg: 'center' },
-            pb: liveScanMetrics?.length ? { xs: 2, md: 2.5 } : 0,
-          }}
-        >
-          <Box sx={{ minWidth: 0 }}>
-            <Stack
-              direction="row"
-              spacing={1.5}
-              alignItems="center"
-              flexWrap="wrap"
-              useFlexGap
-              sx={{ mb: 1.25 }}
-            >
-              <BrandLogo dark sizeKey="default" compact animated />
-              <Box
-                sx={{
-                  width: '1px',
-                  height: 20,
-                  bgcolor: 'rgba(255,255,255,0.18)',
-                  flexShrink: 0,
-                  display: { xs: 'none', sm: 'block' },
-                }}
-              />
-              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-                <Typography sx={commandCenterEyebrowSx}>{eyebrow}</Typography>
-                <Chip
-                  label="Live"
-                  size="small"
-                  sx={{
-                    height: 20,
-                    fontSize: '0.625rem',
-                    fontWeight: 600,
-                    bgcolor: `${chartTheme.live}33`,
-                    color: chartTheme.live,
-                    border: 1,
-                    borderColor: `${chartTheme.live}55`,
-                  }}
-                />
-              </Stack>
-            </Stack>
-            <Typography
-              variant="h4"
-              sx={{
-                ...commandCenterTitleSx,
-                mb: 1,
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.85rem' },
-                lineHeight: 1.15,
-                maxWidth: 720,
+      <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} justifyContent="space-between">
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
+            {eyebrow}
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', fontSize: { xs: '1.35rem', md: '1.75rem' }, mt: 0.5 }}>
+            {title}
+          </Typography>
+          <Typography sx={{ color: 'text.secondary', mt: 1, maxWidth: 680 }}>{subtitle}</Typography>
+          {meta && <Box sx={{ mt: 1.5 }}>{meta}</Box>}
+          <Box sx={{ mt: 2 }}>
+            <OperatorRail
+              active={step}
+              onChange={(i) => {
+                setStep(i);
+                if (i === 0) navigate('/scanner');
+                if (i === 2) navigate('/scanner');
+                if (i === 3) navigate('/analytics');
               }}
-            >
-              {title}
-            </Typography>
-            <Typography
-              sx={{
-                color: blue.textSecondary,
-                maxWidth: 720,
-                lineHeight: 1.65,
-                fontSize: { xs: '0.875rem', md: '0.9375rem' },
-              }}
-            >
-              {subtitle}
-            </Typography>
-            {meta && <Box sx={{ mt: 1.75 }}>{meta}</Box>}
+            />
           </Box>
-
-          {(children || action) && (
-            <Stack
-              direction={{ xs: 'row', sm: 'row' }}
-              spacing={2}
-              alignItems="center"
-              justifyContent={{ xs: 'flex-start', lg: 'flex-end' }}
-              flexWrap="wrap"
-              useFlexGap
-              sx={{ flexShrink: 0 }}
-            >
-              {children && (
-                <Box
-                  sx={{
-                    flexShrink: 0,
-                    p: { xs: 1.25, md: 1.5 },
-                    borderRadius: '50%',
-                    bgcolor: 'rgba(255,255,255,0.08)',
-                    border: `1px solid ${blue.border}`,
-                  }}
-                >
-                  {children}
-                </Box>
-              )}
-              {action && (
-                <Box sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}>
-                  {action}
-                </Box>
-              )}
-            </Stack>
-          )}
         </Box>
-
-        {liveScanMetrics && liveScanMetrics.length > 0 && (
-          <Box sx={{ pt: { xs: 2, md: 2.5 }, borderTop: `1px solid rgba(255,255,255,0.1)` }}>
-            <Typography
-              sx={{
-                fontSize: '0.6875rem',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: blue.textMuted,
-                mb: 1.25,
-              }}
-            >
-              Live scan activity · system-wide
-            </Typography>
-            <LiveScanMetrics metrics={liveScanMetrics} />
-          </Box>
-        )}
-      </Box>
+        <Stack spacing={1.5} alignItems="flex-end" sx={{ minWidth: { lg: 200 } }}>
+          {children}
+          {action}
+        </Stack>
+      </Stack>
+      {liveScanMetrics && liveScanMetrics.length > 0 && (
+        <Box sx={{ mt: 2.5, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Chip label="Live scan activity" size="small" sx={{ mb: 1.25 }} />
+          <LiveScanMetrics metrics={liveScanMetrics} />
+        </Box>
+      )}
     </Box>
   );
 };

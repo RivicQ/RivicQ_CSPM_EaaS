@@ -249,8 +249,8 @@ const Dashboard: React.FC = () => {
     <Box sx={dashboardDesign.layout.page}>
       <DashboardHero
         eyebrow="Security Command Center"
-        title="Five-BOM cryptographic posture"
-        subtitle="Welcome to RivicQ Security Cloud — five-BOM intelligence (QBOM, AIBOM, SBOM, IBOM, CBOM) with cryptographic posture, PQC migration, and DevSecOps evidence."
+        title="Today’s operator loop"
+        subtitle="Discover what changed, assess blast radius, remediate with approval, and export evidence. Five-BOM intelligence stays connected to the same estate."
         meta={
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             {['Five-BOM', 'CBOM', 'QBOM', 'SBOM', 'PQC', 'GitHub', 'HSM', 'Governance'].map((c) => (
