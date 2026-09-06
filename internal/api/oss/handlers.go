@@ -127,6 +127,7 @@ func RegisterSupplementalRoutes(router *gin.RouterGroup, logger *logrus.Logger) 
 	{
 		coreGroup.GET("/status", getCoreStatus(logger))
 		coreGroup.GET("/services", getCoreServices(logger))
+		coreGroup.GET("/scanners", getCoreScannerFramework(logger))
 		coreGroup.GET("/integrations/:name", getCoreIntegrationCheck(logger))
 	}
 
@@ -330,6 +331,14 @@ func getCoreStatus(logger *logrus.Logger) gin.HandlerFunc {
 		status := core.GetStatus(edition)
 		logger.WithField("edition", edition).Info("Serving core status")
 		c.JSON(http.StatusOK, gin.H{"core": status})
+	}
+}
+
+func getCoreScannerFramework(logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		framework := core.GetScannerFrameworkStatus()
+		logger.Info("Serving core scanner framework")
+		c.JSON(http.StatusOK, gin.H{"scanner_framework": framework})
 	}
 }
 
