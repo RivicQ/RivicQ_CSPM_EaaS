@@ -229,7 +229,9 @@ func (m *APIKeyManager) APIKeyAuthMiddleware() gin.HandlerFunc {
 
 func generateAPIKey() string {
 	bytes := make([]byte, 32)
-	rand.Read(bytes)
+	if _, err := rand.Read(bytes); err != nil {
+		panic("crypto/rand unavailable: " + err.Error())
+	}
 	return "cb_" + hex.EncodeToString(bytes)
 }
 

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.4] - 2026-09-06
+
+### Fixed
+- golangci-lint errcheck on API-key generation (`rand.Read`).
+- govulncheck GO-2026-6354 / GO-2026-6355 by bumping `golang.org/x/crypto` to v0.56.0 (requires Go 1.26).
+- CI/CD: frontend docs job installs `web/` deps; Syft uses `anchore/sbom-action`; integration waits for health and uses `sslmode=disable`; production validation builds binaries before start.
+- CodeQL Advanced no longer runs on every push/PR (conflicts with default CodeQL setup).
+
 ## [1.6.3] - 2026-09-06
 
 ### Changed

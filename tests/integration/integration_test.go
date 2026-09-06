@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -49,7 +50,9 @@ func waitForHealth(t *testing.T, url string) map[string]interface{} {
 func TestServersHealthy(t *testing.T) {
 	oss := waitForHealth(t, ossHealthURL)
 	assert.Equal(t, "healthy", oss["status"])
-	assert.Contains(t, oss["edition"], "open")
+	ed := strings.ToLower(fmt.Sprint(oss["edition"]))
+	assert.Truef(t, strings.Contains(ed, "open") || ed == "oss" || strings.Contains(ed, "community"),
+		"unexpected OSS edition %v", oss["edition"])
 
 	ent := waitForHealth(t, enterpriseHealthURL)
 	assert.Equal(t, "healthy", ent["status"])

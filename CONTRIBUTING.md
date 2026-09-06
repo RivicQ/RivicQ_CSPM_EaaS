@@ -19,7 +19,7 @@ By contributing you agree that your patch is provided under Apache-2.0 (see [LEG
 
 ## Prerequisites
 
-- Go 1.25.x (see `go.mod`)
+- Go 1.26.x (see `go.mod`)
 - Node.js 18+ and npm (frontend)
 - Make, Git
 - Docker (optional, for Compose / Helm checks)
