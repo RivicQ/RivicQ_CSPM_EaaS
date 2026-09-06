@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RivicQ CryptoBOM Live Demo — Interactive cryptographic security posture dashboard." />
+  <meta name="theme-color" content="#4f46e5" />
+  <title>Live Demo — RivicQ CryptoBOM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/showcase.css" />
+</head>
+<body class="showcase-body">
+
+  <nav class="nav scrolled" id="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+            <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z"/>
+          </svg>
+        </div>
+        RivicQ CryptoBOM
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#features">Platform</a></li>
+        <li><a href="index.html#posture">Posture</a></li>
+        <li><a href="index.html#compliance">Compliance</a></li>
+        <li><a href="showcase.html">Live Demo</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="#" class="btn btn-ghost" data-platform-link data-platform-path="/login">Sign In</a>
+        <a href="#" class="btn btn-primary" data-platform-link data-platform-path="/dashboard">Open Platform</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <header class="showcase-header">
+    <div class="container showcase-header-inner">
+      <div>
+        <h1 class="showcase-title">Security Posture Command Center</h1>
+        <p class="showcase-subtitle">Interactive demo — simulated cryptographic asset discovery and risk assessment</p>
+      </div>
+      <div class="scan-controls">
+        <button class="scan-btn" id="scanBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Run CBOM Scan
+        </button>
+        <div class="scan-progress" id="scanProgress">
+          <div class="scan-progress-bar" id="scanProgressBar"></div>
+        </div>
+        <div class="showcase-status">
+          <span class="showcase-status-dot"></span>
+          Live Simulation
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <div class="container">
+
+      <!-- KPI Cards -->
+      <div class="dashboard-kpis">
+        <div class="kpi-card info">
+          <div class="kpi-label">Total Assets</div>
+          <div class="kpi-value" id="kpiAssets">12,847</div>
+          <div class="kpi-change up">↑ 234 this week</div>
+        </div>
+        <div class="kpi-card critical">
+          <div class="kpi-label">Critical Findings</div>
+          <div class="kpi-value" id="kpiCritical">23</div>
+          <div class="kpi-change down">↓ 5 resolved</div>
+        </div>
+        <div class="kpi-card warning">
+          <div class="kpi-label">PQC Readiness</div>
+          <div class="kpi-value" id="kpiPQC">67%</div>
+          <div class="kpi-change up">↑ 3% this month</div>
+        </div>
+        <div class="kpi-card success">
+          <div class="kpi-label">Compliance Score</div>
+          <div class="kpi-value" id="kpiCompliance">94%</div>
+          <div class="kpi-change up">↑ 2% this quarter</div>
+        </div>
+      </div>
+
+      <!-- Main Panels -->
+      <div class="dashboard-main">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Cryptographic Findings</span>
+            <div class="panel-actions">
+              <button class="panel-tab active" data-filter="all">All</button>
+              <button class="panel-tab" data-filter="critical">Critical</button>
+              <button class="panel-tab" data-filter="pqc">PQC Risk</button>
+            </div>
+          </div>
+          <div class="panel-body" style="padding: 0;">
+            <table class="findings-table">
+              <thead>
+                <tr>
+                  <th>Severity</th>
+                  <th>Asset</th>
+                  <th>Algorithm</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="findingsBody">
+                <tr data-severity="critical">
+                  <td><span class="severity-badge critical">Critical</span></td>
+                  <td>api-gateway-prod</td>
+                  <td><span class="algo-tag">RSA-1024</span></td>
+                  <td>AWS us-east-1</td>
+                  <td style="color: var(--critical);">Open</td>
+                </tr>
+                <tr data-severity="critical">
+                  <td><span class="severity-badge critical">Critical</span></td>
+                  <td>legacy-payment-svc</td>
+                  <td><span class="algo-tag">SHA-1</span></td>
+                  <td>K8s prod-cluster</td>
+                  <td style="color: var(--critical);">Open</td>
+                </tr>
+                <tr data-severity="high">
+                  <td><span class="severity-badge high">High</span></td>
+                  <td>auth-service</td>
+                  <td><span class="algo-tag">RSA-2048</span></td>
+                  <td>Azure West EU</td>
+                  <td style="color: var(--high);">In Progress</td>
+                </tr>
+                <tr data-severity="pqc">
+                  <td><span class="severity-badge high">High</span></td>
+                  <td>vpn-endpoint</td>
+                  <td><span class="algo-tag">ECDSA P-256</span></td>
+                  <td>GCP europe-west1</td>
+                  <td style="color: var(--high);">Open</td>
+                </tr>
+                <tr data-severity="medium">
+                  <td><span class="severity-badge medium">Medium</span></td>
+                  <td>db-encryption-key</td>
+                  <td><span class="algo-tag">AES-128</span></td>
+                  <td>AWS KMS</td>
+                  <td style="color: var(--medium);">Scheduled</td>
+                </tr>
+                <tr data-severity="low">
+                  <td><span class="severity-badge low">Low</span></td>
+                  <td>tls-cert-frontend</td>
+                  <td><span class="algo-tag">TLS 1.3</span></td>
+                  <td>CloudFront CDN</td>
+                  <td style="color: var(--success-light);">Compliant</td>
+                </tr>
+                <tr data-severity="pqc">
+                  <td><span class="severity-badge low">Low</span></td>
+                  <td>pqc-test-env</td>
+                  <td><span class="algo-tag">Kyber-768</span></td>
+                  <td>IBM Cloud</td>
+                  <td style="color: var(--success-light);">PQC Ready</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Algorithm Distribution</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-canvas-wrap">
+              <canvas id="algoChart"></canvas>
+            </div>
+            <div class="chart-legend" id="algoLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="dashboard-bottom">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Asset Topology</span>
+          </div>
+          <div class="panel-body">
+            <div class="asset-map">
+              <canvas id="assetMap"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Cloud Distribution</span>
+          </div>
+          <div class="panel-body">
+            <div class="cloud-breakdown">
+              <div class="cloud-row">
+                <span class="cloud-row-label">AWS</span>
+                <div class="cloud-row-bar"><div class="cloud-row-fill" data-width="38" style="background: #ff9900;"></div></div>
+                <span class="cloud-row-value">38%</span>
+              </div>
+              <div class="cloud-row">
+                <span class="cloud-row-label">Azure</span>
+                <div class="cloud-row-bar"><div class="cloud-row-fill" data-width="25" style="background: #0078d4;"></div></div>
+                <span class="cloud-row-value">25%</span>
+              </div>
+              <div class="cloud-row">
+                <span class="cloud-row-label">GCP</span>
+                <div class="cloud-row-bar"><div class="cloud-row-fill" data-width="18" style="background: #4285f4;"></div></div>
+                <span class="cloud-row-value">18%</span>
+              </div>
+              <div class="cloud-row">
+                <span class="cloud-row-label">K8s</span>
+                <div class="cloud-row-bar"><div class="cloud-row-fill" data-width="12" style="background: #326ce5;"></div></div>
+                <span class="cloud-row-value">12%</span>
+              </div>
+              <div class="cloud-row">
+                <span class="cloud-row-label">IBM</span>
+                <div class="cloud-row-bar"><div class="cloud-row-fill" data-width="7" style="background: #054ada;"></div></div>
+                <span class="cloud-row-value">7%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Activity Feed</span>
+          </div>
+          <div class="panel-body">
+            <div class="activity-feed" id="activityFeed">
+              <div class="activity-item">
+                <div class="activity-icon scan">🔍</div>
+                <div>
+                  <div class="activity-text">CBOM scan completed for <strong>prod-cluster</strong></div>
+                  <div class="activity-time">2 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon alert">⚠️</div>
+                <div>
+                  <div class="activity-text">Critical: RSA-1024 detected on <strong>api-gateway-prod</strong></div>
+                  <div class="activity-time">8 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon success">✓</div>
+                <div>
+                  <div class="activity-text">Kyber-768 deployment verified on <strong>pqc-test-env</strong></div>
+                  <div class="activity-time">15 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon scan">📋</div>
+                <div>
+                  <div class="activity-text">Compliance report generated: <strong>NIST CSF 2.0</strong></div>
+                  <div class="activity-time">32 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon success">☁️</div>
+                <div>
+                  <div class="activity-text">AWS KMS key rotation completed for <strong>db-encryption-key</strong></div>
+                  <div class="activity-time">1 hour ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card reveal">
+        <h2>This is a simulation. Ready for the real thing?</h2>
+        <p>Connect your infrastructure and run a live CBOM scan in under 5 minutes.</p>
+        <div class="cta-actions">
+          <a href="#" class="btn btn-primary btn-lg" data-platform-link data-platform-path="/register">Start Free Scan</a>
+          <a href="index.html" class="btn btn-secondary btn-lg">Back to Overview</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border: none; padding-top: 0;">
+        <span>&copy; 2026 RivicQ GmbH. Demo simulation — no real data.</span>
+        <span><a href="index.html" style="color: var(--rivicq-400);">← Back to product overview</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/showcase.js"></script>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoBOM DevSecOps Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-card.healthy {
+            border-left-color: #10b981;
+        }
+
+        .status-card.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .status-card.critical {
+            border-left-color: #ef4444;
+        }
+
+        .status-card-title {
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-card-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge.failure {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        .table tr:hover {
+            background: #f9fafb;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #991b1b;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>🔐 CryptoBOM DevSecOps Dashboard</h1>
+            <p>Real-time monitoring of CI/CD pipelines, security scans, deployments, and application health</p>
+            <div class="status-bar" id="statusBar">
+                <div class="status-card healthy">
+                    <div>
+                        <div class="status-card-title">Deployment</div>
+                        <div class="status-card-value">✓</div>
+                    </div>
+                </div>
+                <div class="status-card healthy">
+                    <div>
+                        <div class="status-card-title">Pipeline Success</div>
+                        <div class="status-card-value">98%</div>
+                    </div>
+                </div>
+                <div class="status-card warning">
+                    <div>
+                        <div class="status-card-title">Vulnerabilities</div>
+                        <div class="status-card-value">3</div>
+                    </div>
+                </div>
+                <div class="status-card healthy">
+                    <div>
+                        <div class="status-card-title">Uptime</div>
+                        <div class="status-card-value">99.9%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- CI/CD Pipeline Status -->
+            <div class="card">
+                <h2>Recent Workflow Runs</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Workflow</th>
+                            <th>Branch</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workflowRuns">
+                        <tr>
+                            <td colspan="4" class="loading">
+                                <div class="spinner"></div>
+                                Loading workflow data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Security Scan Summary -->
+            <div class="card">
+                <h2>Security Scan Summary</h2>
+                <div class="metric">
+                    <span class="metric-label">Critical Vulnerabilities</span>
+                    <span class="metric-value badge failure">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">High Severity</span>
+                    <span class="metric-value badge warning">3</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Medium Severity</span>
+                    <span class="metric-value" style="color: #f59e0b;">12</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">SBOM Generated</span>
+                    <span class="metric-value badge success">✓</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">CodeQL Scan</span>
+                    <span class="metric-value badge success">✓</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Container Scan (Trivy)</span>
+                    <span class="metric-value badge success">✓</span>
+                </div>
+            </div>
+
+            <!-- Deployment Timeline -->
+            <div class="card">
+                <h2>Latest Deployments</h2>
+                <div class="metric">
+                    <span class="metric-label">Production - OSS</span>
+                    <span class="metric-value badge success">v1.3.0 (2h ago)</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Production - Enterprise</span>
+                    <span class="metric-value badge success">v1.3.0 (2h ago)</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Staging - OSS</span>
+                    <span class="metric-value badge success">v1.3.1-rc1 (15m ago)</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Recent Rollbacks</span>
+                    <span class="metric-value">0 (this month)</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Avg Deploy Time</span>
+                    <span class="metric-value">8m 34s</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Success Rate</span>
+                    <span class="metric-value">
+                        <span style="color: #10b981;">98.5%</span>
+                        <div class="progress-bar" style="width: 200px;">
+                            <div class="progress-fill" style="width: 98.5%;"></div>
+                        </div>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Application Health -->
+            <div class="card">
+                <h2>Application Health</h2>
+                <div class="metric">
+                    <span class="metric-label">API Response Time (p95)</span>
+                    <span class="metric-value" style="color: #10b981;">124ms</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Error Rate</span>
+                    <span class="metric-value" style="color: #10b981;">0.01%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">DB Connection Pool</span>
+                    <span class="metric-value">45/50</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Pod Restarts (24h)</span>
+                    <span class="metric-value badge success">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">CPU Usage</span>
+                    <span class="metric-value">
+                        <span>34%</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 34%;"></div>
+                        </div>
+                    </span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Memory Usage</span>
+                    <span class="metric-value">
+                        <span>56%</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 56%;"></div>
+                        </div>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Test Coverage -->
+            <div class="card">
+                <h2>Test Coverage & Quality</h2>
+                <div class="metric">
+                    <span class="metric-label">Unit Test Coverage</span>
+                    <span class="metric-value">
+                        <span style="color: #10b981;">87%</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 87%;"></div>
+                        </div>
+                    </span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Integration Tests</span>
+                    <span class="metric-value badge success">42/42 Passed</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">E2E Tests</span>
+                    <span class="metric-value badge success">18/18 Passed</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Code Quality Grade</span>
+                    <span class="metric-value" style="font-size: 20px;">A</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Performance Score</span>
+                    <span class="metric-value" style="color: #10b981;">95</span>
+                </div>
+            </div>
+
+            <!-- Compliance & Security Posture -->
+            <div class="card">
+                <h2>Compliance & Security</h2>
+                <div class="metric">
+                    <span class="metric-label">SBOM up-to-date</span>
+                    <span class="metric-value badge success">✓</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Secrets scanned</span>
+                    <span class="metric-value badge success">✓</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Dependency audit</span>
+                    <span class="metric-value badge success">✓</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">SLSA Level</span>
+                    <span class="metric-value">
+                        <span class="tag">L2</span>
+                        <span class="tag">L3 pending</span>
+                    </span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Compliance Checks</span>
+                    <span class="metric-value">
+                        <span style="color: #10b981;">24/24 Passed</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100%;"></div>
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full-width chart -->
+        <div class="card">
+            <h2>Pipeline Success Rate (Last 30 Days)</h2>
+            <div class="chart-container">
+                <canvas id="successChart"></canvas>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Last updated: <span id="lastUpdate">just now</span> | 
+            <a href="https://github.com/rivic-q/cryptobom-saas" style="color: inherit; text-decoration: none;">GitHub</a> | 
+            <a href="https://grafana.cryptobom.io" style="color: inherit; text-decoration: none;">Grafana</a> | 
+            <a href="https://prometheus.cryptobom.io" style="color: inherit; text-decoration: none;">Prometheus</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        const ctx = document.getElementById('successChart').getContext('2d');
+        const successChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['May 1', 'May 5', 'May 10', 'May 15', 'May 19'],
+                datasets: [{
+                    label: 'Pipeline Success Rate (%)',
+                    data: [95, 97, 96, 98, 98.5],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#667eea',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 90,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Mock workflow data
+        const mockWorkflows = [
+            { name: 'ci-cd.yml', branch: 'main', status: 'success', duration: '8m 42s' },
+            { name: 'deploy-prod.yml', branch: 'main', status: 'success', duration: '12m 15s' },
+            { name: 'ci-oss.yml', branch: 'develop', status: 'success', duration: '6m 33s' },
+            { name: 'security-scan.yml', branch: 'main', status: 'success', duration: '4m 20s' },
+            { name: 'dast-scan.yml', branch: 'schedule', status: 'pending', duration: '--' }
+        ];
+
+        document.getElementById('workflowRuns').innerHTML = mockWorkflows
+            .map(w => `
+                <tr>
+                    <td>${w.name}</td>
+                    <td><span class="tag">${w.branch}</span></td>
+                    <td><span class="badge ${w.status === 'success' ? 'success' : 'pending'}">${w.status.toUpperCase()}</span></td>
+                    <td>${w.duration}</td>
+                </tr>
+            `).join('');
+
+        // Update last update time
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }, 300000);
+    </script>
+</body>
+</html>
