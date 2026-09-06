@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Box, Button, Chip, CircularProgress, Grid, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography, useMediaQuery, useTheme,
+  Box, Button, Chip, CircularProgress, Grid, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography, useTheme,
 } from '@mui/material';
 import {
   ArrowForward, AutoGraph, GitHub, GppGood, Lock, Memory, NotificationsActive, Security, TrendingUp,
@@ -22,8 +22,7 @@ import ProvenanceChip from '../components/dashboard/ProvenanceChip';
 import DashboardDrilldown, { DrilldownState } from '../components/dashboard/DashboardDrilldown';
 import StatCard from '../components/dashboard/StatCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
-import DashboardHero from '../components/dashboard/DashboardHero';
-import PostureRing from '../components/dashboard/PostureRing';
+import InboxHero from '../components/dashboard/InboxHero';
 import SecurityFeedItem from '../components/dashboard/SecurityFeedItem';
 import PostureTrendChart from '../components/dashboard/PostureTrendChart';
 import CloudProviderBreakdown from '../components/dashboard/CloudProviderBreakdown';
@@ -38,7 +37,7 @@ import ScanActivityTimeline from '../components/dashboard/ScanActivityTimeline';
 import FindingsSeverityBar from '../components/dashboard/FindingsSeverityBar';
 import ThreatIntelStrip from '../components/dashboard/ThreatIntelStrip';
 import dashboardDesign from '../theme/dashboardDesign';
-import designSystem, { heroPrimaryCtaSx, heroSecondaryCtaSx, metricValueSx } from '../theme/designSystem';
+import { heroPrimaryCtaSx, heroSecondaryCtaSx, metricValueSx } from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
 
 const ChartTooltipContent: React.FC<any> = ({ active, payload, label }) => {
@@ -68,7 +67,6 @@ const Dashboard: React.FC = () => {
   const { edition, isDemo } = useAuth();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const isCompact = useMediaQuery(theme.breakpoints.down('sm'));
   const [timeRange, setTimeRange] = React.useState('7d');
   const [trendActiveIndex, setTrendActiveIndex] = React.useState<number | null>(null);
   const [selectedProvider, setSelectedProvider] = React.useState<string | null>(null);
@@ -180,7 +178,6 @@ const Dashboard: React.FC = () => {
   }));
   const scanEvents = model.scans;
   const threatMetrics = model.threatMetrics;
-  const liveScanMetrics = model.liveScanMetrics;
 
   const pqcPct = pqcStats.quantumSafe + pqcStats.vulnerable
     ? Math.round((pqcStats.quantumSafe / (pqcStats.quantumSafe + pqcStats.vulnerable)) * 100)
@@ -220,12 +217,17 @@ const Dashboard: React.FC = () => {
   if (communityOnboarding) {
     return (
       <Box sx={dashboardDesign.layout.page}>
-        <DashboardHero
+        <InboxHero
           eyebrow="Community edition"
-          title="Your cryptographic command center"
+          title="Your workspace inbox"
           subtitle="Community shows inventory from scans you run in this workspace. Enterprise simulation data is not mixed in."
+          openCount={0}
+          criticalCount={0}
+          posture={0}
+          items={[]}
+          onOpenQueue={() => navigate('/scanner')}
           action={
-            <Stack spacing={1} sx={{ minWidth: { sm: 180 } }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               <Button variant="contained" disableElevation endIcon={<ArrowForward />} onClick={() => navigate('/scanner')} sx={heroPrimaryCtaSx}>
                 Run CBOM scan
               </Button>
@@ -247,78 +249,39 @@ const Dashboard: React.FC = () => {
 
   return (
     <Box sx={dashboardDesign.layout.page}>
-      <DashboardHero
-        eyebrow="Security Command Center"
-        title="Today’s operator loop"
-        subtitle="Discover what changed, assess blast radius, remediate with approval, and export evidence. Five-BOM intelligence stays connected to the same estate."
+      <InboxHero
+        eyebrow="Security Cloud"
+        title="Inbox · today’s work"
+        subtitle="Review open findings, then scan, remediate, and export evidence. Five-BOM stays on the same estate."
+        openCount={totalFindings}
+        criticalCount={findings.critical ?? 0}
+        posture={healthScore}
+        items={topFindings.slice(0, 4).map((f) => ({
+          id: f.id,
+          title: f.title,
+          severity: f.severity,
+          resource: f.resource,
+        }))}
+        onOpenQueue={() => openDrill('findings', 'Open findings', { subtitle: 'Representative records from the estate' })}
+        onSelectItem={(id) => {
+          const f = model.openFindings.find((x) => x.id === id);
+          openDrill(f?.cveId ? 'cve' : 'findings', f?.cveId || f?.title || 'Finding', { cveId: f?.cveId, subtitle: f?.message });
+        }}
         meta={
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {['Five-BOM', 'CBOM', 'QBOM', 'SBOM', 'PQC', 'GitHub', 'HSM', 'Governance'].map((c) => (
-              <Chip
-                key={c}
-                label={c}
-                size="small"
-                variant="outlined"
-                sx={{
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  height: 24,
-                  color: designSystem.proBlue.textPrimary,
-                  borderColor: 'rgba(255,255,255,0.35)',
-                  bgcolor: 'rgba(255,255,255,0.06)',
-                }}
-              />
-            ))}
             <ProvenanceChip kind={model.dataMode} label={model.dataMode === 'demo' ? 'DEMO ENVIRONMENT' : 'LIVE'} />
-          </Stack>
-        }
-        action={
-          <Stack spacing={1} sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 180 } }}>
-            {isPaidEdition(edition) ? (
-              <Button
-                variant="contained"
-                disableElevation
-                fullWidth
-                endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
-                onClick={() => navigate('/enterprise/cloud-posture')}
-                sx={{ ...heroPrimaryCtaSx, maxWidth: { sm: 'none' } }}
-              >
-                Cloud Posture
-              </Button>
-            ) : (
-              <Button
-                variant="outlined"
-                fullWidth
-                endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
-                onClick={() => navigate('/scanner')}
-                sx={{ ...heroSecondaryCtaSx, maxWidth: { sm: 'none' } }}
-              >
-                Run CBOM Scan
-              </Button>
-            )}
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<GitHub sx={{ fontSize: 18 }} />}
-              onClick={() => navigate('/scanner?tab=github')}
-              sx={{ ...heroSecondaryCtaSx, maxWidth: { sm: 'none' } }}
-            >
+            <Button size="small" startIcon={<GitHub sx={{ fontSize: 16 }} />} onClick={() => navigate('/scanner?tab=github')}>
               Scan GitHub
             </Button>
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={() => navigate('/bom')}
-              sx={{ ...heroSecondaryCtaSx, maxWidth: { sm: 'none' } }}
-            >
-              Five-BOM
-            </Button>
+            <Button size="small" onClick={() => navigate('/bom')}>Five-BOM</Button>
+            {isPaidEdition(edition) && (
+              <Button size="small" endIcon={<ArrowForward sx={{ fontSize: 14 }} />} onClick={() => navigate('/enterprise/cloud-posture')}>
+                Cloud posture
+              </Button>
+            )}
           </Stack>
         }
-        liveScanMetrics={liveScanMetrics}
-      >
-        <PostureRing score={healthScore} size={isCompact ? 96 : 128} onDark />
-      </DashboardHero>
+      />
 
       <CspmCapabilityStrip onNavigate={navigate} />
 
@@ -628,7 +591,7 @@ const Dashboard: React.FC = () => {
           borderRadius: `${dashboardDesign.radius.lg}px`,
           border: 1,
           borderColor: 'divider',
-          bgcolor: isDark ? 'rgba(14,165,233,0.1)' : 'rgba(14,165,233,0.05)',
+          bgcolor: isDark ? 'rgba(196,120,58,0.1)' : 'rgba(196,120,58,0.06)',
           display: 'flex',
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',

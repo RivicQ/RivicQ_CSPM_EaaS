@@ -79,7 +79,6 @@ import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';
 import DemoTrailCoach from '../components/demo/DemoTrailCoach';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { useDemoTrail } from '../context/DemoTrailContext';
-import BomLetterRow from '../components/bom/BomLetterRow';
 import designSystem, {
   sidebarPaperSx,
   sidebarScrollSx,
@@ -295,17 +294,6 @@ const Layout: React.FC = () => {
 
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', minHeight: 0, position: 'relative', color: designSystem.proBlue.textPrimary }}>
-      <Box
-        sx={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 3,
-          background: designSystem.proBlue.accent,
-          borderRadius: '0 4px 4px 0',
-        }}
-      />
       <Box sx={{ px: sidebarCollapsed && isDesktop ? 1 : 2, py: 1.5, display: 'flex', alignItems: 'center', position: 'relative', flexShrink: 0, justifyContent: 'space-between', gap: 1 }}>
         {!(sidebarCollapsed && isDesktop) && (
           <Box sx={{ minWidth: 0 }}>
@@ -323,7 +311,7 @@ const Layout: React.FC = () => {
                 textTransform: 'uppercase',
               }}
             >
-              CSPM · Security Cloud
+              Security Cloud · SaaS
             </Typography>
           </Box>
         )}
@@ -505,10 +493,10 @@ const Layout: React.FC = () => {
               justifyContent: 'flex-start',
               fontWeight: 600,
               fontSize: '0.75rem',
-              bgcolor: 'rgba(14,165,233,0.2)',
-              color: designSystem.proBlue.accentMuted,
+              bgcolor: 'rgba(196,120,58,0.16)',
+              color: designSystem.proBlue.accentLight,
               border: 1,
-              borderColor: 'rgba(125,211,252,0.28)',
+              borderColor: 'rgba(224,154,90,0.32)',
             }}
           />
           <TrademarkNotice
@@ -600,7 +588,7 @@ const Layout: React.FC = () => {
                 },
               }}
             />
-            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'JetBrains Mono, monospace' }}>
+            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'Source Code Pro, monospace' }}>
               ⌘K
             </Typography>
           </Box>
@@ -757,7 +745,7 @@ const Layout: React.FC = () => {
                   fontWeight: 500,
                   flexGrow: 1,
                   color: isDarkMode ? blue.textPrimary : blue.navyMid,
-                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : 'rgba(14,165,233,0.55)', opacity: 1 },
+                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : '#8a8376', opacity: 1 },
                 }}
               />
               <IconButton size="small" onClick={() => setMobileSearchOpen(false)} aria-label="Close search">

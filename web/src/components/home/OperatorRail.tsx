@@ -27,7 +27,7 @@ const OperatorRail: React.FC<Props> = ({ steps = DEFAULT_OPERATOR_STEPS, active,
     <Box sx={{ width: '100%' }} role="list" aria-label="Operator workflow">
       <Box sx={{ position: 'relative', height: 2, bgcolor: 'divider', mb: -3.25, mx: { xs: 2, md: 6 } }}>
         <motion.div
-          style={{ height: '100%', background: '#3b82f6', transformOrigin: 'left' }}
+          style={{ height: '100%', background: '#c4783a', transformOrigin: 'left' }}
           animate={{ scaleX: steps.length <= 1 ? 1 : active / (steps.length - 1) }}
           transition={reduce ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         />
@@ -49,8 +49,8 @@ const OperatorRail: React.FC<Props> = ({ steps = DEFAULT_OPERATOR_STEPS, active,
                 px: 1.5,
                 py: 1.4,
                 border: '1px solid',
-                borderColor: isActive ? '#3b82f6' : 'divider',
-                bgcolor: isActive ? 'rgba(59,130,246,0.12)' : 'background.paper',
+                borderColor: isActive ? '#c4783a' : 'divider',
+                bgcolor: isActive ? 'rgba(196,120,58,0.14)' : 'background.paper',
                 borderRadius: 1,
               }}
             >
@@ -63,7 +63,7 @@ const OperatorRail: React.FC<Props> = ({ steps = DEFAULT_OPERATOR_STEPS, active,
                   height: 10,
                   borderRadius: '50%',
                   mr: 1.25,
-                  bgcolor: done ? '#10b981' : isActive ? '#3b82f6' : '#3f3f46',
+                  bgcolor: done ? '#3d9b7a' : isActive ? '#c4783a' : '#2c281f',
                   flexShrink: 0,
                 }}
               />

@@ -24,7 +24,7 @@ export const LOGO_COLORS = {
     orbitPrimary: designSystem.proBlue.accentLight,
     orbitSecondary: 'rgba(248,250,252,0.55)',
     core: designSystem.proBlue.textPrimary,
-    coreFill: 'rgba(14,165,233,0.22)',
+    coreFill: 'rgba(196,120,58,0.22)',
     wordmark: designSystem.proBlue.textPrimary,
     subtitle: designSystem.proBlue.textMuted,
   },

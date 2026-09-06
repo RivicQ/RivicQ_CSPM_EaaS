@@ -1,39 +1,31 @@
 # RivicQ Security Cloud — core product UX / UI
 
-Dark-native zinc enterprise chrome (Linear/Raycast density). Public home, sign-in, and Command Center share an operator loop: Discover → Assess → Remediate → Report, with motion that respects reduced-motion. Light mode remains available. This is not IBM Carbon or IBM Plex. NEXUS at `/nexus` is a separate identity.
+Warm-ink enterprise SaaS chrome (ledger density, copper accent). Public home is a product site with a labeled console preview. Sign-in is a single-column workspace form. Command Center opens on an inbox queue — not a circular posture gauge. Light mode remains available. This is not IBM Carbon or IBM Plex. NEXUS at `/nexus` is a separate identity.
 
 Live surfaces: public home, Community workspace, Five-BOM hubs, docs hub.
 
-Mockups (also on GitHub Pages after merge):
-
-![Public home](../media/ux/rivicq-horizon-home.png)
-
-![Command Center](../media/ux/rivicq-horizon-workspace.png)
-
 ## Intent
 
-Operators should see **one cryptographic product**, not a pile of enterprise modules.
+Operators should see **one cryptographic SaaS**, not a brochure or a pile of modules.
 
-1. **Five-BOM is the identity** — QBOM · AIBOM · SBOM · IBOM · CBOM tiles on home, app bar, and workspace.
+1. **Inbox first** — today’s findings and scans, then charts.
 2. **Discover → mitigate → report** remains the only client path.
 3. **Community is honest** — locked Enterprise tiles stay visible, never unlabeled as live.
-4. **Zinc is chrome** — sidebar and command surfaces sit on `#09090B` / `#18181B`; status color is semantic only.
+4. **Warm ink is chrome** — canvas `#0C0B09` / surface `#17150F`; copper `#C4783A` is the only brand accent; status color is semantic only.
 
 ## Visual tokens
 
 | Token | Value | Use |
 |---|---|---|
-| Base | `#09090B` | App background |
-| Surface | `#18181B` | Cards, drawers, tables |
-| Border | `#27272A` | 1px dividers |
-| Text | `#FAFAFA` / `#A1A1AA` | Primary / muted |
-| Status | `#EF4444` `#F97316` `#F59E0B` `#3B82F6` `#10B981` | Critical / high / medium / low / success |
-| Type | Inter + JetBrains Mono | UI / IDs |
-| Type | Outfit 400–800 + JetBrains Mono | UI + metrics |
-| Radius | 6 / 10 / 14 / 20 / pill | Cards, pills, search |
-| Motion | opacity only | No blur, no neon glow, no hover-lift |
-
-Primary buttons on light pages are **sky fill** (`#0284c7`) with a soft sky shadow. Navy is reserved for chrome, not every CTA.
+| Base | `#0C0B09` | App background |
+| Surface | `#17150F` | Cards, drawers, tables |
+| Border | `#2C281F` | 1px dividers |
+| Text | `#F3EEE4` / `#B8B0A2` | Primary / muted |
+| Accent | `#C4783A` | Primary actions, focus |
+| Status | `#D64545` `#D97706` `#C9A227` `#3D7AB8` `#3D9B7A` | Critical / high / medium / low / success |
+| Type | Source Sans 3 + Source Code Pro | UI / IDs |
+| Radius | 4 / 6 / 8 / 10 / pill | Cards, controls |
+| Motion | opacity + short translate | No blur, no neon glow, no hover-lift |
 
 ## Information architecture
 
@@ -55,16 +47,17 @@ Community can open every Five-BOM route. AIBOM, IBOM, HSM connectors, and the GR
 
 | Screen | Design |
 |---|---|
-| **Home** | Pill nav, editorial headline, five BOM letter tiles, scan card, horizon wash |
-| **Auth / editions** | Split navy briefing + white form on sky canvas |
-| **Command Center** | Navy horizon hero, five-BOM strip, community-first actions |
-| **Five-BOM / pipeline / governance** | Shared `PageFrame` navy header + white evidence cards |
-| **Docs hub** | Same horizon, pill CTAs, 16px cards, grouped legal/product lists |
-| **Contact directory** | Five-area cards, complete priority table, sky mail chips; `admin@` has no mailto |
+| **Home** | Sticky product nav, editorial headline, labeled console preview, terminal scan |
+| **Auth / editions** | Single-column workspace form on warm ink |
+| **Command Center** | Inbox queue + compact metrics, no circular gauge |
+| **Five-BOM / pipeline / governance** | Shared page header + evidence cards |
+| **Docs hub** | Same chrome, grouped legal/product lists |
+| **Contact directory** | Five-area cards; `admin@` has no mailto |
 
 ## Do not
 
 - Restore IBM Plex, Carbon Gray 100, or trademark banners
+- Restore Horizon sky-blue / navy split login / circular posture gauge as the product identity
 - Present demo data as customer telemetry
 - Treat mappings as certifications
 - Require IBM Quantum hardware for QBOM scores

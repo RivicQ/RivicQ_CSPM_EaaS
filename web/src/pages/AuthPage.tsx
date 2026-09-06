@@ -34,10 +34,6 @@ import {
   Person,
   Visibility,
   VisibilityOff,
-  WorkspacePremium,
-  Storage,
-  Shield,
-  Security,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useDemoTrail } from '../context/DemoTrailContext';
@@ -239,11 +235,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           <BrandLogo dark={isDark} />
           <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
         </Box>
-        <Typography sx={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'text.secondary' }}>
-          {mode === 'register' ? 'Create workspace' : 'Continue the operator loop'}
+        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
+          {mode === 'register' ? 'Create workspace' : 'Security Cloud'}
         </Typography>
         <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', mb: 2, mt: 0.5 }}>
-          {mode === 'register' ? 'Stand up a workspace.' : 'Sign in and pick up the loop.'}
+          {mode === 'register' ? 'Stand up a workspace.' : 'Sign in to your workspace.'}
         </Typography>
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
           {([
@@ -270,7 +266,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       borderRadius: 1,
                       border: 1,
                       borderColor: 'divider',
-                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(14,165,233,0.16)' : 'rgba(245,244,247,0.95)'),
+                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(196,120,58,0.12)' : 'rgba(239,232,218,0.95)'),
                       backdropFilter: 'none',
                     }}
                   >

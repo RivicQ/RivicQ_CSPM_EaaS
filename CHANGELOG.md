@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.3] - 2026-09-06
+
+### Changed
+- Community console is now a **warm-ink enterprise SaaS** (Source Sans 3 + copper `#C4783A` on `#0C0B09`). Public home is a product site with a labeled console preview; Command Center opens on an inbox queue instead of a circular posture gauge. Scan, auth, and dashboard APIs are unchanged.
+- GitHub Pages build no longer fails on unused Horizon leftovers in Layout and Auth.
+
 ## [1.6.2] - 2026-09-06
 
 ### Changed
