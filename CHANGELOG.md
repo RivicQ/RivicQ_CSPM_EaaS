@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - govulncheck GO-2026-6354 / GO-2026-6355 by bumping `golang.org/x/crypto` to v0.56.0 (requires Go 1.26).
 - CI/CD: frontend docs job installs `web/` deps; Syft uses `anchore/sbom-action`; integration waits for health and uses `sslmode=disable`; production validation builds binaries before start.
 - CodeQL Advanced no longer runs on every push/PR (conflicts with default CodeQL setup).
+- Docker images and scanner image use `golang:1.26-alpine`. `run-edition.sh` does not open a browser in CI.
 
 ## [1.6.3] - 2026-09-06
 

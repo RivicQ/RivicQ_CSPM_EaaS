@@ -104,6 +104,11 @@ start_enterprise() {
 open_dashboard() {
     local edition=$1
     local port=$2
+
+    if [ -n "${CI:-}" ]; then
+        echo -e "${YELLOW}Skipping browser open in CI. Dashboard: http://localhost:${port}${NC}"
+        return 0
+    fi
     
     echo -e "${YELLOW}🌐 Opening ${edition^} dashboard...${NC}"
     

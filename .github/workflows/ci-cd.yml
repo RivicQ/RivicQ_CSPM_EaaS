@@ -34,6 +34,9 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          # Default CodeQL setup is enabled on this repo; advanced SARIF uploads are rejected.
+          upload: never
 
   
   # Security Scanning
