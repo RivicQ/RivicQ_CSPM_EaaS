@@ -34,6 +34,9 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          # Default CodeQL setup is enabled on this repo; advanced SARIF uploads are rejected.
+          upload: never
 
   
   # Security Scanning
@@ -217,17 +220,33 @@ jobs:
 
       - name: Start OSS Server
         run: |
-          ./run-edition.sh oss start &
-          sleep 5
+          ./run-edition.sh oss start
 
       - name: Start Enterprise Server
         run: |
-          ./run-edition.sh enterprise start &
-          sleep 5
+          ./run-edition.sh enterprise start
+
+      - name: Wait for health endpoints
+        run: |
+          for url in http://localhost:8080/healthz http://localhost:9090/healthz; do
+            ok=0
+            for _ in $(seq 1 45); do
+              if curl -sf "$url" >/dev/null; then
+                ok=1
+                break
+              fi
+              sleep 2
+            done
+            if [ "$ok" != 1 ]; then
+              echo "unhealthy: $url"
+              tail -n 80 server-oss.log server-enterprise.log 2>/dev/null || true
+              exit 1
+            fi
+          done
 
       - name: Run Integration Tests
         env:
-          DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_integration?sslmode=require
+          DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_integration?sslmode=disable
         run: |
           go test -v -tags=integration ./tests/integration/...
 
@@ -246,7 +265,7 @@ jobs:
       contents: read
 
     env:
-      DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_validation?sslmode=require
+      DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_validation?sslmode=disable
       JWT_SECRET: production-validation-secret-please-replace
       KUBE_CONFIG_STAGING: dummy
       KUBE_CONFIG_PROD: dummy
@@ -276,9 +295,15 @@ jobs:
           helm lint deploy/helm/cryptobom-oss
           helm lint deploy/helm/cryptobom-saas
 
+      - name: Prefetch modules and build servers
+        run: |
+          go mod download
+          go build -o /tmp/cryptobom-oss ./cmd/server/oss
+          go build -tags enterprise -o /tmp/cryptobom-enterprise ./cmd/server/enterprise
+
       - name: Start OSS server
         run: |
-          go run ./cmd/server/oss/main.go > /tmp/cryptobom-oss.log 2>&1 &
+          /tmp/cryptobom-oss > /tmp/cryptobom-oss.log 2>&1 &
           echo $! > /tmp/cryptobom-oss.pid
           for _ in $(seq 1 30); do
             if curl -sf http://localhost:8080/healthz >/dev/null; then
@@ -294,7 +319,7 @@ jobs:
 
       - name: Start Enterprise server
         run: |
-          go run -tags enterprise ./cmd/server/enterprise/main.go > /tmp/cryptobom-enterprise.log 2>&1 &
+          /tmp/cryptobom-enterprise > /tmp/cryptobom-enterprise.log 2>&1 &
           echo $! > /tmp/cryptobom-enterprise.pid
           for _ in $(seq 1 30); do
             if curl -sf http://localhost:9090/healthz >/dev/null; then
@@ -371,6 +396,7 @@ jobs:
       packages: write
 
     strategy:
+      fail-fast: false
       matrix:
         edition: [oss, enterprise]
 
@@ -398,6 +424,7 @@ jobs:
           context: .
           file: ./deploy/docker/Dockerfile.${{ matrix.edition }}
           push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: |
             ${{ steps.img.outputs.path }}:${{ matrix.edition }}-latest
             ${{ steps.img.outputs.path }}:${{ matrix.edition }}-${{ github.sha }}
@@ -405,10 +432,11 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Generate SBOM (Syft)
-        uses: anchore/syft-action@v0.11.0
+        uses: anchore/sbom-action@v0
         with:
           image: ${{ steps.img.outputs.path }}:${{ matrix.edition }}-${{ github.sha }}
-          output: sbom.json
+          format: spdx-json
+          artifact-name: sbom-${{ matrix.edition }}.json
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
@@ -750,20 +778,19 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: web/package-lock.json
 
-      - name: Install Dependencies
-        run: |
-          cd docs/
-          npm ci
+      - name: Install frontend dependencies
+        working-directory: web
+        run: npm ci
 
-      - name: Build Documentation
-        run: |
-          cd docs/
-          npm run build
+      - name: Build frontend (docs artifact)
+        working-directory: web
+        run: npm run build
 
-      - name: Deploy Documentation to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload documentation build
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build
-          destination_dir: docs
+          name: docs-frontend-build
+          path: web/build
+          if-no-files-found: error

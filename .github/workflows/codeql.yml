@@ -12,10 +12,9 @@
 name: "CodeQL Advanced"
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # Default CodeQL setup is enabled on this repo; advanced SARIF uploads are
+  # rejected on push/PR. Keep a manual/scheduled path for after default setup is off.
+  workflow_dispatch:
   schedule:
     - cron: '35 2 * * 5'
 
