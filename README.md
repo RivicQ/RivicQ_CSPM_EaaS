@@ -19,7 +19,7 @@ RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AI
 | **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
 | **Legal pack** | [LEGAL.md](LEGAL.md) · [LICENSE](LICENSE) · [NOTICE](NOTICE) · [PRIVACY.md](PRIVACY.md) · [TRADEMARKS.md](TRADEMARKS.md) · [SECURITY.md](SECURITY.md) |
 
-The Community console is the **RivicQ Security Cloud** — sky-blue and white (`#0ea5e9` / `#0284c7` on `#ffffff`) with Outfit and JetBrains Mono. **NEXUS Quantum Security Fabric** is a separate, original security-graph demo at `/nexus` (obsidian fabric; labeled synthetic data; no secret values). Control mappings are not certifications.
+The Community console is the **RivicQ Security Cloud** — dark-native zinc chrome (`#09090B` / `#18181B`) with Inter and JetBrains Mono. Light mode remains available. **NEXUS Quantum Security Fabric** is a separate, original security-graph demo at `/nexus` (obsidian fabric; labeled synthetic data; no secret values). Control mappings are not certifications.
 
 ---
 

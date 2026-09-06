@@ -12,7 +12,7 @@
 
 The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
 
-UI colors follow the **Security Cloud** sky-blue and white theme (`#0284c7` on `#ffffff`). Control mappings are not certifications.
+UI colors follow the **Security Cloud** dark-native zinc theme (`#09090B` / `#18181B`). Control mappings are not certifications.
 
 ## Getting started
 

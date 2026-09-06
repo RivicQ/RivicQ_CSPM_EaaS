@@ -27,6 +27,8 @@ import {
   BottomNavigation,
   BottomNavigationAction,
   Collapse,
+  Select,
+  FormControl,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -122,6 +124,14 @@ const Layout: React.FC = () => {
   const [navQuery, setNavQuery] = React.useState('');
   const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
   const [topSearch, setTopSearch] = React.useState('');
+  const [timeRange, setTimeRange] = React.useState(() => {
+    try {
+      return sessionStorage.getItem('rivicq.timeRange') || '24h';
+    } catch {
+      return '24h';
+    }
+  });
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const { mode, toggleMode } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
@@ -138,6 +148,25 @@ const Layout: React.FC = () => {
       /* ignore */
     }
   }, [sidebarCollapsed]);
+
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem('rivicq.timeRange', timeRange);
+    } catch {
+      /* ignore */
+    }
+  }, [timeRange]);
+
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   // Workspace, reordered by daily operator priority. Settings is pinned to the
   // sidebar footer instead of living in the middle of the list.
@@ -555,6 +584,7 @@ const Layout: React.FC = () => {
               }}
             />
             <InputBase
+              inputRef={searchInputRef}
               value={topSearch}
               onChange={(e) => setTopSearch(e.target.value)}
               placeholder="Search posture, scans, findings…"
@@ -565,12 +595,41 @@ const Layout: React.FC = () => {
                 color: isDarkMode ? blue.textPrimary : blue.navyMid,
                 '& input': { py: 0.25 },
                 '& input::placeholder': {
-                  color: isDarkMode ? blue.textMuted : 'rgba(14,165,233,0.55)',
+                  color: isDarkMode ? blue.textMuted : '#71717a',
                   opacity: 1,
                 },
               }}
             />
+            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'JetBrains Mono, monospace' }}>
+              ⌘K
+            </Typography>
           </Box>
+
+          <FormControl size="small" sx={{ minWidth: 132, display: { xs: 'none', md: 'inline-flex' } }}>
+            <Select
+              value={timeRange}
+              onChange={(e) => setTimeRange(String(e.target.value))}
+              aria-label="Time range"
+              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
+            >
+              <MenuItem value="24h">Last 24 hours</MenuItem>
+              <MenuItem value="7d">Last 7 days</MenuItem>
+              <MenuItem value="30d">Last 30 days</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 128, display: { xs: 'none', lg: 'inline-flex' } }}>
+            <Select
+              value={edition}
+              onChange={() => navigate('/switcher')}
+              aria-label="Workspace"
+              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
+            >
+              <MenuItem value="community">Community</MenuItem>
+              <MenuItem value="professional">Professional</MenuItem>
+              <MenuItem value="enterprise">Enterprise</MenuItem>
+            </Select>
+          </FormControl>
 
           <Box sx={{ flexGrow: { xs: 1, md: 0 }, display: { xs: 'block', md: 'none' } }} />
 

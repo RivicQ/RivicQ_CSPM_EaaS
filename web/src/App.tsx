@@ -87,7 +87,7 @@ const App: React.FC = () => {
     } catch {
       /* ignore */
     }
-    return 'light';
+    return 'dark';
   });
   const theme = React.useMemo(() => {
     const { getAppTheme } = require('./theme/theme');
@@ -128,7 +128,7 @@ const App: React.FC = () => {
               styles={(theme) => ({
                 '*': { boxSizing: 'border-box' },
                 '::selection': {
-                  background: theme.palette.mode === 'dark' ? 'rgba(14,165,233,0.4)' : 'rgba(14,165,233,0.18)',
+                  background: theme.palette.mode === 'dark' ? 'rgba(59,130,246,0.35)' : 'rgba(37,99,235,0.18)',
                   color: theme.palette.text.primary,
                 },
                 ':focus-visible': {

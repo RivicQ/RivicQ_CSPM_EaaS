@@ -11,47 +11,47 @@ export const designSystem = {
     metric: appTypography.metric.fontFamily,
   },
   gradient: {
-    brand: tokens.colors.brandGradient,
-    brandSoft: 'linear-gradient(180deg, rgba(14,165,233,0.12) 0%, rgba(244,249,253,0) 48%)',
-    heroLight: 'linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%)',
-    heroDark: 'linear-gradient(180deg, #082f49 0%, #0c4a6e 100%)',
-    sidebar: 'linear-gradient(180deg, #082f49 0%, #0b3a5c 100%)',
-    sidebarDark: 'linear-gradient(180deg, #071f33 0%, #082f49 100%)',
-    meshLight: 'linear-gradient(180deg, #ffffff 0%, #f4f9fd 38%, #e8f4fc 100%)',
-    meshDark: 'linear-gradient(180deg, #071f33 0%, #082f49 100%)',
+    brand: 'none',
+    brandSoft: 'none',
+    heroLight: '#fafafa',
+    heroDark: '#09090b',
+    sidebar: '#09090b',
+    sidebarDark: '#09090b',
+    meshLight: '#fafafa',
+    meshDark: '#09090b',
   },
   horizon: {
-    wash: 'radial-gradient(1200px 420px at 50% -12%, rgba(14,165,233,0.22), transparent 58%)',
-    band: 'linear-gradient(90deg, #38bdf8 0%, #0ea5e9 42%, #0284c7 100%)',
+    wash: 'none',
+    band: '#3b82f6',
   },
   shadow: {
-    sm: '0 1px 2px rgba(8,47,73,0.05)',
-    md: '0 8px 24px rgba(8,47,73,0.08)',
-    lg: '0 18px 40px rgba(8,47,73,0.10)',
+    sm: 'none',
+    md: 'none',
+    lg: 'none',
     glow: (_color: string) => 'none',
   },
   motion: {
-    spring: '0.2s ease',
-    smooth: '0.2s ease',
+    spring: '0.15s ease',
+    smooth: '0.15s ease',
   },
-  /** Sky-navy command surface — used on dark chrome; light pages stay white */
+  /** Zinc command surface — Linear/Raycast density, semantic status only */
   proBlue: {
-    navy: '#082f49',
-    navyMid: '#0c4a6e',
-    navyLight: '#075985',
-    royal: '#0369a1',
-    accent: '#0ea5e9',
-    accentLight: '#38bdf8',
-    accentMuted: '#7dd3fc',
-    sidebar: '#082f49',
-    commandCenter: '#082f49',
-    commandGlow: 'radial-gradient(900px 280px at 18% -20%, rgba(56,189,248,0.38), transparent 58%)',
-    border: 'rgba(125,211,252,0.22)',
-    textPrimary: '#f8fafc',
-    textSecondary: 'rgba(248,250,252,0.82)',
-    textMuted: 'rgba(186,230,253,0.78)',
-    navActive: 'rgba(14,165,233,0.28)',
-    navHover: 'rgba(255,255,255,0.06)',
+    navy: '#09090b',
+    navyMid: '#18181b',
+    navyLight: '#27272a',
+    royal: '#3b82f6',
+    accent: '#3b82f6',
+    accentLight: '#60a5fa',
+    accentMuted: '#a1a1aa',
+    sidebar: '#09090b',
+    commandCenter: '#18181b',
+    commandGlow: 'none',
+    border: '#27272a',
+    textPrimary: '#fafafa',
+    textSecondary: '#a1a1aa',
+    textMuted: '#71717a',
+    navActive: 'rgba(59,130,246,0.16)',
+    navHover: 'rgba(250,250,250,0.04)',
     shadow: 'none',
   },
 } as const;
@@ -63,8 +63,8 @@ export const meshBackground = (theme: Theme) => ({
 
 export const glassSurface = (theme: Theme, elevated = false) => ({
   background: theme.palette.mode === 'dark'
-    ? elevated ? theme.palette.background.paper : 'rgba(8,47,73,0.92)'
-    : elevated ? '#ffffff' : 'rgba(255,255,255,0.96)',
+    ? elevated ? theme.palette.background.paper : '#18181b'
+    : elevated ? '#ffffff' : '#fafafa',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
   border: `1px solid ${theme.palette.divider}`,
@@ -105,15 +105,15 @@ export const sidebarScrollSx = {
   overflowY: 'auto',
   overflowX: 'hidden',
   scrollbarWidth: 'thin',
-  scrollbarColor: 'rgba(14,165,233,0.35) transparent',
+  scrollbarColor: '#3f3f46 transparent',
   '&::-webkit-scrollbar': { width: 4 },
   '&::-webkit-scrollbar-track': { background: 'transparent' },
   '&::-webkit-scrollbar-thumb': {
-    background: 'rgba(14,165,233,0.28)',
+    background: '#3f3f46',
     borderRadius: 99,
   },
   '&::-webkit-scrollbar-thumb:hover': {
-    background: 'rgba(14,165,233,0.42)',
+    background: '#52525b',
   },
 };
 
@@ -164,7 +164,7 @@ export const commandCenterCardSx = {
     top: 0,
     left: 0,
     right: 0,
-    height: 3,
+    height: 1,
     background: designSystem.horizon.band,
     pointerEvents: 'none',
   },
@@ -190,14 +190,14 @@ export const heroPrimaryCtaSx = {
   fontSize: '0.875rem',
   letterSpacing: '-0.01em',
   textTransform: 'none',
-  color: `${designSystem.proBlue.navyMid} !important`,
+  color: `#fafafa !important`,
   border: 'none',
   boxShadow: 'none',
   backgroundImage: 'none !important',
-  backgroundColor: '#ffffff !important',
+  backgroundColor: '#2563eb !important',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': { color: 'inherit' },
   '&:hover': {
-    backgroundColor: '#f8fafc !important',
+    backgroundColor: '#1d4ed8 !important',
     backgroundImage: 'none !important',
     boxShadow: 'none',
     transform: 'none',
@@ -231,11 +231,11 @@ export const heroSecondaryCtaSx = {
 
 /** Primary CTA — matches command-center / auth hero navy gradient */
 export const proBlueContainedButtonSx = {
-  backgroundColor: tokens.colors.rivicq[600],
+  backgroundColor: tokens.colors.rivicq[500],
   backgroundImage: 'none',
   color: '#ffffff !important',
   border: '1px solid transparent',
-  boxShadow: '0 8px 20px rgba(14,165,233,0.22)',
+  boxShadow: 'none',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': {
     color: 'inherit',
   },
@@ -243,13 +243,13 @@ export const proBlueContainedButtonSx = {
     backgroundColor: tokens.colors.rivicq[700],
     backgroundImage: 'none',
     color: '#ffffff !important',
-    boxShadow: '0 10px 24px rgba(3,105,161,0.24)',
+    boxShadow: 'none',
     transform: 'none',
   },
   '&.Mui-disabled': {
-    backgroundColor: `${tokens.colors.rivicq[300]} !important`,
+    backgroundColor: `${tokens.colors.rivicq[800]} !important`,
     backgroundImage: 'none !important',
-    color: '#ffffff !important',
+    color: '#a1a1aa !important',
     borderColor: 'transparent',
     boxShadow: 'none',
   },
@@ -291,11 +291,11 @@ export const proBlueBadgeSx = {
 
 /** Top app bar — aligns with pro-blue sidebar & command center */
 export const appBarPaperSx = (mode: 'light' | 'dark') => ({
-  bgcolor: mode === 'dark' ? '#082f49' : '#ffffff',
+  bgcolor: mode === 'dark' ? '#09090b' : '#ffffff',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  color: mode === 'dark' ? designSystem.proBlue.textPrimary : designSystem.proBlue.navyMid,
-  borderBottom: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(14,165,233,0.16)'}`,
+  color: mode === 'dark' ? designSystem.proBlue.textPrimary : '#18181b',
+  borderBottom: `1px solid ${mode === 'dark' ? '#27272a' : '#e4e4e7'}`,
   boxShadow: 'none',
   backgroundImage: 'none',
 });
@@ -307,21 +307,21 @@ export const appBarSearchSx = (mode: 'light' | 'dark') => ({
   px: 1.5,
   py: 0.625,
   width: { md: 240, lg: 320 },
-  bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(14,165,233,0.06)',
-  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(14,165,233,0.16)'}`,
+  bgcolor: mode === 'dark' ? '#18181b' : '#f4f4f5',
+  border: `1px solid ${mode === 'dark' ? '#27272a' : '#e4e4e7'}`,
   transition: designSystem.motion.smooth,
   '&:focus-within': {
-    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.06)' : '#ffffff',
-    borderColor: designSystem.proBlue.accent,
+    bgcolor: mode === 'dark' ? '#18181b' : '#ffffff',
+    borderColor: '#3b82f6',
     boxShadow: 'none',
   },
 });
 
 export const appBarIconButtonSx = (mode: 'light' | 'dark') => ({
   borderRadius: `${designSystem.radius.sm}px`,
-  border: `1px solid ${mode === 'dark' ? designSystem.proBlue.border : 'rgba(14,165,233,0.16)'}`,
-  bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.04)' : '#ffffff',
-  color: mode === 'dark' ? designSystem.proBlue.textSecondary : designSystem.proBlue.navyMid,
+  border: `1px solid ${mode === 'dark' ? '#27272a' : '#e4e4e7'}`,
+  bgcolor: mode === 'dark' ? '#18181b' : '#ffffff',
+  color: mode === 'dark' ? designSystem.proBlue.textSecondary : '#18181b',
   width: 36,
   height: 36,
   '&:hover': {
@@ -338,27 +338,19 @@ export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolea
   display: { xs: 'none', sm: 'inline-flex' },
   bgcolor: isEnterprise
     ? mode === 'dark'
-      ? 'rgba(14,165,233,0.28)'
-      : 'rgba(14,165,233,0.08)'
+      ? 'rgba(59,130,246,0.18)'
+      : 'rgba(37,99,235,0.08)'
     : mode === 'dark'
-      ? 'rgba(14,165,233,0.18)'
-      : 'rgba(14,165,233,0.06)',
+      ? '#18181b'
+      : '#f4f4f5',
   color: isEnterprise
     ? mode === 'dark'
-      ? '#e0f2fe'
-      : '#0369a1'
+      ? '#fafafa'
+      : '#1d4ed8'
     : mode === 'dark'
       ? designSystem.proBlue.accentMuted
-      : designSystem.proBlue.royal,
-  border: `1px solid ${
-    isEnterprise
-      ? mode === 'dark'
-        ? 'rgba(125,211,252,0.28)'
-        : 'rgba(14,165,233,0.22)'
-      : mode === 'dark'
-        ? designSystem.proBlue.border
-        : 'rgba(14,165,233,0.16)'
-  }`,
+      : '#52525b',
+  border: `1px solid ${mode === 'dark' ? '#27272a' : '#e4e4e7'}`,
 });
 
 export const appBarPageTitleSx = (mode: 'light' | 'dark') => ({

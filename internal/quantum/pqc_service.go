@@ -137,13 +137,17 @@ func (s *PQCService) GenerateKeyPair(ctx context.Context, algo PQCAlgorithm, hsm
 		if err != nil || op == nil || len(op.ResultHex) < 128 {
 			s.logger.WithError(err).Warn("HSM seed unavailable, falling back to crypto/rand")
 			seedEntropy = make([]byte, 64)
-			rand.Read(seedEntropy)
+			if _, err := rand.Read(seedEntropy); err != nil {
+				return nil, err
+			}
 		} else {
 			seedEntropy, _ = hex.DecodeString(op.ResultHex[:128])
 		}
 	} else {
 		seedEntropy = make([]byte, 64)
-		rand.Read(seedEntropy)
+		if _, err := rand.Read(seedEntropy); err != nil {
+			return nil, err
+		}
 	}
 
 	// Generate key material (production: use liboqs or cloudflare/circl)

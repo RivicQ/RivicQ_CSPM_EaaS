@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - 2026-09-06
+
+### Changed
+- Security Cloud chrome is dark-native zinc (Inter + JetBrains Mono) with Cmd+K search, workspace switcher, and time-range controls. Features and APIs are unchanged.
+- GitHub Pages now creates `web/build/docs` before publishing NEXUS.md.
+- golangci-lint ignores fixture trees; errcheck/staticcheck nits in OAuth, dotenv, and PQC seed paths are closed.
+
 ## [1.6.0] - 2026-09-06
 
 ### Added

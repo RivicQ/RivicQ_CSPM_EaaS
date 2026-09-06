@@ -12,7 +12,10 @@ linters:
     # Third-party Go code shipped inside web/node_modules must not be analyzed.
     paths:
       - web/node_modules
+      - nexus/node_modules
       - node_modules
+      - fixtures
+      - testdata
 
 run:
   timeout: 5m

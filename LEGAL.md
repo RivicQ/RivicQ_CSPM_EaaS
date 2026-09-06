@@ -60,7 +60,7 @@ This repository includes cryptographic inventory, scanning, and related document
 
 “RivicQ”, the RivicQ logo, “Security Cloud”, and “CryptoBOM” product names are trademarks of RivicQ GmbH.
 
-The RivicQ console visual identity is a **sky-blue and white** Security Cloud theme (`#0284c7` on `#ffffff`) with Outfit and JetBrains Mono.
+The RivicQ console visual identity is a **dark-native zinc** Security Cloud theme (`#09090B` / `#18181B`) with Inter and JetBrains Mono. Light mode remains available.
 
 AWS, Azure, Google Cloud, GitHub, CycloneDX, Qiskit, Kubernetes, and other vendor or project names are trademarks of their respective owners. Use of those names is for interoperability description only and does not imply affiliation, sponsorship, or certification.
 

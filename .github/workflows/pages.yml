@@ -60,7 +60,7 @@ jobs:
 
       - name: Publish NEXUS onto Pages
         run: |
-          mkdir -p web/build/nexus
+          mkdir -p web/build/nexus web/build/docs
           cp -r nexus/dist/. web/build/nexus/
           cp web/build/nexus/index.html web/build/nexus/404.html
           cp docs/NEXUS.md web/build/docs/NEXUS.md

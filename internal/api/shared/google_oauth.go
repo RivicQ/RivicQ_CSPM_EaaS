@@ -74,7 +74,9 @@ func initGoogleOAuthConfig() *oauth2.Config {
 
 func generateOAuthState() string {
 	b := make([]byte, 32)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		return "oauth-state-fallback"
+	}
 	return hex.EncodeToString(b)
 }
 
@@ -199,11 +201,11 @@ func completeGoogleOAuth(
 	}
 
 	if !googleUser.EmailVerified {
-		return nil, fmt.Errorf("Google email not verified")
+		return nil, fmt.Errorf("google email not verified")
 	}
 
 	if len(allowedDomains) > 0 && !workEmailAllowed(googleUser.Email, allowedDomains) {
-		return nil, fmt.Errorf("Email domain not allowed")
+		return nil, fmt.Errorf("email domain not allowed")
 	}
 
 	existingUser, err := service.GetUserByEmail(googleUser.Email)

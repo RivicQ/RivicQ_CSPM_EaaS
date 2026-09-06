@@ -1,18 +1,17 @@
-/** RivicQ Security Cloud type — Outfit (UI) + JetBrains Mono. */
+/** RivicQ Security Cloud type — Inter (UI) + JetBrains Mono. */
 export const appTypography = {
-  fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
-  fontFamilyMono: '"JetBrains Mono", "SF Mono", ui-monospace, monospace',
+  fontFamily: '"Inter", "SF Pro Text", "Helvetica Neue", Arial, sans-serif',
+  fontFamilyMono: '"JetBrains Mono", "Fira Code", ui-monospace, monospace',
 
   display: {
-    fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
-    fontWeight: 700,
+    fontFamily: '"Inter", "SF Pro Text", "Helvetica Neue", Arial, sans-serif',
+    fontWeight: 600,
     letterSpacing: '-0.03em',
     lineHeight: 1.12,
-    fontFeatureSettings: '"ss01"',
   },
 
   metric: {
-    fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
+    fontFamily: '"Inter", "SF Pro Text", "Helvetica Neue", Arial, sans-serif',
     fontWeight: 600,
     letterSpacing: '-0.03em',
     fontVariantNumeric: 'tabular-nums' as const,
@@ -21,9 +20,9 @@ export const appTypography = {
 
   eyebrow: {
     fontWeight: 600,
-    letterSpacing: '0.16em',
+    letterSpacing: '0.12em',
     textTransform: 'uppercase' as const,
-    fontSize: '0.75rem',
+    fontSize: '0.6875rem',
   },
 
   heading: {

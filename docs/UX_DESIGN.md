@@ -1,6 +1,6 @@
-# RivicQ Horizon — core product UX / UI
+# RivicQ Security Cloud — core product UX / UI
 
-The current visual system for RivicQ Security Cloud. Sky-blue and white stay the brand. This is not IBM Carbon or IBM Plex.
+Dark-native zinc enterprise chrome (Linear/Raycast density). Light mode remains available. This is not IBM Carbon or IBM Plex. NEXUS at `/nexus` is a separate identity.
 
 Live surfaces: public home, Community workspace, Five-BOM hubs, docs hub.
 
@@ -17,17 +17,18 @@ Operators should see **one cryptographic product**, not a pile of enterprise mod
 1. **Five-BOM is the identity** — QBOM · AIBOM · SBOM · IBOM · CBOM tiles on home, app bar, and workspace.
 2. **Discover → mitigate → report** remains the only client path.
 3. **Community is honest** — locked Enterprise tiles stay visible, never unlabeled as live.
-4. **Navy is chrome, sky is canvas** — sidebar and command heroes sit on `#082f49`; pages sit on `#f4f9fd`.
+4. **Zinc is chrome** — sidebar and command surfaces sit on `#09090B` / `#18181B`; status color is semantic only.
 
 ## Visual tokens
 
 | Token | Value | Use |
 |---|---|---|
-| Sky | `#0ea5e9` / `#0284c7` | Primary actions, links, BOM tiles |
-| Horizon wash | radial sky at the top of the page | Public home, auth, workspace canvas |
-| Horizon band | `#38bdf8 → #0ea5e9 → #0284c7` | 3px cap on navy heroes |
-| Canvas | `#f4f9fd` | Workspace and marketing |
-| Navy chrome | `#082f49` | Sidebar, command heroes |
+| Base | `#09090B` | App background |
+| Surface | `#18181B` | Cards, drawers, tables |
+| Border | `#27272A` | 1px dividers |
+| Text | `#FAFAFA` / `#A1A1AA` | Primary / muted |
+| Status | `#EF4444` `#F97316` `#F59E0B` `#3B82F6` `#10B981` | Critical / high / medium / low / success |
+| Type | Inter + JetBrains Mono | UI / IDs |
 | Type | Outfit 400–800 + JetBrains Mono | UI + metrics |
 | Radius | 6 / 10 / 14 / 20 / pill | Cards, pills, search |
 | Motion | opacity only | No blur, no neon glow, no hover-lift |

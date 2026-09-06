@@ -14,7 +14,7 @@ const HorizonCanvas: React.FC<HorizonCanvasProps> = ({ dark = false, children })
       position: 'relative',
       isolation: 'isolate',
       background: dark ? designSystem.gradient.meshDark : designSystem.gradient.meshLight,
-      backgroundColor: dark ? designSystem.proBlue.commandCenter : '#f4f9fd',
+      backgroundColor: dark ? '#09090b' : '#fafafa',
     }}
   >
     <Box
@@ -34,7 +34,7 @@ const HorizonCanvas: React.FC<HorizonCanvasProps> = ({ dark = false, children })
         pointerEvents: 'none',
         opacity: dark ? 0.18 : 0.35,
         backgroundImage:
-          'linear-gradient(rgba(14,165,233,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.07) 1px, transparent 1px)',
+          'linear-gradient(rgba(39,39,42,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(39,39,42,0.7) 1px, transparent 1px)',
         backgroundSize: '80px 80px',
         maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.55), transparent 62%)',
       }}
