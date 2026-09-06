@@ -10,6 +10,7 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Public GitHub scans require a running API (`make dev-backend`) or the CLI.
 - Demo Access on Pages is an isolated client session (`rivicq-demo-session`), not a JWT, and cannot see customer data.
 - `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend.
+- `/nexus` is a separate labeled NEXUS demo. It uses synthetic Northbridge Exchange data, never renders secret values, and does not collect payment or attach live cloud/IdP/vault credentials.
 
 ## Scanner accuracy
 

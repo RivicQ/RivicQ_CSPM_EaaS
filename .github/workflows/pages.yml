@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: |
+            web/package-lock.json
+            nexus/package-lock.json
 
       - name: Install dependencies
         working-directory: web
@@ -47,6 +49,21 @@ jobs:
 
       - name: Add SPA redirect
         run: cp web/build/index.html web/build/404.html
+
+      - name: Install NEXUS dependencies
+        working-directory: nexus
+        run: npm ci
+
+      - name: Build NEXUS Quantum Security Fabric
+        working-directory: nexus
+        run: npm run build
+
+      - name: Publish NEXUS onto Pages
+        run: |
+          mkdir -p web/build/nexus
+          cp -r nexus/dist/. web/build/nexus/
+          cp web/build/nexus/index.html web/build/nexus/404.html
+          cp docs/NEXUS.md web/build/docs/NEXUS.md
 
       - name: Publish SDK & plugin docs to the site
         run: |

@@ -12,6 +12,7 @@ This notice describes how the **public Community repository and GitHub Pages dem
 |---------|----------------|
 | **This GitHub repository** | GitHub processes contributor identities under GitHub’s own terms. RivicQ GmbH sees public commits, issues, and PRs you choose to publish. |
 | **GitHub Pages** (https://rivicq.github.io/RivicQ_CSPM_EaaS/) | A **static** React application. There is **no RivicQ production API** on Pages. A labeled demo session is stored in the browser (`rivicq-demo-session`) and is **not a JWT**. |
+| **NEXUS demo** (`/nexus`) | Static labeled fixture. No payment, no secret values, no production inventories. |
 | **Supabase on Pages** (if you sign in) | Authentication is handled by the configured identity provider. See that provider’s privacy policy. Do not use production passwords you reuse elsewhere. |
 | **Self-hosted Community or Enterprise API** | **You** are the operator. Logs, scan targets, and inventory live in your environment. Configure retention, access control, and subprocessors yourself ([docs/DEPLOY_ENV.md](docs/DEPLOY_ENV.md)). |
 

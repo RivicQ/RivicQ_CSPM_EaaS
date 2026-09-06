@@ -114,3 +114,10 @@ Public directory: [docs/contact.html](docs/contact.html) ([CONTACT.md](docs/CONT
 - Source: https://github.com/RivicQ/RivicQ_CSPM_EaaS
 
 `admin@rivicq.com` is not a public mailbox.
+
+---
+
+## NEXUS Quantum Security Fabric
+
+NEXUS is an original product identity and labeled Community demo in this repository (`nexus/`, `/nexus` on GitHub Pages). It does not copy the Community console’s visual brand. It does **not** store or display customer secrets, private keys, or production credentials. Control mappings and PQC algorithm names are not certifications or completed-migration claims. Enterprise rights remain licensed as in §1.
+

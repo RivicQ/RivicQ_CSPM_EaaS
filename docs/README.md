@@ -34,6 +34,7 @@ UI colors follow the **Security Cloud** sky-blue and white theme (`#0284c7` on `
 - [Client architecture](CLIENT_ARCHITECTURE.md) — discover → mitigate → report from OSS to Enterprise
 - [Horizon UX / UI](UX_DESIGN.md) — core product visual system
 - [Contact directory](contact.html) — designed @rivicq.com directory ([CONTACT.md](CONTACT.md))
+- [NEXUS Quantum Security Fabric](NEXUS.md) — original security-graph demo (no customer secrets)
 - [Security Intelligence Engine](security-intelligence.md)
 - [Security Control Matrix](SECURITY_CONTROL_MATRIX.md) — mappings, not certifications
 - [Rollback Runbook](ROLLBACK_RUNBOOK.md)

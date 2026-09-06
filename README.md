@@ -11,6 +11,7 @@ RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AI
 | Resource | URL |
 |----------|-----|
 | **Live app (GitHub Pages)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/ |
+| **NEXUS Quantum Security Fabric (labeled demo)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/nexus/ |
 | **Interactive demo** | https://rivicq.github.io/RivicQ_CSPM_EaaS/demo |
 | **Sign in / register** | https://rivicq.github.io/RivicQ_CSPM_EaaS/login |
 | **Documentation hub** | https://rivicq.github.io/RivicQ_CSPM_EaaS/docs/ |
@@ -18,7 +19,7 @@ RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AI
 | **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
 | **Legal pack** | [LEGAL.md](LEGAL.md) · [LICENSE](LICENSE) · [NOTICE](NOTICE) · [PRIVACY.md](PRIVACY.md) · [TRADEMARKS.md](TRADEMARKS.md) · [SECURITY.md](SECURITY.md) |
 
-The web UI is the **RivicQ Security Cloud** — a sky-blue and white cryptographic SaaS theme (`#0ea5e9` / `#0284c7` on `#ffffff`) with Outfit and JetBrains Mono. Default is light mode. Control mappings are not certifications.
+The Community console is the **RivicQ Security Cloud** — sky-blue and white (`#0ea5e9` / `#0284c7` on `#ffffff`) with Outfit and JetBrains Mono. **NEXUS Quantum Security Fabric** is a separate, original security-graph demo at `/nexus` (obsidian fabric; labeled synthetic data; no secret values). Control mappings are not certifications.
 
 ---
 
@@ -86,6 +87,16 @@ make dev-frontend         # React UI (sky blue / white / Outfit) → :3000
 ```
 
 Open http://localhost:3000/platform — choose **Community** or **Enterprise** on Sign in, or open `/demo`.
+
+### NEXUS Quantum Security Fabric (labeled demo)
+
+```bash
+cd nexus
+npm ci
+npm run dev
+```
+
+Separate original identity (obsidian fabric). Synthetic fixture only — no secret values. See [docs/NEXUS.md](docs/NEXUS.md).
 
 ### CLI and GitHub Action
 

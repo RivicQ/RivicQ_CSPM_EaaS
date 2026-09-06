@@ -76,6 +76,7 @@ minikube/
 # Frontend build artifacts
 web/build/
 docs/build/
+nexus/dist/
 web/.env.save
 web/.env
 web/.env.*

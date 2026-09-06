@@ -4,7 +4,7 @@ RivicQ GmbH takes the security of the Community and Enterprise products seriousl
 
 ## Scope
 
-In scope: the Go APIs, CLI, scanners, intelligence engine, React console, GitHub Action, Helm/Compose charts, and documentation as shipped in this repository.
+In scope: the Go APIs, CLI, scanners, intelligence engine, React console, NEXUS demo (`nexus/`), GitHub Action, Helm/Compose charts, and documentation as shipped in this repository. The NEXUS Pages build must never render secret values or collect payment.
 
 Out of scope for bounty-style reports (still welcome privately if severe): third-party SaaS you connect (GitHub, cloud providers, identity providers), issues that require a already-compromised admin JWT, and theoretical findings without a practical impact.
 
