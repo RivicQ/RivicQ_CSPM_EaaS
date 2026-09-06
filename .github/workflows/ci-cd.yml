@@ -396,6 +396,7 @@ jobs:
       packages: write
 
     strategy:
+      fail-fast: false
       matrix:
         edition: [oss, enterprise]
 
@@ -423,6 +424,7 @@ jobs:
           context: .
           file: ./deploy/docker/Dockerfile.${{ matrix.edition }}
           push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: |
             ${{ steps.img.outputs.path }}:${{ matrix.edition }}-latest
             ${{ steps.img.outputs.path }}:${{ matrix.edition }}-${{ github.sha }}
