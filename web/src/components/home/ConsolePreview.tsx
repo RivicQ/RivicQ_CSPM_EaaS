@@ -65,9 +65,9 @@ const ConsolePreview: React.FC = () => {
         <Box
           key={row.id}
           component={motion.div}
-          initial={reduce ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12 + i * 0.07 }}
+          initial={false}
+          animate={reduce ? undefined : { opacity: [0.55, 1] }}
+          transition={{ delay: 0.08 + i * 0.05, duration: 0.35 }}
           sx={{
             px: 1.5,
             py: 1.1,
