@@ -23,10 +23,10 @@ export function printBrandedReport(opts: {
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/>
 <title>${escapeHtml(opts.title)}</title>
 <style>
-  body { font-family: "Outfit", Helvetica, Arial, sans-serif; color: #161616; margin: 32px; }
-  h1 { color: #0284c7; font-size: 22px; margin: 0 0 8px; }
+  body { font-family: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif; color: #0c0b09; margin: 32px; }
+  h1 { color: #a8622e; font-size: 22px; margin: 0 0 8px; }
   .sub { color: #525252; margin-bottom: 16px; }
-  .disclaimer { background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px 16px; margin: 16px 0; font-size: 13px; }
+  .disclaimer { background: #f3eee4; border-left: 4px solid #c4783a; padding: 12px 16px; margin: 16px 0; font-size: 13px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e0e0e0; }
   th { background: #f4f4f4; }

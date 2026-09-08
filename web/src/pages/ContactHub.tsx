@@ -39,7 +39,7 @@ const ContactHub: React.FC = () => {
                       sx={{ py: 0.75, borderTop: 1, borderColor: 'divider' }}
                     >
                       <Chip size="small" color={c.priority ? 'primary' : 'default'} label={c.label} />
-                      <Typography fontFamily="JetBrains Mono, monospace" fontWeight={700} sx={{ flex: 1 }}>
+                      <Typography fontFamily='"Source Code Pro", ui-monospace, monospace' fontWeight={700} sx={{ flex: 1 }}>
                         {c.email}
                       </Typography>
                       <Button size="small" variant="contained" href={mailto(c.email)}>Email</Button>

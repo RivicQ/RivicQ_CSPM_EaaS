@@ -72,9 +72,19 @@ def main() -> int:
         status = "PASS" if not errors else "FAIL"
         if errors:
             failed += 1
-        print(f"{status:4}  {spec.get('id', path)}  ({source})")
+        findings = report.get("findings") or report.get("Findings") or []
+        n = len(findings) if isinstance(findings, list) else 0
+        gate = ((report.get("gate") or report.get("Gate") or {}).get("decision") or "n/a")
+        print(f"{status:4}  {spec.get('id', path)}  ({source})  findings={n}  gate={gate}")
         for err in errors:
             print(f"      - {err}")
+        if isinstance(findings, list) and findings:
+            titles = []
+            for item in findings[:8]:
+                if isinstance(item, dict):
+                    titles.append(str(item.get("title") or item.get("algorithm") or item.get("finding_type") or item.get("id") or "finding"))
+            if titles:
+                print(f"      sample: {', '.join(titles)}")
     print(f"\n{len(rows) - failed}/{len(rows)} datasets passed")
     return 1 if failed else 0
 
