@@ -22,7 +22,8 @@ jobs:
 
       - name: Run Benchmarks
         run: |
-          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem ./tests/... | tee benchmark-results.txt
+          set -o pipefail
+          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem ./tests | tee benchmark-results.txt
 
       - name: Generate Updated Baseline
         run: |

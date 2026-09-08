@@ -359,7 +359,9 @@ jobs:
 
       - name: Run Performance Benchmarks
         run: |
-          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem -cpuprofile=cpu.prof -memprofile=mem.prof ./tests/... | tee benchmark-results.txt
+          set -o pipefail
+          # Profiles require a single package; these benches live in ./tests.
+          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem -cpuprofile=cpu.prof -memprofile=mem.prof ./tests | tee benchmark-results.txt
 
       - name: Compare Against Benchmark Baseline
         env:
@@ -729,7 +731,8 @@ jobs:
 
       - name: Run Full Benchmark Suite
         run: |
-          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem -cpuprofile=cpu.prof -memprofile=mem.prof ./tests/... | tee benchmark-results.txt
+          set -o pipefail
+          go test -run '^$' -bench 'Benchmark(APICalls|DatasetGeneration)$' -benchmem -cpuprofile=cpu.prof -memprofile=mem.prof ./tests | tee benchmark-results.txt
 
       - name: Process Benchmark Results
         run: |
