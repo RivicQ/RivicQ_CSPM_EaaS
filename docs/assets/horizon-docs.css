@@ -308,6 +308,21 @@ section { max-width: 1120px; margin: 0 auto; padding: 0 1.5rem 3.5rem; }
   color: var(--faint);
   font-size: 0.825rem;
 }
+.md-wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 3rem; }
+.md-body { color: var(--ivory); line-height: 1.65; }
+.md-body h1, .md-body h2, .md-body h3 { letter-spacing: -0.02em; margin: 1.6rem 0 0.6rem; }
+.md-body h1 { font-size: 2rem; }
+.md-body h2 { font-size: 1.35rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+.md-body p, .md-body li { color: var(--muted); }
+.md-body a { color: var(--copper); }
+.md-body code { font-family: var(--mono); font-size: 0.86em; color: var(--copper); }
+.md-body pre { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem; overflow: auto; margin: 1rem 0; }
+.md-body pre code { color: var(--ivory); }
+.md-body table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.4rem; font-size: 0.9rem; }
+.md-body th, .md-body td { border: 1px solid var(--line); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
+.md-body th { background: var(--raised); color: var(--faint); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.md-body blockquote { border-left: 3px solid var(--copper); padding-left: 1rem; color: var(--muted); margin: 1rem 0; }
+
 .site-footer a { color: var(--copper); text-decoration: none; }
 .site-footer a:hover { color: var(--ivory); }
 .footer-mails { margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }

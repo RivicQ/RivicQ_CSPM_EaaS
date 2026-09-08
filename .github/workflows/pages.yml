@@ -83,6 +83,7 @@ jobs:
           cp docs/UX_DESIGN.md web/build/docs/UX_DESIGN.md
           cp docs/CONTACT.md web/build/docs/CONTACT.md
           cp docs/contact.html web/build/docs/contact.html
+          cp docs/read.html web/build/docs/read.html
           mkdir -p web/build/docs/assets
           cp docs/assets/horizon-docs.css web/build/docs/assets/horizon-docs.css
           cp docs/PQC_MIGRATION.md web/build/docs/PQC_MIGRATION.md
