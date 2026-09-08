@@ -1,61 +1,42 @@
 import React from 'react';
-import { Alert, Box, Button, Chip, Grid, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Grid, Stack, Typography } from '@mui/material';
 import PageFrame from '../components/PageFrame';
 import { GlassCard } from '../components/ui';
-import {
-  ECOSYSTEM_AREAS,
-  contactsByArea,
-  mailto,
-} from '../data/contacts';
+import { publishedContacts, mailto } from '../data/contacts';
 
 const ContactHub: React.FC = () => {
   return (
     <PageFrame
       eyebrow="RivicQ GmbH"
-      title="Contact directory"
-      subtitle="One domain: @rivicq.com. Shared inboxes and aliases — not thirty paid mailboxes. admin@ is not published."
+      title="Contact"
+      subtitle="Five public desks on @rivicq.com. Internal aliases and company mailboxes are not published."
       badge="@rivicq.com"
       action={<Button variant="outlined" href={`${process.env.PUBLIC_URL || ''}/docs/contact.html`}>Docs page</Button>}
     >
       <Alert severity="info" sx={{ mb: 3 }}>
-        Partner and grant addresses do not imply signed alliances or certifications. Domain administration stays private with MFA.
+        admin@ is private. Finance, fundraising, research, and staff addresses are not listed here.
       </Alert>
 
       <Grid container spacing={2}>
-        {ECOSYSTEM_AREAS.map((area) => {
-          const rows = contactsByArea(area.id);
-          return (
-            <Grid item xs={12} md={6} key={area.id}>
-              <GlassCard hover={false} padding={2.25}>
-                <Typography variant="overline" color="primary" fontWeight={800}>{area.title}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{area.blurb}</Typography>
-                <Stack spacing={1}>
-                  {rows.map((c) => (
-                    <Stack
-                      key={c.email}
-                      direction={{ xs: 'column', sm: 'row' }}
-                      spacing={1}
-                      alignItems={{ sm: 'center' }}
-                      sx={{ py: 0.75, borderTop: 1, borderColor: 'divider' }}
-                    >
-                      <Chip size="small" color={c.priority ? 'primary' : 'default'} label={c.label} />
-                      <Typography fontFamily='"Source Code Pro", ui-monospace, monospace' fontWeight={700} sx={{ flex: 1 }}>
-                        {c.email}
-                      </Typography>
-                      <Button size="small" variant="contained" href={mailto(c.email)}>Email</Button>
-                    </Stack>
-                  ))}
-                </Stack>
-              </GlassCard>
-            </Grid>
-          );
-        })}
+        {publishedContacts().map((c) => (
+          <Grid item xs={12} sm={6} md={4} key={c.email}>
+            <GlassCard hover={false} padding={2.25}>
+              <Typography variant="overline" color="primary" fontWeight={700}>{c.label}</Typography>
+              <Typography fontFamily='"Source Code Pro", ui-monospace, monospace' fontWeight={700} sx={{ my: 1 }}>
+                {c.email}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{c.purpose}</Typography>
+              <Button size="small" variant="contained" href={mailto(c.email)}>Email</Button>
+            </GlassCard>
+          </Grid>
+        ))}
       </Grid>
 
       <Box sx={{ mt: 3 }}>
-        <Typography variant="caption" color="text.secondary">
-          Founder: revansai.ande@rivicq.com. Future staff: firstname.lastname@rivicq.com. Extra aliases (demo@, regional, noreply@) stay as Zoho forwards.
-        </Typography>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/index.html`}>Documentation</Button>
+          <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/read.html?doc=LEGAL.md`}>Legal</Button>
+        </Stack>
       </Box>
     </PageFrame>
   );

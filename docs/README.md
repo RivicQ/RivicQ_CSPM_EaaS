@@ -6,7 +6,7 @@
 |-------|-----------------|
 | [LEGAL.md](../LEGAL.md) — dual license, warranty, export | [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) |
 | [PRIVACY.md](../PRIVACY.md) — Pages vs self-host | [DATASETS.md](../DATASETS.md) — synthetic samples only |
-| [Contact directory](contact.html) — @rivicq.com | [editions.md](editions.md) — Community vs Enterprise |
+| [Contact](contact.html) — public desks on @rivicq.com | [editions.md](editions.md) — Community vs Enterprise |
 | [TRADEMARKS.md](../TRADEMARKS.md) — RivicQ marks and third-party names | [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) |
 | [NOTICE](../NOTICE) · [LICENSE](../LICENSE) | |
 
@@ -33,7 +33,7 @@ UI colors follow the **Security Cloud** warm-ink ledger (`#0C0B09` canvas, `#171
 - [Enterprise SaaS architecture](ARCHITECTURE.md) — four-layer CBOM, control plane, hardware/QSIC scope
 - [Client architecture](CLIENT_ARCHITECTURE.md) — discover → mitigate → report from OSS to Enterprise
 - [Horizon UX / UI](UX_DESIGN.md) — core product visual system
-- [Contact directory](contact.html) — designed @rivicq.com directory ([CONTACT.md](CONTACT.md))
+- [Contact](contact.html) — public desks on @rivicq.com ([CONTACT.md](CONTACT.md))
 - [NEXUS Quantum Security Fabric](NEXUS.md) — original security-graph demo (no customer secrets)
 - [Security Intelligence Engine](security-intelligence.md)
 - [Security Control Matrix](SECURITY_CONTROL_MATRIX.md) — mappings, not certifications

@@ -6,31 +6,25 @@ import {
   priorityContacts,
 } from './contacts';
 
-describe('rivicq.com contact directory', () => {
-  const PRIORITY_PUBLISHED = [
-    'revansai.ande@rivicq.com',
+describe('rivicq.com public desks', () => {
+  const PUBLIC = [
     'hello@rivicq.com',
     'sales@rivicq.com',
-    'partnerships@rivicq.com',
-    'research@rivicq.com',
-    'grants@rivicq.com',
     'support@rivicq.com',
     'security@rivicq.com',
-    'finance@rivicq.com',
-    'investors@rivicq.com',
-    'innovationhub@rivicq.com',
+    'privacy@rivicq.com',
   ];
 
-  it('publishes the twelve-priority set except admin@', () => {
+  it('publishes only the five public desks', () => {
     const published = publishedContacts().map((c) => c.email);
-    PRIORITY_PUBLISHED.forEach((email) => expect(published).toContain(email));
-    expect(published).toContain('privacy@rivicq.com');
+    expect(published.sort()).toEqual([...PUBLIC].sort());
+    expect(publishedPriorityContacts()).toHaveLength(5);
     expect(published).not.toContain('admin@rivicq.com');
-    expect(published).not.toContain('noreply@rivicq.com');
-    expect(published).not.toContain('demo@rivicq.com');
-    expect(published).not.toContain('europe@rivicq.com');
-    expect(published.length).toBeLessThanOrEqual(22);
-    expect(publishedPriorityContacts()).toHaveLength(11);
+    expect(published).not.toContain('revansai.ande@rivicq.com');
+    expect(published).not.toContain('finance@rivicq.com');
+    expect(published).not.toContain('investors@rivicq.com');
+    expect(published).not.toContain('grants@rivicq.com');
+    expect(published).not.toContain('innovationhub@rivicq.com');
     expect(priorityContacts().some((c) => c.email === 'admin@rivicq.com' && !c.publish)).toBe(true);
   });
 

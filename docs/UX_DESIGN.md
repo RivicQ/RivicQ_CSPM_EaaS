@@ -52,7 +52,7 @@ Community can open every Five-BOM route. AIBOM, IBOM, HSM connectors, and the GR
 | **Command Center** | Inbox queue + compact metrics, no circular gauge |
 | **Five-BOM / pipeline / governance** | Shared page header + evidence cards |
 | **Docs hub** | Same chrome, grouped legal/product lists |
-| **Contact directory** | Five-area cards; `admin@` has no mailto |
+| **Contact** | Five public desks only; `admin@` is not published |
 
 ## Do not
 

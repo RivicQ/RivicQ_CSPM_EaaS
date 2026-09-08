@@ -26,7 +26,7 @@ import { GlassCard, EmptyState } from '../components/ui';
 import { ecosystemService } from '../services/api';
 import { tokens } from '../theme/tokens';
 import designSystem from '../theme/designSystem';
-import { ECOSYSTEM_AREAS, publishedPriorityContacts, mailto } from '../data/contacts';
+import { publishedPriorityContacts, mailto } from '../data/contacts';
 import { useNavigate } from 'react-router-dom';
 
 interface EcosystemTool {
@@ -97,30 +97,20 @@ const RivicQEcosystem: React.FC = () => {
     <PageFrame
       eyebrow="Ecosystem"
       title="RivicQ Ecosystem"
-      subtitle="Five connected areas on one domain (@rivicq.com): company, product, research, Innovation Hub, and partnerships — plus the OSS/Enterprise tool catalog."
+      subtitle="OSS and Enterprise tool catalog. Public mail is limited to hello, sales, support, security, and privacy."
       badge={`${tools.length} tools`}
-      action={<Button variant="contained" startIcon={<MailOutline />} onClick={() => navigate('/contact')}>Contact directory</Button>}
+      action={<Button variant="contained" startIcon={<MailOutline />} onClick={() => navigate('/contact')}>Contact</Button>}
     >
-      <Grid container spacing={2} sx={{ mb: 2.5 }}>
-        {ECOSYSTEM_AREAS.map((area) => (
-          <Grid item xs={12} sm={6} md key={area.id}>
-            <GlassCard>
-              <Typography variant="overline" color="primary" fontWeight={800}>{area.title}</Typography>
-              <Typography variant="body2" color="text.secondary">{area.blurb}</Typography>
-            </GlassCard>
-          </Grid>
-        ))}
-      </Grid>
       <Box sx={{ mb: 2 }}>
       <GlassCard hover={false} padding={2}>
-        <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1.5 }}>Priority @rivicq.com inboxes</Typography>
+        <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1.5 }}>Public @rivicq.com desks</Typography>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          {publishedPriorityContacts().filter((c) => c.email !== 'revansai.ande@rivicq.com').map((c) => (
+          {publishedPriorityContacts().map((c) => (
             <Chip key={c.email} component="a" href={mailto(c.email)} clickable label={c.email} size="small" />
           ))}
         </Stack>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.25 }}>
-          Founder: revansai.ande@rivicq.com. Extra aliases stay unpublished. admin@ is private.
+          Internal aliases stay unpublished. admin@ is private.
         </Typography>
       </GlassCard>
       </Box>

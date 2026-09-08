@@ -30,7 +30,7 @@ const PLATFORM = [
 
 const DOCS = [
   { icon: <MenuBook />, title: 'Documentation', desc: 'Architecture, EaaS, CBOM, and PQC guides.', href: 'docs/index.html' },
-  { icon: <MailOutline />, title: 'Contact directory', desc: 'One domain: @rivicq.com.', href: 'docs/contact.html' },
+  { icon: <MailOutline />, title: 'Contact', desc: 'Public desks on @rivicq.com.', href: 'docs/contact.html' },
   { icon: <Api />, title: 'API reference', desc: 'OpenAPI for the RivicQ platform API.', href: 'api/index.html' },
   { icon: <GitHub />, title: 'GitHub', desc: 'Source, issues, and the OSS scanner.', href: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
 ];
@@ -410,7 +410,7 @@ const Home: React.FC = () => {
               <Button size="small" href="mailto:support@rivicq.com">support@</Button>
               <Button size="small" href="mailto:security@rivicq.com">security@</Button>
               <Button size="small" href="mailto:privacy@rivicq.com">privacy@</Button>
-              <Button size="small" onClick={() => navigate('/contact')}>Directory</Button>
+              <Button size="small" onClick={() => navigate('/contact')}>Contact</Button>
             </Stack>
             <TrademarkNotice />
           </Stack>
