@@ -16,6 +16,7 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 
 - RSA-2048 is **classified**, not automatically marked vulnerable.
 - CVE overlay uses **exact** package versions. Rejected NVD entries are not treated as vulns.
+- Optional PATH tools (Syft, Trivy, Grype, Gitleaks, OSV Scanner) run on local directory scans when installed. They are skipped when missing. Set `RIVICQ_EXTERNAL_TOOLS=0` to disable. Gitleaks findings never include secret values. See [INTEGRATIONS.md](INTEGRATIONS.md).
 - Detector source files (`tls_scanner.go`, etc.) and `fixtures/` / `testdata/` are skipped on default `rivicq scan .` so the engine does not fail its own self-scan.
 - eBPF / Cilium is an **optional integration**, not a shipped kernel program.
 

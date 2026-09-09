@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Quantum Security Fabric** (wordmark **FABRIC**) lives at `fabric/` and `/fabric`. Finding IDs are `QSF-*`. Discovery, each detection, attack stage, asset, and domain inventory has a focused security graph ([docs/FABRIC.md](docs/FABRIC.md)).
 - **Deep-space nebula chrome** — black canvas `#000000`, violet `#7C3AED`, Inter, pill CTAs. Public home, console, docs, marketing, and Fabric share the same visual system. Platform cards cover AI engineering, DevSecOps, cloud security, API security, GRC mappings, and quantum risk. Quantum scores on Pages come from scans you run, not a silent live estate.
 - JWT **tenant isolation** on Community scan/inventory/findings/GitHub/QBOM/intelligence paths. Unauthenticated Home CBOM pilot stays on the public tenant. Enterprise inventory, compliance, quantum, multi-cloud, Terraform, and CNCF handlers ignore spoofable `X-Tenant-ID`.
+- Optional **outsourced scanners** (Syft, Trivy, Grype, Gitleaks, OSV) run on local `rivicq scan .` / scan intelligence when the binary is on PATH. Exit codes that mean “findings exist” are still parsed. Core status no longer claims Trivy/Syft/CodeQL are present unless `LookPath` succeeds.
 
 ## [1.6.4] - 2026-09-06
 

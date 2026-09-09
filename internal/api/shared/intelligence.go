@@ -117,6 +117,7 @@ func GetScanIntelligence(logger *logrus.Logger) gin.HandlerFunc {
 			Target:    job.Target,
 			ScanType:  job.ScanType,
 			Discovery: job.Result,
+			LocalRoot: intelligence.LocalRootIfDir(job.Target),
 		})
 		logger.WithFields(logrus.Fields{
 			"scan_id":  id,
@@ -147,6 +148,7 @@ func GetScanQiskit(logger *logrus.Logger) gin.HandlerFunc {
 			Target:    job.Target,
 			ScanType:  job.ScanType,
 			Discovery: job.Result,
+			LocalRoot: intelligence.LocalRootIfDir(job.Target),
 		})
 		estate := 0
 		if rep.Qiskit != nil {

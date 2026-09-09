@@ -37,6 +37,7 @@ UI colors follow the **Security Cloud** nebula ledger (`#000000` canvas, `#0A0A0
 - [Quantum Security Fabric](FABRIC.md) — original security-graph demo (FABRIC wordmark; path `/fabric`; no customer secrets)
 - [Security Intelligence Engine](security-intelligence.md)
 - [Security Control Matrix](SECURITY_CONTROL_MATRIX.md) — mappings, not certifications
+- [Optional scanners](INTEGRATIONS.md) — Syft, Trivy, Grype, Gitleaks, OSV on PATH
 - [Rollback Runbook](ROLLBACK_RUNBOOK.md)
 
 ## Developers

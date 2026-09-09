@@ -524,6 +524,10 @@ export const ecosystemService = {
   getCategories: () => api.get('/ecosystem/categories'),
 };
 
+export const intelligenceService = {
+  getTools: () => api.get('/intelligence/tools'),
+};
+
 export const coreService = {
   getStatus: (edition?: string) => api.get('/core/status', { params: { edition } }),
   getServices: () => api.get('/core/services'),

@@ -77,6 +77,7 @@ jobs:
           cp docs/security-intelligence.md web/build/docs/
           cp docs/README.md web/build/docs/README.md
           cp docs/KNOWN_LIMITATIONS.md web/build/docs/KNOWN_LIMITATIONS.md
+          cp docs/INTEGRATIONS.md web/build/docs/INTEGRATIONS.md
           cp docs/LAUNCH_CHECKLIST.md web/build/docs/LAUNCH_CHECKLIST.md
           cp docs/PRODUCT_STATUS.md web/build/docs/PRODUCT_STATUS.md
           cp docs/ROADMAP.md web/build/docs/ROADMAP.md

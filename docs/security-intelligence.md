@@ -67,7 +67,7 @@ CLI / API / Dashboard / CI gate
 
 RSA-2048 is **classified**, not automatically marked vulnerable. Weak keys (RSA < 2048), MD5/SHA-1, TLS < 1.2, 3DES/RC4, CISA KEV, and secrets **BLOCK** outside `testdata/` and `fixtures/`.
 
-Optional scanners on `PATH` (Syft, Trivy, Grype, Gitleaks, Semgrep, OSV-Scanner, Checkov, Cosign) are probed and recorded. They are never required to scan.
+Optional PATH scanners **run** on local directory scans when installed: Syft, Trivy, Grype, Gitleaks, OSV Scanner. Semgrep, Checkov, Cosign, and CodeQL are probed only. Missing tools never block the built-in engine. Set `RIVICQ_EXTERNAL_TOOLS=0` to disable. See [INTEGRATIONS.md](INTEGRATIONS.md).
 
 ## CLI
 

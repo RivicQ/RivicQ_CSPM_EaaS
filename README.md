@@ -149,6 +149,7 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Trademarks | [TRADEMARKS.md](TRADEMARKS.md) |
 | Datasets | [DATASETS.md](DATASETS.md) |
 | Security intelligence | [docs/security-intelligence.md](docs/security-intelligence.md) |
+| Optional scanners | [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) |
 | CBOM quickstart | [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md) |
 | Deployment | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | Environment | [docs/DEPLOY_ENV.md](docs/DEPLOY_ENV.md) |

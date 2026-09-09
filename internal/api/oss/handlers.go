@@ -9,6 +9,7 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/core"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/intelligence"
 	"github.com/sirupsen/logrus"
 )
 
@@ -183,6 +184,7 @@ type ecosystemTool struct {
 	DocsURL     string `json:"docs_url,omitempty"`
 	RepoURL     string `json:"repo_url,omitempty"`
 	InstallCmd  string `json:"install_cmd,omitempty"`
+	OnPath      *bool  `json:"on_path,omitempty"`
 }
 
 var ecosystemTools = []ecosystemTool{
@@ -205,9 +207,12 @@ var ecosystemTools = []ecosystemTool{
 	{ID: "int-prometheus", Name: "Prometheus", Category: "integration", Description: "Scrape cryptographic asset metrics, quantum risk scores, and compliance status.", Edition: "both", Status: "available", Type: "integration", DocsURL: "https://prometheus.io/docs"},
 	{ID: "int-grafana", Name: "Grafana", Category: "integration", Description: "Pre-built CBOM compliance dashboards with DORA, NIS2, and quantum risk visualizations.", Edition: "both", Status: "available", Type: "integration", DocsURL: "https://grafana.com/docs"},
 	{ID: "int-cilium", Name: "Cilium / eBPF", Category: "integration", Description: "Real-time cryptographic flow monitoring via eBPF — detect TLS/SSH algorithm usage in live traffic.", Edition: "both", Status: "available", Type: "integration", DocsURL: "https://docs.cilium.io"},
-	{ID: "int-trivy", Name: "Trivy", Category: "integration", Description: "Container and filesystem vulnerability scanning with CBOM enrichment.", Edition: "oss", Status: "available", Type: "integration", DocsURL: "https://aquasecurity.github.io/trivy"},
-	{ID: "int-syft", Name: "Syft", Category: "integration", Description: "SBOM generation for containers and filesystems — import into CryptoBOM for crypto analysis.", Edition: "oss", Status: "available", Type: "integration", RepoURL: "https://github.com/anchore/syft"},
-	{ID: "int-codeql", Name: "CodeQL", Category: "integration", Description: "Static analysis for cryptographic misuse in source code — detect weak algorithms, hardcoded keys.", Edition: "both", Status: "available", Type: "integration", DocsURL: "https://codeql.github.com/docs"},
+	{ID: "int-trivy", Name: "Trivy", Category: "integration", Description: "Optional PATH scanner. Container and filesystem vulnerability scanning. Invoked by rivicq scan . when installed.", Edition: "oss", Status: "available", Type: "integration", DocsURL: "https://aquasecurity.github.io/trivy", InstallCmd: "https://aquasecurity.github.io/trivy/latest/getting-started/installation/"},
+	{ID: "int-syft", Name: "Syft", Category: "integration", Description: "Optional PATH scanner. SBOM generation; crypto-named CycloneDX components are imported.", Edition: "oss", Status: "available", Type: "integration", RepoURL: "https://github.com/anchore/syft", InstallCmd: "https://github.com/anchore/syft#installation"},
+	{ID: "int-grype", Name: "Grype", Category: "integration", Description: "Optional PATH scanner. Vulnerability matching on a directory SBOM. Real advisory IDs only.", Edition: "oss", Status: "available", Type: "integration", RepoURL: "https://github.com/anchore/grype"},
+	{ID: "int-gitleaks", Name: "Gitleaks", Category: "integration", Description: "Optional PATH scanner. Secrets detection. Finding evidence never includes secret values.", Edition: "oss", Status: "available", Type: "integration", RepoURL: "https://github.com/gitleaks/gitleaks"},
+	{ID: "int-osv", Name: "OSV Scanner", Category: "integration", Description: "Optional PATH scanner. Matches lockfiles against the OSV database. Real advisory IDs only.", Edition: "oss", Status: "available", Type: "integration", RepoURL: "https://github.com/google/osv-scanner"},
+	{ID: "int-codeql", Name: "CodeQL", Category: "integration", Description: "Static analysis CLI. Probed on PATH; not executed by rivicq scan (too heavy for a local gate).", Edition: "both", Status: "available", Type: "integration", DocsURL: "https://codeql.github.com/docs"},
 	{ID: "int-argocd", Name: "ArgoCD", Category: "integration", Description: "GitOps deployment with CBOM compliance gates — block deployments with critical crypto findings.", Edition: "enterprise", Status: "enterprise_only", Type: "integration"},
 	{ID: "int-flux", Name: "Flux", Category: "integration", Description: "Continuous delivery with automated CBOM scanning on cluster sync.", Edition: "enterprise", Status: "enterprise_only", Type: "integration"},
 	{ID: "int-delve", Name: "Delve Compliance", Category: "integration", Description: "Automated compliance evidence collection for DORA, NIS2, and SOC 2 frameworks.", Edition: "enterprise", Status: "enterprise_only", Type: "integration"},
@@ -225,17 +230,49 @@ var ecosystemTools = []ecosystemTool{
 	{ID: "github-scanning", Name: "GitHub Crypto Scanning", Category: "integration", Description: "Scan GitHub repositories for cryptographic assets, weak algorithms, and quantum risk. Integrates with GitHub Actions.", Edition: "oss", Status: "available", Type: "integration", DocsURL: "https://docs.rivicq.com/github-scanning"},
 }
 
+func annotateEcosystemTools() []ecosystemTool {
+	onPath := map[string]bool{}
+	for _, t := range intelligence.ProbeExternalTools() {
+		onPath[t.Name] = t.Available
+	}
+	out := make([]ecosystemTool, len(ecosystemTools))
+	copy(out, ecosystemTools)
+	set := func(id, bin string) {
+		v := onPath[bin]
+		for i := range out {
+			if out[i].ID == id {
+				out[i].OnPath = &v
+				if v {
+					out[i].Status = "installed"
+				} else if out[i].Edition == "oss" || out[i].Edition == "both" {
+					out[i].Status = "not_on_path"
+				}
+			}
+		}
+	}
+	set("int-trivy", "trivy")
+	set("int-syft", "syft")
+	set("int-grype", "grype")
+	set("int-gitleaks", "gitleaks")
+	set("int-osv", "osv-scanner")
+	set("int-codeql", "codeql")
+	return out
+}
+
 func getEcosystemTools(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Info("Serving RivicQ ecosystem tools list")
-		c.JSON(http.StatusOK, gin.H{"tools": ecosystemTools})
+		c.JSON(http.StatusOK, gin.H{
+			"tools": annotateEcosystemTools(),
+			"note":  "Optional PATH scanners are invoked during local rivicq scan . when installed. Missing tools do not block the built-in engine.",
+		})
 	}
 }
 
 func getEcosystemTool(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		for _, tool := range ecosystemTools {
+		for _, tool := range annotateEcosystemTools() {
 			if tool.ID == id {
 				c.JSON(http.StatusOK, gin.H{"tool": tool})
 				return
