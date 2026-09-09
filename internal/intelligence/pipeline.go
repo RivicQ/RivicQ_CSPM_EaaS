@@ -14,6 +14,7 @@ type ScanInput struct {
 	Discovery       *discovery.ScanResult
 	ContentFindings []ContentFinding
 	ContentRepo     string
+	LocalRoot       string
 }
 
 func BuildReport(in ScanInput) *Report {
@@ -24,6 +25,12 @@ func BuildReport(in ScanInput) *Report {
 	findings := FromDiscoveryResult(in.Discovery)
 	for _, cf := range in.ContentFindings {
 		findings = append(findings, FromContent(in.ContentRepo, cf))
+	}
+	usedTools := []string{}
+	if in.LocalRoot != "" {
+		extra, used := RunOptionalTools(in.LocalRoot)
+		findings = append(findings, extra...)
+		usedTools = used
 	}
 	var components []discovery.CBOMComponent
 	if in.Discovery != nil {
@@ -54,7 +61,7 @@ func BuildReport(in ScanInput) *Report {
 		ClientArchitecture: buildClientArchitecture(in, findings, qiskit),
 		PQCReadiness:       buildPQCReadiness(findings, in.Discovery),
 		CycloneDX:          CycloneDXBOM(in.Target, components, findings),
-		Tools:              ProbeExternalTools(),
+		Tools:              MarkToolsUsed(ProbeExternalTools(), usedTools),
 		Excludes:           DefaultExcludes(),
 		Metadata: map[string]string{
 			"engine":          "rivicq-intelligence",

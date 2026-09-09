@@ -4,7 +4,7 @@ Honest snapshot of what RivicQ ships today for operators who need **open-source 
 
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data; no production API).
 
-Companion docs: [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [Five-BOM](BOM_FRAMEWORK.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md)
+Companion docs: [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [Five-BOM](BOM_FRAMEWORK.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md) · [Optional scanners](INTEGRATIONS.md)
 
 ## What is complete
 
@@ -22,9 +22,11 @@ The **cryptographic intelligence engine is shared**. Community (`:8080`) and Ent
 | Hardware / QSIC | Declared catalog | Persistable inventory; still not firmware RE |
 | GitHub content scan | Yes (authorized) | Same |
 | Policy gate (BLOCK / WARN / ALLOW) | Yes | Same |
+| Optional PATH scanners | Syft / Trivy / Grype / Gitleaks / OSV when installed | Same |
 | Qiskit-aligned estate score | Local taxonomy (`qiskitprofile`) | Same + optional quantum **connector** (API key, not required) |
 | DORA pack | JSON mappings | Pack flag enabled (still not a certification) |
 | Multi-cloud inventory | No | Yes when credentials exist (empty otherwise) |
+| Tenant isolation | JWT on scans/inventory; anonymous → public tenant | Same + control-plane APIs; `X-Tenant-ID` ignored |
 
 ## Scores — what they mean
 
@@ -72,7 +74,6 @@ GET  /api/v1/security/ai
 
 ## Not complete (see roadmap)
 
-- Tenant isolation on remaining scan write paths
 - Scheduled / continuous scans
 - Live OIDC / SAML ACS login (config store exists)
 - Mailbox-backed password reset (in-memory tokens today)

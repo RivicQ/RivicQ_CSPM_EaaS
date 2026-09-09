@@ -2,8 +2,15 @@
 package tenant
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 )
+
+// PublicTenantID is the workspace for unauthenticated Community traffic
+// (Home CBOM pilot, local demo). JWT tenant_id always wins when present.
+// The X-Tenant-ID header is never a source of truth.
+const PublicTenantID = "00000000-0000-0000-0000-000000000001"
 
 // TenantResolver resolves the tenant for a request.
 type TenantResolver interface {
@@ -20,13 +27,27 @@ func NewDefaultTenantResolver() *DefaultTenantResolver {
 	return &DefaultTenantResolver{}
 }
 
-// Resolve extracts the tenant_id from the JWT claims stored in the gin context.
-// This is set by auth.JWTAuthMiddleware after token validation.
-// Falls back to "default" if not present (e.g. public endpoints).
-func (r *DefaultTenantResolver) Resolve(c *gin.Context) (string, error) {
-	tenantID := c.GetString("tenant_id")
-	if tenantID != "" {
-		return tenantID, nil
+// Normalize returns PublicTenantID when tenantID is empty.
+func Normalize(tenantID string) string {
+	tenantID = strings.TrimSpace(tenantID)
+	if tenantID == "" {
+		return PublicTenantID
 	}
-	return "default", nil
+	return tenantID
+}
+
+// Resolve extracts the tenant from JWT/API-key context (c.GetString("tenant_id")).
+// Unauthenticated requests map to PublicTenantID so the Home CBOM pilot still works.
+// Spoofable headers are ignored.
+func Resolve(c *gin.Context) string {
+	if c == nil {
+		return PublicTenantID
+	}
+	return Normalize(c.GetString("tenant_id"))
+}
+
+// Resolve extracts the tenant_id from the JWT claims stored in the gin context.
+// This is set by auth.JWTAuthMiddleware / OptionalJWTAuthMiddleware after token validation.
+func (r *DefaultTenantResolver) Resolve(c *gin.Context) (string, error) {
+	return Resolve(c), nil
 }

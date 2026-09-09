@@ -40,7 +40,7 @@ export const dashboardDesign = {
   },
   hero: {
     light: '#ffffff',
-    dark: '#17150f',
+    dark: '#0a0a0f',
     glow: 'none',
     glowDark: 'none',
   },

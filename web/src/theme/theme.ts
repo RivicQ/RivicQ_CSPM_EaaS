@@ -19,14 +19,14 @@ declare module '@mui/material/Chip' {
 }
 
 const LIGHT_PRIMARY = {
-  50: '#fbf6ef', 100: '#f4e6d4', 200: '#e8c9a8', 300: '#dba76e', 400: '#e09a5a',
-  500: '#c4783a', 600: '#a8622e', 700: '#864c24', 800: '#5c3519', 900: '#3d2412',
+  50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa',
+  500: '#7c3aed', 600: '#6d28d9', 700: '#5b21b6', 800: '#4c1d95', 900: '#2e1065',
 };
 
 const DARK_PRIMARY = LIGHT_PRIMARY;
 
 const LIGHT_GOLD = {
-  50: '#fbf6ef', 100: '#f4e6d4', 200: '#e8c9a8', 300: '#dba76e', 400: '#e09a5a', 500: '#c4783a', 600: '#a8622e', 700: '#864c24', 800: '#5c3519', 900: '#3d2412',
+  50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#7c3aed', 600: '#6d28d9', 700: '#5b21b6', 800: '#4c1d95', 900: '#2e1065',
 };
 
 const DARK_GOLD = LIGHT_GOLD;
@@ -48,19 +48,19 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
         main: primary[500],
         light: primary[400],
         dark: primary[700],
-        contrastText: isDark ? '#0c0b09' : '#fffdf8',
+        contrastText: isDark ? '#ffffff' : '#ffffff',
       },
       secondary: {
         main: tokens.colors.crypto.success,
         light: '#54b892',
         dark: '#2d7a5f',
-        contrastText: '#0c0b09',
+        contrastText: '#ffffff',
       },
       tertiary: {
         main: gold[500],
         light: gold[400],
         dark: gold[700],
-        contrastText: isDark ? '#0c0b09' : '#fffdf8',
+        contrastText: isDark ? '#ffffff' : '#ffffff',
       },
       error: { main: tokens.colors.crypto.critical },
       warning: { main: tokens.colors.crypto.high },
@@ -76,8 +76,8 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
         disabled: text.muted,
       },
       action: {
-        hover: isDark ? 'rgba(243,238,228,0.05)' : 'rgba(26,23,18,0.04)',
-        selected: isDark ? 'rgba(196,120,58,0.18)' : 'rgba(168,98,46,0.1)',
+        hover: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,15,0.04)',
+        selected: isDark ? 'rgba(124,58,237,0.22)' : 'rgba(109,40,217,0.1)',
       },
       divider: border,
     },
@@ -127,7 +127,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
             transition: designSystem.motion.smooth,
             '&:hover': {
               boxShadow: 'none',
-              borderColor: isDark ? '#3a3428' : '#d4cbb8',
+              borderColor: isDark ? '#2e1065' : '#c4b5fd',
             },
           },
         },
@@ -148,10 +148,10 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: tokens.borderRadius.md,
+            borderRadius: tokens.borderRadius.full,
             textTransform: 'none',
             fontWeight: 600,
-            padding: '8px 16px',
+            padding: '8px 18px',
             transition: 'background-color 0.15s ease, border-color 0.15s ease',
             '&:hover': { transform: 'none' },
             '&:active': { transform: 'none' },
@@ -207,7 +207,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
         styleOverrides: {
           root: {
             '&.Mui-selected': {
-              backgroundColor: isDark ? 'rgba(196,120,58,0.16)' : 'rgba(168,98,46,0.1)',
+              backgroundColor: isDark ? 'rgba(124,58,237,0.22)' : 'rgba(109,40,217,0.1)',
             },
           },
         },
@@ -277,7 +277,7 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
             borderColor: border,
             borderRadius: `${tokens.borderRadius.md}px !important`,
             '&.Mui-selected': {
-              background: isDark ? 'rgba(196,120,58,0.16)' : 'rgba(168,98,46,0.1)',
+              background: isDark ? 'rgba(124,58,237,0.22)' : 'rgba(109,40,217,0.1)',
               color: primary[500],
               borderColor: `${primary[500]}44`,
             },

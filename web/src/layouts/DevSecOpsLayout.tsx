@@ -149,7 +149,7 @@ const DevSecOpsLayout: React.FC<{ children: React.ReactNode; title?: string; sub
                     },
                     '&.Mui-selected': {
                       backgroundColor: 'rgba(102, 126, 234, 0.12)',
-                    borderLeft: '3px solid #0284c7',
+                    borderLeft: '3px solid #7c3aed',
                     },
                   }}
                 >
@@ -185,10 +185,10 @@ const DevSecOpsLayout: React.FC<{ children: React.ReactNode; title?: string; sub
                 sx={{
                   mb: 1,
                   borderRadius: 1,
-                  backgroundColor: 'linear-gradient(135deg, #0284c7 0%, #0284c7 100%)',
+                  bgcolor: '#7c3aed',
                   color: 'white',
                   '&:hover': {
-                    backgroundColor: 'linear-gradient(135deg, #0369a1 0%, #0284c7 100%)',
+                    bgcolor: '#6d28d9',
                   },
                 }}
               >
@@ -216,7 +216,7 @@ const DevSecOpsLayout: React.FC<{ children: React.ReactNode; title?: string; sub
         <AppBar
           position="static"
           sx={{
-            background: 'linear-gradient(135deg, #0284c7 0%, #0284c7 100%)',
+            background: 'linear-gradient(135deg, #7c3aed 0%, #7c3aed 100%)',
             boxShadow: 'none',
             borderBottom: '1px solid rgba(255,255,255,0.1)',
           }}

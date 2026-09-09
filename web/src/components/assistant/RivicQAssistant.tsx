@@ -277,7 +277,7 @@ const RivicQAssistant: React.FC = () => {
                           bgcolor: msg.role === 'user'
                             ? 'primary.main'
                             : theme.palette.mode === 'dark'
-                              ? 'rgba(30,41,59,0.9)'
+                              ? '#12121a'
                               : 'rgba(241,245,249,0.95)',
                           color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
                           border: msg.role === 'assistant' ? 1 : 0,

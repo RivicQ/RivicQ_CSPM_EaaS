@@ -49,7 +49,7 @@ const QuickActionCard: React.FC<{
         border: 1,
         borderColor: isDark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.1)',
         borderRadius: `${dashboardDesign.radius.md}px`,
-        bgcolor: isDark ? 'rgba(30,41,59,0.5)' : 'rgba(255,255,255,0.9)',
+        bgcolor: isDark ? '#0a0a0f' : '#ffffff',
         cursor: 'pointer',
         font: 'inherit',
         color: 'inherit',

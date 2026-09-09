@@ -31,6 +31,7 @@ import AlgorithmDistributionChart from '../components/dashboard/AlgorithmDistrib
 import PQCReadinessPanel from '../components/dashboard/PQCReadinessPanel';
 import QuickActionsGrid, { DEFAULT_QUICK_ACTIONS } from '../components/dashboard/QuickActionsGrid';
 import CspmCapabilityStrip from '../components/dashboard/CspmCapabilityStrip';
+import DomainOpsStrip from '../components/dashboard/DomainOpsStrip';
 import ComplianceScoreGrid from '../components/dashboard/ComplianceScoreGrid';
 import TopFindingsList from '../components/dashboard/TopFindingsList';
 import ScanActivityTimeline from '../components/dashboard/ScanActivityTimeline';
@@ -285,6 +286,12 @@ const Dashboard: React.FC = () => {
 
       <CspmCapabilityStrip onNavigate={navigate} />
 
+      <Box sx={{ mb: dashboardDesign.layout.sectionGap }}>
+        <DashboardPanel title="Operating domains" subtitle="AI, DevSecOps, cloud, API, GRC, and quantum risk — same engine, labeled scan data on Pages">
+          <DomainOpsStrip />
+        </DashboardPanel>
+      </Box>
+
       <QuickActionsGrid actions={quickActions} onNavigate={navigate} />
 
       <Grid container spacing={dashboardDesign.layout.gridSpacing} sx={{ mb: dashboardDesign.layout.sectionGap }}>
@@ -494,7 +501,7 @@ const Dashboard: React.FC = () => {
 
       <Grid container spacing={dashboardDesign.layout.gridSpacing} sx={{ mb: dashboardDesign.layout.sectionGap }}>
         <Grid item xs={12} md={6}>
-          <DashboardPanel title="PQC Migration Readiness" subtitle="Post-quantum cryptography posture" delay={5}>
+          <DashboardPanel title="PQC Migration Readiness" subtitle="From scan intelligence in this workspace — not a silent live estate on Pages" delay={5}>
             <PQCReadinessPanel {...pqcStats} />
           </DashboardPanel>
         </Grid>
@@ -591,7 +598,7 @@ const Dashboard: React.FC = () => {
           borderRadius: `${dashboardDesign.radius.lg}px`,
           border: 1,
           borderColor: 'divider',
-          bgcolor: isDark ? 'rgba(196,120,58,0.1)' : 'rgba(196,120,58,0.06)',
+          bgcolor: isDark ? 'rgba(124,58,237,0.1)' : 'rgba(124,58,237,0.06)',
           display: 'flex',
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
