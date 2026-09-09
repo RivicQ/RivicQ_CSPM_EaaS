@@ -3,7 +3,9 @@ import Badge from '../components/ui/Badge';
 import Metric from '../components/ui/Metric';
 import PageHeader from '../components/ui/PageHeader';
 import Tabs from '../components/ui/Tabs';
+import GraphPanel from '../components/graph/GraphPanel';
 import { hndl, migrations, posture } from '../data/catalog';
+import { DOMAIN_NODE_IDS } from '../data/graph';
 
 const steps = ['RSA-2048', 'Identify dependencies', 'Find applications', 'Find certificates', 'Find services', 'Assess compatibility', 'Select ML-KEM / ML-DSA', 'Test', 'Deploy hybrid', 'Monitor', 'Complete'];
 
@@ -12,7 +14,8 @@ const Pqc: React.FC = () => {
   const [step, setStep] = useState(0);
   return (
     <div>
-      <PageHeader title="PQC readiness center" lede="NIST-standardized algorithms appear as product concepts (ML-KEM, ML-DSA, SLH-DSA). Status is labeled. This demo does not claim a completed migration or a certification." />
+      <PageHeader title="PQC readiness center" lede="NIST-standardized algorithms appear as product concepts (ML-KEM, ML-DSA, SLH-DSA). The graph is the quantum-vulnerable cryptographic path. This demo does not claim a completed migration or a certification." />
+      <GraphPanel focusIds={DOMAIN_NODE_IDS.pqc} label="PQC readiness graph" caption="Quantum-vulnerable crypto graph" />
       <div className="grid grid-4" style={{ margin: '12px 0' }}>
         <Metric label="Quantum readiness" value={`${posture.pqc}%`} />
         <Metric label="Cryptographic assets" value="8,421" />

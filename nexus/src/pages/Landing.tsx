@@ -10,7 +10,7 @@ const Landing: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
         <Mark size={36} />
         <div>
-          <strong style={{ letterSpacing: '0.12em' }}>NEXUS</strong>
+          <strong style={{ letterSpacing: '0.12em' }}>FABRIC</strong>
           <div style={{ color: 'var(--muted)', fontSize: 13 }}>Quantum Security Fabric</div>
         </div>
       </div>

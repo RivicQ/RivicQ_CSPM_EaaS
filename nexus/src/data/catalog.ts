@@ -146,18 +146,19 @@ export const controls = [
 ];
 
 export const findings = [
-  { id: 'NX-1042', title: 'Public ALB allows TLS 1.0', sev: 'critical' as Severity, asset: 'alb/pay-public', owner: 'payments-platform', control: 'PCI-4.2.1', regulation: 'PCI DSS 4.2.1', env: 'prod' },
-  { id: 'NX-1048', title: 'S3 bucket publicly listable', sev: 'critical' as Severity, asset: 's3://nbx-pay-artifacts', owner: 'cloud-sec', control: 'CIS-2.1.4', regulation: 'PCI DSS 1.3', env: 'prod' },
-  { id: 'NX-1101', title: 'SHA-1 CMS signatures in ledger-web', sev: 'critical' as Severity, asset: 'repo/ledger-web', owner: 'appsec', control: 'ISO-A.8.24', regulation: 'BSI TR-02102', env: 'prod' },
-  { id: 'NX-1114', title: 'Unused privileged role binding', sev: 'high' as Severity, asset: 'iam/pay-admin-role', owner: 'identity', control: 'CIS-1.16', regulation: 'SOC 2 CC6.1', env: 'prod' },
-  { id: 'NX-1120', title: 'Expired settlement certificate', sev: 'critical' as Severity, asset: 'old-settlement.nbx.example', owner: 'pki', control: 'SOC2-CC6.7', regulation: 'SOC 2 CC6.7', env: 'prod' },
-  { id: 'NX-1133', title: 'CVE-2022-24771 in node-forge', sev: 'high' as Severity, asset: 'pkg/node-forge@0.10.0', owner: 'devsecops', control: 'ISO-A.8.25', regulation: 'NIS2 Art. 21', env: 'prod' },
+  { id: 'QSF-1042', title: 'Public ALB allows TLS 1.0', sev: 'critical' as Severity, asset: 'alb/pay-public', owner: 'payments-platform', control: 'PCI-4.2.1', regulation: 'PCI DSS 4.2.1', env: 'prod' },
+  { id: 'QSF-1048', title: 'S3 bucket publicly listable', sev: 'critical' as Severity, asset: 's3://nbx-pay-artifacts', owner: 'cloud-sec', control: 'CIS-2.1.4', regulation: 'PCI DSS 1.3', env: 'prod' },
+  { id: 'QSF-1101', title: 'SHA-1 CMS signatures in ledger-web', sev: 'critical' as Severity, asset: 'repo/ledger-web', owner: 'appsec', control: 'ISO-A.8.24', regulation: 'BSI TR-02102', env: 'prod' },
+  { id: 'QSF-1114', title: 'Unused privileged role binding', sev: 'high' as Severity, asset: 'iam/pay-admin-role', owner: 'identity', control: 'CIS-1.16', regulation: 'SOC 2 CC6.1', env: 'prod' },
+  { id: 'QSF-1120', title: 'Expired settlement certificate', sev: 'critical' as Severity, asset: 'old-settlement.nbx.example', owner: 'pki', control: 'SOC2-CC6.7', regulation: 'SOC 2 CC6.7', env: 'prod' },
+  { id: 'QSF-1133', title: 'CVE-2022-24771 in node-forge', sev: 'high' as Severity, asset: 'pkg/node-forge@0.10.0', owner: 'devsecops', control: 'ISO-A.8.25', regulation: 'NIS2 Art. 21', env: 'prod' },
 ];
 
 export const assets = [
   { name: 'nbx-prod-pay', kind: 'Cloud account', env: 'prod', owner: 'payments-platform', criticality: 'critical', exposure: 'high', findings: 8 },
   { name: 'payments-api', kind: 'Application', env: 'prod', owner: 'payments-platform', criticality: 'critical', exposure: 'high', findings: 6 },
   { name: 'pay-postgres', kind: 'Database', env: 'prod', owner: 'data-eng', criticality: 'critical', exposure: 'medium', findings: 3 },
+  { name: 'alb/pay-public', kind: 'Load balancer', env: 'prod', owner: 'payments-platform', criticality: 'critical', exposure: 'high', findings: 3 },
   { name: 'prod-eks', kind: 'Kubernetes', env: 'prod', owner: 'sre', criticality: 'high', exposure: 'medium', findings: 5 },
   { name: 'fraud-xgb', kind: 'AI model', env: 'prod', owner: 'ml-ops', criticality: 'high', exposure: 'medium', findings: 2 },
   { name: 'hsm-eu-1', kind: 'Hardware', env: 'prod', owner: 'pki', criticality: 'critical', exposure: 'low', findings: 0 },

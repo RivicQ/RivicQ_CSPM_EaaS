@@ -3,7 +3,9 @@ import Badge from '../components/ui/Badge';
 import DataTable from '../components/ui/DataTable';
 import Drawer from '../components/ui/Drawer';
 import PageHeader from '../components/ui/PageHeader';
+import GraphPanel from '../components/graph/GraphPanel';
 import { controls, findings, frameworks } from '../data/catalog';
+import { CONTROL_NODE_IDS, FINDING_NODE_IDS } from '../data/graph';
 import { useSession } from '../state/session';
 
 const Compliance: React.FC = () => {
@@ -12,7 +14,12 @@ const Compliance: React.FC = () => {
   const row = controls.find((c) => c.id === id);
   return (
     <div>
-      <PageHeader title="Compliance center" lede="Finding → control → regulation → evidence → remediation. Framework names are engineering mappings. This is not an audit opinion or a certification of NEXUS or of RivicQ GmbH." />
+      <PageHeader title="Compliance center" lede="Finding → control → regulation → evidence → remediation. Each control has a graph of related detections. Framework names are engineering mappings. This is not an audit opinion or a certification of Quantum Security Fabric or of RivicQ GmbH." />
+      <GraphPanel
+        focusIds={row ? CONTROL_NODE_IDS[row.id] : FINDING_NODE_IDS['QSF-1042']}
+        label="Compliance control graph"
+        caption={`${row?.id || 'PCI-4.2.1'} graph`}
+      />
       <div className="grid grid-3" style={{ marginBottom: 16 }}>
         {frameworks.map((f) => (
           <div key={f.name} className="surface metric">
@@ -24,7 +31,7 @@ const Compliance: React.FC = () => {
       </div>
       <DataTable
         caption="Controls"
-        exportName="nexus-controls"
+        exportName="fabric-controls"
         rows={controls}
         rowKey={(r) => r.id}
         onOpen={(r) => setId(r.id)}
@@ -54,6 +61,7 @@ const Compliance: React.FC = () => {
             <span>Exception</span><b>{row.exceptions} recorded · time-boxed · owner required</b>
             <span>Remediation</span><b>Ticket + approval. No silent close.</b>
           </div>
+          <GraphPanel focusIds={CONTROL_NODE_IDS[row.id]} label={`Control graph ${row.id}`} caption={`${row.id} graph`} />
         </Drawer>
       )}
     </div>

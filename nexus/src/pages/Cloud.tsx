@@ -6,20 +6,27 @@ import Metric from '../components/ui/Metric';
 import PageHeader from '../components/ui/PageHeader';
 import Tabs from '../components/ui/Tabs';
 import Topology from '../components/graph/Topology';
+import GraphPanel from '../components/graph/GraphPanel';
 import { clouds, policies } from '../data/catalog';
-import { nodeDetails, topology } from '../data/graph';
+import { CLOUD_ACCOUNT_NODE_IDS, DOMAIN_NODE_IDS, nodeDetails, POLICY_NODE_IDS, topology } from '../data/graph';
 
 const Cloud: React.FC = () => {
   const [tab, setTab] = useState('accounts');
   const [node, setNode] = useState<string | undefined>();
   const [policy, setPolicy] = useState<string | undefined>();
+  const [account, setAccount] = useState(clouds[0]?.account);
   const selected = topology.find((n) => n.id === node);
   const detail = node && (nodeDetails[node] || nodeDetails.app);
   const pol = policies.find((p) => p.id === policy);
 
   return (
     <div>
-      <PageHeader title="Cloud security posture" lede="AWS, Azure, Google Cloud, Kubernetes, OCI, and hybrid. Fixture accounts only. No live attach on GitHub Pages." />
+      <PageHeader title="Cloud security posture" lede="AWS, Azure, Google Cloud, Kubernetes, OCI, and hybrid. Each account and policy has a discovery graph. Fixture accounts only. No live attach on GitHub Pages." />
+      <GraphPanel
+        focusIds={account ? CLOUD_ACCOUNT_NODE_IDS[account] || DOMAIN_NODE_IDS.cloud : DOMAIN_NODE_IDS.cloud}
+        label="Cloud discovery graph"
+        caption={`${account || 'Cloud'} graph`}
+      />
       <div className="grid grid-4">
         <Metric label="Accounts" value={24} />
         <Metric label="Resources" value="18,420" />
@@ -42,9 +49,10 @@ const Cloud: React.FC = () => {
       {tab === 'accounts' && (
         <DataTable
           caption="Cloud accounts"
-          exportName="nexus-cloud-accounts"
+          exportName="fabric-cloud-accounts"
           rows={clouds}
           rowKey={(r) => r.account}
+          onOpen={(r) => setAccount(r.account)}
           columns={[
             { id: 'account', header: 'Account', get: (r) => r.account, mono: true },
             { id: 'provider', header: 'Provider', get: (r) => r.provider },
@@ -87,7 +95,7 @@ const Cloud: React.FC = () => {
       {tab === 'policies' && (
         <DataTable
           caption="CSPM policies"
-          exportName="nexus-policies"
+          exportName="fabric-policies"
           rows={policies}
           rowKey={(r) => r.id}
           onOpen={(r) => setPolicy(r.id)}
@@ -113,6 +121,11 @@ const Cloud: React.FC = () => {
             <span>Pass / fail / exception</span><b>{pol.pass} / {pol.fail} / {pol.exceptions}</b>
             <span>Remediation</span><b>Dry-run only on this demo. Approval required. No silent apply.</b>
           </div>
+          <GraphPanel
+            focusIds={POLICY_NODE_IDS[pol.id] || DOMAIN_NODE_IDS.cloud}
+            label={`Policy graph ${pol.id}`}
+            caption={`${pol.id} graph`}
+          />
           <div className="btn-row" style={{ marginTop: 12 }}>
             <button type="button" className="btn">Duplicate</button>
             <button type="button" className="btn">Test policy</button>

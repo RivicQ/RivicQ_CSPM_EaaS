@@ -8,7 +8,7 @@ const Reports: React.FC = () => {
   const [body, setBody] = useState('');
   const generate = (kind: string) => {
     const text = [
-      `NEXUS ${kind} — labeled Northbridge Exchange fixture`,
+      `Fabric ${kind} — labeled Northbridge Exchange fixture`,
       `Generated as on-screen copy. Not an audit opinion.`,
       `Posture ${posture.overall}/100 · Compliance mapping ${posture.compliance}% · PQC ${posture.pqc}%`,
       mode === 'ciso' ? 'Executive: five business risks, remediation progress, board narrative.' : '',
@@ -21,7 +21,7 @@ const Reports: React.FC = () => {
     const blob = new Blob([body || 'No report generated'], { type: 'text/plain' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `nexus-${mode}-report.${ext}`;
+    a.download = `fabric-${mode}-report.${ext}`;
     a.click();
   };
   return (

@@ -3,17 +3,30 @@ import Badge from '../components/ui/Badge';
 import DataTable from '../components/ui/DataTable';
 import Drawer from '../components/ui/Drawer';
 import PageHeader from '../components/ui/PageHeader';
+import SecurityGraph from '../components/graph/SecurityGraph';
 import { findings } from '../data/catalog';
+import { FINDING_NODE_IDS } from '../data/graph';
 
 const Vulns: React.FC = () => {
-  const [id, setId] = useState<string | undefined>();
+  const [id, setId] = useState<string | undefined>(findings[0]?.id);
   const row = findings.find((f) => f.id === id);
+  const focusIds = row ? FINDING_NODE_IDS[row.id] : undefined;
   return (
     <div>
-      <PageHeader title="Vulnerability management" lede="Findings stay linked to the graph: workload, identity, cryptography, data, control, and business impact." />
+      <PageHeader title="Vulnerability management" lede="Each detection has its own subgraph: workload, identity, cryptography, data, control, and business impact." />
+      <div className="surface" style={{ padding: 12, marginBottom: 12 }}>
+        <p className="mono" style={{ color: 'var(--faint)', marginBottom: 8 }}>
+          {row ? `${row.id} detection graph` : 'Select a finding'}
+        </p>
+        <SecurityGraph
+          focusIds={focusIds}
+          hideUnfocused
+          label={row ? `Detection graph for ${row.id}` : 'Detection graph'}
+        />
+      </div>
       <DataTable
         caption="Findings"
-        exportName="nexus-findings"
+        exportName="fabric-findings"
         rows={findings}
         rowKey={(r) => r.id}
         onOpen={(r) => setId(r.id)}
@@ -39,6 +52,9 @@ const Vulns: React.FC = () => {
             <span>Regulation</span><b>{row.regulation} — mapping only</b>
             <span>Evidence</span><b>Synthetic config snapshot. No customer payload.</b>
             <span>Remediation</span><b>Approval-gated. Dry-run on Pages. Rollback required.</b>
+          </div>
+          <div className="surface" style={{ padding: 12, marginTop: 16 }}>
+            <SecurityGraph focusIds={FINDING_NODE_IDS[row.id]} hideUnfocused label={`Detection graph ${row.id}`} />
           </div>
         </Drawer>
       )}

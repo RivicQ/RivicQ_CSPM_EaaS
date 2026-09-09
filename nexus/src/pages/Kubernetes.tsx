@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DataTable from '../components/ui/DataTable';
 import PageHeader from '../components/ui/PageHeader';
+import GraphPanel from '../components/graph/GraphPanel';
 import { clusters } from '../data/catalog';
+import { CLUSTER_NODE_IDS, DOMAIN_NODE_IDS } from '../data/graph';
 import { useSession } from '../state/session';
 
 const Kubernetes: React.FC = () => {
   const { mode } = useSession();
+  const [name, setName] = useState(clusters[0]?.name);
   return (
     <div>
-      <PageHeader title="Kubernetes" lede="Declared cluster inventory. No live kubeconfig attach in Community Pages." />
+      <PageHeader title="Kubernetes" lede="Each cluster has a workload graph. Declared inventory only — no live kubeconfig attach in Community Pages." />
+      <GraphPanel
+        focusIds={name ? CLUSTER_NODE_IDS[name] || DOMAIN_NODE_IDS.kubernetes : DOMAIN_NODE_IDS.kubernetes}
+        label="Kubernetes discovery graph"
+        caption={`${name || 'Cluster'} graph`}
+      />
       <DataTable
         caption="Clusters"
-        exportName="nexus-kubernetes"
+        exportName="fabric-kubernetes"
         rows={clusters}
         rowKey={(r) => r.name}
+        onOpen={(r) => setName(r.name)}
         columns={[
           { id: 'name', header: 'Cluster', get: (r) => r.name, mono: true },
           { id: 'provider', header: 'Provider', get: (r) => r.provider },

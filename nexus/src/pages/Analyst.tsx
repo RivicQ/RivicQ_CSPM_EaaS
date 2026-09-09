@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Badge from '../components/ui/Badge';
 import PageHeader from '../components/ui/PageHeader';
+import GraphPanel from '../components/graph/GraphPanel';
+import { ATTACK_NODE_IDS } from '../data/graph';
 
 const Analyst: React.FC = () => {
   const [q, setQ] = useState('Show me our highest-risk production assets.');
@@ -24,7 +26,8 @@ const Analyst: React.FC = () => {
           <p><strong>Compliance:</strong> PCI DSS 4.2.1, DORA ICT risk, NIS2 technical measures — mappings, not certifications.</p>
           <p><strong>Crypto risk:</strong> Classical critical + quantum critical on the edge listener.</p>
           <p><strong>Recommendation:</strong> Disable TLS 1.0 listener (dry-run), renew certificate, rotate secret reference, plan ML-KEM hybrid.</p>
-          <p><strong>Confidence:</strong> 0.78 · <strong>Impact:</strong> availability if rollback skipped · <strong>Rollback:</strong> restore previous ALB policy · <strong>Approval:</strong> required · <strong>Audit:</strong> NX-AI-20260906-01</p>
+          <p><strong>Confidence:</strong> 0.78 · <strong>Impact:</strong> availability if rollback skipped · <strong>Rollback:</strong> restore previous ALB policy · <strong>Approval:</strong> required · <strong>Audit:</strong> QSF-AI-20260906-01</p>
+          <GraphPanel focusIds={ATTACK_NODE_IDS} label="Analyst attack-path graph" caption="Highest-risk production path" />
           <div className="btn-row">
             <button type="button" className="btn">Create ticket</button>
             <button type="button" className="btn">Generate report</button>

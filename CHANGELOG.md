@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- **Quantum Security Fabric** (wordmark **FABRIC**) replaces the NEXUS product label. Source and Pages path stay `nexus/` / `/nexus`. Finding IDs are `QSF-*`. Discovery, each detection, attack stage, asset, and domain inventory has a focused security graph ([docs/NEXUS.md](docs/NEXUS.md)).
+
 ## [1.6.4] - 2026-09-06
 
 ### Fixed

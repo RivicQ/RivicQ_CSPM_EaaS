@@ -9,7 +9,9 @@ const groups: { title: string; items: [string, string][] }[] = [
   {
     title: 'Operations',
     items: [
+      ['Discovery', '/discover'],
       ['Command Center', '/app/command'],
+      ['Security graph', '/app/graph'],
       ['Security Posture', '/app/posture'],
       ['Cloud Security', '/app/cloud'],
       ['Assets', '/app/assets'],
@@ -89,7 +91,7 @@ const Shell: React.FC = () => {
         <NavLink to="/" className="mark">
           <Mark />
           <div>
-            <strong>NEXUS</strong>
+            <strong>FABRIC</strong>
             <span>Quantum Security Fabric</span>
           </div>
         </NavLink>

@@ -2,16 +2,33 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Badge from '../components/ui/Badge';
 import PageHeader from '../components/ui/PageHeader';
+import GraphPanel from '../components/graph/GraphPanel';
 import { assets, dimensions } from '../data/catalog';
+import { ASSET_NODE_IDS, FINDING_NODE_IDS } from '../data/graph';
 
-const drill = ['Enterprise', 'Payments', 'AWS', 'nbx-prod-pay', 'payments-api', 'alb/pay-public', 'NX-1042'];
+const drill = ['Enterprise', 'Payments', 'AWS', 'nbx-prod-pay', 'payments-api', 'alb/pay-public', 'QSF-1042'];
 
 const Posture: React.FC = () => {
   const nav = useNavigate();
   const [depth, setDepth] = useState(0);
+  const drillFocus = [
+    undefined,
+    ASSET_NODE_IDS['nbx-prod-pay'],
+    ASSET_NODE_IDS['nbx-prod-pay'],
+    ASSET_NODE_IDS['nbx-prod-pay'],
+    ASSET_NODE_IDS['payments-api'],
+    ASSET_NODE_IDS['alb/pay-public'],
+    FINDING_NODE_IDS['QSF-1042'],
+  ][depth];
   return (
     <div>
-      <PageHeader title="Security posture" lede="Nine scored dimensions. Drill Enterprise → business unit → cloud → account → application → asset → finding. Scores are fixture analytics, not a certification." />
+      <PageHeader title="Security posture" lede="Nine scored dimensions. Drill Enterprise → business unit → cloud → account → application → asset → finding. Each slice has its own graph. Scores are fixture analytics, not a certification." />
+      <GraphPanel
+        focusIds={drillFocus}
+        hideUnfocused={Boolean(drillFocus)}
+        label="Posture drill graph"
+        caption={`${drill[depth]} graph`}
+      />
       <div className="workflow" style={{ marginBottom: 16 }}>
         {drill.map((step, i) => (
           <button key={step} type="button" className={`btn ${i <= depth ? 'primary' : ''}`} onClick={() => setDepth(i)}>

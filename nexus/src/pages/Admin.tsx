@@ -22,7 +22,7 @@ const Admin: React.FC = () => {
       </div>
       <DataTable
         caption="RBAC matrix"
-        exportName="nexus-rbac"
+        exportName="fabric-rbac"
         rows={rbac}
         rowKey={(r) => r.role}
         columns={[

@@ -1,9 +1,9 @@
 {
-  "name": "nexus-quantum-security-fabric",
+  "name": "quantum-security-fabric",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "NEXUS Quantum Security Fabric — labeled Community demo. No customer secrets.",
+  "description": "Quantum Security Fabric — labeled Community demo. No customer secrets.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

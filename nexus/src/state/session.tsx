@@ -18,7 +18,7 @@ const Ctx = createContext<Session | null>(null);
 
 const readMode = (): Mode => {
   try {
-    const raw = sessionStorage.getItem('nexus-mode');
+    const raw = sessionStorage.getItem('fabric-mode') || sessionStorage.getItem('nexus-mode');
     return raw === 'ciso' || raw === 'auditor' || raw === 'engineer' ? raw : 'engineer';
   } catch {
     return 'engineer';
@@ -32,7 +32,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setMode = (m: Mode) => {
     setModeState(m);
     try {
-      sessionStorage.setItem('nexus-mode', m);
+      sessionStorage.setItem('fabric-mode', m);
     } catch {
       /* ignore quota / private-mode */
     }

@@ -21,7 +21,7 @@ function csvEscape(value: string) {
   return `"${value.replace(/"/g, '""')}"`;
 }
 
-function DataTable<T>({ rows, columns, rowKey, caption, onOpen, exportName = 'nexus-export' }: Props<T>) {
+function DataTable<T>({ rows, columns, rowKey, caption, onOpen, exportName = 'fabric-export' }: Props<T>) {
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<string>(columns[0]?.id || '');
   const [dir, setDir] = useState<'asc' | 'desc'>('asc');

@@ -17,9 +17,9 @@ const colors: Record<NodeKind, string> = {
   kube: '#6d7680',
 };
 
-const shape = (n: GNode) => {
-  const c = colors[n.kind];
-  const pulse = n.risk === 'critical' ? 'pulse-threat' : n.risk === 'quantum' ? 'pulse-quantum' : '';
+const shape = (n: GNode, dim: boolean) => {
+  const c = dim ? 'rgba(154,163,173,0.28)' : colors[n.kind];
+  const pulse = dim ? '' : n.risk === 'critical' ? 'pulse-threat' : n.risk === 'quantum' ? 'pulse-quantum' : '';
   if (n.kind === 'identity' || n.kind === 'user' || n.kind === 'ai') {
     return <circle className={pulse} cx={n.x} cy={n.y} r={14} fill="#161a20" stroke={c} strokeWidth="1.6" />;
   }
@@ -44,48 +44,80 @@ const shape = (n: GNode) => {
   return <rect className={pulse} x={n.x - 16} y={n.y - 12} width="32" height="24" rx="6" fill="#161a20" stroke={c} strokeWidth="1.6" />;
 };
 
-const SecurityGraph: React.FC<{ onSelect?: (id: string) => void; selected?: string }> = ({ onSelect, selected }) => (
-  <svg viewBox="0 0 780 330" role="img" aria-label="Enterprise security graph for the labeled Northbridge demo">
-    {edges.map((e) => {
-      const a = nodes.find((n) => n.id === e.from);
-      const b = nodes.find((n) => n.id === e.to);
-      if (!a || !b) return null;
-      const attack = e.kind === 'attack';
-      const crypto = e.kind === 'crypto';
-      return (
-        <line
-          key={`${e.from}-${e.to}-${e.kind}`}
-          x1={a.x}
-          y1={a.y}
-          x2={b.x}
-          y2={b.y}
-          stroke={attack ? '#d46565' : crypto ? '#c45b9a' : 'rgba(232,234,237,0.16)'}
-          strokeWidth={attack || crypto ? 1.6 : 1}
-        />
-      );
-    })}
-    {nodes.map((n) => (
-      <g
-        key={n.id}
-        className="node"
-        tabIndex={0}
-        role="button"
-        aria-pressed={selected === n.id}
-        onClick={() => onSelect?.(n.id)}
-        onKeyDown={(ev) => {
-          if (ev.key === 'Enter' || ev.key === ' ') {
-            ev.preventDefault();
-            onSelect?.(n.id);
-          }
-        }}
-      >
-        {shape(n)}
-        <text x={n.x} y={n.y + 28} textAnchor="middle" fill="#9aa3ad" fontSize="10" fontFamily="Public Sans, sans-serif">
-          {n.label}
-        </text>
-      </g>
-    ))}
-  </svg>
-);
+type Props = {
+  onSelect?: (id: string) => void;
+  selected?: string;
+  /** When set, only these nodes (and edges between them) are in focus. */
+  focusIds?: string[];
+  hideUnfocused?: boolean;
+  label?: string;
+};
+
+const SecurityGraph: React.FC<Props> = ({ onSelect, selected, focusIds, hideUnfocused, label }) => {
+  const focus = focusIds && focusIds.length ? new Set(focusIds) : null;
+  const shownNodes = hideUnfocused && focus
+    ? nodes.filter((n) => focus.has(n.id))
+    : nodes;
+  const shownIds = new Set(shownNodes.map((n) => n.id));
+  return (
+    <svg viewBox="0 0 780 330" role="img" aria-label={label || 'Enterprise security graph for the labeled Northbridge demo'}>
+      {edges.map((e) => {
+        const a = nodes.find((n) => n.id === e.from);
+        const b = nodes.find((n) => n.id === e.to);
+        if (!a || !b) return null;
+        if (!shownIds.has(a.id) || !shownIds.has(b.id)) return null;
+        const focused = !focus || (focus.has(e.from) && focus.has(e.to));
+        if (hideUnfocused && !focused) return null;
+        const attack = e.kind === 'attack';
+        const crypto = e.kind === 'crypto';
+        return (
+          <line
+            key={`${e.from}-${e.to}-${e.kind}`}
+            x1={a.x}
+            y1={a.y}
+            x2={b.x}
+            y2={b.y}
+            stroke={
+              !focused
+                ? 'rgba(232,234,237,0.06)'
+                : attack
+                  ? '#d46565'
+                  : crypto
+                    ? '#c45b9a'
+                    : 'rgba(232,234,237,0.16)'
+            }
+            strokeWidth={focused && (attack || crypto) ? 1.6 : 1}
+          />
+        );
+      })}
+      {shownNodes.map((n) => {
+        const dim = Boolean(focus && !focus.has(n.id));
+        return (
+          <g
+            key={n.id}
+            className="node"
+            tabIndex={dim ? -1 : 0}
+            role="button"
+            aria-pressed={selected === n.id}
+            opacity={dim ? 0.22 : 1}
+            onClick={() => !dim && onSelect?.(n.id)}
+            onKeyDown={(ev) => {
+              if (dim) return;
+              if (ev.key === 'Enter' || ev.key === ' ') {
+                ev.preventDefault();
+                onSelect?.(n.id);
+              }
+            }}
+          >
+            {shape(n, dim)}
+            <text x={n.x} y={n.y + 28} textAnchor="middle" fill={dim ? '#6d7680' : '#9aa3ad'} fontSize="10" fontFamily="Public Sans, sans-serif">
+              {n.label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
 
 export default SecurityGraph;

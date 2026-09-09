@@ -84,6 +84,185 @@ export const attackPath = [
   'Card-hold archive',
 ];
 
+export const ATTACK_NODE_IDS = ['threat', 'ctr', 'id', 'app', 'db', 'data', 'rsa'];
+
+export const CRYPTO_NODE_IDS = ['rsa', 'cert', 'key', 'hsm', 'dep'];
+
+export const DISCOVERY_STAGES: { label: string; add: string[] }[] = [
+  { label: 'Connecting AWS (read-only, demo fixture)…', add: ['acct'] },
+  { label: 'Connecting GitHub (public metadata only)…', add: ['dep'] },
+  { label: 'Discovering Kubernetes workloads…', add: ['k8s', 'ctr'] },
+  { label: 'Discovering certificates…', add: ['cert'] },
+  { label: 'Discovering secret references (names only)…', add: ['sec'] },
+  { label: 'Discovering cryptographic assets…', add: ['rsa', 'key', 'hsm'] },
+  { label: 'Building SBOM…', add: ['app'] },
+  { label: 'Building CryptoBOM…', add: ['rsa'] },
+  { label: 'Building infrastructure graph…', add: ['user', 'id', 'db'] },
+  { label: 'Mapping controls (not certifications)…', add: ['data', 'model', 'ep'] },
+  { label: 'Calculating risk…', add: ['threat'] },
+];
+
+export function discoveryNodeIds(stageCount: number): string[] {
+  const ids = new Set<string>();
+  DISCOVERY_STAGES.slice(0, Math.max(0, stageCount)).forEach((s) => s.add.forEach((id) => ids.add(id)));
+  return [...ids];
+}
+
+export const FINDING_NODE_IDS: Record<string, string[]> = {
+  'QSF-1042': ['threat', 'cert', 'rsa', 'app', 'ctr', 'id'],
+  'QSF-1048': ['acct', 'data', 'threat'],
+  'QSF-1101': ['dep', 'rsa', 'app'],
+  'QSF-1114': ['id', 'user', 'threat', 'app'],
+  'QSF-1120': ['cert', 'key', 'hsm'],
+  'QSF-1133': ['dep', 'app', 'ctr'],
+};
+
+export const ASSET_NODE_IDS: Record<string, string[]> = {
+  'nbx-prod-pay': ['acct', 'db', 'data'],
+  'payments-api': ['app', 'ctr', 'dep', 'rsa'],
+  'pay-postgres': ['db', 'sec', 'data'],
+  'alb/pay-public': ['threat', 'cert', 'app'],
+  'prod-eks': ['k8s', 'ctr'],
+  'fraud-xgb': ['model', 'ep'],
+  'hsm-eu-1': ['hsm', 'key'],
+  'ledger-web': ['dep', 'app'],
+  'card-hold': ['data', 'db'],
+};
+
+export const DOMAIN_NODE_IDS: Record<string, string[]> = {
+  command: ATTACK_NODE_IDS,
+  cloud: ['acct', 'k8s', 'threat', 'db', 'data', 'ctr'],
+  identity: ['user', 'id', 'app', 'threat'],
+  crypto: CRYPTO_NODE_IDS,
+  certs: ['cert', 'key', 'hsm', 'rsa'],
+  secrets: ['sec', 'db', 'app', 'id'],
+  kubernetes: ['k8s', 'ctr', 'app', 'id'],
+  workloads: ['app', 'ctr', 'k8s', 'dep', 'threat'],
+  data: ['db', 'data', 'sec', 'acct', 'rsa'],
+  ai: ['model', 'ep', 'data', 'app', 'id'],
+  pqc: ['rsa', 'cert', 'key', 'hsm', 'dep'],
+  sbom: ['dep', 'app', 'ctr', 'rsa'],
+  hbom: ['hsm', 'key', 'cert'],
+  ibom: ['acct', 'k8s', 'db', 'threat', 'app'],
+};
+
+export const IDENTITY_NODE_IDS: Record<string, string[]> = {
+  'analyst.lee': ['user', 'id'],
+  'pay-pod-sa': ['id', 'app', 'ctr', 'db'],
+  'pay-admin-role': ['id', 'user', 'threat', 'app'],
+  'fraud-infer-sa': ['id', 'model', 'ep'],
+  'ci-deploy': ['id', 'k8s', 'ctr'],
+};
+
+export const SECRET_NODE_IDS: Record<string, string[]> = {
+  PAYMENTS_DB_PASSWORD: ['sec', 'db', 'app'],
+  GH_DEPLOY_TOKEN: ['sec', 'dep', 'app'],
+  MODEL_ENDPOINT_KEY: ['sec', 'model', 'ep'],
+  STRIPE_WEBHOOK_SECRET: ['sec', 'app'],
+  HSM_WRAP_REF: ['sec', 'hsm', 'key'],
+};
+
+export const CERT_NODE_IDS: Record<string, string[]> = {
+  'api.nbx.example': ['cert', 'key', 'app'],
+  'pay.nbx.example': ['cert', 'key', 'rsa', 'app', 'threat'],
+  'ml.nbx.example': ['cert', 'model', 'ep'],
+  'old-settlement.nbx.example': ['cert', 'key', 'rsa'],
+  'int.nbx.example': ['cert', 'key'],
+  'canary.nbx.example': ['cert', 'hsm', 'rsa'],
+};
+
+export const CRYPTO_ASSET_NODE_IDS: Record<string, string[]> = {
+  'pay-edge-tls': ['threat', 'cert', 'rsa', 'app'],
+  'legacy-hash': ['dep', 'app'],
+  'vpn-3des': ['hsm', 'key'],
+  'ssh-weak-kex': ['id', 'user'],
+  'rc4-internal': ['cert', 'rsa'],
+  'api-cert-exp': ['cert', 'key', 'app'],
+  'pay-mlkem-pilot': ['rsa', 'cert', 'hsm'],
+  'internal-rsa2k': ['rsa', 'cert', 'dep'],
+  'ecdsa-signing': ['id', 'key'],
+  'ecdh-session': ['cert', 'key'],
+};
+
+export const WORKLOAD_NODE_IDS: Record<string, string[]> = {
+  'payments-api': ['app', 'ctr', 'k8s', 'dep', 'threat'],
+  'ledger-web': ['dep', 'app'],
+  settlement: ['app', 'db', 'data'],
+  'fraud-infer': ['model', 'ep', 'ctr'],
+};
+
+export const CLUSTER_NODE_IDS: Record<string, string[]> = {
+  'prod-eks': ['k8s', 'ctr', 'app'],
+  'ml-gke': ['k8s', 'model', 'ep'],
+  'edge-oke': ['k8s', 'threat'],
+};
+
+export const CONTROL_NODE_IDS: Record<string, string[]> = {
+  'CIS-2.1.4': ['acct', 'data'],
+  'PCI-4.2.1': ['threat', 'cert', 'rsa', 'app'],
+  'ISO-A.8.24': ['dep', 'rsa', 'app'],
+  'DORA-TRA-04': ['acct', 'data', 'id'],
+  'SOC2-CC6.7': ['cert', 'key', 'hsm'],
+};
+
+export const POLICY_NODE_IDS: Record<string, string[]> = {
+  'NET-01': ['threat', 'acct', 'db'],
+  'IAM-07': ['id', 'user', 'app'],
+  'ENC-03': ['threat', 'cert', 'rsa'],
+  'LOG-02': ['acct', 'user'],
+  'STO-04': ['acct', 'data'],
+  'K8S-11': ['k8s', 'ctr'],
+  'CTR-05': ['ctr', 'app'],
+  'SEC-02': ['sec', 'db', 'app'],
+  'DAT-09': ['data', 'db', 'rsa'],
+  'CMP-01': ['acct', 'id', 'app'],
+};
+
+export const SBOM_NODE_IDS: Record<string, string[]> = {
+  'node-forge': ['dep', 'app', 'ctr'],
+  openssl: ['dep', 'rsa', 'app'],
+  'golang.org/x/crypto': ['dep', 'id'],
+  bcrypt: ['dep', 'app'],
+  'liboqs (pilot)': ['dep', 'rsa', 'hsm'],
+};
+
+export const AIBOM_NODE_IDS: Record<string, string[]> = {
+  'fraud-xgb': ['model', 'ep', 'data', 'id'],
+  'ops-summarizer': ['model', 'user'],
+  'kyc-embed': ['model', 'data'],
+};
+
+export const HBOM_NODE_IDS: Record<string, string[]> = {
+  'hsm-eu-1': ['hsm', 'key'],
+  'tpm-bastion-a': ['hsm', 'user'],
+  'fw-eu-transit': ['threat', 'key'],
+  'dc-berlin-r12': ['k8s', 'hsm'],
+};
+
+export const IBOM_NODE_IDS: Record<string, string[]> = {
+  'vpc-pay': ['acct', 'threat', 'db'],
+  'subnet-pay-a': ['threat', 'acct'],
+  'tf-pay-edge': ['threat', 'cert', 'app'],
+  'pay-postgres': ['db', 'sec', 'data'],
+  'prod-eks': ['k8s', 'ctr'],
+  'nbx-pay-artifacts': ['acct', 'data'],
+};
+
+export const CLOUD_ACCOUNT_NODE_IDS: Record<string, string[]> = {
+  'nbx-prod-core': ['acct', 'k8s'],
+  'nbx-prod-pay': ['acct', 'db', 'data', 'threat'],
+  'nbx-analytics': ['acct', 'data'],
+  'nbx-ml': ['acct', 'model', 'ep'],
+  'nbx-edge': ['acct', 'threat'],
+  'nbx-hybrid': ['acct', 'hsm', 'k8s'],
+};
+
+export function relatedFindingIds(nodeId: string): string[] {
+  return Object.entries(FINDING_NODE_IDS)
+    .filter(([, ids]) => ids.includes(nodeId))
+    .map(([id]) => id);
+}
+
 export const topology = [
   { id: 'acct', label: 'AWS Account nbx-prod-pay', kind: 'cloud' as NodeKind, note: 'Production payments' },
   { id: 'vpc', label: 'VPC vpc-pay', kind: 'cloud' as NodeKind, note: '10.8.0.0/16' },
@@ -102,7 +281,7 @@ export const nodeDetails: Record<string, { overview: string; risk: string; confi
     config: 'Declared Terraform module tf-pay-edge. No live cloud attach.',
     network: 'Reached from alb/pay-public. Egress to pay-postgres and model-endpoint.',
     identity: 'Runs as pay-pod-sa (rds:*, s3:*).',
-    vulns: 'NX-1042, NX-1101 related supply-chain hash.',
+    vulns: 'QSF-1042, QSF-1101 related supply-chain hash.',
     secrets: 'Uses PAYMENTS_DB_PASSWORD reference (name only).',
     data: 'Reads card-hold through PostgreSQL.',
     crypto: 'Edge RSA-1024 / TLS 1.0. Canary ML-KEM-768 hybrid.',
@@ -115,7 +294,7 @@ export const nodeDetails: Record<string, { overview: string; risk: string; confi
     config: 'Encryption at rest declared AES-256. Unencrypted replica finding in analytics account is separate.',
     network: 'Private subnet. Path exists via service account.',
     identity: 'DB secret reference PAYMENTS_DB_PASSWORD.',
-    vulns: 'Privilege path NX-1114.',
+    vulns: 'Privilege path QSF-1114.',
     secrets: 'Secret name only. Value never stored.',
     data: 'card-hold archive, 7-year retention — HNDL hotspot.',
     crypto: 'In-transit TLS 1.3. Archive objects still wrapped with RSA-2048.',

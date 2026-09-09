@@ -3,7 +3,9 @@ import Badge from '../components/ui/Badge';
 import DataTable from '../components/ui/DataTable';
 import Drawer from '../components/ui/Drawer';
 import PageHeader from '../components/ui/PageHeader';
+import GraphPanel from '../components/graph/GraphPanel';
 import { certificates } from '../data/catalog';
+import { CERT_NODE_IDS, DOMAIN_NODE_IDS } from '../data/graph';
 
 const buckets = ['90 days', '60 days', '30 days', '14 days', '7 days', 'Expired'];
 
@@ -12,7 +14,12 @@ const Certs: React.FC = () => {
   const row = certificates.find((c) => c.name === name);
   return (
     <div>
-      <PageHeader title="Certificate inventory" lede="PKI lifecycle: inventory, expiration timeline, renew / rotate / revoke / replace. Destructive actions are approval-gated and disabled on Pages." />
+      <PageHeader title="Certificate inventory" lede="Each certificate has a PKI graph: issuer path, key, workload, and quantum exposure. Destructive actions are approval-gated and disabled on Pages." />
+      <GraphPanel
+        focusIds={name ? CERT_NODE_IDS[name] || DOMAIN_NODE_IDS.certs : DOMAIN_NODE_IDS.certs}
+        label="Certificate graph"
+        caption={`${name || 'PKI'} graph`}
+      />
       <div className="timeline" style={{ marginBottom: 16 }}>
         {buckets.map((b) => {
           const n = certificates.filter((c) => c.status === b).length;
@@ -28,7 +35,7 @@ const Certs: React.FC = () => {
       </div>
       <DataTable
         caption="Certificates"
-        exportName="nexus-certificates"
+        exportName="fabric-certificates"
         rows={certificates}
         rowKey={(r) => r.name}
         onOpen={(r) => setName(r.name)}
@@ -57,6 +64,7 @@ const Certs: React.FC = () => {
             <button type="button" className="btn danger" disabled>Revoke</button>
             <button type="button" className="btn">Automate (playbook)</button>
           </div>
+          <GraphPanel focusIds={CERT_NODE_IDS[row.name]} label={`Certificate graph ${row.name}`} caption={`${row.name} graph`} />
         </Drawer>
       )}
     </div>

@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Metric from '../components/ui/Metric';
 import Badge from '../components/ui/Badge';
 import PageHeader from '../components/ui/PageHeader';
+import GraphPanel from '../components/graph/GraphPanel';
 import { actions, changes, dimensions, posture } from '../data/catalog';
+import { DOMAIN_NODE_IDS } from '../data/graph';
 import { useSession } from '../state/session';
 
 const Command: React.FC = () => {
@@ -11,7 +13,12 @@ const Command: React.FC = () => {
   const { mode } = useSession();
   return (
     <div>
-      <PageHeader title="Security Command Center" lede="How secure are we? What changed? What requires action?" />
+      <PageHeader title="Security Command Center" lede="How secure are we? What changed? What requires action? The graph is the blast radius of the payments fixture." />
+      <GraphPanel
+        focusIds={DOMAIN_NODE_IDS.command}
+        label="Command-center risk graph"
+        caption="Critical path · public edge → identity → data"
+      />
       <div className="surface metric" style={{ margin: '0 0 1.1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <small>Overall security posture</small>

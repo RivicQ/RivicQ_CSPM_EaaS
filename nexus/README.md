@@ -1,6 +1,6 @@
-# NEXUS Quantum Security Fabric
+# Quantum Security Fabric (FABRIC)
 
-Original product identity in this repository. **Not** a reskin of the RivicQ Community console.
+Original product identity in this repository (previously labeled NEXUS). **Not** a reskin of the RivicQ Community console.
 
 Live labeled demo: https://rivicq.github.io/RivicQ_CSPM_EaaS/nexus/
 
@@ -10,7 +10,7 @@ Tagline: *See every asset. Understand every risk. Secure what comes next.*
 
 - Synthetic **Northbridge Exchange** fixture only.
 - Secret **names** and statuses. Never values, private keys, or tokens.
-- Control mappings are **not** certifications of NEXUS or of RivicQ GmbH.
+- Control mappings are **not** certifications of Quantum Security Fabric or of RivicQ GmbH.
 - ML-KEM / ML-DSA / SLH-DSA are NIST-standardized concepts. No completed-migration claim.
 - GitHub Pages does not collect payment or attach live cloud / IdP / vault credentials.
 - Do not contribute customer data or secrets to this tree.

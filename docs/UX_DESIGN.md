@@ -1,6 +1,6 @@
 # RivicQ Security Cloud — core product UX / UI
 
-Warm-ink enterprise SaaS chrome (ledger density, copper accent). Public home is a product site with a labeled console preview. Sign-in is a single-column workspace form. Command Center opens on an inbox queue — not a circular posture gauge. Light mode remains available. This is not IBM Carbon or IBM Plex. NEXUS at `/nexus` is a separate identity.
+Warm-ink enterprise SaaS chrome (ledger density, copper accent). Public home is a product site with a labeled console preview. Sign-in is a single-column workspace form. Command Center opens on an inbox queue — not a circular posture gauge. Light mode remains available. This is not IBM Carbon or IBM Plex. Quantum Security Fabric at `/nexus` is a separate identity (obsidian, Public Sans).
 
 Live surfaces: public home, Community workspace, Five-BOM hubs, docs hub.
 
