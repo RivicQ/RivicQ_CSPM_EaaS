@@ -88,3 +88,32 @@ func TestScannerFlowRejectsEmptyTarget(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Contains(t, w.Body.String(), "target is required")
 }
+
+func TestCoreScannerFrameworkEndpoint(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	group := router.Group("/api/v1")
+	logger := logrus.New()
+	oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/core/scanners", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]any
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+
+	rawFramework, ok := response["scanner_framework"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "1.0", rawFramework["version"])
+
+	lifecycle, ok := rawFramework["lifecycle"].([]any)
+	require.True(t, ok)
+	assert.GreaterOrEqual(t, len(lifecycle), 11)
+
+	supportedScans, ok := rawFramework["supported_scans"].([]any)
+	require.True(t, ok)
+	assert.GreaterOrEqual(t, len(supportedScans), 20)
+}
