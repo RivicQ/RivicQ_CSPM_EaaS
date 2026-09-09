@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             web/package-lock.json
-            nexus/package-lock.json
+            fabric/package-lock.json
 
       - name: Install dependencies
         working-directory: web
@@ -50,20 +50,24 @@ jobs:
       - name: Add SPA redirect
         run: cp web/build/index.html web/build/404.html
 
-      - name: Install NEXUS dependencies
-        working-directory: nexus
+      - name: Install Fabric dependencies
+        working-directory: fabric
         run: npm ci
 
-      - name: Build NEXUS Quantum Security Fabric
-        working-directory: nexus
+      - name: Build Quantum Security Fabric
+        working-directory: fabric
         run: npm run build
 
-      - name: Publish NEXUS onto Pages
+      - name: Publish Fabric onto Pages
         run: |
-          mkdir -p web/build/nexus web/build/docs
-          cp -r nexus/dist/. web/build/nexus/
+          mkdir -p web/build/fabric web/build/docs
+          cp -r fabric/dist/. web/build/fabric/
+          cp web/build/fabric/index.html web/build/fabric/404.html
+          cp docs/FABRIC.md web/build/docs/FABRIC.md
+          # Keep the former demo path as a client redirect so existing bookmarks resolve.
+          mkdir -p web/build/nexus
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/RivicQ_CSPM_EaaS/fabric/"><link rel="canonical" href="/RivicQ_CSPM_EaaS/fabric/"><title>Moved</title><p>This demo moved to <a href="/RivicQ_CSPM_EaaS/fabric/">Quantum Security Fabric</a>.</p>' > web/build/nexus/index.html
           cp web/build/nexus/index.html web/build/nexus/404.html
-          cp docs/NEXUS.md web/build/docs/NEXUS.md
 
       - name: Publish SDK & plugin docs to the site
         run: |

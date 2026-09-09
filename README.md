@@ -11,7 +11,7 @@ RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AI
 | Resource | URL |
 |----------|-----|
 | **Live app (GitHub Pages)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/ |
-| **NEXUS Quantum Security Fabric (labeled demo)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/nexus/ |
+| **Quantum Security Fabric (labeled demo)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/fabric/ |
 | **Interactive demo** | https://rivicq.github.io/RivicQ_CSPM_EaaS/demo |
 | **Sign in / register** | https://rivicq.github.io/RivicQ_CSPM_EaaS/login |
 | **Documentation hub** | https://rivicq.github.io/RivicQ_CSPM_EaaS/docs/ |
@@ -19,7 +19,7 @@ RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AI
 | **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
 | **Legal pack** | [LEGAL.md](LEGAL.md) · [LICENSE](LICENSE) · [NOTICE](NOTICE) · [PRIVACY.md](PRIVACY.md) · [TRADEMARKS.md](TRADEMARKS.md) · [SECURITY.md](SECURITY.md) |
 
-The Community console is the **RivicQ Security Cloud** — dark-native zinc chrome (`#09090B` / `#18181B`) with Inter and JetBrains Mono. Light mode remains available. **NEXUS Quantum Security Fabric** is a separate, original security-graph demo at `/nexus` (obsidian fabric; labeled synthetic data; no secret values). Control mappings are not certifications.
+The Community console is the **RivicQ Security Cloud** — dark-native zinc chrome (`#09090B` / `#18181B`) with Inter and JetBrains Mono. Light mode remains available. **Quantum Security Fabric** (wordmark **FABRIC**) is a separate, original security-graph demo at `/fabric` (obsidian fabric; labeled synthetic data; no secret values). Control mappings are not certifications.
 
 ---
 
@@ -88,15 +88,15 @@ make dev-frontend         # React UI (sky blue / white / Outfit) → :3000
 
 Open http://localhost:3000/platform — choose **Community** or **Enterprise** on Sign in, or open `/demo`.
 
-### NEXUS Quantum Security Fabric (labeled demo)
+### Quantum Security Fabric (labeled demo)
 
 ```bash
-cd nexus
+cd fabric
 npm ci
 npm run dev
 ```
 
-Separate original identity (obsidian fabric). Synthetic fixture only — no secret values. See [docs/NEXUS.md](docs/NEXUS.md).
+Separate original identity (obsidian fabric, wordmark FABRIC). Discovery, each detection (`QSF-*`), attack stages, and domain inventories have their own graphs. Synthetic fixture only — no secret values. See [docs/FABRIC.md](docs/FABRIC.md).
 
 ### CLI and GitHub Action
 

@@ -112,7 +112,7 @@ Public desks: [docs/contact.html](docs/contact.html) ([CONTACT.md](docs/CONTACT.
 
 ---
 
-## NEXUS Quantum Security Fabric
+## Quantum Security Fabric
 
-NEXUS is an original product identity and labeled Community demo in this repository (`nexus/`, `/nexus` on GitHub Pages). It does not copy the Community console’s visual brand. It does **not** store or display customer secrets, private keys, or production credentials. Control mappings and PQC algorithm names are not certifications or completed-migration claims. Enterprise rights remain licensed as in §1.
+**Quantum Security Fabric** (wordmark **FABRIC**) is an original product identity and labeled Community demo in this repository (`fabric/`, `/fabric` on GitHub Pages). It does not copy the Community console’s visual brand. It does **not** store or display customer secrets, private keys, or production credentials. Control mappings and PQC algorithm names are not certifications or completed-migration claims. Enterprise rights remain licensed as in §1.
 
