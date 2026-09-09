@@ -15,14 +15,14 @@ See [Product status](PRODUCT_STATUS.md) for what already ships and [Architecture
 - HSM / quantum status APIs (disconnected without credentials); governance mappings
 - Qiskit profile pipeline (local classical taxonomy) wired into intelligence + `/scans/:id/qiskit`
 - Honest docs: editions, limitations, Qiskit vs IBM Quantum Runtime
+- JWT tenant isolation on Community scan, inventory, findings, GitHub scan, QBOM, intelligence, and BOM unified views; unauthenticated Home CBOM pilot stays on the public tenant. Enterprise inventory/compliance/quantum/multicloud/terraform/CNCF ignore spoofable `X-Tenant-ID`.
 
 ## Build 2 — Enterprise SaaS control plane
 
-1. Tenant isolation on remaining scan/inventory write paths (JWT `tenant_id` already scopes audit/API keys).
-2. Scheduled / continuous scanning (UI schedules today are labeled demo placeholders).
-3. Live OIDC login; SAML ACS as an operations path with the customer IdP.
-4. One high-quality PQC / compliance **report pack** (mappings + evidence export, not certification).
-5. Multi-cloud connectors with explicit empty-state copy when credentials are missing.
+1. Scheduled / continuous scanning (UI schedules today are labeled demo placeholders).
+2. Live OIDC login; SAML ACS as an operations path with the customer IdP.
+3. One high-quality PQC / compliance **report pack** (mappings + evidence export, not certification).
+4. Multi-cloud connectors with explicit empty-state copy when credentials are missing.
 
 ## Build 3 — Cryptography discovery hardening
 

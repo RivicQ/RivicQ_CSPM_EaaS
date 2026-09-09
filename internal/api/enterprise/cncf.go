@@ -60,7 +60,7 @@ type CNCFPlugin struct {
 }
 
 func (h *CNCFHandler) ListTools(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	toolType := c.Query("type")
 
 	query := `
@@ -104,7 +104,7 @@ func (h *CNCFHandler) ListTools(c *gin.Context) {
 }
 
 func (h *CNCFHandler) RegisterTool(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var tool CNCFPlugin
 	if err := c.ShouldBindJSON(&tool); err != nil {
@@ -348,7 +348,7 @@ func (h *CNCFHandler) K3sIntegration(c *gin.Context) {
 }
 
 func (h *CNCFHandler) GetCNCFDashboard(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	dashboard := gin.H{
 		"tools_summary": gin.H{

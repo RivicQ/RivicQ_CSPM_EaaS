@@ -40,6 +40,7 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Compliance PDFs and dashboards are **control mappings**, not certifications.
 - RBAC roles: Admin, Operator, Analyst, Viewer. Mutating SSO and cloud-connector APIs require **Admin**. `RequireRole` is enforced on those routes.
 - API keys and webhooks require a JWT (or API-key) **tenant claim**. The `X-Tenant-ID` header is not a source of truth.
+- Community scan, inventory, findings, GitHub scans, QBOM, and intelligence lists are partitioned by JWT `tenant_id`. Unauthenticated requests share the **public tenant** (Home CBOM pilot). Cross-tenant scan IDs return 404.
 
 ## Third-party names
 

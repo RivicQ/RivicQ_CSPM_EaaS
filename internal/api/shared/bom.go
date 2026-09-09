@@ -23,12 +23,12 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 		var disc *discovery.ScanResult
 		scanTarget := ""
 		if target != "" {
-			if job, ok := discovery.GetScanManager().GetScan(target); ok && job.Result != nil {
+			if job, ok := tenantScanJob(c, target); ok && job.Result != nil {
 				disc = job.Result
 				scanTarget = job.Target
 			}
 		} else {
-			for _, job := range discovery.GetScanManager().ListScans() {
+			for _, job := range tenantScanList(c) {
 				if job.Status == "completed" && job.Result != nil {
 					disc = job.Result
 					scanTarget = job.Target
@@ -49,7 +49,7 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 		c.JSON(http.StatusOK, bom.ReadQuantum())
 	})
 	router.GET("/security/api", func(c *gin.Context) {
-		u := latestUnified()
+		u := latestUnified(c)
 		c.JSON(http.StatusOK, gin.H{
 			"findings": u.APISurface,
 			"source":   "tls_https_scans",
@@ -59,7 +59,7 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	})
 	router.GET("/security/ai", func(c *gin.Context) {
 		fw := bom.Catalog()
-		u := latestUnified()
+		u := latestUnified(c)
 		c.JSON(http.StatusOK, gin.H{
 			"enabled": u.LayersOn["aibom"],
 			"aibom":   u.AIBOM,
@@ -70,8 +70,8 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	logger.Debug("BOM framework routes registered")
 }
 
-func latestUnified() bom.Unified {
-	for _, job := range discovery.GetScanManager().ListScans() {
+func latestUnified(c *gin.Context) bom.Unified {
+	for _, job := range tenantScanList(c) {
 		if job.Status == "completed" && job.Result != nil {
 			return bom.FromDiscovery(job.Target, job.Result)
 		}

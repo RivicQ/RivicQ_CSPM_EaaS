@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/tenant"
 )
 
 //go:embed testdata/demo-repo/**
@@ -43,6 +44,7 @@ type GHComponent struct {
 
 type ghScanJob struct {
 	ID      string
+	TenantID string
 	Status  string
 	Stage   string
 	Stages  []GHScanStage
@@ -91,6 +93,30 @@ func getGHScanJob(id string) (*ghScanJob, bool) {
 	}
 	copied := *j
 	return &copied, true
+}
+
+func getGHScanJobForTenant(tenantID, id string) (*ghScanJob, bool) {
+	job, ok := getGHScanJob(id)
+	if !ok {
+		return nil, false
+	}
+	if tenant.Normalize(job.TenantID) != tenant.Normalize(tenantID) {
+		return nil, false
+	}
+	copied := *job
+	return &copied, true
+}
+
+func listGHScanJobsForTenant(tenantID string) []*ghScanJob {
+	jobs := listGHScanJobs()
+	tenantID = tenant.Normalize(tenantID)
+	out := make([]*ghScanJob, 0, len(jobs))
+	for _, j := range jobs {
+		if tenant.Normalize(j.TenantID) == tenantID {
+			out = append(out, j)
+		}
+	}
+	return out
 }
 
 func listGHScanJobs() []*ghScanJob {

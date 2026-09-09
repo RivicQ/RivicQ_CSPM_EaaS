@@ -25,6 +25,7 @@ The **cryptographic intelligence engine is shared**. Community (`:8080`) and Ent
 | Qiskit-aligned estate score | Local taxonomy (`qiskitprofile`) | Same + optional quantum **connector** (API key, not required) |
 | DORA pack | JSON mappings | Pack flag enabled (still not a certification) |
 | Multi-cloud inventory | No | Yes when credentials exist (empty otherwise) |
+| Tenant isolation | JWT on scans/inventory; anonymous → public tenant | Same + control-plane APIs; `X-Tenant-ID` ignored |
 
 ## Scores — what they mean
 
@@ -72,7 +73,6 @@ GET  /api/v1/security/ai
 
 ## Not complete (see roadmap)
 
-- Tenant isolation on remaining scan write paths
 - Scheduled / continuous scans
 - Live OIDC / SAML ACS login (config store exists)
 - Mailbox-backed password reset (in-memory tokens today)

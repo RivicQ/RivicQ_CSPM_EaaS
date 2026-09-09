@@ -71,7 +71,7 @@ Shipped or in progress:
 
 | Capability | Today | Honest boundary |
 |---|---|---|
-| Multi-tenancy | JWT `tenant_id`; inventory/audit/API keys scoped to claim | Scan APIs are not fully tenant-isolated yet (Build 2) |
+| Multi-tenancy | JWT `tenant_id` on scan, inventory, findings, GitHub scans, QBOM, intelligence, BOM, and Enterprise inventory/compliance/quantum/cloud paths | Unauthenticated Community traffic shares the public tenant (Home CBOM pilot). SSO/audit viewer remain Enterprise |
 | RBAC | Viewer < Analyst < Operator < Admin (`RequireRole`) | Enforced on mutating SSO, cloud connectors, API keys, webhooks, workspace role changes |
 | Auth | Login, register, JWT refresh, TOTP MFA, Google/GitHub OAuth | Password reset is in-memory; no mailbox product |
 | SSO | `POST /sso/saml` and `/sso/ldap` store config | No live SAML ACS / OIDC login handshake yet |
@@ -120,7 +120,7 @@ Shipped or in progress:
 | Auth | Login, register, MFA, OAuth | + SSO config, audit, API keys, webhooks |
 | DORA / GRC | JSON mappings | Pack flag + control-plane evidence |
 | Five-BOM | CBOM + SBOM + local QBOM | + AIBOM + IBOM + HSM connector |
-| Workspaces | Single-tenant OSS default | JWT tenant isolation on control-plane APIs |
+| Workspaces | JWT tenant on scan/inventory; unauthenticated → public tenant | JWT tenant isolation on control-plane APIs |
 | Demo on Pages | Limited Community session (`rivicq-demo-session`) | Same demo label; not a customer tenant |
 
 ## Current honest capability boundaries
