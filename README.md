@@ -139,7 +139,7 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Known limitations | [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) |
 | Editions (OSS vs Enterprise) | [docs/editions.md](docs/editions.md) |
 | Client architecture | [docs/CLIENT_ARCHITECTURE.md](docs/CLIENT_ARCHITECTURE.md) |
-| Horizon UX / UI | [docs/UX_DESIGN.md](docs/UX_DESIGN.md) |
+| Operator UX audit | [docs/ux/README.md](docs/ux/README.md) |
 | Contact | [docs/contact.html](docs/contact.html) · [CONTACT.md](docs/CONTACT.md) — public desks only |
 | Five-BOM framework | [docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md) |
 | PQC migration | [docs/PQC_MIGRATION.md](docs/PQC_MIGRATION.md) |

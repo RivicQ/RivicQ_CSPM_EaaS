@@ -163,6 +163,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ actions, onNavigate
 );
 
 export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
+  { label: 'Critical findings', description: 'Investigation queue', icon: <FactCheck />, path: '/findings?severity=critical', accent: tokens.colors.crypto.high },
   { label: 'GitHub Scan', description: 'Real repo analysis', icon: <GitHub />, path: '/scanner?tab=github', accent: tokens.colors.crypto.quantum },
   { label: 'Run Scan', description: 'CBOM discovery', icon: <DocumentScanner />, path: '/scanner', accent: chartTheme.quickActions[0] },
   { label: 'Five-BOM', description: 'QBOM · AIBOM · SBOM · IBOM · CBOM', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[600] },

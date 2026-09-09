@@ -86,6 +86,8 @@ jobs:
           cp docs/CLIENT_ARCHITECTURE.md web/build/docs/CLIENT_ARCHITECTURE.md
           cp docs/BOM_FRAMEWORK.md web/build/docs/BOM_FRAMEWORK.md
           cp docs/UX_DESIGN.md web/build/docs/UX_DESIGN.md
+          mkdir -p web/build/docs/ux
+          cp docs/ux/*.md web/build/docs/ux/
           cp docs/CONTACT.md web/build/docs/CONTACT.md
           cp docs/contact.html web/build/docs/contact.html
           cp docs/read.html web/build/docs/read.html

@@ -26,6 +26,7 @@ import EditionSwitcher from './pages/EditionSwitcher';
 import Dashboard from './pages/Dashboard';
 import AssetDetails from './pages/AssetDetails';
 import Assets from './pages/Assets';
+import Findings from './pages/Findings';
 import Scanner from './pages/Scanner';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
@@ -176,6 +177,7 @@ const App: React.FC = () => {
                   <Route path="dashboard" element={wrap(Dashboard, 'Dashboard')} />
                   <Route path="assets" element={wrap(Assets, 'Assets')} />
                   <Route path="assets/:id" element={wrap(AssetDetails, 'AssetDetails')} />
+                  <Route path="findings" element={wrap(Findings, 'Findings')} />
                   <Route path="scanner" element={wrap(Scanner, 'Scanner')} />
                   <Route path="cspm" element={wrap(CSPM, 'CSPM')} />
                   <Route path="analytics" element={wrap(Analytics, 'Analytics')} />

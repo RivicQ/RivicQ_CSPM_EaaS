@@ -33,6 +33,7 @@ UI colors follow the **Security Cloud** nebula ledger (`#000000` canvas, `#0A0A0
 - [Enterprise SaaS architecture](ARCHITECTURE.md) — four-layer CBOM, control plane, hardware/QSIC scope
 - [Client architecture](CLIENT_ARCHITECTURE.md) — discover → mitigate → report from OSS to Enterprise
 - [Horizon UX / UI](UX_DESIGN.md) — core product visual system
+- [Operator UX audit](ux/README.md) — findings queue, IA, scorecard
 - [Contact](contact.html) — public desks on @rivicq.com ([CONTACT.md](CONTACT.md))
 - [Quantum Security Fabric](FABRIC.md) — original security-graph demo (FABRIC wordmark; path `/fabric`; no customer secrets)
 - [Security Intelligence Engine](security-intelligence.md)

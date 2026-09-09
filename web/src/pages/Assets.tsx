@@ -9,7 +9,7 @@ import {
   Cloud, Category, Warning, CheckCircle,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { inventoryService } from '../services/api';
 import { downloadJSON, printBrandedReport } from '../utils/reportExport';
 import PageFrame from '../components/PageFrame';
@@ -30,8 +30,9 @@ const CATEGORY_META: Record<string, { color: string; desc: string }> = {
 
 const Assets: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
   const [sortKey, setSortKey] = useState<'name' | 'risk' | 'algorithm'>('risk');
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [page, setPage] = useState(1);
