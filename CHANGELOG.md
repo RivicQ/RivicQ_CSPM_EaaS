@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - **Quantum Security Fabric** (wordmark **FABRIC**) lives at `fabric/` and `/fabric`. Finding IDs are `QSF-*`. Discovery, each detection, attack stage, asset, and domain inventory has a focused security graph ([docs/FABRIC.md](docs/FABRIC.md)).
+- **Deep-space nebula chrome** — black canvas `#000000`, violet `#7C3AED`, Inter, pill CTAs. Public home, console, docs, marketing, and Fabric share the same visual system. Platform cards cover AI engineering, DevSecOps, cloud security, API security, GRC mappings, and quantum risk. Quantum scores on Pages come from scans you run, not a silent live estate.
 
 ## [1.6.4] - 2026-09-06
 

@@ -201,7 +201,7 @@ const MultiCloud: React.FC = () => {
                   <XAxis type="number" />
                   <YAxis dataKey="name" type="category" width={80} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#0284c7" />
+                  <Bar dataKey="count" fill="#7c3aed" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

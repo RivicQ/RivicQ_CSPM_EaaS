@@ -1,8 +1,8 @@
 # RivicQ Security Cloud — core product UX / UI
 
-Warm-ink enterprise SaaS chrome (ledger density, copper accent). Public home is a product site with a labeled console preview. Sign-in is a single-column workspace form. Command Center opens on an inbox queue — not a circular posture gauge. Light mode remains available. This is not IBM Carbon or IBM Plex. Quantum Security Fabric at `/fabric` is a separate identity (obsidian, Public Sans).
+Deep-space nebula chrome: black canvas `#000000`, violet accent `#7C3AED`, Inter, pill CTAs, sparse starfield. Public home matches the cryptographic-security marketing hero. Command Center opens on an inbox queue — not a circular posture gauge. Light mode remains available. This is not IBM Carbon or IBM Plex.
 
-Live surfaces: public home, Community workspace, Five-BOM hubs, docs hub.
+Live surfaces: public home, Community workspace, Five-BOM hubs, docs hub, marketing, Fabric demo.
 
 ## Intent
 
@@ -11,21 +11,21 @@ Operators should see **one cryptographic SaaS**, not a brochure or a pile of mod
 1. **Inbox first** — today’s findings and scans, then charts.
 2. **Discover → mitigate → report** remains the only client path.
 3. **Community is honest** — locked Enterprise tiles stay visible, never unlabeled as live.
-4. **Warm ink is chrome** — canvas `#0C0B09` / surface `#17150F`; copper `#C4783A` is the only brand accent; status color is semantic only.
+4. **Nebula is chrome** — canvas `#000000` / surface `#0A0A0F`; violet `#7C3AED` is the brand accent; status color is semantic only.
 
 ## Visual tokens
 
 | Token | Value | Use |
 |---|---|---|
-| Base | `#0C0B09` | App background |
-| Surface | `#17150F` | Cards, drawers, tables |
-| Border | `#2C281F` | 1px dividers |
-| Text | `#F3EEE4` / `#B8B0A2` | Primary / muted |
-| Accent | `#C4783A` | Primary actions, focus |
-| Status | `#D64545` `#D97706` `#C9A227` `#3D7AB8` `#3D9B7A` | Critical / high / medium / low / success |
-| Type | Source Sans 3 + Source Code Pro | UI / IDs |
-| Radius | 4 / 6 / 8 / 10 / pill | Cards, controls |
-| Motion | opacity + short translate | No blur, no neon glow, no hover-lift |
+| Base | `#000000` | App background |
+| Surface | `#0A0A0F` | Cards, drawers, tables |
+| Border | `#1F1F2E` | 1px dividers |
+| Text | `#FFFFFF` / `#D1D5DB` | Primary / muted |
+| Accent | `#7C3AED` | Primary actions, focus, nebula glow |
+| Status | `#EF4444` `#F97316` `#EAB308` `#38BDF8` `#22C55E` | Critical / high / medium / low / success |
+| Type | Inter + JetBrains Mono | UI / IDs |
+| Radius | 8 / 12 / 16 / pill | Cards, controls |
+| Motion | opacity + short translate | Glow only on hero nebula |
 
 ## Information architecture
 
@@ -43,13 +43,15 @@ Docs hub
 
 Community can open every Five-BOM route. AIBOM, IBOM, HSM connectors, and the GRC pack stay locked until a paid edition.
 
+Quantum risk on Pages comes from **scans you run** (CLI or API). GitHub Pages is static and does not attach a live customer estate.
+
 ## Core screens
 
 | Screen | Design |
 |---|---|
-| **Home** | Sticky product nav, editorial headline, labeled console preview, terminal scan |
-| **Auth / editions** | Single-column workspace form on warm ink |
-| **Command Center** | Inbox queue + compact metrics, no circular gauge |
+| **Home** | Sticky product nav, nebula hero, CBOM pilot scan |
+| **Auth / editions** | Single-column workspace form on black |
+| **Command Center** | Inbox queue + domain strip (AI, DevSecOps, cloud, API, GRC, quantum) |
 | **Five-BOM / pipeline / governance** | Shared page header + evidence cards |
 | **Docs hub** | Same chrome, grouped legal/product lists |
 | **Contact** | Five public desks only; `admin@` is not published |
@@ -62,3 +64,4 @@ Community can open every Five-BOM route. AIBOM, IBOM, HSM connectors, and the GR
 - Treat mappings as certifications
 - Require IBM Quantum hardware for QBOM scores
 - Claim QSIC as shipped silicon
+- Claim a silent real-time quantum feed on GitHub Pages

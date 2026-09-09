@@ -35,7 +35,7 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
     <Button
       variant="contained"
       startIcon={<Upgrade />}
-      sx={{ background: '#0284c7' }}
+      sx={{ background: '#7c3aed' }}
       href="https://rivicq.com"
       target="_blank"
       rel="noopener noreferrer"

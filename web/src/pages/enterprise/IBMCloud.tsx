@@ -66,7 +66,7 @@ const IBMCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Security sx={{ color: '#0284c7', fontSize: 40 }} />
+              <Security sx={{ color: '#7c3aed', fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>
                 {(statusData as any)?.status || (statusError ? 'Not connected' : 'Unknown')}
               </Typography>
@@ -86,7 +86,7 @@ const IBMCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Storage sx={{ color: '#0284c7', fontSize: 40 }} />
+              <Storage sx={{ color: '#7c3aed', fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>{buckets.length}</Typography>
               <Typography variant="caption" color="text.secondary">COS Buckets</Typography>
             </CardContent>

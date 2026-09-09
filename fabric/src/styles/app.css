@@ -5,8 +5,7 @@ html, body, #root { min-height: 100%; }
 body {
   margin: 0;
   background:
-    radial-gradient(1200px 480px at 12% -10%, rgba(139, 126, 200, 0.08), transparent 55%),
-    radial-gradient(900px 420px at 90% 0%, rgba(196, 91, 154, 0.06), transparent 50%),
+    radial-gradient(1200px 480px at 50% 20%, rgba(124, 58, 237, 0.28), transparent 58%),
     var(--bg);
   color: var(--text);
   font-family: var(--font);

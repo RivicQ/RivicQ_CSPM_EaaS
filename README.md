@@ -19,7 +19,7 @@ RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AI
 | **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
 | **Legal pack** | [LEGAL.md](LEGAL.md) · [LICENSE](LICENSE) · [NOTICE](NOTICE) · [PRIVACY.md](PRIVACY.md) · [TRADEMARKS.md](TRADEMARKS.md) · [SECURITY.md](SECURITY.md) |
 
-The Community console is the **RivicQ Security Cloud** — dark-native zinc chrome (`#09090B` / `#18181B`) with Inter and JetBrains Mono. Light mode remains available. **Quantum Security Fabric** (wordmark **FABRIC**) is a separate, original security-graph demo at `/fabric` (obsidian fabric; labeled synthetic data; no secret values). Control mappings are not certifications.
+The Community console is the **RivicQ Security Cloud** — deep-space nebula chrome (`#000000` canvas, violet `#7C3AED`) with Inter and JetBrains Mono. Light mode remains available. **Quantum Security Fabric** (wordmark **FABRIC**) is the labeled security-graph demo at `/fabric`. Control mappings are not certifications.
 
 ---
 
@@ -83,7 +83,7 @@ cd RivicQ_CSPM_EaaS
 cp .env.example .env
 make dev-backend          # Community API :8080
 # or: make dev-enterprise # Enterprise API :9090
-make dev-frontend         # React UI (sky blue / white / Outfit) → :3000
+make dev-frontend         # React UI (nebula black / violet / Inter) → :3000
 ```
 
 Open http://localhost:3000/platform — choose **Community** or **Enterprise** on Sign in, or open `/demo`.

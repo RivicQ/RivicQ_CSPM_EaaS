@@ -110,7 +110,7 @@ const SecurityGraph: React.FC<Props> = ({ onSelect, selected, focusIds, hideUnfo
             }}
           >
             {shape(n, dim)}
-            <text x={n.x} y={n.y + 28} textAnchor="middle" fill={dim ? '#6d7680' : '#9aa3ad'} fontSize="10" fontFamily="Public Sans, sans-serif">
+            <text x={n.x} y={n.y + 28} textAnchor="middle" fill={dim ? '#6d7680' : '#9aa3ad'} fontSize="10" fontFamily="Inter, sans-serif">
               {n.label}
             </text>
           </g>
