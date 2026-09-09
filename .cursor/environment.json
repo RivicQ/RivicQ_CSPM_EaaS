@@ -1,0 +1,18 @@
+{
+  "name": "RivicQ CryptoBOM SaaS",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "backend-oss",
+      "command": "set -a && . ./.env && set +a && CRYPTOBOM_PORT=8080 DEMO_MODE=true ./bin/cryptobom-oss"
+    },
+    {
+      "name": "frontend",
+      "command": "cd web && BROWSER=none HOST=0.0.0.0 PORT=3000 REACT_APP_API_URL=http://localhost:8080/api/v1 REACT_APP_API_PROXY=http://localhost:8080 npm run dev"
+    }
+  ],
+  "ports": [
+    { "name": "OSS API", "port": 8080 },
+    { "name": "Web UI", "port": 3000 }
+  ]
+}
