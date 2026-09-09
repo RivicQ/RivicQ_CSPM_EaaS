@@ -1,0 +1,90 @@
+/* RivicQ Security Cloud — design tokens (aligned with web/src/theme/tokens.ts) */
+:root {
+  --rivicq-50: #f0f9ff;
+  --rivicq-100: #e0f2fe;
+  --rivicq-200: #bae6fd;
+  --rivicq-300: #7dd3fc;
+  --rivicq-400: #38bdf8;
+  --rivicq-500: #0ea5e9;
+  --rivicq-600: #0284c7;
+  --rivicq-700: #0369a1;
+  --rivicq-800: #075985;
+  --rivicq-900: #0c4a6e;
+
+  --gold-400: #fbbf24;
+  --gold-500: #f59e0b;
+  --gold-600: #d97706;
+
+  --quantum: #0284c7;
+  --quantum-light: #38bdf8;
+  --success: #059669;
+  --success-light: #10b981;
+  --critical: #dc2626;
+  --high: #ea580c;
+  --medium: #ca8a04;
+
+  --brand-gradient: linear-gradient(180deg, #0369a1 0%, #0ea5e9 100%);
+  --brand-gradient-dark: linear-gradient(180deg, #082f49 0%, #0369a1 100%);
+  --hero-gradient: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(14, 165, 233, 0.28), transparent),
+                   radial-gradient(ellipse 60% 50% at 80% 50%, rgba(2, 132, 199, 0.12), transparent),
+                   radial-gradient(ellipse 50% 40% at 10% 80%, rgba(8, 47, 73, 0.35), transparent);
+
+  --bg-base: #082f49;
+  --bg-elevated: #0c4a6e;
+  --bg-surface: #075985;
+  --bg-card: rgba(8, 47, 73, 0.78);
+  --bg-card-hover: rgba(12, 74, 110, 0.9);
+  --bg-glass: rgba(8, 47, 73, 0.55);
+
+  --text-primary: #f8fafc;
+  --text-secondary: #e0f2fe;
+  --text-muted: #7dd3fc;
+
+  --border: rgba(186, 230, 253, 0.16);
+  --border-strong: rgba(186, 230, 253, 0.28);
+
+  --font-sans: "Outfit", "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+
+  --shadow-panel: 0 1px 2px rgba(8, 47, 73, 0.2), 0 8px 24px rgba(8, 47, 73, 0.25);
+  --shadow-lg: 0 16px 48px rgba(8, 47, 73, 0.35);
+  --glow-blue: 0 0 40px rgba(14, 165, 233, 0.22);
+  --glow-purple: 0 0 40px rgba(2, 132, 199, 0.18);
+  --glow-green: 0 0 40px rgba(5, 150, 105, 0.2);
+
+  --nav-height: 72px;
+  --max-width: 1280px;
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
