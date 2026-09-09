@@ -22,7 +22,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Limited five-BOM engine: CBOM, SBOM, local QBOM, TLS API hygiene, pipeline stages 1–6, CLI, and GitHub Action.',
       icon: <Security sx={{ fontSize: 34 }} />,
       edition: 'community' as Edition,
-      accent: '#c4783a',
+      accent: '#7c3aed',
       highlights: ['CBOM + SBOM + local QBOM', 'API security from TLS scans', 'Discover → mitigate → report', 'No AIBOM, IBOM, SSO, or DORA pack'],
       action: 'Continue with Community',
     },
@@ -47,7 +47,7 @@ const EditionSwitcher: React.FC = () => {
   ];
 
   const pageBg = isDark ? designSystem.gradient.meshDark : designSystem.gradient.meshLight;
-  const cardBg = isDark ? '#17150f' : '#fffdf8';
+  const cardBg = isDark ? '#0a0a0f' : '#ffffff';
 
   return (
     <Box sx={{ minHeight: '100vh', background: pageBg, py: 8 }}>

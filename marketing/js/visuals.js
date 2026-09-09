@@ -240,40 +240,8 @@
     draw();
   }
 
-  /* ── Live Metric Simulation ──────────────────────────────── */
-  function initLiveMetrics() {
-    const metrics = [
-      { id: 'metricAssets', base: 12847, variance: 12, suffix: '' },
-      { id: 'metricFindings', base: 342, variance: 3, suffix: '' },
-      { id: 'metricPQC', base: 67, variance: 0, suffix: '%' },
-    ];
-
-    metrics.forEach(m => {
-      const el = document.getElementById(m.id);
-      if (!el) return;
-      setInterval(() => {
-        const val = m.base + Math.floor((Math.random() - 0.5) * m.variance * 2);
-        el.textContent = val.toLocaleString() + m.suffix;
-      }, 3000);
-    });
-
-    // Hero overlay metrics
-    const overlayMetrics = [
-      { id: 'heroCritical', base: 23, color: 'critical' },
-      { id: 'heroPQC', base: 67, color: 'quantum', suffix: '%' },
-      { id: 'heroCompliant', base: 94, color: 'success', suffix: '%' },
-    ];
-
-    overlayMetrics.forEach(m => {
-      const el = document.getElementById(m.id);
-      if (!el) return;
-      setInterval(() => {
-        const delta = Math.floor((Math.random() - 0.5) * 4);
-        const val = Math.max(0, Math.min(100, m.base + delta));
-        el.textContent = val + (m.suffix || '');
-      }, 4000);
-    });
-  }
+  /* Static marketing page — do not simulate a live customer estate. */
+  function initLiveMetrics() {}
 
   /* ── Posture Score Animation ─────────────────────────────── */
   function initPostureScore() {

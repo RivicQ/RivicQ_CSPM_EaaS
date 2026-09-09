@@ -24,42 +24,42 @@ const ConsolePreview: React.FC = () => {
       sx={{
         border: '1px solid',
         borderColor: 'divider',
-        bgcolor: '#17150f',
+        bgcolor: '#0a0a0f',
         borderRadius: 1,
         overflow: 'hidden',
-        color: '#f3eee4',
+        color: '#ffffff',
       }}
     >
       <Stack
         direction="row"
         alignItems="center"
         spacing={1}
-        sx={{ px: 1.5, py: 1, borderBottom: '1px solid #2c281f', bgcolor: '#0c0b09' }}
+        sx={{ px: 1.5, py: 1, borderBottom: '1px solid #1f1f2e', bgcolor: '#000000' }}
       >
         <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#5c3519' }} />
-        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#2c281f' }} />
-        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#2c281f' }} />
-        <Typography sx={{ fontFamily: 'Source Code Pro, monospace', fontSize: 11, color: '#8a8376', pl: 1 }}>
+        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1f1f2e' }} />
+        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1f1f2e' }} />
+        <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#9ca3af', pl: 1 }}>
           workspace · community · labeled fixture
         </Typography>
       </Stack>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid #2c281f' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid #1f1f2e' }}>
         {METRICS.map((m) => (
-          <Box key={m.label} sx={{ px: 1.5, py: 1.25, borderRight: '1px solid #2c281f', '&:last-child': { borderRight: 0 } }}>
-            <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8a8376' }}>
+          <Box key={m.label} sx={{ px: 1.5, py: 1.25, borderRight: '1px solid #1f1f2e', '&:last-child': { borderRight: 0 } }}>
+            <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9ca3af' }}>
               {m.label}
             </Typography>
-            <Typography sx={{ fontSize: 22, fontWeight: 650, letterSpacing: '-0.03em', color: '#f3eee4' }}>
+            <Typography sx={{ fontSize: 22, fontWeight: 650, letterSpacing: '-0.03em', color: '#ffffff' }}>
               {m.value}
             </Typography>
           </Box>
         ))}
       </Box>
       <Box sx={{ px: 1.5, py: 1, display: 'grid', gridTemplateColumns: '88px 1fr 56px 96px', gap: 1 }}>
-        <Typography sx={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a8376' }}>ID</Typography>
-        <Typography sx={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a8376' }}>Finding</Typography>
-        <Typography sx={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a8376' }}>Sev</Typography>
-        <Typography sx={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a8376' }}>Asset</Typography>
+        <Typography sx={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9ca3af' }}>ID</Typography>
+        <Typography sx={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9ca3af' }}>Finding</Typography>
+        <Typography sx={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9ca3af' }}>Sev</Typography>
+        <Typography sx={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9ca3af' }}>Asset</Typography>
       </Box>
       {ROWS.map((row, i) => (
         <Box
@@ -74,16 +74,16 @@ const ConsolePreview: React.FC = () => {
             display: 'grid',
             gridTemplateColumns: '88px 1fr 56px 96px',
             gap: 1,
-            borderTop: '1px solid #2c281f',
-            '&:hover': { bgcolor: 'rgba(196,120,58,0.08)' },
+            borderTop: '1px solid #1f1f2e',
+            '&:hover': { bgcolor: 'rgba(124,58,237,0.08)' },
           }}
         >
-          <Typography sx={{ fontFamily: 'Source Code Pro, monospace', fontSize: 12, color: '#b8b0a2' }}>{row.id}</Typography>
+          <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#d1d5db' }}>{row.id}</Typography>
           <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{row.title}</Typography>
           <Typography sx={{ fontSize: 11, fontWeight: 700, color: row.sev === 'HIGH' ? '#d97706' : row.sev === 'MED' ? '#c9a227' : '#3d7ab8' }}>
             {row.sev}
           </Typography>
-          <Typography sx={{ fontFamily: 'Source Code Pro, monospace', fontSize: 12, color: '#b8b0a2' }}>{row.asset}</Typography>
+          <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#d1d5db' }}>{row.asset}</Typography>
         </Box>
       ))}
     </Box>

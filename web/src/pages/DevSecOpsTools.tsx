@@ -32,7 +32,7 @@ const tools = [
     category: 'IaC',
     description: 'Provision cloud and Kubernetes infrastructure reproducibly.',
     icon: <AccountTree />,
-    accent: '#0284c7',
+    accent: '#7c3aed',
     docs: 'https://www.terraform.io/docs',
   },
   {
@@ -72,7 +72,7 @@ const tools = [
     category: 'Security',
     description: 'Static analysis for code vulnerabilities and secure coding issues.',
     icon: <Code />,
-    accent: '#0284c7',
+    accent: '#7c3aed',
     docs: 'https://codeql.github.com/docs/',
   },
   {

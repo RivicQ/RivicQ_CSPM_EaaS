@@ -493,7 +493,7 @@ const Layout: React.FC = () => {
               justifyContent: 'flex-start',
               fontWeight: 600,
               fontSize: '0.75rem',
-              bgcolor: 'rgba(196,120,58,0.16)',
+              bgcolor: 'rgba(124,58,237,0.16)',
               color: designSystem.proBlue.accentLight,
               border: 1,
               borderColor: 'rgba(224,154,90,0.32)',
@@ -588,7 +588,7 @@ const Layout: React.FC = () => {
                 },
               }}
             />
-            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'Source Code Pro, monospace' }}>
+            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'JetBrains Mono, monospace' }}>
               ⌘K
             </Typography>
           </Box>
@@ -745,7 +745,7 @@ const Layout: React.FC = () => {
                   fontWeight: 500,
                   flexGrow: 1,
                   color: isDarkMode ? blue.textPrimary : blue.navyMid,
-                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : '#8a8376', opacity: 1 },
+                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : '#9ca3af', opacity: 1 },
                 }}
               />
               <IconButton size="small" onClick={() => setMobileSearchOpen(false)} aria-label="Close search">

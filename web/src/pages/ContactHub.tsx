@@ -22,7 +22,7 @@ const ContactHub: React.FC = () => {
           <Grid item xs={12} sm={6} md={4} key={c.email}>
             <GlassCard hover={false} padding={2.25}>
               <Typography variant="overline" color="primary" fontWeight={700}>{c.label}</Typography>
-              <Typography fontFamily='"Source Code Pro", ui-monospace, monospace' fontWeight={700} sx={{ my: 1 }}>
+              <Typography fontFamily='"JetBrains Mono", ui-monospace, monospace' fontWeight={700} sx={{ my: 1 }}>
                 {c.email}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{c.purpose}</Typography>

@@ -76,7 +76,7 @@ const InboxHero: React.FC<InboxHeroProps> = ({
           {meta && <Box sx={{ mt: 1.5 }}>{meta}</Box>}
           {action && <Box sx={{ mt: 2 }}>{action}</Box>}
         </Box>
-        <Box sx={{ bgcolor: (t) => (t.palette.mode === 'dark' ? '#0c0b09' : '#efe8da') }}>
+        <Box sx={{ bgcolor: (t) => (t.palette.mode === 'dark' ? '#000000' : '#f1f5f9') }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Typography sx={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700 }}>
               Today’s queue
@@ -105,7 +105,7 @@ const InboxHero: React.FC<InboxHeroProps> = ({
                 </Typography>
               </Stack>
               {item.resource && (
-                <Typography sx={{ fontFamily: 'Source Code Pro, monospace', fontSize: 11, color: 'text.secondary' }}>
+                <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'text.secondary' }}>
                   {item.resource}
                 </Typography>
               )}
