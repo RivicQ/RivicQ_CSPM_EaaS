@@ -88,9 +88,9 @@ const getSeverityIcon = (severity: string) => {
     case 'medium':
       return <Warning sx={{ color: '#eab308' }} />;
     case 'low':
-      return <Info sx={{ color: '#0284c7' }} />;
+      return <Info sx={{ color: '#7c3aed' }} />;
     default:
-      return <Info sx={{ color: '#0284c7' }} />;
+      return <Info sx={{ color: '#7c3aed' }} />;
   }
 };
 

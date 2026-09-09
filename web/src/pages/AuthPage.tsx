@@ -18,7 +18,6 @@ import {
   Tabs,
   TextField,
   Typography,
-  useTheme,
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
@@ -42,6 +41,7 @@ import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { proBlueContainedButtonSx } from '../theme/designSystem';
+import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 
 interface AuthPageProps {
   defaultMode?: 'login' | 'register';
@@ -65,8 +65,6 @@ function passwordStrength(password: string): { score: number; label: string; col
 const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const {
     login,
     register,
@@ -229,14 +227,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   const providerName = backendReachable ? 'RivicQ Identity' : 'Supabase';
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: { xs: 4, md: 8 } }}>
-      <Container maxWidth="sm" sx={{ position: 'relative' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#000', py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
+      <NebulaBackdrop />
+      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-          <BrandLogo dark={isDark} />
+          <BrandLogo dark />
           <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
         </Box>
         <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
-          {mode === 'register' ? 'Create workspace' : 'Security Cloud'}
+          {mode === 'register' ? 'Create workspace' : 'Cryptographic security'}
         </Typography>
         <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', mb: 2, mt: 0.5 }}>
           {mode === 'register' ? 'Stand up a workspace.' : 'Sign in to your workspace.'}
@@ -266,7 +265,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       borderRadius: 1,
                       border: 1,
                       borderColor: 'divider',
-                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(196,120,58,0.12)' : 'rgba(239,232,218,0.95)'),
+                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(124,58,237,0.12)' : 'rgba(124,58,237,0.08)'),
                       backdropFilter: 'none',
                     }}
                   >

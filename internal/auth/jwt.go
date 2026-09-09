@@ -613,6 +613,39 @@ func (as *AuthService) JWTAuthMiddleware(permissions []string) gin.HandlerFunc {
 	}
 }
 
+// OptionalJWTAuthMiddleware binds JWT claims when a Bearer token is present.
+// Missing Authorization continues as the public tenant (Home CBOM pilot).
+// An invalid Bearer token is rejected so a failed login cannot fall into the public workspace.
+func (as *AuthService) OptionalJWTAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if strings.TrimSpace(authHeader) == "" {
+			c.Next()
+			return
+		}
+
+		tokenString := authHeader
+		if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+			tokenString = authHeader[7:]
+		}
+
+		claims, err := as.tokenManager.ValidateToken(tokenString)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		c.Set("user_id", claims.UserID)
+		c.Set("tenant_id", claims.TenantID)
+		c.Set("email", claims.Email)
+		c.Set("role", claims.Role)
+		c.Set("edition", claims.Edition)
+		c.Set("permissions", claims.Permissions)
+		c.Next()
+	}
+}
+
 // hasPermissions checks if user has all required permissions
 func hasPermissions(userPermissions, requiredPermissions []string) bool {
 	if len(requiredPermissions) == 0 {

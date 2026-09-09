@@ -18,8 +18,7 @@ func GetScanQBOM(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		id := c.Param("id")
 		logger.WithField("scan_id", id).Info("Serving QBOM for scan")
 
-		sm := discovery.GetScanManager()
-		job, ok := sm.GetScan(id)
+		job, ok := tenantScanJob(c, id)
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
 			return

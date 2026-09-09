@@ -12,8 +12,7 @@ import (
 )
 
 // enterpriseDefaultTenant is used as a fallback when the request does not
-// carry a tenant (JWT claim or X-Tenant-ID header). It matches the default
-// tenant seeded by the shared handlers.
+// carry a JWT/API-key tenant claim. The X-Tenant-ID header is ignored.
 const enterpriseDefaultTenant = "00000000-0000-0000-0000-000000000001"
 
 // quantumVulnerableAlgorithms maps well-known public-key / hash algorithms to

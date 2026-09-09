@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, Box, Button, Chip, Grid, Stack, Typography } from '@mui/material';
 import { Lock, Science, Shield, Memory, Badge, Description } from '@mui/icons-material';
 import PageFrame from '../components/PageFrame';
-import { GlassCard } from '../components/ui';
+import { GlassCard, EmptyState } from '../components/ui';
 import BomRibbon from '../components/bom/BomRibbon';
 import { bomService } from '../services/api';
 import { layersForEdition } from '../data/bomFramework';
@@ -85,6 +85,32 @@ const BomIntelligence: React.FC = () => {
           </Grid>
         ))}
       </Grid>
+
+      <GlassCard hover={false} delay={0}>
+        <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>CBOM explorer</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Records from GET /bom/unified for this workspace. Empty layers mean no scan data — not a live cloud estate.
+        </Typography>
+        {(!data?.cbom || data.cbom.length === 0) && (
+          <EmptyState
+            title="No CBOM components yet"
+            description="Run rivicq scan . or the website scanner. This list is not a simulated inventory."
+            action={{ label: 'Open scans', onClick: () => navigate('/scanner') }}
+          />
+        )}
+        {Array.isArray(data?.cbom) && data.cbom.length > 0 && (
+          <Stack spacing={1}>
+            {data.cbom.slice(0, 40).map((row: any, i: number) => (
+              <Box key={row.id || row.name || i} sx={{ p: 1.25, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                <Typography fontWeight={700}>{row.name || row.component || row.algorithm || `Component ${i + 1}`}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {[row.algorithm, row.version, row.purl, row.risk].filter(Boolean).join(' · ') || 'No extra fields on this record'}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </GlassCard>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 3 }} flexWrap="wrap" useFlexGap>
         <Button variant="outlined" onClick={() => navigate('/pipeline')}>DevSecOps pipeline</Button>

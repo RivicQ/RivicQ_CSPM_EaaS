@@ -71,6 +71,7 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 	}
 
 	authService := auth.NewAuthService(jwtSecret, userStore)
+	router.Use(authService.OptionalJWTAuthMiddleware())
 	SetupAuthRoutes(router, logger, authService, allowedDomains)
 	return authService
 }

@@ -123,7 +123,7 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 		}})
 		return
 	}
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT id, tenant_id, framework, scope, controls, status, score, 
@@ -171,7 +171,7 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) CreateFramework(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var req struct {
 		Framework string `json:"framework" binding:"required"`
@@ -375,7 +375,7 @@ func (h *ComplianceHandler) GetComplianceDashboard(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetAllComplianceDashboards(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	frameworks := []string{"iso27001", "dora", "gdpr", "eu_ai_act", "soc2", "nist", "pqc"}
 
@@ -458,7 +458,7 @@ func (h *ComplianceHandler) RemediationPlan(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) ListReports(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT id, tenant_id, report_type, framework, title, generated_at
@@ -528,7 +528,7 @@ func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
 	}
 
 	query := `UPDATE compliance_frameworks SET delve_integration = true WHERE tenant_id = $1`
-	_, _ = h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
+	_, _ = h.db.Exec(query, tenantIDFor(c))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "connected",
@@ -538,7 +538,7 @@ func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetDelveStatus(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	connected := false
 	err := h.db.QueryRow(
 		`SELECT delve_integration FROM compliance_frameworks WHERE tenant_id = $1 LIMIT 1`,
@@ -622,7 +622,7 @@ func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
 	}
 
 	query := `UPDATE compliance_frameworks SET kertos_integration = true WHERE tenant_id = $1`
-	_, _ = h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
+	_, _ = h.db.Exec(query, tenantIDFor(c))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "connected",
@@ -632,7 +632,7 @@ func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetKertosStatus(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	connected := false
 	err := h.db.QueryRow(
 		`SELECT kertos_integration FROM compliance_frameworks WHERE tenant_id = $1 LIMIT 1`,
@@ -692,7 +692,7 @@ func (h *ComplianceHandler) SyncKertosData(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) ListRisks(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	level := c.Query("level")
 
 	query := `
@@ -721,7 +721,7 @@ func (h *ComplianceHandler) ListRisks(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) CreateRisk(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var risk map[string]interface{}
 	if err := c.ShouldBindJSON(&risk); err != nil {

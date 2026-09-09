@@ -60,7 +60,7 @@ This repository includes cryptographic inventory, scanning, and related document
 
 “RivicQ”, the RivicQ logo, “Security Cloud”, and “CryptoBOM” product names are trademarks of RivicQ GmbH.
 
-The RivicQ console visual identity is a **dark-native zinc** Security Cloud theme (`#09090B` / `#18181B`) with Inter and JetBrains Mono. Light mode remains available.
+The RivicQ console visual identity is a **deep-space nebula** Security Cloud theme (`#000000` canvas, violet `#7C3AED`) with Inter and JetBrains Mono. Light mode remains available.
 
 AWS, Azure, Google Cloud, GitHub, CycloneDX, Qiskit, Kubernetes, and other vendor or project names are trademarks of their respective owners. Use of those names is for interoperability description only and does not imply affiliation, sponsorship, or certification.
 
@@ -112,7 +112,7 @@ Public desks: [docs/contact.html](docs/contact.html) ([CONTACT.md](docs/CONTACT.
 
 ---
 
-## NEXUS Quantum Security Fabric
+## Quantum Security Fabric
 
-NEXUS is an original product identity and labeled Community demo in this repository (`nexus/`, `/nexus` on GitHub Pages). It does not copy the Community console’s visual brand. It does **not** store or display customer secrets, private keys, or production credentials. Control mappings and PQC algorithm names are not certifications or completed-migration claims. Enterprise rights remain licensed as in §1.
+**Quantum Security Fabric** (wordmark **FABRIC**) is an original product identity and labeled Community demo in this repository (`fabric/`, `/fabric` on GitHub Pages). It does not copy the Community console’s visual brand. It does **not** store or display customer secrets, private keys, or production credentials. Control mappings and PQC algorithm names are not certifications or completed-migration claims. Enterprise rights remain licensed as in §1.
 

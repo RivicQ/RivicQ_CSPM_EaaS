@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import { motion, useReducedMotion } from 'framer-motion';
 
 const NODES = [
-  { x: 40, y: 70, label: 'Repo', c: '#60a5fa' },
+  { x: 40, y: 70, label: 'Repo', c: '#a78bfa' },
   { x: 160, y: 36, label: 'App', c: '#a78bfa' },
   { x: 280, y: 70, label: 'TLS', c: '#f59e0b' },
   { x: 400, y: 36, label: 'Key', c: '#f472b6' },
