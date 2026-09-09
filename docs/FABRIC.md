@@ -1,17 +1,15 @@
 # Quantum Security Fabric (FABRIC)
 
-Original product identity for a unified enterprise security graph. Previously labeled **NEXUS**. **Not** a reskin of the Community console, and **not** a certification of this repository or of any customer.
+Original product identity for a unified enterprise security graph. **Not** a reskin of the Community console, and **not** a certification of this repository or of any customer.
 
-Live labeled demo (GitHub Pages): https://rivicq.github.io/RivicQ_CSPM_EaaS/nexus/
+Live labeled demo (GitHub Pages): https://rivicq.github.io/RivicQ_CSPM_EaaS/fabric/
 
-Source: [`nexus/`](../nexus/) · [nexus/README.md](../nexus/README.md)
+Source: [`fabric/`](../fabric/) · [fabric/README.md](../fabric/README.md)
 
 **FABRIC** · Quantum Security Fabric  
 Tagline: *See every asset. Understand every risk. Secure what comes next.*
 
 The product proposition is **unified security graph + CSPM + BOM intelligence + CryptoBOM + quantum readiness + compliance + gated AI remediation**. A cloud misconfiguration is connected to the workload, identity, application, dependency, cryptographic asset, certificate, data, regulation, and business impact.
-
-The public URL and source directory stay `/nexus` and `nexus/` so existing links keep working.
 
 ## Graphs
 

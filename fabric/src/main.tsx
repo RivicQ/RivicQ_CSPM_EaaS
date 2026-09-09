@@ -7,7 +7,7 @@ import './styles/app.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter basename="/RivicQ_CSPM_EaaS/nexus">
+    <BrowserRouter basename="/RivicQ_CSPM_EaaS/fabric">
       <SessionProvider>
         <App />
       </SessionProvider>

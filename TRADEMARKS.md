@@ -18,7 +18,7 @@ Nominative fair use remains available under applicable trademark law.
 
 The Community console is RivicQ’s **Security Cloud** design: dark-native zinc (`#09090B` / `#18181B`) with **Inter** and **JetBrains Mono** (open fonts). Light mode remains available.
 
-**Quantum Security Fabric** (wordmark **FABRIC**, previously labeled NEXUS) is a separate product identity (obsidian fabric, Public Sans, Source Code Pro). It is not IBM Carbon or IBM Plex, and it is not a reskin of the Security Cloud console.
+**Quantum Security Fabric** (wordmark **FABRIC**) is a separate product identity (obsidian fabric, Public Sans, Source Code Pro). It is not IBM Carbon or IBM Plex, and it is not a reskin of the Security Cloud console.
 
 
 ## Third-party names

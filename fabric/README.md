@@ -1,8 +1,8 @@
 # Quantum Security Fabric (FABRIC)
 
-Original product identity in this repository (previously labeled NEXUS). **Not** a reskin of the RivicQ Community console.
+Original product identity in this repository. **Not** a reskin of the RivicQ Community console.
 
-Live labeled demo: https://rivicq.github.io/RivicQ_CSPM_EaaS/nexus/
+Live labeled demo: https://rivicq.github.io/RivicQ_CSPM_EaaS/fabric/
 
 Tagline: *See every asset. Understand every risk. Secure what comes next.*
 
@@ -15,14 +15,14 @@ Tagline: *See every asset. Understand every risk. Secure what comes next.*
 - GitHub Pages does not collect payment or attach live cloud / IdP / vault credentials.
 - Do not contribute customer data or secrets to this tree.
 
-See [docs/NEXUS.md](../docs/NEXUS.md), [LEGAL.md](../LEGAL.md), [PRIVACY.md](../PRIVACY.md).
+See [docs/FABRIC.md](../docs/FABRIC.md), [LEGAL.md](../LEGAL.md), [PRIVACY.md](../PRIVACY.md).
 
 ## Local
 
 ```bash
-cd nexus
+cd fabric
 npm ci
 npm run dev
 ```
 
-The production base path is `/RivicQ_CSPM_EaaS/nexus/`. Use `npm run preview` after `npm run build` to exercise the same basename.
+The production base path is `/RivicQ_CSPM_EaaS/fabric/`. Use `npm run preview` after `npm run build` to exercise the same basename.

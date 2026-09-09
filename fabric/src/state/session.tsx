@@ -18,7 +18,7 @@ const Ctx = createContext<Session | null>(null);
 
 const readMode = (): Mode => {
   try {
-    const raw = sessionStorage.getItem('fabric-mode') || sessionStorage.getItem('nexus-mode');
+    const raw = sessionStorage.getItem('fabric-mode');
     return raw === 'ciso' || raw === 'auditor' || raw === 'engineer' ? raw : 'engineer';
   } catch {
     return 'engineer';

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Changed
-- **Quantum Security Fabric** (wordmark **FABRIC**) replaces the NEXUS product label. Source and Pages path stay `nexus/` / `/nexus`. Finding IDs are `QSF-*`. Discovery, each detection, attack stage, asset, and domain inventory has a focused security graph ([docs/NEXUS.md](docs/NEXUS.md)).
+- **Quantum Security Fabric** (wordmark **FABRIC**) lives at `fabric/` and `/fabric`. Finding IDs are `QSF-*`. Discovery, each detection, attack stage, asset, and domain inventory has a focused security graph ([docs/FABRIC.md](docs/FABRIC.md)).
 
 ## [1.6.4] - 2026-09-06
 
@@ -31,13 +31,13 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Security Cloud chrome is dark-native zinc (Inter + JetBrains Mono) with Cmd+K search, workspace switcher, and time-range controls. Features and APIs are unchanged.
-- GitHub Pages now creates `web/build/docs` before publishing NEXUS.md.
+- GitHub Pages now creates `web/build/docs` before publishing FABRIC.md.
 - golangci-lint ignores fixture trees; errcheck/staticcheck nits in OAuth, dotenv, and PQC seed paths are closed.
 
 ## [1.6.0] - 2026-09-06
 
 ### Added
-- **NEXUS Quantum Security Fabric** — original enterprise security-graph demo (`nexus/`, `/nexus` on Pages): command center, CSPM, graph, CryptoBOM, PQC/HNDL, five-BOM views, secrets/PKI (names only), compliance mappings, gated AI/automation, and disabled checkout. Labeled synthetic data only; secret values are never rendered ([docs/NEXUS.md](docs/NEXUS.md)).
+- **Quantum Security Fabric** — original enterprise security-graph demo (`fabric/`, `/fabric` on Pages): command center, CSPM, graph, CryptoBOM, PQC/HNDL, five-BOM views, secrets/PKI (names only), compliance mappings, gated AI/automation, and disabled checkout. Labeled synthetic data only; secret values are never rendered ([docs/FABRIC.md](docs/FABRIC.md)).
 
 ## [1.5.9] - 2026-09-03
 

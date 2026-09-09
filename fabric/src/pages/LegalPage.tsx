@@ -5,7 +5,7 @@ const LegalPage: React.FC = () => (
   <div className="landing">
     <h1 className="h1">Legal, editions, and public-safety notes</h1>
     <p className="lede">
-      Quantum Security Fabric is an original product identity in this repository (previously labeled NEXUS). Community source is Apache-2.0.
+      Quantum Security Fabric is an original product identity in this repository. Community source is Apache-2.0.
       Enterprise connectors, SSO, and support require a written license. Cloning GitHub does not grant Enterprise.
     </p>
     <ul>

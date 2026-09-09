@@ -34,7 +34,7 @@ UI colors follow the **Security Cloud** warm-ink ledger (`#0C0B09` canvas, `#171
 - [Client architecture](CLIENT_ARCHITECTURE.md) — discover → mitigate → report from OSS to Enterprise
 - [Horizon UX / UI](UX_DESIGN.md) — core product visual system
 - [Contact](contact.html) — public desks on @rivicq.com ([CONTACT.md](CONTACT.md))
-- [Quantum Security Fabric](NEXUS.md) — original security-graph demo (FABRIC wordmark; path `/nexus`; no customer secrets)
+- [Quantum Security Fabric](FABRIC.md) — original security-graph demo (FABRIC wordmark; path `/fabric`; no customer secrets)
 - [Security Intelligence Engine](security-intelligence.md)
 - [Security Control Matrix](SECURITY_CONTROL_MATRIX.md) — mappings, not certifications
 - [Rollback Runbook](ROLLBACK_RUNBOOK.md)
