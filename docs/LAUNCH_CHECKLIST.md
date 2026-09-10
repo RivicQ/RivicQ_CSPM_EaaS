@@ -1,7 +1,7 @@
 # Full product ready checklist
 
 - [x] Community CLI `rivicq scan .` and GitHub Action policy gate
-- [x] Clear sky-blue / white / Outfit UI on auth, dashboard, and docs hub
+- [x] Deep-space nebula UI (black canvas, violet `#7C3AED`, Inter) on auth, dashboard, and docs hub
 - [x] Sign-In / Register: Community vs Enterprise, validation, demo access, Supabase on Pages
 - [x] Community dashboard does not mix simulated enterprise estates (unless Demo)
 - [x] Inventory search, sort, JSON + print-to-PDF export
