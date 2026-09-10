@@ -21,10 +21,10 @@ const GLYPHS = [
  * key-distribution orbits, and cryptographic algorithm glyphs.
  */
 const CryptoQuantumBackdrop: React.FC<CryptoQuantumBackdropProps> = ({ dark = true }) => {
-  const accent = dark ? 'rgba(186,230,253,0.28)' : 'rgba(14,165,233,0.22)';
-  const accentSoft = dark ? 'rgba(186,230,253,0.1)' : 'rgba(14,165,233,0.1)';
-  const glyphColor = dark ? 'rgba(186,230,253,0.32)' : 'rgba(3,105,161,0.45)';
-  const orbit = dark ? 'rgba(186,230,253,0.14)' : 'rgba(14,165,233,0.14)';
+  const accent = dark ? 'rgba(196,181,253,0.28)' : 'rgba(124,58,237,0.22)';
+  const accentSoft = dark ? 'rgba(196,181,253,0.1)' : 'rgba(124,58,237,0.1)';
+  const glyphColor = dark ? 'rgba(196,181,253,0.32)' : 'rgba(3,105,161,0.45)';
+  const orbit = dark ? 'rgba(196,181,253,0.14)' : 'rgba(124,58,237,0.14)';
 
   return (
     <Box aria-hidden sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
@@ -99,7 +99,7 @@ const CryptoQuantumBackdrop: React.FC<CryptoQuantumBackdropProps> = ({ dark = tr
             borderRadius: 1,
             border: `1px solid ${accentSoft}`,
             color: glyphColor,
-            fontFamily: '"Source Code Pro", ui-monospace, monospace',
+            fontFamily: '"JetBrains Mono", ui-monospace, monospace',
             fontSize: '0.7rem',
             letterSpacing: '0.04em',
             fontWeight: 500,

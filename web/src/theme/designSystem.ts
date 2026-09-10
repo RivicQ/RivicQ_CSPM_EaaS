@@ -4,25 +4,25 @@ import appTypography from './typography';
 
 /** Creative professional design system — shared across the entire product */
 export const designSystem = {
-  radius: { sm: 6, md: 10, lg: 14, xl: 20, pill: 9999 },
+  radius: { sm: 8, md: 12, lg: 16, xl: 24, pill: 9999 },
   font: {
     display: appTypography.fontFamily,
     mono: appTypography.fontFamilyMono,
     metric: appTypography.metric.fontFamily,
   },
   gradient: {
-    brand: 'none',
-    brandSoft: 'none',
-    heroLight: '#f7f3eb',
-    heroDark: '#0c0b09',
-    sidebar: '#0c0b09',
-    sidebarDark: '#0c0b09',
-    meshLight: '#f7f3eb',
-    meshDark: '#0c0b09',
+    brand: 'linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%)',
+    brandSoft: 'radial-gradient(ellipse 70% 55% at 50% 42%, rgba(124,58,237,0.42), transparent 68%)',
+    heroLight: '#f8fafc',
+    heroDark: '#000000',
+    sidebar: '#000000',
+    sidebarDark: '#000000',
+    meshLight: '#f8fafc',
+    meshDark: '#000000',
   },
   horizon: {
-    wash: 'none',
-    band: '#c4783a',
+    wash: 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.38), transparent 70%)',
+    band: '#7c3aed',
   },
   shadow: {
     sm: 'none',
@@ -34,25 +34,25 @@ export const designSystem = {
     spring: '0.15s ease',
     smooth: '0.15s ease',
   },
-  /** Warm-ink ledger surface — enterprise density, copper accent, semantic status only */
+  /** Deep-space console — black canvas, violet accent, semantic status only */
   proBlue: {
-    navy: '#0c0b09',
-    navyMid: '#17150f',
-    navyLight: '#1f1c15',
-    royal: '#c4783a',
-    accent: '#c4783a',
-    accentLight: '#e09a5a',
-    accentMuted: '#b8b0a2',
-    sidebar: '#0c0b09',
-    commandCenter: '#17150f',
-    commandGlow: 'none',
-    border: '#2c281f',
-    textPrimary: '#f3eee4',
-    textSecondary: '#b8b0a2',
-    textMuted: '#8a8376',
-    navActive: 'rgba(196,120,58,0.16)',
-    navHover: 'rgba(243,238,228,0.04)',
-    shadow: 'none',
+    navy: '#000000',
+    navyMid: '#0a0a0f',
+    navyLight: '#12121a',
+    royal: '#7c3aed',
+    accent: '#7c3aed',
+    accentLight: '#a78bfa',
+    accentMuted: '#d1d5db',
+    sidebar: '#000000',
+    commandCenter: '#0a0a0f',
+    commandGlow: '0 0 48px rgba(124,58,237,0.22)',
+    border: '#1f1f2e',
+    textPrimary: '#ffffff',
+    textSecondary: '#d1d5db',
+    textMuted: '#9ca3af',
+    navActive: 'rgba(124,58,237,0.22)',
+    navHover: 'rgba(255,255,255,0.05)',
+    shadow: '0 18px 48px rgba(0,0,0,0.45)',
   },
 } as const;
 
@@ -63,8 +63,8 @@ export const meshBackground = (theme: Theme) => ({
 
 export const glassSurface = (theme: Theme, elevated = false) => ({
   background: theme.palette.mode === 'dark'
-    ? elevated ? theme.palette.background.paper : '#17150f'
-    : elevated ? '#fffdf8' : '#f7f3eb',
+    ? elevated ? theme.palette.background.paper : '#0a0a0f'
+    : elevated ? '#ffffff' : '#f8fafc',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
   border: `1px solid ${theme.palette.divider}`,
@@ -105,15 +105,15 @@ export const sidebarScrollSx = {
   overflowY: 'auto',
   overflowX: 'hidden',
   scrollbarWidth: 'thin',
-  scrollbarColor: '#2c281f transparent',
+  scrollbarColor: '#1f1f2e transparent',
   '&::-webkit-scrollbar': { width: 4 },
   '&::-webkit-scrollbar-track': { background: 'transparent' },
   '&::-webkit-scrollbar-thumb': {
-    background: '#2c281f',
+    background: '#1f1f2e',
     borderRadius: 99,
   },
   '&::-webkit-scrollbar-thumb:hover': {
-    background: '#3a3428',
+    background: '#2e1065',
   },
 };
 
@@ -185,19 +185,19 @@ export const heroPrimaryCtaSx = {
   px: 3,
   py: 1.15,
   minHeight: 42,
-  borderRadius: `${designSystem.radius.md}px`,
+  borderRadius: `${designSystem.radius.pill}px`,
   fontWeight: 600,
   fontSize: '0.875rem',
   letterSpacing: '-0.01em',
   textTransform: 'none',
-  color: `#0c0b09 !important`,
+  color: `#ffffff !important`,
   border: 'none',
   boxShadow: 'none',
   backgroundImage: 'none !important',
-  backgroundColor: '#c4783a !important',
+  backgroundColor: '#7c3aed !important',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': { color: 'inherit' },
   '&:hover': {
-    backgroundColor: '#a8622e !important',
+    backgroundColor: '#6d28d9 !important',
     backgroundImage: 'none !important',
     boxShadow: 'none',
     transform: 'none',
@@ -209,7 +209,7 @@ export const heroSecondaryCtaSx = {
   px: 3,
   py: 1.15,
   minHeight: 42,
-  borderRadius: `${designSystem.radius.md}px`,
+  borderRadius: `${designSystem.radius.pill}px`,
   fontWeight: 600,
   fontSize: '0.875rem',
   letterSpacing: '-0.01em',
@@ -249,7 +249,7 @@ export const proBlueContainedButtonSx = {
   '&.Mui-disabled': {
     backgroundColor: `${tokens.colors.rivicq[800]} !important`,
     backgroundImage: 'none !important',
-    color: '#8a8376 !important',
+    color: '#9ca3af !important',
     borderColor: 'transparent',
     boxShadow: 'none',
   },
@@ -258,11 +258,12 @@ export const proBlueContainedButtonSx = {
 /** Button/icon overrides for actions placed on pro-blue surfaces */
 export const proBlueActionStackSx = {
   '& .MuiButton-contained, & .MuiButton-containedPrimary': {
-    bgcolor: '#fff',
-    color: designSystem.proBlue.navyMid,
+    bgcolor: '#7c3aed',
+    color: '#ffffff',
     fontWeight: 600,
     boxShadow: 'none',
-    '&:hover': { bgcolor: 'rgba(255,255,255,0.92)', boxShadow: 'none' },
+    borderRadius: 999,
+    '&:hover': { bgcolor: '#6d28d9', boxShadow: 'none' },
   },
   '& .MuiButton-outlined': {
     color: designSystem.proBlue.textPrimary,
@@ -291,11 +292,11 @@ export const proBlueBadgeSx = {
 
 /** Top app bar — aligns with pro-blue sidebar & command center */
 export const appBarPaperSx = (mode: 'light' | 'dark') => ({
-  bgcolor: mode === 'dark' ? '#0c0b09' : '#fffdf8',
+  bgcolor: mode === 'dark' ? '#000000' : '#ffffff',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  color: mode === 'dark' ? designSystem.proBlue.textPrimary : '#1a1712',
-  borderBottom: `1px solid ${mode === 'dark' ? '#2c281f' : '#e4dccb'}`,
+  color: mode === 'dark' ? designSystem.proBlue.textPrimary : '#0a0a0f',
+  borderBottom: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
   boxShadow: 'none',
   backgroundImage: 'none',
 });
@@ -307,25 +308,25 @@ export const appBarSearchSx = (mode: 'light' | 'dark') => ({
   px: 1.5,
   py: 0.625,
   width: { md: 240, lg: 320 },
-  bgcolor: mode === 'dark' ? '#17150f' : '#efe8da',
-  border: `1px solid ${mode === 'dark' ? '#2c281f' : '#e4dccb'}`,
+  bgcolor: mode === 'dark' ? '#0a0a0f' : '#f1f5f9',
+  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
   transition: designSystem.motion.smooth,
   '&:focus-within': {
-    bgcolor: mode === 'dark' ? '#17150f' : '#fffdf8',
-    borderColor: '#c4783a',
+    bgcolor: mode === 'dark' ? '#0a0a0f' : '#ffffff',
+    borderColor: '#7c3aed',
     boxShadow: 'none',
   },
 });
 
 export const appBarIconButtonSx = (mode: 'light' | 'dark') => ({
   borderRadius: `${designSystem.radius.sm}px`,
-  border: `1px solid ${mode === 'dark' ? '#2c281f' : '#e4dccb'}`,
-  bgcolor: mode === 'dark' ? '#17150f' : '#fffdf8',
-  color: mode === 'dark' ? designSystem.proBlue.textSecondary : '#1a1712',
+  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
+  bgcolor: mode === 'dark' ? '#0a0a0f' : '#ffffff',
+  color: mode === 'dark' ? designSystem.proBlue.textSecondary : '#0a0a0f',
   width: 36,
   height: 36,
   '&:hover': {
-    bgcolor: mode === 'dark' ? 'rgba(243,238,228,0.08)' : 'rgba(196,120,58,0.08)',
+    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(124,58,237,0.08)',
     borderColor: mode === 'dark' ? designSystem.proBlue.accentMuted : designSystem.proBlue.accent,
   },
 });
@@ -338,19 +339,19 @@ export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolea
   display: { xs: 'none', sm: 'inline-flex' },
   bgcolor: isEnterprise
     ? mode === 'dark'
-      ? 'rgba(196,120,58,0.2)'
-      : 'rgba(168,98,46,0.1)'
+      ? 'rgba(124,58,237,0.2)'
+      : 'rgba(109,40,217,0.1)'
     : mode === 'dark'
-      ? '#17150f'
-      : '#efe8da',
+      ? '#0a0a0f'
+      : '#f1f5f9',
   color: isEnterprise
     ? mode === 'dark'
-      ? '#f3eee4'
-      : '#864c24'
+      ? '#ffffff'
+      : '#5b21b6'
     : mode === 'dark'
       ? designSystem.proBlue.accentMuted
-      : '#5c564c',
-  border: `1px solid ${mode === 'dark' ? '#2c281f' : '#e4dccb'}`,
+      : '#4b5563',
+  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
 });
 
 export const appBarPageTitleSx = (mode: 'light' | 'dark') => ({

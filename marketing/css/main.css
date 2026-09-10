@@ -172,21 +172,21 @@ button {
   padding: var(--space-3) var(--space-5);
   font-size: var(--text-sm);
   font-weight: 600;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   transition: all var(--transition);
   white-space: nowrap;
 }
 
 .btn-primary {
-  background: var(--rivicq-600);
+  background: var(--rivicq-500);
   color: white;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
 }
 
 .btn-primary:hover {
   background: var(--rivicq-500);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
 }
 
 .btn-secondary {
@@ -229,7 +229,30 @@ button {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: var(--hero-gradient);
+  background:
+    radial-gradient(ellipse 55% 48% at 50% 42%, rgba(124, 58, 237, 0.42), transparent 68%),
+    #000;
+  pointer-events: none;
+}
+
+.hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.2px 1.2px at 8% 18%, rgba(255,255,255,0.85), transparent),
+    radial-gradient(1px 1px at 22% 64%, rgba(255,255,255,0.55), transparent),
+    radial-gradient(1.4px 1.4px at 41% 28%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 63% 12%, rgba(255,255,255,0.45), transparent),
+    radial-gradient(1.2px 1.2px at 78% 48%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 91% 22%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 14% 82%, rgba(255,255,255,0.65), transparent),
+    radial-gradient(1px 1px at 34% 91%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1.2px 1.2px at 55% 76%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 72% 88%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 48% 8%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1.3px 1.3px at 86% 70%, rgba(255,255,255,0.55), transparent);
+  opacity: 0.9;
   pointer-events: none;
 }
 
@@ -302,6 +325,13 @@ button {
   flex-wrap: wrap;
   gap: var(--space-4);
   margin-bottom: var(--space-10);
+}
+
+.hero-stat-note {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+  max-width: 36rem;
 }
 
 .hero-stats {

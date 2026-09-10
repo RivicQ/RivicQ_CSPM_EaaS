@@ -17,6 +17,7 @@ import { GlassCard } from '../components/ui';
 import ContextualAIAssistant from '../components/ContextualAIAssistant';
 import { useAuth } from '../context/AuthContext';
 import { tokens } from '../theme/tokens';
+import { intelligenceService } from '../services/api';
 
 const tools = [
   {
@@ -32,7 +33,7 @@ const tools = [
     category: 'IaC',
     description: 'Provision cloud and Kubernetes infrastructure reproducibly.',
     icon: <AccountTree />,
-    accent: '#0284c7',
+    accent: '#7c3aed',
     docs: 'https://www.terraform.io/docs',
   },
   {
@@ -72,16 +73,40 @@ const tools = [
     category: 'Security',
     description: 'Static analysis for code vulnerabilities and secure coding issues.',
     icon: <Code />,
-    accent: '#0284c7',
+    accent: '#7c3aed',
     docs: 'https://codeql.github.com/docs/',
   },
   {
     name: 'Syft',
     category: 'Supply Chain',
-    description: 'Generate SBOMs for apps, containers, and filesystem images.',
+    description: 'Generate SBOMs for apps, containers, and filesystem images. Invoked by rivicq scan when on PATH.',
     icon: <Science />,
     accent: '#d4af37',
     docs: 'https://github.com/anchore/syft',
+  },
+  {
+    name: 'Grype',
+    category: 'Supply Chain',
+    description: 'Match a directory against vulnerability databases. Invoked by rivicq scan when on PATH.',
+    icon: <Security />,
+    accent: '#f97316',
+    docs: 'https://github.com/anchore/grype',
+  },
+  {
+    name: 'Gitleaks',
+    category: 'Secrets',
+    description: 'Detect committed secrets. RivicQ never stores the secret value in findings.',
+    icon: <Visibility />,
+    accent: '#e11d48',
+    docs: 'https://github.com/gitleaks/gitleaks',
+  },
+  {
+    name: 'OSV Scanner',
+    category: 'SCA',
+    description: 'Match lockfiles against the OSV database. Real advisory IDs only.',
+    icon: <Assessment />,
+    accent: '#7c3aed',
+    docs: 'https://google.github.io/osv-scanner/',
   },
   {
     name: 'DevSecOps Benchmarks',
@@ -114,14 +139,40 @@ const pipelineSteps = [
 
 const DevSecOpsTools: React.FC = () => {
   const { edition } = useAuth();
+  const [probe, setProbe] = React.useState<Array<{ name: string; available?: boolean; used?: boolean; note?: string }>>([]);
+
+  React.useEffect(() => {
+    intelligenceService.getTools()
+      .then((r) => setProbe(r.data?.tools || []))
+      .catch(() => setProbe([]));
+  }, []);
 
   return (
     <PageFrame
       eyebrow="Toolchain"
       title="DevSecOps Tools"
-      subtitle="A practical reference for the CI/CD, IaC, runtime, observability, security, and supply chain tools behind RivicQ."
+      subtitle="Optional PATH scanners (Syft, Trivy, Gitleaks, OSV) run during local `rivicq scan .` when installed. Missing tools do not block the built-in engine."
       badge="Gold Cyber Stack"
     >
+      {probe.length > 0 && (
+        <Box sx={{ mb: 2.5, p: 2, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+          <Typography variant="overline" color="primary" fontWeight={800}>This API host</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            Live probe of optional outsourcing scanners. GitHub Pages has no API — this strip needs a running backend.
+          </Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {probe.filter((t) => !t.name?.startsWith('rivicq-')).map((t) => (
+              <Chip
+                key={t.name}
+                size="small"
+                label={`${t.name}: ${t.available ? 'on PATH' : 'not installed'}`}
+                color={t.available ? 'success' : 'default'}
+                variant={t.available ? 'filled' : 'outlined'}
+              />
+            ))}
+          </Stack>
+        </Box>
+      )}
       <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         {tools.map((tool, i) => (
           <Grid item xs={12} sm={6} md={4} key={tool.name}>
@@ -268,7 +319,7 @@ const DevSecOpsTools: React.FC = () => {
         contextKey="tools"
         edition={edition}
         title="DevSecOps AI Assistant"
-        description="Ask about GitHub Actions, Terraform, Kubernetes, Prometheus, Grafana, Trivy, CodeQL, Syft, or benchmark guidance."
+        description="Ask about GitHub Actions, Terraform, Kubernetes, Prometheus, Grafana, Trivy, Grype, Gitleaks, OSV, CodeQL, Syft, or benchmark guidance."
       />
     </PageFrame>
   );

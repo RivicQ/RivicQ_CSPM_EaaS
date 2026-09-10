@@ -1,18 +1,18 @@
 name: Docker Image CI
 
+# Replaces the GitHub starter workflow on main, which built a missing ./Dockerfile.
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - uses: actions/checkout@v4
+      - name: Build OSS image
+        run: docker build . --file deploy/docker/Dockerfile.oss --tag rivicq-oss:ci
+      - name: Build Enterprise image
+        run: docker build . --file deploy/docker/Dockerfile.enterprise --tag rivicq-enterprise:ci

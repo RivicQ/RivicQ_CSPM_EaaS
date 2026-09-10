@@ -12,7 +12,7 @@
 
 The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
 
-UI colors follow the **Security Cloud** warm-ink ledger (`#0C0B09` canvas, `#17150F` surface, copper `#C4783A`). Control mappings are not certifications. Designed HTML hub: [docs/index.html](index.html).
+UI colors follow the **Security Cloud** nebula ledger (`#000000` canvas, `#0A0A0F` surface, violet `#7C3AED`). Control mappings are not certifications. Designed HTML hub: [docs/index.html](index.html).
 
 ## Getting started
 
@@ -32,11 +32,14 @@ UI colors follow the **Security Cloud** warm-ink ledger (`#0C0B09` canvas, `#171
 - [OSS Architecture](oss-architecture.md)
 - [Enterprise SaaS architecture](ARCHITECTURE.md) — four-layer CBOM, control plane, hardware/QSIC scope
 - [Client architecture](CLIENT_ARCHITECTURE.md) — discover → mitigate → report from OSS to Enterprise
-- [Horizon UX / UI](UX_DESIGN.md) — core product visual system
+- [Security Cloud UX](UX_DESIGN.md) — core product visual system
+- [Operator UX audit](ux/README.md) — findings queue, IA, scorecard
 - [Contact](contact.html) — public desks on @rivicq.com ([CONTACT.md](CONTACT.md))
-- [NEXUS Quantum Security Fabric](NEXUS.md) — original security-graph demo (no customer secrets)
+- [RivicQ Graph](FABRIC.md) — labeled security-graph demo (wordmark GRAPH; path `/fabric`; formerly NEXUS / FABRIC; no customer secrets)
+- [Graph rename note](GRAPH.md)
 - [Security Intelligence Engine](security-intelligence.md)
 - [Security Control Matrix](SECURITY_CONTROL_MATRIX.md) — mappings, not certifications
+- [Optional scanners](INTEGRATIONS.md) — Syft, Trivy, Grype, Gitleaks, OSV on PATH
 - [Rollback Runbook](ROLLBACK_RUNBOOK.md)
 
 ## Developers

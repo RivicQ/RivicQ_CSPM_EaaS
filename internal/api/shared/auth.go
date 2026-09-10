@@ -215,10 +215,11 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 		}
 
 		user := &auth.User{
-			Email:    strings.ToLower(strings.TrimSpace(req.Email)),
-			Name:     strings.TrimSpace(req.Name),
-			Password: req.Password,
-			Role:     "viewer",
+			Email:        strings.ToLower(strings.TrimSpace(req.Email)),
+			Name:         strings.TrimSpace(req.Name),
+			Organisation: strings.TrimSpace(req.Organisation),
+			Password:     req.Password,
+			Role:         "viewer",
 		}
 
 		if err := service.Register(user); err != nil {
@@ -265,21 +266,24 @@ func meHandler(service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email := c.GetString("email")
 		name := ""
+		organisation := ""
 		mfaEnabled := false
 		if user, err := service.GetUserByEmail(email); err == nil && user != nil {
 			name = user.Name
+			organisation = user.Organisation
 			mfaEnabled = user.MFAEnabled
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"id":          c.GetString("user_id"),
-			"user_id":     c.GetString("user_id"),
-			"tenant_id":   c.GetString("tenant_id"),
-			"email":       email,
-			"name":        name,
-			"role":        c.GetString("role"),
-			"edition":     c.GetString("edition"),
-			"mfa_enabled": mfaEnabled,
-			"permissions": c.GetStringSlice("permissions"),
+			"id":           c.GetString("user_id"),
+			"user_id":      c.GetString("user_id"),
+			"tenant_id":    c.GetString("tenant_id"),
+			"email":        email,
+			"name":         name,
+			"organisation": organisation,
+			"role":         c.GetString("role"),
+			"edition":      c.GetString("edition"),
+			"mfa_enabled":  mfaEnabled,
+			"permissions":  c.GetStringSlice("permissions"),
 		})
 	}
 }

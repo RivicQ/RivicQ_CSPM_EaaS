@@ -209,3 +209,36 @@ func TestRegisterRejectsShortPassword(t *testing.T) {
 	r.ServeHTTP(w, req)
 	require.Equal(t, http.StatusBadRequest, w.Code)
 }
+
+func TestRegisterPersistsOrganisation(t *testing.T) {
+	r, svc := setupAuthRouter(t)
+	body, _ := json.Marshal(map[string]any{
+		"email":        "opslead@rivicq.com",
+		"password":     "WorkspacePass123!",
+		"name":         "Ops Lead",
+		"organisation": "Example GmbH",
+		"edition":      "community",
+	})
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/register", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusCreated, w.Code)
+
+	user, err := svc.GetUserByEmail("opslead@rivicq.com")
+	require.NoError(t, err)
+	require.Equal(t, "Example GmbH", user.Organisation)
+
+	var resp map[string]any
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	token, _ := resp["access_token"].(string)
+	require.NotEmpty(t, token)
+	meReq := httptest.NewRequest(http.MethodGet, "/api/v1/auth/me", nil)
+	meReq.Header.Set("Authorization", "Bearer "+token)
+	meW := httptest.NewRecorder()
+	r.ServeHTTP(meW, meReq)
+	require.Equal(t, http.StatusOK, meW.Code)
+	var me map[string]any
+	require.NoError(t, json.Unmarshal(meW.Body.Bytes(), &me))
+	require.Equal(t, "Example GmbH", me["organisation"])
+}

@@ -6,17 +6,18 @@ Live static build: https://rivicq.github.io/RivicQ_CSPM_EaaS/
 
 ## Visual language
 
-**RivicQ Security Cloud** — sky-blue and white cryptographic SaaS:
+**RivicQ nebula** — deep-space cryptographic SaaS (black canvas, violet glow):
 
 | Token | Hex | Role |
 |-------|-----|------|
-| Sky | `#0ea5e9` | Interactive / highlight |
-| Sky deep | `#0284c7` | Primary buttons |
-| White | `#ffffff` | Pages and cards |
-| Ice | `#f7fbff` | Soft page wash |
-| Sky navy | `#082f49` | Dark chrome / sidebar |
+| Canvas | `#000000` | Page background |
+| Surface | `#0A0A0F` | Cards and chrome |
+| Violet | `#7C3AED` | Primary buttons / glow |
+| Violet deep | `#6D28D9` | Hover / pressed |
+| Text | `#FFFFFF` | Headings and nav |
+| Muted | `#D1D5DB` | Subheads and body |
 
-Type: **Outfit** + **JetBrains Mono**. Control mappings are not certifications.
+Type: **Inter** + **JetBrains Mono**. Control mappings are not certifications. Pages is static — live quantum/PQC scores need the API or CLI.
 
 Tokens live in `src/theme/tokens.ts`. Theme assembly: `src/theme/theme.ts`.
 

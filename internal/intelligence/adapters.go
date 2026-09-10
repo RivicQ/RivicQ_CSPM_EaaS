@@ -21,6 +21,7 @@ func ProbeExternalTools() []ToolStatus {
 		{"osv-scanner", "osv-scanner", "OSV vulnerability matching. Optional."},
 		{"checkov", "checkov", "IaC scanner. Optional."},
 		{"cosign", "cosign", "Artifact signatures. Optional."},
+		{"codeql", "codeql", "CodeQL CLI. Optional; not executed by rivicq scan (too heavy)."},
 	}
 	out := make([]ToolStatus, 0, len(tools)+1)
 	out = append(out, ToolStatus{
@@ -42,6 +43,25 @@ func ProbeExternalTools() []ToolStatus {
 	return out
 }
 
+// MarkToolsUsed copies probe results and sets Used when the scan actually invoked the binary.
+func MarkToolsUsed(tools []ToolStatus, used []string) []ToolStatus {
+	set := map[string]bool{}
+	for _, n := range used {
+		set[n] = true
+	}
+	out := make([]ToolStatus, len(tools))
+	copy(out, tools)
+	for i := range out {
+		if set[out[i].Name] {
+			out[i].Used = true
+			if out[i].Note == "" {
+				out[i].Note = "Invoked for this scan."
+			}
+		}
+	}
+	return out
+}
+
 // TrySyftJSON runs `syft dir:<root> -o cyclonedx-json` when syft is on PATH.
 func TrySyftJSON(root string) ([]byte, bool) {
 	if _, err := exec.LookPath("syft"); err != nil {
@@ -49,7 +69,11 @@ func TrySyftJSON(root string) ([]byte, bool) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, "syft", "dir:"+root, "-o", "cyclonedx-json")
+	args := []string{"dir:" + root, "-o", "cyclonedx-json"}
+	for _, d := range defaultExcludes {
+		args = append(args, "--exclude", "./"+d+"/**")
+	}
+	cmd := exec.CommandContext(ctx, "syft", args...)
 	b, err := cmd.Output()
 	if err != nil {
 		return nil, false

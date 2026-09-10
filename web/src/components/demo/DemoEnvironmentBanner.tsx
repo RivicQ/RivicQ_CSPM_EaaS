@@ -21,9 +21,10 @@ const DemoEnvironmentBanner: React.FC = () => {
         mb: 2.5,
         borderRadius: `${designSystem.radius.lg}px`,
         backdropFilter: 'none',
-        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(196,120,58,0.16)' : 'rgba(239,232,218,0.96)'),
+        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(124,58,237,0.16)' : 'rgba(124,58,237,0.08)'),
         border: 1,
-        borderColor: 'info.light',
+        borderColor: '#7c3aed',
+        '& .MuiAlert-icon': { color: '#a78bfa' },
       }}
       action={
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>

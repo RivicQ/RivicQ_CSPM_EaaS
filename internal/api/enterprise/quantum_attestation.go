@@ -88,7 +88,7 @@ type QuantumReadiness struct {
 }
 
 func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	status := c.Query("status")
 
 	query := `
@@ -132,7 +132,7 @@ func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
 }
 
 func (h *QuantumAttestationHandler) CreateAttestation(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var attestation QuantumAttestation
 	if err := c.ShouldBindJSON(&attestation); err != nil {
@@ -350,7 +350,7 @@ func (h *QuantumAttestationHandler) GetQuantumProviderStatus(c *gin.Context) {
 }
 
 func (h *QuantumAttestationHandler) GetQuantumReadiness(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Calculating quantum readiness for tenant: ", tenantID)
 
@@ -387,7 +387,7 @@ func (h *QuantumAttestationHandler) GetQuantumReadiness(c *gin.Context) {
 }
 
 func (h *QuantumAttestationHandler) GetMigrationPlan(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Generating migration plan for tenant: ", tenantID)
 
@@ -491,7 +491,7 @@ func (h *QuantumAttestationHandler) ListPQCAlgorithms(c *gin.Context) {
 }
 
 func (h *QuantumAttestationHandler) MigrateAlgorithm(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var req struct {
 		AssetID         string `json:"asset_id"`

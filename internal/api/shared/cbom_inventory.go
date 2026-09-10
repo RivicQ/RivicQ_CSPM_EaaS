@@ -72,7 +72,7 @@ func ListCBOMScans(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		_ = db
 		logger.Debug("Listing CBOM scans")
 
-		jobs := discovery.GetScanManager().ListScans()
+		jobs := tenantScanList(c)
 		sort.Slice(jobs, func(i, j int) bool {
 			return jobs[i].CreatedAt.After(jobs[j].CreatedAt)
 		})
@@ -91,8 +91,8 @@ func ListCBOMScans(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 }
 
 // InventoryFromCBOMScans builds inventory assets from completed scan results.
-func InventoryFromCBOMScans() ([]gin.H, bool) {
-	jobs := discovery.GetScanManager().ListScans()
+func InventoryFromCBOMScans(c *gin.Context) ([]gin.H, bool) {
+	jobs := tenantScanList(c)
 	assets := make([]gin.H, 0)
 	seen := make(map[string]struct{})
 
@@ -138,8 +138,8 @@ func InventoryFromCBOMScans() ([]gin.H, bool) {
 }
 
 // FindingsFromCBOMScans aggregates findings across completed scans.
-func FindingsFromCBOMScans() []gin.H {
-	jobs := discovery.GetScanManager().ListScans()
+func FindingsFromCBOMScans(c *gin.Context) []gin.H {
+	jobs := tenantScanList(c)
 	out := make([]gin.H, 0)
 	for _, job := range jobs {
 		if job.Status != "completed" || job.Result == nil {
@@ -223,7 +223,7 @@ func inferCloudProvider(location string) string {
 // InventoryAssetsHandler serves CBOM scan inventory with demo fallback.
 func InventoryAssetsHandler(logger *logrus.Logger, demoFallback gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if assets, ok := InventoryFromCBOMScans(); ok {
+		if assets, ok := InventoryFromCBOMScans(c); ok {
 			logger.WithField("count", len(assets)).Info("Serving CBOM scan inventory assets")
 			c.JSON(http.StatusOK, gin.H{
 				"assets": assets,
@@ -239,7 +239,7 @@ func InventoryAssetsHandler(logger *logrus.Logger, demoFallback gin.HandlerFunc)
 // InventorySummaryHandler serves summary from scans or demo fallback.
 func InventorySummaryHandler(logger *logrus.Logger, demoFallback gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if assets, ok := InventoryFromCBOMScans(); ok {
+		if assets, ok := InventoryFromCBOMScans(c); ok {
 			logger.WithField("count", len(assets)).Info("Serving CBOM scan inventory summary")
 			c.JSON(http.StatusOK, SummaryFromCBOMScans(assets))
 			return
@@ -251,7 +251,7 @@ func InventorySummaryHandler(logger *logrus.Logger, demoFallback gin.HandlerFunc
 // ScanFindingsHandler returns aggregated findings from completed scans.
 func ScanFindingsHandler(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		findings := FindingsFromCBOMScans()
+		findings := FindingsFromCBOMScans(c)
 		logger.WithField("count", len(findings)).Debug("Serving CBOM scan findings")
 		c.JSON(http.StatusOK, gin.H{
 			"findings": findings,

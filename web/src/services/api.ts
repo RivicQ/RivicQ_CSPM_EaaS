@@ -524,6 +524,10 @@ export const ecosystemService = {
   getCategories: () => api.get('/ecosystem/categories'),
 };
 
+export const intelligenceService = {
+  getTools: () => api.get('/intelligence/tools'),
+};
+
 export const coreService = {
   getStatus: (edition?: string) => api.get('/core/status', { params: { edition } }),
   getServices: () => api.get('/core/services'),
@@ -597,4 +601,18 @@ export const adminService = {
   ssoProviders: () => api.get('/sso/providers'),
   configureSaml: (data: { entity_id: string; acs_url: string; idp_metadata: string; enabled: boolean }) =>
     api.post('/sso/saml', data),
+};
+
+export const platformService = {
+  status: () => api.get('/platform/status'),
+  plans: () => api.get('/platform/plans'),
+  funnel: () => api.get('/platform/funnel'),
+  contacts: () => api.get('/platform/contacts'),
+  createLead: (data: { name: string; email: string; company: string; intent: string; source?: string }) =>
+    api.post('/leads', data),
+  leads: () => api.get('/leads'),
+  opportunities: () => api.get('/opportunities'),
+  ibm: () => api.get('/ibm'),
+  billingStatus: () => api.get('/billing/status'),
+  checkout: (data: { plan_id: string; email?: string }) => api.post('/billing/checkout', data),
 };

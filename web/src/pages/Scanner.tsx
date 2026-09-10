@@ -13,7 +13,6 @@ import StatCard from '../components/dashboard/StatCard';
 import { GlassCard, EmptyState, DetailTabs, TabPanel } from '../components/ui';
 import designSystem from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
-import { DEMO_SCAN_FINDINGS, DEMO_SCAN_SCHEDULES } from '../data/workspaceDemo';
 import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 import ScanReportPanel, { ClientArchitectureView, PQCReadinessView } from '../components/scanner/ScanReportPanel';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +27,7 @@ interface ScanJob {
   startedAt?: string;
   findings: number;
   progress: number;
+  error?: string;
 }
 
 interface PolicyGate {
@@ -96,7 +96,8 @@ const mapApiScan = (s: any): ScanJob => ({
   target: s.target ?? '',
   startedAt: s.created_at,
   findings: s.findings?.total ?? 0,
-  progress: s.progress ?? (s.status === 'completed' ? 100 : 0),
+  progress: typeof s.progress === 'number' ? s.progress : (s.status === 'completed' ? 100 : 0),
+  error: s.error ? String(s.error) : undefined,
 });
 
 const Scanner: React.FC = () => {
@@ -179,13 +180,15 @@ const Scanner: React.FC = () => {
         const response = await cbomService.getScanStatus(scanId);
         const data = response.data ?? response;
         const status = data.status ?? 'running';
-        const progress = typeof data.progress === 'number' ? data.progress : status === 'completed' ? 100 : Math.min(pollAttemptsRef.current * 10, 95);
+        const apiProgress = data.progress;
+        const progress = typeof apiProgress === 'number' ? apiProgress : status === 'completed' ? 100 : 0;
         setScanProgress(progress);
         updateJob(jobId, (job) => ({
           ...job,
           status: status === 'failed' ? 'failed' : status === 'completed' ? 'completed' : 'running',
           progress,
           findings: data.findings?.total ?? job.findings,
+          error: data.error ? String(data.error) : job.error,
         }));
         if (data.finding_items?.length) {
           setLiveFindings(data.finding_items);
@@ -197,6 +200,9 @@ const Scanner: React.FC = () => {
           clearPolling();
           setIsScanning(false);
           refreshScanData();
+          if (status === 'failed') {
+            setError(data.error ? String(data.error) : `Scan ${scanId} failed. Inventory for this target was not updated.`);
+          }
           if (status === 'completed') {
             cbomService.getScanIntelligence(scanId).then((intel) => {
               const gate = intel.data?.gate;
@@ -267,11 +273,10 @@ const Scanner: React.FC = () => {
   };
 
   const benchList = benchmarksRaw?.benchmarks ?? [];
-  const bench = benchList[0] ?? benchmarksRaw ?? { throughput_rps: 1240, p95_latency_ms: 182, scan_time_seconds: 8.4, coverage_pct: 94 };
-
+  const bench = benchList[0] ?? benchmarksRaw;
   const findings: ScanFinding[] = liveFindings.length
     ? liveFindings
-    : (findingsData?.source === 'cbom_scans' ? [] : DEMO_SCAN_FINDINGS as ScanFinding[]);
+    : (Array.isArray(findingsData?.findings) ? findingsData.findings : []);
   const totalFindings = findings.length || scanJobs.reduce((s, j) => s + j.findings, 0);
   const completedScans = scanJobs.filter((j) => j.status === 'completed').length;
 
@@ -286,8 +291,8 @@ const Scanner: React.FC = () => {
       <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         <Grid item xs={6} sm={3}><StatCard label="Completed scans" value={completedScans} icon={<History />} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Findings" value={totalFindings} icon={<BugReport />} accent={tokens.colors.crypto.high} delay={1} /></Grid>
-        <Grid item xs={6} sm={3}><StatCard label="Coverage" value={`${bench.coverage_pct ?? 94}%`} icon={<Security />} accent={tokens.colors.crypto.low} delay={2} /></Grid>
-        <Grid item xs={6} sm={3}><StatCard label="Scan time" value={`${bench.scan_time_seconds ?? 8.4}s`} icon={<Speed />} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard label="Coverage" value={bench?.coverage_pct != null ? `${bench.coverage_pct}%` : '—'} hint={bench?.coverage_pct != null ? 'From benchmark API' : 'No benchmark payload'} icon={<Security />} accent={tokens.colors.crypto.low} delay={2} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard label="Scan time" value={bench?.scan_time_seconds != null ? `${bench.scan_time_seconds}s` : '—'} hint={bench?.scan_time_seconds != null ? 'From benchmark API' : 'Unavailable'} icon={<Speed />} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
       </Grid>
 
       <GlassCard glow={tokens.colors.rivicq[500]} delay={0}>
@@ -396,10 +401,17 @@ const Scanner: React.FC = () => {
           {isScanning && (
             <Box sx={{ mb: 2 }}>
               <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.75 }}>
-                <Typography variant="body2">Scanning {scanTarget}</Typography>
-                <Typography variant="body2" fontFamily={tokens.typography.mono} fontWeight={600}>{scanProgress}%</Typography>
+                <Typography variant="body2">Scanning {scanTarget} — discovering cryptographic surfaces</Typography>
+                <Typography variant="body2" fontFamily={tokens.typography.mono} fontWeight={600}>
+                  {scanProgress > 0 ? `${scanProgress}%` : 'in progress'}
+                </Typography>
               </Stack>
-              <LinearProgress variant="determinate" value={scanProgress} sx={{ height: 8, borderRadius: 4 }} />
+              <LinearProgress
+                variant={scanProgress > 0 ? 'determinate' : 'indeterminate'}
+                value={scanProgress}
+                sx={{ height: 8, borderRadius: 4 }}
+                aria-label={scanProgress > 0 ? `Scan progress ${scanProgress} percent` : 'Scan in progress'}
+              />
             </Box>
           )}
           <Stack direction="row" spacing={1.5}>
@@ -424,7 +436,22 @@ const Scanner: React.FC = () => {
                     <Chip label={job.status} size="small" color={job.status === 'completed' ? 'success' : job.status === 'failed' ? 'error' : 'primary'} />
                     {job.status === 'completed' && <Chip label={`${job.findings} findings`} size="small" />}
                   </Stack>
-                  {job.status === 'running' && <LinearProgress variant="determinate" value={job.progress} sx={{ mt: 1.5, height: 4, borderRadius: 2 }} />}
+                  {job.status === 'failed' && (
+                    <Alert severity="error" sx={{ mt: 1.5 }}>
+                      <Typography variant="subtitle2" fontWeight={800}>Scan failed</Typography>
+                      <Typography variant="body2">Reason: {job.error || 'The API reported failure without a detailed error string.'}</Typography>
+                      <Typography variant="body2">Impact: inventory for {job.target} was not updated.</Typography>
+                      <Typography variant="body2">Next: retry the scan, or reconnect the source if this was GitHub/cloud.</Typography>
+                    </Alert>
+                  )}
+                  {job.status === 'running' && (
+                    <LinearProgress
+                      variant={job.progress > 0 ? 'determinate' : 'indeterminate'}
+                      value={job.progress}
+                      sx={{ mt: 1.5, height: 4, borderRadius: 2 }}
+                      aria-label={job.progress > 0 ? `Scan ${job.progress} percent` : 'Scan running'}
+                    />
+                  )}
                   {job.startedAt && <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>{new Date(job.startedAt).toLocaleString()}</Typography>}
                 </Box>
               ))}
@@ -470,29 +497,21 @@ const Scanner: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tab} index={3}>
-          <Stack spacing={1.5}>
-            {DEMO_SCAN_SCHEDULES.map((sch) => (
-              <Box key={sch.id} sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider', display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-                <Box sx={{ flex: 1, minWidth: 200 }}>
-                  <Typography fontWeight={700}>{sch.name}</Typography>
-                  <Typography variant="caption" color="text.secondary">{sch.cron} · {sch.target}</Typography>
-                </Box>
-                <Chip label={sch.type} size="small" variant="outlined" />
-                <Chip label={sch.status} size="small" color={sch.status === 'active' ? 'success' : 'default'} />
-                <Typography variant="caption" color="text.secondary">Next: {sch.nextRun}</Typography>
-                <Button size="small" variant="outlined">{sch.status === 'active' ? 'Pause' : 'Enable'}</Button>
-              </Box>
-            ))}
-          </Stack>
+          <EmptyState
+            icon={<Event />}
+            title="Scheduled scans are not in Community"
+            description="Continuous / cron schedules need the Enterprise control plane. Pause/Enable in older mock UIs did not persist. Use CI (rivicq scan .) or start a scan here."
+            action={{ label: 'Run a scan now', onClick: () => setTab(0) }}
+          />
         </TabPanel>
 
         <TabPanel value={tab} index={4}>
           <Grid container spacing={2}>
             {[
-              { label: 'Throughput', value: `${bench.throughput_rps ?? 1240} req/s`, hint: 'Scanner API capacity' },
-              { label: 'P95 latency', value: `${bench.p95_latency_ms ?? 182} ms`, hint: 'End-to-end scan orchestration' },
-              { label: 'Scan duration', value: `${bench.scan_time_seconds ?? 8.4}s`, hint: 'Per reference asset set' },
-              { label: 'Coverage', value: `${bench.coverage_pct ?? 94}%`, hint: 'Connected targets' },
+              { label: 'Throughput', value: bench?.throughput_rps != null ? `${bench.throughput_rps} req/s` : 'Unavailable', hint: 'Scanner API capacity' },
+              { label: 'P95 latency', value: bench?.p95_latency_ms != null ? `${bench.p95_latency_ms} ms` : 'Unavailable', hint: 'End-to-end scan orchestration' },
+              { label: 'Scan duration', value: bench?.scan_time_seconds != null ? `${bench.scan_time_seconds}s` : 'Unavailable', hint: 'Per reference asset set' },
+              { label: 'Coverage', value: bench?.coverage_pct != null ? `${bench.coverage_pct}%` : 'Unavailable', hint: 'Connected targets' },
             ].map((item) => (
               <Grid item xs={12} sm={6} key={item.label}>
                 <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover' }}>

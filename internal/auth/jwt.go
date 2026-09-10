@@ -29,14 +29,15 @@ type Claims struct {
 
 // User data structure
 type User struct {
-	ID         string `json:"id"`
-	TenantID   string `json:"tenant_id"`
-	Email      string `json:"email"`
-	Name       string `json:"name"`
-	Role       string `json:"role"`
-	Password   string `json:"-"`
-	MFAEnabled bool   `json:"mfa_enabled"`
-	MFASecret  string `json:"-"`
+	ID           string `json:"id"`
+	TenantID     string `json:"tenant_id"`
+	Email        string `json:"email"`
+	Name         string `json:"name"`
+	Role         string `json:"role"`
+	Organisation string `json:"organisation,omitempty"`
+	Password     string `json:"-"`
+	MFAEnabled   bool   `json:"mfa_enabled"`
+	MFASecret    string `json:"-"`
 }
 
 // TokenBlacklist stores revoked tokens for refresh rotation.
@@ -609,6 +610,39 @@ func (as *AuthService) JWTAuthMiddleware(permissions []string) gin.HandlerFunc {
 		c.Set("edition", claims.Edition)
 		c.Set("permissions", claims.Permissions)
 
+		c.Next()
+	}
+}
+
+// OptionalJWTAuthMiddleware binds JWT claims when a Bearer token is present.
+// Missing Authorization continues as the public tenant (Home CBOM pilot).
+// An invalid Bearer token is rejected so a failed login cannot fall into the public workspace.
+func (as *AuthService) OptionalJWTAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if strings.TrimSpace(authHeader) == "" {
+			c.Next()
+			return
+		}
+
+		tokenString := authHeader
+		if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+			tokenString = authHeader[7:]
+		}
+
+		claims, err := as.tokenManager.ValidateToken(tokenString)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		c.Set("user_id", claims.UserID)
+		c.Set("tenant_id", claims.TenantID)
+		c.Set("email", claims.Email)
+		c.Set("role", claims.Role)
+		c.Set("edition", claims.Edition)
+		c.Set("permissions", claims.Permissions)
 		c.Next()
 	}
 }

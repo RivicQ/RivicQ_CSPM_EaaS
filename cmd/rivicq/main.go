@@ -104,6 +104,7 @@ func runScan(mode string, args []string) error {
 		Discovery:       disc,
 		ContentFindings: contentFindings,
 		ContentRepo:     abs,
+		LocalRoot:       abs,
 	})
 	rep.Asset = abs
 	if rep.Metadata == nil {
@@ -163,9 +164,17 @@ func printTable(mode, abs string, content shared.GHScanResult, rep *intelligence
 	}
 	fmt.Printf("\nExternal tools:\n")
 	anyAvail := false
-	for _, tool := range intelligence.ProbeExternalTools() {
-		if tool.Available && !strings.HasPrefix(tool.Name, "rivicq-") {
-			fmt.Printf("  %s (optional)\n", tool.Name)
+	for _, tool := range rep.Tools {
+		if strings.HasPrefix(tool.Name, "rivicq-") {
+			continue
+		}
+		if tool.Used {
+			fmt.Printf("  %s (used)\n", tool.Name)
+			anyAvail = true
+			continue
+		}
+		if tool.Available {
+			fmt.Printf("  %s (on PATH, not used for this target)\n", tool.Name)
 			anyAvail = true
 		}
 	}

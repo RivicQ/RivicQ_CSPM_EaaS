@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Container, Grid, Stack, Typography, useTheme,
+  Box, Button, Container, Grid, Stack, Typography,
 } from '@mui/material';
 import { Dashboard, Explore, Science } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
@@ -11,11 +11,10 @@ import GlassCard from '../components/ui/GlassCard';
 import { LoadingButton } from '../components/ui';
 import designSystem from '../theme/designSystem';
 import { DEMO_TRAIL_STEPS } from '../demo/trail';
+import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 
 const DemoWelcome: React.FC = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const { demoLogin, isAuthenticated, isDemo, backendReachable } = useAuth();
   const { start, skip } = useDemoTrail();
   const [loading, setLoading] = React.useState(false);
@@ -42,16 +41,11 @@ const DemoWelcome: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        py: { xs: 4, md: 8 },
-        background: isDark ? designSystem.proBlue.commandCenter : designSystem.gradient.meshLight,
-      }}
-    >
-      <Container maxWidth="md">
+    <Box sx={{ minHeight: '100vh', py: { xs: 4, md: 8 }, bgcolor: '#000', position: 'relative', overflow: 'hidden' }}>
+      <NebulaBackdrop />
+      <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
         <Stack spacing={1} sx={{ mb: 3 }} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-          <BrandLogo />
+          <BrandLogo dark />
           <Typography variant="overline" color="primary" fontWeight={800} letterSpacing="0.16em">
             Interactive demo trail
           </Typography>
