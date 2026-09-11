@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/controls"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/sirupsen/logrus"
 )
@@ -123,7 +125,7 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 		}})
 		return
 	}
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT id, tenant_id, framework, scope, controls, status, score, 
@@ -171,7 +173,7 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) CreateFramework(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var req struct {
 		Framework string `json:"framework" binding:"required"`
@@ -375,7 +377,7 @@ func (h *ComplianceHandler) GetComplianceDashboard(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetAllComplianceDashboards(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	frameworks := []string{"iso27001", "dora", "gdpr", "eu_ai_act", "soc2", "nist", "pqc"}
 
@@ -458,7 +460,7 @@ func (h *ComplianceHandler) RemediationPlan(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) ListReports(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT id, tenant_id, report_type, framework, title, generated_at
@@ -528,7 +530,7 @@ func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
 	}
 
 	query := `UPDATE compliance_frameworks SET delve_integration = true WHERE tenant_id = $1`
-	_, _ = h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
+	_, _ = h.db.Exec(query, tenantIDFor(c))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "connected",
@@ -538,7 +540,7 @@ func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetDelveStatus(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	connected := false
 	err := h.db.QueryRow(
 		`SELECT delve_integration FROM compliance_frameworks WHERE tenant_id = $1 LIMIT 1`,
@@ -622,7 +624,7 @@ func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
 	}
 
 	query := `UPDATE compliance_frameworks SET kertos_integration = true WHERE tenant_id = $1`
-	_, _ = h.db.Exec(query, c.GetHeader("X-Tenant-ID"))
+	_, _ = h.db.Exec(query, tenantIDFor(c))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "connected",
@@ -632,7 +634,7 @@ func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetKertosStatus(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	connected := false
 	err := h.db.QueryRow(
 		`SELECT kertos_integration FROM compliance_frameworks WHERE tenant_id = $1 LIMIT 1`,
@@ -692,7 +694,7 @@ func (h *ComplianceHandler) SyncKertosData(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) ListRisks(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	level := c.Query("level")
 
 	query := `
@@ -721,7 +723,7 @@ func (h *ComplianceHandler) ListRisks(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) CreateRisk(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var risk map[string]interface{}
 	if err := c.ShouldBindJSON(&risk); err != nil {
@@ -759,7 +761,20 @@ func (h *ComplianceHandler) MitigateRisk(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) getDefaultControls(framework string) []map[string]interface{} {
-	controls := map[string][]map[string]interface{}{
+	key := strings.ToLower(strings.TrimSpace(framework))
+	for _, cl := range controls.Catalog() {
+		id := strings.ToLower(cl.ID)
+		if id == key || strings.ReplaceAll(id, "-", "_") == key {
+			out := make([]map[string]interface{}, 0, len(cl.Items))
+			for _, item := range cl.Items {
+				out = append(out, map[string]interface{}{
+					"id": item.ID, "title": item.Title, "category": cl.Name, "mapping": item.RivicQ,
+				})
+			}
+			return out
+		}
+	}
+	seed := map[string][]map[string]interface{}{
 		"iso27001": {
 			{"id": "A.5.1", "title": "Information Security Policies", "category": "Information Security Policies"},
 			{"id": "A.6.1", "title": "Internal Organization", "category": "Organization of Information Security"},
@@ -831,7 +846,10 @@ func (h *ComplianceHandler) getDefaultControls(framework string) []map[string]in
 		},
 	}
 
-	if c, ok := controls[framework]; ok {
+	if c, ok := seed[framework]; ok {
+		return c
+	}
+	if c, ok := seed[key]; ok {
 		return c
 	}
 	return []map[string]interface{}{}

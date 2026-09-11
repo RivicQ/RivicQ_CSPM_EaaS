@@ -1,6 +1,8 @@
 package shared
 
 import (
+	"database/sql"
+	"fmt"
 	"os"
 	"strings"
 
@@ -8,14 +10,46 @@ import (
 	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/platform"
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	defaultJWTSecret         = "oss-default-secret-not-for-production"
+	defaultBootstrapPassword = "DemoPass123!"
+)
+
+func isProductionRuntime() bool {
+	for _, key := range []string{"CRYPTOBOM_ENV", "RIVICQ_ENV", "ENV"} {
+		switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
+		case "production", "prod":
+			return true
+		}
+	}
+	return gin.Mode() == gin.ReleaseMode
+}
+
+func resolveJWTSecret(raw string, production bool) (string, error) {
+	secret := strings.TrimSpace(raw)
+	if secret == "" || secret == defaultJWTSecret {
+		if production {
+			return "", fmt.Errorf("JWT_SECRET must be a unique value in production")
+		}
+		if secret == "" {
+			secret = defaultJWTSecret
+		}
+	}
+	return secret, nil
+}
+
 // SetupStandardAuth configures JWT auth with PostgreSQL or in-memory user store.
 func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger) *auth.AuthService {
-	jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET"))
-	if jwtSecret == "" {
-		jwtSecret = "oss-default-secret-not-for-production"
+	production := isProductionRuntime()
+	jwtSecret, err := resolveJWTSecret(os.Getenv("JWT_SECRET"), production)
+	if err != nil {
+		logger.WithError(err).Fatal("refusing to start with an unsafe JWT secret")
+	}
+	if jwtSecret == defaultJWTSecret {
 		logger.Warn("JWT_SECRET not set — using default secret for development only")
 	}
 
@@ -32,7 +66,7 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 		}
 		bootstrapPassword := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_PASSWORD"))
 		if bootstrapPassword == "" {
-			bootstrapPassword = "DemoPass123!"
+			bootstrapPassword = defaultBootstrapPassword
 		}
 		bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
 		if bootstrapName == "" {
@@ -51,6 +85,9 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 
 		var userCount int
 		if err := db.DB.QueryRow("SELECT COUNT(*) FROM users").Scan(&userCount); err == nil && userCount == 0 {
+			if production && bootstrapPassword == defaultBootstrapPassword {
+				logger.Fatal("AUTH_BOOTSTRAP_PASSWORD must be set in production; DemoPass123! is not allowed")
+			}
 			if hashedPassword, hashErr := auth.HashPassword(bootstrapPassword); hashErr == nil {
 				_, execErr := db.Exec(`
 					INSERT INTO users (id, tenant_id, email, name, role, password)
@@ -58,6 +95,23 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 					uuid.New().String(), "tenant-1", bootstrapEmail, bootstrapName, bootstrapRole, hashedPassword)
 				if execErr == nil {
 					logger.WithField("email", bootstrapEmail).Info("Bootstrap admin user created")
+				}
+				if !production {
+					demoEmail := strings.TrimSpace(os.Getenv("AUTH_DEMO_EMAIL"))
+					if demoEmail == "" {
+						demoEmail = "demo@rivicq.local"
+					}
+					demoPass := strings.TrimSpace(os.Getenv("AUTH_DEMO_PASSWORD"))
+					if demoPass == "" {
+						demoPass = bootstrapPassword
+					}
+					if hashedDemo, demoErr := auth.HashPassword(demoPass); demoErr == nil {
+						_, _ = db.Exec(`
+							INSERT INTO users (id, tenant_id, email, name, role, password)
+							VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (email) DO NOTHING`,
+							uuid.New().String(), "tenant-1", demoEmail, "Community demo", "operator", hashedDemo)
+						logger.WithField("email", demoEmail).Info("Bootstrap Community demo operator created")
+					}
 				}
 			}
 		}
@@ -71,6 +125,12 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 	}
 
 	authService := auth.NewAuthService(jwtSecret, userStore)
+	router.Use(authService.OptionalJWTAuthMiddleware())
 	SetupAuthRoutes(router, logger, authService, allowedDomains)
+	var sqlDB *sql.DB
+	if db != nil {
+		sqlDB = db.DB
+	}
+	platform.SetupRoutes(router, logger, authService, sqlDB)
 	return authService
 }

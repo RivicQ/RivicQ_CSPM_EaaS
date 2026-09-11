@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             web/package-lock.json
-            nexus/package-lock.json
+            fabric/package-lock.json
 
       - name: Install dependencies
         working-directory: web
@@ -38,6 +38,7 @@ jobs:
         run: npm run build
         env:
           REACT_APP_EDITION: community
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
           REACT_APP_SUPABASE_URL: https://suhoabdijefnsoxveewn.supabase.co
           REACT_APP_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8q50RgRBzXcuvjdaF7qBpg_E0GKHPt4
 
@@ -50,20 +51,25 @@ jobs:
       - name: Add SPA redirect
         run: cp web/build/index.html web/build/404.html
 
-      - name: Install NEXUS dependencies
-        working-directory: nexus
+      - name: Install Fabric dependencies
+        working-directory: fabric
         run: npm ci
 
-      - name: Build NEXUS Quantum Security Fabric
-        working-directory: nexus
+      - name: Build RivicQ Graph
+        working-directory: fabric
         run: npm run build
 
-      - name: Publish NEXUS onto Pages
+      - name: Publish Graph onto Pages
         run: |
-          mkdir -p web/build/nexus web/build/docs
-          cp -r nexus/dist/. web/build/nexus/
+          mkdir -p web/build/fabric web/build/docs
+          cp -r fabric/dist/. web/build/fabric/
+          cp web/build/fabric/index.html web/build/fabric/404.html
+          cp docs/FABRIC.md web/build/docs/FABRIC.md
+          cp docs/GRAPH.md web/build/docs/GRAPH.md
+          # Former NEXUS path stays as a bookmark redirect.
+          mkdir -p web/build/nexus
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/RivicQ_CSPM_EaaS/fabric/"><link rel="canonical" href="/RivicQ_CSPM_EaaS/fabric/"><title>Moved</title><p>This demo moved to <a href="/RivicQ_CSPM_EaaS/fabric/">RivicQ Graph</a>.</p>' > web/build/nexus/index.html
           cp web/build/nexus/index.html web/build/nexus/404.html
-          cp docs/NEXUS.md web/build/docs/NEXUS.md
 
       - name: Publish SDK & plugin docs to the site
         run: |
@@ -73,19 +79,28 @@ jobs:
           cp docs/security-intelligence.md web/build/docs/
           cp docs/README.md web/build/docs/README.md
           cp docs/KNOWN_LIMITATIONS.md web/build/docs/KNOWN_LIMITATIONS.md
+          cp docs/INTEGRATIONS.md web/build/docs/INTEGRATIONS.md
           cp docs/LAUNCH_CHECKLIST.md web/build/docs/LAUNCH_CHECKLIST.md
           cp docs/PRODUCT_STATUS.md web/build/docs/PRODUCT_STATUS.md
+          cp docs/PLATFORM.md web/build/docs/PLATFORM.md
+          cp docs/DESIGN_SYSTEM.md web/build/docs/DESIGN_SYSTEM.md
+          cp docs/ENGINEERING_AUDIT.md web/build/docs/ENGINEERING_AUDIT.md
           cp docs/ROADMAP.md web/build/docs/ROADMAP.md
           cp docs/QISKIT_PIPELINE.md web/build/docs/QISKIT_PIPELINE.md
           cp docs/ARCHITECTURE.md web/build/docs/ARCHITECTURE.md
           cp docs/CLIENT_ARCHITECTURE.md web/build/docs/CLIENT_ARCHITECTURE.md
           cp docs/BOM_FRAMEWORK.md web/build/docs/BOM_FRAMEWORK.md
           cp docs/UX_DESIGN.md web/build/docs/UX_DESIGN.md
+          mkdir -p web/build/docs/ux
+          cp docs/ux/*.md web/build/docs/ux/
           cp docs/CONTACT.md web/build/docs/CONTACT.md
+          cp docs/GRAPH.md web/build/docs/GRAPH.md
           cp docs/contact.html web/build/docs/contact.html
           cp docs/read.html web/build/docs/read.html
           mkdir -p web/build/docs/assets
           cp docs/assets/horizon-docs.css web/build/docs/assets/horizon-docs.css
+          cp docs/assets/rivicq-mark.svg web/build/docs/assets/rivicq-mark.svg
+          cp docs/assets/rivicq-mark.png web/build/docs/assets/rivicq-mark.png
           cp docs/PQC_MIGRATION.md web/build/docs/PQC_MIGRATION.md
           cp docs/editions.md web/build/docs/editions.md
           cp DATASETS.md web/build/docs/DATASETS.md

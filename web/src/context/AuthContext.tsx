@@ -290,21 +290,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await authService.changePassword(currentPassword, nextPassword);
   }, []);
 
-  const demoLogin = React.useCallback(async (nextEdition: Edition) => {
+  const demoLogin = React.useCallback(async (_nextEdition: Edition) => {
     if (backendReachable) {
-      const response = await authService.demo(nextEdition);
-      completeAuth({ ...response.data, demo_mode: true });
+      const response = await authService.demo('community');
+      completeAuth({ ...response.data, demo_mode: true, edition: 'oss' });
       return;
     }
     // Isolated Pages/static demo — not a JWT, not mixed with customer data.
     const demoUser: AuthUser = {
       id: 'demo-user',
-      name: 'Demo CISO',
+      name: 'Demo operator',
       email: 'demo-ciso@demo.rivicq.local',
-      role: 'admin',
+      role: 'operator',
       tenantId: 'tenant-demo',
       mfaEnabled: false,
-      edition: nextEdition,
+      edition: 'community',
       demo: true,
     };
     try {
@@ -312,7 +312,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
       /* ignore */
     }
-    persist(CLIENT_DEMO_TOKEN, demoUser, nextEdition);
+    persist(CLIENT_DEMO_TOKEN, demoUser, 'community');
   }, [backendReachable, completeAuth, persist]);
 
   const logout = React.useCallback(() => {
@@ -333,6 +333,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [backendReachable, edition, persist, token]);
 
   const setEdition = React.useCallback((nextEdition: Edition) => {
+    if (user?.demo) {
+      persist(token, user, 'community');
+      return;
+    }
     persist(token, user, nextEdition);
   }, [persist, token, user]);
 

@@ -478,6 +478,7 @@ export const bomService = {
   getPipeline: () => api.get('/bom/pipeline'),
   getUnified: (scanId?: string) => api.get('/bom/unified', { params: scanId ? { scan_id: scanId } : undefined }),
   getGovernance: () => api.get('/governance/controls'),
+  getChecklists: () => api.get('/governance/checklists'),
   getHsm: () => api.get('/hsm/status'),
   getQuantum: () => api.get('/quantum/status'),
   getApiSecurity: () => api.get('/security/api'),
@@ -522,6 +523,10 @@ export const ecosystemService = {
   getTools: () => api.get('/ecosystem/tools'),
   getTool: (id: string) => api.get(`/ecosystem/tools/${id}`),
   getCategories: () => api.get('/ecosystem/categories'),
+};
+
+export const intelligenceService = {
+  getTools: () => api.get('/intelligence/tools'),
 };
 
 export const coreService = {
@@ -597,4 +602,18 @@ export const adminService = {
   ssoProviders: () => api.get('/sso/providers'),
   configureSaml: (data: { entity_id: string; acs_url: string; idp_metadata: string; enabled: boolean }) =>
     api.post('/sso/saml', data),
+};
+
+export const platformService = {
+  status: () => api.get('/platform/status'),
+  plans: () => api.get('/platform/plans'),
+  funnel: () => api.get('/platform/funnel'),
+  contacts: () => api.get('/platform/contacts'),
+  createLead: (data: { name: string; email: string; company: string; intent: string; source?: string }) =>
+    api.post('/leads', data),
+  leads: () => api.get('/leads'),
+  opportunities: () => api.get('/opportunities'),
+  ibm: () => api.get('/ibm'),
+  billingStatus: () => api.get('/billing/status'),
+  checkout: (data: { plan_id: string; email?: string }) => api.post('/billing/checkout', data),
 };

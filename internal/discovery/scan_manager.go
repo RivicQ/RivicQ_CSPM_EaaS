@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/tenant"
 )
 
 type ScanJob struct {
@@ -24,6 +25,7 @@ type ScanJob struct {
 	Error     string      `json:"error,omitempty"`
 	CreatedAt time.Time   `json:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
+	TenantID  string      `json:"-"`
 }
 
 // PersistFunc persists a completed scan result and returns a stable asset ID
@@ -33,7 +35,7 @@ type PersistFunc func(job *ScanJob, result *ScanResult) (string, error)
 type ScanManager struct {
 	mu        sync.RWMutex
 	jobs      map[string]*ScanJob
-	results   map[string]*ScanResult // assetID -> latest completed result
+	results   map[string]*ScanResult // tenantID/assetID -> latest completed result
 	scanner   *Scanner
 	persistFn PersistFunc
 }
@@ -58,18 +60,32 @@ func (sm *ScanManager) AssetIDFor(target string) string {
 	return uuid.NewSHA1(uuid.NameSpaceURL, []byte(strings.TrimSpace(target))).String()
 }
 
-// GetResult returns the latest completed scan result for an asset.
+func resultKey(tenantID, assetID string) string {
+	return tenant.Normalize(tenantID) + "/" + assetID
+}
+
+// GetResult returns the latest completed scan result for an asset in the public tenant.
 func (sm *ScanManager) GetResult(assetID string) (*ScanResult, bool) {
+	return sm.GetResultForTenant(tenant.PublicTenantID, assetID)
+}
+
+// GetResultForTenant returns the latest completed scan result for an asset in a tenant.
+func (sm *ScanManager) GetResultForTenant(tenantID, assetID string) (*ScanResult, bool) {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	result, ok := sm.results[assetID]
+	result, ok := sm.results[resultKey(tenantID, assetID)]
 	return result, ok
 }
 
 func (sm *ScanManager) StartScan(target, scanType string) *ScanJob {
+	return sm.StartScanForTenant(tenant.PublicTenantID, target, scanType)
+}
+
+func (sm *ScanManager) StartScanForTenant(tenantID, target, scanType string) *ScanJob {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
+	tenantID = tenant.Normalize(tenantID)
 	assetID := sm.AssetIDFor(target)
 	job := &ScanJob{
 		ID:        uuid.New().String(),
@@ -80,6 +96,7 @@ func (sm *ScanManager) StartScan(target, scanType string) *ScanJob {
 		Progress:  0,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+		TenantID:  tenantID,
 	}
 	sm.jobs[job.ID] = job
 
@@ -133,7 +150,7 @@ func (sm *ScanManager) executeScan(job *ScanJob) {
 
 	// Keep the latest result indexed by asset so GetAssetBOM can resolve it
 	// even when persistence is unavailable (demo mode).
-	sm.results[job.AssetID] = result
+	sm.results[resultKey(job.TenantID, job.AssetID)] = result
 }
 
 func (sm *ScanManager) GetScan(id string) (*ScanJob, bool) {
@@ -148,12 +165,32 @@ func (sm *ScanManager) GetScan(id string) (*ScanJob, bool) {
 	return &snapshot, true
 }
 
+func (sm *ScanManager) GetScanForTenant(tenantID, id string) (*ScanJob, bool) {
+	job, ok := sm.GetScan(id)
+	if !ok {
+		return nil, false
+	}
+	if tenant.Normalize(job.TenantID) != tenant.Normalize(tenantID) {
+		return nil, false
+	}
+	return job, true
+}
+
 func (sm *ScanManager) ListScans() []*ScanJob {
+	return sm.ListScansForTenant(tenant.PublicTenantID)
+}
+
+func (sm *ScanManager) ListScansForTenant(tenantID string) []*ScanJob {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	scans := make([]*ScanJob, 0, len(sm.jobs))
+	tenantID = tenant.Normalize(tenantID)
+	scans := make([]*ScanJob, 0)
 	for _, j := range sm.jobs {
-		scans = append(scans, j)
+		if tenant.Normalize(j.TenantID) != tenantID {
+			continue
+		}
+		snapshot := *j
+		scans = append(scans, &snapshot)
 	}
 	return scans
 }
@@ -193,6 +230,16 @@ func buildTargets(target, scanType string) []Target {
 			Protocol: "hardware",
 			Kind:     string(ClassHardware),
 			Label:    "Hardware inventory: " + label,
+			Path:     label,
+		}}
+	case ClassFirmware:
+		label := parseFirmwareLabel(target)
+		return []Target{{
+			ID:       nextID(),
+			Host:     "declared",
+			Protocol: "firmware",
+			Kind:     string(ClassFirmware),
+			Label:    "Firmware inventory: " + label,
 			Path:     label,
 		}}
 	case ClassPod:
@@ -337,7 +384,7 @@ func httpSchemeFor(raw string, port int) string {
 func ResourcesFromTargets(targets []Target) map[string]bool {
 	out := map[string]bool{
 		"tls": false, "http": false, "https": false, "ssh": false, "sbom": false,
-		"k8s": false, "hardware": false,
+		"k8s": false, "hardware": false, "firmware": false,
 	}
 	for _, t := range targets {
 		p := strings.ToLower(t.Protocol)

@@ -5,6 +5,7 @@ import { ArrowForward, Lock, Security, WorkspacePremium, CloudQueue, Psychology,
 import { setEditionPreference, Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 import designSystem from '../theme/designSystem';
+import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 
 const EditionSwitcher: React.FC = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Limited five-BOM engine: CBOM, SBOM, local QBOM, TLS API hygiene, pipeline stages 1–6, CLI, and GitHub Action.',
       icon: <Security sx={{ fontSize: 34 }} />,
       edition: 'community' as Edition,
-      accent: '#c4783a',
+      accent: '#7c3aed',
       highlights: ['CBOM + SBOM + local QBOM', 'API security from TLS scans', 'Discover → mitigate → report', 'No AIBOM, IBOM, SSO, or DORA pack'],
       action: 'Continue with Community',
     },
@@ -31,7 +32,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Cloud posture, conformance packs, and the full security module suite for growing teams.',
       icon: <Shield sx={{ fontSize: 34 }} />,
       edition: 'professional' as Edition,
-      accent: '#d97706',
+      accent: '#a78bfa',
       highlights: ['CSPM & conformance packs', 'AIBOM / IBOM workspace', 'Multi-cloud accounts', 'Threat & vuln management'],
       action: 'Continue with Professional',
     },
@@ -47,13 +48,14 @@ const EditionSwitcher: React.FC = () => {
   ];
 
   const pageBg = isDark ? designSystem.gradient.meshDark : designSystem.gradient.meshLight;
-  const cardBg = isDark ? '#17150f' : '#fffdf8';
+  const cardBg = isDark ? '#0a0a0f' : '#ffffff';
 
   return (
-    <Box sx={{ minHeight: '100vh', background: pageBg, py: 8 }}>
-      <Container maxWidth="lg">
+    <Box sx={{ minHeight: '100vh', bgcolor: '#000', background: pageBg, py: 8, position: 'relative', overflow: 'hidden' }}>
+      {isDark && <NebulaBackdrop />}
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-          <BrandLogo />
+          <BrandLogo dark={isDark} />
         </Box>
         <Stack spacing={2} sx={{ mb: 4, textAlign: 'center' }}>
           <Chip icon={<Lock />} label="Edition Selection" color="primary" sx={{ alignSelf: 'center', fontWeight: 600 }} />

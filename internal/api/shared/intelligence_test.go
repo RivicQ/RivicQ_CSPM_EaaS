@@ -115,6 +115,7 @@ func TestBOMFrameworkRoutes(t *testing.T) {
 		"/api/v1/bom/pipeline",
 		"/api/v1/bom/unified",
 		"/api/v1/governance/controls",
+		"/api/v1/governance/checklists",
 		"/api/v1/hsm/status",
 		"/api/v1/quantum/status",
 		"/api/v1/security/api",

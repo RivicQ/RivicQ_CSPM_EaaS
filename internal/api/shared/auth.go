@@ -90,11 +90,16 @@ func authProvidersHandler() gin.HandlerFunc {
 
 func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if isProductionRuntime() {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Demo access is disabled in production"})
+			return
+		}
 		if !demoModeEnabled() {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Demo access is disabled (DEMO_MODE=false)"})
 			return
 		}
-		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
+		// Community operator only — never an admin session and never an Enterprise edition claim.
+		edition := "oss"
 
 		email := strings.TrimSpace(os.Getenv("DEMO_CISO_EMAIL"))
 		if email == "" {
@@ -102,7 +107,7 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 		}
 		name := strings.TrimSpace(os.Getenv("DEMO_CISO_NAME"))
 		if name == "" {
-			name = "Demo CISO"
+			name = "Demo operator"
 		}
 
 		demoUser := &auth.User{
@@ -110,7 +115,7 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 			TenantID: "tenant-demo",
 			Email:    email,
 			Name:     name,
-			Role:     "admin",
+			Role:     "operator",
 		}
 
 		accessToken, err := service.TokenManager().GenerateToken(demoUser, edition)
@@ -141,7 +146,7 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 				ID:    "demo-user",
 				Name:  name,
 				Email: email,
-				Role:  "admin",
+				Role:  "operator",
 			},
 			"edition":   edition,
 			"demo_mode": true,
@@ -215,10 +220,11 @@ func registerHandler(logger *logrus.Logger, service *auth.AuthService, allowedDo
 		}
 
 		user := &auth.User{
-			Email:    strings.ToLower(strings.TrimSpace(req.Email)),
-			Name:     strings.TrimSpace(req.Name),
-			Password: req.Password,
-			Role:     "viewer",
+			Email:        strings.ToLower(strings.TrimSpace(req.Email)),
+			Name:         strings.TrimSpace(req.Name),
+			Organisation: strings.TrimSpace(req.Organisation),
+			Password:     req.Password,
+			Role:         "viewer",
 		}
 
 		if err := service.Register(user); err != nil {
@@ -265,21 +271,24 @@ func meHandler(service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email := c.GetString("email")
 		name := ""
+		organisation := ""
 		mfaEnabled := false
 		if user, err := service.GetUserByEmail(email); err == nil && user != nil {
 			name = user.Name
+			organisation = user.Organisation
 			mfaEnabled = user.MFAEnabled
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"id":          c.GetString("user_id"),
-			"user_id":     c.GetString("user_id"),
-			"tenant_id":   c.GetString("tenant_id"),
-			"email":       email,
-			"name":        name,
-			"role":        c.GetString("role"),
-			"edition":     c.GetString("edition"),
-			"mfa_enabled": mfaEnabled,
-			"permissions": c.GetStringSlice("permissions"),
+			"id":           c.GetString("user_id"),
+			"user_id":      c.GetString("user_id"),
+			"tenant_id":    c.GetString("tenant_id"),
+			"email":        email,
+			"name":         name,
+			"organisation": organisation,
+			"role":         c.GetString("role"),
+			"edition":      c.GetString("edition"),
+			"mfa_enabled":  mfaEnabled,
+			"permissions":  c.GetStringSlice("permissions"),
 		})
 	}
 }

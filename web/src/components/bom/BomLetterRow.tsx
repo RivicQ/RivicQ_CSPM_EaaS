@@ -15,8 +15,8 @@ const BomLetterRow: React.FC<{ dark?: boolean; compact?: boolean }> = ({ dark, c
           py: compact ? 0.75 : 1,
           borderRadius: `${designSystem.radius.md}px`,
           border: '1px solid',
-          borderColor: dark ? 'rgba(186,230,253,0.28)' : 'rgba(14,165,233,0.22)',
-          bgcolor: dark ? 'rgba(14,165,233,0.16)' : '#ffffff',
+          borderColor: dark ? 'rgba(196,181,253,0.28)' : 'rgba(124,58,237,0.22)',
+          bgcolor: dark ? 'rgba(124,58,237,0.16)' : '#ffffff',
           boxShadow: dark ? 'none' : designSystem.shadow.sm,
         }}
       >
@@ -25,7 +25,7 @@ const BomLetterRow: React.FC<{ dark?: boolean; compact?: boolean }> = ({ dark, c
             fontWeight: 800,
             letterSpacing: '0.08em',
             fontSize: compact ? '0.7rem' : '0.8125rem',
-            color: dark ? '#e0f2fe' : tokens.colors.rivicq[700],
+            color: dark ? '#ede9fe' : tokens.colors.rivicq[700],
             lineHeight: 1,
           }}
         >
@@ -37,7 +37,7 @@ const BomLetterRow: React.FC<{ dark?: boolean; compact?: boolean }> = ({ dark, c
             fontSize: '0.5625rem',
             letterSpacing: '0.04em',
             textTransform: 'uppercase',
-            color: dark ? 'rgba(186,230,253,0.72)' : tokens.colors.text.muted,
+            color: dark ? 'rgba(196,181,253,0.72)' : tokens.colors.text.muted,
           }}
         >
           {layer.community ? 'OSS' : 'Ent'}

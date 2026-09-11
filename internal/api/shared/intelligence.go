@@ -87,7 +87,7 @@ func EvaluateIntelligencePolicies(logger *logrus.Logger) gin.HandlerFunc {
 
 func IntelligenceFindingsHandler(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		findings := normalizedFindingsFromScans()
+		findings := normalizedFindingsFromScans(c)
 		logger.WithField("count", len(findings)).Debug("Serving normalized intelligence findings")
 		c.JSON(http.StatusOK, gin.H{
 			"findings": findings,
@@ -100,7 +100,7 @@ func IntelligenceFindingsHandler(logger *logrus.Logger) gin.HandlerFunc {
 func GetScanIntelligence(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		job, ok := discovery.GetScanManager().GetScan(id)
+		job, ok := tenantScanJob(c, id)
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
 			return
@@ -117,6 +117,7 @@ func GetScanIntelligence(logger *logrus.Logger) gin.HandlerFunc {
 			Target:    job.Target,
 			ScanType:  job.ScanType,
 			Discovery: job.Result,
+			LocalRoot: intelligence.LocalRootIfDir(job.Target),
 		})
 		logger.WithFields(logrus.Fields{
 			"scan_id":  id,
@@ -130,7 +131,7 @@ func GetScanIntelligence(logger *logrus.Logger) gin.HandlerFunc {
 func GetScanQiskit(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		job, ok := discovery.GetScanManager().GetScan(id)
+		job, ok := tenantScanJob(c, id)
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
 			return
@@ -147,6 +148,7 @@ func GetScanQiskit(logger *logrus.Logger) gin.HandlerFunc {
 			Target:    job.Target,
 			ScanType:  job.ScanType,
 			Discovery: job.Result,
+			LocalRoot: intelligence.LocalRootIfDir(job.Target),
 		})
 		estate := 0
 		if rep.Qiskit != nil {
@@ -172,7 +174,7 @@ func GetScanQiskit(logger *logrus.Logger) gin.HandlerFunc {
 func GetScanCycloneDX(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		job, ok := discovery.GetScanManager().GetScan(id)
+		job, ok := tenantScanJob(c, id)
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
 			return
@@ -192,8 +194,8 @@ func GetScanCycloneDX(logger *logrus.Logger) gin.HandlerFunc {
 	}
 }
 
-func normalizedFindingsFromScans() []intelligence.Finding {
-	jobs := discovery.GetScanManager().ListScans()
+func normalizedFindingsFromScans(c *gin.Context) []intelligence.Finding {
+	jobs := tenantScanList(c)
 	out := make([]intelligence.Finding, 0)
 	for _, job := range jobs {
 		if job.Status != "completed" || job.Result == nil {

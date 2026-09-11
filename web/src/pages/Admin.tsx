@@ -32,8 +32,7 @@ import { EmptyState } from '../components/ui';
 type WorkspaceUser = { id: string; name: string; email: string; role: string };
 
 const LABELED_DEMO_USERS: WorkspaceUser[] = [
-  { id: 'demo-admin', name: 'Demo CISO', email: 'demo-ciso@demo.rivicq.local', role: 'admin' },
-  { id: 'demo-operator', name: 'Demo Operator', email: 'operator@demo.rivicq.local', role: 'operator' },
+  { id: 'demo-operator', name: 'Demo operator', email: 'demo-ciso@demo.rivicq.local', role: 'operator' },
   { id: 'demo-analyst', name: 'Demo Analyst', email: 'analyst@demo.rivicq.local', role: 'analyst' },
   { id: 'demo-viewer', name: 'Demo Viewer', email: 'viewer@demo.rivicq.local', role: 'viewer' },
 ];

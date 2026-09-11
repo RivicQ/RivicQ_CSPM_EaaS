@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 	"time"
@@ -69,9 +70,9 @@ func GetStatus(edition string) CoreStatus {
 			Prometheus:      os.Getenv("PROMETHEUS_ENABLED") == "true",
 			Grafana:         os.Getenv("GRAFANA_ENABLED") == "true",
 			Cilium:          os.Getenv("CILIUM_ENDPOINT") != "",
-			Trivy:           true,
-			Syft:            true,
-			CodeQL:          true,
+			Trivy:           toolOnPath("trivy"),
+			Syft:            toolOnPath("syft"),
+			CodeQL:          toolOnPath("codeql"),
 			GoogleOAuth:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID") != "" && os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET") != "",
 			GitHubOAuth:     os.Getenv("GITHUB_OAUTH_CLIENT_ID") != "" && os.Getenv("GITHUB_OAUTH_CLIENT_SECRET") != "",
 			GitHubScanning:  os.Getenv("GITHUB_TOKEN") != "",
@@ -101,11 +102,11 @@ func CheckIntegration(name string) (bool, string) {
 	case "cilium":
 		return os.Getenv("CILIUM_ENDPOINT") != "", "Cilium eBPF flow monitoring"
 	case "trivy":
-		return true, "Trivy vulnerability scanner"
+		return toolOnPath("trivy"), "Trivy vulnerability scanner (optional PATH binary)"
 	case "syft":
-		return true, "Syft SBOM generation"
+		return toolOnPath("syft"), "Syft SBOM generation (optional PATH binary)"
 	case "codeql":
-		return true, "CodeQL static analysis"
+		return toolOnPath("codeql"), "CodeQL static analysis (optional PATH binary)"
 	case "google_oauth":
 		ok := os.Getenv("GOOGLE_OAUTH_CLIENT_ID") != "" && os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET") != ""
 		return ok, "Google OAuth single sign-on"
@@ -133,6 +134,11 @@ func GetServices() ServicesStatus {
 		RivicQProtocol:  probeService(os.Getenv("RIVICQ_PROTOCOL_ENDPOINT"), "rivicq-protocol"),
 		CryptoBOMCore:   ServiceHealth{Reachable: true, Status: "running"},
 	}
+}
+
+func toolOnPath(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
 }
 
 func probeService(endpoint, name string) ServiceHealth {
