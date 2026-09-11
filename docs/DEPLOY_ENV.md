@@ -3,7 +3,8 @@
 Use these variables for local, CI, and production deployments.
 
 ## Core
-- `REACT_APP_API_URL`: Browser API base URL, usually `http://localhost:8080/api/v1`.
+- `REACT_APP_API_URL`: Browser API base URL. Local Community: `http://localhost:8080/api/v1`. For GitHub Pages to run live scans, set this at **build** time to a public Community engine (CORS must allow `https://rivicq.github.io`). Leave unset on Pages if no public engine exists — the site then shows “Needs the RivicQ engine” and never fabricates findings.
+- `CORS_ORIGINS`: Extra allowed browser origins (comma-separated). `https://rivicq.github.io` is always included so a hosted engine can serve the public site.
 - `DATABASE_URL`: PostgreSQL connection string used by the API server and migrations.
 - `JWT_SECRET`: Signing secret for authentication tokens.
 - `AUTH_ALLOWED_DOMAINS`: Comma-separated email domains allowed to sign in.

@@ -12,10 +12,12 @@ import { cbomService, gitHubScanService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
 import TrademarkNotice from '../components/TrademarkNotice';
 import HomeScanReport, { HomeScanReportData } from '../components/home/HomeScanReport';
+import PublicEngineNotice from '../components/brand/PublicEngineNotice';
 import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
+import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -48,7 +50,7 @@ const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', '
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, backendReachable } = useAuth();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
   const [progress, setProgress] = React.useState(0);
@@ -100,6 +102,12 @@ const Home: React.FC = () => {
 
   const handleScan = async () => {
     if (!repoUrl.trim()) return;
+    if (!backendReachable) {
+      setScanStatus('error');
+      setProgress(0);
+      setReport(null);
+      return;
+    }
     setScanStatus('scanning');
     setProgress(0);
     setReport(null);
@@ -361,9 +369,18 @@ const Home: React.FC = () => {
         <Box id="scan" sx={{ scrollMarginTop: 80 }}>
           <MotionSection>
             <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: panel, borderRadius: 2, p: { xs: 2, md: 2.5 } }}>
-              <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'text.secondary', mb: 1.5 }}>
-                $ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate
-              </Typography>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
+                <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'text.secondary' }}>
+                  $ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate
+                </Typography>
+                <Chip
+                  size="small"
+                  label={backendReachable ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DISCONNECTED}
+                  color={backendReachable ? 'success' : 'default'}
+                  variant="outlined"
+                />
+              </Stack>
+              {!backendReachable && <PublicEngineNotice variant="scan" compact />}
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
                 <TextField
                   fullWidth
@@ -380,7 +397,7 @@ const Home: React.FC = () => {
                   onClick={handleScan}
                   loading={scanStatus === 'scanning'}
                   loadingText="Scanning…"
-                  disabled={!repoUrl.trim()}
+                  disabled={!repoUrl.trim() || !backendReachable}
                   sx={{ minWidth: 168 }}
                 >
                   Run scan

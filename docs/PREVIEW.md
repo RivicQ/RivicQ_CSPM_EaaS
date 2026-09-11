@@ -21,6 +21,11 @@ Published to a `/preview` folder on `gh-pages`. Production files at the site roo
 | IBM Partner Plus | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/ibm/ |
 | Sign in | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/login/ |
 | Demo trail | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/demo/ |
+| Findings (console) | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/findings/ |
+| Scans | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/scanner/ |
+| CBOM workspace | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/bom/ |
+| PQC migration | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/migration/ |
+| Governance | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/governance/ |
 | RivicQ Graph | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/fabric/ |
 | Docs hub | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/docs/ |
 | Docs contact | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/docs/contact.html |
@@ -33,7 +38,7 @@ Hard-refresh (Ctrl+Shift+R) if a cached cream page appears.
 - Files changed: https://github.com/RivicQ/RivicQ_CSPM_EaaS/pull/73/files
 - Diff vs `main`: https://github.com/RivicQ/RivicQ_CSPM_EaaS/compare/main...cursor/rivicq-com-platform-86cc
 - Contact page source: https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/cursor/rivicq-com-platform-86cc/web/src/pages/ContactHub.tsx
-- Latest commit: https://github.com/RivicQ/RivicQ_CSPM_EaaS/commit/075158d8fcb8c1fcf84f8f68b4711f54d49b51a6
+- Branch tip: https://github.com/RivicQ/RivicQ_CSPM_EaaS/commits/cursor/rivicq-com-platform-86cc
 
 ## 3. Local (full console + API)
 
@@ -53,3 +58,13 @@ Production will replace cream with nebula:
 https://rivicq.github.io/RivicQ_CSPM_EaaS/  
 https://rivicq.github.io/RivicQ_CSPM_EaaS/contact  
 https://rivicq.github.io/RivicQ_CSPM_EaaS/fabric/
+
+## 5. Public site vs RivicQ engine
+
+GitHub Pages is static. Live CBOM scans and IBM readiness need a Community API (`:8080`). Until `REACT_APP_API_URL` is set at Pages build time, public pages show **Needs the RivicQ engine** and never invent findings or co-sell records.
+
+| Surface | When the engine is unreachable |
+|---------|--------------------------------|
+| Home scan | Honest banner + sign-in / labeled demo |
+| Product / CSPM / CBOM / PQC / Enterprise / Security | Same engine notice |
+| IBM Partner Plus | Honesty line always; Pages cannot load live checklist state |

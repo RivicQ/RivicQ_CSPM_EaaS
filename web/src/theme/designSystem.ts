@@ -154,9 +154,10 @@ export const sidebarNavItemButtonSx = (active: boolean, disabled: boolean) => ({
 export const commandCenterCardSx = {
   position: 'relative' as const,
   overflow: 'hidden' as const,
-  background: designSystem.proBlue.commandCenter,
+  background: '#0a0a0f',
+  backgroundImage: 'none',
   border: `1px solid ${designSystem.proBlue.border}`,
-  boxShadow: designSystem.shadow.md,
+  boxShadow: 'none',
   color: designSystem.proBlue.textPrimary,
   '&::after': {
     content: '""',
@@ -302,17 +303,19 @@ export const appBarPaperSx = (mode: 'light' | 'dark') => ({
 });
 
 export const appBarSearchSx = (mode: 'light' | 'dark') => ({
-  display: { xs: 'none', md: 'flex' },
+  display: { xs: 'none', lg: 'flex' },
   alignItems: 'center',
+  flexWrap: 'nowrap',
   borderRadius: `${designSystem.radius.md}px`,
   px: 1.5,
   py: 0,
   height: 36,
   maxHeight: 36,
   overflow: 'hidden',
-  flexShrink: 1,
-  minWidth: 0,
-  width: { md: 200, lg: 280 },
+  flexShrink: 0,
+  minWidth: 220,
+  width: { lg: 240, xl: 280 },
+  whiteSpace: 'nowrap',
   bgcolor: mode === 'dark' ? '#0a0a0f' : '#f1f5f9',
   border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
   transition: designSystem.motion.smooth,

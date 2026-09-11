@@ -3,6 +3,7 @@ import { Box, Chip, Grid, Stack, Typography } from '@mui/material';
 import SitePage, { siteCardSx } from './SitePage';
 import { platformService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { PUBLIC_ENGINE_IBM_HONESTY } from '../data/publicInfrastructure';
 
 type Mapping = {
   ibm_technology: string;
@@ -82,12 +83,13 @@ const IBMPartner: React.FC = () => {
       lede="RivicQ has been selected for IBM Partner Plus. This page tracks RivicQ readiness. It does not call IBM seller, marketplace, or Partner Plus APIs."
       primary={{ label: 'Request a conversation', to: '/request-demo' }}
       secondary={{ label: 'Email sales@', to: 'mailto:sales@rivicq.com' }}
-      notice="No fabricated co-sell records. Marketplace metadata is not auto-published. Qiskit scores on scans are a local taxonomy — not IBM Quantum hardware."
+      notice={PUBLIC_ENGINE_IBM_HONESTY}
+      engineNotice="ibm"
     >
       {!backendReachable && (
-        <Box sx={{ p: 1.75, mb: 3, bgcolor: '#0a0a0f', border: '1px solid #1f1f2e', borderRadius: 2, color: '#d1d5db' }}>
-          GitHub Pages cannot load live readiness state. Run the API to see the checklist.
-        </Box>
+        <Typography sx={{ color: '#9ca3af', mb: 2, fontSize: '0.875rem' }}>
+          Checklist below is a published snapshot of RivicQ readiness. It is not live IBM Partner Plus API state.
+        </Typography>
       )}
       {error && (
         <Box sx={{ p: 1.75, mb: 3, bgcolor: '#0a0a0f', border: '1px solid #7f1d1d', borderRadius: 2, color: '#fecaca' }}>

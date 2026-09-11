@@ -8,6 +8,7 @@ const EnterprisePublic: React.FC = () => (
     lede="Cloning this repository gives you the Community scan engine. Enterprise SSO, RBAC, audit, and cloud connectors are a commercial contract with RivicQ GmbH."
     primary={{ label: 'Request enterprise demo', to: '/request-demo' }}
     secondary={{ label: 'See pricing', to: '/pricing' }}
+    engineNotice="scan"
     blocks={[
       { title: 'SSO and RBAC', body: 'Workspace roles on the API. Edition switcher in the UI is a preference, not a license grant.' },
       { title: 'Cloud connectors', body: 'AWS, GCP, Azure, IBM Cloud when credentials and a license exist. Nothing is auto-attached.' },

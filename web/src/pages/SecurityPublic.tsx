@@ -8,6 +8,7 @@ const SecurityPublic: React.FC = () => (
     lede="GitHub Pages is a public static site. It must never hold database credentials, admin tools, or customer estates. Production scans need the CLI or a running API."
     primary={{ label: 'Security policy', to: `${process.env.PUBLIC_URL || ''}/docs/read.html?doc=SECURITY.md` }}
     secondary={{ label: 'Report a vulnerability', to: 'mailto:security@rivicq.com' }}
+    engineNotice="scan"
     blocks={[
       { title: 'Public desks', body: 'hello@, sales@, support@, security@, privacy@ on rivicq.com. admin@ is private.' },
       { title: 'Tenant isolation', body: 'JWT tenant_id scopes Community scans. Spoofable X-Tenant-ID is ignored.' },

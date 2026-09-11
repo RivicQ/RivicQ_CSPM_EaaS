@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
+import PublicEngineNotice from '../components/brand/PublicEngineNotice';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
 
 export type SiteBlock = { title: string; body: string };
@@ -33,9 +34,10 @@ const SitePage: React.FC<{
   primary?: { label: string; to: string };
   secondary?: { label: string; to: string };
   notice?: string;
+  engineNotice?: 'scan' | 'ibm';
   maxWidth?: 'md' | 'lg';
   children?: React.ReactNode;
-}> = ({ eyebrow, title, lede, blocks = [], primary, secondary, notice, maxWidth = 'md', children }) => {
+}> = ({ eyebrow, title, lede, blocks = [], primary, secondary, notice, engineNotice, maxWidth = 'md', children }) => {
   const navigate = useNavigate();
   const go = (to: string) => {
     if (to.startsWith('mailto:') || to.startsWith('http') || to.includes('.html')) {
@@ -60,6 +62,7 @@ const SitePage: React.FC<{
           )}
         </Stack>
         {notice && <Box sx={noticeSx}>{notice}</Box>}
+        {engineNotice && <PublicEngineNotice variant={engineNotice} />}
         {blocks.length > 0 && (
           <Grid container spacing={2}>
             {blocks.map((b) => (

@@ -8,6 +8,7 @@ const Product: React.FC = () => (
     lede="RivicQ discovers cryptographic assets, cloud risks, and migration exposure. Community is the scan engine on this GitHub project. Enterprise is the licensed SaaS. GitHub Pages is static."
     primary={{ label: 'Start security assessment', to: '/' }}
     secondary={{ label: 'Request enterprise demo', to: '/request-demo' }}
+    engineNotice="scan"
     blocks={[
       { title: 'CSPM', body: 'Posture from declared and scanned assets. Live cloud attach needs customer credentials and an Enterprise license.' },
       { title: 'CBOM', body: 'CycloneDX cryptographic bill of materials from repository and host scans. Not a silent live estate on Pages.' },

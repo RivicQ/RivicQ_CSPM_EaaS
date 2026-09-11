@@ -23,7 +23,7 @@ const HorizonCanvas: React.FC<HorizonCanvasProps> = ({ dark = false, children })
         position: 'absolute',
         inset: 0,
         pointerEvents: 'none',
-        background: dark ? designSystem.proBlue.commandGlow : designSystem.horizon.wash,
+        background: dark ? 'transparent' : designSystem.horizon.wash,
       }}
     />
     <Box

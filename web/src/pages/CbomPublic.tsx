@@ -8,6 +8,7 @@ const CbomPublic: React.FC = () => (
     lede="Community produces CBOM and SBOM from rivicq scan and the GitHub Action. Five-BOM (QBOM, AIBOM, IBOM) is the Enterprise workspace model — not implied by a Pages demo."
     primary={{ label: 'Start free CBOM pilot', to: '/' }}
     secondary={{ label: 'Read the workflow', to: `${process.env.PUBLIC_URL || ''}/docs/index.html` }}
+    engineNotice="scan"
     blocks={[
       { title: 'CycloneDX', body: 'GET /api/v1/scans/:id/cyclonedx when an API is running. The CLI writes local evidence.' },
       { title: 'Inventory', body: 'Algorithms, key sizes, libraries, and locations from the scan — not a guessed fleet inventory.' },

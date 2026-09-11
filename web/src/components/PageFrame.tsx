@@ -51,21 +51,11 @@ const PageFrame: React.FC<PageFrameProps> = ({
             bgcolor: 'background.paper',
           }),
           borderRadius: `${designSystem.radius.xl}px`,
-          boxShadow: creative ? blue.commandGlow : undefined,
+          bgcolor: creative ? '#0a0a0f' : 'background.paper',
+          backgroundImage: 'none',
+          boxShadow: 'none',
         }}
       >
-        {creative && (
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              opacity: 0.04,
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-              backgroundSize: '48px 48px',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
         <Box sx={{ p: { xs: 2, md: 2.5 }, position: 'relative', zIndex: 1 }}>
           <Stack
             direction={{ xs: 'column', lg: 'row' }}
@@ -73,7 +63,7 @@ const PageFrame: React.FC<PageFrameProps> = ({
             alignItems={{ xs: 'flex-start', lg: 'center' }}
             spacing={2}
           >
-            <Box>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
               {(eyebrow || badge) && (
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.25 }}>
                   {eyebrow && (
@@ -127,13 +117,25 @@ const PageFrame: React.FC<PageFrameProps> = ({
                 {action}
               </Stack>
             )}
-            {visual && (
-              <Box sx={{ flex: 1, minWidth: { xs: '100%', lg: 240 }, maxWidth: { lg: 420 } }}>
-                {visual}
-              </Box>
-            )}
           </Stack>
         </Box>
+        {visual && (
+          <Box
+            sx={{
+              mx: { xs: 1.5, md: 2 },
+              mb: { xs: 1.5, md: 2 },
+              px: 1.75,
+              py: 1.5,
+              borderRadius: 2,
+              bgcolor: '#000000',
+              border: '1px solid #1f1f2e',
+              backgroundImage: 'none',
+              minHeight: 120,
+            }}
+          >
+            {visual}
+          </Box>
+        )}
       </Box>
       {children}
     </Box>

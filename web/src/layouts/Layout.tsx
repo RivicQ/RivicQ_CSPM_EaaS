@@ -609,7 +609,7 @@ const Layout: React.FC = () => {
           ...appBarPaperSx(mode),
         }}
       >
-        <Toolbar sx={{ minHeight: 60, gap: 1.25, px: { xs: 1.5, md: 2.5 } }}>
+        <Toolbar sx={{ minHeight: 60, maxHeight: 60, gap: 1.25, px: { xs: 1.5, md: 2.5 }, flexWrap: 'nowrap', overflow: 'hidden' }}>
           {!isDesktop && (
             <IconButton
               edge="start"
@@ -666,8 +666,8 @@ const Layout: React.FC = () => {
                 opacity: 0.85,
               }}
             />
-            <Typography noWrap sx={{ fontSize: '0.8125rem', fontWeight: 500, flexGrow: 1, minWidth: 0, color: isDarkMode ? blue.textMuted : '#71717a' }}>
-              Search findings, assets, scans…
+            <Typography noWrap sx={{ fontSize: '0.8125rem', fontWeight: 500, flexGrow: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', color: isDarkMode ? blue.textMuted : '#71717a' }}>
+              Search
             </Typography>
             <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'JetBrains Mono, monospace' }}>
               ⌘K
@@ -720,7 +720,7 @@ const Layout: React.FC = () => {
               <IconButton
                 onClick={() => setPaletteOpen(true)}
                 aria-label="Search workspace"
-                sx={{ ...appBarIconButtonSx(mode), display: { xs: 'inline-flex', md: 'none' } }}
+                sx={{ ...appBarIconButtonSx(mode), display: { xs: 'inline-flex', lg: 'none' } }}
               >
                 <Search sx={{ fontSize: 18 }} />
               </IconButton>

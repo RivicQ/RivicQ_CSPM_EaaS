@@ -8,6 +8,7 @@ const CspmPublic: React.FC = () => (
     lede="Cloud Security Posture Management here means cryptographic and cloud-risk discovery from scans you run — not a claimed live attach to every customer cloud on GitHub Pages."
     primary={{ label: 'Run a public scan', to: '/' }}
     secondary={{ label: 'Open the console', to: '/login' }}
+    engineNotice="scan"
     blocks={[
       { title: 'Security score', body: 'Comes from a completed scan or a connected workspace. Pages does not invent a live estate score.' },
       { title: 'Assets', body: 'Repositories, hosts, certificates, and declared cloud accounts when a connector exists.' },

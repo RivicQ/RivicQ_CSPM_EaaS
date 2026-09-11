@@ -5,7 +5,8 @@ import {
 import { CheckCircle, ErrorOutline, GitHub, Lock, ArrowForward, Shield, Language } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { tokens } from '../../theme/tokens';
-import designSystem from '../../theme/designSystem';
+import { websiteCtaSx } from '../../theme/websiteChrome';
+import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_SCAN_COPY } from '../../data/publicInfrastructure';
 
 export type HomeScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -47,7 +48,7 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
             <Typography variant="h6" fontWeight={800}>CBOM scan</Typography>
             {status === 'scanning' && <Chip size="small" label="Running" color="primary" />}
             {status === 'complete' && <Chip size="small" label="Completed" color="success" />}
-            {status === 'error' && <Chip size="small" label="Needs the RivicQ engine" />}
+            {status === 'error' && <Chip size="small" label={PUBLIC_ENGINE_CHIP_DISCONNECTED} />}
           </Stack>
 
           {status === 'scanning' && (
@@ -137,7 +138,7 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
                   ))}
                 </Stack>
               )}
-              <Button variant="contained" endIcon={<ArrowForward />} onClick={onOpenApp} sx={{ mt: 2, ...({ backgroundImage: designSystem.gradient.brand }) }}>
+              <Button variant="contained" endIcon={<ArrowForward />} onClick={onOpenApp} sx={{ mt: 2, ...websiteCtaSx }}>
                 Open full report
               </Button>
             </Box>
@@ -146,11 +147,10 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
           {status === 'error' && (
             <Stack spacing={2}>
               <Alert severity="info" icon={<ErrorOutline fontSize="inherit" />}>
-                Live scanning runs against the RivicQ CBOM engine. On the public site the engine isn’t reachable — sign in
-                to run a real scan and get a full, evidence-backed report. We never show fabricated findings here.
+                {PUBLIC_ENGINE_SCAN_COPY}
               </Alert>
               <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
-                <Button variant="contained" endIcon={<ArrowForward />} onClick={onRegister} sx={{ backgroundImage: designSystem.gradient.brand }}>
+                <Button variant="contained" endIcon={<ArrowForward />} onClick={onRegister} sx={websiteCtaSx}>
                   Start free — run a real scan
                 </Button>
                 <Button variant="outlined" startIcon={<GitHub />} onClick={onOpenApp}>
