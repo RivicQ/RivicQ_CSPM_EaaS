@@ -97,7 +97,7 @@ Poll `GET /api/v1/scans/:id` until `status=completed`, then `GET /api/v1/scans/:
 
 ## Public website routes (React, GitHub Pages after merge)
 
-These routes are unauthenticated marketing pages on the same nebula chrome as Home. They 404 or fall back to the old cream app on github.io until this branch is on `main`.
+These routes are unauthenticated marketing pages on the same nebula chrome as Home. Until merge, use `/preview/` on github.io.
 
 | Path | Page |
 |---|---|

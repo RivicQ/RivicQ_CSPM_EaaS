@@ -89,6 +89,7 @@ code {
   min-height: 56px;
 }
 .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 650; font-size: 1.1rem; color: var(--ivory); text-decoration: none; }
+.logo-mark { width: 28px; height: 28px; border-radius: 6px; display: block; flex-shrink: 0; }
 .logo-badge {
   background: var(--accent);
   color: #ffffff;

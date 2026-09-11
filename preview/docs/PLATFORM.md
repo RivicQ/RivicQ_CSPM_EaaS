@@ -38,7 +38,7 @@ Password JWT, optional MFA, Google/GitHub OAuth when configured, demo token via 
 
 ### 7. Deployment architecture
 
-Pages workflow builds Community React and publishes to `gh-pages`. Production scans need CLI or a running API. Live rivicq.com / github.io still show cream/terracotta **until this nebula stack is merged to `main`**.
+Pages workflow builds Community React and publishes to `gh-pages`. Production scans need CLI or a running API. Live scanning on Pages needs the RivicQ engine (`REACT_APP_API_URL` at build time). Without it the public site shows **Needs the RivicQ engine** and never fabricates findings.
 
 ### 8. Existing integrations
 
@@ -69,7 +69,7 @@ GitHub Actions: lint/test/build, Pages deploy, CodeQL (duplicate cancelled jobs 
 
 ### 14. UX/UI weaknesses
 
-Live Pages (pre-merge) still cream/terracotta. After merge: nebula front door. Command palette / findings UX is an operator MVP, not a full CISO suite.
+Command palette / findings UX is an operator MVP, not a full CISO suite. Empty console heroes must show labeled charts, not a solid violet wash.
 
 ### 15. Performance problems
 
@@ -118,7 +118,9 @@ Production readiness  46/100
 OVERALL RIVICQ PLATFORM SCORE  47/100
 ```
 
-Weighted sense-check: product + security pull the score up; CRM, payments, and IBM APIs are stubs, so overall stays below 50. Stage: **Commercial MVP with an honest front door** — not Enterprise Ready.
+Full engineering/UX register: [ENGINEERING_AUDIT.md](ENGINEERING_AUDIT.md) (overall **52/100**, classification **PILOT READY** for Community scan / **NOT ENTERPRISE READY**).
+
+Weighted sense-check: product + security pull the score up; CRM, payments, and IBM APIs are stubs, so the commercial platform score stays below 50. Stage: **Commercial MVP with an honest front door** — not Enterprise Ready.
 
 ### Product
 

@@ -16,7 +16,7 @@ Nominative fair use remains available under applicable trademark law.
 
 ## Product visual identity
 
-The Community console is RivicQ’s **Security Cloud** design: deep-space nebula (`#000000` canvas, violet `#7C3AED`) with **Inter** and **JetBrains Mono** (open fonts). Light mode remains available.
+The Community console is RivicQ’s **Security Cloud** design: deep-space nebula (`#000000` canvas, violet `#7C3AED`) with **Inter** and **JetBrains Mono** (open fonts). Light mode remains available. The logo is the geometric **R** mark on a rounded black square.
 
 **RivicQ Graph** (wordmark **GRAPH**) is the labeled security-graph demo at `/fabric` (formerly NEXUS / FABRIC). It is not IBM Carbon or IBM Plex.
 
