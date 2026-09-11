@@ -666,7 +666,7 @@ const Layout: React.FC = () => {
                 opacity: 0.85,
               }}
             />
-            <Typography sx={{ fontSize: '0.8125rem', fontWeight: 500, flexGrow: 1, color: isDarkMode ? blue.textMuted : '#71717a' }}>
+            <Typography noWrap sx={{ fontSize: '0.8125rem', fontWeight: 500, flexGrow: 1, minWidth: 0, color: isDarkMode ? blue.textMuted : '#71717a' }}>
               Search findings, assets, scans…
             </Typography>
             <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'JetBrains Mono, monospace' }}>

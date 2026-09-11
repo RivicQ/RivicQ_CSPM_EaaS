@@ -7,10 +7,11 @@ import PageFrame from '../components/PageFrame';
 import { GlassCard, EmptyState } from '../components/ui';
 import BomRibbon from '../components/bom/BomRibbon';
 import { bomService } from '../services/api';
-import { layersForEdition } from '../data/bomFramework';
+import { layersForEdition, PIPELINE_STAGES } from '../data/bomFramework';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
 import { tokens } from '../theme/tokens';
+import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 
 const ICONS: Record<string, React.ReactNode> = {
   cbom: <Shield />,
@@ -50,6 +51,7 @@ const BomIntelligence: React.FC = () => {
       title="QBOM · AIBOM · SBOM · IBOM · CBOM"
       subtitle="Unified cryptographic, quantum, software, AI, and identity bills of materials. Community runs CBOM, SBOM, and local QBOM. AIBOM and IBOM unlock with Enterprise."
       badge={paid ? 'Enterprise layers' : 'Community engine'}
+      visual={<OpsHeroVisual variant="bom" bom={counts} />}
       action={<Button variant="contained" onClick={() => navigate('/scanner')}>Run a scan</Button>}
     >
       <Stack spacing={2} sx={{ mb: 3 }}>
@@ -58,6 +60,17 @@ const BomIntelligence: React.FC = () => {
           {framework?.honesty || 'Partner APIs (HSM, GRC, identity) stay disconnected without customer credentials. Mappings are not certifications.'}
           {isDemo ? ' This demo is Community-limited labeled sample data.' : ''}
         </Alert>
+        <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+          {PIPELINE_STAGES.map((s) => (
+            <Chip
+              key={s.id}
+              size="small"
+              variant={s.oss ? 'filled' : 'outlined'}
+              color={s.oss ? 'primary' : 'default'}
+              label={`${s.id}. ${s.name}`}
+            />
+          ))}
+        </Stack>
       </Stack>
 
       <Grid container spacing={2.5}>

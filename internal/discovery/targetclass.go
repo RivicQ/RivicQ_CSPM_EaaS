@@ -17,6 +17,7 @@ const (
 	ClassPod      TargetClass = "pod"
 	ClassPath     TargetClass = "path"
 	ClassHardware TargetClass = "hardware"
+	ClassFirmware TargetClass = "firmware"
 )
 
 // ClassifyTarget maps a raw target string and scan_type onto a client architecture class.
@@ -33,6 +34,8 @@ func ClassifyTarget(raw, scanType string) TargetClass {
 		return ClassPod
 	case "hardware", "hsm", "qsic", "tpm":
 		return ClassHardware
+	case "firmware", "cyclonedx", "hbom-fw":
+		return ClassFirmware
 	case "host":
 		return ClassHost
 	}
@@ -44,6 +47,8 @@ func ClassifyTarget(raw, scanType string) TargetClass {
 		return ClassPod
 	case strings.HasPrefix(low, "hardware://"), strings.HasPrefix(low, "hsm://"), strings.HasPrefix(low, "qsic://"):
 		return ClassHardware
+	case strings.HasPrefix(low, "firmware://"), strings.HasPrefix(low, "cdx://"), strings.HasSuffix(low, ".cdx.json"), strings.HasSuffix(low, ".bom.json"):
+		return ClassFirmware
 	}
 
 	_, _, path := normalizeTarget(s)
@@ -118,6 +123,21 @@ func parseHardwareLabel(raw string) string {
 	}
 	if s == "" {
 		return "declared-crypto-module"
+	}
+	return s
+}
+
+func parseFirmwareLabel(raw string) string {
+	s := strings.TrimSpace(raw)
+	for _, p := range []string{"firmware://", "cdx://"} {
+		low := strings.ToLower(s)
+		if strings.HasPrefix(low, p) {
+			s = strings.TrimSpace(s[len(p):])
+			break
+		}
+	}
+	if s == "" {
+		return "declared-firmware"
 	}
 	return s
 }

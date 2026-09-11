@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/controls"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/sirupsen/logrus"
 )
@@ -759,7 +761,20 @@ func (h *ComplianceHandler) MitigateRisk(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) getDefaultControls(framework string) []map[string]interface{} {
-	controls := map[string][]map[string]interface{}{
+	key := strings.ToLower(strings.TrimSpace(framework))
+	for _, cl := range controls.Catalog() {
+		id := strings.ToLower(cl.ID)
+		if id == key || strings.ReplaceAll(id, "-", "_") == key {
+			out := make([]map[string]interface{}, 0, len(cl.Items))
+			for _, item := range cl.Items {
+				out = append(out, map[string]interface{}{
+					"id": item.ID, "title": item.Title, "category": cl.Name, "mapping": item.RivicQ,
+				})
+			}
+			return out
+		}
+	}
+	seed := map[string][]map[string]interface{}{
 		"iso27001": {
 			{"id": "A.5.1", "title": "Information Security Policies", "category": "Information Security Policies"},
 			{"id": "A.6.1", "title": "Internal Organization", "category": "Organization of Information Security"},
@@ -831,7 +846,10 @@ func (h *ComplianceHandler) getDefaultControls(framework string) []map[string]in
 		},
 	}
 
-	if c, ok := controls[framework]; ok {
+	if c, ok := seed[framework]; ok {
+		return c
+	}
+	if c, ok := seed[key]; ok {
 		return c
 	}
 	return []map[string]interface{}{}

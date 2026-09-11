@@ -232,6 +232,16 @@ func buildTargets(target, scanType string) []Target {
 			Label:    "Hardware inventory: " + label,
 			Path:     label,
 		}}
+	case ClassFirmware:
+		label := parseFirmwareLabel(target)
+		return []Target{{
+			ID:       nextID(),
+			Host:     "declared",
+			Protocol: "firmware",
+			Kind:     string(ClassFirmware),
+			Label:    "Firmware inventory: " + label,
+			Path:     label,
+		}}
 	case ClassPod:
 		spec := parsePodTarget(target)
 		targets = append(targets, Target{
@@ -374,7 +384,7 @@ func httpSchemeFor(raw string, port int) string {
 func ResourcesFromTargets(targets []Target) map[string]bool {
 	out := map[string]bool{
 		"tls": false, "http": false, "https": false, "ssh": false, "sbom": false,
-		"k8s": false, "hardware": false,
+		"k8s": false, "hardware": false, "firmware": false,
 	}
 	for _, t := range targets {
 		p := strings.ToLower(t.Protocol)

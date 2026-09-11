@@ -90,11 +90,16 @@ func authProvidersHandler() gin.HandlerFunc {
 
 func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if isProductionRuntime() {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Demo access is disabled in production"})
+			return
+		}
 		if !demoModeEnabled() {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Demo access is disabled (DEMO_MODE=false)"})
 			return
 		}
-		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
+		// Community operator only — never an admin session and never an Enterprise edition claim.
+		edition := "oss"
 
 		email := strings.TrimSpace(os.Getenv("DEMO_CISO_EMAIL"))
 		if email == "" {
@@ -102,7 +107,7 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 		}
 		name := strings.TrimSpace(os.Getenv("DEMO_CISO_NAME"))
 		if name == "" {
-			name = "Demo CISO"
+			name = "Demo operator"
 		}
 
 		demoUser := &auth.User{
@@ -110,7 +115,7 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 			TenantID: "tenant-demo",
 			Email:    email,
 			Name:     name,
-			Role:     "admin",
+			Role:     "operator",
 		}
 
 		accessToken, err := service.TokenManager().GenerateToken(demoUser, edition)
@@ -141,7 +146,7 @@ func DemoAccessHandler(logger *logrus.Logger, service *auth.AuthService) gin.Han
 				ID:    "demo-user",
 				Name:  name,
 				Email: email,
-				Role:  "admin",
+				Role:  "operator",
 			},
 			"edition":   edition,
 			"demo_mode": true,

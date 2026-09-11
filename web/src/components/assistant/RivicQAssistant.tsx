@@ -214,7 +214,7 @@ const RivicQAssistant: React.FC = () => {
                     RivicQ AI
                   </Typography>
                   <Typography variant="caption" sx={{ color: designSystem.proBlue.textSecondary }}>
-                    {scanning ? 'Scanning workspace…' : 'Live posture assistant'}
+                    {scanning ? 'Scanning workspace…' : (context?.demoMode ? 'Labeled demo assistant' : 'Workspace assistant')}
                   </Typography>
                 </Box>
                 <Tooltip title="Rescan workspace">

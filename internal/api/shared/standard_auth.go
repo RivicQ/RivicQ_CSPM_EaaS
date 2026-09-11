@@ -96,6 +96,23 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 				if execErr == nil {
 					logger.WithField("email", bootstrapEmail).Info("Bootstrap admin user created")
 				}
+				if !production {
+					demoEmail := strings.TrimSpace(os.Getenv("AUTH_DEMO_EMAIL"))
+					if demoEmail == "" {
+						demoEmail = "demo@rivicq.local"
+					}
+					demoPass := strings.TrimSpace(os.Getenv("AUTH_DEMO_PASSWORD"))
+					if demoPass == "" {
+						demoPass = bootstrapPassword
+					}
+					if hashedDemo, demoErr := auth.HashPassword(demoPass); demoErr == nil {
+						_, _ = db.Exec(`
+							INSERT INTO users (id, tenant_id, email, name, role, password)
+							VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (email) DO NOTHING`,
+							uuid.New().String(), "tenant-1", demoEmail, "Community demo", "operator", hashedDemo)
+						logger.WithField("email", demoEmail).Info("Bootstrap Community demo operator created")
+					}
+				}
 			}
 		}
 	} else {

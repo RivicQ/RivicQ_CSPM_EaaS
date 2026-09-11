@@ -15,6 +15,7 @@ import {
   deleteView, loadSavedViews, parseFindingsPayload, saveView, type OpsFinding, type SavedView,
 } from '../ops/findings';
 import ProvenanceChip from '../components/dashboard/ProvenanceChip';
+import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 
 const SEV_ORDER: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
 
@@ -84,6 +85,8 @@ const Findings: React.FC = () => {
     all: all.length,
     critical: all.filter((f) => f.severity === 'critical').length,
     high: all.filter((f) => f.severity === 'high').length,
+    medium: all.filter((f) => f.severity === 'medium').length,
+    low: all.filter((f) => f.severity === 'low').length,
   };
 
   return (
@@ -92,6 +95,13 @@ const Findings: React.FC = () => {
       title="Findings"
       subtitle="Investigation queue from completed scans in this workspace. Evidence is scanner output. Secret values are never shown."
       badge={isDemo ? 'Demo session' : `${all.length} open`}
+      visual={
+        <OpsHeroVisual
+          variant="findings"
+          empty={all.length === 0}
+          severity={{ critical: counts.critical, high: counts.high, medium: counts.medium, low: counts.low }}
+        />
+      }
       action={
         <Stack direction="row" spacing={1}>
           <Button size="small" variant="outlined" startIcon={<Save />} onClick={() => setSaveOpen(true)}>Save view</Button>

@@ -478,6 +478,7 @@ export const bomService = {
   getPipeline: () => api.get('/bom/pipeline'),
   getUnified: (scanId?: string) => api.get('/bom/unified', { params: scanId ? { scan_id: scanId } : undefined }),
   getGovernance: () => api.get('/governance/controls'),
+  getChecklists: () => api.get('/governance/checklists'),
   getHsm: () => api.get('/hsm/status'),
   getQuantum: () => api.get('/quantum/status'),
   getApiSecurity: () => api.get('/security/api'),

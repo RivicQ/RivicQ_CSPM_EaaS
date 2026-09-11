@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -60,6 +61,22 @@ func TestForgotPasswordDoesNotRevealAccount(t *testing.T) {
 	require.NotEmpty(t, resp["message"])
 	_, hasToken := resp["reset_token"]
 	require.False(t, hasToken, "unknown emails must not return a reset token")
+}
+
+func TestDemoAccessForcesCommunityOperator(t *testing.T) {
+	r, _ := setupAuthRouter(t)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/demo?edition=enterprise", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+	var resp map[string]any
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	user, _ := resp["user"].(map[string]any)
+	require.NotNil(t, user)
+	require.Equal(t, "operator", user["role"])
+	ed, _ := resp["edition"].(string)
+	require.Equal(t, "oss", strings.ToLower(ed))
+	require.Equal(t, true, resp["demo_mode"])
 }
 
 func TestForgotAndResetPasswordDemoMode(t *testing.T) {

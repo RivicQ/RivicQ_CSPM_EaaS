@@ -122,13 +122,15 @@ export function useWorkspaceContext(edition: Edition) {
               scanCoverage: cloud.scan_coverage ?? cloud.scanCoverage,
               scansToday: cloud.scans_today ?? cloud.scansToday,
             }
-          : {
-              totalResources: 150,
-              byProvider: DEMO_INVENTORY_SUMMARY.by_cloud_provider,
-              securityFindings: { critical: 2, high: 8, medium: 15, low: 25 },
-              scanCoverage: 94,
-              scansToday: 18,
-            },
+          : usingDemo
+            ? {
+                totalResources: 0,
+                byProvider: DEMO_INVENTORY_SUMMARY.by_cloud_provider,
+                securityFindings: { critical: 0, high: 0, medium: 0, low: 0 },
+                scanCoverage: 0,
+                scansToday: 0,
+              }
+            : undefined,
         security: {
           events: events.slice(0, 8).map((e: any) => ({
             severity: e.severity,

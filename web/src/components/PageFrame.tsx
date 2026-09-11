@@ -16,6 +16,7 @@ type PageFrameProps = {
   badge?: string;
   action?: React.ReactNode;
   secondaryAction?: React.ReactNode;
+  visual?: React.ReactNode;
   children?: React.ReactNode;
   creative?: boolean;
 };
@@ -27,6 +28,7 @@ const PageFrame: React.FC<PageFrameProps> = ({
   badge,
   action,
   secondaryAction,
+  visual,
   children,
   creative = true,
 }) => {
@@ -49,28 +51,26 @@ const PageFrame: React.FC<PageFrameProps> = ({
             bgcolor: 'background.paper',
           }),
           borderRadius: `${designSystem.radius.xl}px`,
+          boxShadow: creative ? blue.commandGlow : undefined,
         }}
       >
         {creative && (
-          <>
-            <Box sx={{ position: 'absolute', inset: 0, background: blue.commandGlow, pointerEvents: 'none' }} />
-            <Box
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                opacity: 0.04,
-                backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-                backgroundSize: '48px 48px',
-                pointerEvents: 'none',
-              }}
-            />
-          </>
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0.04,
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+              backgroundSize: '48px 48px',
+              pointerEvents: 'none',
+            }}
+          />
         )}
-        <Box sx={{ p: { xs: 2.5, md: 3 }, position: 'relative' }}>
+        <Box sx={{ p: { xs: 2, md: 2.5 }, position: 'relative', zIndex: 1 }}>
           <Stack
-            direction={{ xs: 'column', md: 'row' }}
+            direction={{ xs: 'column', lg: 'row' }}
             justifyContent="space-between"
-            alignItems={{ xs: 'flex-start', md: 'flex-end' }}
+            alignItems={{ xs: 'flex-start', lg: 'center' }}
             spacing={2}
           >
             <Box>
@@ -126,6 +126,11 @@ const PageFrame: React.FC<PageFrameProps> = ({
                 {secondaryAction}
                 {action}
               </Stack>
+            )}
+            {visual && (
+              <Box sx={{ flex: 1, minWidth: { xs: '100%', lg: 240 }, maxWidth: { lg: 420 } }}>
+                {visual}
+              </Box>
             )}
           </Stack>
         </Box>

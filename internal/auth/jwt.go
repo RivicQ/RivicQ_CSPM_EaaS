@@ -184,6 +184,9 @@ func NewTokenManager(secretKey string) *TokenManager {
 
 // GenerateToken creates a new JWT access token for a user
 func (tm *TokenManager) GenerateToken(user *User, edition string) (string, error) {
+	if IsLabeledDemoEmail(user.Email) {
+		edition = "oss"
+	}
 	permissions := tm.getPermissionsForRole(user.Role, edition)
 
 	claims := Claims{
@@ -203,6 +206,12 @@ func (tm *TokenManager) GenerateToken(user *User, edition string) (string, error
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(tm.secretKey))
+}
+
+// IsLabeledDemoEmail is the Community demo identity (operator, OSS edition).
+func IsLabeledDemoEmail(email string) bool {
+	e := strings.ToLower(strings.TrimSpace(email))
+	return e == "demo@rivicq.local" || strings.HasSuffix(e, "@demo.rivicq.local")
 }
 
 // GenerateRefreshToken creates a long-lived refresh token.

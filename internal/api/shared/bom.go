@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/bom"
+	"github.com/rivic-q/cryptobom-saas/internal/controls"
 	"github.com/rivic-q/cryptobom-saas/internal/discovery"
 	"github.com/sirupsen/logrus"
 )
@@ -41,6 +42,12 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	router.GET("/governance/controls", func(c *gin.Context) {
 		fw := bom.Catalog()
 		c.JSON(http.StatusOK, gin.H{"controls": fw.Controls, "edition": fw.Edition, "note": "Operator mappings, not ISO/SOC/NIST certifications."})
+	})
+	router.GET("/governance/checklists", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"checklists": controls.Catalog(),
+			"note":       "Published OWASP/NIST lists mapped to RivicQ evidence. Not certifications or scored audits.",
+		})
 	})
 	router.GET("/hsm/status", func(c *gin.Context) {
 		c.JSON(http.StatusOK, bom.ReadHSM())

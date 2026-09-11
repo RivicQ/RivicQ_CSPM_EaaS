@@ -95,7 +95,14 @@ const CommandPalette: React.FC<Props> = ({ open, onClose, findings, scans, asset
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" aria-label="Command palette">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      aria-label="Command palette"
+      sx={{ '& .MuiDialog-container': { alignItems: 'flex-start', pt: { xs: 8, md: 12 } } }}
+    >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1.25 }}>
         <Search fontSize="small" />
         <Typography variant="subtitle2" fontWeight={800} sx={{ flexGrow: 1 }}>Search RivicQ</Typography>

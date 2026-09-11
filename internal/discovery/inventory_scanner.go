@@ -110,6 +110,37 @@ func ScanDeclaredInventory(ctx context.Context, target Target) ([]Finding, []CBO
 			})
 		}
 		return findings, components, nil
+	case "firmware":
+		label := parseFirmwareLabel(target.Path)
+		if label == "declared-firmware" && target.Label != "" {
+			label = parseFirmwareLabel(target.Label)
+		}
+		f := Finding{
+			ID:          uuid.New().String(),
+			TargetID:    target.ID,
+			TargetLabel: target.Label,
+			Host:        "declared",
+			Protocol:    "firmware",
+			FindingType: "FIRMWARE_COMPONENT_DECLARED",
+			Title:       "Declared firmware / semiconductor component: " + label,
+			Description: "Operator-declared firmware inventory (CycloneDX component, hash, or catalog name). RivicQ does not reverse-engineer binaries, extract keys, or inspect semiconductor dies.",
+			Evidence:    "kind=firmware label=" + label,
+			Severity:    SeverityInfo,
+			Remediation: "Attach a CycloneDX SBOM/HBOM from the vendor. Live silicon attestation requires a customer HSM/HPCS connector.",
+			DORARef:     "DORA RTS Art. 9 — ICT asset inventory",
+			QuantumSafe: false,
+			ScannedAt:   now,
+		}
+		c := CBOMComponent{
+			Algorithm:   "undeclared",
+			Library:     "firmware-component",
+			RiskLevel:   SeverityInfo,
+			QuantumSafe: false,
+			PQCStatus:   "inventory_only",
+			Location:    "hbom:firmware:" + label,
+			BSIRef:      "BSI TR-02102 — inventory before algorithm assessment",
+		}
+		return []Finding{f}, []CBOMComponent{c}, nil
 	default:
 		return nil, nil, nil
 	}

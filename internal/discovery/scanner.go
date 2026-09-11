@@ -80,7 +80,7 @@ func (s *Scanner) scanTarget(ctx context.Context, target Target) ([]Finding, []C
 		return findings, componentsFromFindings(findings), err
 	case "sbom":
 		return s.scanSBOM(ctx, target)
-	case "k8s", "hardware":
+	case "k8s", "hardware", "firmware":
 		return ScanDeclaredInventory(ctx, target)
 	default:
 		return nil, nil, nil
