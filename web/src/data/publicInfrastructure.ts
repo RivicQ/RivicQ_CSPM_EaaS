@@ -13,3 +13,6 @@ export const PUBLIC_ENGINE_IBM_COPY = `${PUBLIC_ENGINE_IBM_HONESTY} ${PUBLIC_ENG
 
 export const PUBLIC_ENGINE_CHIP_DISCONNECTED = 'Needs the RivicQ engine';
 export const PUBLIC_ENGINE_CHIP_LIVE = 'RivicQ engine · live';
+
+export const PUBLIC_PAGES_SALES_FORM =
+  'GitHub Pages has no live API. This form opens a mail to sales@rivicq.com.';

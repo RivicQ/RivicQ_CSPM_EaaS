@@ -31,6 +31,10 @@ Warning amber is **severity**, not brand. Demo and chrome chips use primary viol
 - Radius: 8 / 12 / 16 / pill (`9999`).
 - Motion: short opacity/translate. Glow only on the public nebula hero. Honor `prefers-reduced-motion`.
 
+## Logo
+
+Official mark: geometric **R** on a rounded black square (`web/public/brand/rivicq-mark.svg`). Do not replace it with orbits, hex shields, or a lock. Wordmark is **RivicQ** (Inter, weight 600) with optional `CryptoBOM EaaS` caption.
+
 ## Components
 
 Public pages: `PublicShell` + `SitePage` + `websiteCtaSx`.  

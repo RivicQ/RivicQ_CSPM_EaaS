@@ -4,8 +4,9 @@ import {
   Box, Button, Container, MenuItem, Stack, TextField, Typography,
 } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
+import { useAuth } from '../contexts/AuthContext';
 import { platformService } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { PUBLIC_PAGES_SALES_FORM } from '../data/publicInfrastructure';
 
 const INTENTS = [
   { value: 'demo', label: 'Enterprise demo' },
@@ -62,7 +63,7 @@ const RequestDemo: React.FC = () => {
           <Box component="form" onSubmit={submit} sx={{ p: 3, bgcolor: '#0a0a0f', border: '1px solid #1f1f2e', borderRadius: 2 }}>
             {!backendReachable && (
               <Box sx={{ p: 1.75, mb: 2, bgcolor: '#000', border: '1px solid #1f1f2e', borderRadius: 2, color: '#d1d5db' }}>
-                GitHub Pages has no live API. This form opens a mail to sales@rivicq.com.
+                {PUBLIC_PAGES_SALES_FORM}
               </Box>
             )}
             {error && (

@@ -126,18 +126,21 @@ button {
 }
 
 .nav-logo-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-md);
-  background: var(--brand-gradient);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
   display: grid;
   place-items: center;
-  box-shadow: var(--glow-blue);
 }
 
+.nav-logo-icon img,
 .nav-logo-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
+  display: block;
+  border-radius: 6px;
 }
 
 .nav-links {
