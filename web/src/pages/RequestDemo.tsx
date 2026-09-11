@@ -4,7 +4,7 @@ import {
   Box, Button, Container, MenuItem, Stack, TextField, Typography,
 } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { platformService } from '../services/api';
 import { PUBLIC_PAGES_SALES_FORM } from '../data/publicInfrastructure';
 
