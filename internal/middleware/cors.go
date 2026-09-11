@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -18,8 +19,17 @@ type CORSConfig struct {
 }
 
 func DefaultCORSConfig() CORSConfig {
+	origins := []string{"*", "https://rivicq.github.io"}
+	if extra := strings.TrimSpace(os.Getenv("CORS_ORIGINS")); extra != "" {
+		for _, o := range strings.Split(extra, ",") {
+			o = strings.TrimSpace(o)
+			if o != "" {
+				origins = append(origins, o)
+			}
+		}
+	}
 	return CORSConfig{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   origins,
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch, http.MethodOptions},
 		AllowedHeaders:   []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Request-ID", "Idempotency-Key"},
 		ExposedHeaders:   []string{"X-Request-ID", "X-CryptoBOM-Edition", "Retry-After"},

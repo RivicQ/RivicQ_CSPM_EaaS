@@ -63,10 +63,10 @@ const AssetDetails: React.FC = () => {
   }
 
   const riskLevel = asset.risk_level || asset.riskLevel || 'UNKNOWN';
-  const quantumSafe = asset.quantum_safe || asset.quantumSafe || false;
+  const quantumSafe = Boolean(asset.quantum_safe ?? asset.quantumSafe);
   const algorithm = asset.algorithm || asset.crypto_algorithm || 'N/A';
-  const keySize = asset.key_size || asset.keySize || 'N/A';
-  const complianceScore = asset.compliance_score || asset.complianceScore || 75;
+  const keySize = asset.key_size || asset.keySize;
+  const complianceScore = asset.compliance_score ?? asset.complianceScore;
 
   const getRiskColor = (): 'success' | 'warning' | 'error' | 'default' => {
     switch (riskLevel.toUpperCase()) {
@@ -132,12 +132,18 @@ const AssetDetails: React.FC = () => {
             <Divider sx={{ mb: 2 }} />
             <Box mb={2.5}>
               <Box display="flex" justifyContent="space-between" mb={1}>
-                <Typography variant="body2" color="text.secondary">Compliance Score</Typography>
+                <Typography variant="body2" color="text.secondary">Compliance mapping score</Typography>
                 <Typography variant="body2" fontWeight={700} sx={{ fontFamily: tokens.typography.mono }}>
-                  {complianceScore}%
+                  {typeof complianceScore === 'number' ? `${complianceScore}%` : 'Not provided'}
                 </Typography>
               </Box>
-              <LinearProgress variant="determinate" value={complianceScore} sx={{ height: 8, borderRadius: 4 }} />
+              {typeof complianceScore === 'number' ? (
+                <LinearProgress variant="determinate" value={complianceScore} sx={{ height: 8, borderRadius: 4 }} />
+              ) : (
+                <Typography variant="caption" color="text.secondary">
+                  This asset has no compliance_score from the API. Mappings are not certifications.
+                </Typography>
+              )}
             </Box>
             <Typography variant="body2" color="text.secondary" gutterBottom fontWeight={600}>
               Remediation Steps

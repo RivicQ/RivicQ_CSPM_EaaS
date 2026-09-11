@@ -13,18 +13,10 @@ export type LogoSizeKey = keyof typeof LOGO_SIZES;
 
 export const LOGO_COLORS = {
   light: {
-    orbitPrimary: tokens.colors.rivicq[600],
-    orbitSecondary: '#334155',
-    core: tokens.colors.rivicq[700],
-    coreFill: `${tokens.colors.rivicq[600]}18`,
     wordmark: tokens.colors.rivicq[600],
     subtitle: tokens.colors.text.secondary,
   },
   dark: {
-    orbitPrimary: designSystem.proBlue.accentLight,
-    orbitSecondary: 'rgba(248,250,252,0.55)',
-    core: designSystem.proBlue.textPrimary,
-    coreFill: 'rgba(196,120,58,0.22)',
     wordmark: designSystem.proBlue.textPrimary,
     subtitle: designSystem.proBlue.textMuted,
   },

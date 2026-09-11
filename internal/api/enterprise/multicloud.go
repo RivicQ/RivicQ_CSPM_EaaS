@@ -94,7 +94,7 @@ type SecurityFinding struct {
 }
 
 func (h *MultiCloudHandler) ListCloudAccounts(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	provider := c.Query("provider")
 
 	query := `
@@ -138,7 +138,7 @@ func (h *MultiCloudHandler) ListCloudAccounts(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AddCloudAccount(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var account CloudAccount
 	if err := c.ShouldBindJSON(&account); err != nil {
@@ -258,7 +258,7 @@ func (h *MultiCloudHandler) ListCloudResources(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AWSInventory(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	h.logger.Info("Fetching AWS inventory for tenant: ", tenantID)
 
 	sdks := newCloudSDKs(c.Request.Context())
@@ -304,7 +304,7 @@ func (h *MultiCloudHandler) AWSInventory(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AWSScan(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Starting AWS security scan for tenant: ", tenantID)
 
@@ -316,7 +316,7 @@ func (h *MultiCloudHandler) AWSScan(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) GCPInventory(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	h.logger.Info("Fetching GCP inventory for tenant: ", tenantID)
 
 	sdks := newCloudSDKs(c.Request.Context())
@@ -352,7 +352,7 @@ func (h *MultiCloudHandler) GCPInventory(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) GCPScan(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Starting GCP security scan for tenant: ", tenantID)
 
@@ -364,7 +364,7 @@ func (h *MultiCloudHandler) GCPScan(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) IBMCloudInventory(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Fetching IBM Cloud inventory for tenant: ", tenantID)
 
@@ -387,7 +387,7 @@ func (h *MultiCloudHandler) IBMCloudInventory(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) IBMCloudScan(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Starting IBM Cloud security scan for tenant: ", tenantID)
 
@@ -399,7 +399,7 @@ func (h *MultiCloudHandler) IBMCloudScan(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AzureInventory(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	h.logger.Info("Fetching Azure inventory for tenant: ", tenantID)
 
 	sdks := newCloudSDKs(c.Request.Context())
@@ -435,7 +435,7 @@ func (h *MultiCloudHandler) AzureInventory(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AzureScan(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Starting Azure security scan for tenant: ", tenantID)
 
@@ -447,7 +447,7 @@ func (h *MultiCloudHandler) AzureScan(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) GetResourcesSummary(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	summary := gin.H{
 		"total_resources": 150,

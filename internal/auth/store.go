@@ -206,14 +206,14 @@ func (m *MockUserStore) ListUsersByTenant(tenantID string) ([]*User, error) {
 // DatabaseUserStore methods
 func (d *DatabaseUserStore) GetUserByEmail(email string) (*User, error) {
 	query := `
-		SELECT id, tenant_id, email, name, role, mfa_enabled, mfa_secret
+		SELECT id, tenant_id, email, name, role, mfa_enabled, mfa_secret, COALESCE(organisation, '')
 		FROM users 
 		WHERE email = $1`
 
 	user := &User{}
 	var mfaSecret sql.NullString
 	err := d.db.QueryRow(query, email).Scan(
-		&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Role, &user.MFAEnabled, &mfaSecret,
+		&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Role, &user.MFAEnabled, &mfaSecret, &user.Organisation,
 	)
 
 	if err != nil {
@@ -235,14 +235,14 @@ func (d *DatabaseUserStore) GetUserByEmail(email string) (*User, error) {
 
 func (d *DatabaseUserStore) GetUserByID(id string) (*User, error) {
 	query := `
-		SELECT id, tenant_id, email, name, role, mfa_enabled, mfa_secret
+		SELECT id, tenant_id, email, name, role, mfa_enabled, mfa_secret, COALESCE(organisation, '')
 		FROM users 
 		WHERE id = $1`
 
 	user := &User{}
 	var mfaSecret sql.NullString
 	err := d.db.QueryRow(query, id).Scan(
-		&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Role, &user.MFAEnabled, &mfaSecret,
+		&user.ID, &user.TenantID, &user.Email, &user.Name, &user.Role, &user.MFAEnabled, &mfaSecret, &user.Organisation,
 	)
 
 	if err != nil {
@@ -263,11 +263,11 @@ func (d *DatabaseUserStore) CreateUser(user *User) error {
 	user.TenantID = "tenant-1" // Default tenant
 
 	query := `
-		INSERT INTO users (id, tenant_id, email, name, role, password, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`
+		INSERT INTO users (id, tenant_id, email, name, role, password, organisation, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`
 
 	_, err = d.db.Exec(query,
-		user.ID, user.TenantID, user.Email, user.Name, user.Role, hashedPassword,
+		user.ID, user.TenantID, user.Email, user.Name, user.Role, hashedPassword, user.Organisation,
 	)
 
 	return err
@@ -277,18 +277,18 @@ func (d *DatabaseUserStore) UpdateUser(user *User) error {
 	if strings.TrimSpace(user.Password) != "" {
 		_, err := d.db.Exec(`
 			UPDATE users
-			SET name = $2, role = $3, mfa_enabled = $4, mfa_secret = $5, password = $6, updated_at = NOW()
+			SET name = $2, role = $3, mfa_enabled = $4, mfa_secret = $5, password = $6, organisation = $7, updated_at = NOW()
 			WHERE id = $1`,
-			user.ID, user.Name, user.Role, user.MFAEnabled, user.MFASecret, user.Password,
+			user.ID, user.Name, user.Role, user.MFAEnabled, user.MFASecret, user.Password, user.Organisation,
 		)
 		return err
 	}
 	query := `
 		UPDATE users 
-		SET name = $2, role = $3, mfa_enabled = $4, mfa_secret = $5, updated_at = NOW()
+		SET name = $2, role = $3, mfa_enabled = $4, mfa_secret = $5, organisation = $6, updated_at = NOW()
 		WHERE id = $1`
 
-	_, err := d.db.Exec(query, user.ID, user.Name, user.Role, user.MFAEnabled, user.MFASecret)
+	_, err := d.db.Exec(query, user.ID, user.Name, user.Role, user.MFAEnabled, user.MFASecret, user.Organisation)
 	return err
 }
 

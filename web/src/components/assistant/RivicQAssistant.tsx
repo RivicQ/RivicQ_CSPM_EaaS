@@ -183,7 +183,7 @@ const RivicQAssistant: React.FC = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(186,230,253,0.16)' : 'rgba(14,165,233,0.16)'}`,
+                border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(196,181,253,0.16)' : 'rgba(124,58,237,0.16)'}`,
               }}
             >
               <Box
@@ -214,7 +214,7 @@ const RivicQAssistant: React.FC = () => {
                     RivicQ AI
                   </Typography>
                   <Typography variant="caption" sx={{ color: designSystem.proBlue.textSecondary }}>
-                    {scanning ? 'Scanning workspace…' : 'Live posture assistant'}
+                    {scanning ? 'Scanning workspace…' : (context?.demoMode ? 'Labeled demo assistant' : 'Workspace assistant')}
                   </Typography>
                 </Box>
                 <Tooltip title="Rescan workspace">
@@ -277,7 +277,7 @@ const RivicQAssistant: React.FC = () => {
                           bgcolor: msg.role === 'user'
                             ? 'primary.main'
                             : theme.palette.mode === 'dark'
-                              ? 'rgba(30,41,59,0.9)'
+                              ? '#12121a'
                               : 'rgba(241,245,249,0.95)',
                           color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
                           border: msg.role === 'assistant' ? 1 : 0,
@@ -374,7 +374,7 @@ const RivicQAssistant: React.FC = () => {
             width: FAB_SIZE,
             height: FAB_SIZE,
             borderRadius: '50%',
-            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(186,230,253,0.2)' : 'rgba(14,165,233,0.2)'}`,
+            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(196,181,253,0.2)' : 'rgba(124,58,237,0.2)'}`,
             cursor: 'pointer',
             p: 0,
             display: 'grid',
@@ -397,7 +397,7 @@ const RivicQAssistant: React.FC = () => {
                   size={FAB_SIZE + 8}
                   sx={{
                     position: 'absolute',
-                    color: 'rgba(14,165,233,0.28)',
+                    color: 'rgba(124,58,237,0.28)',
                   }}
                 />
               )}

@@ -49,7 +49,7 @@ const QuickActionCard: React.FC<{
         border: 1,
         borderColor: isDark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.1)',
         borderRadius: `${dashboardDesign.radius.md}px`,
-        bgcolor: isDark ? 'rgba(30,41,59,0.5)' : 'rgba(255,255,255,0.9)',
+        bgcolor: isDark ? '#0a0a0f' : '#ffffff',
         cursor: 'pointer',
         font: 'inherit',
         color: 'inherit',
@@ -60,7 +60,7 @@ const QuickActionCard: React.FC<{
         },
         '&:hover': {
           borderColor: `${action.accent}44`,
-          bgcolor: isDark ? 'rgba(8,47,73,0.92)' : '#fff',
+          bgcolor: isDark ? 'rgba(46,16,101,0.92)' : '#fff',
           transform: 'none',
           boxShadow: 'none',
           '& .qa-arrow': { opacity: 1 },
@@ -163,6 +163,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ actions, onNavigate
 );
 
 export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
+  { label: 'Critical findings', description: 'Investigation queue', icon: <FactCheck />, path: '/findings?severity=critical', accent: tokens.colors.crypto.high },
   { label: 'GitHub Scan', description: 'Real repo analysis', icon: <GitHub />, path: '/scanner?tab=github', accent: tokens.colors.crypto.quantum },
   { label: 'Run Scan', description: 'CBOM discovery', icon: <DocumentScanner />, path: '/scanner', accent: chartTheme.quickActions[0] },
   { label: 'Five-BOM', description: 'QBOM · AIBOM · SBOM · IBOM · CBOM', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[600] },

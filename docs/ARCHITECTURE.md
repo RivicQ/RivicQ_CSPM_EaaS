@@ -5,6 +5,8 @@ This is not a certification, and it does not claim firmware reverse-engineering.
 
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data only).
 
+Core engine contract (findings, fingerprints, PQC classes, CLI fail-on): [CORE_ENGINE.md](CORE_ENGINE.md).
+
 ## Core SaaS layers
 
 Four-layer CBOM architecture (input → engine → PQC operationalization → outputs), with a client path of **discover → mitigate → report**, plus the five-BOM DevSecOps overlay ([BOM_FRAMEWORK.md](BOM_FRAMEWORK.md)). Details: [CLIENT_ARCHITECTURE.md](CLIENT_ARCHITECTURE.md).
@@ -44,11 +46,11 @@ Live GitHub Pages demo is **Community-limited** (labeled sample data, no product
 
 | Surface | Who | Home |
 |---|---|---|
-| Public | Anonymous | Marketing home, free/local scan path, **limited Community** Interactive Demo |
-| Community | Authenticated OSS | Command Center, Scanner, **Five-BOM** (CBOM/SBOM/QBOM), Pipeline, API security, Assets, Analytics, Settings |
+| Public | Anonymous | Marketing home, Product / CSPM / CBOM / PQC / Enterprise / Security / Pricing / Request demo / IBM / Contact, **limited Community** Interactive Demo, RivicQ Graph (`/fabric`) |
+| Community | Authenticated OSS | Overview, Scanner, **Five-BOM** (CBOM/SBOM/QBOM), Pipeline, API security, Assets, Analytics, Settings |
 | Enterprise | Authenticated paid workspace | Community surfaces + inventory, compliance, multi-cloud, quantum, admin |
 
-Fast path: visit → Demo or Register → Command Center → first CBOM in the scanner (CLI: `rivicq scan .`).
+Fast path: visit → Demo or Register → Overview → first CBOM in the scanner (CLI: `rivicq scan .`).
 
 Editions: **Community** (Apache-2.0, limited engine), **Professional**, **Enterprise** (commercial control plane). UI edition preference is client-selected; license enforcement belongs on the Enterprise binary (`CRYPTOBOM_LICENSE_KEY`).
 
@@ -71,7 +73,7 @@ Shipped or in progress:
 
 | Capability | Today | Honest boundary |
 |---|---|---|
-| Multi-tenancy | JWT `tenant_id`; inventory/audit/API keys scoped to claim | Scan APIs are not fully tenant-isolated yet (Build 2) |
+| Multi-tenancy | JWT `tenant_id` on scan, inventory, findings, GitHub scans, QBOM, intelligence, BOM, and Enterprise inventory/compliance/quantum/cloud paths | Unauthenticated Community traffic shares the public tenant (Home CBOM pilot). SSO/audit viewer remain Enterprise |
 | RBAC | Viewer < Analyst < Operator < Admin (`RequireRole`) | Enforced on mutating SSO, cloud connectors, API keys, webhooks, workspace role changes |
 | Auth | Login, register, JWT refresh, TOTP MFA, Google/GitHub OAuth | Password reset is in-memory; no mailbox product |
 | SSO | `POST /sso/saml` and `/sso/ldap` store config | No live SAML ACS / OIDC login handshake yet |
@@ -85,7 +87,7 @@ Shipped or in progress:
 
 - CLI: `cmd/rivicq` (`rivicq scan .`)
 - REST: `/api/v1`
-- Dashboard: React Command Center
+- Dashboard: React Overview (`/dashboard`)
 - GitHub Action policy gate (do not change the gate contract)
 - Air-gapped: Helm/Compose documented in `docs/DEPLOYMENT.md`
 
@@ -120,7 +122,7 @@ Shipped or in progress:
 | Auth | Login, register, MFA, OAuth | + SSO config, audit, API keys, webhooks |
 | DORA / GRC | JSON mappings | Pack flag + control-plane evidence |
 | Five-BOM | CBOM + SBOM + local QBOM | + AIBOM + IBOM + HSM connector |
-| Workspaces | Single-tenant OSS default | JWT tenant isolation on control-plane APIs |
+| Workspaces | JWT tenant on scan/inventory; unauthenticated → public tenant | JWT tenant isolation on control-plane APIs |
 | Demo on Pages | Limited Community session (`rivicq-demo-session`) | Same demo label; not a customer tenant |
 
 ## Current honest capability boundaries
@@ -137,10 +139,10 @@ Full list: [ROADMAP.md](ROADMAP.md). Product snapshot: [PRODUCT_STATUS.md](PRODU
 ### Build 1 — Client architecture + auth + admin (this delivery)
 
 1. Finalize login / register / edition selection (Community, Professional, Enterprise).
-2. Command Center as operational home; strong empty states.
+2. Overview as operational home; strong empty states.
 3. Complete authentication: login, signup, MFA enroll/confirm/disable, forgot/reset password, profile, change password.
 4. Admin console: workspace users/roles, audit viewer, API keys, webhooks, SSO **config** (not live IdP login).
-5. Persist theme; enterprise-ready sky-blue/white UI; labeled demo only.
+5. Persist theme; nebula black/violet UI; labeled demo only.
 6. Website HTTPS detection (TLS + headers/cookies; SSH skipped unless `full`) and Qiskit-aligned scores in the client.
 
 ### Build 2 — Enterprise SaaS control plane

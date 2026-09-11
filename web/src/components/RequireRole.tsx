@@ -16,7 +16,7 @@ const RequireRole: React.FC<{ role: WorkspaceRole; children: React.ReactElement 
   if (!roleAtLeast(user?.role, role)) {
     return (
       <Box sx={{ minHeight: '70vh', display: 'grid', placeItems: 'center', px: 2 }}>
-        <Card sx={{ maxWidth: 640, width: '100%', border: '1px solid rgba(14,165,233,0.30)' }}>
+        <Card sx={{ maxWidth: 640, width: '100%', border: '1px solid rgba(124,58,237,0.30)' }}>
           <CardContent sx={{ p: 4 }}>
             <Stack spacing={2}>
               <Lock color="primary" />
@@ -25,11 +25,12 @@ const RequireRole: React.FC<{ role: WorkspaceRole; children: React.ReactElement 
               </Typography>
               <Typography color="text.secondary">
                 This area requires the <strong>{role}</strong> role. Your workspace role is{' '}
-                <strong>{user?.role || 'viewer'}</strong>.
+                <strong>{user?.role || 'viewer'}</strong>. Community demo sessions are operator-only and cannot open Admin.
+                Local full access uses the bootstrap admin created from AUTH_BOOTSTRAP_EMAIL (never publish that password).
               </Typography>
               <Alert severity="info">Ask a workspace admin to grant access. Roles are enforced on the server, not only in the UI.</Alert>
               <Button variant="outlined" onClick={() => navigate('/dashboard')}>
-                Back to Command Center
+                Back to Overview
               </Button>
             </Stack>
           </CardContent>

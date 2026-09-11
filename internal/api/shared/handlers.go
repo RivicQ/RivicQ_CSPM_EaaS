@@ -11,10 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/rivic-q/cryptobom-saas/internal/discovery"
+	"github.com/rivic-q/cryptobom-saas/internal/tenant"
 	"github.com/sirupsen/logrus"
 )
-
-const defaultTenantID = "00000000-0000-0000-0000-000000000001"
 
 func demoMode(db *database.DB) bool {
 	return db == nil || db.DB == nil || db.Queries == nil
@@ -34,11 +33,10 @@ func persistCBOMScanResult(db *database.DB, logger *logrus.Logger) discovery.Per
 			return "", nil
 		}
 
-		// Ensure the default tenant exists before writing the CBOM report
-		// (crypto_assets and cbom_reports reference tenants by FK).
+		tid := tenant.Normalize(job.TenantID)
 		if _, err := db.Exec(`INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-			defaultTenantID, "Default Organization"); err != nil {
-			logger.WithError(err).Warn("Failed to ensure default tenant for scan persistence")
+			tid, "Organization"); err != nil {
+			logger.WithError(err).Warn("Failed to ensure tenant for scan persistence")
 		}
 
 		bomJSON, err := json.Marshal(result)
@@ -47,7 +45,7 @@ func persistCBOMScanResult(db *database.DB, logger *logrus.Logger) discovery.Per
 		}
 
 		report := &database.CBOMReport{
-			TenantID:     defaultTenantID,
+			TenantID:     tid,
 			Name:         job.Target,
 			Version:      "1.0",
 			CycloneDXBOM: string(bomJSON),
@@ -143,7 +141,7 @@ func CreateCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		}
 
 		report := &database.CBOMReport{
-			TenantID:     defaultTenantID,
+			TenantID:     requestTenant(c),
 			Name:         body.Name,
 			Version:      body.Version,
 			CycloneDXBOM: bomStr,
@@ -165,7 +163,7 @@ func ListCBOMReports(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			c.JSON(http.StatusOK, gin.H{"reports": []gin.H{}, "demo_mode": true})
 			return
 		}
-		reports, err := db.Queries.ListCBOMReports(defaultTenantID, 100, 0)
+		reports, err := db.Queries.ListCBOMReports(requestTenant(c), 100, 0)
 		if err != nil {
 			logger.WithError(err).Error("Failed to list CBOM reports")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list reports"})
@@ -187,8 +185,21 @@ func GetCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			c.JSON(http.StatusNotFound, gin.H{"error": "report not found"})
 			return
 		}
+		if tenant.Normalize(report.TenantID) != requestTenant(c) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "report not found"})
+			return
+		}
 		c.JSON(http.StatusOK, report)
 	}
+}
+
+func requireCBOMReportTenant(c *gin.Context, db *database.DB, id string) (*database.CBOMReport, bool) {
+	report, err := db.Queries.GetCBOMReport(id)
+	if err != nil || tenant.Normalize(report.TenantID) != requestTenant(c) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "report not found"})
+		return nil, false
+	}
+	return report, true
 }
 
 func UpdateCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
@@ -196,6 +207,9 @@ func UpdateCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		id := c.Param("id")
 		if demoMode(db) {
 			c.JSON(http.StatusOK, gin.H{"id": id, "updated": true, "demo_mode": true})
+			return
+		}
+		if _, ok := requireCBOMReportTenant(c, db, id); !ok {
 			return
 		}
 		var body struct {
@@ -228,6 +242,9 @@ func DeleteCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			c.JSON(http.StatusOK, gin.H{"id": id, "deleted": true, "demo_mode": true})
 			return
 		}
+		if _, ok := requireCBOMReportTenant(c, db, id); !ok {
+			return
+		}
 		if err := db.Queries.DeleteCBOMReport(id); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete"})
 			return
@@ -254,7 +271,7 @@ func ScanCBOMReport(db *database.DB, logger *logrus.Logger, cfg interface{}) gin
 		installScanPersistence(db, logger)
 
 		sm := discovery.GetScanManager()
-		job := sm.StartScan(target, "cbom")
+		job := sm.StartScanForTenant(requestTenant(c), target, "cbom")
 
 		logger.WithFields(logrus.Fields{
 			"report_id": id,
@@ -355,7 +372,7 @@ func ListSecurityEvents(db *database.DB, logger *logrus.Logger) gin.HandlerFunc 
 			c.JSON(http.StatusOK, gin.H{"events": []gin.H{}, "demo_mode": true})
 			return
 		}
-		events, err := db.Queries.ListSecurityEvents(defaultTenantID, 100, 0)
+		events, err := db.Queries.ListSecurityEvents(requestTenant(c), 100, 0)
 		if err != nil {
 			logger.WithError(err).Error("Failed to list security events")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list events"})
@@ -382,7 +399,7 @@ func CreateSecurityEvent(db *database.DB, logger *logrus.Logger) gin.HandlerFunc
 			return
 		}
 		event := &database.SecurityEvent{
-			TenantID:    defaultTenantID,
+			TenantID:    requestTenant(c),
 			EventType:   body.EventType,
 			Severity:    body.Severity,
 			Source:      body.Source,
@@ -440,7 +457,7 @@ func GetDashboardOverview(db *database.DB, logger *logrus.Logger) gin.HandlerFun
 			})
 			return
 		}
-		metrics, err := db.Queries.GetMetricsOverview(defaultTenantID)
+		metrics, err := db.Queries.GetMetricsOverview(requestTenant(c))
 		if err != nil {
 			logger.WithError(err).Error("Failed to get metrics overview")
 			c.JSON(http.StatusOK, gin.H{
@@ -476,7 +493,7 @@ func GetMetrics(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			})
 			return
 		}
-		metrics, err := db.Queries.GetMetricsOverview(defaultTenantID)
+		metrics, err := db.Queries.GetMetricsOverview(requestTenant(c))
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"metrics": gin.H{}})
 			return
@@ -491,7 +508,7 @@ func GetComplianceStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc
 			c.JSON(http.StatusOK, gin.H{"compliance": 85.5, "demo_mode": true})
 			return
 		}
-		metrics, err := db.Queries.GetMetricsOverview(defaultTenantID)
+		metrics, err := db.Queries.GetMetricsOverview(requestTenant(c))
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"compliance": 0})
 			return
@@ -522,7 +539,7 @@ func GetMetricsOverview(db *database.DB, logger *logrus.Logger) gin.HandlerFunc 
 			})
 			return
 		}
-		metrics, err := db.Queries.GetMetricsOverview(defaultTenantID)
+		metrics, err := db.Queries.GetMetricsOverview(requestTenant(c))
 		if err != nil {
 			logger.WithError(err).Error("Failed to get metrics overview")
 			c.JSON(http.StatusOK, gin.H{
@@ -543,7 +560,7 @@ func ListKubernetesClusters(db *database.DB, logger *logrus.Logger) gin.HandlerF
 			c.JSON(http.StatusOK, gin.H{"clusters": []gin.H{}, "demo_mode": true})
 			return
 		}
-		clusters, err := db.Queries.ListKubernetesClusters(defaultTenantID, 100, 0)
+		clusters, err := db.Queries.ListKubernetesClusters(requestTenant(c), 100, 0)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list clusters"})
 			return
@@ -570,7 +587,7 @@ func AddKubernetesCluster(db *database.DB, logger *logrus.Logger) gin.HandlerFun
 			return
 		}
 		cluster := &database.KubernetesCluster{
-			TenantID: defaultTenantID,
+			TenantID: requestTenant(c),
 			Name:     body.Name,
 			Endpoint: body.Endpoint,
 			Version:  body.Version,
@@ -614,7 +631,7 @@ func ScanCluster(db *database.DB, logger *logrus.Logger, cfg interface{}) gin.Ha
 			target = "pod://default/" + id + "@" + strings.TrimSpace(body.Host)
 		}
 		sm := discovery.GetScanManager()
-		job := sm.StartScan(target, "pod")
+		job := sm.StartScanForTenant(requestTenant(c), target, "pod")
 		logger.WithFields(logrus.Fields{"cluster_id": id, "scan_id": job.ID, "target": target}).Info("Declared Kubernetes inventory scan")
 		c.JSON(http.StatusAccepted, gin.H{
 			"cluster_id":  id,
@@ -754,7 +771,7 @@ func TriggerCBOMScan(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		installScanPersistence(db, logger)
 
 		sm := discovery.GetScanManager()
-		job := sm.StartScan(req.Target, req.ScanType)
+		job := sm.StartScanForTenant(requestTenant(c), req.Target, req.ScanType)
 
 		logger.WithFields(logrus.Fields{
 			"scan_id": job.ID, "asset_id": job.AssetID, "target": req.Target, "scan_type": req.ScanType,
@@ -778,8 +795,7 @@ func GetCBOMScanStatus(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		id := c.Param("id")
 		logger.WithField("scan_id", id).Info("Getting CBOM scan status")
 
-		sm := discovery.GetScanManager()
-		job, ok := sm.GetScan(id)
+		job, ok := tenantScanJob(c, id)
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
 			return
@@ -833,8 +849,7 @@ func GetCBOMScanReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		id := c.Param("id")
 		logger.WithField("scan_id", id).Info("Getting CBOM scan report")
 
-		sm := discovery.GetScanManager()
-		job, ok := sm.GetScan(id)
+		job, ok := tenantScanJob(c, id)
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
 			return
@@ -873,7 +888,7 @@ func GetAssetBOM(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		logger.WithField("asset_id", id).Info("Getting asset CBOM")
 
 		sm := discovery.GetScanManager()
-		if result, ok := sm.GetResult(id); ok && len(result.Components) > 0 {
+		if result, ok := sm.GetResultForTenant(requestTenant(c), id); ok && len(result.Components) > 0 {
 			c.JSON(http.StatusOK, gin.H{
 				"asset_id":    id,
 				"bom_version": "1.0",

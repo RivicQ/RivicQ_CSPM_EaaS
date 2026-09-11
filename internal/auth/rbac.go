@@ -15,8 +15,25 @@ var roleRank = map[string]int{
 	"admin":    4,
 }
 
+// roleAliases map product titles onto the four persisted JWT roles.
+// JWT still stores viewer|analyst|operator|admin. Frontend labels are not authorization.
+var roleAliases = map[string]string{
+	"owner":            "admin",
+	"administrator":    "admin",
+	"security manager": "admin",
+	"security-manager": "admin",
+	"security_manager": "admin",
+	"security analyst": "analyst",
+	"security-analyst": "analyst",
+	"security_analyst": "analyst",
+	"developer":        "operator",
+}
+
 func NormalizeRole(role string) string {
 	r := strings.ToLower(strings.TrimSpace(role))
+	if alias, ok := roleAliases[r]; ok {
+		r = alias
+	}
 	if _, ok := roleRank[r]; ok {
 		return r
 	}

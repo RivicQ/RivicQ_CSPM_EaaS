@@ -184,4 +184,14 @@ func TestClassifyTarget(t *testing.T) {
 	if ClassifyTarget("pod://ns/name", "cbom") != ClassPod {
 		t.Fatal("pod uri")
 	}
+	if ClassifyTarget("firmware://cyclonedx", "firmware") != ClassFirmware {
+		t.Fatal("firmware")
+	}
+}
+
+func TestBuildTargetsFirmwareDeclared(t *testing.T) {
+	got := buildTargets("firmware://cyclonedx", "firmware")
+	if len(got) != 1 || got[0].Protocol != "firmware" {
+		t.Fatalf("got %+v", got)
+	}
 }

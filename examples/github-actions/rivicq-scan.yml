@@ -1,0 +1,30 @@
+# Example consumer workflow. See README.md in this directory.
+# This file is documentation, not an active workflow of this repository.
+name: RivicQ scan
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  rivicq:
+    name: CBOM policy evaluation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.x'
+      - name: Install RivicQ CLI
+        run: go install github.com/rivic-q/cryptobom-saas/cmd/rivicq@latest
+      - name: Scan repository
+        run: rivicq scan . --format json --fail-on high | tee rivicq-report.json
+      - name: Upload CBOM / intelligence report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rivicq-cbom-report
+          path: rivicq-report.json

@@ -16,6 +16,7 @@ RivicQ ships **one cryptographic intelligence engine** and two **legal editions*
 | **SSO** | No | OIDC; SAML configuration store (IdP ACS is operational work) |
 | **RBAC** | Basic roles in the UI | Server-side `RequireRole` (Viewer &lt; Analyst &lt; Operator &lt; Admin) |
 | **Audit viewer** | No | Yes — tenant from JWT claims only |
+| **Workspaces** | JWT tenant on scans; anonymous → public tenant | JWT tenant isolation |
 | **Compliance PDFs / packs** | No | Control **mappings** (DORA / BSI / eIDAS / ISO / NIST, etc.) — **not a certification** |
 | **Support** | GitHub issues | Contracted |
 

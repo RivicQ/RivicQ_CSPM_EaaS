@@ -24,7 +24,7 @@ interface ScanProgressStreamProps {
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  info: '#0284c7',
+  info: '#7c3aed',
   warning: '#ff832b',
   error: '#da1e28',
   success: '#24a148',
@@ -102,7 +102,7 @@ const ScanProgressStream: React.FC<ScanProgressStreamProps> = ({
           style={{
             backgroundColor:
               status === 'complete' ? '#24a148' :
-              status === 'error' ? '#da1e28' : '#0284c7',
+              status === 'error' ? '#da1e28' : '#7c3aed',
             color: '#fff',
             fontSize: '0.65rem',
             height: 20,

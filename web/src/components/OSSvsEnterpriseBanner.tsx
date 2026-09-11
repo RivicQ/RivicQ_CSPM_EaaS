@@ -14,7 +14,7 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
 }) => (
   <Box
     sx={{
-      background: 'rgba(14,165,233,0.1)',
+      background: 'rgba(124,58,237,0.1)',
       border: `1px solid ${tokens.colors.rivicq[200]}`,
       borderRadius: 4,
       p: 3,
@@ -35,7 +35,7 @@ export const OSSvsEnterpriseBanner: React.FC<OSSvsEnterpriseBannerProps> = ({
     <Button
       variant="contained"
       startIcon={<Upgrade />}
-      sx={{ background: '#0284c7' }}
+      sx={{ background: '#7c3aed' }}
       href="https://rivicq.com"
       target="_blank"
       rel="noopener noreferrer"

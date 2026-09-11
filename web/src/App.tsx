@@ -26,6 +26,7 @@ import EditionSwitcher from './pages/EditionSwitcher';
 import Dashboard from './pages/Dashboard';
 import AssetDetails from './pages/AssetDetails';
 import Assets from './pages/Assets';
+import Findings from './pages/Findings';
 import Scanner from './pages/Scanner';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
@@ -60,6 +61,16 @@ import HsmQuantum from './pages/HsmQuantum';
 import GovernanceHub from './pages/GovernanceHub';
 import MigrationHub from './pages/MigrationHub';
 import ContactHub from './pages/ContactHub';
+import RequestDemo from './pages/RequestDemo';
+import Pricing from './pages/Pricing';
+import IBMPartner from './pages/IBMPartner';
+import CRMLeads from './pages/CRMLeads';
+import Product from './pages/Product';
+import CspmPublic from './pages/CspmPublic';
+import CbomPublic from './pages/CbomPublic';
+import PqcPublic from './pages/PqcPublic';
+import EnterprisePublic from './pages/EnterprisePublic';
+import SecurityPublic from './pages/SecurityPublic';
 
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
@@ -128,7 +139,7 @@ const App: React.FC = () => {
               styles={(theme) => ({
                 '*': { boxSizing: 'border-box' },
                 '::selection': {
-                  background: theme.palette.mode === 'dark' ? 'rgba(196,120,58,0.4)' : 'rgba(168,98,46,0.22)',
+                  background: theme.palette.mode === 'dark' ? 'rgba(124,58,237,0.45)' : 'rgba(109,40,217,0.22)',
                   color: theme.palette.text.primary,
                 },
                 ':focus-visible': {
@@ -164,6 +175,15 @@ const App: React.FC = () => {
                 <Route path="/oauth/callback" element={wrap(OAuthCallback, 'OAuthCallback')} />
                 <Route path="/switcher" element={wrap(EditionSwitcher, 'EditionSwitcher')} />
                 <Route path="/contact" element={wrap(ContactHub, 'ContactHub')} />
+                <Route path="/request-demo" element={wrap(RequestDemo, 'RequestDemo')} />
+                <Route path="/pricing" element={wrap(Pricing, 'Pricing')} />
+                <Route path="/ibm" element={wrap(IBMPartner, 'IBMPartner')} />
+                <Route path="/product" element={wrap(Product, 'Product')} />
+                <Route path="/product/cspm" element={wrap(CspmPublic, 'CspmPublic')} />
+                <Route path="/cbom" element={wrap(CbomPublic, 'CbomPublic')} />
+                <Route path="/pqc" element={wrap(PqcPublic, 'PqcPublic')} />
+                <Route path="/enterprise" element={wrap(EnterprisePublic, 'EnterprisePublic')} />
+                <Route path="/security" element={wrap(SecurityPublic, 'SecurityPublic')} />
                 <Route path="/logout" element={<LogoutRedirect />} />
                 <Route
                   path="/"
@@ -176,6 +196,7 @@ const App: React.FC = () => {
                   <Route path="dashboard" element={wrap(Dashboard, 'Dashboard')} />
                   <Route path="assets" element={wrap(Assets, 'Assets')} />
                   <Route path="assets/:id" element={wrap(AssetDetails, 'AssetDetails')} />
+                  <Route path="findings" element={wrap(Findings, 'Findings')} />
                   <Route path="scanner" element={wrap(Scanner, 'Scanner')} />
                   <Route path="cspm" element={wrap(CSPM, 'CSPM')} />
                   <Route path="analytics" element={wrap(Analytics, 'Analytics')} />
@@ -191,7 +212,7 @@ const App: React.FC = () => {
                   <Route path="connectors/hsm" element={wrap(HsmQuantum, 'HsmQuantum')} />
                   <Route path="governance" element={wrap(GovernanceHub, 'GovernanceHub')} />
                   <Route path="migration" element={wrap(MigrationHub, 'MigrationHub')} />
-                  <Route path="contact" element={wrap(ContactHub, 'ContactHub')} />
+                  <Route path="crm" element={<RequireRole role="admin">{wrap(CRMLeads, 'CRM')}</RequireRole>} />
 
                   <Route path="enterprise/inventory" element={<RequireEnterprise>{wrap(Inventory, 'Inventory')}</RequireEnterprise>} />
                   <Route path="enterprise/compliance" element={<RequireEnterprise>{wrap(Compliance, 'Compliance')}</RequireEnterprise>} />

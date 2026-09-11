@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/tenant"
 	"github.com/sirupsen/logrus"
 )
 
@@ -100,8 +101,9 @@ func GitHubScanHandler(logger *logrus.Logger) gin.HandlerFunc {
 
 		jobID := uuid.New().String()
 		storeGHScanJob(&ghScanJob{
-			ID:     jobID,
-			Status: "queued",
+			ID:       jobID,
+			TenantID: requestTenant(c),
+			Status:   "queued",
 			Stage:  "queued",
 			Stages: []GHScanStage{{ID: "queued", Label: "Queued", Status: "completed"}},
 			Demo:   token == "" && demoModeEnabled(),
@@ -245,7 +247,7 @@ func GitHubRepoListHandler(logger *logrus.Logger) gin.HandlerFunc {
 func GitHubScanStatusHandler(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		if job, ok := getGHScanJob(id); ok {
+		if job, ok := getGHScanJobForTenant(requestTenant(c), id); ok {
 			c.JSON(http.StatusOK, gin.H{
 				"scan_id": job.ID,
 				"status":  job.Status,
@@ -267,7 +269,7 @@ func GitHubScanStatusHandler(logger *logrus.Logger) gin.HandlerFunc {
 
 func GitHubScanListHandler(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		jobs := listGHScanJobs()
+		jobs := listGHScanJobsForTenant(requestTenant(c))
 		out := make([]gin.H, 0, len(jobs))
 		for _, job := range jobs {
 			findings := 0
@@ -292,12 +294,13 @@ func GitHubScanListHandler(logger *logrus.Logger) gin.HandlerFunc {
 
 func GitHubScanCompareHandler(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		current, ok := getGHScanJob(c.Param("id"))
+		tid := requestTenant(c)
+		current, ok := getGHScanJobForTenant(tid, c.Param("id"))
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "scan not found"})
 			return
 		}
-		against, ok := getGHScanJob(c.Query("against"))
+		against, ok := getGHScanJobForTenant(tid, c.Query("against"))
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "comparison scan not found"})
 			return
@@ -332,7 +335,7 @@ func GitHubWebhookHandler(logger *logrus.Logger) gin.HandlerFunc {
 						go func(name string) {
 							result := scanGitHubRepo(context.Background(), token, name, "crypto", false, logger)
 							storeGHScanJob(&ghScanJob{
-								ID: result.ScanID, Status: result.Status, Stage: "completed",
+								ID: result.ScanID, TenantID: tenant.PublicTenantID, Status: result.Status, Stage: "completed",
 								Results: []GHScanResult{result}, Demo: result.Demo,
 							})
 						}(fullName)

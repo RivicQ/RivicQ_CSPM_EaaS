@@ -32,7 +32,9 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const color = accent || theme.palette.primary.main;
+  const isZero = value === 0 || value === '0';
+  const color = isZero ? (isDark ? '#a78bfa' : tokens.colors.rivicq[500]) : (accent || theme.palette.primary.main);
+  const valueColor = isZero ? (isDark ? '#ffffff' : 'text.primary') : (accent || 'text.primary');
 
   return (
     <Box
@@ -97,7 +99,7 @@ const StatCard: React.FC<StatCardProps> = ({
                 ...metricValueSx,
                 fontSize: featured ? '1.5rem' : '1.375rem',
                 lineHeight: 1,
-                color: accent || 'text.primary',
+                color: valueColor,
               }}
             >
               {value}

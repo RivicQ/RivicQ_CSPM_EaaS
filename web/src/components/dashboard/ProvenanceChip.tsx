@@ -5,7 +5,7 @@ import type { DataKind } from '../../data/enterprise/types';
 
 const COLOR: Record<DataKind, 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'info'> = {
   live: 'success',
-  demo: 'warning',
+  demo: 'primary',
   benchmark: 'info',
   intel: 'secondary',
   calculated: 'primary',

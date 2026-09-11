@@ -1,18 +1,18 @@
-/** RivicQ Security Cloud type — Source Sans 3 + Source Code Pro. Not IBM Plex. */
+/** RivicQ Security Cloud type — Inter + JetBrains Mono. */
 export const appTypography = {
-  fontFamily: '"Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-  fontFamilyMono: '"Source Code Pro", ui-monospace, monospace',
+  fontFamily: 'Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+  fontFamilyMono: '"JetBrains Mono", ui-monospace, monospace',
 
   display: {
-    fontFamily: '"Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-    fontWeight: 620,
-    letterSpacing: '-0.028em',
+    fontFamily: 'Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+    fontWeight: 700,
+    letterSpacing: '-0.03em',
     lineHeight: 1.08,
   },
 
   metric: {
-    fontFamily: '"Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-    fontWeight: 620,
+    fontFamily: 'Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+    fontWeight: 650,
     letterSpacing: '-0.02em',
     fontVariantNumeric: 'tabular-nums' as const,
     fontFeatureSettings: '"tnum"',
@@ -26,7 +26,7 @@ export const appTypography = {
   },
 
   heading: {
-    fontWeight: 620,
+    fontWeight: 650,
     letterSpacing: '-0.018em',
     lineHeight: 1.28,
   },
