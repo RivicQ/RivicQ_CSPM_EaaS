@@ -48,7 +48,7 @@ Every completed scan status includes `target_class`, `resources`, and `finding_i
 | Legal | Apache-2.0 | Commercial license (`CRYPTOBOM_LICENSE_KEY=ENT-…`) |
 | Engine | Full CBOM + Qiskit local taxonomy | Same engine |
 | Live demo (GitHub Pages) | **Limited Community workspace** | UI preference only — not a license |
-| Five-BOM | CBOM + SBOM + local QBOM | + AIBOM + IBOM |
+| BOM layers | CBOM + SBOM CSPM | + QBOM + HBOM + AIBOM + IBOM |
 | DORA pack | JSON mappings | Pack flag enabled |
 | Multi-cloud / quantum / HSM connectors | Catalog only | Connectors when credentials exist |
 | QSIC | Declared research ASIC (not shipped, not FIPS certified) | Same honesty + persistable inventory |

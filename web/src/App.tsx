@@ -208,15 +208,15 @@ const App: React.FC = () => {
                   <Route path="bom" element={wrap(BomIntelligence, 'BomIntelligence')} />
                   <Route path="pipeline" element={wrap(DevSecOpsPipeline, 'DevSecOpsPipeline')} />
                   <Route path="security/api" element={wrap(ApiSecurity, 'ApiSecurity')} />
-                  <Route path="security/ai" element={wrap(AiSecurity, 'AiSecurity')} />
-                  <Route path="connectors/hsm" element={wrap(HsmQuantum, 'HsmQuantum')} />
+                  <Route path="security/ai" element={<RequireEnterprise layers>{wrap(AiSecurity, 'AiSecurity')}</RequireEnterprise>} />
+                  <Route path="connectors/hsm" element={<RequireEnterprise layers>{wrap(HsmQuantum, 'HsmQuantum')}</RequireEnterprise>} />
                   <Route path="governance" element={wrap(GovernanceHub, 'GovernanceHub')} />
                   <Route path="migration" element={wrap(MigrationHub, 'MigrationHub')} />
                   <Route path="crm" element={<RequireRole role="admin">{wrap(CRMLeads, 'CRM')}</RequireRole>} />
 
                   <Route path="enterprise/inventory" element={<RequireEnterprise>{wrap(Inventory, 'Inventory')}</RequireEnterprise>} />
                   <Route path="enterprise/compliance" element={<RequireEnterprise>{wrap(Compliance, 'Compliance')}</RequireEnterprise>} />
-                  <Route path="enterprise/quantum" element={<RequireEnterprise>{wrap(Quantum, 'Quantum')}</RequireEnterprise>} />
+                  <Route path="enterprise/quantum" element={<RequireEnterprise layers>{wrap(Quantum, 'Quantum')}</RequireEnterprise>} />
                   <Route path="enterprise/multicloud" element={<RequireEnterprise>{wrap(MultiCloud, 'MultiCloud')}</RequireEnterprise>} />
                   <Route path="enterprise/cncf" element={<RequireEnterprise>{wrap(CNCF, 'CNCF')}</RequireEnterprise>} />
                   <Route path="enterprise/terraform" element={<RequireEnterprise>{wrap(TerraformIaC, 'Terraform')}</RequireEnterprise>} />

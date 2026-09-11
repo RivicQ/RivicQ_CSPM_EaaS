@@ -47,7 +47,8 @@ Live GitHub Pages demo is **Community-limited** (labeled sample data, no product
 | Surface | Who | Home |
 |---|---|---|
 | Public | Anonymous | Marketing home, Product / CSPM / CBOM / PQC / Enterprise / Security / Pricing / Request demo / IBM / Contact, **limited Community** Interactive Demo, RivicQ Graph (`/fabric`) |
-| Community | Authenticated OSS | Overview, Scanner, **Five-BOM** (CBOM/SBOM/QBOM), Pipeline, API security, Assets, Analytics, Settings |
+| Community | Authenticated OSS | Overview, Scanner, **CBOM/SBOM CSPM**, Pipeline, API security, Assets, Analytics, Settings |
+| Enterprise | Authenticated paid workspace | Community surfaces + QBOM, HBOM, AIBOM, IBOM, inventory, compliance, multi-cloud, quantum, admin |
 | Enterprise | Authenticated paid workspace | Community surfaces + inventory, compliance, multi-cloud, quantum, admin |
 
 Fast path: visit → Demo or Register → Overview → first CBOM in the scanner (CLI: `rivicq scan .`).
@@ -60,7 +61,7 @@ Shared by Community and Enterprise:
 
 - `internal/discovery` — TLS, SSH, HTTP(S) websites, SBOM/package cryptographic discovery
 - `internal/intelligence` — normalized findings, crypto risk, policy gate, Qiskit profile, audit score
-- `internal/bom` — five-BOM overlay (CBOM/QBOM/SBOM Community; AIBOM/IBOM Enterprise) without changing ScanResult
+- `internal/bom` — CBOM/SBOM Community; QBOM, HBOM, AIBOM, IBOM Enterprise. Does not change ScanResult.
 - CycloneDX CBOM via `/scans/:id/cyclonedx` and the intelligence pipeline
 - Qiskit pipeline via `/scans/:id/qiskit` (local taxonomy; not IBM Quantum hardware)
 - Scan report JSON is `discovery.ScanResult` (`GetCBOMScanReport`)
@@ -121,7 +122,7 @@ Shipped or in progress:
 | Scan targets | Website, host, IP, server, declared pod, QSIC catalog | Same + live kube attach, cloud connectors |
 | Auth | Login, register, MFA, OAuth | + SSO config, audit, API keys, webhooks |
 | DORA / GRC | JSON mappings | Pack flag + control-plane evidence |
-| Five-BOM | CBOM + SBOM + local QBOM | + AIBOM + IBOM + HSM connector |
+| BOM layers | CBOM + SBOM | + QBOM + HBOM + AIBOM + IBOM + HSM connector |
 | Workspaces | JWT tenant on scan/inventory; unauthenticated → public tenant | JWT tenant isolation on control-plane APIs |
 | Demo on Pages | Limited Community session (`rivicq-demo-session`) | Same demo label; not a customer tenant |
 

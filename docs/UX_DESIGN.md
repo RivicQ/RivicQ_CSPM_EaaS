@@ -2,7 +2,7 @@
 
 Deep-space nebula chrome: black canvas `#000000`, violet accent `#7C3AED`, Inter, pill CTAs, sparse starfield. Public pages (Home, Product, CSPM, CBOM, PQC, Enterprise, Security, Pricing, Request demo, IBM, Contact) share `PublicShell`. Overview (`/dashboard`) opens on an inbox queue — not a circular posture gauge. Light mode remains available. This is not IBM Carbon or IBM Plex.
 
-Live surfaces: public home, Community workspace, Five-BOM hubs, docs hub, marketing, RivicQ Graph demo (`/fabric`, formerly NEXUS / FABRIC).
+Live surfaces: public home, Community workspace, CBOM/SBOM hubs, docs hub, marketing, RivicQ Graph demo (`/fabric`, formerly NEXUS / FABRIC).
 
 ## Intent
 
@@ -35,15 +35,13 @@ Public (unauthenticated)
   Enterprise / Security / Pricing / Request demo / IBM / Contact
   Docs hub · RivicQ Graph demo (`/fabric`)
 Workspace (Community)
-  Overview → Scanner → Five-BOM
-  Pipeline · API security · AI security · HSM/Quantum · Governance · Migration
+  Overview → Scanner → CBOM / SBOM
+  Pipeline · API security · Governance · Migration
 Enterprise (licensed)
-  Cloud posture · Conformance · Inventory · Compliance · Quantum · CSPM
-Docs hub
-  Launch paths · @rivicq.com directory · Legal / Product / Honesty lists
+  QBOM · HBOM · AIBOM · IBOM · HSM · Cloud posture · Conformance · Inventory
 ```
 
-Community can open every Five-BOM route. AIBOM, IBOM, HSM connectors, and the GRC pack stay locked until a paid edition.
+Community cannot open QBOM, HBOM, AIBOM, IBOM, or HSM routes. Those stay locked until a licensed Enterprise workspace. PQC classification on CBOM findings remains Community.
 
 Quantum risk on Pages comes from **scans you run** (CLI or API). GitHub Pages is static and does not attach a live customer estate.
 
@@ -56,7 +54,7 @@ Quantum risk on Pages comes from **scans you run** (CLI or API). GitHub Pages is
 | **Contact** | Five public desks only; `admin@` is not published; same chrome as Home |
 | **Auth / editions** | Single-column workspace form on black |
 | **Overview** | Inbox queue + domain strip (AI, DevSecOps, cloud, API, GRC, quantum) |
-| **Five-BOM / pipeline / governance** | Shared page header + evidence cards |
+| **CBOM / SBOM / pipeline / governance** | Shared page header + nebula evidence cards |
 | **Docs hub** | Same chrome, grouped legal/product lists |
 | **RivicQ Graph** | Labeled synthetic graph demo at `/fabric` |
 

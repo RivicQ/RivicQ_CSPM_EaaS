@@ -4,20 +4,20 @@ import "os"
 
 // HSMStatus is the honest PKCS#11 / cloud HSM connector view.
 type HSMStatus struct {
-	Engine      string       `json:"engine"`
-	Connected   bool         `json:"connected"`
-	Module      string       `json:"module,omitempty"`
-	Providers   []Connector  `json:"providers"`
-	QSIC        string       `json:"qsic"`
-	Note        string       `json:"note"`
+	Engine    string      `json:"engine"`
+	Connected bool        `json:"connected"`
+	Module    string      `json:"module,omitempty"`
+	Providers []Connector `json:"providers"`
+	QSIC      string      `json:"qsic"`
+	Note      string      `json:"note"`
 }
 
-// QuantumStatus is local QBOM scoring plus optional runtime connector.
+// QuantumStatus is local PQC taxonomy plus optional runtime connector.
 type QuantumStatus struct {
-	Scoring     string      `json:"scoring"`
-	Runtime     Connector   `json:"runtime"`
-	Migration   Connector   `json:"migration"`
-	Note        string      `json:"note"`
+	Scoring   string    `json:"scoring"`
+	Runtime   Connector `json:"runtime"`
+	Migration Connector `json:"migration"`
+	Note      string    `json:"note"`
 }
 
 func ReadHSM() HSMStatus {

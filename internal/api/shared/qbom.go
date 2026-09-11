@@ -9,12 +9,22 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/rivic-q/cryptobom-saas/internal/discovery"
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
 	"github.com/sirupsen/logrus"
 )
 
 // GetScanQBOM returns a Quantum BOM view derived from a completed CBOM scan.
+// QBOM is an Enterprise layer. Community still classifies algorithms on CBOM findings.
 func GetScanQBOM(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if !edition.Detect().Features.QBOM {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "QBOM is an Enterprise layer",
+				"edition": edition.Detect().Edition,
+				"note":    "Community Cryptographic Security Posture Management still classifies algorithms on CBOM findings. This is not IBM Quantum hardware.",
+			})
+			return
+		}
 		id := c.Param("id")
 		logger.WithField("scan_id", id).Info("Serving QBOM for scan")
 

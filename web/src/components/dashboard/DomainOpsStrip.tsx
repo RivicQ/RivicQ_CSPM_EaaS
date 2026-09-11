@@ -1,12 +1,12 @@
 import React from 'react';
-import { Box, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {
   Api, CloudQueue, Hub, Policy, Psychology, Timeline,
 } from '@mui/icons-material';
 
 const DOMAINS = [
-  { title: 'AI engineering', desc: 'Model, dataset, and AI-identity inventory (AIBOM).', path: '/security/ai' },
+  { title: 'AI engineering', desc: 'AIBOM is Enterprise. Community still flags serving-stack crypto in CBOM.', path: '/security/ai' },
   { title: 'DevSecOps', desc: 'Pipeline evidence from scan to policy gate.', path: '/pipeline' },
   { title: 'Cloud security', desc: 'CSPM and multi-cloud posture (connectors are Enterprise).', path: '/cspm' },
   { title: 'API security', desc: 'TLS hygiene and gateway inventory from scans.', path: '/security/api' },
@@ -16,7 +16,6 @@ const DOMAINS = [
 
 const DomainOpsStrip: React.FC = () => {
   const nav = useNavigate();
-  const theme = useTheme();
   return (
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: 'repeat(3, 1fr)' }, gap: 1.25 }}>
       {DOMAINS.map((d) => (
@@ -31,9 +30,9 @@ const DomainOpsStrip: React.FC = () => {
             p: 1.75,
             borderRadius: 2,
             border: '1px solid',
-            borderColor: 'divider',
-            bgcolor: theme.palette.background.paper,
-            color: 'inherit',
+            borderColor: '#1f1f2e',
+            bgcolor: '#0a0a0f',
+            color: '#fff',
             font: 'inherit',
             '&:hover': { borderColor: 'primary.main' },
           }}

@@ -2,12 +2,12 @@ import React from 'react';
 import { Chip, Stack, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { layersForEdition } from '../../data/bomFramework';
-import { isPaidEdition } from '../../config/editions';
+import { isEnterpriseEdition } from '../../config/editions';
 import { useAuth } from '../../context/AuthContext';
 
 const BomRibbon: React.FC<{ compact?: boolean }> = ({ compact }) => {
   const { edition } = useAuth();
-  const paid = isPaidEdition(edition);
+  const paid = isEnterpriseEdition(edition);
   const navigate = useNavigate();
   return (
     <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>

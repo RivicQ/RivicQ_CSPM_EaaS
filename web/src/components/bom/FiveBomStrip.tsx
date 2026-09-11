@@ -13,17 +13,17 @@ const FiveBomStrip: React.FC = () => {
     <Box>
       <Stack spacing={1} sx={{ mb: 3, textAlign: 'center' }}>
         <Chip
-          label="Five-BOM DevSecOps"
+          label="Cryptographic Security Posture Management"
           color="primary"
           variant="outlined"
           sx={{ alignSelf: 'center', fontWeight: 700 }}
         />
         <Typography variant="h4" fontWeight={700} sx={{ letterSpacing: '-0.02em' }}>
-          QBOM · AIBOM · SBOM · IBOM · CBOM
+          Community CBOM · SBOM · Enterprise Q / H / AI / I
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 720, mx: 'auto' }}>
-          One cryptographic intelligence engine. Community runs CBOM, SBOM, and local QBOM.
-          AIBOM, IBOM, PKCS#11 HSM, and GRC packs unlock with Enterprise. Partner APIs stay empty without credentials.
+          One cryptographic intelligence engine. Community is CBOM and SBOM Cryptographic Security Posture Management.
+          QBOM, HBOM, AIBOM, IBOM, PKCS#11 HSM, and GRC packs unlock with Enterprise. Partner APIs stay empty without credentials.
         </Typography>
       </Stack>
       <Grid container spacing={2}>

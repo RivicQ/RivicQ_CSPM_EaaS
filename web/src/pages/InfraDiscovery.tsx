@@ -27,11 +27,11 @@ import {
   Collapse,
 } from '@mui/material';
 import {
-  NetworkCheck,
   PlayArrow,
   ExpandMore,
   ExpandLess,
 } from '@mui/icons-material';
+import PageFrame from '../components/PageFrame';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -220,11 +220,11 @@ const SEVERITY_COLORS: Record<SeverityLevel, string> = {
 };
 
 const SEVERITY_BG: Record<SeverityLevel, string> = {
-  CRITICAL: '#fef2f2',
-  HIGH: '#fff7ed',
-  MEDIUM: '#fefce8',
-  LOW: '#f0fdf4',
-  INFO: '#f9fafb',
+  CRITICAL: 'rgba(239,68,68,0.16)',
+  HIGH: 'rgba(249,115,22,0.16)',
+  MEDIUM: 'rgba(234,179,8,0.14)',
+  LOW: 'rgba(34,197,94,0.12)',
+  INFO: 'rgba(31,31,46,0.9)',
 };
 
 function SeverityBadge({ severity }: { severity: SeverityLevel }) {
@@ -279,17 +279,17 @@ function CompliancePills({ bsiRef, doraRef, eidasRef }: { bsiRef: string; doraRe
 
 function ScanSummaryBar({ summary }: { summary: ScanSummary }) {
   const cards = [
-    { label: 'Targets Scanned', value: summary.scanned_targets, icon: '🌐', bg: '#eff6ff', color: '#1d4ed8' },
-    { label: 'CRITICAL Findings', value: summary.critical, icon: '🔴', bg: '#fef2f2', color: '#dc2626' },
-    { label: 'HIGH Findings', value: summary.high, icon: '🟠', bg: '#fff7ed', color: '#ea580c' },
-    { label: 'Quantum-Unsafe Assets', value: summary.quantum_unsafe, icon: '⚛', bg: '#f0f9ff', color: '#7c3aed' },
+    { label: 'Targets Scanned', value: summary.scanned_targets, icon: '🌐', bg: '#0a0a0f', color: '#a78bfa' },
+    { label: 'CRITICAL Findings', value: summary.critical, icon: '🔴', bg: '#0a0a0f', color: '#ef4444' },
+    { label: 'HIGH Findings', value: summary.high, icon: '🟠', bg: '#0a0a0f', color: '#f97316' },
+    { label: 'Quantum-Unsafe Assets', value: summary.quantum_unsafe, icon: '⚛', bg: '#0a0a0f', color: '#7c3aed' },
   ];
 
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
       {cards.map((card) => (
         <Grid item xs={12} sm={6} md={3} key={card.label}>
-          <Card sx={{ bgcolor: card.bg, border: `1px solid ${card.color}20` }}>
+          <Card sx={{ bgcolor: card.bg, border: '1px solid #1f1f2e' }}>
             <CardContent sx={{ py: 2 }}>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Box>
@@ -352,7 +352,7 @@ function TargetStatusGrid({ findings }: { findings: Finding[] }) {
               <Card
                 sx={{
                   border: `2px solid ${worst ? SEVERITY_COLORS[worst] + '40' : '#22c55e40'}`,
-                  bgcolor: worst ? SEVERITY_BG[worst] : '#f0fdf4',
+                  bgcolor: worst ? SEVERITY_BG[worst] : '#0a0a0f',
                 }}
               >
                 <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
@@ -428,10 +428,10 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
         />
       </Box>
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table size="small">
+      <TableContainer component={Paper} variant="outlined" sx={{ bgcolor: '#0a0a0f', borderColor: '#1f1f2e', color: '#e5e7eb' }}>
+        <Table size="small" sx={{ '& .MuiTableCell-root': { color: '#e5e7eb', borderColor: '#1f1f2e' } }}>
           <TableHead>
-            <TableRow sx={{ bgcolor: '#f8fafc' }}>
+            <TableRow sx={{ bgcolor: '#111118' }}>
               <TableCell><Typography variant="caption" fontWeight="bold">Severity</Typography></TableCell>
               <TableCell><Typography variant="caption" fontWeight="bold">Target</Typography></TableCell>
               <TableCell><Typography variant="caption" fontWeight="bold">Protocol</Typography></TableCell>
@@ -448,7 +448,7 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
                 <TableRow
                   hover
                   onClick={() => setExpandedRow(expandedRow === f.id ? null : f.id)}
-                  sx={{ cursor: 'pointer', bgcolor: expandedRow === f.id ? '#f8fafc' : 'inherit' }}
+                  sx={{ cursor: 'pointer', bgcolor: expandedRow === f.id ? '#111118' : 'transparent' }}
                 >
                   <TableCell><SeverityBadge severity={f.severity} /></TableCell>
                   <TableCell>
@@ -475,7 +475,7 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
                 <TableRow>
                   <TableCell colSpan={8} sx={{ py: 0, border: expandedRow === f.id ? undefined : 'none' }}>
                     <Collapse in={expandedRow === f.id} timeout="auto" unmountOnExit>
-                      <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 1, my: 1 }}>
+                      <Box sx={{ p: 2, bgcolor: '#111118', borderRadius: 1, my: 1, border: '1px solid #1f1f2e' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{f.description}</Typography>
                         <Typography variant="caption" component="div" sx={{ mb: 0.5 }}>
                           <strong>Evidence:</strong> {f.evidence}
@@ -615,38 +615,19 @@ const InfraDiscovery: React.FC = () => {
   }, []);
 
   return (
-    <Box>
-      {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Box display="flex" alignItems="center" gap={1} sx={{ mb: 0.5 }}>
-          <NetworkCheck sx={{ color: '#7c3aed', fontSize: 32 }} />
-          <Typography variant="h4" fontWeight="bold">
-            Infrastructure Discovery — Weak Cryptography
-          </Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          Real-time scanning of network endpoints for cryptographic vulnerabilities |{' '}
-          <strong>BSI TR-02102-2</strong> · <strong>eIDAS 2.0</strong> · <strong>DORA</strong>
-        </Typography>
-        {lastScanId && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-            Scan ID: {lastScanId}
-          </Typography>
-        )}
-      </Box>
-
-      {/* Scan Button */}
+    <PageFrame
+      eyebrow="Labeled sample fixtures"
+      title="Infrastructure discovery"
+      subtitle="Network cryptographic discovery. The table below is labeled sample data until you run a live scan against the RivicQ engine. Mappings are not certifications."
+    >
+      <Alert severity="info" sx={{ mb: 2, bgcolor: '#0a0a0f', color: '#d1d5db', border: '1px solid #1f1f2e' }}>
+        Seed rows are fixtures, not a customer estate. Live scanning needs the Community API.
+      </Alert>
       <ScanButton onScanComplete={handleScanComplete} />
-
-      {/* Summary Bar */}
       <ScanSummaryBar summary={summary} />
-
-      {/* Target Status Grid */}
       <TargetStatusGrid findings={findings} />
-
-      {/* Findings Table */}
       <FindingsTable findings={findings} />
-    </Box>
+    </PageFrame>
   );
 };
 

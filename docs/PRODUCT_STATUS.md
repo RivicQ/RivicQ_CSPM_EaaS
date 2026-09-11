@@ -4,7 +4,7 @@ Honest snapshot of what RivicQ ships today for operators who need **open-source 
 
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data; no production API).
 
-Companion docs: [Core engine](CORE_ENGINE.md) · [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [Five-BOM](BOM_FRAMEWORK.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md) · [Optional scanners](INTEGRATIONS.md)
+Companion docs: [Core engine](CORE_ENGINE.md) · [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [BOM layers](BOM_FRAMEWORK.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md) · [Optional scanners](INTEGRATIONS.md)
 
 ## What is complete
 
@@ -13,7 +13,8 @@ The **cryptographic intelligence engine is shared**. Community (`:8080`) and Ent
 | Layer | Community (OSS, limited) | Enterprise |
 |---|---|---|
 | TLS / SSH / HTTP(S) / SBOM discovery | Yes | Same engine |
-| Five-BOM (CBOM / QBOM / SBOM) | Yes (local QBOM) | Same + AIBOM + IBOM |
+| QBOM / HBOM / AIBOM / IBOM | Locked (Enterprise; APIs 403) | Licensed control-plane layers |
+| CBOM / SBOM CSPM | Yes | Same engine |
 | API security (TLS/HTTPS surface) | Yes | Same + gateway inventory when connected |
 | DevSecOps pipeline | Stages 1–6 + JSON (stage 8) | Stage 7 continuous monitoring |
 | HSM / PKCS#11 | Declared QSIC/HSM catalog | Connector when `PKCS11_MODULE` or cloud IAM exists |
@@ -66,10 +67,11 @@ GET  /api/v1/bom/framework
 GET  /api/v1/bom/pipeline
 GET  /api/v1/bom/unified
 GET  /api/v1/governance/controls
-GET  /api/v1/hsm/status
-GET  /api/v1/quantum/status
+GET  /api/v1/hsm/status              # 403 on Community
+GET  /api/v1/quantum/status          # local taxonomy stays Community
 GET  /api/v1/security/api
-GET  /api/v1/security/ai
+GET  /api/v1/security/ai             # 403 on Community
+GET  /api/v1/scans/:id/qbom          # 403 on Community
 ```
 
 ## Not complete (see roadmap)

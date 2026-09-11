@@ -32,7 +32,7 @@ export const ECOSYSTEM_AREAS: { id: ContactArea; title: string; blurb: string }[
   {
     id: 'product',
     title: 'Product platform',
-    blurb: 'Five-BOM SaaS, customer support, security disclosures, sales, and automated notifications.',
+    blurb: 'Cryptographic Security Posture Management SaaS, customer support, security disclosures, sales, and automated notifications.',
   },
   {
     id: 'research',

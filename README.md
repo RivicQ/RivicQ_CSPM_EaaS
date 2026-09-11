@@ -1,8 +1,8 @@
-# RivicQ — Cryptographic Security Cloud
+# RivicQ — Cryptographic Security Posture Management
 
 **RivicQ GmbH** (Berlin) · Community **open source** (Apache License 2.0) and **Enterprise** (commercial)
 
-RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AIBOM, SBOM, IBOM, CBOM), and DevSecOps. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
+RivicQ is **Cryptographic Security Posture Management** (CSPM): Community inventories cryptography (CBOM) and software components (SBOM). QBOM, HBOM, AIBOM, and IBOM are licensed Enterprise control-plane layers. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/github/actions/workflow/status/RivicQ/RivicQ_CSPM_EaaS/pages.yml?label=GitHub%20Pages)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions/workflows/pages.yml)
@@ -33,7 +33,8 @@ The Community console is the **RivicQ Security Cloud** — deep-space nebula chr
 | CLI `rivicq scan .` | Yes | Yes |
 | GitHub Action policy gate | Yes | Yes |
 | CBOM / CycloneDX 1.6 export | Yes | Yes |
-| Five-BOM (QBOM / AIBOM / SBOM / IBOM / CBOM) | CBOM + SBOM + local QBOM | Same + AIBOM, IBOM, HSM connector |
+| CBOM / SBOM CSPM | Yes | Same engine |
+| QBOM / HBOM / AIBOM / IBOM | Locked (Enterprise APIs return 403) | Licensed control-plane layers |
 | API security (TLS/HTTPS hygiene) | Yes | Same + gateway inventory when a connector exists |
 | DevSecOps pipeline view | Stages 1–6 + JSON evidence | Stage 7 continuous monitoring |
 | Dashboard, inventory, scanner | Limited: website, host, IP, server, declared pod, QSIC catalog | Same engine + live kube attach, DORA pack |
@@ -141,7 +142,7 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Client architecture | [docs/CLIENT_ARCHITECTURE.md](docs/CLIENT_ARCHITECTURE.md) |
 | Operator UX audit | [docs/ux/README.md](docs/ux/README.md) |
 | Contact | [docs/contact.html](docs/contact.html) · [CONTACT.md](docs/CONTACT.md) — public desks only |
-| Five-BOM framework | [docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md) |
+| BOM framework | [docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md) |
 | PQC migration | [docs/PQC_MIGRATION.md](docs/PQC_MIGRATION.md) |
 | SaaS architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Legal | [LEGAL.md](LEGAL.md) |

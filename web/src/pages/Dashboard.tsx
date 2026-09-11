@@ -202,7 +202,7 @@ const Dashboard: React.FC = () => {
       list = list.filter((a) => !['GitHub Scan', 'Run Scan'].includes(a.label));
     }
     if (persona === 'engineer') {
-      list = list.filter((a) => ['Run Scan', 'GitHub Scan', 'Critical findings', 'Five-BOM'].includes(a.label) || a.path.startsWith('/scanner') || a.path === '/tools');
+      list = list.filter((a) => ['Run Scan', 'GitHub Scan', 'Critical findings', 'CBOM'].includes(a.label) || a.path.startsWith('/scanner') || a.path === '/tools');
     }
     return list;
   }, [edition, persona]);
@@ -270,7 +270,7 @@ const Dashboard: React.FC = () => {
       <InboxHero
         eyebrow="Security Cloud"
         title="Inbox · today’s work"
-        subtitle="Review open findings, then scan, remediate, and export evidence. Five-BOM stays on the same estate."
+        subtitle="Review open findings, then scan, remediate, and export evidence. Community CBOM and SBOM stay on this estate; QBOM/HBOM/AIBOM/IBOM are Enterprise."
         openCount={totalFindings}
         criticalCount={findings.critical ?? 0}
         posture={healthScore}
@@ -289,7 +289,7 @@ const Dashboard: React.FC = () => {
             <Button size="small" startIcon={<GitHub sx={{ fontSize: 16 }} />} onClick={() => navigate('/scanner?tab=github')}>
               Scan GitHub
             </Button>
-            <Button size="small" onClick={() => navigate('/bom')}>Five-BOM</Button>
+            <Button size="small" onClick={() => navigate('/bom')}>CBOM</Button>
             {isPaidEdition(edition) && (
               <Button size="small" endIcon={<ArrowForward sx={{ fontSize: 14 }} />} onClick={() => navigate('/enterprise/cloud-posture')}>
                 Cloud posture

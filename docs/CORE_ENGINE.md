@@ -1,4 +1,4 @@
-# RivicQ CBOM / Crypto-CSPM core
+# RivicQ Cryptographic Security Posture Management core
 
 This is the production engine contract. It describes **what the code does today**, not a roadmap.
 
@@ -72,7 +72,7 @@ Aliases (normalized before compare): Owner/Administrator/Security Manager → ad
 
 ## Not in this core (do not build yet)
 
-HBOM, IBOM, AIBOM, Q-BOM engines, QKD, live Stripe, IBM Partner Plus APIs, mailbox password reset, live SAML ACS.
+HBOM, IBOM, AIBOM, and Q-BOM **engines** are Enterprise control-plane layers. Community is CBOM + SBOM Cryptographic Security Posture Management. Those APIs return HTTP 403 on Community (`GET /scans/:id/qbom`, `/hsm/status`, `/security/ai`). Local PQC classification on CBOM findings remains Community (taxonomy, not a QBOM product). QKD, live Stripe, IBM Partner Plus APIs, mailbox password reset, live SAML ACS are still out of scope.
 
 ## Enterprise gate (unchecked)
 

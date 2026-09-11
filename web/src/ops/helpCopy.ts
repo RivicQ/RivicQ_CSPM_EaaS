@@ -17,11 +17,11 @@ const HELP: Record<string, { title: string; body: string }> = {
   },
   '/bom': {
     title: 'CBOM',
-    body: 'Five-BOM layers from GET /bom/unified. Counts of 0 mean that layer has no records in this workspace, not a live cloud estate.',
+    body: 'CBOM and SBOM from GET /bom/unified. QBOM, HBOM, AIBOM, and IBOM are Enterprise layers. Counts of 0 mean that layer has no records in this workspace, not a live cloud estate.',
   },
   '/migration': {
     title: 'PQC migration',
-    body: 'Readiness comes from scan intelligence / QBOM. RSA-2048 is classified, not automatically marked vulnerable. IBM Quantum hardware is not invoked.',
+    body: 'Readiness comes from scan intelligence and PQC classes on CBOM findings. RSA-2048 is classified, not automatically marked vulnerable. IBM Quantum hardware is not invoked. QBOM as a product layer is Enterprise.',
   },
   '/governance': {
     title: 'Governance',

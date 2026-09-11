@@ -114,6 +114,7 @@ func buildClientArchitecture(in ScanInput, findings []Finding, qiskit qiskitprof
 }
 
 func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadiness {
+	cfg := edition.Detect()
 	layers := map[string]int{
 		"sbom":  0,
 		"cbom":  40,
@@ -128,7 +129,7 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 		if res["tls"] || res["https"] || res["ssh"] || len(disc.Components) > 0 {
 			layers["cbom"] = 90
 		}
-		if res["hardware"] {
+		if res["hardware"] && cfg.Features.HBOM {
 			layers["hbom"] = 70
 		}
 		if res["k8s"] {
@@ -137,6 +138,7 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 	}
 	shor := 0
 	pqc := 0
+	high := 0
 	for _, f := range findings {
 		cl := qiskitprofile.Classify(f.Algorithm, f.KeyLength)
 		if cl.AttackClass == qiskitprofile.AttackShor {
@@ -144,6 +146,10 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 		}
 		if f.QuantumSafe || cl.AttackClass == qiskitprofile.AttackPQC {
 			pqc++
+		}
+		sev := strings.ToLower(f.Severity)
+		if sev == "high" || sev == "critical" {
+			high++
 		}
 	}
 	hndl := 0
@@ -153,7 +159,16 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 			hndl = 100
 		}
 	}
-	layerAvg := (layers["sbom"] + layers["cbom"] + layers["hbom"] + layers["aibom"]) / 4
+	if cfg.Features.AIBOM {
+		layers["aibom"] = 40
+		if high == 0 {
+			layers["aibom"] += 20
+		}
+	}
+	layerAvg := (layers["sbom"] + layers["cbom"]) / 2
+	if cfg.Features.HBOM {
+		layerAvg = (layers["sbom"] + layers["cbom"] + layers["hbom"] + layers["aibom"]) / 4
+	}
 	overall := layerAvg
 	if hndl > 50 {
 		overall -= (hndl - 50) / 5
@@ -167,7 +182,6 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 	if overall > 100 {
 		overall = 100
 	}
-	cfg := edition.Detect()
 	return &PQCReadiness{
 		Overall:          overall,
 		Layers:           layers,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { ArrowForward, Assessment, Cloud, DocumentScanner, FactCheck, GitHub, Radar, Storage, AccountTree } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
@@ -26,9 +26,6 @@ const QuickActionCard: React.FC<{
   index: number;
   onNavigate: (path: string) => void;
 }> = ({ action, index, onNavigate }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-
   return (
     <Box
       component={motion.button}
@@ -47,12 +44,12 @@ const QuickActionCard: React.FC<{
         px: 1.25,
         py: 0.875,
         border: 1,
-        borderColor: isDark ? 'rgba(148,163,184,0.12)' : 'rgba(100,116,139,0.1)',
+        borderColor: 'rgba(148,163,184,0.12)',
         borderRadius: `${dashboardDesign.radius.md}px`,
-        bgcolor: isDark ? '#0a0a0f' : '#ffffff',
+        bgcolor: '#0a0a0f',
         cursor: 'pointer',
         font: 'inherit',
-        color: 'inherit',
+        color: '#fff',
         transition: dashboardDesign.motion.transition,
         '&:focus-visible': {
           outline: `2px solid ${action.accent}`,
@@ -60,7 +57,7 @@ const QuickActionCard: React.FC<{
         },
         '&:hover': {
           borderColor: `${action.accent}44`,
-          bgcolor: isDark ? 'rgba(46,16,101,0.92)' : '#fff',
+          bgcolor: 'rgba(46,16,101,0.92)',
           transform: 'none',
           boxShadow: 'none',
           '& .qa-arrow': { opacity: 1 },
@@ -166,7 +163,7 @@ export const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
   { label: 'Critical findings', description: 'Investigation queue', icon: <FactCheck />, path: '/findings?severity=critical', accent: tokens.colors.crypto.high },
   { label: 'GitHub Scan', description: 'Real repo analysis', icon: <GitHub />, path: '/scanner?tab=github', accent: tokens.colors.crypto.quantum },
   { label: 'Run Scan', description: 'CBOM discovery', icon: <DocumentScanner />, path: '/scanner', accent: chartTheme.quickActions[0] },
-  { label: 'Five-BOM', description: 'QBOM · AIBOM · SBOM · IBOM · CBOM', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[600] },
+  { label: 'CBOM', description: 'Cryptographic Security Posture Management', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[600] },
   { label: 'Assets', description: 'Crypto inventory', icon: <Storage />, path: '/assets', accent: chartTheme.quickActions[1] },
   { label: 'Analytics', description: 'Trends & reports', icon: <Assessment />, path: '/analytics', accent: chartTheme.quickActions[2] },
   { label: 'CSPM', description: 'Crypto posture', icon: <Radar />, path: '/enterprise/cspm', accent: chartTheme.quickActions[3] },

@@ -47,7 +47,7 @@ const Pill: React.FC<{ node: Node; align?: 'left' | 'right'; dark: boolean; acce
       py: { xs: 0.5, sm: 0.75 },
       borderRadius: 999,
       border: `1px solid ${dark ? 'rgba(196,181,253,0.16)' : 'rgba(124,58,237,0.16)'}`,
-      bgcolor: dark ? 'rgba(46,16,101,0.92)' : '#ffffff',
+      bgcolor: '#0a0a0f',
       color: accent || (dark ? tokens.colors.textLight.secondary : tokens.colors.text.secondary),
       backdropFilter: 'none',
     }}
@@ -104,7 +104,7 @@ const EncryptionLayerVisual: React.FC<EncryptionLayerVisualProps> = ({ dark }) =
         borderRadius: 1,
         p: { xs: 2, md: 3 },
         border: `1px solid ${isDark ? 'rgba(196,181,253,0.14)' : 'rgba(124,58,237,0.16)'}`,
-        background: isDark ? '#0a0a0f' : '#ffffff',
+        background: '#0a0a0f',
         backdropFilter: 'none',
         overflow: 'hidden',
       }}

@@ -33,7 +33,7 @@ Warning amber is **severity**, not brand. Demo and chrome chips use primary viol
 
 ## Logo
 
-Official mark: geometric **R** on a rounded black square (`web/public/brand/rivicq-mark.svg`). Do not replace it with orbits, hex shields, or a lock. Wordmark is **RivicQ** (Inter, weight 600) with optional `CryptoBOM EaaS` caption.
+Official mark: geometric **R** on a rounded black square (`web/public/brand/rivicq-mark.svg`). Do not replace it with orbits, hex shields, or a lock. Wordmark is **RivicQ** (Inter, weight 600) with caption **Cryptographic Security Posture Management**.
 
 ## Components
 

@@ -5,7 +5,7 @@ const CbomPublic: React.FC = () => (
   <SitePage
     eyebrow="CBOM"
     title="A cryptographic bill of materials you can export."
-    lede="Community produces CBOM and SBOM from rivicq scan and the GitHub Action. Five-BOM (QBOM, AIBOM, IBOM) is the Enterprise workspace model — not implied by a Pages demo."
+    lede="Community produces CBOM and SBOM from rivicq scan and the GitHub Action. QBOM, HBOM, AIBOM, and IBOM are Enterprise control-plane layers — not implied by a Pages demo."
     primary={{ label: 'Start free CBOM pilot', to: '/' }}
     secondary={{ label: 'Read the workflow', to: `${process.env.PUBLIC_URL || ''}/docs/index.html` }}
     engineNotice="scan"

@@ -5,10 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Changed
+- **Cryptographic Security Posture Management** — Community is CBOM + SBOM. QBOM, HBOM, AIBOM, and IBOM are Enterprise (APIs return 403 on OSS). Local PQC classes on CBOM findings stay Community.
 - **Public website chrome** — Home, Product, CSPM, CBOM, PQC, Enterprise, Security, Pricing, Request demo, IBM Partner Plus, and Contact share the rivicq.com nebula shell (black `#000000`, violet `#7C3AED`, Inter, pill CTAs). Contact is a marketing page, not a cream Command Center card. Console Overview keeps the same tokens.
 - **RivicQ Graph** (wordmark **GRAPH**) is the labeled security-graph demo at `fabric/` and `/fabric`. Formerly NEXUS / Quantum Security Fabric. Finding IDs remain `QSF-*`. `/nexus` still redirects. Notes: [docs/FABRIC.md](docs/FABRIC.md), [docs/GRAPH.md](docs/GRAPH.md).
 - **Deep-space nebula chrome** — black canvas `#000000`, violet `#7C3AED`, Inter, pill CTAs. Public home, console, docs, marketing, and Graph share the same visual system. Platform cards cover AI engineering, DevSecOps, cloud security, API security, GRC mappings, and quantum risk. Quantum scores on Pages come from scans you run, not a silent live estate.
-- JWT **tenant isolation** on Community scan/inventory/findings/GitHub/QBOM/intelligence paths. Unauthenticated Home CBOM pilot stays on the public tenant. Enterprise inventory, compliance, quantum, multi-cloud, Terraform, and CNCF handlers ignore spoofable `X-Tenant-ID`.
+- JWT **tenant isolation** on Community scan/inventory/findings/GitHub/intelligence paths. QBOM/HBOM/AIBOM APIs 403 on Community. Unauthenticated Home CBOM pilot stays on the public tenant. Enterprise inventory, compliance, quantum, multi-cloud, Terraform, and CNCF handlers ignore spoofable `X-Tenant-ID`.
 - **Operator UX:** workflow nav (Overview / Findings / Scans), command palette (⌘K), breadcrumbs, persona layout, findings investigation from `GET /scans/findings`. Scan progress is indeterminate unless the API sends a percent. Fake notification counts, schedule toggles, and default compliance 75 were removed.
 - Optional **outsourced scanners** (Syft, Trivy, Grype, Gitleaks, OSV) run on local `rivicq scan .` / scan intelligence when the binary is on PATH. Exit codes that mean “findings exist” are still parsed. Core status no longer claims Trivy/Syft/CodeQL are present unless `LookPath` succeeds.
 

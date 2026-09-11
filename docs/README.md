@@ -25,7 +25,7 @@ UI colors follow the **Security Cloud** nebula ledger (`#000000` canvas, `#0A0A0
 ## Product
 
 - [Product status](PRODUCT_STATUS.md) — OSS vs Enterprise, audits, scores, website scan
-- [Five-BOM framework](BOM_FRAMEWORK.md) — QBOM, AIBOM, SBOM, IBOM, CBOM, pipeline, HSM
+- [BOM framework](BOM_FRAMEWORK.md) — Community CBOM/SBOM; Enterprise QBOM, HBOM, AIBOM, IBOM
 - [Roadmap](ROADMAP.md) — Builds 2–5 and quantum track
 - [Qiskit pipeline](QISKIT_PIPELINE.md) — local profile vs optional Aer vs IBM Runtime
 - [PQC Migration Guide](PQC_MIGRATION.md)

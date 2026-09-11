@@ -279,7 +279,6 @@ const Layout: React.FC = () => {
     toNav('/tools', 'PATH Scanners', 'Integrations'),
     toNav('/ecosystem', 'Ecosystem', 'Integrations'),
     toNav('/pipeline', 'Pipeline', 'Integrations'),
-    toNav('/connectors/hsm', 'HSM & Quantum', 'Integrations'),
     toNav('/contact', 'Contact', 'Integrations'),
     toNav('/ibm', 'IBM Partner Plus', 'Integrations'),
     ...(isAdminRole(user?.role) ? [toNav('/crm', 'CRM', 'Integrations')] : []),

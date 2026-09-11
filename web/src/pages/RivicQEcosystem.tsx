@@ -257,7 +257,7 @@ const RivicQEcosystem: React.FC = () => {
             <TableBody>
               {[
                 { category: 'CBOM Scanning', oss: 'TLS / SSH / HTTP / SBOM + website/host/IP/pod', ent: 'Same engine + live kube attach when credentials exist' },
-                { category: 'Five-BOM', oss: 'CBOM, SBOM, local QBOM', ent: 'AIBOM, IBOM, HSM connector, GRC pack flag' },
+                { category: 'BOM layers', oss: 'CBOM + SBOM CSPM', ent: 'QBOM, HBOM, AIBOM, IBOM, HSM connector, GRC pack flag' },
                 { category: 'Compliance', oss: 'JSON mappings (DORA, NIS2, CRA, BSI)', ent: 'Same mappings + evidence pack — not a certification' },
                 { category: 'Quantum', oss: 'Local qiskitprofile taxonomy', ent: 'Same + optional runtime / HSM when a key exists' },
                 { category: 'Cloud', oss: 'Catalog only', ent: 'AWS / Azure / GCP / IBM Cloud when customer credentials exist' },

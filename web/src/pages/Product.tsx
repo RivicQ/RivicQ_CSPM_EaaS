@@ -14,7 +14,7 @@ const Product: React.FC = () => (
       { title: 'CBOM', body: 'CycloneDX cryptographic bill of materials from repository and host scans. Not a silent live estate on Pages.' },
       { title: 'PQC readiness', body: 'Harvest-now exposure and ML-KEM / ML-DSA planning. Qiskit scores are a local taxonomy — not IBM Quantum hardware.' },
       { title: 'Crypto-agility', body: 'Inventory algorithms and keys so operators can plan replacements. RSA-2048 is classified, not auto-marked vulnerable.' },
-      { title: 'AI security', body: 'AIBOM for models, datasets, and AI identities. EU AI Act names are mappings, not a product certification.' },
+      { title: 'AI security', body: 'AIBOM is Enterprise. Community CBOM still flags cryptography on AI serving stacks. EU AI Act names are mappings, not a certification.' },
       { title: 'Governance', body: 'DORA, NIS2, NIST, ISO, PCI, SOC 2 operator mappings. Mappings are not audits or certifications.' },
     ]}
   />

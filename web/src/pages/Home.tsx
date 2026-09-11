@@ -22,7 +22,7 @@ import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_CHIP_LIVE } from '../dat
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
 const PLATFORM = [
-  { icon: <Psychology />, title: 'AI engineering', desc: 'AIBOM for models, datasets, endpoints, and AI identities. EU AI Act names are mappings, not a product certification.' },
+  { icon: <Psychology />, title: 'AI engineering', desc: 'AIBOM is an Enterprise inventory for models, datasets, and AI identities. Community CBOM still flags cryptography on serving stacks. EU AI Act names are mappings, not a certification.' },
   { icon: <AccountTree />, title: 'DevSecOps', desc: 'Scan → inventory → policy gate in CI. The GitHub Action is Community; continuous monitoring is Enterprise.' },
   { icon: <GppGood />, title: 'Cloud security', desc: 'CSPM from declared and scanned assets. Live cloud attach needs customer credentials and an Enterprise license.' },
   { icon: <Api />, title: 'API security', desc: 'TLS/HTTPS hygiene from website and host scans. Gateway inventory is Enterprise when a connector exists.' },
@@ -450,7 +450,7 @@ const Home: React.FC = () => {
                 <Chip size="small" icon={<Lock />} label="Apache-2.0" sx={{ mb: 1.5 }} />
                 <Typography variant="h5" sx={{ fontWeight: 650, mb: 1 }}>Community</Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                  This GitHub project. CBOM, SBOM, local QBOM, dashboard, and the GitHub Action policy gate.
+                  This GitHub project. CBOM, SBOM, dashboard, and the GitHub Action policy gate. QBOM/HBOM/AIBOM/IBOM are Enterprise.
                 </Typography>
                 {['CBOM scanning', 'Crypto inventory', 'Workspace dashboard', 'CLI · rivicq scan .'].map((f) => (
                   <Stack key={f} direction="row" spacing={1} alignItems="center" sx={{ mb: 0.75 }}>

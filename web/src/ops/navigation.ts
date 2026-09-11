@@ -16,7 +16,7 @@ export const OPS_ROUTES: OpsRoute[] = [
   { text: 'Findings', path: '/findings', section: 'Operations', keywords: ['critical', 'high', 'evidence', 'remediation', 'queue'] },
   { text: 'Assets', path: '/assets', section: 'Operations', keywords: ['inventory', 'crypto', 'certificate', 'key'] },
   { text: 'Scans', path: '/scanner', section: 'Operations', keywords: ['cbom', 'github', 'website', 'history', 'failed'] },
-  { text: 'CBOM', path: '/bom', section: 'Operations', keywords: ['five-bom', 'sbom', 'qbom', 'explorer'] },
+  { text: 'CBOM', path: '/bom', section: 'Operations', keywords: ['sbom', 'cspm', 'inventory', 'explorer'] },
   { text: 'PQC Migration', path: '/migration', section: 'Operations', keywords: ['quantum', 'readiness', 'roadmap', 'hybrid'] },
 
   { text: 'Crypto Posture', path: '/cspm', section: 'Posture', keywords: ['cspm', 'risk', 'score'] },
@@ -27,11 +27,12 @@ export const OPS_ROUTES: OpsRoute[] = [
   { text: 'PATH Scanners', path: '/tools', section: 'Integrations', keywords: ['trivy', 'syft', 'gitleaks', 'osv', 'devsecops'] },
   { text: 'Ecosystem', path: '/ecosystem', section: 'Integrations', keywords: ['sdk', 'cli', 'plugin'] },
   { text: 'Pipeline', path: '/pipeline', section: 'Integrations', keywords: ['ci', 'github actions', 'gate'] },
-  { text: 'HSM & Quantum', path: '/connectors/hsm', section: 'Integrations', keywords: ['pkcs11', 'ibm'] },
   { text: 'Contact', path: '/contact', section: 'Integrations', keywords: ['hello', 'support', 'sales'] },
   { text: 'IBM Partner Plus', path: '/ibm', section: 'Integrations', keywords: ['ibm', 'partner', 'marketplace', 'cosell'] },
   { text: 'CRM', path: '/crm', section: 'Integrations', keywords: ['leads', 'sales', 'funnel'], adminOnly: true },
 
+  { text: 'HSM & Quantum', path: '/connectors/hsm', section: 'Enterprise', keywords: ['pkcs11', 'ibm', 'hbom'], enterpriseOnly: true },
+  { text: 'AIBOM', path: '/security/ai', section: 'Enterprise', keywords: ['ai', 'model', 'aibom'], enterpriseOnly: true },
   { text: 'Cloud Posture', path: '/enterprise/cloud-posture', section: 'Enterprise', keywords: ['aws', 'gcp', 'azure'], enterpriseOnly: true },
   { text: 'Compliance', path: '/enterprise/compliance', section: 'Enterprise', keywords: ['framework', 'gap'], enterpriseOnly: true },
   { text: 'Quantum', path: '/enterprise/quantum', section: 'Enterprise', keywords: ['qiskit', 'attestation'], enterpriseOnly: true },

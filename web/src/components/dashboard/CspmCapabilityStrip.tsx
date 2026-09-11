@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import {
   FactCheck, Hub, Memory, Psychology, GitHub, AccountTree,
 } from '@mui/icons-material';
@@ -17,9 +17,9 @@ type Capability = {
 };
 
 const CAPABILITIES: Capability[] = [
-  { label: 'Five-BOM', hint: 'QBOM · AIBOM · SBOM · IBOM · CBOM', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[500] },
-  { label: 'GitHub Scan', hint: 'Real repository analysis', icon: <GitHub />, path: '/scanner?tab=github', accent: tokens.colors.crypto.quantum },
-  { label: 'CBOM', hint: 'Crypto bill of materials', icon: <Memory />, path: '/scanner', accent: tokens.colors.crypto.quantum },
+  { label: 'CBOM', hint: 'Cryptographic inventory', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[500] },
+  { label: 'SBOM', hint: 'Software + crypto libraries', icon: <GitHub />, path: '/bom', accent: tokens.colors.crypto.quantum },
+  { label: 'Scanner', hint: 'Website, host, repo scans', icon: <Memory />, path: '/scanner', accent: tokens.colors.crypto.quantum },
   { label: 'PQC', hint: 'Quantum readiness', icon: <Psychology />, path: '/migration', accent: tokens.colors.gold[500] },
   { label: 'Governance', hint: 'Control mapping', icon: <FactCheck />, path: '/governance', accent: tokens.colors.crypto.low },
   { label: 'Pipeline', hint: 'Eight-stage DevSecOps', icon: <Hub />, path: '/pipeline', accent: tokens.colors.crypto.info },
@@ -30,9 +30,6 @@ type CspmCapabilityStripProps = {
 };
 
 const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-
   return (
     <Box sx={{ mb: dashboardDesign.layout.sectionGap }}>
       <Stack direction="row" spacing={1} alignItems="baseline" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
@@ -40,7 +37,7 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
           Cryptographic Security Posture Management
         </Typography>
         <Typography sx={{ color: 'text.secondary', fontSize: '0.6875rem' }}>
-          Five-BOM workspace — Community layers unlocked
+          Community CBOM + SBOM — Enterprise Q/H/AI/I locked
         </Typography>
       </Stack>
       <Box
@@ -73,13 +70,13 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
               px: 1.5,
               py: 1.25,
               border: 1,
-              borderColor: isDark ? 'rgba(196,181,253,0.14)' : 'rgba(124,58,237,0.14)',
+              borderColor: 'rgba(196,181,253,0.14)',
               borderRadius: `${designSystem.radius.md}px`,
-              bgcolor: isDark ? 'rgba(15,39,68,0.55)' : 'rgba(255,255,255,0.92)',
+              bgcolor: '#0a0a0f',
               cursor: 'pointer',
               font: 'inherit',
-              color: 'inherit',
-              boxShadow: isDark ? 'none' : designSystem.shadow.sm,
+              color: '#fff',
+              boxShadow: 'none',
               transition: designSystem.motion.smooth,
               '&:hover': {
                 borderColor: `${item.accent}66`,

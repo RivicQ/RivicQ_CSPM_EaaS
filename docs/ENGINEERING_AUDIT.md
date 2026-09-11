@@ -303,3 +303,78 @@ Hardening of the CBOM/Crypto-CSPM core only. No HBOM/IBOM/AIBOM engines. No Ente
 - [ ] Accessibility reviewed
 - [ ] Enterprise onboarding flow tested
 
+---
+
+## 36. CSPM Enterprise-BOM increment (11 September 2026)
+
+Product rename and edition split. Community is **Cryptographic Security Posture Management** (CBOM + SBOM). QBOM, HBOM, AIBOM, and IBOM moved off the open-source surface onto the licensed Enterprise control plane. Local PQC classification on CBOM findings stays Community (taxonomy, not a QBOM product). **Not Enterprise Ready.**
+
+### Implemented
+
+- Edition flags: `QBOM` / `HBOM` false on OSS, true on Enterprise
+- Catalog: six layers; Community `community=false` for Q/H/AI/I
+- Unified BOM omits Q/H/AI/I rows on OSS; `layers_enabled` matches
+- `GET /scans/:id/qbom`, `/hsm/status`, `/security/ai` return **403** on Community
+- PQC overall score averages CBOM+SBOM only on OSS (no fake HBOM/AIBOM contribution)
+- Console routes for AIBOM, HSM, and QBOM require Enterprise (not Professional UI preference)
+- Nebula surfaces (`#000` / `#0A0A0F` / `#1F1F2E`) on leftover white/pastel cards (InfraDiscovery table, edition switcher, QBOM viewer, capability/quick-action strips, RequireEnterprise)
+- Wordmark: Cryptographic Security Posture Management
+
+`discovery.ScanResult` JSON is unchanged. No Stripe, IBM seller APIs, or mailbox reset.
+
+### Scores (0–100, not inflated)
+
+| Area | Score | Notes |
+|---|---:|---|
+| CSPM core (CBOM+SBOM+scan+gate+CLI) | 72 | Engine + fingerprints + PQC classes + fail-on + edition gating |
+| Architecture | 70 | OSS vs Enterprise BOM boundary is now enforced in API + UI |
+| Security | 70 | JWT tenancy + 403 on Enterprise layers; not a pentest |
+| CBOM quality | 74 | CycloneDX 1.6 + fingerprints |
+| PQC engine | 70 | Taxonomy on CBOM; QBOM product is Enterprise |
+| API | 70 | Versioned `/api/v1`; Enterprise BOM routes 403 on OSS |
+| UX/UI | 70 | Nebula identity on remaining white-coded surfaces; no WCAG audit |
+| Documentation | 78 | Remaining ~20–30% listed below |
+| Production readiness (CSPM core) | 58 | Pilot engine; not multi-tenant paid SaaS |
+| Enterprise readiness | 40 | License + connectors + PSP + IBM APIs missing |
+
+**CSPM core production-grade: 72/100.**  
+**Documented readiness of remaining work: ~80% of the backlog is named below.**  
+**Overall product: 62/100.** **RIVICQ ENTERPRISE READY: no.**
+
+Do not read “80% readiness documentation” as “80% production SaaS.” Mailbox, PSP, backup, precision, and IBM APIs are still absent.
+
+### Remaining ~20–30% (named)
+
+**BLOCKERS (prevent PRODUCTION READY / ENTERPRISE READY)**
+
+- Production Postgres + unique `JWT_SECRET` + TLS drill not evidenced in this repo
+- Password reset is in-memory (no mailbox)
+- No backup/restore evidence
+- No live PSP; IBM Partner APIs absent by design
+- GitHub Pages has no API
+- Licensed Enterprise binary + connector credentials
+
+**HIGH**
+
+- Enterprise DB-down paths that fail open (inventory) still exist
+- Observability is healthz/readyz, not traces + SLOs
+- Scanner precision/recall unpublished
+- Source maps on Pages
+- No WCAG audit
+- No named-customer E2E against a real estate
+- HBOM/IBOM/AIBOM/QBOM **engines** (not catalogs) are still Enterprise stubs — declared inventory, not live attach
+
+**MEDIUM**
+
+- `proBlue` token names
+- Optional PATH tools skipped when missing
+- Professional edition is a UI preference, not a license
+- Light-mode leftovers may remain on unvisited console widgets
+
+**LOW**
+
+- Graph demo still lives in `fabric/`
+- Leads-only CRM (intentional)
+
+Enterprise gate checkboxes in section 35 remain **unchecked**.
+

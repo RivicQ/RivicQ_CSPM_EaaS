@@ -54,11 +54,14 @@ const RivicQWordmark: React.FC<RivicQWordmarkProps> = ({
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
             fontWeight: 500,
-            fontSize: '0.625rem',
+            fontSize: '0.58rem',
             mt: 0.25,
+            maxWidth: 200,
+            whiteSpace: 'normal',
+            lineHeight: 1.25,
           }}
         >
-          CryptoBOM EaaS
+          Cryptographic Security Posture Management
         </Typography>
       )}
     </Box>

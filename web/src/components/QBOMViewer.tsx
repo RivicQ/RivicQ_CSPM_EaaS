@@ -80,6 +80,8 @@ interface QBOMViewerProps {
   onShareMigrationPlan?: () => void;
 }
 
+const nebulaCard = { bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' };
+
 const getRiskColor = (score: number): 'error' | 'warning' | 'info' | 'success' => {
   if (score >= 80) return 'success';
   if (score >= 60) return 'info';
@@ -121,7 +123,7 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
       </Box>
 
       {/* Main Risk Score Card */}
-      <Card sx={{ mb: 3, bgcolor: 'background.paper' }}>
+      <Card sx={{ mb: 3, ...nebulaCard }}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Box>
@@ -170,17 +172,16 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
             }}
           />
 
-          <Alert severity="warning" sx={{ mt: 2 }}>
-            <strong>Quantum Threat Assessment:</strong> Your infrastructure is vulnerable to
-            harvest-now-decrypt-later (HNDL) attacks. Begin migration to post-quantum cryptography
-            immediately. Target completion: Q3 2027.
+          <Alert severity="info" sx={{ mt: 2, bgcolor: '#111118', color: '#d1d5db', border: '1px solid #1f1f2e' }}>
+            QBOM scores are a local taxonomy from this scan — not IBM Quantum hardware and not a certification.
+            RSA-2048 is classified (Shor family), not automatically marked vulnerable. Harvest-now exposure is planning evidence, not a live attack clock.
           </Alert>
         </CardContent>
       </Card>
 
       {/* Critical Actions */}
       {qbom.critical_actions.length > 0 && (
-        <Card sx={{ mb: 3, borderLeft: '4px solid', borderColor: 'error.main' }}>
+        <Card sx={{ mb: 3, borderLeft: '4px solid', borderColor: 'error.main', ...nebulaCard }}>
           <CardContent>
             <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5, color: 'error.main' }}>
               ⚠️ Critical Actions Required
@@ -202,7 +203,7 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
       {/* Algorithm Risk Summary */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={4}>
-          <Card>
+          <Card sx={nebulaCard}>
             <CardContent sx={{ pb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Error sx={{ color: 'error.main' }} />
@@ -221,7 +222,7 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
         </Grid>
 
         <Grid item xs={12} sm={4}>
-          <Card>
+          <Card sx={nebulaCard}>
             <CardContent sx={{ pb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Warning sx={{ color: 'warning.main' }} />
@@ -240,7 +241,7 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
         </Grid>
 
         <Grid item xs={12} sm={4}>
-          <Card>
+          <Card sx={nebulaCard}>
             <CardContent sx={{ pb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <CheckCircle sx={{ color: 'success.main' }} />
@@ -260,7 +261,7 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
       </Grid>
 
       {/* Vulnerable Algorithms */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3, ...nebulaCard }}>
         <CardContent>
           <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
             Quantum-Vulnerable Algorithms
@@ -339,7 +340,7 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
 
       {/* Migration Roadmap */}
       {qbom.migration_roadmap.length > 0 && (
-        <Card sx={{ mb: 3 }}>
+        <Card sx={{ mb: 3, ...nebulaCard }}>
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle1" fontWeight={700}>

@@ -11,7 +11,7 @@ export const DEMO_TRAIL_STEPS: DemoTrailStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to RivicQ Community',
-    body: 'This live demo is the limited Community edition: five-BOM intelligence (CBOM, SBOM, local QBOM), dashboard, and discover → mitigate → report. AIBOM, IBOM, HSM connectors, and the DORA pack stay on Enterprise. Sample data is labeled DEMO — not customer telemetry.',
+    body: 'This live demo is the limited Community edition: Cryptographic Security Posture Management (CBOM + SBOM), dashboard, and discover → mitigate → report. QBOM, HBOM, AIBOM, IBOM, HSM connectors, and the DORA pack stay on Enterprise. Sample data is labeled DEMO — not customer telemetry.',
     path: '/demo',
     hint: 'Start the tour or jump into the command center.',
   },
@@ -31,8 +31,8 @@ export const DEMO_TRAIL_STEPS: DemoTrailStep[] = [
   },
   {
     id: 'assets',
-    title: 'Five-BOM intelligence',
-    body: 'Unified QBOM, AIBOM, SBOM, IBOM, and CBOM. Community layers are on. AIBOM and IBOM tiles stay locked until a licensed workspace. RSA-2048 is classified (Shor family), not automatically “vulnerable”.',
+    title: 'CBOM · SBOM intelligence',
+    body: 'Unified CBOM and SBOM on Community. QBOM, HBOM, AIBOM, and IBOM tiles stay locked until a licensed Enterprise workspace. RSA-2048 is classified (Shor family), not automatically “vulnerable”.',
     path: '/bom',
     hint: 'Open a Community layer, then inspect locked Enterprise tiles.',
   },

@@ -14,11 +14,12 @@ import (
 type Layer string
 
 const (
-	LayerCBOM Layer = "cbom"
-	LayerQBOM Layer = "qbom"
-	LayerSBOM Layer = "sbom"
+	LayerCBOM  Layer = "cbom"
+	LayerSBOM  Layer = "sbom"
+	LayerQBOM  Layer = "qbom"
+	LayerHBOM  Layer = "hbom"
 	LayerAIBOM Layer = "aibom"
-	LayerIBOM Layer = "ibom"
+	LayerIBOM  Layer = "ibom"
 )
 
 // LayerInfo describes a BOM type and whether the current edition enables it.
@@ -36,13 +37,13 @@ type LayerInfo struct {
 
 // PipelineStage is one DevSecOps stage from the BOM guide.
 type PipelineStage struct {
-	ID       int      `json:"id"`
-	Name     string   `json:"name"`
-	BOMs     []Layer  `json:"boms"`
-	Action   string   `json:"action"`
-	Artifact string   `json:"artifact"`
-	OSS      bool     `json:"oss"`
-	Partner  string   `json:"partner,omitempty"`
+	ID       int     `json:"id"`
+	Name     string  `json:"name"`
+	BOMs     []Layer `json:"boms"`
+	Action   string  `json:"action"`
+	Artifact string  `json:"artifact"`
+	OSS      bool    `json:"oss"`
+	Partner  string  `json:"partner,omitempty"`
 }
 
 // Connector is an optional partner/HSM/quantum integration.
@@ -83,13 +84,13 @@ func Catalog() Framework {
 	cfg := edition.Detect()
 	ent := cfg.Edition == edition.Enterprise
 	return Framework{
-		Product:  "RivicQ Security Cloud",
-		Edition:  cfg.Edition,
-		Layers:   layers(ent),
-		Pipeline: pipeline(),
+		Product:    "RivicQ Security Cloud",
+		Edition:    cfg.Edition,
+		Layers:     layers(ent),
+		Pipeline:   pipeline(),
 		Connectors: connectors(ent),
 		Controls:   controls(ent),
-		Honesty:    "Community ships CBOM + SBOM + local QBOM. AIBOM, IBOM, HSM/PKCS#11, and GRC packs are Enterprise. Partner APIs stay disconnected without customer credentials. Mappings are not certifications. QSIC is declared research hardware.",
+		Honesty:    "Community is Cryptographic Security Posture Management: CBOM + SBOM. QBOM, HBOM, AIBOM, and IBOM are Enterprise. Partner APIs stay disconnected without customer credentials. Mappings are not certifications.",
 	}
 }
 
@@ -98,51 +99,58 @@ func layers(ent bool) []LayerInfo {
 		{
 			ID: LayerCBOM, Name: "CBOM", Role: "Cryptographic inventory — algorithms, keys, certs, libraries",
 			Community: true, Enterprise: true, Enabled: true,
-			Schema: "CycloneDX 1.6 cryptographic-asset",
+			Schema:      "CycloneDX 1.6 cryptographic-asset",
 			Regulations: []string{"DORA RTS Art. 9", "NIS2 Art. 21", "FIPS 140-3", "OWASP A02"},
-			Honesty: "Primary Apache-2.0 product. Shared engine for both editions.",
+			Honesty:     "Primary Apache-2.0 product. Shared engine for both editions.",
 		},
 		{
 			ID: LayerQBOM, Name: "QBOM", Role: "Quantum vulnerability + CRQC urgency + PQC replacement",
-			Community: true, Enterprise: true, Enabled: true,
-			Schema: "CBOM + qiskitprofile attack class",
+			Community: false, Enterprise: true, Enabled: ent,
+			Schema:      "CBOM + qiskitprofile attack class",
 			Regulations: []string{"NIST IR 8105", "FIPS 203/204/205", "CISA PQC"},
-			Honesty: "Local Shor/Grover/PQC taxonomy. IBM Quantum Runtime is not invoked.",
+			Honesty:     "Enterprise layer. Community still classifies algorithms on CBOM findings (local taxonomy). IBM Quantum Runtime is not invoked.",
 		},
 		{
 			ID: LayerSBOM, Name: "SBOM", Role: "Software components with crypto-library flag",
 			Community: true, Enterprise: true, Enabled: true,
-			Schema: "CycloneDX 1.6 / SPDX",
+			Schema:      "CycloneDX 1.6 / SPDX",
 			Regulations: []string{"US EO 14028", "EU CRA", "DORA RTS Art. 9(4)"},
-			Honesty: "Generated from local path / lockfiles. Optional Syft/Trivy when installed.",
+			Honesty:     "Generated from local path / lockfiles. Optional Syft/Trivy when installed.",
+		},
+		{
+			ID: LayerHBOM, Name: "HBOM", Role: "Hardware / HSM / TPM / QSIC declared cryptographic inventory",
+			Community: false, Enterprise: true, Enabled: ent,
+			Schema:      "Declared HSM/PKCS#11 inventory",
+			Regulations: []string{"FIPS 140-3", "BSI TR-02102"},
+			Honesty:     "Enterprise connector. Not firmware reverse-engineering. QSIC is declared research hardware.",
 		},
 		{
 			ID: LayerAIBOM, Name: "AIBOM", Role: "AI/ML model provenance, EU AI Act risk tier, serving crypto",
 			Community: false, Enterprise: true, Enabled: ent,
-			Schema: "CycloneDX 1.6 + ISO/IEC 42001 fields",
+			Schema:      "CycloneDX 1.6 + ISO/IEC 42001 fields",
 			Regulations: []string{"EU AI Act Art. 6 / Annex IV", "NIST AI RMF", "OWASP ML Top 10"},
-			Honesty: "Enterprise declared inventory. Not a live model-weight scanner.",
+			Honesty:     "Enterprise declared inventory. Not a live model-weight scanner.",
 		},
 		{
 			ID: LayerIBOM, Name: "IBOM", Role: "Human, machine, and service identities bound to crypto assets",
 			Community: false, Enterprise: true, Enabled: ent,
-			Schema: "NIST SP 800-207 inventory",
+			Schema:      "NIST SP 800-207 inventory",
 			Regulations: []string{"NIST SP 800-207", "DORA RTS identity", "Zero Trust"},
-			Honesty: "Enterprise connector (directory / NHI). Community still scans secrets into CBOM.",
+			Honesty:     "Enterprise connector (directory / NHI). Community still scans secrets into CBOM.",
 		},
 	}
 }
 
 func pipeline() []PipelineStage {
 	return []PipelineStage{
-		{ID: 1, Name: "Developer IDE", BOMs: []Layer{LayerQBOM, LayerIBOM}, Action: "Crypto API lint + secrets scan", Artifact: "Pre-commit policy violations", OSS: true},
+		{ID: 1, Name: "Developer IDE", BOMs: []Layer{LayerCBOM, LayerSBOM}, Action: "Crypto API lint + secrets scan", Artifact: "Pre-commit policy violations", OSS: true},
 		{ID: 2, Name: "Source commit", BOMs: []Layer{LayerSBOM}, Action: "cdxgen / syft from lock files", Artifact: "SBOM JSON (CycloneDX 1.6)", OSS: true},
-		{ID: 3, Name: "CI/CD build", BOMs: []Layer{LayerCBOM, LayerQBOM, LayerSBOM, LayerAIBOM, LayerIBOM}, Action: "rivicq scan . — unified BOM merge", Artifact: "unified-bom.cdx.json", OSS: true},
+		{ID: 3, Name: "CI/CD build", BOMs: []Layer{LayerCBOM, LayerSBOM}, Action: "rivicq scan . — CBOM + SBOM merge", Artifact: "unified-bom.cdx.json", OSS: true},
 		{ID: 4, Name: "Container scan", BOMs: []Layer{LayerCBOM, LayerSBOM}, Action: "Optional Trivy/Grype + crypto lib versions", Artifact: "Container CBOM patch", OSS: true},
-		{ID: 5, Name: "Staging deploy", BOMs: []Layer{LayerCBOM, LayerQBOM}, Action: "TLS/HTTPS endpoint scan + QBOM scoring", Artifact: "CBOM report JSON", OSS: true},
-		{ID: 6, Name: "Security gate", BOMs: []Layer{LayerCBOM, LayerQBOM, LayerSBOM}, Action: "Policy gate BLOCK / WARN / ALLOW", Artifact: "Pass / block decision", OSS: true},
-		{ID: 7, Name: "Production", BOMs: []Layer{LayerCBOM, LayerIBOM}, Action: "Continuous EaaS monitoring (Enterprise)", Artifact: "Live CBOM dashboard", OSS: false},
-		{ID: 8, Name: "Compliance report", BOMs: []Layer{LayerCBOM, LayerQBOM, LayerSBOM, LayerAIBOM, LayerIBOM}, Action: "DORA / NIS2 / SOC 2 mappings", Artifact: "JSON (Community) or pack (Enterprise)", OSS: true},
+		{ID: 5, Name: "Staging deploy", BOMs: []Layer{LayerCBOM}, Action: "TLS/HTTPS endpoint scan + PQC classification on CBOM", Artifact: "CBOM report JSON", OSS: true},
+		{ID: 6, Name: "Security gate", BOMs: []Layer{LayerCBOM, LayerSBOM}, Action: "Policy gate BLOCK / WARN / ALLOW", Artifact: "Pass / block decision", OSS: true},
+		{ID: 7, Name: "Production", BOMs: []Layer{LayerCBOM, LayerIBOM, LayerHBOM}, Action: "Continuous CSPM monitoring (Enterprise)", Artifact: "Live CBOM dashboard", OSS: false},
+		{ID: 8, Name: "Compliance report", BOMs: []Layer{LayerCBOM, LayerSBOM, LayerQBOM, LayerAIBOM, LayerIBOM, LayerHBOM}, Action: "DORA / NIS2 / SOC 2 mappings", Artifact: "JSON (Community) or pack (Enterprise)", OSS: true},
 	}
 }
 
@@ -161,19 +169,19 @@ func connectors(ent bool) []Connector {
 			ID: "cryptonext", Domain: "Post-quantum PKI / crypto-agility", Protocol: "REST / gRPC",
 			Auth: "mTLS + API key", Connected: ent && envSet("CRYPTONEXT_API_KEY"), Enterprise: true,
 			EnvHint: "CRYPTONEXT_API_KEY",
-			Note: "QBOM → ML-KEM/ML-DSA migration confirmation. Disconnected without a customer key.",
+			Note:    "QBOM → ML-KEM/ML-DSA migration confirmation. Disconnected without a customer key.",
 		},
 		{
 			ID: "crypto4a", Domain: "Quantum-safe HSM (QxHSM)", Protocol: "PKCS#11 / REST",
 			Auth: "HSM token + API key", Connected: ent && envSet("CRYPTO4A_API_KEY", "PKCS11_MODULE"), Enterprise: true,
 			EnvHint: "CRYPTO4A_API_KEY or PKCS11_MODULE",
-			Note: "PQC key storage. FIPS 140-3 claims belong to the customer module, not RivicQ.",
+			Note:    "PQC key storage. FIPS 140-3 claims belong to the customer module, not RivicQ.",
 		},
 		{
 			ID: "cloud-hsm", Domain: "Cloud HSM / KMS", Protocol: "AWS CloudHSM / KMS / PKCS#11",
 			Auth: "customer IAM", Connected: ent && envSet("AWS_CLOUDHSM_CLUSTER_ID", "AWS_ACCESS_KEY_ID"), Enterprise: true,
 			EnvHint: "AWS_CLOUDHSM_CLUSTER_ID",
-			Note: "Enterprise connector. Empty inventory when credentials are missing.",
+			Note:    "Enterprise connector. Empty inventory when credentials are missing.",
 		},
 		{
 			ID: "local-qiskit", Domain: "Quantum scoring", Protocol: "in-process",
@@ -184,25 +192,25 @@ func connectors(ent bool) []Connector {
 			ID: "quantum-runtime", Domain: "Optional quantum runtime", Protocol: "REST",
 			Auth: "API key", Connected: ent && envSet("IBMQ_API_KEY", "IBM_QUANTUM_TOKEN"), Enterprise: true,
 			EnvHint: "IBMQ_API_KEY",
-			Note: "Never required for QBOM scores.",
+			Note:    "Never required for QBOM scores.",
 		},
 		{
 			ID: "vanta", Domain: "Compliance evidence", Protocol: "REST",
 			Auth: "OAuth 2.0", Connected: ent && envSet("VANTA_API_KEY"), Enterprise: true,
 			EnvHint: "VANTA_API_KEY",
-			Note: "Optional GRC sink for SBOM/CBOM JSON. Not a certification of RivicQ.",
+			Note:    "Optional GRC sink for SBOM/CBOM JSON. Not a certification of RivicQ.",
 		},
 		{
 			ID: "okta", Domain: "Identity directory (IBOM)", Protocol: "SCIM 2.0",
 			Auth: "OAuth 2.0", Connected: ent && envSet("OKTA_API_TOKEN"), Enterprise: true,
 			EnvHint: "OKTA_API_TOKEN",
-			Note: "Human + OAuth client inventory. Disconnected by default.",
+			Note:    "Human + OAuth client inventory. Disconnected by default.",
 		},
 		{
 			ID: "unosecur", Domain: "NHI / AI agent identities", Protocol: "REST / SCIM",
 			Auth: "OAuth 2.0", Connected: ent && envSet("UNOSECURE_API_KEY"), Enterprise: true,
 			EnvHint: "UNOSECURE_API_KEY",
-			Note: "Machine-identity enrichment for IBOM/AIBOM. Optional.",
+			Note:    "Machine-identity enrichment for IBOM/AIBOM. Optional.",
 		},
 	}
 }

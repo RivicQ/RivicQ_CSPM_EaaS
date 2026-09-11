@@ -111,8 +111,9 @@ const OpsHeroVisual: React.FC<OpsHeroVisualProps> = ({
   if (variant === 'bom') {
     const rows = [
       { id: 'CBOM', n: bom.cbom || 0 },
-      { id: 'QBOM', n: bom.qbom || 0 },
       { id: 'SBOM', n: bom.sbom || 0 },
+      { id: 'QBOM', n: bom.qbom || 0 },
+      { id: 'HBOM', n: bom.hbom || 0 },
       { id: 'AIBOM', n: bom.aibom || 0 },
       { id: 'IBOM', n: bom.ibom || 0 },
     ];

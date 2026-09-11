@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Alert, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Skeleton, Stack, Typography, useTheme,
+  Alert, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Skeleton, Stack, Typography,
 } from '@mui/material';
 import { CheckCircle, ErrorOutline, GitHub, Lock, ArrowForward, Shield, Language } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -34,14 +34,12 @@ type HomeScanReportProps = {
 const STAGES = ['Connecting', 'Discovering files', 'Analyzing crypto', 'Building CBOM', 'Quantifying risk'];
 
 const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, report, onOpenApp, onRegister }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-  const cardBg = isDark ? '#0a0a0f' : '#ffffff';
+  const cardBg = '#0a0a0f';
   const activeStage = Math.min(STAGES.length - 1, Math.floor((progress / 100) * STAGES.length));
 
   return (
     <Box component={motion.div} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} sx={{ mb: 6 }}>
-      <Card sx={{ bgcolor: cardBg, border: 1, borderColor: isDark ? '#1f1f2e' : 'divider' }}>
+      <Card sx={{ bgcolor: cardBg, border: 1, borderColor: '#1f1f2e', color: '#fff' }}>
         <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
             {/github/i.test(report?.target || '') ? <GitHub sx={{ color: tokens.colors.rivicq[500] }} /> : <Language sx={{ color: tokens.colors.rivicq[500] }} />}

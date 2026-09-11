@@ -7,6 +7,7 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/bom"
 	"github.com/rivic-q/cryptobom-saas/internal/controls"
 	"github.com/rivic-q/cryptobom-saas/internal/discovery"
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
 	"github.com/sirupsen/logrus"
 )
 
@@ -50,6 +51,14 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 		})
 	})
 	router.GET("/hsm/status", func(c *gin.Context) {
+		if !edition.Detect().Features.HBOM && !edition.Detect().Features.HSMConnector {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "HBOM / HSM inventory is an Enterprise layer",
+				"edition": edition.Detect().Edition,
+				"note":    "Community CBOM still inventories algorithms and certificates from scans. This is not firmware reverse-engineering.",
+			})
+			return
+		}
 		c.JSON(http.StatusOK, bom.ReadHSM())
 	})
 	router.GET("/quantum/status", func(c *gin.Context) {
@@ -65,6 +74,14 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 		})
 	})
 	router.GET("/security/ai", func(c *gin.Context) {
+		if !edition.Detect().Features.AIBOM {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "AIBOM is an Enterprise layer",
+				"edition": edition.Detect().Edition,
+				"note":    "Community CBOM still flags cryptography used by serving stacks when scanned.",
+			})
+			return
+		}
 		fw := bom.Catalog()
 		u := latestUnified(c)
 		c.JSON(http.StatusOK, gin.H{

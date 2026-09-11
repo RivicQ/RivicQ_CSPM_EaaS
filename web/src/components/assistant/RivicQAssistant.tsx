@@ -379,7 +379,7 @@ const RivicQAssistant: React.FC = () => {
             p: 0,
             display: 'grid',
             placeItems: 'center',
-            bgcolor: theme.palette.mode === 'dark' ? 'rgba(248,250,252,0.96)' : '#ffffff',
+            bgcolor: '#0a0a0f',
             boxShadow: designSystem.shadow.lg,
             transition: designSystem.motion.smooth,
             '&:hover': {

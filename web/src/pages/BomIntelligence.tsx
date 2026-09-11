@@ -9,14 +9,15 @@ import BomRibbon from '../components/bom/BomRibbon';
 import { bomService } from '../services/api';
 import { layersForEdition, PIPELINE_STAGES } from '../data/bomFramework';
 import { useAuth } from '../context/AuthContext';
-import { isPaidEdition } from '../config/editions';
+import { isEnterpriseEdition } from '../config/editions';
 import { tokens } from '../theme/tokens';
 import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 
 const ICONS: Record<string, React.ReactNode> = {
   cbom: <Shield />,
-  qbom: <Science />,
   sbom: <Description />,
+  qbom: <Science />,
+  hbom: <Memory />,
   aibom: <Memory />,
   ibom: <Badge />,
 };
@@ -24,7 +25,7 @@ const ICONS: Record<string, React.ReactNode> = {
 const BomIntelligence: React.FC = () => {
   const navigate = useNavigate();
   const { edition, isDemo } = useAuth();
-  const paid = isPaidEdition(edition);
+  const paid = isEnterpriseEdition(edition);
   const layers = layersForEdition(paid);
   const { data } = useQuery({
     queryKey: ['bom-unified'],
@@ -39,17 +40,18 @@ const BomIntelligence: React.FC = () => {
 
   const counts: Record<string, number> = {
     cbom: data?.cbom?.length ?? 0,
-    qbom: data?.qbom?.length ?? 0,
     sbom: data?.sbom?.length ?? 0,
+    qbom: data?.qbom?.length ?? 0,
+    hbom: data?.hbom?.length ?? 0,
     aibom: data?.aibom?.length ?? 0,
     ibom: data?.ibom?.length ?? 0,
   };
 
   return (
     <PageFrame
-      eyebrow="Five-BOM intelligence"
-      title="QBOM · AIBOM · SBOM · IBOM · CBOM"
-      subtitle="Unified cryptographic, quantum, software, AI, and identity bills of materials. Community runs CBOM, SBOM, and local QBOM. AIBOM and IBOM unlock with Enterprise."
+      eyebrow="Cryptographic Security Posture Management"
+      title="CBOM · SBOM"
+      subtitle="Community inventories cryptography and software components. QBOM, HBOM, AIBOM, and IBOM are Enterprise control-plane layers — locked here until the workspace is licensed."
       badge={paid ? 'Enterprise layers' : 'Community engine'}
       visual={<OpsHeroVisual variant="bom" bom={counts} />}
       action={<Button variant="contained" onClick={() => navigate('/scanner')}>Run a scan</Button>}
