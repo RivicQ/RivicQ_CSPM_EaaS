@@ -1,1 +1,0 @@
-RivicQ nebula preview from cursor/rivicq-com-platform-86cc (PR 73). Not production. Deleted on the next main Pages deploy.
