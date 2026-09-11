@@ -11,13 +11,13 @@ import (
 
 // ClientArchitecture is the discover → mitigate → report path for a scan.
 type ClientArchitecture struct {
-	TargetClass string  `json:"target_class"`
-	Target      string  `json:"target"`
-	ScanType    string  `json:"scan_type,omitempty"`
-	Edition     string  `json:"edition"`
+	TargetClass string          `json:"target_class"`
+	Target      string          `json:"target"`
+	ScanType    string          `json:"scan_type,omitempty"`
+	Edition     string          `json:"edition"`
 	Resources   map[string]bool `json:"resources"`
-	Phases      []Phase `json:"phases"`
-	Honesty     string  `json:"honesty"`
+	Phases      []Phase         `json:"phases"`
+	Honesty     string          `json:"honesty"`
 }
 
 // Phase is one step of the client architecture.
@@ -32,22 +32,24 @@ type Phase struct {
 // PQCReadiness scores the four workbook layers (SBOM/CBOM/HBOM/AIBOM) plus HNDL and DORA/NIS2/BSI mapping.
 // Community returns JSON scores. Enterprise adds pack_available when the control plane is licensed.
 type PQCReadiness struct {
-	Overall         int            `json:"overall"`
-	Layers          map[string]int `json:"layers"`
-	HNDLExposure    int            `json:"hndl_exposure"`
-	Migration       []Mitigation   `json:"migration"`
-	Compliance      []ControlMap   `json:"compliance"`
-	PackAvailable   bool           `json:"pack_available"`
-	Note            string         `json:"note"`
+	Overall          int            `json:"overall"`
+	Layers           map[string]int `json:"layers"`
+	Classifications  map[string]int `json:"classifications"`
+	SupportedNISTPQC []string       `json:"supported_nist_pqc"`
+	HNDLExposure     int            `json:"hndl_exposure"`
+	Migration        []Mitigation   `json:"migration"`
+	Compliance       []ControlMap   `json:"compliance"`
+	PackAvailable    bool           `json:"pack_available"`
+	Note             string         `json:"note"`
 }
 
 // Mitigation is a PQC mapping for one algorithm family (not a live key rotation).
 type Mitigation struct {
-	Algorithm    string `json:"algorithm"`
-	AttackClass  string `json:"attack_class,omitempty"`
-	ReplaceWith  string `json:"replace_with"`
-	Standard     string `json:"standard"`
-	Priority     string `json:"priority"`
+	Algorithm   string `json:"algorithm"`
+	AttackClass string `json:"attack_class,omitempty"`
+	ReplaceWith string `json:"replace_with"`
+	Standard    string `json:"standard"`
+	Priority    string `json:"priority"`
 }
 
 // ControlMap is an operator mapping, not a certification.
@@ -112,6 +114,7 @@ func buildClientArchitecture(in ScanInput, findings []Finding, qiskit qiskitprof
 }
 
 func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadiness {
+	cfg := edition.Detect()
 	layers := map[string]int{
 		"sbom":  0,
 		"cbom":  40,
@@ -126,7 +129,7 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 		if res["tls"] || res["https"] || res["ssh"] || len(disc.Components) > 0 {
 			layers["cbom"] = 90
 		}
-		if res["hardware"] {
+		if res["hardware"] && cfg.Features.HBOM {
 			layers["hbom"] = 70
 		}
 		if res["k8s"] {
@@ -135,6 +138,7 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 	}
 	shor := 0
 	pqc := 0
+	high := 0
 	for _, f := range findings {
 		cl := qiskitprofile.Classify(f.Algorithm, f.KeyLength)
 		if cl.AttackClass == qiskitprofile.AttackShor {
@@ -142,6 +146,10 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 		}
 		if f.QuantumSafe || cl.AttackClass == qiskitprofile.AttackPQC {
 			pqc++
+		}
+		sev := strings.ToLower(f.Severity)
+		if sev == "high" || sev == "critical" {
+			high++
 		}
 	}
 	hndl := 0
@@ -151,7 +159,16 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 			hndl = 100
 		}
 	}
-	layerAvg := (layers["sbom"] + layers["cbom"] + layers["hbom"] + layers["aibom"]) / 4
+	if cfg.Features.AIBOM {
+		layers["aibom"] = 40
+		if high == 0 {
+			layers["aibom"] += 20
+		}
+	}
+	layerAvg := (layers["sbom"] + layers["cbom"]) / 2
+	if cfg.Features.HBOM {
+		layerAvg = (layers["sbom"] + layers["cbom"] + layers["hbom"] + layers["aibom"]) / 4
+	}
 	overall := layerAvg
 	if hndl > 50 {
 		overall -= (hndl - 50) / 5
@@ -165,15 +182,16 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 	if overall > 100 {
 		overall = 100
 	}
-	cfg := edition.Detect()
 	return &PQCReadiness{
-		Overall:       overall,
-		Layers:        layers,
-		HNDLExposure:  hndl,
-		Migration:     pqcMitigations(findings),
-		Compliance:    complianceMaps(findings, cfg.Features.DORAPack),
-		PackAvailable: cfg.Features.DORAPack,
-		Note:          "Workbook-aligned PQC readiness (SBOM/CBOM/HBOM/AIBOM + HNDL). AIBOM is scored when model-signing crypto is present. Not a Big-4 assessment and not a certification.",
+		Overall:          overall,
+		Layers:           layers,
+		Classifications:  pqcClassificationCounts(findings),
+		SupportedNISTPQC: SupportedNISTPQC,
+		HNDLExposure:     hndl,
+		Migration:        pqcMitigations(findings),
+		Compliance:       complianceMaps(findings, cfg.Features.DORAPack),
+		PackAvailable:    cfg.Features.DORAPack,
+		Note:             "PQC classes are a local taxonomy (pqc-ready / hybrid-ready / migration-required / high-risk / unknown). HBOM/AIBOM layer scores are placeholders, not engines. Not CAVP and not a certification.",
 	}
 }
 

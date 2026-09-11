@@ -99,7 +99,7 @@ func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
 		c.JSON(http.StatusOK, demoTerraformResources())
 		return
 	}
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	cloudProvider := c.Query("provider")
 	resourceType := c.Query("type")
 
@@ -151,7 +151,7 @@ func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ScanTerraformResources(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var req struct {
 		Workspace  string `json:"workspace"`
@@ -270,7 +270,7 @@ func (h *TerraformHandler) UpdateTerraformResource(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ListWorkspaces(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Listing workspaces for tenant: ", tenantID)
 
@@ -301,7 +301,7 @@ func (h *TerraformHandler) ListWorkspaces(c *gin.Context) {
 }
 
 func (h *TerraformHandler) CreateWorkspace(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	var workspace Workspace
 	if err := c.ShouldBindJSON(&workspace); err != nil {
@@ -342,7 +342,7 @@ func (h *TerraformHandler) ListSecurityFindings(c *gin.Context) {
 		c.JSON(http.StatusOK, demoTerraformFindings())
 		return
 	}
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	severity := c.Query("severity")
 	provider := c.Query("provider")
 
@@ -405,7 +405,7 @@ func (h *TerraformHandler) ListSecurityFindings(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ListComplianceViolations(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	framework := c.Query("framework")
 
 	h.logger.Info("Listing compliance violations for tenant: ", tenantID)
@@ -451,7 +451,7 @@ func (h *TerraformHandler) ListComplianceViolations(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ListModules(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Listing Terraform modules for tenant: ", tenantID)
 
@@ -480,7 +480,7 @@ func (h *TerraformHandler) ListModules(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ScanModules(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Scanning Terraform modules for tenant: ", tenantID)
 
@@ -491,7 +491,7 @@ func (h *TerraformHandler) ScanModules(c *gin.Context) {
 }
 
 func (h *TerraformHandler) DetectDrift(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	workspace := c.Query("workspace")
 
 	h.logger.Info("Detecting drift for tenant: ", tenantID, " workspace: ", workspace)
@@ -521,7 +521,7 @@ func (h *TerraformHandler) DetectDrift(c *gin.Context) {
 }
 
 func (h *TerraformHandler) GetPlanHistory(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	workspace := c.Query("workspace")
 
 	h.logger.Info("Getting plan history for tenant: ", tenantID, " workspace: ", workspace)

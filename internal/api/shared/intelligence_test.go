@@ -106,7 +106,7 @@ func TestBOMFrameworkRoutes(t *testing.T) {
 	require.Equal(t, "RivicQ Security Cloud", fw["product"])
 	layers, ok := fw["layers"].([]any)
 	require.True(t, ok)
-	require.Equal(t, 5, len(layers))
+	require.Equal(t, 6, len(layers))
 	pipe, ok := fw["pipeline"].([]any)
 	require.True(t, ok)
 	require.Equal(t, 8, len(pipe))
@@ -115,16 +115,31 @@ func TestBOMFrameworkRoutes(t *testing.T) {
 		"/api/v1/bom/pipeline",
 		"/api/v1/bom/unified",
 		"/api/v1/governance/controls",
-		"/api/v1/hsm/status",
+		"/api/v1/governance/checklists",
 		"/api/v1/quantum/status",
 		"/api/v1/security/api",
-		"/api/v1/security/ai",
 	} {
 		req := httptest.NewRequest(http.MethodGet, path, nil)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 		require.Equal(t, http.StatusOK, w.Code, path)
 	}
+	for _, path := range []string{"/api/v1/hsm/status", "/api/v1/security/ai"} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		require.Equal(t, http.StatusForbidden, w.Code, path)
+	}
+}
+
+func TestGetScanQBOMForbiddenOnOSS(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.GET("/api/v1/scans/:id/qbom", GetScanQBOM(nil, logrus.New()))
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/scans/any/qbom", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestAnalyzeRepositoryFiles_RSAKeyLength(t *testing.T) {

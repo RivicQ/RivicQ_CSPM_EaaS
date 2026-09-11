@@ -5,7 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/bom"
+	"github.com/rivic-q/cryptobom-saas/internal/controls"
 	"github.com/rivic-q/cryptobom-saas/internal/discovery"
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,12 +25,12 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 		var disc *discovery.ScanResult
 		scanTarget := ""
 		if target != "" {
-			if job, ok := discovery.GetScanManager().GetScan(target); ok && job.Result != nil {
+			if job, ok := tenantScanJob(c, target); ok && job.Result != nil {
 				disc = job.Result
 				scanTarget = job.Target
 			}
 		} else {
-			for _, job := range discovery.GetScanManager().ListScans() {
+			for _, job := range tenantScanList(c) {
 				if job.Status == "completed" && job.Result != nil {
 					disc = job.Result
 					scanTarget = job.Target
@@ -42,14 +44,28 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 		fw := bom.Catalog()
 		c.JSON(http.StatusOK, gin.H{"controls": fw.Controls, "edition": fw.Edition, "note": "Operator mappings, not ISO/SOC/NIST certifications."})
 	})
+	router.GET("/governance/checklists", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"checklists": controls.Catalog(),
+			"note":       "Published OWASP/NIST lists mapped to RivicQ evidence. Not certifications or scored audits.",
+		})
+	})
 	router.GET("/hsm/status", func(c *gin.Context) {
+		if !edition.Detect().Features.HBOM && !edition.Detect().Features.HSMConnector {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "HBOM / HSM inventory is an Enterprise layer",
+				"edition": edition.Detect().Edition,
+				"note":    "Community CBOM still inventories algorithms and certificates from scans. This is not firmware reverse-engineering.",
+			})
+			return
+		}
 		c.JSON(http.StatusOK, bom.ReadHSM())
 	})
 	router.GET("/quantum/status", func(c *gin.Context) {
 		c.JSON(http.StatusOK, bom.ReadQuantum())
 	})
 	router.GET("/security/api", func(c *gin.Context) {
-		u := latestUnified()
+		u := latestUnified(c)
 		c.JSON(http.StatusOK, gin.H{
 			"findings": u.APISurface,
 			"source":   "tls_https_scans",
@@ -58,8 +74,16 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 		})
 	})
 	router.GET("/security/ai", func(c *gin.Context) {
+		if !edition.Detect().Features.AIBOM {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "AIBOM is an Enterprise layer",
+				"edition": edition.Detect().Edition,
+				"note":    "Community CBOM still flags cryptography used by serving stacks when scanned.",
+			})
+			return
+		}
 		fw := bom.Catalog()
-		u := latestUnified()
+		u := latestUnified(c)
 		c.JSON(http.StatusOK, gin.H{
 			"enabled": u.LayersOn["aibom"],
 			"aibom":   u.AIBOM,
@@ -70,8 +94,8 @@ func SetupBOMRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	logger.Debug("BOM framework routes registered")
 }
 
-func latestUnified() bom.Unified {
-	for _, job := range discovery.GetScanManager().ListScans() {
+func latestUnified(c *gin.Context) bom.Unified {
+	for _, job := range tenantScanList(c) {
 		if job.Status == "completed" && job.Result != nil {
 			return bom.FromDiscovery(job.Target, job.Result)
 		}

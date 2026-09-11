@@ -8,6 +8,7 @@ import { Warning, Cloud, Dns, Security, Assessment, Storage } from '@mui/icons-m
 import { providerColor } from '../theme/chartTheme';
 import { tokens } from '../theme/tokens';
 import PageFrame from '../components/PageFrame';
+import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 import StatCard from '../components/dashboard/StatCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import PostureRing from '../components/dashboard/PostureRing';
@@ -81,6 +82,7 @@ const CSPM: React.FC = () => {
       title="Cryptographic Security Posture Management"
       subtitle="Monitor, assess, and improve your cryptographic security posture across all environments."
       badge={healthScore != null ? `Score ${healthScore}` : undefined}
+      visual={<OpsHeroVisual variant="findings" empty={findings.length === 0} />}
       action={usingDemo || isDemo ? <ProvenanceChip kind="demo" label="DEMO ENVIRONMENT" /> : undefined}
     >
       <Grid container spacing={2.5} sx={{ mb: 0.5 }}>

@@ -4,6 +4,7 @@ import { CircularProgress, Typography, Container, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { normalizeEdition } from '../config/editions';
+import AuthChrome from '../components/brand/AuthChrome';
 
 const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -135,20 +136,22 @@ const OAuthCallback: React.FC = () => {
 
   if (error) {
     return (
-      <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <AuthChrome>
         <Alert severity="error">{error}</Alert>
-      </Container>
+      </AuthChrome>
     );
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 8, textAlign: 'center' }}>
-      <CircularProgress size={48} sx={{ mb: 2 }} />
-      <Typography variant="h6">Completing authentication...</Typography>
-      <Typography variant="body2" color="text.secondary">
-        Redirecting to your workspace
-      </Typography>
-    </Container>
+    <AuthChrome>
+      <Container maxWidth="sm" sx={{ textAlign: 'center' }} disableGutters>
+        <CircularProgress size={48} sx={{ mb: 2 }} />
+        <Typography variant="h6">Completing authentication...</Typography>
+        <Typography variant="body2" color="text.secondary">
+          Redirecting to your workspace
+        </Typography>
+      </Container>
+    </AuthChrome>
   );
 };
 

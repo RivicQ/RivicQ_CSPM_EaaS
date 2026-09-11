@@ -4,18 +4,20 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, Box, Button, Chip, Grid, Stack, Typography } from '@mui/material';
 import { Lock, Science, Shield, Memory, Badge, Description } from '@mui/icons-material';
 import PageFrame from '../components/PageFrame';
-import { GlassCard } from '../components/ui';
+import { GlassCard, EmptyState } from '../components/ui';
 import BomRibbon from '../components/bom/BomRibbon';
 import { bomService } from '../services/api';
-import { layersForEdition } from '../data/bomFramework';
+import { layersForEdition, PIPELINE_STAGES } from '../data/bomFramework';
 import { useAuth } from '../context/AuthContext';
-import { isPaidEdition } from '../config/editions';
+import { isEnterpriseEdition } from '../config/editions';
 import { tokens } from '../theme/tokens';
+import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 
 const ICONS: Record<string, React.ReactNode> = {
   cbom: <Shield />,
-  qbom: <Science />,
   sbom: <Description />,
+  qbom: <Science />,
+  hbom: <Memory />,
   aibom: <Memory />,
   ibom: <Badge />,
 };
@@ -23,7 +25,7 @@ const ICONS: Record<string, React.ReactNode> = {
 const BomIntelligence: React.FC = () => {
   const navigate = useNavigate();
   const { edition, isDemo } = useAuth();
-  const paid = isPaidEdition(edition);
+  const paid = isEnterpriseEdition(edition);
   const layers = layersForEdition(paid);
   const { data } = useQuery({
     queryKey: ['bom-unified'],
@@ -38,18 +40,20 @@ const BomIntelligence: React.FC = () => {
 
   const counts: Record<string, number> = {
     cbom: data?.cbom?.length ?? 0,
-    qbom: data?.qbom?.length ?? 0,
     sbom: data?.sbom?.length ?? 0,
+    qbom: data?.qbom?.length ?? 0,
+    hbom: data?.hbom?.length ?? 0,
     aibom: data?.aibom?.length ?? 0,
     ibom: data?.ibom?.length ?? 0,
   };
 
   return (
     <PageFrame
-      eyebrow="Five-BOM intelligence"
-      title="QBOM · AIBOM · SBOM · IBOM · CBOM"
-      subtitle="Unified cryptographic, quantum, software, AI, and identity bills of materials. Community runs CBOM, SBOM, and local QBOM. AIBOM and IBOM unlock with Enterprise."
+      eyebrow="Cryptographic Security Posture Management"
+      title="CBOM · SBOM"
+      subtitle="Community inventories cryptography and software components. QBOM, HBOM, AIBOM, and IBOM are Enterprise control-plane layers — locked here until the workspace is licensed."
       badge={paid ? 'Enterprise layers' : 'Community engine'}
+      visual={<OpsHeroVisual variant="bom" bom={counts} />}
       action={<Button variant="contained" onClick={() => navigate('/scanner')}>Run a scan</Button>}
     >
       <Stack spacing={2} sx={{ mb: 3 }}>
@@ -58,6 +62,17 @@ const BomIntelligence: React.FC = () => {
           {framework?.honesty || 'Partner APIs (HSM, GRC, identity) stay disconnected without customer credentials. Mappings are not certifications.'}
           {isDemo ? ' This demo is Community-limited labeled sample data.' : ''}
         </Alert>
+        <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+          {PIPELINE_STAGES.map((s) => (
+            <Chip
+              key={s.id}
+              size="small"
+              variant={s.oss ? 'filled' : 'outlined'}
+              color={s.oss ? 'primary' : 'default'}
+              label={`${s.id}. ${s.name}`}
+            />
+          ))}
+        </Stack>
       </Stack>
 
       <Grid container spacing={2.5}>
@@ -85,6 +100,32 @@ const BomIntelligence: React.FC = () => {
           </Grid>
         ))}
       </Grid>
+
+      <GlassCard hover={false} delay={0}>
+        <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>CBOM explorer</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Records from GET /bom/unified for this workspace. Empty layers mean no scan data — not a live cloud estate.
+        </Typography>
+        {(!data?.cbom || data.cbom.length === 0) && (
+          <EmptyState
+            title="No CBOM components yet"
+            description="Run rivicq scan . or the website scanner. This list is not a simulated inventory."
+            action={{ label: 'Open scans', onClick: () => navigate('/scanner') }}
+          />
+        )}
+        {Array.isArray(data?.cbom) && data.cbom.length > 0 && (
+          <Stack spacing={1}>
+            {data.cbom.slice(0, 40).map((row: any, i: number) => (
+              <Box key={row.id || row.name || i} sx={{ p: 1.25, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                <Typography fontWeight={700}>{row.name || row.component || row.algorithm || `Component ${i + 1}`}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {[row.algorithm, row.version, row.purl, row.risk].filter(Boolean).join(' · ') || 'No extra fields on this record'}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </GlassCard>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 3 }} flexWrap="wrap" useFlexGap>
         <Button variant="outlined" onClick={() => navigate('/pipeline')}>DevSecOps pipeline</Button>

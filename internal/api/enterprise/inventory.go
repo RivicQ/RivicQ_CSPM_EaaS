@@ -167,7 +167,7 @@ func (h *InventoryHandler) ListAssets(c *gin.Context) {
 		c.JSON(http.StatusOK, demoAssetsList())
 		return
 	}
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 	category := c.Query("category")
 	cloudProvider := c.Query("cloud_provider")
 	limit := c.DefaultQuery("limit", "100")
@@ -357,7 +357,7 @@ func (h *InventoryHandler) DeleteAsset(c *gin.Context) {
 
 func (h *InventoryHandler) ListAssetsByCategory(c *gin.Context) {
 	category := c.Param("category")
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT id, tenant_id, asset_id, name, description, category, sub_category,
@@ -400,7 +400,7 @@ func (h *InventoryHandler) ListAssetsByCategory(c *gin.Context) {
 
 func (h *InventoryHandler) ListAssetsByCloudProvider(c *gin.Context) {
 	provider := c.Param("provider")
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT id, tenant_id, asset_id, name, description, category, sub_category,
@@ -442,7 +442,7 @@ func (h *InventoryHandler) ListAssetsByCloudProvider(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListCryptoAssets(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT ca.*, ia.asset_id, ia.name, ia.category
@@ -498,7 +498,7 @@ func (h *InventoryHandler) ScanCryptoAssets(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListAIAssets(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT aa.*, ia.asset_id, ia.name
@@ -569,7 +569,7 @@ func (h *InventoryHandler) RegisterAIModel(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListHardwareAssets(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT ha.*, ia.asset_id, ia.name
@@ -621,7 +621,7 @@ func (h *InventoryHandler) DiscoverHardware(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListSoftwareAssets(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT sa.*, ia.asset_id, ia.name
@@ -703,7 +703,7 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 	}
 
 	if h.db != nil {
-		tenantID := c.GetHeader("X-Tenant-ID")
+		tenantID := tenantIDFor(c)
 		for _, comp := range sbomResult.Components {
 			assetID := uuid.New()
 			invAssetID := uuid.New()
@@ -753,7 +753,7 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListInfrastructureAssets(c *gin.Context) {
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	query := `
 		SELECT ia.id, ia.inventory_asset_id, ia.infrastructure_type, ia.resource_type,
@@ -822,7 +822,7 @@ func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	summary := InventorySummary{
 		ByCategory:      make(map[string]int),
@@ -875,7 +875,7 @@ func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
 
 func (h *InventoryHandler) ExportInventory(c *gin.Context) {
 	format := c.DefaultQuery("format", "json")
-	tenantID := c.GetHeader("X-Tenant-ID")
+	tenantID := tenantIDFor(c)
 
 	h.logger.Info("Exporting inventory for tenant: ", tenantID, " format: ", format)
 

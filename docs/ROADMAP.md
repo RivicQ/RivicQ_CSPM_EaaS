@@ -10,19 +10,19 @@ See [Product status](PRODUCT_STATUS.md) for what already ships and [Architecture
 - Auth: login, register, MFA, OAuth, in-memory password reset, workspace roles
 - Discovery: TLS, SSH, HTTP**S** websites, SBOM, GitHub content
 - Intelligence: normalized findings, crypto risk, policy gate, CycloneDX CBOM
-- Five-BOM framework: CBOM, QBOM, SBOM (Community); AIBOM, IBOM (Enterprise)
+- BOM framework: Community CBOM + SBOM CSPM; QBOM, HBOM, AIBOM, IBOM Enterprise (APIs 403 on OSS)
 - DevSecOps pipeline view (stages 1–6 OSS; stage 7 Enterprise); API security from TLS scans
 - HSM / quantum status APIs (disconnected without credentials); governance mappings
 - Qiskit profile pipeline (local classical taxonomy) wired into intelligence + `/scans/:id/qiskit`
 - Honest docs: editions, limitations, Qiskit vs IBM Quantum Runtime
+- JWT tenant isolation on Community scan, inventory, findings, GitHub scan, intelligence, and BOM unified views; unauthenticated Home CBOM pilot stays on the public tenant. QBOM/HBOM/AIBOM/IBOM APIs return 403 on Community. Enterprise inventory/compliance/quantum/multicloud/terraform/CNCF ignore spoofable `X-Tenant-ID`.
 
 ## Build 2 — Enterprise SaaS control plane
 
-1. Tenant isolation on remaining scan/inventory write paths (JWT `tenant_id` already scopes audit/API keys).
-2. Scheduled / continuous scanning (UI schedules today are labeled demo placeholders).
-3. Live OIDC login; SAML ACS as an operations path with the customer IdP.
-4. One high-quality PQC / compliance **report pack** (mappings + evidence export, not certification).
-5. Multi-cloud connectors with explicit empty-state copy when credentials are missing.
+1. Scheduled / continuous scanning (UI schedules today are labeled demo placeholders).
+2. Live OIDC login; SAML ACS as an operations path with the customer IdP.
+3. One high-quality PQC / compliance **report pack** (mappings + evidence export, not certification).
+4. Multi-cloud connectors with explicit empty-state copy when credentials are missing.
 
 ## Build 3 — Cryptography discovery hardening
 
@@ -39,7 +39,7 @@ See [Product status](PRODUCT_STATUS.md) for what already ships and [Architecture
 2. Client-ready CLI docs; first CBOM in 10 minutes (`rivicq scan .`).
 3. Keep the dataset accuracy pipeline green (`make analyze-datasets`).
 4. Usable air-gapped Helm/Compose path (`docs/DEPLOYMENT.md`).
-5. Five-BOM pipeline evidence export (Community JSON; Enterprise pack) — **catalog shipped**; continuous production monitoring remains Enterprise.
+5. BOM pipeline evidence export (Community CBOM/SBOM JSON; Enterprise pack) — **catalog shipped**; continuous production monitoring remains Enterprise.
 
 ## Build 5 — Demo confidence
 

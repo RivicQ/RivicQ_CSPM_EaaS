@@ -1,36 +1,47 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Chip, Container, Grid, Stack, Typography, TextField, InputAdornment, useTheme,
+  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment,
 } from '@mui/material';
 import {
-  ArrowForward, CheckCircle, GitHub, GppGood, Memory, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
-  Api, MenuBook, EnhancedEncryption, AccountTree, MailOutline,
+  ArrowForward, CheckCircle, GitHub, GppGood, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
+  Api, MenuBook, EnhancedEncryption, AccountTree, MailOutline, KeyboardArrowDown, NorthEast,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { cbomService, gitHubScanService } from '../services/api';
 import BrandLogo from '../components/BrandLogo';
 import TrademarkNotice from '../components/TrademarkNotice';
 import HomeScanReport, { HomeScanReportData } from '../components/home/HomeScanReport';
-import ConsolePreview from '../components/home/ConsolePreview';
+import PublicEngineNotice from '../components/brand/PublicEngineNotice';
 import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
 import { MotionSection } from '../motion/primitives';
+import NebulaBackdrop from '../components/brand/NebulaBackdrop';
+import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
 const PLATFORM = [
-  { icon: <AccountTree />, title: 'Five-BOM workspace', desc: 'QBOM, AIBOM, SBOM, IBOM, and CBOM in one control plane. Community runs CBOM, SBOM, and local QBOM.' },
-  { icon: <EnhancedEncryption />, title: 'Encryption intelligence', desc: 'Repositories, cloud KMS, HSMs, and certificates in one cryptographic model — discover and govern from a single API.' },
-  { icon: <Memory />, title: 'Crypto inventory', desc: 'Automatic discovery of algorithms and keys. Export CycloneDX / SPDX Cryptographic Bills of Materials.' },
-  { icon: <Psychology />, title: 'PQC readiness', desc: 'Harvest-now-decrypt-later exposure and ML-KEM / ML-DSA planning. Qiskit scores are a local taxonomy — not IBM Quantum hardware.' },
-  { icon: <GppGood />, title: 'API & DevSecOps', desc: 'TLS hygiene from website and host scans plus an eight-stage pipeline view. Continuous monitoring is Enterprise.' },
-  { icon: <FactCheck />, title: 'Governance mappings', desc: 'DORA, NIS2, EU AI Act, CRA, NIST, FIPS, and BSI operator mappings. Mappings are not certifications.' },
+  { icon: <Psychology />, title: 'AI engineering', desc: 'AIBOM is an Enterprise inventory for models, datasets, and AI identities. Community CBOM still flags cryptography on serving stacks. EU AI Act names are mappings, not a certification.' },
+  { icon: <AccountTree />, title: 'DevSecOps', desc: 'Scan → inventory → policy gate in CI. The GitHub Action is Community; continuous monitoring is Enterprise.' },
+  { icon: <GppGood />, title: 'Cloud security', desc: 'CSPM from declared and scanned assets. Live cloud attach needs customer credentials and an Enterprise license.' },
+  { icon: <Api />, title: 'API security', desc: 'TLS/HTTPS hygiene from website and host scans. Gateway inventory is Enterprise when a connector exists.' },
+  { icon: <FactCheck />, title: 'GRC & compliance risk', desc: 'DORA, NIS2, NIST, ISO, PCI, SOC 2 operator mappings. Mappings are not audits or certifications.' },
+  { icon: <EnhancedEncryption />, title: 'Quantum risk', desc: 'Harvest-now exposure and ML-KEM / ML-DSA planning from scan intelligence. Pages is static — live scores need the API or CLI.' },
 ];
 
-const DOCS = [
+type HomeDoc = {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  href?: string;
+  to?: string;
+};
+
+const DOCS: HomeDoc[] = [
   { icon: <MenuBook />, title: 'Documentation', desc: 'Architecture, EaaS, CBOM, and PQC guides.', href: 'docs/index.html' },
-  { icon: <MailOutline />, title: 'Contact', desc: 'Public desks on @rivicq.com.', href: 'docs/contact.html' },
+  { icon: <MailOutline />, title: 'Contact', desc: 'Public desks on @rivicq.com.', to: '/contact' },
+  { icon: <AccountTree />, title: 'RivicQ Graph', desc: 'Labeled security-graph demo. Synthetic data only.', href: 'fabric/' },
   { icon: <Api />, title: 'API reference', desc: 'OpenAPI for the RivicQ platform API.', href: 'api/index.html' },
   { icon: <GitHub />, title: 'GitHub', desc: 'Source, issues, and the OSS scanner.', href: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
 ];
@@ -39,9 +50,7 @@ const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', '
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const { isAuthenticated, backendReachable } = useAuth();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
   const [progress, setProgress] = React.useState(0);
@@ -93,6 +102,12 @@ const Home: React.FC = () => {
 
   const handleScan = async () => {
     if (!repoUrl.trim()) return;
+    if (!backendReachable) {
+      setScanStatus('error');
+      setProgress(0);
+      setReport(null);
+      return;
+    }
     setScanStatus('scanning');
     setProgress(0);
     setReport(null);
@@ -197,71 +212,175 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const ink = isDark ? '#0c0b09' : '#f7f3eb';
-  const panel = isDark ? '#17150f' : '#fffdf8';
+  const ink = '#000000';
+  const panel = '#0a0a0f';
+  const [navMenu, setNavMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
+
+  const NAV = [
+    { id: 'home', label: 'Home', onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+    {
+      id: 'products',
+      label: 'Products',
+      items: [
+        { label: 'Product', action: () => navigate('/product') },
+        { label: 'CSPM', action: () => navigate('/product/cspm') },
+        { label: 'CBOM', action: () => navigate('/cbom') },
+        { label: 'Post-quantum', action: () => navigate('/pqc') },
+        { label: 'CBOM pilot', action: () => scrollToId('scan') },
+      ],
+    },
+    {
+      id: 'solutions',
+      label: 'Solutions',
+      items: [
+        { label: 'Enterprise', action: () => navigate('/enterprise') },
+        { label: 'Security', action: () => navigate('/security') },
+        { label: 'AI engineering', action: () => scrollToId('platform') },
+        { label: 'Cloud security', action: () => navigate('/product/cspm') },
+      ],
+    },
+    {
+      id: 'compliance',
+      label: 'Compliance Centre',
+      items: [
+        { label: 'GRC mappings', action: () => scrollToId('plans') },
+        { label: 'Governance hub', action: () => navigate('/login') },
+      ],
+    },
+    {
+      id: 'trust',
+      label: 'Trust & Security',
+      items: [
+        { label: 'Security policy', action: () => openExternal('docs/read.html?doc=SECURITY.md') },
+        { label: 'Privacy', action: () => openExternal('docs/read.html?doc=PRIVACY.md') },
+      ],
+    },
+    {
+      id: 'resources',
+      label: 'Resources',
+      items: [
+        { label: 'Documentation', action: () => openExternal('docs/index.html') },
+        { label: 'RivicQ Graph demo', action: () => openExternal('fabric/') },
+        { label: 'API reference', action: () => openExternal('api/index.html') },
+        { label: 'GitHub', action: () => openExternal('https://github.com/RivicQ/RivicQ_CSPM_EaaS') },
+      ],
+    },
+    {
+      id: 'company',
+      label: 'Company',
+      items: [
+        { label: 'Contact', action: () => navigate('/contact') },
+        { label: 'Pricing', action: () => navigate('/pricing') },
+        { label: 'IBM Partner Plus', action: () => navigate('/ibm') },
+        { label: 'Request demo', action: () => navigate('/request-demo') },
+        { label: 'hello@rivicq.com', action: () => { window.location.href = 'mailto:hello@rivicq.com'; } },
+      ],
+    },
+  ];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: ink, color: 'text.primary' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: ink, color: 'text.primary', position: 'relative' }}>
+      <Box sx={{ height: 3, bgcolor: '#7c3aed', position: 'sticky', top: 0, zIndex: 21 }} />
       <Box
         sx={{
           position: 'sticky',
-          top: 0,
+          top: 3,
           zIndex: 20,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          bgcolor: ink,
+          bgcolor: 'rgba(0,0,0,0.72)',
+          backdropFilter: 'blur(12px)',
         }}
       >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
-            <BrandLogo dark={isDark} />
-            <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-              <Button size="small" onClick={() => scrollToId('platform')}>Platform</Button>
-              <Button size="small" onClick={() => scrollToId('scan')}>Scan</Button>
-              <Button size="small" onClick={() => scrollToId('plans')}>Plans</Button>
-              <Button size="small" onClick={() => openExternal('docs/index.html')}>Docs</Button>
-              <Button variant="outlined" size="small" onClick={() => navigate('/login')}>Sign in</Button>
-              <Button variant="contained" size="small" onClick={() => navigate('/register')}>Open workspace</Button>
+            <BrandLogo dark />
+            <Stack direction="row" spacing={0.25} flexWrap="wrap" useFlexGap sx={{ display: { xs: 'none', md: 'flex' } }}>
+              {NAV.map((item) => (
+                <Button
+                  key={item.id}
+                  size="small"
+                  endIcon={'items' in item ? <KeyboardArrowDown sx={{ fontSize: 16 }} /> : undefined}
+                  onClick={(e) => {
+                    if ('items' in item && item.items) setNavMenu({ id: item.id, el: e.currentTarget });
+                    else item.onClick?.();
+                  }}
+                  sx={{ color: '#fff', fontWeight: 500 }}
+                >
+                  {item.label}
+                </Button>
+              ))}
             </Stack>
+            <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={{ borderRadius: 999, bgcolor: '#7c3aed', '&:hover': { bgcolor: '#6d28d9' } }}>
+              Request demo
+            </Button>
+          </Stack>
+        </Container>
+        <Menu
+          anchorEl={navMenu?.el}
+          open={Boolean(navMenu)}
+          onClose={() => setNavMenu(null)}
+          slotProps={{ paper: { sx: { bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' } } }}
+        >
+          {(NAV.find((n) => n.id === navMenu?.id) as { items?: { label: string; action: () => void }[] } | undefined)?.items?.map((it) => (
+            <MenuItem
+              key={it.label}
+              onClick={() => {
+                it.action();
+                setNavMenu(null);
+              }}
+            >
+              {it.label}
+            </MenuItem>
+          ))}
+        </Menu>
+      </Box>
+
+      <Box sx={{ position: 'relative', minHeight: { xs: 560, md: 640 }, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+        <NebulaBackdrop />
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: { xs: 8, md: 12 } }}>
+          <Typography sx={{ fontSize: { xs: '2.2rem', md: '3.35rem' }, fontWeight: 750, letterSpacing: '-0.04em', lineHeight: 1.08, color: '#fff', mb: 2.5 }}>
+            Know what cryptography protects your business before attackers do.
+          </Typography>
+          <Typography sx={{ color: '#d1d5db', maxWidth: 720, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
+            RivicQ discovers cryptographic assets, cloud risks and migration exposure — then inventories them as CBOM evidence for PQC planning.
+          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center">
+            <Button
+              variant="contained"
+              size="large"
+              endIcon={<NorthEast />}
+              onClick={() => scrollToId('scan')}
+              sx={{ px: 3, py: 1.2, bgcolor: '#7c3aed', '&:hover': { bgcolor: '#6d28d9' } }}
+            >
+              Start security assessment
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => navigate('/request-demo')}
+              sx={{ px: 3, py: 1.2, color: '#fff', borderColor: 'rgba(255,255,255,0.55)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.06)' } }}
+            >
+              Request enterprise demo
+            </Button>
           </Stack>
         </Container>
       </Box>
 
       <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
-        <MotionSection>
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography sx={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'text.secondary', mb: 1.5 }}>
-                RivicQ Security Cloud · Berlin
-              </Typography>
-              <Typography sx={{ fontSize: { xs: '2.35rem', md: '3.4rem' }, fontWeight: 650, letterSpacing: '-0.045em', lineHeight: 1.02, mb: 2 }}>
-                The cryptographic control plane for teams that ship software.
-              </Typography>
-              <Typography sx={{ color: 'text.secondary', maxWidth: 520, mb: 3, fontSize: '1.05rem' }}>
-                Community is a limited scan engine on this GitHub project. Enterprise is the licensed SaaS —
-                connectors, SSO, evidence packs. Open a workspace or run a public target now.
-              </Typography>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
-                <Button variant="contained" size="large" endIcon={<ArrowForward />} onClick={() => navigate('/register')}>
-                  Open a workspace
-                </Button>
-                <Button variant="outlined" size="large" onClick={() => navigate('/demo')}>
-                  Labeled demo
-                </Button>
-              </Stack>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <ConsolePreview />
-            </Grid>
-          </Grid>
-        </MotionSection>
-
-        <Box id="scan" sx={{ mt: 8, scrollMarginTop: 80 }}>
+        <Box id="scan" sx={{ scrollMarginTop: 80 }}>
           <MotionSection>
-            <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: panel, borderRadius: 1, p: { xs: 2, md: 2.5 } }}>
-              <Typography sx={{ fontFamily: 'Source Code Pro, monospace', fontSize: 12, color: 'text.secondary', mb: 1.5 }}>
-                $ rivicq scan · public target only
-              </Typography>
+            <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: panel, borderRadius: 2, p: { xs: 2, md: 2.5 } }}>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
+                <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'text.secondary' }}>
+                  $ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate
+                </Typography>
+                <Chip
+                  size="small"
+                  label={backendReachable ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DISCONNECTED}
+                  color={backendReachable ? 'success' : 'default'}
+                  variant="outlined"
+                />
+              </Stack>
+              {!backendReachable && <PublicEngineNotice variant="scan" compact />}
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
                 <TextField
                   fullWidth
@@ -278,7 +397,7 @@ const Home: React.FC = () => {
                   onClick={handleScan}
                   loading={scanStatus === 'scanning'}
                   loadingText="Scanning…"
-                  disabled={!repoUrl.trim()}
+                  disabled={!repoUrl.trim() || !backendReachable}
                   sx={{ minWidth: 168 }}
                 >
                   Run scan
@@ -331,7 +450,7 @@ const Home: React.FC = () => {
                 <Chip size="small" icon={<Lock />} label="Apache-2.0" sx={{ mb: 1.5 }} />
                 <Typography variant="h5" sx={{ fontWeight: 650, mb: 1 }}>Community</Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                  This GitHub project. CBOM, SBOM, local QBOM, dashboard, and the GitHub Action policy gate.
+                  This GitHub project. CBOM, SBOM, dashboard, and the GitHub Action policy gate. QBOM/HBOM/AIBOM/IBOM are Enterprise.
                 </Typography>
                 {['CBOM scanning', 'Crypto inventory', 'Workspace dashboard', 'CLI · rivicq scan .'].map((f) => (
                   <Stack key={f} direction="row" spacing={1} alignItems="center" sx={{ mb: 0.75 }}>
@@ -364,9 +483,9 @@ const Home: React.FC = () => {
         <Box id="docs" sx={{ mt: 8, scrollMarginTop: 80 }}>
           <Grid container spacing={2}>
             {DOCS.map((d) => (
-              <Grid item xs={12} sm={6} md={3} key={d.title}>
+              <Grid item xs={12} sm={6} md={4} key={d.title}>
                 <Box
-                  onClick={() => openExternal(d.href)}
+                  onClick={() => (d.to ? navigate(d.to) : openExternal(d.href || ''))}
                   sx={{
                     p: 2,
                     height: '100%',
@@ -401,7 +520,7 @@ const Home: React.FC = () => {
         <Box sx={{ mt: 8, py: 3, borderTop: 1, borderColor: 'divider' }}>
           <Stack spacing={1.25} alignItems="center">
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="center">
-              <BrandLogo compact dark={isDark} />
+              <BrandLogo compact dark />
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
             </Stack>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">
@@ -411,6 +530,9 @@ const Home: React.FC = () => {
               <Button size="small" href="mailto:security@rivicq.com">security@</Button>
               <Button size="small" href="mailto:privacy@rivicq.com">privacy@</Button>
               <Button size="small" onClick={() => navigate('/contact')}>Contact</Button>
+              <Button size="small" onClick={() => navigate('/pricing')}>Pricing</Button>
+              <Button size="small" onClick={() => navigate('/ibm')}>IBM Partner Plus</Button>
+              <Button size="small" onClick={() => navigate('/request-demo')}>Request demo</Button>
             </Stack>
             <TrademarkNotice />
           </Stack>

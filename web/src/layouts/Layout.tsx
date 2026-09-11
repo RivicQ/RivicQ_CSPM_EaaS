@@ -26,7 +26,6 @@ import {
   Paper,
   BottomNavigation,
   BottomNavigationAction,
-  Collapse,
   Select,
   FormControl,
 } from '@mui/material';
@@ -57,12 +56,13 @@ import {
   Person,
   AdminPanelSettings,
   AccountTree,
-  Hub,
   Api,
   Timeline,
   VpnKey,
   Policy,
   SwapHoriz,
+  HelpOutline,
+  BugReport,
   MailOutline,
 } from '@mui/icons-material';
 import BomRibbon from '../components/bom/BomRibbon';
@@ -79,6 +79,15 @@ import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';
 import DemoTrailCoach from '../components/demo/DemoTrailCoach';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { useDemoTrail } from '../context/DemoTrailContext';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { cbomService, inventoryService } from '../services/api';
+import { OPS_ROUTES, titleFor } from '../ops/navigation';
+import { parseFindingsPayload, scanStatus } from '../ops/findings';
+import { loadPersona, persistPersona, PERSONA_LABEL, type OpsPersona } from '../ops/persona';
+import CommandPalette from '../components/ops/CommandPalette';
+import OpsBreadcrumbs from '../components/ops/OpsBreadcrumbs';
+import HelpDrawer from '../components/ops/HelpDrawer';
+import StatusChip from '../components/ops/StatusChip';
 import designSystem, {
   sidebarPaperSx,
   sidebarScrollSx,
@@ -107,7 +116,8 @@ const DRAWER_WIDTH_COLLAPSED = 76;
 const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, edition, logout, isDemo } = useAuth();
+  const { user, edition, logout, isDemo, backendReachable } = useAuth();
+  const queryClient = useQueryClient();
   const { active: trailActive } = useDemoTrail();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
@@ -117,12 +127,13 @@ const Layout: React.FC = () => {
       return false;
     }
   });
-  const [notifications] = React.useState(5);
+  const [notificationsAnchor, setNotificationsAnchor] = React.useState<null | HTMLElement>(null);
+  const [paletteOpen, setPaletteOpen] = React.useState(false);
+  const [helpOpen, setHelpOpen] = React.useState(false);
+  const [persona, setPersona] = React.useState<OpsPersona>(() => loadPersona());
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [modulesOpen, setModulesOpen] = React.useState(false);
   const [navQuery, setNavQuery] = React.useState('');
-  const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
-  const [topSearch, setTopSearch] = React.useState('');
   const [timeRange, setTimeRange] = React.useState(() => {
     try {
       return sessionStorage.getItem('rivicq.timeRange') || '24h';
@@ -130,7 +141,6 @@ const Layout: React.FC = () => {
       return '24h';
     }
   });
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const { mode, toggleMode } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
@@ -157,61 +167,138 @@ const Layout: React.FC = () => {
   }, [timeRange]);
 
   React.useEffect(() => {
+    persistPersona(persona);
+    window.dispatchEvent(new CustomEvent('rivicq-persona', { detail: persona }));
+  }, [persona]);
+
+  React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        searchInputRef.current?.focus();
+        setPaletteOpen(true);
+      }
+      if (e.key === '?' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        setHelpOpen(true);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // Workspace, reordered by daily operator priority. Settings is pinned to the
-  // sidebar footer instead of living in the middle of the list.
-  const navigationItems: NavItem[] = [
-    { text: 'Command Center', icon: <Dashboard />, path: '/dashboard' },
-    { text: isDemo ? 'Demo Trail' : 'Try Demo', icon: <Psychology />, path: '/demo' },
-    { text: 'Scanner', icon: <Security />, path: '/scanner' },
-    { text: 'BOM Intelligence', icon: <AccountTree />, path: '/bom' },
-    { text: 'Assets', icon: <Storage />, path: '/assets' },
-    { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
-    { text: 'DevSecOps Tools', icon: <Category />, path: '/tools' },
-    { text: 'RivicQ Ecosystem', icon: <CloudQueue />, path: '/ecosystem' },
-    { text: 'Contact', icon: <MailOutline />, path: '/contact' },
-  ];
+  const { data: findingsPayload } = useQuery({
+    queryKey: ['ops-findings'],
+    queryFn: () => cbomService.getScanFindings().then((r) => r.data).catch(() => null),
+    staleTime: 30_000,
+  });
+  const { data: scansPayload } = useQuery({
+    queryKey: ['cbom-scans'],
+    queryFn: () => cbomService.listScans().then((r) => r.data).catch(() => null),
+    staleTime: 15_000,
+  });
+  const { data: assetsPayload } = useQuery({
+    queryKey: ['ops-assets-index'],
+    queryFn: () => inventoryService.getAssets().then((r) => r.data).catch(() => null),
+    staleTime: 30_000,
+  });
 
-  const bomItems: NavItem[] = [
-    { text: 'DevSecOps Pipeline', icon: <Timeline />, path: '/pipeline', section: 'Five-BOM' },
-    { text: 'API Security', icon: <Api />, path: '/security/api', section: 'Five-BOM' },
-    { text: 'AI Security', icon: <Hub />, path: '/security/ai', section: 'Five-BOM' },
-    { text: 'HSM & Quantum', icon: <VpnKey />, path: '/connectors/hsm', section: 'Five-BOM' },
-    { text: 'Governance', icon: <Policy />, path: '/governance', section: 'Five-BOM' },
-    { text: 'PQC Migration', icon: <SwapHoriz />, path: '/migration', section: 'Five-BOM' },
+  const opsFindings = React.useMemo(() => parseFindingsPayload(findingsPayload), [findingsPayload]);
+  const opsScans = React.useMemo(() => {
+    const list = scansPayload?.scans;
+    if (!Array.isArray(list)) return [];
+    return list.map((s: any) => ({
+      id: String(s.id ?? s.scan_id ?? ''),
+      target: String(s.target ?? ''),
+      status: String(s.status ?? ''),
+      error: s.error ? String(s.error) : '',
+    })).filter((s: { id: string }) => s.id);
+  }, [scansPayload]);
+  const opsAssets = React.useMemo(() => {
+    const list = Array.isArray(assetsPayload?.assets) ? assetsPayload.assets : Array.isArray(assetsPayload) ? assetsPayload : [];
+    return list.slice(0, 40).map((a: any) => ({ id: String(a.id), name: String(a.name || a.id) }));
+  }, [assetsPayload]);
+
+  const failedScans = opsScans.filter((s) => scanStatus(s.status) === 'failed');
+  const criticalFindings = opsFindings.filter((f) => f.severity === 'critical' || f.severity === 'high');
+  const noticeCount = failedScans.length + (criticalFindings.length > 0 ? 1 : 0);
+
+  const ICON_FOR: Record<string, React.ReactElement> = {
+    '/dashboard': <Dashboard />,
+    '/findings': <BugReport />,
+    '/assets': <Storage />,
+    '/scanner': <Security />,
+    '/bom': <AccountTree />,
+    '/migration': <SwapHoriz />,
+    '/cspm': <GppGood />,
+    '/governance': <Policy />,
+    '/security/api': <Api />,
+    '/analytics': <Analytics />,
+    '/tools': <Category />,
+    '/ecosystem': <CloudQueue />,
+    '/pipeline': <Timeline />,
+    '/connectors/hsm': <VpnKey />,
+    '/contact': <MailOutline />,
+    '/ibm': <WorkspacePremium />,
+    '/crm': <Assessment />,
+    '/enterprise/cloud-posture': <GppGood />,
+    '/enterprise/compliance': <Assessment />,
+    '/enterprise/quantum': <Psychology />,
+    '/enterprise/multicloud': <Cloud />,
+    '/enterprise/inventory': <Storage />,
+    '/enterprise/cspm': <GppGood />,
+    '/enterprise/conformance-packs': <FactCheck />,
+    '/enterprise/terraform': <GitHub />,
+    '/modules': <Category />,
+  };
+
+  const paid = isPaidEdition(edition);
+  const toNav = (path: string, text: string, section?: string, disabled?: boolean): NavItem => ({
+    text,
+    icon: ICON_FOR[path] || <Security />,
+    path,
+    section,
+    disabled,
+  });
+
+  const operationsItems: NavItem[] = [
+    toNav('/dashboard', 'Overview'),
+    toNav('/findings', 'Findings'),
+    toNav('/assets', 'Assets'),
+    toNav('/scanner', 'Scans'),
+    toNav('/bom', 'CBOM'),
+    toNav('/migration', 'PQC Migration'),
+    ...(isDemo ? [toNav('/demo', 'Demo Trail')] : []),
+  ];
+  const postureItems: NavItem[] = [
+    toNav('/cspm', 'Crypto Posture', 'Posture'),
+    toNav('/governance', 'Governance', 'Posture'),
+    toNav('/security/api', 'API Security', 'Posture'),
+    toNav('/analytics', 'Reports', 'Posture'),
+  ];
+  const integrationItems: NavItem[] = [
+    toNav('/tools', 'PATH Scanners', 'Integrations'),
+    toNav('/ecosystem', 'Ecosystem', 'Integrations'),
+    toNav('/pipeline', 'Pipeline', 'Integrations'),
+    toNav('/contact', 'Contact', 'Integrations'),
+    toNav('/ibm', 'IBM Partner Plus', 'Integrations'),
+    ...(isAdminRole(user?.role) ? [toNav('/crm', 'CRM', 'Integrations')] : []),
   ];
 
   const settingsItem: NavItem = { text: 'Settings', icon: <Settings />, path: '/settings' };
   const adminItem: NavItem = { text: 'Admin', icon: <AdminPanelSettings />, path: '/admin' };
-  const allWorkspaceItems = [...navigationItems, settingsItem, ...(isAdminRole(user?.role) ? [adminItem] : [])];
+  const allWorkspaceItems = [...operationsItems, ...postureItems, ...integrationItems, settingsItem, ...(isAdminRole(user?.role) ? [adminItem] : [])];
 
-  const enterpriseItems: NavItem[] = [
-    { text: 'Cloud Posture', icon: <GppGood />, path: '/enterprise/cloud-posture', section: 'Enterprise' },
-    { text: 'Conformance Packs', icon: <FactCheck />, path: '/enterprise/conformance-packs', section: 'Enterprise' },
-    { text: 'Inventory', icon: <Storage />, path: '/enterprise/inventory', section: 'Enterprise' },
-    { text: 'Compliance', icon: <Assessment />, path: '/enterprise/compliance', section: 'Enterprise' },
-    { text: 'Quantum', icon: <Psychology />, path: '/enterprise/quantum', section: 'Enterprise' },
-    { text: 'Multi-Cloud', icon: <Cloud />, path: '/enterprise/multicloud', section: 'Enterprise' },
-    { text: 'CNCF Tools', icon: <CloudQueue />, path: '/enterprise/cncf', section: 'Enterprise' },
-    { text: 'Terraform', icon: <GitHub />, path: '/enterprise/terraform', section: 'Enterprise' },
-    { text: 'CSPM', icon: <GppGood />, path: '/enterprise/cspm', section: 'Enterprise' },
-  ];
+  const enterpriseItems: NavItem[] = OPS_ROUTES.filter((r) => r.enterpriseOnly).map((r) =>
+    toNav(r.path, r.text, 'Enterprise', !paid),
+  );
 
-  const enterpriseNav = enterpriseItems.map((it) => ({ ...it, disabled: !isPaidEdition(edition) }));
+  const enterpriseNav = enterpriseItems;
 
   const navMatch = (item: NavItem) => item.text.toLowerCase().includes(navQuery.trim().toLowerCase());
-  const workspaceSource = navQuery ? allWorkspaceItems : navigationItems;
+  const workspaceSource = navQuery ? allWorkspaceItems : operationsItems;
   const workspaceMatches = navQuery ? workspaceSource.filter(navMatch) : workspaceSource;
-  const bomMatches = navQuery ? bomItems.filter(navMatch) : bomItems;
+  const postureMatches = navQuery ? postureItems.filter(navMatch) : postureItems;
+  const integrationMatches = navQuery ? integrationItems.filter(navMatch) : integrationItems;
   const enterpriseMatches = navQuery ? enterpriseNav.filter(navMatch) : enterpriseNav;
 
   const modulesNav: NavItem[] = [
@@ -226,16 +313,16 @@ const Layout: React.FC = () => {
     navigate(path);
     setDrawerOpen(false);
     setNavQuery('');
-    setMobileSearchOpen(false);
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(path + '/'));
 
   const currentSection = React.useMemo(() => {
-    if (bomItems.some((it) => isActive(it.path)) || location.pathname === '/bom') return 'Five-BOM';
+    if (postureItems.some((it) => isActive(it.path))) return 'Posture';
+    if (integrationItems.some((it) => isActive(it.path))) return 'Integrations';
     if (enterpriseItems.some((it) => isActive(it.path))) return 'Enterprise';
     if (location.pathname.startsWith('/modules')) return 'Security Modules';
-    return 'Workspace';
+    return 'Operations';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
@@ -243,13 +330,13 @@ const Layout: React.FC = () => {
   const isDarkMode = mode === 'dark';
 
   const currentTitle = React.useMemo(() => {
-    const all = [...allWorkspaceItems, ...bomItems, ...enterpriseItems, ...modulesNav];
+    const all = [...allWorkspaceItems, ...enterpriseItems, ...modulesNav];
     const active = all.find((it) => it.path !== '/modules' && isActive(it.path));
     if (location.pathname.startsWith('/modules/') && location.pathname !== '/modules') {
       const m = MODULES.find((x) => x.id === location.pathname.split('/')[2]);
       return m?.name ?? 'Security Module';
     }
-    return active?.text ?? 'Command Center';
+    return active?.text ?? titleFor(location.pathname);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
@@ -384,18 +471,27 @@ const Layout: React.FC = () => {
         {workspaceMatches.length > 0 && (
           <List sx={{ px: 0, py: 0 }}>
             <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
-              Workspace
+              Operations
             </Typography>
             {workspaceMatches.map((item) => renderNavItem(item))}
           </List>
         )}
 
-        {bomMatches.length > 0 && (
+        {postureMatches.length > 0 && (
           <List sx={{ px: 0, py: 0 }}>
             <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
-              Five-BOM
+              Posture
             </Typography>
-            {bomMatches.map((item) => renderNavItem(item))}
+            {postureMatches.map((item) => renderNavItem(item))}
+          </List>
+        )}
+
+        {integrationMatches.length > 0 && (
+          <List sx={{ px: 0, py: 0 }}>
+            <Typography variant="caption" sx={{ ...sidebarSectionLabelSx, display: sidebarCollapsed && isDesktop ? 'none' : 'block' }}>
+              Integrations
+            </Typography>
+            {integrationMatches.map((item) => renderNavItem(item))}
           </List>
         )}
 
@@ -410,7 +506,7 @@ const Layout: React.FC = () => {
           </List>
         )}
 
-        {navQuery && workspaceMatches.length === 0 && enterpriseMatches.length === 0 && (
+        {navQuery && workspaceMatches.length === 0 && postureMatches.length === 0 && integrationMatches.length === 0 && enterpriseMatches.length === 0 && (
           <Typography variant="caption" sx={{ px: 2.5, py: 1, display: 'block', color: designSystem.proBlue.textMuted }}>
             No navigation matches “{navQuery}”.
           </Typography>
@@ -484,21 +580,12 @@ const Layout: React.FC = () => {
               }}
             />
           )}
-          <Chip
-            icon={<Psychology sx={{ fontSize: 14, color: `${designSystem.proBlue.accentMuted} !important` }} />}
-            label="PQC Ready"
-            size="small"
-            sx={{
-              width: '100%',
-              justifyContent: 'flex-start',
-              fontWeight: 600,
-              fontSize: '0.75rem',
-              bgcolor: 'rgba(196,120,58,0.16)',
-              color: designSystem.proBlue.accentLight,
-              border: 1,
-              borderColor: 'rgba(224,154,90,0.32)',
-            }}
-          />
+          <Box sx={{ px: 0.5 }}>
+            <StatusChip status={backendReachable ? 'healthy' : isDemo ? 'warning' : 'disconnected'} />
+            <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'rgba(247,245,251,0.45)' }}>
+              {backendReachable ? 'API reachable' : isDemo ? 'Demo session · no live estate' : 'API disconnected'}
+            </Typography>
+          </Box>
           <TrademarkNotice
             compact
             sx={{ color: 'rgba(247,245,251,0.45)', px: 0.5 }}
@@ -521,7 +608,7 @@ const Layout: React.FC = () => {
           ...appBarPaperSx(mode),
         }}
       >
-        <Toolbar sx={{ minHeight: 60, gap: 1.25, px: { xs: 1.5, md: 2.5 } }}>
+        <Toolbar sx={{ minHeight: 60, maxHeight: 60, gap: 1.25, px: { xs: 1.5, md: 2.5 }, flexWrap: 'nowrap', overflow: 'hidden' }}>
           {!isDesktop && (
             <IconButton
               edge="start"
@@ -562,7 +649,14 @@ const Layout: React.FC = () => {
 
           <Box sx={{ flexGrow: 1 }} />
 
-          <Box sx={appBarSearchSx(mode)}>
+          <Box
+            sx={{ ...appBarSearchSx(mode), cursor: 'pointer' }}
+            onClick={() => setPaletteOpen(true)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setPaletteOpen(true); }}
+            role="button"
+            tabIndex={0}
+            aria-label="Open workspace search"
+          >
             <Search
               sx={{
                 fontSize: 18,
@@ -571,27 +665,26 @@ const Layout: React.FC = () => {
                 opacity: 0.85,
               }}
             />
-            <InputBase
-              inputRef={searchInputRef}
-              value={topSearch}
-              onChange={(e) => setTopSearch(e.target.value)}
-              placeholder="Search posture, scans, findings…"
-              sx={{
-                fontSize: '0.8125rem',
-                fontWeight: 500,
-                flexGrow: 1,
-                color: isDarkMode ? blue.textPrimary : blue.navyMid,
-                '& input': { py: 0.25 },
-                '& input::placeholder': {
-                  color: isDarkMode ? blue.textMuted : '#71717a',
-                  opacity: 1,
-                },
-              }}
-            />
-            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'Source Code Pro, monospace' }}>
+            <Typography noWrap sx={{ fontSize: '0.8125rem', fontWeight: 500, flexGrow: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', color: isDarkMode ? blue.textMuted : '#71717a' }}>
+              Search
+            </Typography>
+            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'JetBrains Mono, monospace' }}>
               ⌘K
             </Typography>
           </Box>
+
+          <FormControl size="small" sx={{ minWidth: 118, display: { xs: 'none', md: 'inline-flex' } }}>
+            <Select
+              value={persona}
+              onChange={(e) => setPersona(e.target.value as OpsPersona)}
+              aria-label="Operator view"
+              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
+            >
+              <MenuItem value="ciso">{PERSONA_LABEL.ciso}</MenuItem>
+              <MenuItem value="analyst">{PERSONA_LABEL.analyst}</MenuItem>
+              <MenuItem value="engineer">{PERSONA_LABEL.engineer}</MenuItem>
+            </Select>
+          </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 132, display: { xs: 'none', md: 'inline-flex' } }}>
             <Select
@@ -624,9 +717,9 @@ const Layout: React.FC = () => {
           <Stack direction="row" spacing={0.75} alignItems="center">
             <Tooltip title="Search">
               <IconButton
-                onClick={() => setMobileSearchOpen((v) => !v)}
-                aria-label="Search"
-                sx={{ ...appBarIconButtonSx(mode), display: { xs: 'inline-flex', md: 'none' } }}
+                onClick={() => setPaletteOpen(true)}
+                aria-label="Search workspace"
+                sx={{ ...appBarIconButtonSx(mode), display: { xs: 'inline-flex', lg: 'none' } }}
               >
                 <Search sx={{ fontSize: 18 }} />
               </IconButton>
@@ -634,16 +727,30 @@ const Layout: React.FC = () => {
 
             <ThemeToggle mode={mode} onToggle={toggleMode} compact />
 
-            <Tooltip title="Refresh">
-              <IconButton sx={{ ...appBarIconButtonSx(mode), display: { xs: 'none', sm: 'inline-flex' } }}>
+            <Tooltip title="Refresh workspace data">
+              <IconButton
+                aria-label="Refresh"
+                onClick={() => queryClient.invalidateQueries()}
+                sx={{ ...appBarIconButtonSx(mode), display: { xs: 'none', sm: 'inline-flex' } }}
+              >
                 <Refresh sx={{ fontSize: 18 }} />
               </IconButton>
             </Tooltip>
 
+            <Tooltip title="Help">
+              <IconButton aria-label="Open help" onClick={() => setHelpOpen(true)} sx={appBarIconButtonSx(mode)}>
+                <HelpOutline sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+
             <Tooltip title="Notifications">
-              <IconButton sx={appBarIconButtonSx(mode)}>
+              <IconButton
+                aria-label={noticeCount ? `${noticeCount} notifications` : 'No notifications'}
+                onClick={(e) => setNotificationsAnchor(e.currentTarget)}
+                sx={appBarIconButtonSx(mode)}
+              >
                 <Badge
-                  badgeContent={notifications}
+                  badgeContent={noticeCount}
                   color="error"
                   sx={{
                     '& .MuiBadge-badge': {
@@ -729,31 +836,38 @@ const Layout: React.FC = () => {
               <Logout sx={{ fontSize: 18, mr: 1.5 }} /> Logout
             </MenuItem>
           </Menu>
-        </Toolbar>
-
-        <Collapse in={mobileSearchOpen && !isDesktop} timeout={reduceMotion ? 0 : 220} unmountOnExit>
-          <Box sx={{ px: 1.5, pb: 1.25, pt: 0.25 }}>
-            <Box sx={{ ...appBarSearchSx(mode), display: 'flex', width: '100%' }}>
-              <Search sx={{ fontSize: 18, color: isDarkMode ? blue.textMuted : blue.royal, mr: 1, opacity: 0.85 }} />
-              <InputBase
-                autoFocus
-                value={topSearch}
-                onChange={(e) => setTopSearch(e.target.value)}
-                placeholder="Search posture, scans, findings…"
-                sx={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 500,
-                  flexGrow: 1,
-                  color: isDarkMode ? blue.textPrimary : blue.navyMid,
-                  '& input::placeholder': { color: isDarkMode ? blue.textMuted : '#8a8376', opacity: 1 },
+          <Menu
+            anchorEl={notificationsAnchor}
+            open={Boolean(notificationsAnchor)}
+            onClose={() => setNotificationsAnchor(null)}
+            MenuListProps={{ 'aria-label': 'Notifications' }}
+          >
+            {failedScans.length === 0 && criticalFindings.length === 0 && (
+              <MenuItem disabled>No scan failures or critical findings in this workspace.</MenuItem>
+            )}
+            {failedScans.slice(0, 5).map((s) => (
+              <MenuItem
+                key={s.id}
+                onClick={() => {
+                  setNotificationsAnchor(null);
+                  navigate(`/scanner?scan=${encodeURIComponent(s.id)}`);
                 }}
-              />
-              <IconButton size="small" onClick={() => setMobileSearchOpen(false)} aria-label="Close search">
-                <ChevronLeft sx={{ fontSize: 18, color: isDarkMode ? blue.textMuted : blue.royal }} />
-              </IconButton>
-            </Box>
-          </Box>
-        </Collapse>
+              >
+                Scan failed · {s.target || s.id}
+              </MenuItem>
+            ))}
+            {criticalFindings.length > 0 && (
+              <MenuItem
+                onClick={() => {
+                  setNotificationsAnchor(null);
+                  navigate('/findings?severity=critical');
+                }}
+              >
+                {criticalFindings.length} critical/high findings
+              </MenuItem>
+            )}
+          </Menu>
+        </Toolbar>
       </AppBar>
 
       <Drawer
@@ -816,6 +930,7 @@ const Layout: React.FC = () => {
         >
           <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: { xs: 2, md: 3 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />
+            <OpsBreadcrumbs />
             <Outlet />
           </Box>
         </motion.div>
@@ -837,15 +952,15 @@ const Layout: React.FC = () => {
         >
           <BottomNavigation
             showLabels
-            value={Math.max(0, [navigationItems[0], navigationItems[2], navigationItems[3], navigationItems[4]].findIndex((it) => isActive(it.path)))}
+            value={Math.max(0, [operationsItems[0], operationsItems[1], operationsItems[3], operationsItems[2]].findIndex((it) => isActive(it.path)))}
             onChange={(_, idx) => {
-              const mobileNav = [navigationItems[0], navigationItems[2], navigationItems[3], navigationItems[4]];
+              const mobileNav = [operationsItems[0], operationsItems[1], operationsItems[3], operationsItems[2]];
               const item = mobileNav[idx];
               if (item) handleNavigation(item.path);
             }}
             sx={{ height: 56 }}
           >
-            {[navigationItems[0], navigationItems[2], navigationItems[3], navigationItems[4]].map((item) => (
+            {[operationsItems[0], operationsItems[1], operationsItems[3], operationsItems[2]].map((item) => (
               <BottomNavigationAction key={item.path} label={item.text.split(' ')[0]} icon={item.icon} />
             ))}
           </BottomNavigation>
@@ -853,6 +968,15 @@ const Layout: React.FC = () => {
       )}
       <RivicQAssistant />
       <DemoTrailCoach />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        findings={opsFindings}
+        scans={opsScans}
+        assets={opsAssets}
+        paid={paid}
+      />
+      <HelpDrawer open={helpOpen} onClose={() => setHelpOpen(false)} />
     </Box>
   );
 };

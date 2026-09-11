@@ -1,6 +1,6 @@
-# Five-BOM DevSecOps framework
+# BOM DevSecOps framework
 
-Honest catalog of **QBOM, AIBOM, SBOM, IBOM, and CBOM** as implemented in RivicQ Security Cloud.
+Honest catalog of **CBOM and SBOM** (Community Cryptographic Security Posture Management) plus **QBOM, HBOM, AIBOM, and IBOM** as Enterprise control-plane layers.
 This is not a certification and it does not claim partner APIs without customer credentials.
 
 Companion: [editions.md](editions.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [PRODUCT_STATUS.md](PRODUCT_STATUS.md) · [PQC_MIGRATION.md](PQC_MIGRATION.md) · [ROADMAP.md](ROADMAP.md)
@@ -12,9 +12,10 @@ Companion: [editions.md](editions.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [
 | Layer | Role | Community (OSS) | Enterprise |
 |---|---|---|---|
 | **CBOM** | Cryptographic inventory (algorithms, keys, certs, libraries) | Yes — CycloneDX 1.6 | Same engine |
-| **QBOM** | Quantum vulnerability, CRQC urgency, PQC replacement | Yes — local `qiskitprofile` | Same + optional quantum runtime |
+| **QBOM** | Quantum vulnerability, CRQC urgency, PQC replacement | Locked — Community still classifies algorithms on CBOM | Licensed QBOM view + optional quantum runtime |
 | **SBOM** | Software components with a crypto-library flag | Yes — lockfiles / local path | Same + optional Syft/Trivy |
-| **AIBOM** | AI/ML provenance, EU AI Act risk tier, serving crypto | Locked (declared inventory only) | Declared registry — **not** a model-weight scanner |
+| **HBOM** | Hardware / HSM / TPM / QSIC declared inventory | Locked | Connector when credentials exist — not firmware RE |
+| **AIBOM** | AI/ML provenance, EU AI Act risk tier, serving crypto | Locked | Declared registry — **not** a model-weight scanner |
 | **IBOM** | Human, machine, and service identities bound to crypto | Secrets still land in CBOM | Directory / NHI connector when a key exists |
 
 The scan report JSON remains `discovery.ScanResult` (`GET /scans/:id/report`). Unified BOM is a **view** over that contract, not a second scanner.
@@ -27,7 +28,7 @@ The scan report JSON remains `discovery.ScanResult` (`GET /scans/:id/report`). U
 | 2 Source commit | cdxgen / syft from lock files | SBOM JSON | Yes |
 | 3 CI/CD build | `rivicq scan .` unified merge | unified-bom view | Yes |
 | 4 Container scan | Optional Trivy/Grype + crypto libs | Container CBOM patch | Yes |
-| 5 Staging deploy | TLS/HTTPS + QBOM scoring | CBOM report JSON | Yes |
+| 5 Staging deploy | TLS/HTTPS + PQC classification on CBOM | CBOM report JSON | Yes |
 | 6 Security gate | Policy gate BLOCK / WARN / ALLOW | Pass / block | Yes |
 | 7 Production | Continuous EaaS monitoring | Live dashboard | Enterprise |
 | 8 Compliance report | DORA / NIS2 / SOC 2 mappings | JSON or pack | Yes (JSON) |
@@ -69,19 +70,19 @@ GET /security/api
 GET /security/ai
 ```
 
-Edition flags: Community `aibom=false`, `ibom=false`, `hsmConnector=false`, `apiSecurity=true`, `devSecOpsPipeline=true`.
-Enterprise enables AIBOM, IBOM, HSM connector, AI security, and the DORA pack flag.
+Edition flags: Community `qbom=false`, `hbom=false`, `aibom=false`, `ibom=false`, `hsmConnector=false`, `apiSecurity=true`, `devSecOpsPipeline=true`.
+Enterprise enables QBOM, HBOM, AIBOM, IBOM, HSM connector, AI security, and the DORA pack flag.
 
-## Console routes (Community-accessible)
+## Console routes
 
-Locked Enterprise tiles stay visible; they do not require `RequireEnterprise` except existing paid modules.
+`/security/ai` and `/connectors/hsm` require the Enterprise edition (UI lock + API 403 on Community).
 
 | Path | Page |
 |---|---|
-| `/bom` | Five-BOM intelligence |
+| `/bom` | CBOM · SBOM intelligence (Enterprise layers locked) |
 | `/pipeline` | Eight-stage pipeline |
 | `/security/api` | TLS/HTTPS API surface |
-| `/security/ai` | AIBOM (locked on Community) |
+| `/security/ai` | AIBOM (Enterprise) |
 | `/connectors/hsm` | HSM + quantum status |
 | `/governance` | Control mappings |
 | `/migration` | PQC shift roadmap |

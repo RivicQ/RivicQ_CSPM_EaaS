@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- **Cryptographic Security Posture Management** — Community is CBOM + SBOM. QBOM, HBOM, AIBOM, and IBOM are Enterprise (APIs return 403 on OSS). Local PQC classes on CBOM findings stay Community.
+- **Public website chrome** — Home, Product, CSPM, CBOM, PQC, Enterprise, Security, Pricing, Request demo, IBM Partner Plus, and Contact share the rivicq.com nebula shell (black `#000000`, violet `#7C3AED`, Inter, pill CTAs). Contact is a marketing page, not a cream Command Center card. Console Overview keeps the same tokens.
+- **RivicQ Graph** (wordmark **GRAPH**) is the labeled security-graph demo at `fabric/` and `/fabric`. Formerly NEXUS / Quantum Security Fabric. Finding IDs remain `QSF-*`. `/nexus` still redirects. Notes: [docs/FABRIC.md](docs/FABRIC.md), [docs/GRAPH.md](docs/GRAPH.md).
+- **Deep-space nebula chrome** — black canvas `#000000`, violet `#7C3AED`, Inter, pill CTAs. Public home, console, docs, marketing, and Graph share the same visual system. Platform cards cover AI engineering, DevSecOps, cloud security, API security, GRC mappings, and quantum risk. Quantum scores on Pages come from scans you run, not a silent live estate.
+- JWT **tenant isolation** on Community scan/inventory/findings/GitHub/intelligence paths. QBOM/HBOM/AIBOM APIs 403 on Community. Unauthenticated Home CBOM pilot stays on the public tenant. Enterprise inventory, compliance, quantum, multi-cloud, Terraform, and CNCF handlers ignore spoofable `X-Tenant-ID`.
+- **Operator UX:** workflow nav (Overview / Findings / Scans), command palette (⌘K), breadcrumbs, persona layout, findings investigation from `GET /scans/findings`. Scan progress is indeterminate unless the API sends a percent. Fake notification counts, schedule toggles, and default compliance 75 were removed.
+- Optional **outsourced scanners** (Syft, Trivy, Grype, Gitleaks, OSV) run on local `rivicq scan .` / scan intelligence when the binary is on PATH. Exit codes that mean “findings exist” are still parsed. Core status no longer claims Trivy/Syft/CodeQL are present unless `LookPath` succeeds.
+
 ## [1.6.4] - 2026-09-06
 
 ### Fixed
@@ -26,13 +37,13 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Security Cloud chrome is dark-native zinc (Inter + JetBrains Mono) with Cmd+K search, workspace switcher, and time-range controls. Features and APIs are unchanged.
-- GitHub Pages now creates `web/build/docs` before publishing NEXUS.md.
+- GitHub Pages now creates `web/build/docs` before publishing FABRIC.md.
 - golangci-lint ignores fixture trees; errcheck/staticcheck nits in OAuth, dotenv, and PQC seed paths are closed.
 
 ## [1.6.0] - 2026-09-06
 
 ### Added
-- **NEXUS Quantum Security Fabric** — original enterprise security-graph demo (`nexus/`, `/nexus` on Pages): command center, CSPM, graph, CryptoBOM, PQC/HNDL, five-BOM views, secrets/PKI (names only), compliance mappings, gated AI/automation, and disabled checkout. Labeled synthetic data only; secret values are never rendered ([docs/NEXUS.md](docs/NEXUS.md)).
+- **Quantum Security Fabric** — original enterprise security-graph demo (`fabric/`, `/fabric` on Pages): command center, CSPM, graph, CryptoBOM, PQC/HNDL, five-BOM views, secrets/PKI (names only), compliance mappings, gated AI/automation, and disabled checkout. Labeled synthetic data only; secret values are never rendered ([docs/FABRIC.md](docs/FABRIC.md)).
 
 ## [1.5.9] - 2026-09-03
 

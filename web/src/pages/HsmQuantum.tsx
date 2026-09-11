@@ -24,7 +24,7 @@ const HsmQuantum: React.FC = () => {
     <PageFrame
       eyebrow="Connectors"
       title="HSM and quantum integration"
-      subtitle="Local QBOM scoring is always on. PKCS#11 / cloud HSM and optional quantum runtime stay disconnected until you supply credentials."
+      subtitle="PQC classification on CBOM findings is Community. PKCS#11 / cloud HSM and QBOM stay disconnected until an Enterprise license and credentials exist."
     >
       <Alert severity="info" sx={{ mb: 3 }}>
         {hsm?.note || 'HSM integration does not extract keys or reverse-engineer firmware.'} {hsm?.qsic}
@@ -53,7 +53,7 @@ const HsmQuantum: React.FC = () => {
           <GlassCard>
             <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>Quantum</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Scoring: {q?.scoring || 'qiskitprofile (local-classical)'}. Runtime is optional and never required for QBOM.
+              Scoring: {q?.scoring || 'qiskitprofile (local-classical)'}. Runtime is optional and never required for CBOM PQC classes.
             </Typography>
             <Stack spacing={1}>
               <Stack direction="row" spacing={1}><Chip size="small" label="runtime" /><Typography variant="body2">{q?.runtime?.connected ? 'API key present' : 'Not connected'}</Typography></Stack>

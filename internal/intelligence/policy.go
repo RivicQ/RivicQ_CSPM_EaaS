@@ -33,15 +33,15 @@ type PolicyHit struct {
 }
 
 type GateResult struct {
-	Passed    bool        `json:"passed"`
-	Failed    bool        `json:"failed"`
-	Action    Action      `json:"action"`
-	Decision  string      `json:"decision"`
-	Blocked   int         `json:"blocked"`
-	Warned    int         `json:"warned"`
-	Hits      []PolicyHit `json:"hits"`
-	Reasons   []string    `json:"reasons,omitempty"`
-	Warnings  []string    `json:"warnings,omitempty"`
+	Passed   bool        `json:"passed"`
+	Failed   bool        `json:"failed"`
+	Action   Action      `json:"action"`
+	Decision string      `json:"decision"`
+	Blocked  int         `json:"blocked"`
+	Warned   int         `json:"warned"`
+	Hits     []PolicyHit `json:"hits"`
+	Reasons  []string    `json:"reasons,omitempty"`
+	Warnings []string    `json:"warnings,omitempty"`
 }
 
 func DefaultPolicies() []Policy {

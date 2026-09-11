@@ -10,12 +10,14 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Public GitHub scans require a running API (`make dev-backend`) or the CLI.
 - Demo Access on Pages is an isolated client session (`rivicq-demo-session`), not a JWT, and cannot see customer data.
 - `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend.
-- `/nexus` is a separate labeled NEXUS demo. It uses synthetic Northbridge Exchange data, never renders secret values, and does not collect payment or attach live cloud/IdP/vault credentials.
+- `/fabric` is a separate labeled RivicQ Graph demo (wordmark GRAPH; formerly NEXUS / FABRIC). It uses synthetic Northbridge Exchange data, never renders secret values, and does not collect payment or attach live cloud/IdP/vault credentials.
 
 ## Scanner accuracy
 
 - RSA-2048 is **classified**, not automatically marked vulnerable.
 - CVE overlay uses **exact** package versions. Rejected NVD entries are not treated as vulns.
+- Optional PATH tools (Syft, Trivy, Grype, Gitleaks, OSV Scanner) run on local directory scans when installed. They are skipped when missing. Set `RIVICQ_EXTERNAL_TOOLS=0` to disable. Gitleaks findings never include secret values. See [INTEGRATIONS.md](INTEGRATIONS.md).
+- `rivicq scan . --fail-on critical|high` (severity) in addition to policy BLOCK/WARN. See [CORE_ENGINE.md](CORE_ENGINE.md).
 - Detector source files (`tls_scanner.go`, etc.) and `fixtures/` / `testdata/` are skipped on default `rivicq scan .` so the engine does not fail its own self-scan.
 - eBPF / Cilium is an **optional integration**, not a shipped kernel program.
 
@@ -40,6 +42,7 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Compliance PDFs and dashboards are **control mappings**, not certifications.
 - RBAC roles: Admin, Operator, Analyst, Viewer. Mutating SSO and cloud-connector APIs require **Admin**. `RequireRole` is enforced on those routes.
 - API keys and webhooks require a JWT (or API-key) **tenant claim**. The `X-Tenant-ID` header is not a source of truth.
+- Community scan, inventory, findings, GitHub scans, QBOM, and intelligence lists are partitioned by JWT `tenant_id`. Unauthenticated requests share the **public tenant** (Home CBOM pilot). Cross-tenant scan IDs return 404.
 
 ## Third-party names
 

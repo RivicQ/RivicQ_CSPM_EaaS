@@ -46,6 +46,8 @@ type Features struct {
 	APIKeysWebhooks      bool `json:"apiKeysWebhooks"`
 	AIBOM                bool `json:"aibom"`
 	IBOM                 bool `json:"ibom"`
+	QBOM                 bool `json:"qbom"`
+	HBOM                 bool `json:"hbom"`
 	ApiSecurity          bool `json:"apiSecurity"`
 	AiSecurity           bool `json:"aiSecurity"`
 	HSMConnector         bool `json:"hsmConnector"`
@@ -102,6 +104,8 @@ func ossConfig() *Config {
 			APIKeysWebhooks:      false,
 			AIBOM:                false,
 			IBOM:                 false,
+			QBOM:                 false,
+			HBOM:                 false,
 			ApiSecurity:          true,
 			AiSecurity:           false,
 			HSMConnector:         false,
@@ -147,6 +151,8 @@ func enterpriseConfig() *Config {
 			APIKeysWebhooks:      true,
 			AIBOM:                true,
 			IBOM:                 true,
+			QBOM:                 true,
+			HBOM:                 true,
 			ApiSecurity:          true,
 			AiSecurity:           true,
 			HSMConnector:         true,
@@ -162,8 +168,8 @@ func (c *Config) Public() map[string]any {
 		c = Detect()
 	}
 	return map[string]any{
-		"edition":  c.Edition,
-		"features": c.Features,
+		"edition":             c.Edition,
+		"features":            c.Features,
 		"client_architecture": []string{"discover", "mitigate", "report"},
 		"scan_targets": map[string]any{
 			"website":  map[string]any{"enabled": c.Features.WebsiteScan, "resources": []string{"tls", "https"}},
@@ -182,10 +188,12 @@ func (c *Config) Public() map[string]any {
 		},
 		"bom_layers": map[string]any{
 			"cbom":  true,
-			"qbom":  c.Features.QiskitProfile,
 			"sbom":  c.Features.LocalSBOM,
+			"qbom":  c.Features.QBOM,
+			"hbom":  c.Features.HBOM,
 			"aibom": c.Features.AIBOM,
 			"ibom":  c.Features.IBOM,
+			"note":  "Community is CBOM + SBOM cryptographic security posture management. QBOM, HBOM, AIBOM, and IBOM are Enterprise control-plane layers.",
 		},
 	}
 }

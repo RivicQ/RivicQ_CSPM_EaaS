@@ -13,7 +13,10 @@ func FromDiscovery(f discovery.Finding) Finding {
 		Source:      "live",
 		Scanner:     f.Protocol,
 		Asset:       f.TargetLabel,
+		AssetID:     f.TargetID,
 		Component:   f.Algorithm,
+		Title:       f.Title,
+		Description: f.Description,
 		Severity:    string(f.Severity),
 		Evidence:    f.Evidence,
 		Location:    f.Host,
@@ -42,16 +45,16 @@ func FromDiscovery(f discovery.Finding) Finding {
 	if f.Severity != "" && severityRank(string(f.Severity)) > severityRank(n.Severity) {
 		n.Severity = normalizeSeverity(string(f.Severity))
 	}
-	return n
+	return FinalizeFinding(n)
 }
 
 // ContentFinding is a scanner-agnostic DTO so this package does not import API handlers.
 type ContentFinding struct {
 	ID, FilePath, FindingType, Algorithm, Severity, Description, Remediation, Evidence, Tool, CVE, CWE string
-	Line, KeyLength                                                                                     int
-	QuantumSafe                                                                                         bool
-	Compliance                                                                                          []string
-	Demo                                                                                                bool
+	Line, KeyLength                                                                                    int
+	QuantumSafe                                                                                        bool
+	Compliance                                                                                         []string
+	Demo                                                                                               bool
 }
 
 func FromContent(repo string, f ContentFinding) Finding {
@@ -92,7 +95,7 @@ func FromContent(repo string, f ContentFinding) Finding {
 	if severityRank(n.Risk.Level) > severityRank(n.Severity) {
 		n.Severity = n.Risk.Level
 	}
-	return n
+	return FinalizeFinding(n)
 }
 
 func FromDiscoveryResult(res *discovery.ScanResult) []Finding {

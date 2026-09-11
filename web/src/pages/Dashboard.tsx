@@ -31,6 +31,7 @@ import AlgorithmDistributionChart from '../components/dashboard/AlgorithmDistrib
 import PQCReadinessPanel from '../components/dashboard/PQCReadinessPanel';
 import QuickActionsGrid, { DEFAULT_QUICK_ACTIONS } from '../components/dashboard/QuickActionsGrid';
 import CspmCapabilityStrip from '../components/dashboard/CspmCapabilityStrip';
+import DomainOpsStrip from '../components/dashboard/DomainOpsStrip';
 import ComplianceScoreGrid from '../components/dashboard/ComplianceScoreGrid';
 import TopFindingsList from '../components/dashboard/TopFindingsList';
 import ScanActivityTimeline from '../components/dashboard/ScanActivityTimeline';
@@ -39,6 +40,7 @@ import ThreatIntelStrip from '../components/dashboard/ThreatIntelStrip';
 import dashboardDesign from '../theme/dashboardDesign';
 import { heroPrimaryCtaSx, heroSecondaryCtaSx, metricValueSx } from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
+import { loadPersona, PERSONA_HELP, type OpsPersona } from '../ops/persona';
 
 const ChartTooltipContent: React.FC<any> = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -73,6 +75,15 @@ const Dashboard: React.FC = () => {
   const [selectedAlgorithm, setSelectedAlgorithm] = React.useState<string | null>(null);
   const [selectedHeatmapCell, setSelectedHeatmapCell] = React.useState<string | null>(null);
   const [drilldown, setDrilldown] = React.useState<DrilldownState>(null);
+  const [persona, setPersona] = React.useState<OpsPersona>(() => loadPersona());
+  React.useEffect(() => {
+    const onPersona = (e: Event) => {
+      const next = (e as CustomEvent).detail;
+      if (next === 'ciso' || next === 'analyst' || next === 'engineer') setPersona(next);
+    };
+    window.addEventListener('rivicq-persona', onPersona);
+    return () => window.removeEventListener('rivicq-persona', onPersona);
+  }, []);
 
   const { data: summaryData, isLoading: summaryLoading } = useQuery({
     queryKey: ['dashboard-summary'],
@@ -183,11 +194,18 @@ const Dashboard: React.FC = () => {
     ? Math.round((pqcStats.quantumSafe / (pqcStats.quantumSafe + pqcStats.vulnerable)) * 100)
     : 0;
 
-  const quickActions = React.useMemo(() => (
-    isPaidEdition(edition)
+  const quickActions = React.useMemo(() => {
+    let list = isPaidEdition(edition)
       ? DEFAULT_QUICK_ACTIONS
-      : DEFAULT_QUICK_ACTIONS.filter((a) => !a.path.startsWith('/enterprise'))
-  ), [edition]);
+      : DEFAULT_QUICK_ACTIONS.filter((a) => !a.path.startsWith('/enterprise'));
+    if (persona === 'ciso') {
+      list = list.filter((a) => !['GitHub Scan', 'Run Scan'].includes(a.label));
+    }
+    if (persona === 'engineer') {
+      list = list.filter((a) => ['Run Scan', 'GitHub Scan', 'Critical findings', 'CBOM'].includes(a.label) || a.path.startsWith('/scanner') || a.path === '/tools');
+    }
+    return list;
+  }, [edition, persona]);
 
   const riskTotal = riskData.reduce((s, d) => s + d.value, 0);
 
@@ -225,7 +243,7 @@ const Dashboard: React.FC = () => {
           criticalCount={0}
           posture={0}
           items={[]}
-          onOpenQueue={() => navigate('/scanner')}
+          onOpenQueue={() => navigate('/findings')}
           action={
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               <Button variant="contained" disableElevation endIcon={<ArrowForward />} onClick={() => navigate('/scanner')} sx={heroPrimaryCtaSx}>
@@ -252,7 +270,7 @@ const Dashboard: React.FC = () => {
       <InboxHero
         eyebrow="Security Cloud"
         title="Inbox · today’s work"
-        subtitle="Review open findings, then scan, remediate, and export evidence. Five-BOM stays on the same estate."
+        subtitle="Review open findings, then scan, remediate, and export evidence. Community CBOM and SBOM stay on this estate; QBOM/HBOM/AIBOM/IBOM are Enterprise."
         openCount={totalFindings}
         criticalCount={findings.critical ?? 0}
         posture={healthScore}
@@ -262,18 +280,16 @@ const Dashboard: React.FC = () => {
           severity: f.severity,
           resource: f.resource,
         }))}
-        onOpenQueue={() => openDrill('findings', 'Open findings', { subtitle: 'Representative records from the estate' })}
-        onSelectItem={(id) => {
-          const f = model.openFindings.find((x) => x.id === id);
-          openDrill(f?.cveId ? 'cve' : 'findings', f?.cveId || f?.title || 'Finding', { cveId: f?.cveId, subtitle: f?.message });
-        }}
+        onOpenQueue={() => navigate('/findings')}
+        onSelectItem={(id) => navigate(`/findings?id=${encodeURIComponent(id)}`)}
         meta={
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             <ProvenanceChip kind={model.dataMode} label={model.dataMode === 'demo' ? 'DEMO ENVIRONMENT' : 'LIVE'} />
+            <Typography variant="caption" color="text.secondary">{PERSONA_HELP[persona]}</Typography>
             <Button size="small" startIcon={<GitHub sx={{ fontSize: 16 }} />} onClick={() => navigate('/scanner?tab=github')}>
               Scan GitHub
             </Button>
-            <Button size="small" onClick={() => navigate('/bom')}>Five-BOM</Button>
+            <Button size="small" onClick={() => navigate('/bom')}>CBOM</Button>
             {isPaidEdition(edition) && (
               <Button size="small" endIcon={<ArrowForward sx={{ fontSize: 14 }} />} onClick={() => navigate('/enterprise/cloud-posture')}>
                 Cloud posture
@@ -283,7 +299,13 @@ const Dashboard: React.FC = () => {
         }
       />
 
-      <CspmCapabilityStrip onNavigate={navigate} />
+      {persona !== 'ciso' && <CspmCapabilityStrip onNavigate={navigate} />}
+
+      <Box sx={{ mb: dashboardDesign.layout.sectionGap }}>
+        <DashboardPanel title="Operating domains" subtitle="AI, DevSecOps, cloud, API, GRC, and quantum risk — same engine, labeled scan data on Pages">
+          <DomainOpsStrip />
+        </DashboardPanel>
+      </Box>
 
       <QuickActionsGrid actions={quickActions} onNavigate={navigate} />
 
@@ -332,7 +354,7 @@ const Dashboard: React.FC = () => {
             icon={<NotificationsActive />}
             accent={dashboardDesign.severity.high}
             delay={2}
-            onClick={() => openDrill('findings', 'Open findings', { subtitle: 'Representative records from the estate' })}
+            onClick={() => navigate('/findings')}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -494,7 +516,7 @@ const Dashboard: React.FC = () => {
 
       <Grid container spacing={dashboardDesign.layout.gridSpacing} sx={{ mb: dashboardDesign.layout.sectionGap }}>
         <Grid item xs={12} md={6}>
-          <DashboardPanel title="PQC Migration Readiness" subtitle="Post-quantum cryptography posture" delay={5}>
+          <DashboardPanel title="PQC Migration Readiness" subtitle="From scan intelligence in this workspace — not a silent live estate on Pages" delay={5}>
             <PQCReadinessPanel {...pqcStats} />
           </DashboardPanel>
         </Grid>
@@ -591,7 +613,7 @@ const Dashboard: React.FC = () => {
           borderRadius: `${dashboardDesign.radius.lg}px`,
           border: 1,
           borderColor: 'divider',
-          bgcolor: isDark ? 'rgba(196,120,58,0.1)' : 'rgba(196,120,58,0.06)',
+          bgcolor: isDark ? 'rgba(124,58,237,0.1)' : 'rgba(124,58,237,0.06)',
           display: 'flex',
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',

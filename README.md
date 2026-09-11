@@ -1,8 +1,8 @@
-# RivicQ — Cryptographic Security Cloud
+# RivicQ — Cryptographic Security Posture Management
 
 **RivicQ GmbH** (Berlin) · Community **open source** (Apache License 2.0) and **Enterprise** (commercial)
 
-RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AIBOM, SBOM, IBOM, CBOM), and DevSecOps. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
+RivicQ is **Cryptographic Security Posture Management** (CSPM): Community inventories cryptography (CBOM) and software components (SBOM). QBOM, HBOM, AIBOM, and IBOM are licensed Enterprise control-plane layers. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/github/actions/workflow/status/RivicQ/RivicQ_CSPM_EaaS/pages.yml?label=GitHub%20Pages)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions/workflows/pages.yml)
@@ -11,7 +11,7 @@ RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AI
 | Resource | URL |
 |----------|-----|
 | **Live app (GitHub Pages)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/ |
-| **NEXUS Quantum Security Fabric (labeled demo)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/nexus/ |
+| **RivicQ Graph (labeled demo)** | https://rivicq.github.io/RivicQ_CSPM_EaaS/fabric/ |
 | **Interactive demo** | https://rivicq.github.io/RivicQ_CSPM_EaaS/demo |
 | **Sign in / register** | https://rivicq.github.io/RivicQ_CSPM_EaaS/login |
 | **Documentation hub** | https://rivicq.github.io/RivicQ_CSPM_EaaS/docs/ |
@@ -19,7 +19,7 @@ RivicQ is a **security SaaS platform** for CSPM, five-BOM intelligence (QBOM, AI
 | **This repository** | https://github.com/RivicQ/RivicQ_CSPM_EaaS |
 | **Legal pack** | [LEGAL.md](LEGAL.md) · [LICENSE](LICENSE) · [NOTICE](NOTICE) · [PRIVACY.md](PRIVACY.md) · [TRADEMARKS.md](TRADEMARKS.md) · [SECURITY.md](SECURITY.md) |
 
-The Community console is the **RivicQ Security Cloud** — dark-native zinc chrome (`#09090B` / `#18181B`) with Inter and JetBrains Mono. Light mode remains available. **NEXUS Quantum Security Fabric** is a separate, original security-graph demo at `/nexus` (obsidian fabric; labeled synthetic data; no secret values). Control mappings are not certifications.
+The Community console is the **RivicQ Security Cloud** — deep-space nebula chrome (`#000000` canvas, violet `#7C3AED`) with Inter and JetBrains Mono. Light mode remains available. **RivicQ Graph** (wordmark **GRAPH**) is the labeled security-graph demo at `/fabric` (formerly NEXUS / FABRIC). Control mappings are not certifications.
 
 ---
 
@@ -33,7 +33,8 @@ The Community console is the **RivicQ Security Cloud** — dark-native zinc chro
 | CLI `rivicq scan .` | Yes | Yes |
 | GitHub Action policy gate | Yes | Yes |
 | CBOM / CycloneDX 1.6 export | Yes | Yes |
-| Five-BOM (QBOM / AIBOM / SBOM / IBOM / CBOM) | CBOM + SBOM + local QBOM | Same + AIBOM, IBOM, HSM connector |
+| CBOM / SBOM CSPM | Yes | Same engine |
+| QBOM / HBOM / AIBOM / IBOM | Locked (Enterprise APIs return 403) | Licensed control-plane layers |
 | API security (TLS/HTTPS hygiene) | Yes | Same + gateway inventory when a connector exists |
 | DevSecOps pipeline view | Stages 1–6 + JSON evidence | Stage 7 continuous monitoring |
 | Dashboard, inventory, scanner | Limited: website, host, IP, server, declared pod, QSIC catalog | Same engine + live kube attach, DORA pack |
@@ -83,20 +84,20 @@ cd RivicQ_CSPM_EaaS
 cp .env.example .env
 make dev-backend          # Community API :8080
 # or: make dev-enterprise # Enterprise API :9090
-make dev-frontend         # React UI (sky blue / white / Outfit) → :3000
+make dev-frontend         # React UI (nebula black / violet / Inter) → :3000
 ```
 
 Open http://localhost:3000/platform — choose **Community** or **Enterprise** on Sign in, or open `/demo`.
 
-### NEXUS Quantum Security Fabric (labeled demo)
+### RivicQ Graph (labeled demo)
 
 ```bash
-cd nexus
+cd fabric
 npm ci
 npm run dev
 ```
 
-Separate original identity (obsidian fabric). Synthetic fixture only — no secret values. See [docs/NEXUS.md](docs/NEXUS.md).
+Same nebula chrome as the website (black / violet / Inter). Discovery, each detection (`QSF-*`), attack stages, and domain inventories have their own graphs. Synthetic fixture only — no secret values. See [docs/FABRIC.md](docs/FABRIC.md) and [docs/GRAPH.md](docs/GRAPH.md). `/nexus` bookmarks redirect to `/fabric`.
 
 ### CLI and GitHub Action
 
@@ -139,9 +140,9 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Known limitations | [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) |
 | Editions (OSS vs Enterprise) | [docs/editions.md](docs/editions.md) |
 | Client architecture | [docs/CLIENT_ARCHITECTURE.md](docs/CLIENT_ARCHITECTURE.md) |
-| Horizon UX / UI | [docs/UX_DESIGN.md](docs/UX_DESIGN.md) |
+| Operator UX audit | [docs/ux/README.md](docs/ux/README.md) |
 | Contact | [docs/contact.html](docs/contact.html) · [CONTACT.md](docs/CONTACT.md) — public desks only |
-| Five-BOM framework | [docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md) |
+| BOM framework | [docs/BOM_FRAMEWORK.md](docs/BOM_FRAMEWORK.md) |
 | PQC migration | [docs/PQC_MIGRATION.md](docs/PQC_MIGRATION.md) |
 | SaaS architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Legal | [LEGAL.md](LEGAL.md) |
@@ -149,6 +150,7 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Trademarks | [TRADEMARKS.md](TRADEMARKS.md) |
 | Datasets | [DATASETS.md](DATASETS.md) |
 | Security intelligence | [docs/security-intelligence.md](docs/security-intelligence.md) |
+| Optional scanners | [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) |
 | CBOM quickstart | [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md) |
 | Deployment | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | Environment | [docs/DEPLOY_ENV.md](docs/DEPLOY_ENV.md) |

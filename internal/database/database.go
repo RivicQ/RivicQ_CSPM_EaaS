@@ -101,8 +101,20 @@ func createTables(db *DB) error {
 			password TEXT NOT NULL DEFAULT '',
 			mfa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
 			mfa_secret TEXT,
+			organisation TEXT NOT NULL DEFAULT '',
 			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+		);`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS organisation TEXT NOT NULL DEFAULT '';`,
+		`CREATE TABLE IF NOT EXISTS commercial_leads (
+			id TEXT PRIMARY KEY,
+			name TEXT,
+			email TEXT NOT NULL,
+			company TEXT,
+			intent TEXT,
+			source TEXT,
+			stage TEXT,
+			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 		);`,
 		`CREATE TABLE IF NOT EXISTS cbom_reports (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

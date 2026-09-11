@@ -1,14 +1,14 @@
 import { BOM_LAYERS, PIPELINE_STAGES, layersForEdition } from './bomFramework';
 
-describe('five-BOM catalog', () => {
-  it('has five layers with Community CBOM/QBOM/SBOM and locked AIBOM/IBOM', () => {
-    expect(BOM_LAYERS).toHaveLength(5);
+describe('BOM catalog', () => {
+  it('has six layers with Community CBOM/SBOM and Enterprise Q/H/AI/I', () => {
+    expect(BOM_LAYERS).toHaveLength(6);
     const ids = BOM_LAYERS.map((l) => l.id);
-    expect(ids).toEqual(['cbom', 'qbom', 'sbom', 'aibom', 'ibom']);
+    expect(ids).toEqual(['cbom', 'qbom', 'sbom', 'hbom', 'aibom', 'ibom']);
     const community = layersForEdition(false);
-    expect(community.filter((l) => l.enabled).map((l) => l.id)).toEqual(['cbom', 'qbom', 'sbom']);
-    const paid = layersForEdition(true);
-    expect(paid.every((l) => l.enabled)).toBe(true);
+    expect(community.filter((l) => l.enabled).map((l) => l.id)).toEqual(['cbom', 'sbom']);
+    const enterprise = layersForEdition(true);
+    expect(enterprise.every((l) => l.enabled)).toBe(true);
   });
 
   it('has eight pipeline stages with production monitoring as Enterprise', () => {

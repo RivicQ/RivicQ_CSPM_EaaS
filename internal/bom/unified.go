@@ -10,16 +10,17 @@ import (
 
 // Unified is the merged five-BOM view for a scan or the workspace.
 type Unified struct {
-	Target     string         `json:"target,omitempty"`
-	Edition    string         `json:"edition"`
-	CBOM       []Asset        `json:"cbom"`
-	QBOM       []QuantumAsset `json:"qbom"`
-	SBOM       []Asset        `json:"sbom"`
-	AIBOM      []AIAsset      `json:"aibom"`
-	IBOM       []Identity     `json:"ibom"`
-	APISurface []APIFinding   `json:"api_security"`
+	Target     string          `json:"target,omitempty"`
+	Edition    string          `json:"edition"`
+	CBOM       []Asset         `json:"cbom"`
+	QBOM       []QuantumAsset  `json:"qbom"`
+	SBOM       []Asset         `json:"sbom"`
+	HBOM       []Asset         `json:"hbom"`
+	AIBOM      []AIAsset       `json:"aibom"`
+	IBOM       []Identity      `json:"ibom"`
+	APISurface []APIFinding    `json:"api_security"`
 	LayersOn   map[string]bool `json:"layers_enabled"`
-	Note       string         `json:"note"`
+	Note       string          `json:"note"`
 }
 
 // Asset is a CBOM/SBOM component summary.
@@ -36,21 +37,21 @@ type Asset struct {
 // QuantumAsset is a QBOM row (CBOM + quantum urgency).
 type QuantumAsset struct {
 	Asset
-	AttackClass  string `json:"attack_class"`
-	Replacement  string `json:"replacement"`
-	Standard     string `json:"standard"`
-	Priority     string `json:"priority"`
-	CRQCNote     string `json:"crqc_note"`
+	AttackClass string `json:"attack_class"`
+	Replacement string `json:"replacement"`
+	Standard    string `json:"standard"`
+	Priority    string `json:"priority"`
+	CRQCNote    string `json:"crqc_note"`
 }
 
 // AIAsset is a declared AIBOM row.
 type AIAsset struct {
-	Identifier   string   `json:"identifier"`
-	RiskTier     int      `json:"risk_tier"`
-	Endpoint     string   `json:"endpoint,omitempty"`
-	CryptoDeps   []string `json:"crypto_dependencies,omitempty"`
-	Adversarial  string   `json:"adversarial_risk,omitempty"`
-	Declared     bool     `json:"declared"`
+	Identifier  string   `json:"identifier"`
+	RiskTier    int      `json:"risk_tier"`
+	Endpoint    string   `json:"endpoint,omitempty"`
+	CryptoDeps  []string `json:"crypto_dependencies,omitempty"`
+	Adversarial string   `json:"adversarial_risk,omitempty"`
+	Declared    bool     `json:"declared"`
 }
 
 // Identity is an IBOM row.
@@ -74,10 +75,17 @@ func FromDiscovery(target string, disc *discovery.ScanResult) Unified {
 	cfg := edition.Detect()
 	ent := cfg.Edition == edition.Enterprise
 	out := Unified{
-		Target:   target,
-		Edition:  string(cfg.Edition),
-		LayersOn: map[string]bool{"cbom": true, "qbom": true, "sbom": true, "aibom": ent, "ibom": ent},
-		Note:     Catalog().Honesty,
+		Target:  target,
+		Edition: string(cfg.Edition),
+		LayersOn: map[string]bool{
+			"cbom":  true,
+			"sbom":  true,
+			"qbom":  ent,
+			"hbom":  ent,
+			"aibom": ent,
+			"ibom":  ent,
+		},
+		Note: Catalog().Honesty,
 	}
 	if disc == nil {
 		return out
@@ -104,7 +112,7 @@ func FromDiscovery(target string, disc *discovery.ScanResult) Unified {
 		case qiskitprofile.AttackPQC:
 			qa.Replacement, qa.Standard, qa.Priority = "Keep NIST PQC parameter set", "FIPS 203/204/205", "preferred"
 		}
-		if cl.AttackClass != qiskitprofile.AttackNone {
+		if cl.AttackClass != qiskitprofile.AttackNone && ent {
 			out.QBOM = append(out.QBOM, qa)
 		}
 	}
@@ -131,6 +139,10 @@ func FromDiscovery(target string, disc *discovery.ScanResult) Unified {
 		}
 	}
 	if ent {
+		res := discovery.ResourcesFromTargets(disc.Targets)
+		if res["hardware"] {
+			out.HBOM = append(out.HBOM, Asset{Name: "Declared HSM/QSIC inventory", Location: target, PQCStatus: "declared"})
+		}
 		out.AIBOM = []AIAsset{{
 			Identifier: "declared-model-registry", RiskTier: 2, Declared: true,
 			Adversarial: "EU AI Act documentation is operator-supplied. This is not a weight scanner.",

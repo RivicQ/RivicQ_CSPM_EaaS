@@ -11,7 +11,7 @@ func TestOSSLimitsControlPlane(t *testing.T) {
 	if !f.WebsiteScan || !f.HostIPScan || !f.PodInventory || !f.QiskitProfile {
 		t.Fatalf("OSS engine flags: %+v", f)
 	}
-	if f.DORAPack || f.MultiCloudInventory || f.SSOSAMIL || f.AuditLog || f.LiveKubernetesAttach || f.AIBOM || f.IBOM {
+	if f.DORAPack || f.MultiCloudInventory || f.SSOSAMIL || f.AuditLog || f.LiveKubernetesAttach || f.AIBOM || f.IBOM || f.QBOM || f.HBOM {
 		t.Fatalf("OSS must not enable control-plane flags: %+v", f)
 	}
 	if !f.ApiSecurity || !f.DevSecOpsPipeline {
@@ -25,7 +25,7 @@ func TestEnterpriseEnablesControlPlane(t *testing.T) {
 		t.Fatalf("edition=%s", cfg.Edition)
 	}
 	f := cfg.Features
-	if !f.DORAPack || !f.HardwareInventory || !f.CloudConnectors || !f.QuantumConnector || !f.AIBOM || !f.HSMConnector {
+	if !f.DORAPack || !f.HardwareInventory || !f.CloudConnectors || !f.QuantumConnector || !f.AIBOM || !f.HSMConnector || !f.QBOM || !f.HBOM {
 		t.Fatalf("enterprise flags: %+v", f)
 	}
 }
@@ -37,7 +37,7 @@ func TestPublicCatalog(t *testing.T) {
 		t.Fatalf("scan_targets %+v", pub["scan_targets"])
 	}
 	layers, ok := pub["bom_layers"].(map[string]any)
-	if !ok || layers["cbom"] != true || layers["aibom"] != false {
+	if !ok || layers["cbom"] != true || layers["aibom"] != false || layers["qbom"] != false || layers["hbom"] != false {
 		t.Fatalf("bom_layers %+v", pub["bom_layers"])
 	}
 }
