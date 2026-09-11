@@ -45,6 +45,14 @@ body::before {
     radial-gradient(1px 1px at 55% 76%, rgba(255,255,255,0.6), transparent);
   opacity: 0.85;
 }
+.shell {
+  width: 100%;
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
 .site-header, main, .site-footer { position: relative; z-index: 1; }
 .skip {
   position: absolute;
@@ -71,11 +79,14 @@ code {
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 0.85rem 2rem;
+  padding: 0;
+}
+.header-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  min-height: 56px;
 }
 .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 650; font-size: 1.1rem; color: var(--ivory); text-decoration: none; }
 .logo-badge {
@@ -100,9 +111,7 @@ code {
 
 .hero {
   text-align: left;
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 3.25rem 1.5rem 2rem;
+  padding: 3.25rem 0 2rem;
 }
 .hero-eyebrow {
   display: inline-block;
@@ -148,7 +157,7 @@ code {
 .btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ivory); }
 .btn-sm { padding: 0.35rem 0.85rem; font-size: 0.8rem; }
 
-section { max-width: 1120px; margin: 0 auto; padding: 0 1.5rem 3.5rem; }
+section { padding: 0 0 3.5rem; }
 .section-title { font-size: 1.45rem; font-weight: 650; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
 .section-sub { color: var(--faint); margin-bottom: 1.75rem; font-size: 0.95rem; max-width: 720px; }
 
@@ -310,11 +319,10 @@ section { max-width: 1120px; margin: 0 auto; padding: 0 1.5rem 3.5rem; }
 .stats {
   display: flex;
   justify-content: flex-start;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 2rem;
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 1.5rem 2.75rem;
+  gap: 2rem 3rem;
+  padding: 0 0 2.75rem;
 }
 .stat { text-align: left; }
 .stat-value { font-size: 1.25rem; font-weight: 650; color: var(--ivory); font-family: var(--mono); }
@@ -322,14 +330,12 @@ section { max-width: 1120px; margin: 0 auto; padding: 0 1.5rem 3.5rem; }
 
 .site-footer {
   text-align: left;
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 2.5rem;
+  padding: 2rem 0 2.5rem;
   border-top: 1px solid var(--line);
   color: var(--faint);
   font-size: 0.825rem;
 }
-.md-wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 3rem; }
+.md-wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 0 3rem; }
 .md-body { color: var(--ivory); line-height: 1.65; }
 .md-body h1, .md-body h2, .md-body h3 { letter-spacing: -0.02em; margin: 1.6rem 0 0.6rem; }
 .md-body h1 { font-size: 2rem; }

@@ -62,7 +62,7 @@ There is no separate worker fleet, no live Stripe service, and no IBM Partner Pl
 | Observability | 45 | Health endpoints; not traces + SLO alerts |
 | Performance | 40 | No p50/p95 published |
 | Scalability | 42 | Single-process scan-bound |
-| UX/UI | 64 | Nebula tokens in source; live `main` Pages still cream until merge/overlay |
+| UX/UI | 64 | Nebula tokens; Pages overlay at `/preview/` until `main` merge |
 | Accessibility | 52 | Focus styles exist; no WCAG audit run this pass |
 | Documentation | 70 | Honest limitations docs |
 | Enterprise readiness | 38 | License + connectors + PSP + IBM APIs missing |
@@ -104,7 +104,7 @@ Weighting: product/security pull up; CRM, payments, IBM APIs, observability, and
 |---|---|---|---|---|---|---|
 | P0-1 | P0 | Auth | Empty/`oss-default-secret` JWT in release | Refuse start in production | `TestResolveJWTSecret` | **Fixed this increment** |
 | P0-2 | P0 | Auth | Default `DemoPass123!` bootstrap in prod | Fatal if first user would use default | code path | **Fixed this increment** |
-| P0-3 | P0 | Pages | `main` still ships cream/terracotta | Merge PR 73 or overlay nebula build | visual | **In progress** (source done; `main` deploy pending) |
+| P0-3 | P0 | Pages | Production github.io lagged this PR | Overlay `/preview/` plus gh-pages publish from this branch | visual | **In progress** |
 | P1-1 | P1 | Payments | Checkout `not_configured` | Real PSP adapter + webhook secret | — | Open |
 | P1-2 | P1 | Auth | Password reset in-memory | Mailbox or operator reset | — | Open |
 | P1-3 | P1 | Tenancy | DB-down Enterprise demo fallbacks | Fail closed | — | Open |
@@ -145,7 +145,7 @@ Weighting: product/security pull up; CRM, payments, IBM APIs, observability, and
 
 **Performance / observability.** No fabricated p95. Health exists.
 
-**UX/UI / a11y / brand.** Website theme is black + `#7C3AED`. Live `main` contact was still terracotta because Pages deploys from `main`. Preview and overlay exist on this PR.
+**UX/UI / a11y / brand.** Website theme is black + `#7C3AED`. Docs hub, contact, and markdown reader share the same 1120px shell. Preview overlay exists on this PR.
 
 **Public Pages exposure.** `REACT_APP_SUPABASE_PUBLISHABLE_KEY` in `pages.yml` is a **publishable** client key (expected public). Do not put service-role keys in the SPA. Source maps ship with CRA builds — treat as public.
 

@@ -34,9 +34,9 @@
 
 name: Build and deploy an app to AKS with Helm
 
+# Placeholder ACR/AKS names. Do not run on every main push — it fails without
+# real Azure secrets. Use workflow_dispatch after filling env and secrets.
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 env:

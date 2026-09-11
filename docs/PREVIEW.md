@@ -1,6 +1,6 @@
 # How to preview this branch
 
-GitHub Pages workflows deploy from `main`. A nebula overlay is also published from this PR so `/contact` and `/preview/contact` show black/violet instead of terracotta. The next official `main` Pages job can replace the overlay until the PR is merged.
+GitHub Pages workflows deploy from `main`. This branch also publishes a nebula overlay so `/preview/` matches the PR. Production github.io stays the last `main` deploy until merge — hard-refresh `/preview/` to review.
 
 ## 1. Temporary live preview (this PR)
 
@@ -30,7 +30,7 @@ Published to a `/preview` folder on `gh-pages`. Production files at the site roo
 | Docs hub | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/docs/ |
 | Docs contact | https://rivicq.github.io/RivicQ_CSPM_EaaS/preview/docs/contact.html |
 
-Hard-refresh (Ctrl+Shift+R) if a cached cream page appears.
+Hard-refresh (Ctrl+Shift+R) if a cached page appears.
 
 ## 2. GitHub source (proof the code is on the branch)
 
@@ -53,7 +53,7 @@ Graph demo: `cd fabric && npm ci && npm run dev`
 
 ## 4. After merge to `main`
 
-Production will replace cream with nebula:
+Production will use this nebula stack:
 
 https://rivicq.github.io/RivicQ_CSPM_EaaS/  
 https://rivicq.github.io/RivicQ_CSPM_EaaS/contact  
