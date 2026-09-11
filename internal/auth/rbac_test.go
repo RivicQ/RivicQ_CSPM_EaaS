@@ -18,6 +18,18 @@ func TestRoleAtLeast(t *testing.T) {
 	if !RoleAtLeast("analyst", "analyst") {
 		t.Fatal("equal roles should pass")
 	}
+	if NormalizeRole("Owner") != "admin" {
+		t.Fatal("owner aliases to admin")
+	}
+	if NormalizeRole("security_manager") != "admin" {
+		t.Fatal("security manager aliases to admin")
+	}
+	if NormalizeRole("security-analyst") != "analyst" {
+		t.Fatal("security analyst aliases to analyst")
+	}
+	if NormalizeRole("developer") != "operator" {
+		t.Fatal("developer aliases to operator")
+	}
 	if NormalizeRole("nope") != "viewer" {
 		t.Fatal("unknown roles collapse to viewer")
 	}

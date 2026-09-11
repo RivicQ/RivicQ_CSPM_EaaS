@@ -5,6 +5,8 @@ This is not a certification, and it does not claim firmware reverse-engineering.
 
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data only).
 
+Core engine contract (findings, fingerprints, PQC classes, CLI fail-on): [CORE_ENGINE.md](CORE_ENGINE.md).
+
 ## Core SaaS layers
 
 Four-layer CBOM architecture (input → engine → PQC operationalization → outputs), with a client path of **discover → mitigate → report**, plus the five-BOM DevSecOps overlay ([BOM_FRAMEWORK.md](BOM_FRAMEWORK.md)). Details: [CLIENT_ARCHITECTURE.md](CLIENT_ARCHITECTURE.md).

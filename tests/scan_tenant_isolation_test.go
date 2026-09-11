@@ -121,6 +121,27 @@ func TestInvalidBearerDoesNotFallBackToPublicTenant(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
+func TestIntelligenceReportIsTenantScoped(t *testing.T) {
+	router := scanTenantRouter(t)
+	tokenA := tenantBearer("intel-a")
+	tokenB := tenantBearer("intel-b")
+	idA := postScan(t, router, tokenA, "127.0.0.1")
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+idA+"/intelligence", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenB)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code, w.Body.String())
+
+	reqOK := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+idA+"/cyclonedx", nil)
+	reqOK.Header.Set("Authorization", "Bearer "+tokenA)
+	wOK := httptest.NewRecorder()
+	router.ServeHTTP(wOK, reqOK)
+	// Scan may still be running (accepted job). Cross-tenant must never leak; owner may be 409 or 200.
+	if wOK.Code != http.StatusOK && wOK.Code != http.StatusConflict {
+		t.Fatalf("owner cyclonedx status %d %s", wOK.Code, wOK.Body.String())
+	}
+}
 func TestScanListDoesNotLeakOtherTenants(t *testing.T) {
 	router := scanTenantRouter(t)
 	tokenA := tenantBearer("list-tenant-a")

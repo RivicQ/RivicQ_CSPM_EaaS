@@ -32,6 +32,7 @@ func BuildReport(in ScanInput) *Report {
 		findings = append(findings, extra...)
 		usedTools = used
 	}
+	findings = DedupFindings(findings)
 	var components []discovery.CBOMComponent
 	if in.Discovery != nil {
 		components = in.Discovery.Components
@@ -64,8 +65,10 @@ func BuildReport(in ScanInput) *Report {
 		Tools:              MarkToolsUsed(ProbeExternalTools(), usedTools),
 		Excludes:           DefaultExcludes(),
 		Metadata: map[string]string{
-			"engine":          "rivicq-intelligence",
-			"qiskit_pipeline": qiskitprofile.Engine,
+			"engine":           "rivicq-intelligence",
+			"scanner_version":  ScannerVersion,
+			"qiskit_pipeline":  qiskitprofile.Engine,
+			"finding_identity": "sha256-fingerprint",
 		},
 	}
 }

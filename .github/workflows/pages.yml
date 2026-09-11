@@ -84,6 +84,7 @@ jobs:
           cp docs/PRODUCT_STATUS.md web/build/docs/PRODUCT_STATUS.md
           cp docs/PLATFORM.md web/build/docs/PLATFORM.md
           cp docs/DESIGN_SYSTEM.md web/build/docs/DESIGN_SYSTEM.md
+          cp docs/CORE_ENGINE.md web/build/docs/CORE_ENGINE.md
           cp docs/ENGINEERING_AUDIT.md web/build/docs/ENGINEERING_AUDIT.md
           cp docs/ROADMAP.md web/build/docs/ROADMAP.md
           cp docs/QISKIT_PIPELINE.md web/build/docs/QISKIT_PIPELINE.md

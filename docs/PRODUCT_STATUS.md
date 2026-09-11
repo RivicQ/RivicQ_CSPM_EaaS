@@ -4,7 +4,7 @@ Honest snapshot of what RivicQ ships today for operators who need **open-source 
 
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data; no production API).
 
-Companion docs: [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [Five-BOM](BOM_FRAMEWORK.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md) · [Optional scanners](INTEGRATIONS.md)
+Companion docs: [Core engine](CORE_ENGINE.md) · [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [Five-BOM](BOM_FRAMEWORK.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md) · [Optional scanners](INTEGRATIONS.md)
 
 ## What is complete
 

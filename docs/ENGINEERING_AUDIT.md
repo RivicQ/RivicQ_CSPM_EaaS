@@ -207,3 +207,99 @@ PSP adapter + webhooks. Official IBM access before any live badge. Request IDs, 
 ## What this pass did not do
 
 It did not rewrite every dashboard widget, invent a 50-entity CRM, add Stripe, claim scanner precision, publish p99 numbers, or mark the product Enterprise Ready. Those would violate the honesty rule in this repository.
+
+---
+
+## 35. Core-engine increment (11 September 2026)
+
+Hardening of the CBOM/Crypto-CSPM core only. No HBOM/IBOM/AIBOM engines. No Enterprise Ready claim.
+
+### Implemented
+
+- Deterministic finding fingerprints (`sha256`) and `DedupFindings` on the intelligence report
+- PQC classes: `pqc-ready` / `hybrid-ready` / `migration-required` / `high-risk` / `unknown`
+- CLI `--fail-on critical|high|medium` with exit 0/1/2
+- RBAC aliases (Owner, Security Manager, Security Analyst, Developer) mapped onto existing JWT roles
+- Tenant isolation test for `/scans/:id/intelligence`
+- Example GitHub Action under `examples/github-actions/`
+- [CORE_ENGINE.md](CORE_ENGINE.md)
+
+`discovery.ScanResult` JSON is unchanged.
+
+### Scores (0–100, not inflated)
+
+| Area | Score | Notes |
+|---|---:|---|
+| Architecture | 68 | Boundaries documented; commercial layer still thin |
+| Security audit | 70 | JWT tenancy + RBAC aliases; not a pentest |
+| Technical debt | 55 | Stubs remain (payments, IBM Partner, mailbox reset) |
+| Dependencies | 60 | Lockfiles; unused cloud SDKs still in module |
+| API | 66 | Versioned `/api/v1`; ScanResult stable |
+| Authentication | 64 | JWT/MFA/OAuth; in-memory password reset |
+| RBAC | 72 | Server `RequireRole`; aliases documented |
+| Multi-tenancy | 74 | JWT isolation tests including intelligence |
+| Scanner accuracy | 58 | Deterministic rules; no published precision/recall |
+| CBOM quality | 74 | CycloneDX 1.6 + fingerprints |
+| PQC engine | 70 | Taxonomy + classes; not CAVP / not hardware |
+| CI/CD | 64 | Lint/test/CodeQL/self-scan; no staging approval gate |
+| UX/UI | 64 | Nebula identity; no WCAG audit |
+| Performance | 40 | No p50/p95 published |
+| Test coverage | 62 | Unit + tenant isolation; no named-customer E2E |
+| Production readiness | 40 | Pilot engine; not multi-tenant paid SaaS |
+
+**Overall: 58/100.** **RIVICQ ENTERPRISE READY: no.**
+
+### BLOCKERS
+
+- No production Postgres + unique `JWT_SECRET` + TLS drill in this repo
+- Password reset is in-memory (no mailbox)
+- No backup/restore evidence
+- No live PSP; IBM Partner APIs absent by design
+- GitHub Pages has no API
+
+### HIGH
+
+- Enterprise DB-down paths that fail open (inventory) still exist
+- Observability is healthz/readyz, not traces + SLOs
+- Scanner precision/recall unpublished
+- Source maps on Pages
+
+### MEDIUM
+
+- `proBlue` token names
+- Optional PATH tools skipped when missing
+- Role titles vs JWT names need operator docs (aliases now exist)
+
+### LOW
+
+- Graph demo still lives in `fabric/`
+- Leads-only CRM (intentional)
+
+### Enterprise gate (all still unchecked)
+
+- [ ] No critical security vulnerabilities
+- [ ] No known authentication bypass
+- [ ] No known authorization bypass
+- [ ] Tenant isolation tested *(partial: scans/intelligence; not every Enterprise connector)*
+- [ ] Secrets removed
+- [ ] CI/CD enforced
+- [ ] Production database migrations tested
+- [ ] Backup/recovery tested
+- [ ] Scanner deterministic *(intelligence fingerprints: yes; network UUIDs remain per scan)*
+- [ ] Findings reproducible
+- [ ] CBOM reproducible
+- [ ] Risk scoring explainable
+- [ ] PQC classifications documented
+- [ ] API documented
+- [ ] Audit logging implemented
+- [ ] Observability implemented
+- [ ] E2E tests passing
+- [ ] Security tests passing
+- [ ] Performance benchmark completed
+- [ ] Production deployment tested
+- [ ] Rollback tested
+- [ ] Documentation complete
+- [ ] UX/UI consistent
+- [ ] Accessibility reviewed
+- [ ] Enterprise onboarding flow tested
+

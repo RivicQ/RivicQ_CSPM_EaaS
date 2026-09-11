@@ -25,6 +25,9 @@ func main() {
 	case "scan", "sbom", "cbom", "vuln", "secrets", "iac", "compliance", "policy":
 		if err := runScan(cmd, args); err != nil {
 			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
+			if _, ok := err.(failOnError); ok {
+				os.Exit(intelligence.ExitFailOn)
+			}
 			os.Exit(1)
 		}
 	case "version", "-version", "--version":
@@ -47,12 +50,20 @@ Usage:
 
 Flags:
   --format table|json     output format (default table)
-  --fail-on BLOCK|WARN|NONE  policy gate (default BLOCK; NONE never fails)
+  --fail-on BLOCK|WARN|NONE|critical|high|medium
+                          CI gate (default BLOCK). critical/high/medium use finding severity.
   --include-fixtures         include fixtures/testdata (dataset analysis)
   --json                     shortcut for --format json
 
+Exit codes:
+  0  pass
+  1  fail-on threshold met
+  2  usage error
+
 Examples:
   rivicq scan .
+  rivicq scan . --fail-on critical
+  rivicq scan . --fail-on high
   rivicq cbom ./src --format json
   rivicq scan fixtures/crypto-test --include-fixtures --fail-on NONE --format json
 `)
@@ -61,7 +72,7 @@ Examples:
 func runScan(mode string, args []string) error {
 	fs := flag.NewFlagSet("rivicq "+mode, flag.ContinueOnError)
 	format := fs.String("format", "table", "table|json")
-	failOn := fs.String("fail-on", "BLOCK", "BLOCK|WARN|NONE")
+	failOn := fs.String("fail-on", "BLOCK", "BLOCK|WARN|NONE|critical|high|medium")
 	asJSON := fs.Bool("json", false, "json output")
 	includeFixtures := fs.Bool("include-fixtures", false, "scan fixtures/ and testdata/ (dataset analysis only)")
 	flagArgs, positional := splitCLIArgs(args)
@@ -124,16 +135,23 @@ func runScan(mode string, args []string) error {
 		printTable(mode, abs, content, rep)
 	}
 
-	failed := rep.Gate.Failed
-	if strings.EqualFold(*failOn, "NONE") || *failOn == "" {
-		failed = false
-	} else if strings.EqualFold(*failOn, "WARN") && len(rep.Gate.Warnings) > 0 {
-		failed = true
-	}
+	failed := intelligence.ShouldFailOn(*failOn, rep)
 	if failed {
-		return fmt.Errorf("policy gate %s", rep.Gate.Decision)
+		return failOnError{threshold: *failOn, decision: rep.Gate.Decision}
 	}
 	return nil
+}
+
+type failOnError struct {
+	threshold string
+	decision  string
+}
+
+func (e failOnError) Error() string {
+	if e.decision != "" {
+		return "fail-on " + e.threshold + " (gate " + e.decision + ")"
+	}
+	return "fail-on " + e.threshold
 }
 
 func printTable(mode, abs string, content shared.GHScanResult, rep *intelligence.Report) {
@@ -149,6 +167,15 @@ func printTable(mode, abs string, content shared.GHScanResult, rep *intelligence
 	fmt.Printf("IaC           %s\n", s.IaC)
 	fmt.Printf("Container     %s\n", s.Container)
 	fmt.Printf("PQC readiness %d%%\n", content.PQCReadiness)
+	if rep.PQCReadiness != nil {
+		fmt.Printf("PQC classes   pqc-ready=%d hybrid-ready=%d migration-required=%d high-risk=%d unknown=%d\n",
+			rep.PQCReadiness.Classifications[intelligence.PQCReady],
+			rep.PQCReadiness.Classifications[intelligence.PQCHybridReady],
+			rep.PQCReadiness.Classifications[intelligence.PQCMigrationReq],
+			rep.PQCReadiness.Classifications[intelligence.PQCHighRisk],
+			rep.PQCReadiness.Classifications[intelligence.PQCUnknown],
+		)
+	}
 	fmt.Printf("Compliance    %s\n\n", s.Compliance)
 	fmt.Printf("Policy Gate:  %s", rep.Gate.Decision)
 	if rep.Gate.Failed {
