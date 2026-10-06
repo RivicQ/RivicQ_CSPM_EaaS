@@ -508,10 +508,10 @@ button {
   font-size: 1.4rem;
 }
 
-.feature-icon.blue { background: rgba(79, 70, 229, 0.15); color: var(--rivicq-400); }
+.feature-icon.blue { background: rgba(124, 58, 237, 0.15); color: var(--rivicq-400); }
 .feature-icon.purple { background: rgba(124, 58, 237, 0.15); color: var(--quantum-light); }
 .feature-icon.green { background: rgba(5, 150, 105, 0.15); color: var(--success-light); }
-.feature-icon.gold { background: rgba(245, 158, 11, 0.15); color: var(--gold-400); }
+.feature-icon.gold { background: rgba(124, 58, 237, 0.15); color: var(--rivicq-400); }
 
 .feature-card h3 {
   font-size: var(--text-xl);
@@ -842,7 +842,7 @@ button {
 }
 
 .timeline-item:nth-child(2) .timeline-dot { background: var(--quantum); box-shadow: 0 0 12px rgba(124, 58, 237, 0.5); }
-.timeline-item:nth-child(3) .timeline-dot { background: var(--gold-500); box-shadow: 0 0 12px rgba(245, 158, 11, 0.5); }
+.timeline-item:nth-child(3) .timeline-dot { background: var(--gold-500); box-shadow: 0 0 12px rgba(124, 58, 237, 0.5); }
 .timeline-item:nth-child(4) .timeline-dot { background: var(--success); box-shadow: 0 0 12px rgba(5, 150, 105, 0.5); }
 
 .timeline-date {

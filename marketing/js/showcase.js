@@ -257,7 +257,7 @@
               const item = document.createElement('div');
               item.className = 'activity-item';
               item.innerHTML = `
-                <div class="activity-icon scan">🔍</div>
+                <div class="activity-icon scan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg></div>
                 <div>
                   <div class="activity-text">CBOM scan completed — <strong>${Math.floor(Math.random() * 50 + 10)} new assets</strong> discovered</div>
                   <div class="activity-time">Just now</div>

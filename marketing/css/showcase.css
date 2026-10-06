@@ -201,7 +201,7 @@
 }
 
 .findings-table tr:hover td {
-  background: rgba(79, 70, 229, 0.04);
+  background: rgba(124, 58, 237, 0.05);
 }
 
 .severity-badge {
@@ -364,7 +364,7 @@
   flex-shrink: 0;
 }
 
-.activity-icon.scan { background: rgba(79, 70, 229, 0.15); }
+.activity-icon.scan { background: rgba(124, 58, 237, 0.15); }
 .activity-icon.alert { background: rgba(220, 38, 38, 0.15); }
 .activity-icon.success { background: rgba(5, 150, 105, 0.15); }
 
