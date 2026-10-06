@@ -108,7 +108,11 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 				if execErr == nil {
 					logger.WithField("email", bootstrapEmail).Info("Bootstrap admin user created")
 				}
-				if !production {
+				// The demo operator is seeded on a fresh install so there is
+				// something to sign in with. The runtime reports release mode,
+				// so gating on !production alone would drop it; an explicit
+				// RIVICQ_ALLOW_DEMO_MODE is the operator asking for it back.
+				if !production || DemoModeEnabled() {
 					demoEmail := strings.TrimSpace(os.Getenv("AUTH_DEMO_EMAIL"))
 					if demoEmail == "" {
 						demoEmail = "demo@rivicq.local"

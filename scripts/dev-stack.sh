@@ -12,7 +12,7 @@ cd "$ROOT"
 MODE="${1:-oss}"
 export JWT_SECRET="${JWT_SECRET:-dev-jwt-secret-change-in-production-min-32-chars}"
 export AUTH_BOOTSTRAP_EMAIL="${AUTH_BOOTSTRAP_EMAIL:-admin@rivicq.local}"
-export AUTH_BOOTSTRAP_PASSWORD="${AUTH_BOOTSTRAP_PASSWORD:-DemoPass123!}"
+export AUTH_BOOTSTRAP_PASSWORD="${AUTH_BOOTSTRAP_PASSWORD:-change-me}"
 
 if [[ ! -f .env ]]; then
   cp .env.example .env
