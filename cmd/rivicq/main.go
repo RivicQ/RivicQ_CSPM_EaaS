@@ -168,12 +168,14 @@ func printTable(mode, abs string, content shared.GHScanResult, rep *intelligence
 	fmt.Printf("Container     %s\n", s.Container)
 	fmt.Printf("PQC readiness %d%%\n", content.PQCReadiness)
 	if rep.PQCReadiness != nil {
-		fmt.Printf("PQC classes   pqc-ready=%d hybrid-ready=%d migration-required=%d high-risk=%d unknown=%d\n",
-			rep.PQCReadiness.Classifications[intelligence.PQCReady],
-			rep.PQCReadiness.Classifications[intelligence.PQCHybridReady],
-			rep.PQCReadiness.Classifications[intelligence.PQCMigrationReq],
-			rep.PQCReadiness.Classifications[intelligence.PQCHighRisk],
-			rep.PQCReadiness.Classifications[intelligence.PQCUnknown],
+		fmt.Printf("PQC taxonomy  %s\n", rep.PQCReadiness.TaxonomyVersion)
+		fmt.Printf("PQC classes   legacy=%d high-risk=%d migration-required=%d hybrid-ready=%d pqc-ready=%d unknown=%d\n",
+			rep.PQCReadiness.Classifications[intelligence.ClassPQCLegacy],
+			rep.PQCReadiness.Classifications[intelligence.ClassPQCHighRisk],
+			rep.PQCReadiness.Classifications[intelligence.ClassPQCMigrationRequired],
+			rep.PQCReadiness.Classifications[intelligence.ClassPQCHybridReady],
+			rep.PQCReadiness.Classifications[intelligence.ClassPQCReady],
+			rep.PQCReadiness.Classifications[intelligence.ClassPQCUnknown],
 		)
 	}
 	fmt.Printf("Compliance    %s\n\n", s.Compliance)

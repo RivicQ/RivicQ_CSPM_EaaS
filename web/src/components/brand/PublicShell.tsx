@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Menu, MenuItem, Stack, Typography } from '@mui/material';
-import { KeyboardArrowDown } from '@mui/icons-material';
+import { Box, Button, Container, Divider, IconButton, Menu, MenuItem, MenuList, Stack, Typography } from '@mui/material';
+import { KeyboardArrowDown, Menu as MenuIcon } from '@mui/icons-material';
 import BrandLogo from '../BrandLogo';
 import NebulaBackdrop from './NebulaBackdrop';
 import TrademarkNotice from '../TrademarkNotice';
@@ -37,6 +37,7 @@ const NAV: NavItem[] = [
 const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = ({ children, nebula = true }) => {
   const navigate = useNavigate();
   const [menu, setMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
+  const [mobileMenu, setMobileMenu] = React.useState<HTMLElement | null>(null);
 
   const go = (to: string) => {
     const staticAsset = to.startsWith('http') || to.includes('.html') || !to.startsWith('/');
@@ -46,6 +47,11 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
       return;
     }
     navigate(to);
+  };
+
+  const goAndCloseMobile = (to: string) => {
+    setMobileMenu(null);
+    go(to);
   };
 
   return (
@@ -59,7 +65,24 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
       <Box sx={{ position: 'sticky', top: 3, zIndex: 20, bgcolor: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)' }}>
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
-            <Box onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}><BrandLogo dark /></Box>
+            <Box
+              component="button"
+              type="button"
+              aria-label="RivicQ home"
+              onClick={() => navigate('/')}
+              sx={{
+                border: 'none',
+                background: 'none',
+                p: 0,
+                m: 0,
+                cursor: 'pointer',
+                display: 'block',
+                borderRadius: 1,
+                '&:focus-visible': { outline: '2px solid #7c3aed', outlineOffset: 2 },
+              }}
+            >
+              <BrandLogo dark />
+            </Box>
             <Stack direction="row" spacing={0.25} sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
                 <Button
@@ -76,11 +99,48 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
                 </Button>
               ))}
             </Stack>
-            <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={websiteCtaSx}>
-              Request demo
-            </Button>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <IconButton
+                size="small"
+                aria-label="Open navigation menu"
+                aria-haspopup="menu"
+                aria-expanded={Boolean(mobileMenu)}
+                onClick={(e) => setMobileMenu(e.currentTarget)}
+                sx={{ display: { xs: 'inline-flex', md: 'none' }, color: '#fff' }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={websiteCtaSx}>
+                Request demo
+              </Button>
+            </Stack>
           </Stack>
         </Container>
+        <Menu
+          anchorEl={mobileMenu}
+          open={Boolean(mobileMenu)}
+          onClose={() => setMobileMenu(null)}
+          slotProps={{ paper: { sx: { bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e', minWidth: 220 } } }}
+        >
+          <MenuList aria-label="Main navigation" sx={{ py: 0.5 }}>
+            {NAV.map((item, index) => (
+              <React.Fragment key={item.id}>
+                {index > 0 && <Divider sx={{ borderColor: '#1f1f2e' }} />}
+                {item.items ? (
+                  item.items.map((sub) => (
+                    <MenuItem key={sub.to} onClick={() => goAndCloseMobile(sub.to)} sx={{ color: '#fff' }}>
+                      {sub.label}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem onClick={() => goAndCloseMobile(item.to || '/')} sx={{ color: '#fff' }}>
+                    {item.label}
+                  </MenuItem>
+                )}
+              </React.Fragment>
+            ))}
+          </MenuList>
+        </Menu>
         <Menu
           anchorEl={menu?.el}
           open={Boolean(menu)}

@@ -1,9 +1,17 @@
 package auth_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
+)
+
+// strongPassword satisfies the current policy: 12-72 bytes with at least one
+// uppercase, lowercase, digit and symbol.
+const (
+	strongPassword  = "Rivicq-Str0ng-Pass!"
+	rotatedPassword = "Rivicq-Rotated-P4ss!"
 )
 
 func TestPasswordResetAndChange(t *testing.T) {
@@ -30,31 +38,36 @@ func TestPasswordResetAndChange(t *testing.T) {
 		t.Fatal("must not issue a token for an unknown email")
 	}
 
-	if err := svc.ResetPassword("bogus", "NewPass123!"); err == nil {
+	if err := svc.ResetPassword("bogus", strongPassword); err == nil {
 		t.Fatal("expected invalid token to fail")
 	}
 	if err := svc.ResetPassword(token, "short"); err == nil {
 		t.Fatal("expected short password to fail")
 	}
-	if err := svc.ResetPassword(token, "NewPass123!"); err != nil {
+	if err := svc.ResetPassword(token, strongPassword); err != nil {
 		t.Fatalf("reset: %v", err)
 	}
-	if err := svc.ResetPassword(token, "NewPass123!"); err == nil {
+	if err := svc.ResetPassword(token, strongPassword); err == nil {
 		t.Fatal("reset token must be single-use")
 	}
 
-	if _, err := svc.Login("admin@rivicq.com", "NewPass123!"); err != nil {
+	if _, err := svc.Login("admin@rivicq.com", strongPassword); err != nil {
 		t.Fatalf("login after reset: %v", err)
 	}
 
-	if err := svc.ChangePassword("admin@rivicq.com", "wrong", "AnotherPass123!"); err == nil {
+	if err := svc.ChangePassword("admin@rivicq.com", "wrong", rotatedPassword); err == nil {
 		t.Fatal("expected current-password mismatch")
 	}
-	if err := svc.ChangePassword("admin@rivicq.com", "NewPass123!", "AnotherPass123!"); err != nil {
+	if err := svc.ChangePassword("admin@rivicq.com", strongPassword, rotatedPassword); err != nil {
 		t.Fatalf("change password: %v", err)
 	}
-	if _, err := svc.Login("admin@rivicq.com", "AnotherPass123!"); err != nil {
+	if _, err := svc.Login("admin@rivicq.com", rotatedPassword); err != nil {
 		t.Fatalf("login after change: %v", err)
+	}
+
+	// A password containing the user's email must be rejected.
+	if err := svc.ChangePassword("admin@rivicq.com", rotatedPassword, "Rivicq-admin-Rivicq1"); err == nil {
+		t.Fatal("expected password containing the account email to be rejected")
 	}
 }
 
@@ -81,10 +94,31 @@ func TestListUsersByTenant(t *testing.T) {
 }
 
 func TestValidatePassword(t *testing.T) {
-	if err := auth.ValidatePassword("1234567"); err == nil {
-		t.Fatal("expected rejection of short password")
+	cases := []struct {
+		name string
+		pw   string
+		ok   bool
+	}{
+		{"empty", "", false},
+		{"too short", "Aa1!aaaaa", false},
+		{"minimum length", "Aa1!aaaaaaaa", true},
+		{"leading whitespace", " Rivicq-Str0ng-Pass", false},
+		{"trailing whitespace", "Rivicq-Str0ng-Pass ", false},
+		{"two classes only", "rivicqsecurepass", false},
+		{"too long", "Aa1!" + strings.Repeat("a", 70), false},
+		{"common password", "demopass123", false},
+		{"single character class", strings.Repeat("a", 20), false},
+		{"lower+digit+symbol", "rivicq-secure-1", true},
+		{"upper+lower+digit", "RivicqSecure123", true},
+		{"strong passphrase", "correct-horse-Battery-7", true},
 	}
-	if err := auth.ValidatePassword("12345678"); err != nil {
-		t.Fatalf("8 chars should pass: %v", err)
+	for _, tc := range cases {
+		err := auth.ValidatePassword(tc.pw)
+		if tc.ok && err != nil {
+			t.Errorf("%s: expected accept, got %v", tc.name, err)
+		}
+		if !tc.ok && err == nil {
+			t.Errorf("%s: expected rejection", tc.name)
+		}
 	}
 }

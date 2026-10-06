@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,6 +12,28 @@ import (
 // Query interface for database operations
 type Queries struct {
 	db *sql.DB
+}
+
+// ErrNotFound is returned when a tenant-scoped lookup matches no row. Callers
+// must map it to 404 rather than 500 so a cross-tenant probe is
+// indistinguishable from a missing resource.
+var ErrNotFound = errors.New("not found")
+
+// ErrForbidden is returned when a row exists but belongs to another tenant.
+// Handlers should normally translate this to 404 as well.
+var ErrForbidden = errors.New("forbidden")
+
+// mapRowError normalises driver errors into the sentinels above.
+func mapRowError(err error, tenantID string) error {
+	if err == nil {
+		return nil
+	}
+	if errors.Is(err, sql.ErrNoRows) {
+		// Distinguish "absent" from "owned by someone else" only where we can
+		// cheaply; otherwise both collapse to NotFound for the client.
+		return ErrNotFound
+	}
+	return err
 }
 
 // CBOM Report data structures
@@ -29,6 +52,7 @@ type CBOMReport struct {
 // CryptoAsset data structures
 type CryptoAsset struct {
 	ID                 string    `json:"id" db:"id"`
+	TenantID           string    `json:"tenant_id" db:"tenant_id"`
 	CBOMReportID       string    `json:"cbom_report_id" db:"cbom_report_id"`
 	Algorithm          string    `json:"algorithm" db:"algorithm"`
 	KeySize            int       `json:"key_size" db:"key_size"`
@@ -44,6 +68,7 @@ type CryptoAsset struct {
 // QuantumAttestation data structures
 type QuantumAttestation struct {
 	ID              string     `json:"id" db:"id"`
+	TenantID        string     `json:"tenant_id" db:"tenant_id"`
 	CBOMReportID    string     `json:"cbom_report_id" db:"cbom_report_id"`
 	AttestationType string     `json:"attestation_type" db:"attestation_type"`
 	QuantumNetwork  string     `json:"quantum_network" db:"quantum_network"`
@@ -107,28 +132,35 @@ func (q *Queries) CreateCBOMReport(report *CBOMReport) error {
 	).Scan(&report.ID, &report.CreatedAt, &report.UpdatedAt)
 }
 
-func (q *Queries) GetCBOMReport(id string) (*CBOMReport, error) {
+// GetCBOMReport fetches a report scoped to the caller's tenant.
+//
+// The tenant predicate is not optional: an unknown tenant returns
+// ErrNotFound, so a report ID alone never grants access.
+func (q *Queries) GetCBOMReport(tenantID, id string) (*CBOMReport, error) {
 	query := `
-		SELECT id, tenant_id, name, version, cyclonedx_bom, metadata, status, created_at, updated_at
-		FROM cbom_reports 
-		WHERE id = $1`
+		SELECT id, tenant_id, name, version, cyclonedx_bom,
+		       COALESCE(metadata, '{}'::jsonb), COALESCE(status, ''),
+		       created_at, updated_at
+		FROM cbom_reports
+		WHERE id = $1 AND tenant_id = $2`
 
 	report := &CBOMReport{}
-	err := q.db.QueryRow(query, id).Scan(
+	err := q.db.QueryRow(query, id, tenantID).Scan(
 		&report.ID, &report.TenantID, &report.Name, &report.Version,
 		&report.CycloneDXBOM, &report.Metadata, &report.Status,
 		&report.CreatedAt, &report.UpdatedAt,
 	)
-
 	if err != nil {
-		return nil, err
+		return nil, mapRowError(err, tenantID)
 	}
 	return report, nil
 }
 
 func (q *Queries) ListCBOMReports(tenantID string, limit, offset int) ([]CBOMReport, error) {
 	query := `
-		SELECT id, tenant_id, name, version, cyclonedx_bom, metadata, status, created_at, updated_at
+		SELECT id, tenant_id, name, version, cyclonedx_bom,
+		       COALESCE(metadata, '{}'::jsonb), COALESCE(status, ''),
+		       created_at, updated_at
 		FROM cbom_reports 
 		WHERE tenant_id = $1 
 		ORDER BY created_at DESC 
@@ -157,36 +189,61 @@ func (q *Queries) ListCBOMReports(tenantID string, limit, offset int) ([]CBOMRep
 	return reports, nil
 }
 
-func (q *Queries) UpdateCBOMReport(report *CBOMReport) error {
+// UpdateCBOMReport updates a report only within the caller's tenant.
+func (q *Queries) UpdateCBOMReport(tenantID string, report *CBOMReport) error {
 	query := `
-		UPDATE cbom_reports 
-		SET name = $2, version = $3, cyclonedx_bom = $4, metadata = $5, status = $6, updated_at = NOW()
-		WHERE id = $1`
+		UPDATE cbom_reports
+		SET name = $3, version = $4, cyclonedx_bom = $5, metadata = $6, status = $7, updated_at = NOW()
+		WHERE id = $2 AND tenant_id = $1`
 
-	_, err := q.db.Exec(
+	res, err := q.db.Exec(
 		query,
-		report.ID, report.Name, report.Version,
+		tenantID, report.ID, report.Name, report.Version,
 		report.CycloneDXBOM, report.Metadata, report.Status,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return requireOneRow(res, "cbom_reports", report.ID)
 }
 
-func (q *Queries) DeleteCBOMReport(id string) error {
-	query := `DELETE FROM cbom_reports WHERE id = $1`
-	_, err := q.db.Exec(query, id)
-	return err
+// DeleteCBOMReport deletes a report only within the caller's tenant.
+func (q *Queries) DeleteCBOMReport(tenantID, id string) error {
+	res, err := q.db.Exec(`DELETE FROM cbom_reports WHERE id = $1 AND tenant_id = $2`, id, tenantID)
+	if err != nil {
+		return err
+	}
+	return requireOneRow(res, "cbom_reports", id)
+}
+
+// requireOneRow converts "matched nothing" into ErrNotFound so tenant-scoped
+// writes cannot silently succeed as no-ops.
+func requireOneRow(res sql.Result, table, id string) error {
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return fmt.Errorf("%s %s: %w", table, id, ErrNotFound)
+	}
+	return nil
 }
 
 // Crypto Asset operations
 func (q *Queries) CreateCryptoAsset(asset *CryptoAsset) error {
 	query := `
-		INSERT INTO crypto_assets (id, cbom_report_id, algorithm, key_size, usage, location, vulnerability_score, quantum_safe, metadata)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO crypto_assets (id, tenant_id, cbom_report_id, algorithm, key_size, usage, location, vulnerability_score, quantum_safe, metadata)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id, created_at, updated_at`
+
+	if asset.TenantID == "" {
+		return errors.New("crypto asset requires tenant_id")
+	}
 
 	return q.db.QueryRow(
 		query,
 		uuid.New().String(),
+		asset.TenantID,
 		asset.CBOMReportID,
 		asset.Algorithm,
 		asset.KeySize,
@@ -198,35 +255,42 @@ func (q *Queries) CreateCryptoAsset(asset *CryptoAsset) error {
 	).Scan(&asset.ID, &asset.CreatedAt, &asset.UpdatedAt)
 }
 
-func (q *Queries) GetCryptoAsset(id string) (*CryptoAsset, error) {
+// GetCryptoAsset fetches a crypto asset scoped to the caller's tenant.
+func (q *Queries) GetCryptoAsset(tenantID, id string) (*CryptoAsset, error) {
 	query := `
-		SELECT id, cbom_report_id, algorithm, key_size, usage, location, vulnerability_score, quantum_safe, metadata, created_at, updated_at
-		FROM crypto_assets 
-		WHERE id = $1`
+		SELECT id, tenant_id, cbom_report_id, algorithm,
+		       COALESCE(key_size, 0), usage, COALESCE(location, ''),
+		       COALESCE(vulnerability_score, 0), COALESCE(quantum_safe, false),
+		       COALESCE(metadata, '{}'::jsonb), created_at, updated_at
+		FROM crypto_assets
+		WHERE id = $1 AND tenant_id = $2`
 
 	asset := &CryptoAsset{}
-	err := q.db.QueryRow(query, id).Scan(
-		&asset.ID, &asset.CBOMReportID, &asset.Algorithm, &asset.KeySize,
+	err := q.db.QueryRow(query, id, tenantID).Scan(
+		&asset.ID, &asset.TenantID, &asset.CBOMReportID, &asset.Algorithm, &asset.KeySize,
 		&asset.Usage, &asset.Location, &asset.VulnerabilityScore,
 		&asset.QuantumSafe, &asset.Metadata,
 		&asset.CreatedAt, &asset.UpdatedAt,
 	)
-
 	if err != nil {
-		return nil, err
+		return nil, mapRowError(err, tenantID)
 	}
 	return asset, nil
 }
 
-func (q *Queries) ListCryptoAssets(cbomReportID string, limit, offset int) ([]CryptoAsset, error) {
+// ListCryptoAssets lists assets for one report within the caller's tenant.
+func (q *Queries) ListCryptoAssets(tenantID, cbomReportID string, limit, offset int) ([]CryptoAsset, error) {
 	query := `
-		SELECT id, cbom_report_id, algorithm, key_size, usage, location, vulnerability_score, quantum_safe, metadata, created_at, updated_at
-		FROM crypto_assets 
-		WHERE cbom_report_id = $1 
-		ORDER BY created_at DESC 
-		LIMIT $2 OFFSET $3`
+		SELECT id, tenant_id, cbom_report_id, algorithm,
+		       COALESCE(key_size, 0), usage, COALESCE(location, ''),
+		       COALESCE(vulnerability_score, 0), COALESCE(quantum_safe, false),
+		       COALESCE(metadata, '{}'::jsonb), created_at, updated_at
+		FROM crypto_assets
+		WHERE cbom_report_id = $1 AND tenant_id = $2
+		ORDER BY created_at DESC
+		LIMIT $3 OFFSET $4`
 
-	rows, err := q.db.Query(query, cbomReportID, limit, offset)
+	rows, err := q.db.Query(query, cbomReportID, tenantID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +300,7 @@ func (q *Queries) ListCryptoAssets(cbomReportID string, limit, offset int) ([]Cr
 	for rows.Next() {
 		asset := CryptoAsset{}
 		err := rows.Scan(
-			&asset.ID, &asset.CBOMReportID, &asset.Algorithm, &asset.KeySize,
+			&asset.ID, &asset.TenantID, &asset.CBOMReportID, &asset.Algorithm, &asset.KeySize,
 			&asset.Usage, &asset.Location, &asset.VulnerabilityScore,
 			&asset.QuantumSafe, &asset.Metadata,
 			&asset.CreatedAt, &asset.UpdatedAt,
@@ -250,30 +314,39 @@ func (q *Queries) ListCryptoAssets(cbomReportID string, limit, offset int) ([]Cr
 	return assets, nil
 }
 
-func (q *Queries) UpdateCryptoAsset(asset *CryptoAsset) error {
+// UpdateCryptoAsset updates an asset only within the caller's tenant.
+func (q *Queries) UpdateCryptoAsset(tenantID string, asset *CryptoAsset) error {
 	query := `
-		UPDATE crypto_assets 
-		SET algorithm = $2, key_size = $3, usage = $4, location = $5, vulnerability_score = $6, quantum_safe = $7, metadata = $8, updated_at = NOW()
-		WHERE id = $1`
+		UPDATE crypto_assets
+		SET algorithm = $3, key_size = $4, usage = $5, location = $6, vulnerability_score = $7, quantum_safe = $8, metadata = $9, updated_at = NOW()
+		WHERE id = $2 AND tenant_id = $1`
 
-	_, err := q.db.Exec(
+	res, err := q.db.Exec(
 		query,
-		asset.ID, asset.Algorithm, asset.KeySize, asset.Usage,
+		tenantID, asset.ID, asset.Algorithm, asset.KeySize, asset.Usage,
 		asset.Location, asset.VulnerabilityScore, asset.QuantumSafe, asset.Metadata,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return requireOneRow(res, "crypto_assets", asset.ID)
 }
 
 // Quantum Attestation operations
 func (q *Queries) CreateQuantumAttestation(attestation *QuantumAttestation) error {
 	query := `
-		INSERT INTO quantum_attestations (id, cbom_report_id, attestation_type, quantum_network, status, result)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO quantum_attestations (id, tenant_id, cbom_report_id, attestation_type, quantum_network, status, result)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at, updated_at`
+
+	if attestation.TenantID == "" {
+		return errors.New("quantum attestation requires tenant_id")
+	}
 
 	return q.db.QueryRow(
 		query,
 		uuid.New().String(),
+		attestation.TenantID,
 		attestation.CBOMReportID,
 		attestation.AttestationType,
 		attestation.QuantumNetwork,
@@ -282,15 +355,18 @@ func (q *Queries) CreateQuantumAttestation(attestation *QuantumAttestation) erro
 	).Scan(&attestation.ID, &attestation.CreatedAt, &attestation.UpdatedAt)
 }
 
-func (q *Queries) ListQuantumAttestations(cbomReportID string, limit, offset int) ([]QuantumAttestation, error) {
+// ListQuantumAttestations lists attestations within the caller's tenant.
+func (q *Queries) ListQuantumAttestations(tenantID, cbomReportID string, limit, offset int) ([]QuantumAttestation, error) {
 	query := `
-		SELECT id, cbom_report_id, attestation_type, quantum_network, status, result, attested_at, created_at, updated_at
-		FROM quantum_attestations 
-		WHERE cbom_report_id = $1 
-		ORDER BY created_at DESC 
-		LIMIT $2 OFFSET $3`
+		SELECT id, tenant_id, cbom_report_id, attestation_type,
+		       COALESCE(quantum_network, ''), status,
+		       COALESCE(result, '{}'::jsonb), attested_at, created_at, updated_at
+		FROM quantum_attestations
+		WHERE cbom_report_id = $1 AND tenant_id = $2
+		ORDER BY created_at DESC
+		LIMIT $3 OFFSET $4`
 
-	rows, err := q.db.Query(query, cbomReportID, limit, offset)
+	rows, err := q.db.Query(query, cbomReportID, tenantID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +376,7 @@ func (q *Queries) ListQuantumAttestations(cbomReportID string, limit, offset int
 	for rows.Next() {
 		attestation := QuantumAttestation{}
 		err := rows.Scan(
-			&attestation.ID, &attestation.CBOMReportID, &attestation.AttestationType,
+			&attestation.ID, &attestation.TenantID, &attestation.CBOMReportID, &attestation.AttestationType,
 			&attestation.QuantumNetwork, &attestation.Status, &attestation.Result,
 			&attestation.AttestedAt, &attestation.CreatedAt, &attestation.UpdatedAt,
 		)
@@ -335,7 +411,9 @@ func (q *Queries) CreateSecurityEvent(event *SecurityEvent) error {
 
 func (q *Queries) ListSecurityEvents(tenantID string, limit, offset int) ([]SecurityEvent, error) {
 	query := `
-		SELECT id, tenant_id, event_type, severity, source, description, metadata, resolved, created_at, updated_at
+		SELECT id, tenant_id, event_type, severity, source,
+		       COALESCE(description, ''), COALESCE(metadata, '{}'::jsonb),
+		       COALESCE(resolved, false), created_at, updated_at
 		FROM security_events 
 		WHERE tenant_id = $1 
 		ORDER BY created_at DESC 
@@ -387,7 +465,10 @@ func (q *Queries) CreateKubernetesCluster(cluster *KubernetesCluster) error {
 
 func (q *Queries) ListKubernetesClusters(tenantID string, limit, offset int) ([]KubernetesCluster, error) {
 	query := `
-		SELECT id, tenant_id, name, endpoint, version, platform, region, status, metadata, created_at, updated_at
+		SELECT id, tenant_id, name, endpoint,
+		       COALESCE(version, ''), COALESCE(platform, ''), COALESCE(region, ''),
+		       COALESCE(status, ''), COALESCE(metadata, '{}'::jsonb),
+		       created_at, updated_at
 		FROM kubernetes_clusters 
 		WHERE tenant_id = $1 
 		ORDER BY created_at DESC 

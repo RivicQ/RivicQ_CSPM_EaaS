@@ -7,6 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// The four persisted roles. Frontend labels map onto these via roleAliases.
+const (
+	RoleViewer   = "viewer"
+	RoleAnalyst  = "analyst"
+	RoleOperator = "operator"
+	RoleAdmin    = "admin"
+)
+
 // Role hierarchy used by Enterprise RBAC. Viewer < Analyst < Operator < Admin.
 var roleRank = map[string]int{
 	"viewer":   1,
@@ -37,7 +45,7 @@ func NormalizeRole(role string) string {
 	if _, ok := roleRank[r]; ok {
 		return r
 	}
-	return "viewer"
+	return RoleViewer
 }
 
 func RoleAtLeast(have, need string) bool {

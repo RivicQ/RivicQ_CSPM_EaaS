@@ -324,11 +324,11 @@ func buildThreats(stats []algorithmStat, assets []cryptoAssetRow) []ThreatDetect
 		}
 
 		threats = append(threats, ThreatDetection{
-			ID:             fmt.Sprintf("threat-%s-%d", slugify(st.Algorithm), now.Unix()),
-			Type:           tType,
-			Severity:       st.RiskLevel,
-			Confidence:     confidence,
-			Source:         "ml-threat-engine",
+			ID:         fmt.Sprintf("threat-%s-%d", slugify(st.Algorithm), now.Unix()),
+			Type:       tType,
+			Severity:   st.RiskLevel,
+			Confidence: confidence,
+			Source:     "ml-threat-engine",
 			Description: fmt.Sprintf(
 				"%d asset(s) rely on %s which is not quantum-safe (vulnerability score %d).",
 				st.Usage, st.Algorithm, st.Vulnerability),
@@ -425,14 +425,14 @@ func computeQuantumMetrics(ctx context.Context, db *database.DB, tenantID string
 		return nil, err
 	}
 	metrics := &quantumMetrics{
-		QuantumSafeAssets:    analysis.QuantumSafeAssets,
-		QuantumVulnerable:    analysis.VulnerableAssets,
-		IBMQAttestations:     countAttestations(db, tenantID),
-		QuantumRiskScore:     analysis.QuantumRiskScore,
-		PQCReadinessPct:      analysis.PQCReadiness,
-		TotalAssets:          analysis.TotalAssets,
-		AtRiskData:           analysis.VulnerableAssets,
-		OutdatedAlgorithms:   len(analysis.AlgorithmStats),
+		QuantumSafeAssets:  analysis.QuantumSafeAssets,
+		QuantumVulnerable:  analysis.VulnerableAssets,
+		IBMQAttestations:   countAttestations(db, tenantID),
+		QuantumRiskScore:   analysis.QuantumRiskScore,
+		PQCReadinessPct:    analysis.PQCReadiness,
+		TotalAssets:        analysis.TotalAssets,
+		AtRiskData:         analysis.VulnerableAssets,
+		OutdatedAlgorithms: len(analysis.AlgorithmStats),
 	}
 	return metrics, nil
 }

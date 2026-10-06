@@ -12,7 +12,18 @@ import (
 )
 
 // SSHScanner scans SSH endpoints for cryptographic weaknesses
-type SSHScanner struct{}
+// SSHScanner probes SSH service configuration and key exchange strength.
+type SSHScanner struct {
+	policy       TargetPolicy
+	hasOwnPolicy bool
+}
+
+func (s *SSHScanner) effectivePolicy() TargetPolicy {
+	if s.hasOwnPolicy {
+		return s.policy
+	}
+	return PolicyFromEnv()
+}
 
 // Scan connects to an SSH server and returns findings about weak cryptography
 func (s *SSHScanner) Scan(ctx context.Context, target Target) ([]Finding, error) {
@@ -47,9 +58,10 @@ func (s *SSHScanner) Scan(ctx context.Context, target Target) ([]Finding, error)
 
 	addr := fmt.Sprintf("%s:%d", target.Host, target.Port)
 
-	// Use a net.Dialer to respect context
-	var d net.Dialer
-	conn, err := d.DialContext(ctx, "tcp", addr)
+	// Enforce the policy at connect time rather than trusting the check made
+	// before the scan was queued: DNS may have been rebound in between.
+	policy := s.effectivePolicy()
+	conn, err := policy.DialContext(ctx, "tcp", addr)
 	if err != nil {
 		return nil, fmt.Errorf("dial %s: %w", addr, err)
 	}

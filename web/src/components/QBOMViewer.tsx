@@ -1,44 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  LinearProgress,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
-import {
-  CheckCircle,
-  Warning,
-  Error,
-  Download,
-  Share,
-  Timeline,
-  Speed,
-  Shield,
-  Upgrade,
-  TrendingDown,
-  Assignment,
-} from '@mui/icons-material';
+import { Alert, Box, Button, Card, CardContent, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Grid, LinearProgress, Stack, Typography, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { CheckCircle, Warning, Error, Download } from '@mui/icons-material';
 
 interface QBOMAlgorithm {
   name: string;

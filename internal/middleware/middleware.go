@@ -8,6 +8,13 @@ import (
 )
 
 func Setup(router *gin.Engine, editionCfg *edition.Config, logger *logrus.Logger, db *database.DB) {
+	if editionCfg == nil {
+		editionCfg = edition.Detect()
+	}
+	if logger == nil {
+		logger = logrus.New()
+	}
+
 	router.Use(RequestID())
 	router.Use(SecurityHeaders())
 	router.Use(Audit(logger, db))

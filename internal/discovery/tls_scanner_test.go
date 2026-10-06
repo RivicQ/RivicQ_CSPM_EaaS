@@ -97,7 +97,7 @@ func TestTLSScanner_TLS12_NoForwardSecrecy(t *testing.T) {
 	_, err = parsePort(portStr, &port)
 	require.NoError(t, err)
 
-	scanner := &TLSScanner{}
+	scanner := newTestTLSScanner()
 	target := Target{ID: "test", Host: host, Port: port, Protocol: "tls", Label: "Test"}
 	findings, err := scanner.Scan(context.Background(), target)
 	require.NoError(t, err)
@@ -130,7 +130,7 @@ func TestTLSScanner_RSA1024_Critical(t *testing.T) {
 	_, err = parsePort(portStr, &port)
 	require.NoError(t, err)
 
-	scanner := &TLSScanner{}
+	scanner := newTestTLSScanner()
 	target := Target{ID: "test", Host: host, Port: port, Protocol: "tls", Label: "Test"}
 	findings, err := scanner.Scan(context.Background(), target)
 	require.NoError(t, err)
@@ -164,7 +164,7 @@ func TestTLSScanner_SHA1Cert_High(t *testing.T) {
 	_, err = parsePort(portStr, &port)
 	require.NoError(t, err)
 
-	scanner := &TLSScanner{}
+	scanner := newTestTLSScanner()
 	target := Target{ID: "test", Host: host, Port: port, Protocol: "tls", Label: "Test"}
 	findings, err := scanner.Scan(context.Background(), target)
 	require.NoError(t, err)
@@ -197,7 +197,7 @@ func TestTLSScanner_TLS13_ECDHE_NoFindings(t *testing.T) {
 	_, err = parsePort(portStr, &port)
 	require.NoError(t, err)
 
-	scanner := &TLSScanner{}
+	scanner := newTestTLSScanner()
 	target := Target{ID: "test", Host: host, Port: port, Protocol: "tls", Label: "Test"}
 	findings, err := scanner.Scan(context.Background(), target)
 	require.NoError(t, err)
@@ -232,7 +232,7 @@ func TestTLSScanner_RSA2048_Medium(t *testing.T) {
 	_, err = parsePort(portStr, &port)
 	require.NoError(t, err)
 
-	scanner := &TLSScanner{}
+	scanner := newTestTLSScanner()
 	target := Target{ID: "test", Host: host, Port: port, Protocol: "tls", Label: "Test"}
 	findings, err := scanner.Scan(context.Background(), target)
 	require.NoError(t, err)

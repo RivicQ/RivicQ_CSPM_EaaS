@@ -64,17 +64,17 @@ func demoInventorySummary(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Debug("Serving demo inventory summary")
 		c.JSON(http.StatusOK, gin.H{
-			"total_assets":        18742,
-			"compliance_score":    0,
-			"by_category":         gin.H{"cryptographic": 2140, "compute": 3214, "containers": 4860, "storage": 1280, "databases": 436, "identity": 12680},
-			"by_cloud_provider":   gin.H{"aws": 11480, "azure": 3880, "gcp": 3382},
-			"quantum_safe_count":  1391,
-			"non_quantum_safe":    749,
-			"vulnerable_assets":   842,
-			"last_scan_time":      time.Now().UTC().Format(time.RFC3339),
-			"source":              "enterprise_simulation",
-			"data_kind":           "demo",
-			"note":                "Deterministic enterprise simulation. Scores are calculated in the UI scoring engine, not hardcoded here.",
+			"total_assets":       18742,
+			"compliance_score":   0,
+			"by_category":        gin.H{"cryptographic": 2140, "compute": 3214, "containers": 4860, "storage": 1280, "databases": 436, "identity": 12680},
+			"by_cloud_provider":  gin.H{"aws": 11480, "azure": 3880, "gcp": 3382},
+			"quantum_safe_count": 1391,
+			"non_quantum_safe":   749,
+			"vulnerable_assets":  842,
+			"last_scan_time":     time.Now().UTC().Format(time.RFC3339),
+			"source":             "enterprise_simulation",
+			"data_kind":          "demo",
+			"note":               "Deterministic enterprise simulation. Scores are calculated in the UI scoring engine, not hardcoded here.",
 		})
 	}
 }

@@ -56,7 +56,7 @@ func (w *WebhookManager) SetupRoutes(router *gin.RouterGroup, authMW gin.Handler
 }
 
 func (w *WebhookManager) ListWebhooks(c *gin.Context) {
-	if w.db == nil {
+	if !enterpriseDBReady(w.db) {
 		c.JSON(http.StatusOK, gin.H{"webhooks": []Webhook{}})
 		return
 	}
@@ -86,8 +86,7 @@ func (w *WebhookManager) ListWebhooks(c *gin.Context) {
 }
 
 func (w *WebhookManager) CreateWebhook(c *gin.Context) {
-	if w.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, w.db) {
 		return
 	}
 	tenantID, ok := jwtTenantOrAbort(c)
@@ -131,8 +130,7 @@ func (w *WebhookManager) CreateWebhook(c *gin.Context) {
 }
 
 func (w *WebhookManager) UpdateWebhook(c *gin.Context) {
-	if w.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, w.db) {
 		return
 	}
 	tenantID, ok := jwtTenantOrAbort(c)
@@ -163,8 +161,7 @@ func (w *WebhookManager) UpdateWebhook(c *gin.Context) {
 }
 
 func (w *WebhookManager) DeleteWebhook(c *gin.Context) {
-	if w.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, w.db) {
 		return
 	}
 	tenantID, ok := jwtTenantOrAbort(c)
@@ -181,8 +178,7 @@ func (w *WebhookManager) DeleteWebhook(c *gin.Context) {
 }
 
 func (w *WebhookManager) TestWebhook(c *gin.Context) {
-	if w.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, w.db) {
 		return
 	}
 	tenantID, ok := jwtTenantOrAbort(c)
@@ -213,7 +209,7 @@ func (w *WebhookManager) TestWebhook(c *gin.Context) {
 }
 
 func (w *WebhookManager) ListDeliveries(c *gin.Context) {
-	if w.db == nil {
+	if !enterpriseDBReady(w.db) {
 		c.JSON(http.StatusOK, gin.H{"deliveries": []interface{}{}})
 		return
 	}
@@ -258,7 +254,7 @@ func (w *WebhookManager) ListDeliveries(c *gin.Context) {
 
 // DispatchEvent sends an event to all active webhooks subscribed to the event type.
 func (w *WebhookManager) DispatchEvent(tenantID, eventType string, data interface{}) {
-	if w.db == nil {
+	if !enterpriseDBReady(w.db) {
 		return
 	}
 
@@ -332,7 +328,7 @@ func (w *WebhookManager) deliver(wh Webhook, eventType string, payload interface
 }
 
 func (w *WebhookManager) recordDelivery(webhookID, eventType, status string, statusCode int, responseBody string) {
-	if w.db == nil {
+	if !enterpriseDBReady(w.db) {
 		return
 	}
 	_, _ = w.db.Exec(`

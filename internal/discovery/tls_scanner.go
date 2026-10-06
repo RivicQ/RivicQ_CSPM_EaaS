@@ -13,7 +13,18 @@ import (
 )
 
 // TLSScanner scans TLS endpoints for cryptographic weaknesses
-type TLSScanner struct{}
+// TLSScanner inspects TLS versions, cipher suites, and certificate validity.
+type TLSScanner struct {
+	policy       TargetPolicy
+	hasOwnPolicy bool
+}
+
+func (s *TLSScanner) effectivePolicy() TargetPolicy {
+	if s.hasOwnPolicy {
+		return s.policy
+	}
+	return PolicyFromEnv()
+}
 
 // Scan connects to a TLS endpoint and returns findings
 func (s *TLSScanner) Scan(ctx context.Context, target Target) ([]Finding, error) {
@@ -39,19 +50,21 @@ func (s *TLSScanner) Scan(ctx context.Context, target Target) ([]Finding, error)
 		},
 	}
 
-	dialer := tls.Dialer{Config: cfg}
 	addr := fmt.Sprintf("%s:%d", target.Host, target.Port)
 
-	conn, err := dialer.DialContext(ctx, "tcp", addr)
+	// Resolve and validate under the policy, then pin: the TLS handshake runs
+	// against the address that was checked, not a fresh DNS answer.
+	raw, err := s.effectivePolicy().DialContext(ctx, "tcp", addr)
 	if err != nil {
 		return nil, fmt.Errorf("connect %s: %w", addr, err)
 	}
-	defer func() { _ = conn.Close() }()
 
-	tlsConn, ok := conn.(*tls.Conn)
-	if !ok {
-		return nil, fmt.Errorf("not a TLS connection")
+	tlsConn := tls.Client(raw, cfg)
+	if err := tlsConn.HandshakeContext(ctx); err != nil {
+		_ = raw.Close()
+		return nil, fmt.Errorf("tls handshake %s: %w", addr, err)
 	}
+	defer func() { _ = tlsConn.Close() }()
 
 	state := tlsConn.ConnectionState()
 

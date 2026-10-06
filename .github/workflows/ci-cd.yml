@@ -251,7 +251,13 @@ jobs:
 
       - name: Run Integration Tests
         env:
+          # Both names are set: the suite reads either, and RIVICQ_SMOKE_URLS
+          # re-enables TestServersHealthy, which skips without it. This job is
+          # the one place the OSS and Enterprise servers above are actually
+          # running, so the smoke test belongs here.
           DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_integration?sslmode=disable
+          RIVICQ_TEST_DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_integration?sslmode=disable
+          RIVICQ_SMOKE_URLS: "1"
         run: |
           go test -v -tags=integration ./tests/integration/...
 

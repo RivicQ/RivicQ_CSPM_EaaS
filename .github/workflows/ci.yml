@@ -35,6 +35,21 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+      - name: Vet Enterprise
+        run: go vet -tags enterprise ./...
+
+      - name: Format check
+        # gofmt drift is invisible in review until it lands, and an unformatted
+        # file is usually a file someone could not read closely.
+        run: |
+          unformatted=$(gofmt -l $(git ls-files '*.go'))
+          if [ -n "$unformatted" ]; then
+            echo "These files are not gofmt-clean:"
+            echo "$unformatted"
+            gofmt -d $unformatted | head -100
+            exit 1
+          fi
+
       - name: Test (short)
         run: go test -count=1 -short ./...
 

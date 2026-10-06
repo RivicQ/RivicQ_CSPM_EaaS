@@ -23,19 +23,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
-import {
-  CheckCircle,
-  Warning,
-  Error,
-  Download,
-  Gavel,
-  Shield,
-  TrendingUp,
-  Assignment,
-  Timeline,
-  CheckBox,
-  OpenInNew,
-} from '@mui/icons-material';
+import { CheckCircle, Warning, Error, Download, Gavel, Assignment, Timeline, OpenInNew } from '@mui/icons-material';
 
 interface ComplianceStatus {
   status: 'compliant' | 'non_compliant' | 'partial' | 'not_applicable';

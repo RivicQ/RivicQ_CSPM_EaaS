@@ -17,7 +17,25 @@ type DB struct {
 	logger  *logrus.Logger
 }
 
-func New(logger *logrus.Logger) *DB {
+// DemoMode reports whether the process was explicitly allowed to start
+// without a database. Demo mode serves fabricated data, so it must never be a
+// silent consequence of a connection failure.
+func DemoMode() bool {
+	v := strings.ToLower(strings.TrimSpace(os.Getenv("RIVICQ_ALLOW_DEMO_MODE")))
+	return v == "1" || v == "true" || v == "yes"
+}
+
+// New connects to PostgreSQL and returns an error when the database is
+// unreachable.
+//
+// It no longer degrades to an in-memory demo on failure. Callers that allow a
+// demo fallback must opt in explicitly via DemoMode() and must not treat the
+// demo instance as production-ready.
+func New(logger *logrus.Logger) (*DB, error) {
+	if logger == nil {
+		logger = logrus.New()
+	}
+
 	dsn := strings.TrimSpace(os.Getenv("DATABASE_URL"))
 	if dsn == "" {
 		host := envOrDefault("CRYPTOBOM_DB_HOST", "localhost")
@@ -27,8 +45,7 @@ func New(logger *logrus.Logger) *DB {
 		dbname := envOrDefault("CRYPTOBOM_DB_NAME", "cryptobom_saas")
 
 		if password == "" {
-			logger.Warn("CRYPTOBOM_DB_PASSWORD not set — using default for local dev only")
-			password = "cryptobom"
+			return nil, fmt.Errorf("CRYPTOBOM_DB_PASSWORD is not set (refusing to fall back to a default database password)")
 		}
 		sslmode := envOrDefault("CRYPTOBOM_DB_SSLMODE", "disable")
 
@@ -40,14 +57,12 @@ func New(logger *logrus.Logger) *DB {
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		logger.WithError(err).Warn("Database unavailable — running in demo mode")
-		return nil
+		return nil, fmt.Errorf("cannot open database: %w", err)
 	}
 
 	if err := db.Ping(); err != nil {
-		logger.WithError(err).Warn("Database unreachable — running in demo mode")
 		_ = db.Close()
-		return nil
+		return nil, fmt.Errorf("cannot reach database: %w", err)
 	}
 
 	db.SetMaxOpenConns(25)
@@ -60,190 +75,34 @@ func New(logger *logrus.Logger) *DB {
 		DB:      db,
 		Queries: NewQueries(db),
 		logger:  logger,
+	}, nil
+}
+
+// NewOptional connects to the database, returning nil only when the operator
+// has explicitly enabled demo mode. The boolean reports whether the returned
+// database is usable, so callers can log the mode accurately.
+func NewOptional(logger *logrus.Logger) (*DB, bool) {
+	db, err := New(logger)
+	if err == nil {
+		return db, true
 	}
+	if !DemoMode() {
+		if logger != nil {
+			logger.WithError(err).Fatal("Database required and unreachable — refusing to serve")
+		}
+		panic("database required and unreachable: " + err.Error())
+	}
+	if logger != nil {
+		logger.WithError(err).Error("Demo mode explicitly enabled (RIVICQ_ALLOW_DEMO_MODE) — data is fabricated and in-memory")
+	}
+	return nil, false
 }
 
 func RunMigrations(db *DB) error {
 	if db == nil {
 		return nil
 	}
-	if err := createTables(db); err != nil {
-		return fmt.Errorf("migrations failed: %w", err)
-	}
-	if err := createIndexes(db); err != nil {
-		return fmt.Errorf("index creation failed: %w", err)
-	}
-	return nil
-}
-
-// createTables creates tables consistent with the tenant-based schema in
-// deploy/migrations/001_initial_schema.sql (tenants.id is TEXT).
-func createTables(db *DB) error {
-	if db == nil {
-		return nil
-	}
-	queries := []string{
-		`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`,
-		`CREATE TABLE IF NOT EXISTS tenants (
-			id TEXT PRIMARY KEY,
-			name TEXT NOT NULL,
-			domain TEXT UNIQUE,
-			plan TEXT NOT NULL DEFAULT 'oss',
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`CREATE TABLE IF NOT EXISTS users (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-			email TEXT NOT NULL UNIQUE,
-			name TEXT NOT NULL,
-			role TEXT NOT NULL DEFAULT 'viewer',
-			password TEXT NOT NULL DEFAULT '',
-			mfa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-			mfa_secret TEXT,
-			organisation TEXT NOT NULL DEFAULT '',
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS organisation TEXT NOT NULL DEFAULT '';`,
-		`CREATE TABLE IF NOT EXISTS commercial_leads (
-			id TEXT PRIMARY KEY,
-			name TEXT,
-			email TEXT NOT NULL,
-			company TEXT,
-			intent TEXT,
-			source TEXT,
-			stage TEXT,
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`CREATE TABLE IF NOT EXISTS cbom_reports (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-			name TEXT NOT NULL,
-			version TEXT NOT NULL,
-			cyclonedx_bom JSONB NOT NULL,
-			metadata JSONB,
-			status TEXT DEFAULT 'pending',
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`CREATE TABLE IF NOT EXISTS crypto_assets (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			cbom_report_id UUID NOT NULL REFERENCES cbom_reports(id) ON DELETE CASCADE,
-			algorithm TEXT NOT NULL,
-			key_size INTEGER,
-			usage TEXT NOT NULL,
-			location TEXT,
-			vulnerability_score INTEGER DEFAULT 0,
-			quantum_safe BOOLEAN DEFAULT FALSE,
-			metadata JSONB,
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`CREATE TABLE IF NOT EXISTS security_events (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-			event_type TEXT NOT NULL,
-			severity TEXT NOT NULL,
-			source TEXT NOT NULL,
-			description TEXT,
-			metadata JSONB,
-			resolved BOOLEAN DEFAULT FALSE,
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`CREATE TABLE IF NOT EXISTS kubernetes_clusters (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-			name TEXT NOT NULL,
-			endpoint TEXT NOT NULL,
-			version TEXT,
-			platform TEXT,
-			region TEXT,
-			status TEXT DEFAULT 'active',
-			metadata JSONB,
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`CREATE TABLE IF NOT EXISTS quantum_attestations (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			cbom_report_id UUID NOT NULL REFERENCES cbom_reports(id) ON DELETE CASCADE,
-			attestation_type TEXT NOT NULL,
-			quantum_network TEXT,
-			status TEXT NOT NULL DEFAULT 'pending',
-			result TEXT,
-			attested_at TIMESTAMP WITH TIME ZONE,
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`CREATE TABLE IF NOT EXISTS audit_events (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id TEXT REFERENCES tenants(id) ON DELETE SET NULL,
-			event_type TEXT NOT NULL,
-			request_id TEXT,
-			method TEXT,
-			path TEXT,
-			status INT,
-			latency_ms INT,
-			ip TEXT,
-			user_agent TEXT,
-			actor_id TEXT,
-			metadata JSONB,
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-		`CREATE TABLE IF NOT EXISTS sso_configs (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-			provider TEXT NOT NULL,
-			enabled BOOLEAN DEFAULT FALSE,
-			metadata JSONB,
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			UNIQUE(tenant_id, provider)
-		);`,
-		`CREATE TABLE IF NOT EXISTS cloud_accounts (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-			provider TEXT NOT NULL,
-			account_id TEXT NOT NULL,
-			account_name TEXT,
-			status TEXT DEFAULT 'active',
-			metadata JSONB,
-			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-		);`,
-	}
-
-	for _, query := range queries {
-		if _, err := db.Exec(query); err != nil {
-			return fmt.Errorf("failed to execute query: %s, error: %w", query[:60], err)
-		}
-	}
-	return nil
-}
-
-func createIndexes(db *DB) error {
-	if db == nil {
-		return nil
-	}
-	indexes := []string{
-		`CREATE INDEX IF NOT EXISTS idx_users_tenant_id ON users(tenant_id);`,
-		`CREATE INDEX IF NOT EXISTS idx_cbom_reports_tenant_id ON cbom_reports(tenant_id);`,
-		`CREATE INDEX IF NOT EXISTS idx_crypto_assets_cbom_report_id ON crypto_assets(cbom_report_id);`,
-		`CREATE INDEX IF NOT EXISTS idx_security_events_tenant_id ON security_events(tenant_id);`,
-		`CREATE INDEX IF NOT EXISTS idx_kubernetes_clusters_tenant_id ON kubernetes_clusters(tenant_id);`,
-		`CREATE INDEX IF NOT EXISTS idx_crypto_assets_quantum_safe ON crypto_assets(quantum_safe);`,
-		`CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events(severity);`,
-		`CREATE INDEX IF NOT EXISTS idx_audit_events_created_at ON audit_events(created_at);`,
-		`CREATE INDEX IF NOT EXISTS idx_audit_events_event_type ON audit_events(event_type);`,
-	}
-
-	for _, index := range indexes {
-		if _, err := db.Exec(index); err != nil {
-			return fmt.Errorf("failed to create index: %s, error: %w", index, err)
-		}
-	}
-	return nil
+	return ApplyMigrations(db.DB, db.logger, coreMigrations())
 }
 
 func envOrDefault(key, def string) string {

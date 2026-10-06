@@ -2,12 +2,16 @@ package shared
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,53 +22,61 @@ import (
 )
 
 type GHRepo struct {
-	FullName    string `json:"full_name"`
-	CloneURL    string `json:"clone_url"`
+	FullName      string `json:"full_name"`
+	CloneURL      string `json:"clone_url"`
 	DefaultBranch string `json:"default_branch"`
-	Private     bool   `json:"private"`
-	Description string `json:"description"`
-	Language    string `json:"language"`
-	UpdatedAt   string `json:"updated_at"`
+	Private       bool   `json:"private"`
+	Description   string `json:"description"`
+	Language      string `json:"language"`
+	UpdatedAt     string `json:"updated_at"`
 }
 
 type GHScanRequest struct {
-	Repos      []string `json:"repos" binding:"required"`
-	ScanType   string   `json:"scan_type"`
-	DeepScan   bool     `json:"deep_scan"`
+	Repos    []string `json:"repos" binding:"required"`
+	ScanType string   `json:"scan_type"`
+	DeepScan bool     `json:"deep_scan"`
 }
 
 type GHScanResult struct {
-	ScanID         string         `json:"scan_id"`
-	Repo           string         `json:"repo"`
-	Status         string         `json:"status"`
-	CryptoFindings []GHFinding    `json:"crypto_findings,omitempty"`
-	Summary        GHSummary      `json:"summary,omitempty"`
-	ScannedAt      string         `json:"scanned_at"`
-	CommitSHA      string         `json:"commit_sha,omitempty"`
-	DefaultBranch  string         `json:"default_branch,omitempty"`
-	Languages      []string       `json:"languages,omitempty"`
-	Stages         []GHScanStage  `json:"stages,omitempty"`
-	SBOM           []GHComponent  `json:"sbom,omitempty"`
-	CBOM           []GHComponent  `json:"cbom,omitempty"`
-	PQCReadiness   int            `json:"pqc_readiness,omitempty"`
-	FileCount      int            `json:"file_count,omitempty"`
-	Error          string         `json:"error,omitempty"`
-	Demo           bool           `json:"demo,omitempty"`
+	ScanID string `json:"scan_id"`
+	Repo   string `json:"repo"`
+	// EngineVersion pins the detector rule set that produced these findings.
+	EngineVersion   string        `json:"engine_version,omitempty"`
+	TaxonomyVersion string        `json:"pqc_taxonomy_version,omitempty"`
+	Status          string        `json:"status"`
+	CryptoFindings  []GHFinding   `json:"crypto_findings,omitempty"`
+	Summary         GHSummary     `json:"summary,omitempty"`
+	ScannedAt       string        `json:"scanned_at"`
+	CommitSHA       string        `json:"commit_sha,omitempty"`
+	DefaultBranch   string        `json:"default_branch,omitempty"`
+	Languages       []string      `json:"languages,omitempty"`
+	Stages          []GHScanStage `json:"stages,omitempty"`
+	SBOM            []GHComponent `json:"sbom,omitempty"`
+	CBOM            []GHComponent `json:"cbom,omitempty"`
+	PQCReadiness    int           `json:"pqc_readiness,omitempty"`
+	FileCount       int           `json:"file_count,omitempty"`
+	Error           string        `json:"error,omitempty"`
+	Demo            bool          `json:"demo,omitempty"`
 }
 
 type GHFinding struct {
 	ID          string `json:"id"`
-	FilePath    string `json:"file_path"`
-	LineNumber  int    `json:"line_number"`
-	FindingType string `json:"finding_type"`
-	Algorithm   string `json:"algorithm"`
-	KeyLength   int    `json:"key_length,omitempty"`
-	Severity    string `json:"severity"`
-	Description string `json:"description"`
-	Remediation string `json:"remediation"`
-	QuantumSafe bool   `json:"quantum_safe"`
-	OWASP       string `json:"owasp,omitempty"`
-	CWE         string `json:"cwe,omitempty"`
+	Fingerprint string `json:"fingerprint"`
+	RuleID      string `json:"rule_id"`
+	// Confidence is 0..1 and reflects evidence strength, not severity:
+	// a pattern match is weaker than an exact version-to-advisory match.
+	Confidence  float64  `json:"confidence"`
+	FilePath    string   `json:"file_path"`
+	LineNumber  int      `json:"line_number"`
+	FindingType string   `json:"finding_type"`
+	Algorithm   string   `json:"algorithm"`
+	KeyLength   int      `json:"key_length,omitempty"`
+	Severity    string   `json:"severity"`
+	Description string   `json:"description"`
+	Remediation string   `json:"remediation"`
+	QuantumSafe bool     `json:"quantum_safe"`
+	OWASP       string   `json:"owasp,omitempty"`
+	CWE         string   `json:"cwe,omitempty"`
 	Evidence    string   `json:"evidence,omitempty"`
 	Tool        string   `json:"tool,omitempty"`
 	CVE         string   `json:"cve,omitempty"`
@@ -104,9 +116,9 @@ func GitHubScanHandler(logger *logrus.Logger) gin.HandlerFunc {
 			ID:       jobID,
 			TenantID: requestTenant(c),
 			Status:   "queued",
-			Stage:  "queued",
-			Stages: []GHScanStage{{ID: "queued", Label: "Queued", Status: "completed"}},
-			Demo:   token == "" && demoModeEnabled(),
+			Stage:    "queued",
+			Stages:   []GHScanStage{{ID: "queued", Label: "Queued", Status: "completed"}},
+			Demo:     token == "" && demoModeEnabled(),
 		})
 
 		go runGitHubScanJob(jobID, token, req.Repos, req.ScanType, req.DeepScan, logger)
@@ -309,14 +321,141 @@ func GitHubScanCompareHandler(logger *logrus.Logger) gin.HandlerFunc {
 	}
 }
 
+// WebhookSecretFromEnv returns the configured shared secret for GitHub
+// webhooks. An empty result means the endpoint cannot be used safely.
+func WebhookSecretFromEnv() string {
+	for _, key := range []string{"RIVICQ_GITHUB_WEBHOOK_SECRET", "GITHUB_WEBHOOK_SECRET"} {
+		if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// verifyGitHubSignature checks the X-Hub-Signature-256 header using a
+// constant-time comparison.
+//
+// GitHub signs the raw request body with HMAC-SHA256 keyed by the webhook
+// secret and sends it as "sha256=<base64>".
+func verifyGitHubSignature(secret string, payload []byte, header string) error {
+	if secret == "" {
+		return fmt.Errorf("webhook secret is not configured")
+	}
+	if header == "" {
+		return fmt.Errorf("missing X-Hub-Signature-256 header")
+	}
+	const prefix = "sha256="
+	if !strings.HasPrefix(header, prefix) {
+		return fmt.Errorf("unsupported signature algorithm")
+	}
+	provided, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(header, prefix))
+	if err != nil {
+		return fmt.Errorf("malformed signature encoding")
+	}
+
+	mac := hmac.New(sha256.New, []byte(secret))
+	if _, err := mac.Write(payload); err != nil {
+		return err
+	}
+	if !hmac.Equal(provided, mac.Sum(nil)) {
+		return fmt.Errorf("signature mismatch")
+	}
+	return nil
+}
+
+// DefaultWebhookBodyBytes caps the delivery body.
+//
+// The limit is applied before the body is read, not after, so an oversized
+// payload costs one rejected connection instead of the memory it would have
+// occupied. GitHub push payloads for large repositories comfortably exceed a
+// megabyte, so this is generous for real deliveries while still bounding the
+// damage from an attacker who has replayed a captured body.
+const DefaultWebhookBodyBytes int64 = 8 << 20 // 8 MiB
+
+// DefaultWebhookReplayTTL is how long a delivery ID is remembered.
+const DefaultWebhookReplayTTL = 30 * time.Minute
+
+// maxWebhookBodyBytes returns the configured body ceiling, falling back to the
+// default when the value is unset or nonsensical. A limit of zero or negative
+// would reject every delivery, so it is ignored rather than honoured.
+func maxWebhookBodyBytes() int64 {
+	if v, err := strconv.ParseInt(strings.TrimSpace(os.Getenv("RIVICQ_GITHUB_WEBHOOK_MAX_BYTES")), 10, 64); err == nil && v > 0 {
+		return v
+	}
+	return DefaultWebhookBodyBytes
+}
+
+// webhookReplayTTL returns the configured replay window.
+func webhookReplayTTL() time.Duration {
+	if v, err := strconv.ParseInt(strings.TrimSpace(os.Getenv("RIVICQ_WEBHOOK_REPLAY_TTL_SECONDS")), 10, 64); err == nil && v > 0 {
+		return time.Duration(v) * time.Second
+	}
+	return DefaultWebhookReplayTTL
+}
+
+// webhookScanConcurrency bounds scans started from webhook deliveries.
+//
+// Each delivery used to start an unbounded goroutine, so replaying one captured
+// push could exhaust memory and outbound GitHub API quota.
+var webhookScanConcurrency = make(chan struct{}, 4)
+
+// webhookScanTimeout caps a single delivery-triggered scan. Without it a scan
+// that never completes keeps its goroutine and file descriptors forever.
+const webhookScanTimeout = 10 * time.Minute
+
+// githubDeliveries remembers recently accepted deliveries to reject replays.
+// The TTL is read per request so it can be tuned without a restart; the cache
+// itself is process-local.
+var githubDeliveries = newDeliveryCache(DefaultWebhookReplayTTL, 20000)
+
+// GitHubWebhookHandler accepts push and pull_request deliveries.
+//
+// The payload is authenticated with an HMAC signature before it is parsed, and
+// the repository name comes only from the signed body. An unsigned or
+// incorrectly signed delivery is rejected outright; when no secret is
+// configured the endpoint is disabled rather than open.
 func GitHubWebhookHandler(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		event := c.GetHeader("X-GitHub-Event")
 		delivery := c.GetHeader("X-GitHub-Delivery")
 
-		payload, err := c.GetRawData()
+		secret := WebhookSecretFromEnv()
+		if secret == "" {
+			logger.Error("GitHub webhook received but no webhook secret is configured; refusing delivery")
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"error":   "webhook_disabled",
+				"message": "GitHub webhook secret is not configured",
+			})
+			return
+		}
+
+		// Bound the body before reading it. An unbounded read here would let an
+		// unauthenticated caller exhaust memory before we ever check a signature.
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxWebhookBodyBytes())
+		payload, err := io.ReadAll(c.Request.Body)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read payload"})
+			var tooLarge *http.MaxBytesError
+			if errors.As(err, &tooLarge) {
+				logger.WithField("delivery", delivery).Warn("Rejected oversized GitHub webhook delivery")
+				c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "payload_too_large"})
+				return
+			}
+			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read payload"})
+			return
+		}
+
+		if err := verifyGitHubSignature(secret, payload, c.GetHeader("X-Hub-Signature-256")); err != nil {
+			logger.WithError(err).WithField("delivery", delivery).Warn("Rejected GitHub webhook delivery")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid signature"})
+			return
+		}
+
+		// The signature proves the body is authentic, not that it is new. A
+		// captured delivery replays byte for byte, so the delivery ID is
+		// checked separately.
+		if !githubDeliveries.rememberFor(delivery, webhookReplayTTL()) {
+			logger.WithField("delivery", delivery).Warn("Rejected replayed GitHub webhook delivery")
+			c.JSON(http.StatusConflict, gin.H{"error": "duplicate_delivery"})
 			return
 		}
 
@@ -325,24 +464,66 @@ func GitHubWebhookHandler(logger *logrus.Logger) gin.HandlerFunc {
 			"delivery": delivery,
 		}).Info("GitHub webhook received")
 
-		var eventData map[string]interface{}
-		if err := json.Unmarshal(payload, &eventData); err == nil {
-			if repo, ok := eventData["repository"].(map[string]interface{}); ok {
-				if fullName, ok := repo["full_name"].(string); ok {
-					logger.WithField("repo", fullName).Info("Webhook for repository")
-					if event == "push" || event == "pull_request" {
-						token := os.Getenv("GITHUB_TOKEN")
-						go func(name string) {
-							result := scanGitHubRepo(context.Background(), token, name, "crypto", false, logger)
-							storeGHScanJob(&ghScanJob{
-								ID: result.ScanID, TenantID: tenant.PublicTenantID, Status: result.Status, Stage: "completed",
-								Results: []GHScanResult{result}, Demo: result.Demo,
-							})
-						}(fullName)
-					}
-				}
-			}
+		// Only the events that represent new code need a scan.
+		if event != "push" && event != "pull_request" {
+			c.JSON(http.StatusOK, gin.H{
+				"status":   "ignored",
+				"event":    event,
+				"delivery": delivery,
+			})
+			return
 		}
+
+		var eventData map[string]interface{}
+		if err := json.Unmarshal(payload, &eventData); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "malformed payload"})
+			return
+		}
+		repo, _ := eventData["repository"].(map[string]interface{})
+		fullName, _ := repo["full_name"].(string)
+		if strings.TrimSpace(fullName) == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "repository.full_name is required"})
+			return
+		}
+
+		owner, _, ok := strings.Cut(fullName, "/")
+		if !ok || owner == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "repository.full_name is malformed"})
+			return
+		}
+
+		logger.WithField("repo", fullName).Info("Webhook for repository")
+		token := os.Getenv("GITHUB_TOKEN")
+
+		// Queue the scan instead of starting it inline: a burst of deliveries
+		// must not turn into a burst of outbound GitHub calls. The slot is
+		// released when the scan finishes, however long it takes.
+		select {
+		case webhookScanConcurrency <- struct{}{}:
+		default:
+			logger.WithField("repo", fullName).Warn("Webhook scan queue is saturated; delivery accepted without scanning")
+			c.JSON(http.StatusAccepted, gin.H{
+				"status":   "queued_later",
+				"event":    event,
+				"delivery": delivery,
+			})
+			return
+		}
+
+		go func(name string) {
+			defer func() { <-webhookScanConcurrency }()
+
+			// Bound the work: context.Background() left every stuck scan running
+			// for the lifetime of the process.
+			ctx, cancel := context.WithTimeout(context.Background(), webhookScanTimeout)
+			defer cancel()
+
+			result := scanGitHubRepo(ctx, token, name, "crypto", false, logger)
+			storeGHScanJob(&ghScanJob{
+				ID: result.ScanID, TenantID: tenant.PublicTenantID, Status: result.Status, Stage: "completed",
+				Results: []GHScanResult{result}, Demo: result.Demo,
+			})
+		}(fullName)
 
 		c.JSON(http.StatusOK, gin.H{
 			"status":   "accepted",

@@ -138,7 +138,10 @@ func (h *MultiCloudHandler) ListCloudAccounts(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AddCloudAccount(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	var account CloudAccount
 	if err := c.ShouldBindJSON(&account); err != nil {
@@ -304,7 +307,10 @@ func (h *MultiCloudHandler) AWSInventory(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AWSScan(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	h.logger.Info("Starting AWS security scan for tenant: ", tenantID)
 
@@ -352,7 +358,10 @@ func (h *MultiCloudHandler) GCPInventory(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) GCPScan(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	h.logger.Info("Starting GCP security scan for tenant: ", tenantID)
 
@@ -387,7 +396,10 @@ func (h *MultiCloudHandler) IBMCloudInventory(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) IBMCloudScan(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	h.logger.Info("Starting IBM Cloud security scan for tenant: ", tenantID)
 
@@ -435,7 +447,10 @@ func (h *MultiCloudHandler) AzureInventory(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AzureScan(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	h.logger.Info("Starting Azure security scan for tenant: ", tenantID)
 

@@ -34,8 +34,8 @@ func generateInsights(ctx context.Context, db *database.DB, tenantID string) ([]
 	if len(analysis.AlgorithmStats) > 0 {
 		top := analysis.AlgorithmStats[0]
 		insights = append(insights, mlInsight{
-			Type:        "posture_summary",
-			Title:       "Post-quantum readiness assessment",
+			Type:  "posture_summary",
+			Title: "Post-quantum readiness assessment",
 			Description: fmt.Sprintf(
 				"%d%% of %d cryptographic assets are quantum-safe. Highest risk is %s (%s, %d use(s)).",
 				int(analysis.PQCReadiness), analysis.TotalAssets, top.Algorithm, top.RiskLevel, top.Usage),
@@ -50,8 +50,8 @@ func generateInsights(ctx context.Context, db *database.DB, tenantID string) ([]
 		worst := analysis.AlgorithmStats[0]
 		if worst.RiskLevel == "critical" || worst.RiskLevel == "high" {
 			insights = append(insights, mlInsight{
-				Type:        "critical_algorithm",
-				Title:       fmt.Sprintf("%s is the largest quantum exposure", worst.Algorithm),
+				Type:  "critical_algorithm",
+				Title: fmt.Sprintf("%s is the largest quantum exposure", worst.Algorithm),
 				Description: fmt.Sprintf(
 					"%d asset(s) rely on %s with a vulnerability score of %d. Recommended action: %s.",
 					worst.Usage, worst.Algorithm, worst.Vulnerability, worst.Migration),

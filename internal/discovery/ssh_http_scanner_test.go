@@ -15,7 +15,7 @@ import (
 // ── SSH Scanner Unit Tests ─────────────────────────────────────────────────────
 
 func TestSSHScanner_CheckHostKey_DSA_Critical(t *testing.T) {
-	s := &SSHScanner{}
+	s := newTestSSHScanner()
 	findings := s.checkHostKey(
 		Target{ID: "t1", Host: "localhost", Port: 2222, Protocol: "ssh", Label: "Test SSH"},
 		"ssh-dss",
@@ -31,7 +31,7 @@ func TestSSHScanner_CheckHostKey_DSA_Critical(t *testing.T) {
 }
 
 func TestSSHScanner_CheckHostKey_RSA_Medium(t *testing.T) {
-	s := &SSHScanner{}
+	s := newTestSSHScanner()
 	findings := s.checkHostKey(
 		Target{ID: "t1", Host: "localhost", Port: 2222, Protocol: "ssh", Label: "Test SSH"},
 		"ssh-rsa",
@@ -44,7 +44,7 @@ func TestSSHScanner_CheckHostKey_RSA_Medium(t *testing.T) {
 }
 
 func TestSSHScanner_CheckHostKey_Ed25519_NoFindings(t *testing.T) {
-	s := &SSHScanner{}
+	s := newTestSSHScanner()
 	findings := s.checkHostKey(
 		Target{ID: "t1", Host: "localhost", Port: 2222, Protocol: "ssh", Label: "Test SSH"},
 		"ssh-ed25519",
@@ -54,7 +54,7 @@ func TestSSHScanner_CheckHostKey_Ed25519_NoFindings(t *testing.T) {
 }
 
 func TestSSHScanner_WeakKEXFinding_Group1_Critical(t *testing.T) {
-	s := &SSHScanner{}
+	s := newTestSSHScanner()
 	f := s.weakKEXFinding(
 		Target{ID: "t1", Host: "localhost", Port: 2222, Protocol: "ssh", Label: "Test SSH"},
 		"diffie-hellman-group1-sha1",
@@ -69,7 +69,7 @@ func TestSSHScanner_WeakKEXFinding_Group1_Critical(t *testing.T) {
 }
 
 func TestSSHScanner_WeakKEXFinding_Group14_High(t *testing.T) {
-	s := &SSHScanner{}
+	s := newTestSSHScanner()
 	f := s.weakKEXFinding(
 		Target{ID: "t1", Host: "localhost", Port: 2222, Protocol: "ssh", Label: "Test SSH"},
 		"diffie-hellman-group14-sha1",
@@ -83,7 +83,7 @@ func TestSSHScanner_WeakKEXFinding_Group14_High(t *testing.T) {
 // ── HTTP Scanner Unit Tests ────────────────────────────────────────────────────
 
 func TestHTTPScanner_CheckSecurityHeaders_AllMissing(t *testing.T) {
-	s := &HTTPScanner{}
+	s := newTestHTTPScanner()
 	target := Target{ID: "t1", Host: "localhost", Port: 5001, Protocol: "http", Label: "Test HTTP"}
 	headers := http.Header{}
 
@@ -102,7 +102,7 @@ func TestHTTPScanner_CheckSecurityHeaders_AllMissing(t *testing.T) {
 }
 
 func TestHTTPScanner_CheckSecurityHeaders_HSTSPresent(t *testing.T) {
-	s := &HTTPScanner{}
+	s := newTestHTTPScanner()
 	target := Target{ID: "t1", Host: "localhost", Port: 5001, Protocol: "http", Label: "Test HTTP"}
 	headers := http.Header{
 		"Strict-Transport-Security": []string{"max-age=63072000"},
@@ -116,7 +116,7 @@ func TestHTTPScanner_CheckSecurityHeaders_HSTSPresent(t *testing.T) {
 }
 
 func TestHTTPScanner_CheckSecurityHeaders_AllPresent(t *testing.T) {
-	s := &HTTPScanner{}
+	s := newTestHTTPScanner()
 	target := Target{ID: "t1", Host: "localhost", Port: 5001, Protocol: "http", Label: "Test HTTP"}
 	headers := http.Header{
 		"Strict-Transport-Security": []string{"max-age=63072000; includeSubDomains"},
@@ -185,7 +185,7 @@ func TestHTTPScanner_Scan_MD5Response_Critical(t *testing.T) {
 	_, err = parsePort(portStr, &port)
 	require.NoError(t, err)
 
-	scanner := &HTTPScanner{}
+	scanner := newTestHTTPScanner()
 	target := Target{ID: "t1", Host: host, Port: port, Protocol: "http", Label: "Test MD5 API"}
 	findings, err := scanner.Scan(context.Background(), target)
 	require.NoError(t, err)
@@ -219,7 +219,7 @@ func TestHTTPScanner_Scan_NoMD5Response(t *testing.T) {
 	_, err = parsePort(portStr, &port)
 	require.NoError(t, err)
 
-	scanner := &HTTPScanner{}
+	scanner := newTestHTTPScanner()
 	target := Target{ID: "t1", Host: host, Port: port, Protocol: "http", Label: "Test HTTP"}
 	findings, err := scanner.Scan(context.Background(), target)
 	require.NoError(t, err)
@@ -243,7 +243,7 @@ func TestHTTPScanner_HTTPSSchemeAndInsecureCookie(t *testing.T) {
 	_, err = parsePort(portStr, &port)
 	require.NoError(t, err)
 
-	scanner := &HTTPScanner{}
+	scanner := newTestHTTPScanner()
 	target := Target{ID: "t1", Host: host, Port: port, Protocol: "http", Scheme: "https", Label: "Test HTTPS"}
 	findings, err := scanner.Scan(context.Background(), target)
 	require.NoError(t, err)
@@ -262,7 +262,7 @@ func TestHTTPScanner_HTTPSSchemeAndInsecureCookie(t *testing.T) {
 }
 
 func TestHTTPScanner_CheckSecurityHeaders_HTTPSCookie(t *testing.T) {
-	s := &HTTPScanner{}
+	s := newTestHTTPScanner()
 	target := Target{ID: "t1", Host: "localhost", Port: 443, Protocol: "http", Scheme: "https"}
 	headers := http.Header{
 		"Strict-Transport-Security": []string{"max-age=1"},

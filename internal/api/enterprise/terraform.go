@@ -95,7 +95,7 @@ type Workspace struct {
 }
 
 func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
-	if h.db == nil {
+	if !enterpriseDBReady(h.db) {
 		c.JSON(http.StatusOK, demoTerraformResources())
 		return
 	}
@@ -151,7 +151,10 @@ func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ScanTerraformResources(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	var req struct {
 		Workspace  string `json:"workspace"`
@@ -301,7 +304,10 @@ func (h *TerraformHandler) ListWorkspaces(c *gin.Context) {
 }
 
 func (h *TerraformHandler) CreateWorkspace(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	var workspace Workspace
 	if err := c.ShouldBindJSON(&workspace); err != nil {
@@ -338,7 +344,7 @@ func (h *TerraformHandler) GetWorkspaceState(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ListSecurityFindings(c *gin.Context) {
-	if h.db == nil {
+	if !enterpriseDBReady(h.db) {
 		c.JSON(http.StatusOK, demoTerraformFindings())
 		return
 	}
@@ -480,7 +486,10 @@ func (h *TerraformHandler) ListModules(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ScanModules(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	h.logger.Info("Scanning Terraform modules for tenant: ", tenantID)
 

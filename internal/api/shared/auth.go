@@ -62,12 +62,17 @@ func SetupAuthRoutes(router *gin.RouterGroup, logger *logrus.Logger, service *au
 		// Google OAuth
 		authGroup.GET("/google/login", GoogleLoginHandler(logger))
 		authGroup.POST("/google/exchange", GoogleExchangeHandler(logger, service, allowedDomains))
-		authGroup.Any("/google/callback", GoogleCallbackHandler(logger, service, allowedDomains))
+		// Only GET and POST: providers use GET with query parameters or POST with
+		// form_post. Any() would also register PUT/PATCH/DELETE here, creating
+		// dead mutation endpoints on an unauthenticated path.
+		authGroup.GET("/google/callback", GoogleCallbackHandler(logger, service, allowedDomains))
+		authGroup.POST("/google/callback", GoogleCallbackHandler(logger, service, allowedDomains))
 		authGroup.GET("/google/status", GoogleOAuthStatusHandler(logger))
 
 		// GitHub OAuth
 		authGroup.GET("/github/login", GitHubLoginHandler(logger))
-		authGroup.Any("/github/callback", GitHubCallbackHandler(logger, service, allowedDomains))
+		authGroup.GET("/github/callback", GitHubCallbackHandler(logger, service, allowedDomains))
+		authGroup.POST("/github/callback", GitHubCallbackHandler(logger, service, allowedDomains))
 		authGroup.GET("/github/status", GitHubOAuthStatusHandler(logger))
 
 		// Demo access
@@ -474,7 +479,7 @@ func refreshTokenHandler(service *auth.AuthService, logger *logrus.Logger) gin.H
 			c.JSON(http.StatusBadRequest, gin.H{"error": "refresh_token required"})
 			return
 		}
-		newAccess, newRefresh, err := service.TokenManager().RefreshAccessToken(req.RefreshToken)
+		newAccess, newRefresh, err := service.RefreshSession(req.RefreshToken)
 		if err != nil {
 			logger.WithError(err).Warn("refresh token failed")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or revoked refresh token"})

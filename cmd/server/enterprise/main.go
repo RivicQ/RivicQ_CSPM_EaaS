@@ -5,47 +5,35 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/api/enterprise"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
-	"github.com/rivic-q/cryptobom-saas/internal/database"
-	"github.com/rivic-q/cryptobom-saas/internal/edition"
-	"github.com/rivic-q/cryptobom-saas/internal/middleware"
 	"github.com/rivic-q/cryptobom-saas/internal/observability"
+	"github.com/rivic-q/cryptobom-saas/internal/server"
 	"github.com/sirupsen/logrus"
 )
 
+// This binary delegates to internal/server rather than assembling its own router.
+//
+// It used to call gin.Default().Run(), which meant no read/write/idle timeouts,
+// no graceful drain, and a /readyz that always returned 200 even with no
+// database. A second bootstrap like that is how a hardened build quietly stops
+// being hardened, so there is now exactly one server construction path.
 func main() {
-	config.LoadDotEnv()
-
-	// Initialize logger
 	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)
 
-	// Initialize Enterprise configuration
+	// Must precede LoadEnterprise: server.New also loads .env, but it runs after
+	// this configuration read, so relying on it here would silently ignore .env.
+	config.LoadDotEnv()
+
 	cfg, err := config.LoadEnterprise()
 	if err != nil {
-		log.Fatal("Failed to load Enterprise configuration:", err)
+		logger.WithError(err).Fatal("Failed to load Enterprise configuration")
 	}
 
-	// Initialize database with enterprise features
-	db := database.New(logger)
-	if db != nil {
-		logger.Info("Database connected — running in production mode with PostgreSQL")
-		if err := database.RunMigrations(db); err != nil {
-			logger.WithError(err).Fatal("Database migration failed")
-		}
-	} else {
-		logger.Warn("No database available — running in demo mode with in-memory auth")
-	}
-
-	// Initialize OpenTelemetry tracing
+	// Initialize OpenTelemetry tracing.
 	otelShutdown, err := observability.InitOTEL("cryptobom-enterprise", "2.0.0")
 	if err != nil {
 		logger.Warn("OpenTelemetry initialization failed (tracing disabled): ", err)
@@ -58,89 +46,41 @@ func main() {
 		logger.Info("OpenTelemetry tracing enabled")
 	}
 
-	// Initialize Gin router
-	router := gin.Default()
-
-	// Apply enterprise middleware stack (request ID, security headers, audit, rate limit, CORS)
-	router.Use(middleware.RequestID())
-	router.Use(middleware.SecurityHeaders())
-	router.Use(middleware.Audit(logger, db))
-	router.Use(middleware.RateLimit(edition.Detect().Features.APIRateLimit))
-	router.Use(middleware.CORS(middleware.DefaultCORSConfig()))
-	router.Use(middleware.TracingMiddleware("cryptobom-enterprise"))
-	router.Use(func(c *gin.Context) {
-		c.Header("X-CryptoBOM-Edition", "enterprise")
-		c.Next()
-	})
-
-	// Enterprise health check with IBMQ status
-	router.GET("/healthz", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":         "healthy",
-			"service":        "RivicQ - Encryption as a Service (Enterprise)",
-			"edition":        "Enterprise",
-			"version":        "2.0.0",
-			"timestamp":      time.Now().Format("2006-01-02T15:04:05Z07:00"),
-			"ibmq_connected": cfg.IBMQ.Enabled,
-		})
-	})
-
-	router.GET("/readyz", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":  "ready",
-			"service": "RivicQ - Encryption as a Service (Enterprise)",
-		})
-	})
-
-	router.GET("/edition", func(c *gin.Context) {
-		c.JSON(200, edition.Detect().Public())
-	})
-
-	// Setup Enterprise API routes
-	apiGroup := router.Group("/api/v1")
-	enterprise.SetupRoutes(apiGroup, db, logger, cfg)
-
-	// IBMQ-specific routes
-	ibmqGroup := apiGroup.Group("/ibmq")
-	{
-		ibmqGroup.GET("/status", enterprise.GetIBMQStatus(cfg))
-		ibmqGroup.GET("/systems", enterprise.ListIBMQuantumSystems(cfg))
-		ibmqGroup.POST("/attest", enterprise.CreateIBMQuantumAttestation(cfg, logger))
-		ibmqGroup.GET("/networks", enterprise.ListQuantumNetworks(cfg, logger))
-		ibmqGroup.POST("/emergency", enterprise.TriggerEmergencyQuantumResponse(cfg, logger))
+	// IBMQ-specific routes, registered through the shared bootstrap so the
+	// hardened HTTP server, readiness probe, and auth gate still apply.
+	ibmqRoutes := func(api *gin.RouterGroup, s *server.Server) {
+		group := api.Group("/ibmq")
+		group.GET("/status", enterprise.GetIBMQStatus(cfg))
+		group.GET("/systems", enterprise.ListIBMQuantumSystems(cfg))
+		group.POST("/attest", enterprise.CreateIBMQuantumAttestation(cfg, s.Logger))
+		group.GET("/networks", enterprise.ListQuantumNetworks(cfg, s.Logger))
+		group.POST("/emergency", enterprise.TriggerEmergencyQuantumResponse(cfg, s.Logger))
 	}
 
-	// Start server on different port for Enterprise
-	port := ":" + cfg.Server.Port
-	fmt.Printf("🚀 RivicQ — Encryption as a Service (Enterprise) v%s\n", "2.0.0")
-	fmt.Printf("📊 Enterprise Server running on port %s\n", port)
-	fmt.Printf("🎯 Health check: http://localhost:%s/healthz\n", cfg.Server.Port)
-	fmt.Printf("🌐 Enterprise API: http://localhost:%s/api/v1\n", cfg.Server.Port)
-	fmt.Printf("⚛️  IBM Quantum Integration: http://localhost:%s/api/v1/ibmq\n", cfg.Server.Port)
-	fmt.Printf("🔒 Enterprise Edition Features:\n")
-	fmt.Printf("   • IBM Quantum attestation & verification\n")
-	fmt.Printf("   • Advanced threat detection with ML\n")
-	fmt.Printf("   • Multi-cloud deployment support\n")
-	fmt.Printf("   • Enterprise SSO (SAML/LDAP)\n")
-	fmt.Printf("   • Quantum vulnerability assessment\n")
-	fmt.Printf("   • Real-time quantum-safe monitoring\n")
-	fmt.Printf("   • Advanced analytics & reporting\n")
-	fmt.Printf("   • 24/7 enterprise support\n")
+	srv := server.New(
+		server.WithLogger(logger),
+		server.WithPort(cfg.Server.Port),
+		server.WithAPIRouteHook(ibmqRoutes),
+	)
 
-	// Graceful shutdown setup
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	printBanner(srv.Port)
 
-	// Handle shutdown in goroutine
-	go func() {
-		<-quit
-		fmt.Printf("\n🔹 Shutting down RivicQ — Encryption as a Service (Enterprise)...\n")
-		time.Sleep(2 * time.Second)
-		os.Exit(0)
-	}()
+	srv.Start()
+}
 
-	// Start server
-	if err := router.Run(port); err != nil {
-		log.Fatal(err)
+func printBanner(port string) {
+	if port == "" {
+		port = "9090"
 	}
+	fmt.Printf("RivicQ - Encryption as a Service (Enterprise) v%s\n", "2.0.0")
+	fmt.Printf("  Server running on port %s\n", port)
+	fmt.Printf("  Health: http://localhost:%s/healthz\n", port)
+	fmt.Printf("  API:    http://localhost:%s/api/v1\n", port)
+	fmt.Printf("  IBMQ:   http://localhost:%s/api/v1/ibmq\n", port)
+	fmt.Print("\n  Enterprise Edition Features:\n")
+	fmt.Print("     Community engine plus control plane (SSO config, audit, API keys)\n")
+	fmt.Print("     Multi-cloud / HSM / quantum connectors when credentials exist\n")
+	fmt.Print("     DORA pack mappings (not a certification)\n")
+	fmt.Print("     Declared HSM/TPM/QSIC inventory (QSIC is research silicon)\n")
+	fmt.Print("     Live Kubernetes attach when a cluster credential is configured\n\n")
 }

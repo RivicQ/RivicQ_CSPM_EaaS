@@ -15,6 +15,9 @@ import (
 func ToContentFinding(f GHFinding) intelligence.ContentFinding {
 	return intelligence.ContentFinding{
 		ID:          f.ID,
+		RuleID:      f.RuleID,
+		Fingerprint: f.Fingerprint,
+		Confidence:  f.Confidence,
 		FilePath:    f.FilePath,
 		FindingType: f.FindingType,
 		Algorithm:   f.Algorithm,

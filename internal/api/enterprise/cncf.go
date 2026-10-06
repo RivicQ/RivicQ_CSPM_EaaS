@@ -104,7 +104,10 @@ func (h *CNCFHandler) ListTools(c *gin.Context) {
 }
 
 func (h *CNCFHandler) RegisterTool(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	var tool CNCFPlugin
 	if err := c.ShouldBindJSON(&tool); err != nil {

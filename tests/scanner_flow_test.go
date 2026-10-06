@@ -18,12 +18,35 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 )
 
-func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
+// testBootstrapPassword satisfies the bootstrap policy: RivicQ ships no default
+// password, so tests must supply one explicitly.
+const (
+	testBootstrapPassword = "Rivicq-Test-Bootstrap-P4ss!"
+	testBootstrapEmail    = "admin@rivicq.local"
+)
+
+// scannerTestRouter builds an OSS router and returns it with a valid access
+// token. The API group is deny-by-default, so every data-plane call must
+// present a bearer token.
+func scannerTestRouter(t *testing.T) (*gin.Engine, string) {
+	t.Helper()
 	gin.SetMode(gin.TestMode)
+	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", testBootstrapPassword)
+	t.Setenv("JWT_SECRET", scanTenantSecret)
+	t.Setenv("RIVICQ_SCAN_ALLOW_PRIVATE_NETS", "true")
 	router := gin.New()
 	group := router.Group("/api/v1")
 	logger := logrus.New()
-	oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
+	logger.SetLevel(logrus.FatalLevel)
+	svc := oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
+
+	resp, err := svc.Login(testBootstrapEmail, testBootstrapPassword)
+	require.NoError(t, err, "bootstrap admin must be able to log in")
+	return router, resp.AccessToken
+}
+
+func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
+	router, token := scannerTestRouter(t)
 
 	payload := map[string]string{"target": "127.0.0.1"}
 	body, err := json.Marshal(payload)
@@ -31,6 +54,7 @@ func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/scans", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -51,6 +75,7 @@ func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
 	var status map[string]any
 	for time.Now().Before(deadline) {
 		statusReq := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+scanID, nil)
+		statusReq.Header.Set("Authorization", "Bearer "+token)
 		statusRec := httptest.NewRecorder()
 		router.ServeHTTP(statusRec, statusReq)
 
@@ -70,11 +95,7 @@ func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
 }
 
 func TestScannerFlowRejectsEmptyTarget(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-	group := router.Group("/api/v1")
-	logger := logrus.New()
-	oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
+	router, token := scannerTestRouter(t)
 
 	payload := map[string]string{"target": "   "}
 	body, err := json.Marshal(payload)
@@ -82,9 +103,37 @@ func TestScannerFlowRejectsEmptyTarget(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/scans", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Contains(t, w.Body.String(), "target is required")
+}
+
+// TestScannerFlowRequiresAuthentication pins the deny-by-default boundary: an
+// anonymous request must not reach the scan handler.
+func TestScannerFlowRequiresAuthentication(t *testing.T) {
+	router, _ := scannerTestRouter(t)
+
+	body, err := json.Marshal(map[string]string{"target": "127.0.0.1"})
+	require.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/scans", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Contains(t, w.Body.String(), "authentication_required")
+
+	// A garbage token must be rejected rather than treated as anonymous.
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/scans", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer not-a-real-token")
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Contains(t, w.Body.String(), "invalid_token")
 }

@@ -1,6 +1,7 @@
 package intelligence
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/rivic-q/cryptobom-saas/internal/discovery"
@@ -39,20 +40,93 @@ func TestDedupMergesRepeatedScans(t *testing.T) {
 }
 
 func TestClassifyPQC(t *testing.T) {
-	if ClassifyPQC(Finding{Algorithm: "ML-KEM-768"}) != PQCReady {
-		t.Fatal("ML-KEM should be pqc-ready")
+	cases := []struct {
+		name    string
+		finding Finding
+		want    string
+	}{
+		{"ml-kem is standardised pqc", Finding{Algorithm: "ML-KEM-768"}, ClassPQCReady},
+		{"ml-dsa is standardised pqc", Finding{Algorithm: "ML-DSA-65"}, ClassPQCReady},
+		{"slh-dsa is standardised pqc", Finding{Algorithm: "SLH-DSA-SHA2-128s"}, ClassPQCReady},
+		{"rsa-1024 is below policy", Finding{Algorithm: "RSA", KeyLength: 1024}, ClassPQCHighRisk},
+		{"rsa-2048 needs migration, not broken", Finding{Algorithm: "RSA", KeyLength: 2048}, ClassPQCMigrationRequired},
+		{"md5 is already broken classically", Finding{Algorithm: "MD5"}, ClassPQCLegacy},
+		{"sha1 is already broken classically", Finding{Algorithm: "SHA-1"}, ClassPQCLegacy},
+		{"rc4 is already broken classically", Finding{Algorithm: "RC4"}, ClassPQCLegacy},
+		{"3des is already broken classically", Finding{Algorithm: "3DES"}, ClassPQCLegacy},
+		{"tls 1.0 is obsolete", Finding{Evidence: "TLS 1.0 negotiated"}, ClassPQCLegacy},
+		{"aes-256 resists grover", Finding{Algorithm: "AES", KeyLength: 256}, ClassPQCHybridReady},
+		{"aes-128 is below grover resistance", Finding{Algorithm: "AES", KeyLength: 128}, ClassPQCHighRisk},
+		{"hybrid ml-kem is hybrid_ready", Finding{Algorithm: "X25519+ML-KEM-768", Evidence: "hybrid"}, ClassPQCHybridReady},
+		{"no evidence is unknown", Finding{}, ClassPQCUnknown},
+		{"unrecognised is unknown", Finding{Algorithm: "SomeVendorCipher"}, ClassPQCUnknown},
 	}
-	if ClassifyPQC(Finding{Algorithm: "RSA", KeyLength: 1024}) != PQCHighRisk {
-		t.Fatal("RSA-1024 should be high-risk")
+	for _, tc := range cases {
+		if got := ClassifyPQC(tc.finding); got != tc.want {
+			t.Errorf("%s: got %q want %q", tc.name, got, tc.want)
+		}
 	}
-	if ClassifyPQC(Finding{Algorithm: "RSA", KeyLength: 2048}) != PQCMigrationReq {
-		t.Fatal("RSA-2048 is classified for migration, not auto-vulnerable")
+}
+
+// TestPQCClassificationAlwaysSuppliesAReason guards against a class shipped
+// without justification: a reviewer must be able to check every verdict.
+func TestPQCClassificationAlwaysSuppliesAReason(t *testing.T) {
+	for _, f := range []Finding{
+		{Algorithm: "ML-KEM-768"},
+		{Algorithm: "RSA", KeyLength: 2048},
+		{Algorithm: "MD5"},
+		{Algorithm: "AES", KeyLength: 256},
+		{},
+	} {
+		r := ClassifyPQCWithReason(f)
+		if r.Class == "" {
+			t.Errorf("%+v produced an empty class", f)
+		}
+		if !IsValidPQCClass(r.Class) {
+			t.Errorf("%+v produced %q which is not in the taxonomy", f, r.Class)
+		}
+		if r.Reason == "" {
+			t.Errorf("%+v produced no reason", f)
+		}
+		if r.Action == "" {
+			t.Errorf("%+v produced no recommended action", f)
+		}
+		if r.Version != TaxonomyVersion {
+			t.Errorf("%+v reported version %q want %q", f, r.Version, TaxonomyVersion)
+		}
 	}
-	if ClassifyPQC(Finding{Algorithm: "MD5"}) != PQCHighRisk {
-		t.Fatal("MD5 high-risk")
+}
+
+// TestTaxonomyIsClosedAndVersioned prevents an unversioned or ad-hoc class from
+// leaking into stored data.
+func TestTaxonomyIsClosedAndVersioned(t *testing.T) {
+	if len(PQCClasses) != 6 {
+		t.Fatalf("expected six classes, got %d: %v", len(PQCClasses), PQCClasses)
 	}
-	if ClassifyPQC(Finding{Algorithm: "AES", KeyLength: 256}) != PQCHybridReady {
-		t.Fatal("AES-256 hybrid-ready / grover-sized")
+	if !strings.Contains(TaxonomyVersion, "1.0.0") {
+		t.Fatalf("taxonomy version must carry a semver, got %q", TaxonomyVersion)
+	}
+	seen := map[string]bool{}
+	for _, c := range PQCClasses {
+		if c == "" {
+			t.Error("empty class name in taxonomy")
+		}
+		if seen[c] {
+			t.Errorf("duplicate class %q", c)
+		}
+		seen[c] = true
+		if !IsValidPQCClass(c) {
+			t.Errorf("%q should be valid", c)
+		}
+		if PQCRecommendedAction(c) == "" {
+			t.Errorf("%q has no recommended action", c)
+		}
+	}
+	if IsValidPQCClass("pqc-ready") {
+		t.Error("the pre-taxonomy hyphenated names must not remain valid")
+	}
+	if IsValidPQCClass("anything-else") {
+		t.Error("unknown classes must be invalid")
 	}
 }
 
@@ -98,7 +172,7 @@ func TestBuildReportStampsFingerprints(t *testing.T) {
 	if rep.Findings[0].Fingerprint == "" {
 		t.Fatal("missing fingerprint")
 	}
-	if rep.PQCReadiness.Classifications[PQCHighRisk] < 1 {
+	if rep.PQCReadiness.Classifications[ClassPQCLegacy] < 1 {
 		t.Fatalf("classifications %+v", rep.PQCReadiness.Classifications)
 	}
 	if len(rep.PQCReadiness.SupportedNISTPQC) != 3 {

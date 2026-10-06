@@ -2,17 +2,22 @@ package shared
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"encoding/json"
 	"io/fs"
 	"path"
+	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rivic-q/cryptobom-saas/internal/intelligence"
 	"github.com/rivic-q/cryptobom-saas/internal/tenant"
 )
 
@@ -43,19 +48,19 @@ type GHComponent struct {
 }
 
 type ghScanJob struct {
-	ID      string
+	ID       string
 	TenantID string
-	Status  string
-	Stage   string
-	Stages  []GHScanStage
-	Results []GHScanResult
-	Error   string
-	Demo    bool
+	Status   string
+	Stage    string
+	Stages   []GHScanStage
+	Results  []GHScanResult
+	Error    string
+	Demo     bool
 }
 
 var ghScanJobs = struct {
-	mu   sync.RWMutex
-	jobs map[string]*ghScanJob
+	mu    sync.RWMutex
+	jobs  map[string]*ghScanJob
 	order []string
 }{jobs: map[string]*ghScanJob{}}
 
@@ -132,16 +137,59 @@ func listGHScanJobs() []*ghScanJob {
 	return out
 }
 
+// EngineVersion identifies the content-analysis rule set. Bump it when rule
+// behaviour changes so reports can explain a shift in finding counts.
+const EngineVersion = "rivicq-content-scanner/1.1.0"
+
+// findingFingerprint is the tenant-independent identity of a finding. Repeated
+// scans of unchanged content produce the same fingerprint, which is what makes
+// scan-to-scan diffing and suppression stable. ScanID and line-exact evidence
+// are deliberately excluded so a moved line is not reported as a new finding.
+func findingFingerprint(ruleID, filePath, findingType, algorithm, cve string, keyLength int) string {
+	sum := sha256.Sum256([]byte(strings.Join([]string{
+		strings.ToLower(ruleID),
+		strings.ToLower(filePath),
+		strings.ToUpper(findingType),
+		strings.ToUpper(algorithm),
+		strings.ToUpper(cve),
+		strconv.Itoa(keyLength),
+	}, "|")))
+	return hex.EncodeToString(sum[:])
+}
+
+// findingKey keys diffs on fingerprint so two findings of the same algorithm in
+// one file are tracked separately instead of overwriting each other.
 func findingKey(f GHFinding) string {
-	return strings.ToLower(f.FilePath + "|" + f.FindingType + "|" + f.Algorithm)
+	if f.Fingerprint != "" {
+		return f.Fingerprint
+	}
+	return findingFingerprint(f.RuleID, f.FilePath, f.FindingType, f.Algorithm, f.CVE, f.KeyLength)
+}
+
+// sortFindings gives output a deterministic order so a report diff reflects real
+// changes rather than map iteration or file-walk ordering.
+func sortFindings(findings []GHFinding) {
+	sort.SliceStable(findings, func(i, j int) bool {
+		a, b := findings[i], findings[j]
+		if a.FilePath != b.FilePath {
+			return a.FilePath < b.FilePath
+		}
+		if a.LineNumber != b.LineNumber {
+			return a.LineNumber < b.LineNumber
+		}
+		if a.RuleID != b.RuleID {
+			return a.RuleID < b.RuleID
+		}
+		return a.Algorithm < b.Algorithm
+	})
 }
 
 type GHScanDiff struct {
-	CurrentScan  string      `json:"current_scan"`
-	PreviousScan string      `json:"previous_scan"`
-	New          []GHFinding `json:"new"`
-	Resolved     []GHFinding `json:"resolved"`
-	Unchanged    []GHFinding `json:"unchanged"`
+	CurrentScan  string           `json:"current_scan"`
+	PreviousScan string           `json:"previous_scan"`
+	New          []GHFinding      `json:"new"`
+	Resolved     []GHFinding      `json:"resolved"`
+	Unchanged    []GHFinding      `json:"unchanged"`
 	Counts       GHScanDiffCounts `json:"counts"`
 }
 
@@ -183,6 +231,7 @@ func compareGHScans(current, previous *ghScanJob) GHScanDiff {
 
 type cryptoRule struct {
 	re          *regexp.Regexp
+	ruleID      string
 	algorithm   string
 	findingType string
 	severity    string
@@ -190,19 +239,26 @@ type cryptoRule struct {
 	owasp       string
 	cwe         string
 	remediation string
+	// confidence reflects how specific the pattern is. A named weak-algorithm
+	// API call is high confidence; a bare "rsa" substring is low.
+	confidence float64
 }
 
+// cryptoRules is ordered by descending confidence so the strongest evidence for
+// a file wins the CBOM entry. Rule IDs are stable: downstream suppressions,
+// accuracy benchmarks, and report cross-references depend on them.
 var cryptoRules = []cryptoRule{
-	{regexp.MustCompile(`(?i)` + `crypto/` + `md5|hashlib\.` + `md5|MessageDigest\.getInstance\(["']MD5|md5\.Sum\(`), "MD5", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Replace MD5 with SHA-256 or SHA-3; do not use MD5 for integrity or passwords."},
-	{regexp.MustCompile(`(?i)` + `crypto/` + `sha1|hashlib\.` + `sha1|sha1\.Sum\(`), "SHA-1", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Migrate SHA-1 to SHA-256 or SHA-3."},
-	{regexp.MustCompile(`(?i)` + `crypto/` + `rsa|RSA\.generate|` + `rsa` + `\.GenerateKey|RSA_PKCS1|algorithm:\s*['"]RS256`), "RSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "Review RSA key sizes (prefer ≥3072) and plan ML-KEM / ML-DSA hybrid migration."},
-	{regexp.MustCompile(`(?i)` + `des-` + `ede3|` + `DES` + `ede|triple-des|tripledes`), "3DES", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Remove 3DES; use AES-256-GCM."},
-	{regexp.MustCompile(`(?i)arc` + `four|rc4-` + `sha|RC4-` + `MD5`), "RC4", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Disable RC4; use TLS 1.2+ with AEAD ciphers."},
-	{regexp.MustCompile(`(?i)` + `crypto/` + `ecdsa|EC_KEY|` + `ecdsa` + `\.GenerateKey`), "ECDSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "ECDSA is not quantum-safe; plan ML-DSA migration."},
-	{regexp.MustCompile(`(?i)jwt\.sign|json` + `webtoken|jose\.JWT`), "JWT", "CRYPTO_IMPORT", "LOW", false, "A02:2021 Cryptographic Failures", "CWE-347", "Prefer EdDSA or PQC-hybrid JWT signing; rotate secrets."},
-	{regexp.MustCompile(`(?i)ml-kem|ml-dsa|kyber|dilithium|liboqs`), "PQC", "PQC_LIBRARY", "INFO", true, "A02:2021 Cryptographic Failures", "CWE-327", "PQC library detected — verify it is used for production key exchange, not only imported."},
-	{regexp.MustCompile(`tls\.VersionTLS10`), "TLS 1.0", "WEAK_TLS", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Disable TLS 1.0; require TLS 1.2 or TLS 1.3."},
-	{regexp.MustCompile(`tls\.VersionTLS11`), "TLS 1.1", "WEAK_TLS", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Disable TLS 1.1; require TLS 1.2 or TLS 1.3."},
+	{regexp.MustCompile(`(?i)` + `crypto/` + `md5|hashlib\.` + `md5|MessageDigest\.getInstance\(["']MD5|md5\.Sum\(`), "crypto.weak-hash.md5", "MD5", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Replace MD5 with SHA-256 or SHA-3; do not use MD5 for integrity or passwords.", 0.85},
+	{regexp.MustCompile(`(?i)` + `crypto/` + `sha1|hashlib\.` + `sha1|sha1\.Sum\(`), "crypto.weak-hash.sha1", "SHA-1", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Migrate SHA-1 to SHA-256 or SHA-3.", 0.85},
+	{regexp.MustCompile(`(?i)` + `des-` + `ede3|` + `DES` + `ede|triple-des|tripledes`), "crypto.weak-cipher.3des", "3DES", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Remove 3DES; use AES-256-GCM.", 0.8},
+	{regexp.MustCompile(`(?i)arc` + `four|crypto/` + `rc4|rc4\.New(Cipher|Stream)|rc4-` + `sha|RC4-` + `MD5`), "crypto.weak-cipher.rc4", "RC4", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Disable RC4; use TLS 1.2+ with AEAD ciphers.", 0.8},
+	{regexp.MustCompile(`tls\.VersionTLS10`), "tls.version.1_0", "TLS 1.0", "WEAK_TLS", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Disable TLS 1.0; require TLS 1.2 or TLS 1.3.", 0.9},
+	{regexp.MustCompile(`tls\.VersionTLS11`), "tls.version.1_1", "TLS 1.1", "WEAK_TLS", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Disable TLS 1.1; require TLS 1.2 or TLS 1.3.", 0.9},
+	{regexp.MustCompile(`(?i)ml-kem|ml_dsa|ml-dsa|ml_kem|kyber|dilithium|liboqs|pqcrypto`), "crypto.pqc.library", "PQC", "PQC_LIBRARY", "INFO", true, "A02:2021 Cryptographic Failures", "CWE-327", "PQC library detected — verify it is used for production key exchange, not only imported.", 0.6},
+	{regexp.MustCompile(`(?i)GenerateKey\([^)]*?,\s*(512|768|1024)\s*\)|RSA\.generate\((512|768|1024)\)|key_?size\s*[:=]\s*(512|768|1024)\b|\bRSA_KEY_(SIZE|BITS)\s*=\s*(512|768|1024)\b`), "crypto.rsa.keysize.insufficient", "RSA", "WEAK_KEY_SIZE", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Regenerate RSA keys at ≥2048 bits; prefer ≥3072 and plan ML-KEM hybrid migration.", 0.85},
+	{regexp.MustCompile(`(?i)` + `crypto/` + `rsa|RSA\.generate|` + `rsa` + `\.GenerateKey|RSA_PKCS1|algorithm:\s*['"]RS256`), "crypto.import.rsa", "RSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "Review RSA key sizes (prefer ≥3072) and plan ML-KEM / ML-DSA hybrid migration.", 0.5},
+	{regexp.MustCompile(`(?i)` + `crypto/` + `ecdsa|EC_KEY|` + `ecdsa` + `\.GenerateKey`), "crypto.import.ecdsa", "ECDSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "ECDSA is not quantum-safe; plan ML-DSA migration.", 0.5},
+	{regexp.MustCompile(`(?i)jwt\.sign|json` + `webtoken|jose\.JWT|import\s+jwt\b|\bjwt\.(encode|decode)\(`), "crypto.import.jwt", "JWT", "CRYPTO_IMPORT", "LOW", false, "A02:2021 Cryptographic Failures", "CWE-347", "Prefer EdDSA or PQC-hybrid JWT signing; rotate secrets.", 0.45},
 }
 
 // rsaKeyBitsRe captures RSA modulus size from GenerateKey(..., N) or RSA.generate(N).
@@ -231,16 +287,18 @@ func extractKeyLength(algorithm, content string) int {
 
 type secretRule struct {
 	re          *regexp.Regexp
+	ruleID      string
 	kind        string
 	severity    string
 	remediation string
+	confidence  float64
 }
 
 var secretRules = []secretRule{
-	{regexp.MustCompile(`AKIA[0-9A-Z]{16}`), "aws_access_key", "CRITICAL", "Rotate the AWS key; store credentials in a secret manager."},
-	{regexp.MustCompile(`ghp_[A-Za-z0-9]{20,}`), "github_token", "CRITICAL", "Revoke the GitHub PAT and use a GitHub App with least privilege."},
-	{regexp.MustCompile(`-----BEGIN (RSA |OPENSSH |EC |OPENSSH )?PRIVATE KEY-----`), "private_key", "CRITICAL", "Remove private keys from source control; rotate the key pair."},
-	{regexp.MustCompile(`(?i)(api[_-]?key|secret|password|token)\s*[=:]\s*['"][^'"]{12,}['"]`), "generic_secret", "HIGH", "Move secrets to environment variables or a vault; rotate exposed values."},
+	{regexp.MustCompile(`AKIA[0-9A-Z]{16}`), "secret.aws-access-key", "aws_access_key", "CRITICAL", "Rotate the AWS key; store credentials in a secret manager.", 0.9},
+	{regexp.MustCompile(`ghp_[A-Za-z0-9]{20,}`), "secret.github-pat", "github_token", "CRITICAL", "Revoke the GitHub PAT and use a GitHub App with least privilege.", 0.9},
+	{regexp.MustCompile(`-----BEGIN (RSA |OPENSSH |EC |OPENSSH )?PRIVATE KEY-----`), "secret.private-key", "private_key", "CRITICAL", "Remove private keys from source control; rotate the key pair.", 0.95},
+	{regexp.MustCompile(`(?i)(api[_-]?key|secret|password|token)\s*[=:]\s*['"][^'"]{12,}['"]`), "secret.generic-assignment", "generic_secret", "HIGH", "Move secrets to environment variables or a vault; rotate exposed values.", 0.55},
 }
 
 var interestingExt = map[string]bool{
@@ -432,7 +490,8 @@ func scaAdvisories(filePath string, comps []GHComponent, demo bool) []GHFinding 
 			continue
 		}
 		out = append(out, GHFinding{
-			ID:          uuid.New().String(),
+			RuleID:      "sca.advisory." + strings.ToLower(cve),
+			Confidence:  0.95,
 			FilePath:    filePath,
 			LineNumber:  1,
 			FindingType: "SCA",
@@ -470,6 +529,17 @@ func complianceFor(f GHFinding) []string {
 }
 
 // AnalyzeRepositoryFiles runs deterministic SAST/SCA/secret/CBOM/IaC analysis on real file contents.
+// documentationExtensions are treated as prose for the crypto rules.
+var documentationExtensions = map[string]bool{
+	".md": true, ".markdown": true, ".rst": true, ".txt": true, ".adoc": true,
+}
+
+// isDocumentationPath reports whether a path is documentation rather than code.
+func isDocumentationPath(path string) bool {
+	ext := strings.ToLower(filepath.Ext(path))
+	return documentationExtensions[ext]
+}
+
 func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResult {
 	findings := make([]GHFinding, 0)
 	sbom := make([]GHComponent, 0)
@@ -489,17 +559,27 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 		base := strings.ToLower(path.Base(file.Path))
 
 		for _, rule := range cryptoRules {
+			// Prose is not code. A README that says "we do not use DESede" or
+			// lists weak algorithms to ban them is the single largest source of
+			// false positives for a regex scanner, and documentation is also the
+			// least useful place to action a finding. Secret rules are exempt:
+			// a leaked credential pasted into a README is a real incident.
+			if isDocumentationPath(file.Path) {
+				continue
+			}
 			loc := rule.re.FindStringIndex(content)
 			if loc == nil {
 				continue
 			}
+			keyLen := extractKeyLength(rule.algorithm, content)
 			findings = append(findings, GHFinding{
-				ID:          uuid.New().String(),
+				RuleID:      rule.ruleID,
+				Confidence:  rule.confidence,
 				FilePath:    file.Path,
 				LineNumber:  lineOf(content, loc[0]),
 				FindingType: rule.findingType,
 				Algorithm:   rule.algorithm,
-				KeyLength:   extractKeyLength(rule.algorithm, content),
+				KeyLength:   keyLen,
 				Severity:    rule.severity,
 				Description: rule.algorithm + " usage in " + file.Path,
 				Remediation: rule.remediation,
@@ -523,7 +603,8 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 				continue
 			}
 			findings = append(findings, GHFinding{
-				ID:          uuid.New().String(),
+				RuleID:      rule.ruleID,
+				Confidence:  rule.confidence,
 				FilePath:    file.Path,
 				LineNumber:  lineOf(content, loc[0]),
 				FindingType: "SECRET",
@@ -558,7 +639,8 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 		if base == "dockerfile" {
 			if strings.Contains(content, "USER root") {
 				findings = append(findings, GHFinding{
-					ID: uuid.New().String(), FilePath: file.Path, LineNumber: lineOf(content, strings.Index(content, "USER root")),
+					RuleID: "container.runs-as-root", Confidence: 0.9,
+					FilePath: file.Path, LineNumber: lineOf(content, strings.Index(content, "USER root")),
 					FindingType: "CONTAINER", Algorithm: "docker", Severity: "HIGH",
 					Description: "Container runs as root", Remediation: "Add a non-root USER instruction.",
 					OWASP: "A05:2021 Security Misconfiguration", CWE: "CWE-250", Tool: "rivicq-docker-analyzer", Demo: demo,
@@ -566,7 +648,8 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 			}
 			if strings.Contains(content, "EXPOSE 22") {
 				findings = append(findings, GHFinding{
-					ID: uuid.New().String(), FilePath: file.Path, LineNumber: lineOf(content, strings.Index(content, "EXPOSE 22")),
+					RuleID: "container.exposes-ssh", Confidence: 0.85,
+					FilePath: file.Path, LineNumber: lineOf(content, strings.Index(content, "EXPOSE 22")),
 					FindingType: "CONTAINER", Algorithm: "docker", Severity: "MEDIUM",
 					Description: "Dockerfile exposes SSH port 22", Remediation: "Do not expose SSH from application images.",
 					OWASP: "A05:2021 Security Misconfiguration", CWE: "CWE-668", Tool: "rivicq-docker-analyzer", Demo: demo,
@@ -578,7 +661,8 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 		if strings.HasSuffix(base, ".tf") || strings.Contains(file.Path, "terraform") {
 			if strings.Contains(content, "0.0.0.0/0") {
 				findings = append(findings, GHFinding{
-					ID: uuid.New().String(), FilePath: file.Path, LineNumber: lineOf(content, strings.Index(content, "0.0.0.0/0")),
+					RuleID: "iac.open-cidr", Confidence: 0.8,
+					FilePath: file.Path, LineNumber: lineOf(content, strings.Index(content, "0.0.0.0/0")),
 					FindingType: "IAC", Algorithm: "terraform", Severity: "HIGH",
 					Description: "Security group allows 0.0.0.0/0", Remediation: "Restrict CIDR to known networks.",
 					OWASP: "A01:2021 Broken Access Control", CWE: "CWE-284", Tool: "rivicq-iac-analyzer", Demo: demo,
@@ -586,7 +670,8 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 			}
 			if strings.Contains(content, "public-read") {
 				findings = append(findings, GHFinding{
-					ID: uuid.New().String(), FilePath: file.Path, LineNumber: lineOf(content, strings.Index(content, "public-read")),
+					RuleID: "iac.public-read-acl", Confidence: 0.85,
+					FilePath: file.Path, LineNumber: lineOf(content, strings.Index(content, "public-read")),
 					FindingType: "IAC", Algorithm: "terraform", Severity: "CRITICAL",
 					Description: "Object storage ACL is public-read", Remediation: "Use private ACLs and bucket policies.",
 					OWASP: "A01:2021 Broken Access Control", CWE: "CWE-732", Tool: "rivicq-iac-analyzer", Demo: demo,
@@ -597,7 +682,8 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 
 		if strings.Contains(base, "openapi") || strings.Contains(base, "swagger") {
 			findings = append(findings, GHFinding{
-				ID: uuid.New().String(), FilePath: file.Path, LineNumber: 1,
+				RuleID: "api.spec-discovered", Confidence: 0.9,
+				FilePath: file.Path, LineNumber: 1,
 				FindingType: "API", Algorithm: "openapi", Severity: "INFO",
 				Description: "OpenAPI/Swagger specification discovered",
 				Remediation: "Review operations against OWASP API Security Top 10; this is discovery, not a complete API test.",
@@ -608,7 +694,8 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 			})
 			if !strings.Contains(content, "securitySchemes") && !strings.Contains(content, "security:") {
 				findings = append(findings, GHFinding{
-					ID: uuid.New().String(), FilePath: file.Path, LineNumber: 1,
+					RuleID: "api.missing-security-schemes", Confidence: 0.7,
+					FilePath: file.Path, LineNumber: 1,
 					FindingType: "API", Algorithm: "openapi", Severity: "HIGH",
 					Description: "API specification does not declare security schemes",
 					Remediation: "Define securitySchemes (OAuth2, OIDC, or mTLS) and apply them to operations.",
@@ -631,31 +718,45 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 	stages = appendStage(stages, "compliance", "Mapping compliance controls")
 	stages = appendStage(stages, "completed", "Scan complete")
 
+	// Stamp stable identity on every finding, then order deterministically, so
+	// two scans of unchanged content produce byte-identical findings.
 	for i := range findings {
 		if len(findings[i].Compliance) == 0 {
 			findings[i].Compliance = complianceFor(findings[i])
 		}
+		if findings[i].Confidence == 0 {
+			findings[i].Confidence = 0.5
+		}
+		findings[i].Fingerprint = findingFingerprint(
+			findings[i].RuleID, findings[i].FilePath, findings[i].FindingType,
+			findings[i].Algorithm, findings[i].CVE, findings[i].KeyLength,
+		)
+		findings[i].ID = "rvq-" + findings[i].Fingerprint[:16]
 	}
+	sortFindings(findings)
 
 	langList := make([]string, 0, len(langs))
 	for k := range langs {
 		langList = append(langList, k)
 	}
+	sort.Strings(langList)
 
 	result := GHScanResult{
-		ScanID:         uuid.New().String(),
-		Repo:           repo,
-		Status:         "completed",
-		CryptoFindings: findings,
-		Summary:        summarizeFindings(findings),
-		ScannedAt:      time.Now().UTC().Format(time.RFC3339),
-		Stages:         stages,
-		SBOM:           sbom,
-		CBOM:           cbom,
-		Languages:      langList,
-		PQCReadiness:   pqcReadiness(findings),
-		FileCount:      len(files),
-		Demo:           demo,
+		ScanID:          uuid.New().String(),
+		Repo:            repo,
+		EngineVersion:   EngineVersion,
+		TaxonomyVersion: intelligence.TaxonomyVersion,
+		Status:          "completed",
+		CryptoFindings:  findings,
+		Summary:         summarizeFindings(findings),
+		ScannedAt:       time.Now().UTC().Format(time.RFC3339),
+		Stages:          stages,
+		SBOM:            sbom,
+		CBOM:            cbom,
+		Languages:       langList,
+		PQCReadiness:    pqcReadiness(findings),
+		FileCount:       len(files),
+		Demo:            demo,
 	}
 	return result
 }

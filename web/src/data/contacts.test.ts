@@ -31,9 +31,13 @@ describe('rivicq.com public desks', () => {
   it('uses only the rivicq.com domain and never publishes private or automated addresses', () => {
     CONTACTS.forEach((c) => {
       expect(c.email.endsWith(`@${CONTACT_DOMAIN}`)).toBe(true);
-      if (c.kind === 'private' || c.kind === 'automated') {
-        expect(c.publish).toBe(false);
-      }
     });
+
+    // Hoisted out of the loop: jest/no-conditional-expect rejects an assertion
+    // that only runs on some iterations, because a filtered collection would
+    // silently satisfy it.
+    const nonPublic = CONTACTS.filter((c) => c.kind === 'private' || c.kind === 'automated');
+    expect(nonPublic.length).toBeGreaterThan(0);
+    expect(nonPublic.every((c) => c.publish === false)).toBe(true);
   });
 });

@@ -5,6 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -13,7 +15,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/pquerna/otp/totp"
+	"github.com/rivic-q/cryptobom-saas/internal/tenant"
 	"golang.org/x/crypto/bcrypt"
+)
+
+// TokenUse distinguishes an access token from a refresh token. Without it a
+// stolen access token can be exchanged at /auth/refresh for a 30-day session.
+const (
+	TokenUseAccess  = "access"
+	TokenUseRefresh = "refresh"
 )
 
 // JWT Claims structure
@@ -24,6 +34,7 @@ type Claims struct {
 	Role        string   `json:"role"`
 	Edition     string   `json:"edition"`
 	Permissions []string `json:"permissions"`
+	TokenUse    string   `json:"token_use"`
 	jwt.RegisteredClaims
 }
 
@@ -146,6 +157,18 @@ func (s *PasswordResetStore) Create(email string) (string, error) {
 	return raw, nil
 }
 
+// Peek returns the email bound to a reset token without invalidating it, so a
+// password-policy failure does not burn the token.
+func (s *PasswordResetStore) Peek(raw string) (string, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	sess, ok := s.sessions[hashResetToken(strings.TrimSpace(raw))]
+	if !ok || time.Now().After(sess.Expires) {
+		return "", false
+	}
+	return sess.Email, true
+}
+
 // Consume validates and deletes a reset token. Returns the bound email.
 func (s *PasswordResetStore) Consume(raw string) (string, bool) {
 	s.mu.Lock()
@@ -168,39 +191,57 @@ type TokenManager struct {
 	accessTokenTTL time.Duration
 	refreshTTL     time.Duration
 	issuer         string
+	audience       string
 	blacklist      *TokenBlacklist
 }
 
-// NewTokenManager creates a new token manager
+// DefaultTokenIssuer is the only issuer RivicQ accepts.
+const DefaultTokenIssuer = "rivicq"
+
+// DefaultTokenAudience is the only audience RivicQ accepts.
+const DefaultTokenAudience = "rivicq-api"
+
+// NewTokenManager creates a new token manager.
+//
+// Access tokens live 1 hour. Refresh tokens live 7 days and are single-use:
+// presenting one rotates it and revokes it, so replay is detectable.
 func NewTokenManager(secretKey string) *TokenManager {
+	refreshTTL := 7 * 24 * time.Hour
+	if raw := strings.TrimSpace(os.Getenv("AUTH_REFRESH_TTL")); raw != "" {
+		if d, err := time.ParseDuration(raw); err == nil && d > 0 {
+			refreshTTL = d
+		}
+	}
 	return &TokenManager{
 		secretKey:      secretKey,
-		accessTokenTTL: 1 * time.Hour,       // 1 hour access token
-		refreshTTL:     30 * 24 * time.Hour, // 30 day refresh
-		issuer:         "cryptobom-saas",
+		accessTokenTTL: 1 * time.Hour,
+		refreshTTL:     refreshTTL,
+		issuer:         DefaultTokenIssuer,
+		audience:       DefaultTokenAudience,
 		blacklist:      NewTokenBlacklist(),
 	}
 }
 
-// GenerateToken creates a new JWT access token for a user
+// GenerateToken creates a new JWT access token for a user.
 func (tm *TokenManager) GenerateToken(user *User, edition string) (string, error) {
 	if IsLabeledDemoEmail(user.Email) {
 		edition = "oss"
 	}
-	permissions := tm.getPermissionsForRole(user.Role, edition)
 
 	claims := Claims{
 		UserID:      user.ID,
 		TenantID:    user.TenantID,
 		Email:       user.Email,
-		Role:        user.Role,
+		Role:        NormalizeRole(user.Role),
 		Edition:     edition,
-		Permissions: permissions,
+		Permissions: PermissionsForRole(user.Role),
+		TokenUse:    TokenUseAccess,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        uuid.New().String(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tm.accessTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    tm.issuer,
+			Audience:  jwt.ClaimStrings{tm.audience},
 		},
 	}
 
@@ -214,46 +255,84 @@ func IsLabeledDemoEmail(email string) bool {
 	return e == "demo@rivicq.local" || strings.HasSuffix(e, "@demo.rivicq.local")
 }
 
-// GenerateRefreshToken creates a long-lived refresh token.
+// GenerateRefreshToken creates a single-use refresh token. It deliberately
+// carries no edition and no permissions: authority is re-derived from the user
+// record at refresh time, so a rotated token cannot carry stale privilege.
 func (tm *TokenManager) GenerateRefreshToken(user *User) (string, error) {
 	claims := Claims{
 		UserID:   user.ID,
 		TenantID: user.TenantID,
 		Email:    user.Email,
-		Role:     user.Role,
+		Role:     NormalizeRole(user.Role),
+		TokenUse: TokenUseRefresh,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        uuid.New().String(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tm.refreshTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    tm.issuer + "-refresh",
+			Issuer:    tm.issuer,
+			Audience:  jwt.ClaimStrings{tm.audience},
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(tm.secretKey))
 }
 
-// ValidateToken validates a JWT token and returns claims
-func (tm *TokenManager) ValidateToken(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+// parseAndValidate verifies signature, algorithm, issuer, audience and expiry,
+// then returns the claims. It does not filter on token use.
+func (tm *TokenManager) parseAndValidate(tokenString string) (*Claims, error) {
+	tokenString = strings.TrimSpace(tokenString)
+	if tokenString == "" {
+		return nil, errors.New("token is required")
+	}
+
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
 		return []byte(tm.secretKey), nil
-	})
-
+	},
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+		jwt.WithIssuer(tm.issuer),
+		jwt.WithAudience(tm.audience),
+		jwt.WithExpirationRequired(),
+	)
 	if err != nil {
 		return nil, err
 	}
-
-	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		// Check token blacklist (revoked during rotation)
-		if claims.ID != "" && tm.blacklist.IsRevoked(claims.ID) {
-			return nil, errors.New("token has been revoked")
-		}
-		return claims, nil
+	if !token.Valid {
+		return nil, errors.New("invalid token")
 	}
+	if claims.ID != "" && tm.blacklist.IsRevoked(claims.ID) {
+		return nil, errors.New("token has been revoked")
+	}
+	return claims, nil
+}
 
-	return nil, errors.New("invalid token")
+// ValidateToken validates a JWT **access** token and returns its claims.
+// Refresh tokens are rejected here; use ValidateRefreshToken for those.
+func (tm *TokenManager) ValidateToken(tokenString string) (*Claims, error) {
+	claims, err := tm.parseAndValidate(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	if claims.TokenUse != TokenUseAccess {
+		return nil, errors.New("token is not an access token")
+	}
+	return claims, nil
+}
+
+// ValidateRefreshToken validates a JWT **refresh** token. Access tokens are
+// rejected so a leaked 1-hour token cannot be exchanged for a long session.
+func (tm *TokenManager) ValidateRefreshToken(tokenString string) (*Claims, error) {
+	claims, err := tm.parseAndValidate(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	if claims.TokenUse != TokenUseRefresh {
+		return nil, errors.New("token is not a refresh token")
+	}
+	return claims, nil
 }
 
 // RevokeToken revokes a token by adding it to the blacklist.
@@ -268,14 +347,15 @@ func (tm *TokenManager) RevokeToken(tokenString string) error {
 	return nil
 }
 
-// RefreshAccessToken generates a new access token and revokes the old one (rotation).
-func (tm *TokenManager) RefreshAccessToken(oldTokenString string) (string, string, error) {
-	claims, err := tm.ValidateToken(oldTokenString)
+// RefreshAccessToken rotates a refresh token: the presented token is revoked
+// and a fresh access+refresh pair is issued. Presenting an already-revoked
+// token fails, which is how refresh-token reuse is detected.
+func (tm *TokenManager) RefreshAccessToken(refreshTokenString string) (string, string, error) {
+	claims, err := tm.ValidateRefreshToken(refreshTokenString)
 	if err != nil {
 		return "", "", err
 	}
 
-	// Revoke the old token
 	if claims.ID != "" {
 		tm.blacklist.Revoke(claims.ID, claims.ExpiresAt.Time)
 	}
@@ -286,24 +366,24 @@ func (tm *TokenManager) RefreshAccessToken(oldTokenString string) (string, strin
 		Email:    claims.Email,
 		Role:     claims.Role,
 	}
-	edition := claims.Edition
 
-	newToken, err := tm.GenerateToken(user, edition)
+	newToken, err := tm.GenerateToken(user, "")
 	if err != nil {
 		return "", "", err
 	}
 
-	refreshToken, err := tm.GenerateRefreshToken(user)
+	nextRefresh, err := tm.GenerateRefreshToken(user)
 	if err != nil {
 		return "", "", err
 	}
 
-	return newToken, refreshToken, nil
+	return newToken, nextRefresh, nil
 }
 
-// RefreshToken generates a new token from an existing valid token (deprecated, use RefreshAccessToken).
-func (tm *TokenManager) RefreshToken(tokenString string) (string, error) {
-	accessToken, _, err := tm.RefreshAccessToken(tokenString)
+// RefreshToken is retained for callers that only need the new access token.
+// It still requires a refresh token, not an access token.
+func (tm *TokenManager) RefreshToken(refreshTokenString string) (string, error) {
+	accessToken, _, err := tm.RefreshAccessToken(refreshTokenString)
 	return accessToken, err
 }
 
@@ -345,38 +425,6 @@ func (as *AuthService) ValidateTOTP(user *User, code string) bool {
 	return totp.Validate(strings.TrimSpace(code), user.MFASecret)
 }
 
-// getPermissionsForRole returns permissions based on user role and edition
-func (tm *TokenManager) getPermissionsForRole(role, edition string) []string {
-	basePermissions := map[string][]string{
-		"admin":    {"cbom:read", "cbom:write", "cbom:delete", "assets:read", "assets:write", "security:read", "security:write", "k8s:read", "k8s:write", "users:manage"},
-		"operator": {"cbom:read", "cbom:write", "assets:read", "assets:write", "security:read", "k8s:read", "k8s:write"},
-		"analyst":  {"cbom:read", "assets:read", "security:read", "k8s:read"},
-		"viewer":   {"cbom:read", "assets:read"},
-	}
-
-	// Add enterprise-specific permissions
-	if edition == "enterprise" || edition == "professional" {
-		enterprisePermissions := map[string][]string{
-			"admin":    {"ibmq:attest", "ibmq:emergency", "ml:analyze", "cloud:manage", "sso:manage"},
-			"operator": {"ibmq:attest", "ml:analyze", "cloud:read"},
-			"analyst":  {"ibmq:read", "ml:read"},
-			"viewer":   {"ibmq:read"},
-		}
-
-		// Merge enterprise permissions
-		for role, perms := range enterprisePermissions {
-			if basePerms, exists := basePermissions[role]; exists {
-				basePermissions[role] = append(basePerms, perms...)
-			}
-		}
-	}
-
-	if perms, exists := basePermissions[role]; exists {
-		return perms
-	}
-	return []string{}
-}
-
 // UserStore interface for user authentication
 type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
@@ -386,12 +434,102 @@ type UserStore interface {
 	ListUsersByTenant(tenantID string) ([]*User, error)
 }
 
-const MinPasswordLength = 8
+const (
+	// MinPasswordLength is the floor for workspace passwords.
+	MinPasswordLength = 12
+	// MaxPasswordLength bounds bcrypt input; bcrypt silently truncates at 72
+	// bytes, so anything longer is rejected rather than quietly shortened.
+	MaxPasswordLength = 72
+)
 
-// ValidatePassword enforces the workspace password policy.
+// commonPasswords is a small deny list of the passwords that dominate
+// credential-stuffing lists. It is a floor, not a breach-list service.
+var commonPasswords = map[string]bool{
+	"password":      true,
+	"password1":     true,
+	"password123":   true,
+	"passw0rd":      true,
+	"12345678":      true,
+	"123456789":     true,
+	"1234567890":    true,
+	"qwerty123":     true,
+	"letmein":       true,
+	"welcome1":      true,
+	"administrator": true,
+	"changeme":      true,
+	"demopass123":   true,
+	"rivicq123":     true,
+}
+
+// ValidatePassword enforces the workspace password policy:
+// 12-72 characters, at least three of {lowercase, uppercase, digit, symbol},
+// not a common password, and not containing the local part of an email or the
+// tenant name.
 func ValidatePassword(password string) error {
+	return ValidatePasswordFor(password, "", "")
+}
+
+// ValidatePasswordFor is ValidatePassword with identity context so a password
+// cannot be built out of the account's own name.
+func ValidatePasswordFor(password, email, tenant string) error {
 	if len(password) < MinPasswordLength {
-		return errors.New("password must be at least 8 characters")
+		return fmt.Errorf("password must be at least %d characters", MinPasswordLength)
+	}
+	if len(password) > MaxPasswordLength {
+		return fmt.Errorf("password must be at most %d bytes", MaxPasswordLength)
+	}
+	if strings.TrimSpace(password) != password || password == "" {
+		return errors.New("password must not begin or end with whitespace")
+	}
+	if commonPasswords[strings.ToLower(password)] {
+		return errors.New("password is too common; choose a unique passphrase")
+	}
+
+	var lower, upper, digit, symbol bool
+	for _, r := range password {
+		switch {
+		case r >= 'a' && r <= 'z':
+			lower = true
+		case r >= 'A' && r <= 'Z':
+			upper = true
+		case r >= '0' && r <= '9':
+			digit = true
+		default:
+			symbol = true
+		}
+	}
+	classes := 0
+	for _, ok := range []bool{lower, upper, digit, symbol} {
+		if ok {
+			classes++
+		}
+	}
+	if classes < 3 {
+		return errors.New("password must mix at least three of: lowercase, uppercase, digits, symbols")
+	}
+
+	// Compare on a squashed alphanumeric form so "Rivicq-Example-Org-1" is
+	// recognised as derived from "Example Org" despite separators and case.
+	squash := func(in string) string {
+		var b strings.Builder
+		for _, r := range strings.ToLower(in) {
+			if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+				b.WriteRune(r)
+			}
+		}
+		return b.String()
+	}
+	squashed := squash(password)
+
+	if email != "" {
+		if local, _, found := strings.Cut(email, "@"); found {
+			if local = squash(local); len(local) >= 4 && strings.Contains(squashed, local) {
+				return errors.New("password must not contain your email address")
+			}
+		}
+	}
+	if org := squash(tenant); len(org) >= 4 && strings.Contains(squashed, org) {
+		return errors.New("password must not contain your organization name")
 	}
 	return nil
 }
@@ -455,15 +593,21 @@ func (as *AuthService) RequestPasswordReset(email string) (token string, found b
 
 // ResetPassword consumes a reset token and sets a new password.
 func (as *AuthService) ResetPassword(token, newPassword string) error {
-	if err := ValidatePassword(newPassword); err != nil {
-		return err
-	}
-	email, ok := as.resetTokens.Consume(token)
+	// Peek first so the identity-aware policy check can reject a weak password
+	// without consuming the token, then consume only once the password is
+	// acceptable.
+	email, ok := as.resetTokens.Peek(token)
 	if !ok {
 		return errors.New("invalid or expired reset token")
 	}
 	user, err := as.userStore.GetUserByEmail(email)
 	if err != nil {
+		return errors.New("invalid or expired reset token")
+	}
+	if err := ValidatePasswordFor(newPassword, user.Email, user.Organisation); err != nil {
+		return err
+	}
+	if _, ok := as.resetTokens.Consume(token); !ok {
 		return errors.New("invalid or expired reset token")
 	}
 	hashed, err := HashPassword(newPassword)
@@ -476,15 +620,17 @@ func (as *AuthService) ResetPassword(token, newPassword string) error {
 
 // ChangePassword verifies the current password and sets a new one.
 func (as *AuthService) ChangePassword(email, current, next string) error {
-	if err := ValidatePassword(next); err != nil {
-		return err
-	}
+	// Verify the current password before policy checks so a caller cannot use
+	// the error text to probe the policy for an account they do not own.
 	user, err := as.userStore.GetUserByEmail(email)
 	if err != nil {
 		return errors.New("user not found")
 	}
 	if !checkPassword(current, user.Password) {
 		return errors.New("current password is incorrect")
+	}
+	if err := ValidatePasswordFor(next, user.Email, user.Organisation); err != nil {
+		return err
 	}
 	hashed, err := HashPassword(next)
 	if err != nil {
@@ -526,24 +672,7 @@ func (as *AuthService) LoginWithEdition(email, password, edition string) (*Login
 		}, nil
 	}
 
-	edition = strings.ToLower(strings.TrimSpace(edition))
-	switch edition {
-	case "community":
-		edition = "oss"
-	case "pro":
-		edition = "professional"
-	case "ent":
-		edition = "enterprise"
-	}
-	if edition == "" {
-		edition = "oss"
-		switch user.Role {
-		case "admin":
-			edition = "enterprise"
-		case "operator", "analyst":
-			edition = "professional"
-		}
-	}
+	edition = editionForRole(edition, user.Role)
 
 	accessToken, err := as.tokenManager.GenerateToken(user, edition)
 	if err != nil {
@@ -559,6 +688,75 @@ func (as *AuthService) LoginWithEdition(email, password, edition string) (*Login
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+
+// editionForRole normalises an edition request, falling back to the edition
+// implied by the user's role when none was requested.
+//
+// Refresh uses this so a rotated token carries the same edition the user
+// originally logged in with instead of silently dropping to OSS.
+func editionForRole(requested, role string) string {
+	edition := strings.ToLower(strings.TrimSpace(requested))
+	switch edition {
+	case "community":
+		edition = "oss"
+	case "pro":
+		edition = "professional"
+	case "ent":
+		edition = "enterprise"
+	}
+	if edition != "" {
+		return edition
+	}
+	switch NormalizeRole(role) {
+	case "admin":
+		return "enterprise"
+	case "operator", "analyst":
+		return "professional"
+	}
+	return "oss"
+}
+
+// RefreshSession rotates a refresh token and issues a new access token.
+//
+// Unlike TokenManager.RefreshAccessToken, this re-reads the user record so the
+// new access token carries the authoritative tenant, role and edition. If the
+// user no longer exists, or the token's tenant no longer matches the account,
+// the refresh is refused.
+func (as *AuthService) RefreshSession(refreshTokenString string) (string, string, error) {
+	claims, err := as.tokenManager.ValidateRefreshToken(refreshTokenString)
+	if err != nil {
+		return "", "", err
+	}
+
+	user, err := as.userStore.GetUserByID(claims.UserID)
+	if err != nil {
+		return "", "", errors.New("account no longer exists")
+	}
+	// A token issued for a tenant the account no longer belongs to must not
+	// mint a token for the new tenant.
+	if tenant.Normalize(user.TenantID) != tenant.Normalize(claims.TenantID) {
+		return "", "", errors.New("account tenant changed; re-authentication required")
+	}
+	// Authority is re-derived from the store, so a demotion takes effect on the
+	// next refresh rather than persisting until the access token expires.
+	if claims.Role != NormalizeRole(user.Role) {
+		return "", "", errors.New("account role changed; re-authentication required")
+	}
+
+	if claims.ID != "" {
+		as.tokenManager.blacklist.Revoke(claims.ID, claims.ExpiresAt.Time)
+	}
+
+	accessToken, err := as.tokenManager.GenerateToken(user, editionForRole("", user.Role))
+	if err != nil {
+		return "", "", err
+	}
+	nextRefresh, err := as.tokenManager.GenerateRefreshToken(user)
+	if err != nil {
+		return "", "", err
+	}
+	return accessToken, nextRefresh, nil
 }
 
 // Register creates a new user and returns their ID

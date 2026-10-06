@@ -117,7 +117,7 @@ func (h *ComplianceHandler) SetupRoutes(router *gin.RouterGroup) {
 }
 
 func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
-	if h.db == nil {
+	if !enterpriseDBReady(h.db) {
 		c.JSON(http.StatusOK, gin.H{"frameworks": []gin.H{
 			{"framework": "iso27001", "status": "active", "score": 75},
 			{"framework": "dora", "status": "active", "score": 82},
@@ -173,7 +173,10 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) CreateFramework(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	var req struct {
 		Framework string `json:"framework" binding:"required"`
@@ -723,7 +726,10 @@ func (h *ComplianceHandler) ListRisks(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) CreateRisk(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	var risk map[string]interface{}
 	if err := c.ShouldBindJSON(&risk); err != nil {

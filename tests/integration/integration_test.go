@@ -47,7 +47,14 @@ func waitForHealth(t *testing.T, url string) map[string]interface{} {
 	return nil
 }
 
+// TestServersHealthy is a deployment smoke test: it needs an OSS server on 8080
+// and an Enterprise server on 9090 already running. It is opt-in so that
+// `go test -tags integration` stays self-contained instead of hanging for
+// serverStartTimeout against nothing.
 func TestServersHealthy(t *testing.T) {
+	if os.Getenv("RIVICQ_SMOKE_URLS") == "" {
+		t.Skip("set RIVICQ_SMOKE_URLS to run the live server health smoke test")
+	}
 	oss := waitForHealth(t, ossHealthURL)
 	assert.Equal(t, "healthy", oss["status"])
 	ed := strings.ToLower(fmt.Sprint(oss["edition"]))
@@ -60,9 +67,12 @@ func TestServersHealthy(t *testing.T) {
 }
 
 func TestDatabaseConnectivity(t *testing.T) {
-	dsn := os.Getenv("DATABASE_URL")
+	dsn := os.Getenv("RIVICQ_TEST_DATABASE_URL")
 	if dsn == "" {
-		t.Skip("DATABASE_URL not set; skipping database integration test")
+		dsn = os.Getenv("DATABASE_URL")
+	}
+	if dsn == "" {
+		t.Skip("RIVICQ_TEST_DATABASE_URL or DATABASE_URL not set; skipping")
 	}
 	db, err := sql.Open("postgres", dsn)
 	require.NoError(t, err)

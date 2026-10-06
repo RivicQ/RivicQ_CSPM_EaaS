@@ -63,13 +63,13 @@ type MigrationStep struct {
 
 // MigrationRoadmap is the full quantum migration plan for a set of assets.
 type MigrationRoadmap struct {
-	TotalAssets      int             `json:"total_assets"`
-	CriticalCount    int             `json:"critical_count"`
-	HighCount        int             `json:"high_count"`
-	OverallScore     int             `json:"overall_migration_score"` // 0-100; 100 = fully migrated
-	Steps            []MigrationStep `json:"steps"`
-	EstimatedEffort  string          `json:"estimated_effort"`
-	GeneratedAt      time.Time       `json:"generated_at"`
+	TotalAssets     int             `json:"total_assets"`
+	CriticalCount   int             `json:"critical_count"`
+	HighCount       int             `json:"high_count"`
+	OverallScore    int             `json:"overall_migration_score"` // 0-100; 100 = fully migrated
+	Steps           []MigrationStep `json:"steps"`
+	EstimatedEffort string          `json:"estimated_effort"`
+	GeneratedAt     time.Time       `json:"generated_at"`
 }
 
 // QuantumScanner assesses cryptographic assets for post-quantum readiness.
@@ -198,9 +198,9 @@ func (s *QuantumScanner) GenerateAttestationReport(assetID string, report *Quant
 	rand.Read(sigBytes) //nolint:errcheck
 
 	return &AttestationReport{
-		AssetID:  assetID,
-		ScanID:   hex.EncodeToString(scanIDBytes),
-		Timestamp: time.Now().UTC(),
+		AssetID:    assetID,
+		ScanID:     hex.EncodeToString(scanIDBytes),
+		Timestamp:  time.Now().UTC(),
 		RiskReport: report,
 		CertChain: []string{
 			"-----BEGIN CERTIFICATE-----\nMIIB...CryptoBOM Root CA (stub)\n-----END CERTIFICATE-----",

@@ -1,42 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  LinearProgress,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-} from '@mui/material';
-import {
-  CheckCircle,
-  Error,
-  Warning,
-  Info,
-  Download,
-  Share,
-  AccessTime,
-  Dns,
-  Shield,
-  Code,
-} from '@mui/icons-material';
+import { Alert, Box, Button, Card, CardContent, Chip, Grid, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableRow, Tabs, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Divider } from '@mui/material';
+import { CheckCircle, Error, Warning, Info, Download, Share, AccessTime, Dns, Shield } from '@mui/icons-material';
 
 interface Finding {
   id: string;

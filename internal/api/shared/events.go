@@ -22,11 +22,11 @@ type ScanProgress struct {
 }
 
 type scanSession struct {
-	id       string
-	msg      chan []byte
-	done     chan struct{}
-	closed   bool
-	mu       sync.Mutex
+	id     string
+	msg    chan []byte
+	done   chan struct{}
+	closed bool
+	mu     sync.Mutex
 }
 
 var (

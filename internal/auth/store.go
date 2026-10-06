@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -13,11 +14,15 @@ const (
 	defaultOSSBootstrapEmail = "admin@rivicq.local"
 	defaultOSSBootstrapName  = "OSS Admin"
 	defaultOSSBootstrapRole  = "admin"
-	defaultOSSBootstrapPass  = "DemoPass123!"
 )
+
+// DefaultBootstrapPasswordRefused is the historical shared demo password. It is
+// retained only so bootstrap paths can detect and reject it explicitly.
+const DefaultBootstrapPasswordRefused = "DemoPass123!"
 
 // MockUserStore implements UserStore interface with database
 type MockUserStore struct {
+	mu    sync.RWMutex
 	users map[string]*User
 }
 
@@ -28,6 +33,7 @@ type DatabaseUserStore struct {
 
 // WorkDomainUserStore implements UserStore for production-only, domain-restricted auth.
 type WorkDomainUserStore struct {
+	mu             sync.RWMutex
 	users          map[string]*User
 	allowedDomains []string
 }
@@ -36,9 +42,9 @@ type WorkDomainUserStore struct {
 // It requires the CRYPTOBOM_BOOTSTRAP_PASSWORD environment variable to be set;
 // if it is not set, an error is returned to prevent use of hardcoded credentials.
 func NewMockUserStore() (*MockUserStore, error) {
-	bootstrapPassword := os.Getenv("CRYPTOBOM_BOOTSTRAP_PASSWORD")
+	bootstrapPassword := BootstrapPasswordFromEnv()
 	if bootstrapPassword == "" {
-		return nil, fmt.Errorf("CRYPTOBOM_BOOTSTRAP_PASSWORD environment variable must be set")
+		return nil, fmt.Errorf("CRYPTOBOM_BOOTSTRAP_PASSWORD or AUTH_BOOTSTRAP_PASSWORD environment variable must be set")
 	}
 
 	hashedPassword, err := hashPassword(bootstrapPassword)
@@ -94,6 +100,16 @@ func NewDatabaseUserStore(db *sql.DB) *DatabaseUserStore {
 	return &DatabaseUserStore{db: db}
 }
 
+// BootstrapPasswordFromEnv reads the bootstrap password from either the
+// AUTH_ or the legacy CRYPTOBOM_ variable name. AUTH_ wins so an operator can
+// override the legacy name without editing their deployment.
+func BootstrapPasswordFromEnv() string {
+	if v := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_PASSWORD")); v != "" {
+		return v
+	}
+	return strings.TrimSpace(os.Getenv("CRYPTOBOM_BOOTSTRAP_PASSWORD"))
+}
+
 // NewWorkDomainUserStore creates a seeded in-memory store for approved work domains.
 // Returns an error if no bootstrap user is configured, so callers should fall back.
 func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
@@ -107,9 +123,12 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 			bootstrapEmail = "admin@" + allowedDomains[0]
 		}
 	}
-	bootstrapPassword := os.Getenv("AUTH_BOOTSTRAP_PASSWORD")
+	bootstrapPassword := BootstrapPasswordFromEnv()
 	if bootstrapPassword == "" {
-		bootstrapPassword = defaultOSSBootstrapPass
+		return nil, fmt.Errorf("AUTH_BOOTSTRAP_PASSWORD must be set; there is no default password")
+	}
+	if bootstrapPassword == DefaultBootstrapPasswordRefused {
+		return nil, fmt.Errorf("AUTH_BOOTSTRAP_PASSWORD must not be the published demo password %q", DefaultBootstrapPasswordRefused)
 	}
 	bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
 	if bootstrapName == "" {
@@ -160,6 +179,8 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 
 // MockUserStore methods
 func (m *MockUserStore) GetUserByEmail(email string) (*User, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	if user, exists := m.users[strings.ToLower(email)]; exists {
 		return user, nil
 	}
@@ -167,6 +188,8 @@ func (m *MockUserStore) GetUserByEmail(email string) (*User, error) {
 }
 
 func (m *MockUserStore) GetUserByID(id string) (*User, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	for _, user := range m.users {
 		if user.ID == id {
 			return user, nil
@@ -184,16 +207,22 @@ func (m *MockUserStore) CreateUser(user *User) error {
 		return err
 	}
 	user.Password = hashedPassword
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.users[strings.ToLower(user.Email)] = user
 	return nil
 }
 
 func (m *MockUserStore) UpdateUser(user *User) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.users[strings.ToLower(user.Email)] = user
 	return nil
 }
 
 func (m *MockUserStore) ListUsersByTenant(tenantID string) ([]*User, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	out := make([]*User, 0, len(m.users))
 	for _, user := range m.users {
 		if tenantID == "" || user.TenantID == tenantID {
@@ -323,6 +352,8 @@ func (w *WorkDomainUserStore) GetUserByEmail(email string) (*User, error) {
 	if !EmailDomainAllowed(email, w.allowedDomains) {
 		return nil, fmt.Errorf("email domain not allowed")
 	}
+	w.mu.RLock()
+	defer w.mu.RUnlock()
 	if user, exists := w.users[strings.ToLower(email)]; exists {
 		return user, nil
 	}
@@ -330,6 +361,8 @@ func (w *WorkDomainUserStore) GetUserByEmail(email string) (*User, error) {
 }
 
 func (w *WorkDomainUserStore) GetUserByID(id string) (*User, error) {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
 	for _, user := range w.users {
 		if user.ID == id {
 			return user, nil
@@ -350,16 +383,22 @@ func (w *WorkDomainUserStore) CreateUser(user *User) error {
 		return err
 	}
 	user.Password = hashedPassword
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	w.users[strings.ToLower(user.Email)] = user
 	return nil
 }
 
 func (w *WorkDomainUserStore) UpdateUser(user *User) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	w.users[strings.ToLower(user.Email)] = user
 	return nil
 }
 
 func (w *WorkDomainUserStore) ListUsersByTenant(tenantID string) ([]*User, error) {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
 	out := make([]*User, 0, len(w.users))
 	for _, user := range w.users {
 		if tenantID == "" || user.TenantID == tenantID {

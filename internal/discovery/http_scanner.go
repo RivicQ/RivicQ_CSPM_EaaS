@@ -2,7 +2,6 @@ package discovery
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,8 +12,23 @@ import (
 	"github.com/google/uuid"
 )
 
-// HTTPScanner scans HTTP/HTTPS websites for weak cryptography usage and missing security headers.
-type HTTPScanner struct{}
+// HTTPScanner scans HTTP/HTTPS websites for weak cryptography usage and missing
+// security headers.
+type HTTPScanner struct {
+	// policy enforces the target restrictions again at connect time. The zero
+	// value means "use the environment policy", so a directly constructed
+	// scanner is never less restricted than the deployment default.
+	policy       TargetPolicy
+	hasOwnPolicy bool
+}
+
+// effectivePolicy returns the scanner's policy, falling back to the environment.
+func (s *HTTPScanner) effectivePolicy() TargetPolicy {
+	if s.hasOwnPolicy {
+		return s.policy
+	}
+	return PolicyFromEnv()
+}
 
 var md5Regex = regexp.MustCompile(`^[0-9a-f]{32}$`)
 
@@ -43,18 +57,9 @@ func (s *HTTPScanner) Scan(ctx context.Context, target Target) ([]Finding, error
 	}
 	baseURL := fmt.Sprintf("%s://%s:%d", scheme, target.Host, port)
 
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // scanner must still read headers on untrusted certs; TLS scanner reports cert issues
-		},
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 5 {
-				return http.ErrUseLastResponse
-			}
-			return nil
-		},
-	}
+	// Connect through the policy so a rebound hostname cannot redirect the
+	// scanner at an internal address, and re-check every redirect hop.
+	client := s.effectivePolicy().SafeHTTPClient(true)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseURL+"/?data=test", nil)
 	if err != nil {

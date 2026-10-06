@@ -2,6 +2,7 @@ package shared
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -17,6 +18,25 @@ import (
 
 func demoMode(db *database.DB) bool {
 	return db == nil || db.DB == nil || db.Queries == nil
+}
+
+// scanTargetRejected maps a target policy failure to an HTTP response and
+// reports whether the request was rejected.
+func scanTargetRejected(c *gin.Context, err error, logger *logrus.Logger) bool {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, discovery.ErrTargetBlocked) {
+		logger.WithError(err).WithField("target", c.Request.URL.Query().Get("target")).Warn("Scan target rejected by policy")
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":   "target_not_permitted",
+			"message": err.Error(),
+		})
+		return true
+	}
+	logger.WithError(err).Error("Failed to start scan")
+	c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start scan"})
+	return true
 }
 
 // installScanPersistence wires the DB-backed persist hook into the shared scan
@@ -180,12 +200,8 @@ func GetCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			c.JSON(http.StatusOK, gin.H{"id": id, "demo_mode": true})
 			return
 		}
-		report, err := db.Queries.GetCBOMReport(id)
+		report, err := db.Queries.GetCBOMReport(requestTenant(c), id)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "report not found"})
-			return
-		}
-		if tenant.Normalize(report.TenantID) != requestTenant(c) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "report not found"})
 			return
 		}
@@ -194,8 +210,8 @@ func GetCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 }
 
 func requireCBOMReportTenant(c *gin.Context, db *database.DB, id string) (*database.CBOMReport, bool) {
-	report, err := db.Queries.GetCBOMReport(id)
-	if err != nil || tenant.Normalize(report.TenantID) != requestTenant(c) {
+	report, err := db.Queries.GetCBOMReport(requestTenant(c), id)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "report not found"})
 		return nil, false
 	}
@@ -227,7 +243,8 @@ func UpdateCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			Version: body.Version,
 			Status:  body.Status,
 		}
-		if err := db.Queries.UpdateCBOMReport(report); err != nil {
+		if err := db.Queries.UpdateCBOMReport(requestTenant(c), report); err != nil {
+			logger.WithError(err).Error("Failed to update CBOM report")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update"})
 			return
 		}
@@ -245,7 +262,8 @@ func DeleteCBOMReport(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		if _, ok := requireCBOMReportTenant(c, db, id); !ok {
 			return
 		}
-		if err := db.Queries.DeleteCBOMReport(id); err != nil {
+		if err := db.Queries.DeleteCBOMReport(requestTenant(c), id); err != nil {
+			logger.WithError(err).Error("Failed to delete CBOM report")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete"})
 			return
 		}
@@ -271,7 +289,10 @@ func ScanCBOMReport(db *database.DB, logger *logrus.Logger, cfg interface{}) gin
 		installScanPersistence(db, logger)
 
 		sm := discovery.GetScanManager()
-		job := sm.StartScanForTenant(requestTenant(c), target, "cbom")
+		job, err := sm.StartScanForTenant(requestTenant(c), target, "cbom")
+		if scanTargetRejected(c, err, logger) {
+			return
+		}
 
 		logger.WithFields(logrus.Fields{
 			"report_id": id,
@@ -306,7 +327,7 @@ func ListCryptoAssets(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "cbom_report_id query param required"})
 			return
 		}
-		assets, err := db.Queries.ListCryptoAssets(cbomID, 100, 0)
+		assets, err := db.Queries.ListCryptoAssets(requestTenant(c), cbomID, 100, 0)
 		if err != nil {
 			logger.WithError(err).Error("Failed to list crypto assets")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list assets"})
@@ -323,7 +344,7 @@ func GetCryptoAsset(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			c.JSON(http.StatusOK, gin.H{"id": id, "found": true, "demo_mode": true})
 			return
 		}
-		asset, err := db.Queries.GetCryptoAsset(id)
+		asset, err := db.Queries.GetCryptoAsset(requestTenant(c), id)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "asset not found"})
 			return
@@ -356,7 +377,8 @@ func UpdateCryptoAsset(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			VulnerabilityScore: body.VulnerabilityScore,
 			QuantumSafe:        body.QuantumSafe,
 		}
-		if err := db.Queries.UpdateCryptoAsset(asset); err != nil {
+		if err := db.Queries.UpdateCryptoAsset(requestTenant(c), asset); err != nil {
+			logger.WithError(err).Error("Failed to update crypto asset")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update"})
 			return
 		}
@@ -631,7 +653,10 @@ func ScanCluster(db *database.DB, logger *logrus.Logger, cfg interface{}) gin.Ha
 			target = "pod://default/" + id + "@" + strings.TrimSpace(body.Host)
 		}
 		sm := discovery.GetScanManager()
-		job := sm.StartScanForTenant(requestTenant(c), target, "pod")
+		job, err := sm.StartScanForTenant(requestTenant(c), target, "pod")
+		if scanTargetRejected(c, err, logger) {
+			return
+		}
 		logger.WithFields(logrus.Fields{"cluster_id": id, "scan_id": job.ID, "target": target}).Info("Declared Kubernetes inventory scan")
 		c.JSON(http.StatusAccepted, gin.H{
 			"cluster_id":  id,
@@ -771,7 +796,10 @@ func TriggerCBOMScan(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		installScanPersistence(db, logger)
 
 		sm := discovery.GetScanManager()
-		job := sm.StartScanForTenant(requestTenant(c), req.Target, req.ScanType)
+		job, err := sm.StartScanForTenant(requestTenant(c), req.Target, req.ScanType)
+		if scanTargetRejected(c, err, logger) {
+			return
+		}
 
 		logger.WithFields(logrus.Fields{
 			"scan_id": job.ID, "asset_id": job.AssetID, "target": req.Target, "scan_type": req.ScanType,
@@ -905,7 +933,7 @@ func GetAssetBOM(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 		}
 
 		if !demoMode(db) {
-			assets, err := db.Queries.ListCryptoAssets(id, 100, 0)
+			assets, err := db.Queries.ListCryptoAssets(requestTenant(c), id, 100, 0)
 			if err == nil && len(assets) > 0 {
 				components := make([]gin.H, 0, len(assets))
 				quantumSafe, atRisk := 0, 0

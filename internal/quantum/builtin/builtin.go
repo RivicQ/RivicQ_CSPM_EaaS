@@ -26,7 +26,7 @@ type Options struct {
 	Logger *logrus.Logger
 	// IBM enables the opt-in IBM Quantum provider. Only used to seed config;
 	// the provider reports itself unavailable when no API key is present.
-	IBM      quantum.IBMQuantumConfig
+	IBM       quantum.IBMQuantumConfig
 	EnableIBM bool
 	// OQS options for the oqs-engine provider (backend, HSM seed).
 	OQS oqsengine.Options

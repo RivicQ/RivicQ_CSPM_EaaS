@@ -6,16 +6,15 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/rivic-q/cryptobom-saas/internal/api/oss"
+	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 )
@@ -26,6 +25,11 @@ func scanTenantRouter(t *testing.T) *gin.Engine {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 	t.Setenv("JWT_SECRET", scanTenantSecret)
+	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", testBootstrapPassword)
+	// These tests scan loopback on purpose to exercise tenant scoping. The
+	// production policy blocks loopback by default, so it is opted into here
+	// explicitly rather than loosened in the default.
+	t.Setenv("RIVICQ_SCAN_ALLOW_PRIVATE_NETS", "true")
 	router := gin.New()
 	group := router.Group("/api/v1")
 	logger := logrus.New()
@@ -34,18 +38,21 @@ func scanTenantRouter(t *testing.T) *gin.Engine {
 	return router
 }
 
-func tenantBearer(tenantID string) string {
-	claims := jwt.MapClaims{
-		"user_id":   uuid.New().String(),
-		"tenant_id": tenantID,
-		"email":     tenantID + "@example.com",
-		"role":      "operator",
-		"exp":       time.Now().Add(time.Hour).Unix(),
-		"iat":       time.Now().Unix(),
-	}
-	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	s, _ := tok.SignedString([]byte(scanTenantSecret))
-	return s
+// tenantBearer mints a real access token through the production TokenManager.
+// Hand-rolling JWT claims is no longer sufficient because validation is strict
+// about issuer, audience, token use and expiry.
+func tenantBearer(t *testing.T, tenantID string) string {
+	t.Helper()
+	tm := auth.NewTokenManager(scanTenantSecret)
+	tok, err := tm.GenerateToken(&auth.User{
+		ID:       uuid.New().String(),
+		TenantID: tenantID,
+		Email:    tenantID + "@example.com",
+		Name:     "Isolation " + tenantID,
+		Role:     "operator",
+	}, "oss")
+	require.NoError(t, err)
+	return tok
 }
 
 func postScan(t *testing.T, router *gin.Engine, token, target string) string {
@@ -82,8 +89,8 @@ func getScan(router *gin.Engine, token, id string, extra map[string]string) *htt
 
 func TestScanIsolationAcrossTenants(t *testing.T) {
 	router := scanTenantRouter(t)
-	tokenA := tenantBearer("tenant-a")
-	tokenB := tenantBearer("tenant-b")
+	tokenA := tenantBearer(t, "tenant-a")
+	tokenB := tenantBearer(t, "tenant-b")
 
 	idA := postScan(t, router, tokenA, "127.0.0.1")
 	idB := postScan(t, router, tokenB, "127.0.0.1")
@@ -97,34 +104,55 @@ func TestScanIsolationAcrossTenants(t *testing.T) {
 	crossA := getScan(router, tokenA, idB, nil)
 	assert.Equal(t, http.StatusNotFound, crossA.Code)
 
-	spoof := getScan(router, "", idA, map[string]string{"X-Tenant-ID": "tenant-a"})
+	spoof := getScan(router, tokenB, idA, map[string]string{"X-Tenant-ID": "tenant-a"})
 	assert.Equal(t, http.StatusNotFound, spoof.Code)
 
 	anon := getScan(router, "", idA, nil)
-	assert.Equal(t, http.StatusNotFound, anon.Code)
+	assert.Equal(t, http.StatusUnauthorized, anon.Code)
 }
 
-func TestPublicScanPilotStillWorksWithoutAuth(t *testing.T) {
+// TestAnonymousScanIsRejected pins the deny-by-default decision: the former
+// unauthenticated "public pilot" scan surface is gone. An anonymous caller
+// must not be able to create or read a scan.
+func TestAnonymousScanIsRejected(t *testing.T) {
 	router := scanTenantRouter(t)
-	id := postScan(t, router, "", "127.0.0.1")
-	got := getScan(router, "", id, nil)
-	assert.Equal(t, http.StatusOK, got.Code)
-}
 
-func TestInvalidBearerDoesNotFallBackToPublicTenant(t *testing.T) {
-	router := scanTenantRouter(t)
-	id := postScan(t, router, "", "127.0.0.1")
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+id, nil)
-	req.Header.Set("Authorization", "Bearer not-a-token")
+	body, err := json.Marshal(map[string]string{"target": "127.0.0.1"})
+	require.NoError(t, err)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/scans", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	assert.Equal(t, http.StatusUnauthorized, getScan(router, "", "any-id", nil).Code)
+}
+
+// TestInvalidBearerDoesNotFallBackToPublicTenant ensures a malformed credential
+// is rejected outright instead of being treated as an anonymous request.
+func TestInvalidBearerDoesNotFallBackToPublicTenant(t *testing.T) {
+	router := scanTenantRouter(t)
+	token := tenantBearer(t, "tenant-a")
+	id := postScan(t, router, token, "127.0.0.1")
+
+	w := getScan(router, "not-a-token", id, nil)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// A token signed with the right secret but the wrong claims must also fail.
+	tm := auth.NewTokenManager(scanTenantSecret)
+	refresh, err := tm.GenerateRefreshToken(&auth.User{
+		ID: uuid.New().String(), TenantID: "tenant-a",
+		Email: "tenant-a@example.com", Role: "operator",
+	})
+	require.NoError(t, err)
+	w = getScan(router, refresh, id, nil)
+	assert.Equal(t, http.StatusUnauthorized, w.Code, "a refresh token must not work as an access token")
 }
 
 func TestIntelligenceReportIsTenantScoped(t *testing.T) {
 	router := scanTenantRouter(t)
-	tokenA := tenantBearer("intel-a")
-	tokenB := tenantBearer("intel-b")
+	tokenA := tenantBearer(t, "intel-a")
+	tokenB := tenantBearer(t, "intel-b")
 	idA := postScan(t, router, tokenA, "127.0.0.1")
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+idA+"/intelligence", nil)
@@ -144,8 +172,8 @@ func TestIntelligenceReportIsTenantScoped(t *testing.T) {
 }
 func TestScanListDoesNotLeakOtherTenants(t *testing.T) {
 	router := scanTenantRouter(t)
-	tokenA := tenantBearer("list-tenant-a")
-	tokenB := tenantBearer("list-tenant-b")
+	tokenA := tenantBearer(t, "list-tenant-a")
+	tokenB := tenantBearer(t, "list-tenant-b")
 	idA := postScan(t, router, tokenA, "127.0.0.1")
 	idB := postScan(t, router, tokenB, "127.0.0.1")
 

@@ -28,22 +28,31 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	authService := shared.SetupStandardAuth(router, db, logger)
 	enterpriseAuth := authService.JWTAuthMiddleware(nil)
 
-	// Initialize Enterprise database with fallback
+	// Initialize Enterprise database with fallback.
+	//
+	// The enterprise store is only attempted when the standard database is
+	// actually usable. Without this guard a demo-mode instance would still dial
+	// PostgreSQL for the enterprise handlers, and a test would silently read and
+	// write whatever happens to be listening on the developer's machine.
 	var enterpriseDB *database.EnterpriseDB
-	dbConfig := config.DatabaseConfig{
-		Host:     getEnvOrDefault("CRYPTOBOM_DB_HOST", "localhost"),
-		Port:     getEnvOrDefaultInt("CRYPTOBOM_DB_PORT", 5432),
-		User:     getEnvOrDefault("CRYPTOBOM_DB_USER", "cryptobom"),
-		Password: os.Getenv("CRYPTOBOM_DB_PASSWORD"),
-		Name:     getEnvOrDefault("CRYPTOBOM_ENTERPRISE_DB_NAME", "cryptobom_enterprise"),
-		SSLMode:  getEnvOrDefault("CRYPTOBOM_DB_SSLMODE", "disable"),
-	}
-	enterpriseDB, err := database.NewEnterpriseConnection(dbConfig)
-	if err != nil {
-		logger.WithError(err).Warn("Enterprise database unavailable — enterprise endpoints will use demo mode")
+	if !standardDBReady(db) {
+		logger.Warn("Standard database unavailable — enterprise endpoints will use demo mode")
 	} else {
-		if err := database.RunEnterpriseMigrations(enterpriseDB); err != nil {
-			logger.WithError(err).Warn("Enterprise migrations failed — enterprise endpoints will use demo mode")
+		dbConfig := config.DatabaseConfig{
+			Host:     getEnvOrDefault("CRYPTOBOM_DB_HOST", "localhost"),
+			Port:     getEnvOrDefaultInt("CRYPTOBOM_DB_PORT", 5432),
+			User:     getEnvOrDefault("CRYPTOBOM_DB_USER", "cryptobom"),
+			Password: os.Getenv("CRYPTOBOM_DB_PASSWORD"),
+			Name:     getEnvOrDefault("CRYPTOBOM_ENTERPRISE_DB_NAME", "cryptobom_enterprise"),
+			SSLMode:  getEnvOrDefault("CRYPTOBOM_DB_SSLMODE", "disable"),
+		}
+		conn, connErr := database.NewEnterpriseConnection(dbConfig)
+		if connErr != nil {
+			logger.WithError(connErr).Warn("Enterprise database unavailable — enterprise endpoints will use demo mode")
+		} else if migrateErr := database.RunEnterpriseMigrations(conn); migrateErr != nil {
+			logger.WithError(migrateErr).Warn("Enterprise migrations failed — enterprise endpoints will use demo mode")
+		} else {
+			enterpriseDB = conn
 		}
 	}
 
@@ -542,11 +551,11 @@ func getThreatIntelligence(db *database.DB, logger *logrus.Logger, cfg *config.E
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"threats":           analysis.Threats,
-			"total_threats":     analysis.TotalThreats,
+			"threats":            analysis.Threats,
+			"total_threats":      analysis.TotalThreats,
 			"quantum_risk_score": analysis.QuantumRiskScore,
-			"pqc_readiness":     analysis.PQCReadiness,
-			"source":            analysis.Source,
+			"pqc_readiness":      analysis.PQCReadiness,
+			"source":             analysis.Source,
 		})
 	}
 }
@@ -1000,15 +1009,15 @@ func getQuantumRiskAssessment(db *database.DB, logger *logrus.Logger, cfg *confi
 			migrationPriority = severityFromRisk(analysis.QuantumRiskScore)
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"overall_risk":         overall,
-			"quantum_safe_assets":  analysis.QuantumSafeAssets,
-			"vulnerable_assets":    analysis.VulnerableAssets,
-			"total_assets":         analysis.TotalAssets,
-			"migration_priority":   migrationPriority,
-			"risk_score":           analysis.QuantumRiskScore,
-			"pqc_readiness":        analysis.PQCReadiness,
-			"threats_detected":     analysis.TotalThreats,
-			"algorithm_stats":      analysis.AlgorithmStats,
+			"overall_risk":        overall,
+			"quantum_safe_assets": analysis.QuantumSafeAssets,
+			"vulnerable_assets":   analysis.VulnerableAssets,
+			"total_assets":        analysis.TotalAssets,
+			"migration_priority":  migrationPriority,
+			"risk_score":          analysis.QuantumRiskScore,
+			"pqc_readiness":       analysis.PQCReadiness,
+			"threats_detected":    analysis.TotalThreats,
+			"algorithm_stats":     analysis.AlgorithmStats,
 		})
 	}
 }

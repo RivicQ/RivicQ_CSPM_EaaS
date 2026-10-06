@@ -18,21 +18,21 @@ func findingsToGin(findings []discovery.Finding) []gin.H {
 	out := make([]gin.H, 0, len(findings))
 	for _, f := range findings {
 		out = append(out, gin.H{
-			"id":            f.ID,
-			"severity":      strings.ToLower(string(f.Severity)),
-			"title":         f.Title,
-			"description":   f.Description,
-			"asset":         f.TargetLabel,
-			"target_label":  f.TargetLabel,
-			"host":          f.Host,
-			"port":          f.Port,
-			"protocol":      f.Protocol,
-			"algorithm":     f.Algorithm,
+			"id":             f.ID,
+			"severity":       strings.ToLower(string(f.Severity)),
+			"title":          f.Title,
+			"description":    f.Description,
+			"asset":          f.TargetLabel,
+			"target_label":   f.TargetLabel,
+			"host":           f.Host,
+			"port":           f.Port,
+			"protocol":       f.Protocol,
+			"algorithm":      f.Algorithm,
 			"recommendation": f.Remediation,
-			"remediation":   f.Remediation,
-			"evidence":      f.Evidence,
-			"quantum_safe":  f.QuantumSafe,
-			"bsi_ref":       f.BSIRef,
+			"remediation":    f.Remediation,
+			"evidence":       f.Evidence,
+			"quantum_safe":   f.QuantumSafe,
+			"bsi_ref":        f.BSIRef,
 		})
 	}
 	return out

@@ -54,10 +54,38 @@ func TestNewMockUserStore_AdminUserExists(t *testing.T) {
 	}
 }
 
-func TestNewWorkDomainUserStore_UsesDefaultsWhenUnset(t *testing.T) {
+func TestNewWorkDomainUserStore_RefusesWithoutBootstrapPassword(t *testing.T) {
 	t.Setenv("AUTH_ALLOWED_DOMAINS", "")
 	t.Setenv("AUTH_BOOTSTRAP_EMAIL", "")
 	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "")
+	t.Setenv("AUTH_BOOTSTRAP_NAME", "")
+	t.Setenv("AUTH_BOOTSTRAP_ROLE", "")
+
+	store, err := auth.NewWorkDomainUserStore()
+	if err == nil {
+		t.Fatal("expected an error when AUTH_BOOTSTRAP_PASSWORD is unset; there is no default password")
+	}
+	if store != nil {
+		t.Fatal("expected no store when bootstrap password is unset")
+	}
+}
+
+func TestNewWorkDomainUserStore_RefusesPublishedDemoPassword(t *testing.T) {
+	t.Setenv("AUTH_ALLOWED_DOMAINS", "")
+	t.Setenv("AUTH_BOOTSTRAP_EMAIL", "")
+	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "DemoPass123!")
+	t.Setenv("AUTH_BOOTSTRAP_NAME", "")
+	t.Setenv("AUTH_BOOTSTRAP_ROLE", "")
+
+	if _, err := auth.NewWorkDomainUserStore(); err == nil {
+		t.Fatal("expected the published demo bootstrap password to be rejected")
+	}
+}
+
+func TestNewWorkDomainUserStore_UsesDefaultsWhenUnset(t *testing.T) {
+	t.Setenv("AUTH_ALLOWED_DOMAINS", "")
+	t.Setenv("AUTH_BOOTSTRAP_EMAIL", "")
+	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "Rivicq-Bootstrap-P4ss!")
 	t.Setenv("AUTH_BOOTSTRAP_NAME", "")
 	t.Setenv("AUTH_BOOTSTRAP_ROLE", "")
 
@@ -81,7 +109,7 @@ func TestNewWorkDomainUserStore_UsesDefaultsWhenUnset(t *testing.T) {
 func TestNewWorkDomainUserStore_UsesAllowedDomainPrefix(t *testing.T) {
 	t.Setenv("AUTH_ALLOWED_DOMAINS", "example.com")
 	t.Setenv("AUTH_BOOTSTRAP_EMAIL", "")
-	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "")
+	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "Rivicq-Bootstrap-P4ss!")
 	t.Setenv("AUTH_BOOTSTRAP_NAME", "")
 	t.Setenv("AUTH_BOOTSTRAP_ROLE", "")
 

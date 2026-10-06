@@ -63,7 +63,7 @@ func TestSSHScanner_Scan_DSAHostKey_Findings(t *testing.T) {
 	})
 	defer cleanup()
 
-	scanner := &SSHScanner{}
+	scanner := newTestSSHScanner()
 	target := Target{
 		ID: "ssh-test", Host: "127.0.0.1", Port: port,
 		Protocol: "ssh", Label: "Test SSH",
@@ -100,7 +100,7 @@ func TestSSHScanner_ScanBanner_HostKeyExtracted(t *testing.T) {
 	port, cleanup := startMockSSHServer(t, signer, []string{"curve25519-sha256"})
 	defer cleanup()
 
-	scanner := &SSHScanner{}
+	scanner := newTestSSHScanner()
 	target := Target{
 		ID: "ssh-test", Host: "127.0.0.1", Port: port,
 		Protocol: "ssh", Label: "Test SSH Banner",

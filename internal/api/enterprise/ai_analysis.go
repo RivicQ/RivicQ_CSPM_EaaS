@@ -14,17 +14,17 @@ import (
 
 // aiResponse is the structured output of the AI analysis endpoint.
 type aiResponse struct {
-	AnalysisID   string           `json:"analysis_id"`
-	Subject      string           `json:"subject"`
-	Summary      string           `json:"summary"`
-	Severity     string           `json:"severity"`
-	Confidence   float64          `json:"confidence"`
-	KeyFindings  []string         `json:"key_findings"`
-	Risks        []aiRisk         `json:"risks"`
-	Recommendations []string      `json:"recommendations"`
-	Scope        string           `json:"scope"`
-	GeneratedAt  time.Time        `json:"generated_at"`
-	Source       string           `json:"source"`
+	AnalysisID      string    `json:"analysis_id"`
+	Subject         string    `json:"subject"`
+	Summary         string    `json:"summary"`
+	Severity        string    `json:"severity"`
+	Confidence      float64   `json:"confidence"`
+	KeyFindings     []string  `json:"key_findings"`
+	Risks           []aiRisk  `json:"risks"`
+	Recommendations []string  `json:"recommendations"`
+	Scope           string    `json:"scope"`
+	GeneratedAt     time.Time `json:"generated_at"`
+	Source          string    `json:"source"`
 }
 
 type aiRisk struct {
@@ -51,7 +51,11 @@ func analyzeAI(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 			req.Context = "dashboard"
 		}
 
-		result, err := runAnalysis(c.Request.Context(), db, req)
+		tenantID, ok := jwtTenantOrAbort(c)
+		if !ok {
+			return
+		}
+		result, err := runAnalysis(c.Request.Context(), db, tenantID, req)
 		if err != nil {
 			logger.WithError(err).Error("AI analysis failed")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "AI analysis failed"})
@@ -61,8 +65,7 @@ func analyzeAI(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 	}
 }
 
-func runAnalysis(ctx context.Context, db *database.DB, req aiAnalyzeRequest) (*aiResponse, error) {
-	tenantID := enterpriseDefaultTenant
+func runAnalysis(ctx context.Context, db *database.DB, tenantID string, req aiAnalyzeRequest) (*aiResponse, error) {
 	analysis, err := analyzeThreats(ctx, db, tenantID)
 	if err != nil {
 		return nil, err
@@ -70,9 +73,9 @@ func runAnalysis(ctx context.Context, db *database.DB, req aiAnalyzeRequest) (*a
 
 	switch req.Context {
 	case "asset":
-		return analyzeAsset(ctx, db, req, analysis)
+		return analyzeAsset(ctx, db, tenantID, req, analysis)
 	case "report":
-		return analyzeReport(ctx, db, req, analysis)
+		return analyzeReport(ctx, db, tenantID, req, analysis)
 	case "scan":
 		return analyzeScan(ctx, db, req, analysis)
 	case "posture":
@@ -84,13 +87,13 @@ func runAnalysis(ctx context.Context, db *database.DB, req aiAnalyzeRequest) (*a
 
 func analyzeDashboard(analysis *ThreatAnalysis) (*aiResponse, error) {
 	resp := &aiResponse{
-		AnalysisID: fmt.Sprintf("ai-%d", time.Now().Unix()),
-		Subject:    "Platform security posture",
-		Confidence: 0.92,
+		AnalysisID:  fmt.Sprintf("ai-%d", time.Now().Unix()),
+		Subject:     "Platform security posture",
+		Confidence:  0.92,
 		GeneratedAt: time.Now().UTC(),
-		Source:     "rivicq-ai",
-		Scope:      "dashboard",
-		Severity:   severityFromRisk(analysis.QuantumRiskScore),
+		Source:      "rivicq-ai",
+		Scope:       "dashboard",
+		Severity:    severityFromRisk(analysis.QuantumRiskScore),
 		Summary: fmt.Sprintf(
 			"Your cryptographic inventory contains %d asset(s); %d (%.1f%%) are quantum-safe. "+
 				"%d threat(s) were detected by the ML engine, with %d critical and %d high.",
@@ -148,31 +151,31 @@ func analyzePosture(analysis *ThreatAnalysis) (*aiResponse, error) {
 	return resp, nil
 }
 
-func analyzeAsset(ctx context.Context, db *database.DB, req aiAnalyzeRequest, _ *ThreatAnalysis) (*aiResponse, error) {
+func analyzeAsset(ctx context.Context, db *database.DB, tenantID string, req aiAnalyzeRequest, _ *ThreatAnalysis) (*aiResponse, error) {
 	if db == nil || db.Queries == nil {
 		return &aiResponse{
-			AnalysisID: fmt.Sprintf("ai-%d", time.Now().Unix()),
-			Subject:    "Asset analysis",
-			Confidence: 0.7,
+			AnalysisID:  fmt.Sprintf("ai-%d", time.Now().Unix()),
+			Subject:     "Asset analysis",
+			Confidence:  0.7,
 			GeneratedAt: time.Now().UTC(),
-			Source:     "rivicq-ai",
-			Scope:      "asset",
-			Summary:    "Asset intelligence is unavailable in demo mode. Connect the enterprise database.",
-			Severity:   "info",
+			Source:      "rivicq-ai",
+			Scope:       "asset",
+			Summary:     "Asset intelligence is unavailable in demo mode. Connect the enterprise database.",
+			Severity:    "info",
 		}, nil
 	}
-	asset, err := db.Queries.GetCryptoAsset(req.TargetID)
+	asset, err := db.Queries.GetCryptoAsset(tenantID, req.TargetID)
 	if err != nil {
 		return nil, err
 	}
 	resp := &aiResponse{
-		AnalysisID: fmt.Sprintf("ai-%d", time.Now().Unix()),
-		Subject:    "Cryptographic asset " + asset.Algorithm,
-		Confidence: 0.9,
+		AnalysisID:  fmt.Sprintf("ai-%d", time.Now().Unix()),
+		Subject:     "Cryptographic asset " + asset.Algorithm,
+		Confidence:  0.9,
 		GeneratedAt: time.Now().UTC(),
-		Source:     "rivicq-ai",
-		Scope:      "asset",
-		Severity:   riskLevelFor(asset.VulnerabilityScore, asset.QuantumSafe, !asset.QuantumSafe),
+		Source:      "rivicq-ai",
+		Scope:       "asset",
+		Severity:    riskLevelFor(asset.VulnerabilityScore, asset.QuantumSafe, !asset.QuantumSafe),
 		Summary: fmt.Sprintf(
 			"Asset uses %s (key size %d) with a vulnerability score of %d. Quantum-safe: %t.",
 			asset.Algorithm, asset.KeySize, asset.VulnerabilityScore, asset.QuantumSafe),
@@ -192,15 +195,15 @@ func analyzeAsset(ctx context.Context, db *database.DB, req aiAnalyzeRequest, _ 
 	return resp, nil
 }
 
-func analyzeReport(ctx context.Context, db *database.DB, req aiAnalyzeRequest, _ *ThreatAnalysis) (*aiResponse, error) {
+func analyzeReport(ctx context.Context, db *database.DB, tenantID string, req aiAnalyzeRequest, _ *ThreatAnalysis) (*aiResponse, error) {
 	if db == nil || db.Queries == nil {
 		return nil, fmt.Errorf("database unavailable")
 	}
-	report, err := db.Queries.GetCBOMReport(req.TargetID)
+	report, err := db.Queries.GetCBOMReport(tenantID, req.TargetID)
 	if err != nil {
 		return nil, err
 	}
-	assets, err := db.Queries.ListCryptoAssets(req.TargetID, 1000, 0)
+	assets, err := db.Queries.ListCryptoAssets(tenantID, req.TargetID, 1000, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -215,13 +218,13 @@ func analyzeReport(ctx context.Context, db *database.DB, req aiAnalyzeRequest, _
 		pct = float64(safe) / float64(len(assets)) * 100
 	}
 	resp := &aiResponse{
-		AnalysisID: fmt.Sprintf("ai-%d", time.Now().Unix()),
-		Subject:    "CBOM report " + report.Name,
-		Confidence: 0.88,
+		AnalysisID:  fmt.Sprintf("ai-%d", time.Now().Unix()),
+		Subject:     "CBOM report " + report.Name,
+		Confidence:  0.88,
 		GeneratedAt: time.Now().UTC(),
-		Source:     "rivicq-ai",
-		Scope:      "report",
-		Severity:   severityFromRisk(1 - pct/100),
+		Source:      "rivicq-ai",
+		Scope:       "report",
+		Severity:    severityFromRisk(1 - pct/100),
 		Summary: fmt.Sprintf(
 			"CBOM report %q (v%s) contains %d cryptographic asset(s), %.1f%% quantum-safe.",
 			report.Name, report.Version, len(assets), pct),
@@ -264,9 +267,9 @@ func SetupAIRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logg
 		ai.POST("/analyze", analyzeAI(db, logger))
 		ai.GET("/status", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
-				"engine":   "rivicq-ai",
-				"version":  "1.0",
-				"enabled":  true,
+				"engine":       "rivicq-ai",
+				"version":      "1.0",
+				"enabled":      true,
 				"capabilities": strings.Split("dashboard,asset,report,scan,posture", ","),
 			})
 		})

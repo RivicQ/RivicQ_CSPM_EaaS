@@ -1,8 +1,10 @@
 package server
 
 import (
+	"context"
+	"errors"
 	"fmt"
-	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -20,14 +22,50 @@ import (
 )
 
 type Server struct {
-	Engine  *gin.Engine
-	Edition edition.Edition
-	Logger  *logrus.Logger
-	DB      *database.DB
-	Port    string
+	Engine   *gin.Engine
+	Edition  edition.Edition
+	Logger   *logrus.Logger
+	DB       *database.DB
+	Port     string
+	DemoMode bool
+	// routeHooks run at the end of API route registration so an edition-specific
+	// binary can add routes without duplicating the whole bootstrap. Keeping one
+	// bootstrap is what prevents a second server from shipping weaker timeouts
+	// or an always-ready probe.
+	routeHooks []func(*gin.RouterGroup, *Server)
 }
 
-func New() *Server {
+// Option customises the server at construction time.
+type Option func(*Server)
+
+// WithPort overrides the listen port.
+func WithPort(port string) Option {
+	return func(s *Server) {
+		if port != "" {
+			s.Port = port
+		}
+	}
+}
+
+// WithLogger replaces the default logger.
+func WithLogger(logger *logrus.Logger) Option {
+	return func(s *Server) {
+		if logger != nil {
+			s.Logger = logger
+		}
+	}
+}
+
+// WithAPIRouteHook registers extra routes on the /api/v1 group.
+func WithAPIRouteHook(hook func(*gin.RouterGroup, *Server)) Option {
+	return func(s *Server) {
+		if hook != nil {
+			s.routeHooks = append(s.routeHooks, hook)
+		}
+	}
+}
+
+func New(opts ...Option) *Server {
 	config.LoadDotEnv()
 
 	logger := logrus.New()
@@ -45,24 +83,29 @@ func New() *Server {
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
 
-	db := database.New(logger)
+	db, dbOK := database.NewOptional(logger)
 
 	middleware.Setup(router, editionCfg, logger, db)
-	if db != nil {
+	if dbOK {
 		if err := database.RunMigrations(db); err != nil {
-			logger.WithError(err).Warn("Database migrations failed — running with existing schema")
+			logger.WithError(err).Fatal("Database migrations failed — refusing to serve against an unknown schema")
 		}
 	} else {
-		logger.Warn("No database — demo mode: all data is in-memory and ephemeral")
+		logger.Warn("Demo mode: all data is in-memory, fabricated and ephemeral — not for production")
 	}
 
-	return &Server{
-		Engine:  router,
-		Edition: editionCfg.Edition,
-		Logger:  logger,
-		DB:      db,
-		Port:    os.Getenv("CRYPTOBOM_PORT"),
+	s := &Server{
+		Engine:   router,
+		Edition:  editionCfg.Edition,
+		Logger:   logger,
+		DB:       db,
+		Port:     os.Getenv("CRYPTOBOM_PORT"),
+		DemoMode: !dbOK,
 	}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
 }
 
 func (s *Server) Start() {
@@ -74,8 +117,7 @@ func (s *Server) Start() {
 		}
 	}
 
-	s.registerHealthRoutes()
-	s.registerAPIRoutes()
+	s.RegisterRoutes()
 
 	serviceName := fmt.Sprintf("RivicQ — Encryption as a Service (%s)", s.Edition)
 	if s.Edition == edition.OSS {
@@ -87,19 +129,69 @@ func (s *Server) Start() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
+	addr := fmt.Sprintf(":%s", s.Port)
+	httpServer := &http.Server{
+		Addr:    addr,
+		Handler: s.Engine,
+		// Explicit timeouts. Without them a slow client can hold a connection
+		// open indefinitely, which is the usual shape of a slowloris outage.
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       60 * time.Second,
+		WriteTimeout:      300 * time.Second, // scans stream over SSE
+		IdleTimeout:       120 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
+
+	serverErrors := make(chan error, 1)
 	go func() {
-		<-quit
-		fmt.Printf("\nShutting down %s...\n", serviceName)
-		time.Sleep(2 * time.Second)
-		os.Exit(0)
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			serverErrors <- err
+		}
+		close(serverErrors)
 	}()
 
-	addr := fmt.Sprintf(":%s", s.Port)
-	if err := s.Engine.Run(addr); err != nil {
-		log.Fatal(err)
+	select {
+	case err := <-serverErrors:
+		if err != nil {
+			s.Logger.WithError(err).Fatal("HTTP server failed")
+		}
+	case sig := <-quit:
+		s.Logger.WithField("signal", sig.String()).Info("Shutting down")
 	}
+
+	// Drain in-flight requests, then close the database. Returning immediately
+	// on signal would abandon live scans mid-flight.
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	if err := httpServer.Shutdown(ctx); err != nil {
+		s.Logger.WithError(err).Error("Graceful shutdown failed; forcing close")
+		_ = httpServer.Close()
+	}
+	if s.DB != nil && s.DB.DB != nil {
+		if err := s.DB.Close(); err != nil {
+			s.Logger.WithError(err).Error("Database close failed")
+		}
+	}
+	s.Logger.Info("Shutdown complete")
 }
 
+// RegisterRoutes mounts the health, readiness, spec and API routes.
+//
+// It is separate from Start so an operator or a test can build the full route
+// table without opening a listener.
+func (s *Server) RegisterRoutes() {
+	s.registerHealthRoutes()
+	s.registerAPIRoutes()
+}
+
+// registerHealthRoutes exposes liveness and readiness separately.
+//
+// /healthz reports that the process is running and never fails on a dependency,
+// so a database blip does not trigger a restart loop.
+//
+// /readyz reports whether the instance should receive traffic. It returns 503
+// when the database is unreachable, and 503 in demo mode: fabricated in-memory
+// data must never be routed to by a load balancer.
 func (s *Server) registerHealthRoutes() {
 	s.Engine.GET("/healthz", func(c *gin.Context) {
 		dbStatus := "disconnected"
@@ -109,32 +201,40 @@ func (s *Server) registerHealthRoutes() {
 			}
 		}
 		resp := gin.H{
-			"status":      "healthy",
-			"service":     fmt.Sprintf("RivicQ - %s", s.Edition),
-			"edition":     s.Edition,
-			"database":    dbStatus,
-			"demo_mode":   s.DB == nil,
-			"timestamp":   time.Now().Format(time.RFC3339),
+			"status":    "healthy",
+			"service":   fmt.Sprintf("RivicQ - %s", s.Edition),
+			"edition":   s.Edition,
+			"database":  dbStatus,
+			"demo_mode": s.DemoMode,
+			"timestamp": time.Now().UTC().Format(time.RFC3339),
 		}
 		if s.Edition == edition.Enterprise {
 			resp["ibmq_connected"] = os.Getenv("IBMQ_ENABLED") == "true"
 		}
-		c.JSON(200, resp)
+		c.JSON(http.StatusOK, resp)
 	})
 
 	s.Engine.GET("/readyz", func(c *gin.Context) {
-		dbReady := true
-		if s.DB != nil && s.DB.DB != nil {
-			dbReady = s.DB.Ping() == nil
-		}
+		dbReady := s.DB != nil && s.DB.DB != nil && s.DB.Ping() == nil
+
 		status := "ready"
+		code := http.StatusOK
 		if !dbReady {
-			status = "degraded"
+			status = "not_ready"
+			code = http.StatusServiceUnavailable
 		}
-		c.JSON(200, gin.H{
-			"status":   status,
-			"database": dbReady,
-			"service":  fmt.Sprintf("RivicQ - %s", s.Edition),
+		if s.DemoMode {
+			status = "demo_mode"
+			code = http.StatusServiceUnavailable
+		}
+
+		c.JSON(code, gin.H{
+			"status":    status,
+			"database":  dbReady,
+			"demo_mode": s.DemoMode,
+			"service":   fmt.Sprintf("RivicQ - %s", s.Edition),
+			"edition":   s.Edition,
+			"timestamp": time.Now().UTC().Format(time.RFC3339),
 		})
 	})
 
@@ -163,6 +263,10 @@ func (s *Server) registerAPIRoutes() {
 	}
 
 	apiGroup.GET("/scans/:id/stream", shared.StreamScanProgress(s.DB, s.Logger))
+
+	for _, hook := range s.routeHooks {
+		hook(apiGroup, s)
+	}
 }
 
 func (s *Server) printOSSInfo(serviceName string) {
@@ -195,64 +299,64 @@ func (s *Server) registerOpenAPISpec() {
 			"paths": gin.H{
 				"/healthz": gin.H{
 					"get": gin.H{
-						"summary": "Health check",
+						"summary":   "Health check",
 						"responses": gin.H{"200": gin.H{"description": "Service health status"}},
 					},
 				},
 				"/readyz": gin.H{
 					"get": gin.H{
-						"summary": "Readiness check",
+						"summary":   "Readiness check",
 						"responses": gin.H{"200": gin.H{"description": "Service readiness including DB status"}},
 					},
 				},
 				"/edition": gin.H{
 					"get": gin.H{
-						"summary": "Edition info",
+						"summary":   "Edition info",
 						"responses": gin.H{"200": gin.H{"description": "Edition type and feature flags"}},
 					},
 				},
 				"/api/v1/cbom": gin.H{
 					"get": gin.H{
-						"summary": "List CBOM reports",
+						"summary":   "List CBOM reports",
 						"responses": gin.H{"200": gin.H{"description": "Array of CBOM reports"}},
 					},
 					"post": gin.H{
-						"summary": "Create CBOM report",
+						"summary":   "Create CBOM report",
 						"responses": gin.H{"201": gin.H{"description": "Created CBOM report"}},
 					},
 				},
 				"/api/v1/scans": gin.H{
 					"post": gin.H{
-						"summary": "Trigger CBOM scan",
+						"summary":   "Trigger CBOM scan",
 						"responses": gin.H{"202": gin.H{"description": "Scan accepted"}},
 					},
 				},
 				"/api/v1/scans/{id}": gin.H{
 					"get": gin.H{
-						"summary": "Get scan status",
+						"summary":    "Get scan status",
 						"parameters": []gin.H{{"name": "id", "in": "path", "required": true}},
-						"responses": gin.H{"200": gin.H{"description": "Scan status and results"}},
+						"responses":  gin.H{"200": gin.H{"description": "Scan status and results"}},
 					},
 				},
 				"/api/v1/scans/{id}/stream": gin.H{
 					"get": gin.H{
-						"summary": "SSE scan progress stream",
+						"summary":    "SSE scan progress stream",
 						"parameters": []gin.H{{"name": "id", "in": "path", "required": true}},
-						"responses": gin.H{"200": gin.H{"description": "Server-Sent Events stream"}},
+						"responses":  gin.H{"200": gin.H{"description": "Server-Sent Events stream"}},
 					},
 				},
 				"/api/v1/dashboard/overview": gin.H{
 					"get": gin.H{
-						"summary": "Dashboard overview",
+						"summary":   "Dashboard overview",
 						"responses": gin.H{"200": gin.H{"description": "Dashboard metrics"}},
 					},
 				},
-			"/api/v1/cspm/overview": gin.H{
-				"get": gin.H{
-					"summary": "CSPM overview (Enterprise)",
-					"responses": gin.H{"200": gin.H{"description": "CSPM posture data"}},
+				"/api/v1/cspm/overview": gin.H{
+					"get": gin.H{
+						"summary":   "CSPM overview (Enterprise)",
+						"responses": gin.H{"200": gin.H{"description": "CSPM posture data"}},
+					},
 				},
-			},
 			},
 		})
 	})

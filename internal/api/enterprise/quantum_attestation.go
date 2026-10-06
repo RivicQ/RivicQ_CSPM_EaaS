@@ -132,7 +132,10 @@ func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
 }
 
 func (h *QuantumAttestationHandler) CreateAttestation(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	var attestation QuantumAttestation
 	if err := c.ShouldBindJSON(&attestation); err != nil {
@@ -491,7 +494,10 @@ func (h *QuantumAttestationHandler) ListPQCAlgorithms(c *gin.Context) {
 }
 
 func (h *QuantumAttestationHandler) MigrateAlgorithm(c *gin.Context) {
-	tenantID := tenantIDFor(c)
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 
 	var req struct {
 		AssetID         string `json:"asset_id"`

@@ -319,20 +319,20 @@ func (c *Client) mapStorageAccount(sa *armstorage.Account) AzureStorageAccount {
 }
 
 type AKSCluster struct {
-	Name              string            `json:"name"`
-	ResourceGroup     string            `json:"resource_group"`
-	Location          string            `json:"location"`
-	Status            string            `json:"status"`
-	Version           string            `json:"version"`
-	DNSPrefix         string            `json:"dns_prefix"`
-	FQDN              string            `json:"fqdn"`
-	NodeCount         int32             `json:"node_count"`
-	VMSize            string            `json:"vm_size"`
-	NetworkPlugin     string            `json:"network_plugin"`
-	PrivateCluster    bool              `json:"private_cluster"`
-	RBACEnabled       bool              `json:"rbac_enabled"`
-	Tags              map[string]string `json:"tags"`
-	CreatedAt         time.Time         `json:"created_at"`
+	Name           string            `json:"name"`
+	ResourceGroup  string            `json:"resource_group"`
+	Location       string            `json:"location"`
+	Status         string            `json:"status"`
+	Version        string            `json:"version"`
+	DNSPrefix      string            `json:"dns_prefix"`
+	FQDN           string            `json:"fqdn"`
+	NodeCount      int32             `json:"node_count"`
+	VMSize         string            `json:"vm_size"`
+	NetworkPlugin  string            `json:"network_plugin"`
+	PrivateCluster bool              `json:"private_cluster"`
+	RBACEnabled    bool              `json:"rbac_enabled"`
+	Tags           map[string]string `json:"tags"`
+	CreatedAt      time.Time         `json:"created_at"`
 }
 
 func (c *Client) ListAKSClusters(ctx context.Context) ([]AKSCluster, error) {

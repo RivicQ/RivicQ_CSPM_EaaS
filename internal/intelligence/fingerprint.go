@@ -92,7 +92,7 @@ func FinalizeFinding(f Finding) Finding {
 	f.ID = "rvq-" + fp[:16]
 	f.PQCClass = ClassifyPQC(f)
 	if f.RecommendedAction == "" {
-		f.RecommendedAction = pqcRecommendedAction(f.PQCClass)
+		f.RecommendedAction = PQCRecommendedAction(f.PQCClass)
 	}
 	f.Risk.RecommendedAction = f.RecommendedAction
 	now := time.Now().UTC()

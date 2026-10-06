@@ -43,18 +43,18 @@ type AlgorithmBackend interface {
 
 // Options configures the OQS engine provider.
 type Options struct {
-	Logger   *logrus.Logger
-	Backend  Backend
-	HSMSeed  bool
-	HSM      *quantum.AWSHSMClient
+	Logger  *logrus.Logger
+	Backend Backend
+	HSMSeed bool
+	HSM     *quantum.AWSHSMClient
 }
 
 // Engine is the OQS engine provider.
 type Engine struct {
-	logger *logrus.Logger
-	svc    *quantum.PQCService
+	logger  *logrus.Logger
+	svc     *quantum.PQCService
 	backend AlgorithmBackend
-	nist   *nistpqc.Engine
+	nist    *nistpqc.Engine
 }
 
 // New creates the OQS engine provider. When backend is BackendLiboqs and no
@@ -107,7 +107,7 @@ func (e *Engine) Info() provider.ProviderInfo {
 		ConfigSchema: map[string]any{
 			"type": "object",
 			"properties": map[string]any{
-				"backend": map[string]any{"type": "string", "enum": []string{"software", "liboqs"}},
+				"backend":  map[string]any{"type": "string", "enum": []string{"software", "liboqs"}},
 				"hsm_seed": map[string]any{"type": "boolean"},
 			},
 		},

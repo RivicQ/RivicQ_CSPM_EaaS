@@ -15,9 +15,18 @@ import (
 )
 
 const (
-	defaultJWTSecret         = "oss-default-secret-not-for-production"
-	defaultBootstrapPassword = "DemoPass123!"
+	defaultJWTSecret = "oss-default-secret-not-for-production"
+	// PublishedBootstrapPassword appeared in RivicQ documentation and in the
+	// default .env, so it must never be accepted as a real credential.
+	PublishedBootstrapPassword = "DemoPass123!"
 )
+
+// DemoModeEnabled reports whether the operator explicitly allowed serving
+// fabricated, in-memory data.
+func DemoModeEnabled() bool {
+	v := strings.ToLower(strings.TrimSpace(os.Getenv("RIVICQ_ALLOW_DEMO_MODE")))
+	return v == "1" || v == "true" || v == "yes"
+}
 
 func isProductionRuntime() bool {
 	for _, key := range []string{"CRYPTOBOM_ENV", "RIVICQ_ENV", "ENV"} {
@@ -64,9 +73,15 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 		if bootstrapEmail == "" {
 			bootstrapEmail = "admin@rivicq.local"
 		}
-		bootstrapPassword := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_PASSWORD"))
+		bootstrapPassword := auth.BootstrapPasswordFromEnv()
 		if bootstrapPassword == "" {
-			bootstrapPassword = defaultBootstrapPassword
+			if production || !DemoModeEnabled() {
+				logger.Fatal("AUTH_BOOTSTRAP_PASSWORD must be set; RivicQ does not ship a default bootstrap password")
+			}
+			bootstrapPassword = PublishedBootstrapPassword
+		}
+		if bootstrapPassword == PublishedBootstrapPassword && !DemoModeEnabled() {
+			logger.Fatal("AUTH_BOOTSTRAP_PASSWORD must not be the published demo password")
 		}
 		bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
 		if bootstrapName == "" {
@@ -85,9 +100,6 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 
 		var userCount int
 		if err := db.DB.QueryRow("SELECT COUNT(*) FROM users").Scan(&userCount); err == nil && userCount == 0 {
-			if production && bootstrapPassword == defaultBootstrapPassword {
-				logger.Fatal("AUTH_BOOTSTRAP_PASSWORD must be set in production; DemoPass123! is not allowed")
-			}
 			if hashedPassword, hashErr := auth.HashPassword(bootstrapPassword); hashErr == nil {
 				_, execErr := db.Exec(`
 					INSERT INTO users (id, tenant_id, email, name, role, password)
@@ -125,7 +137,12 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 	}
 
 	authService := auth.NewAuthService(jwtSecret, userStore)
-	router.Use(authService.OptionalJWTAuthMiddleware())
+	// Deny by default: every /api/v1 route requires a valid access token
+	// unless it appears in auth.PublicRoutes.
+	router.Use(authService.EnforceAuth())
+	// Authentication is not authorization. Without this, every role that could
+	// log in could also delete reports and mint API keys.
+	router.Use(auth.RequireRoutePermission())
 	SetupAuthRoutes(router, logger, authService, allowedDomains)
 	var sqlDB *sql.DB
 	if db != nil {

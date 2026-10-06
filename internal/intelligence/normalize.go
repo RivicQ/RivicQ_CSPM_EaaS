@@ -50,16 +50,30 @@ func FromDiscovery(f discovery.Finding) Finding {
 
 // ContentFinding is a scanner-agnostic DTO so this package does not import API handlers.
 type ContentFinding struct {
-	ID, FilePath, FindingType, Algorithm, Severity, Description, Remediation, Evidence, Tool, CVE, CWE string
-	Line, KeyLength                                                                                    int
-	QuantumSafe                                                                                        bool
-	Compliance                                                                                         []string
-	Demo                                                                                               bool
+	ID, RuleID, Fingerprint, FilePath, FindingType, Algorithm, Severity, Description, Remediation, Evidence, Tool, CVE, CWE string
+	Line, KeyLength                                                                                                         int
+	// Confidence is the detector's own confidence in 0..1. Zero means the
+	// detector did not report one and the legacy default applies.
+	Confidence  float64
+	QuantumSafe bool
+	Compliance  []string
+	Demo        bool
+}
+
+// contentConfidence maps a detector confidence into the 0..1 range, falling back
+// to the historical 0.72 when the detector reported nothing.
+func contentConfidence(reported float64) float64 {
+	if reported <= 0 || reported > 1 {
+		return 0.72
+	}
+	return reported
 }
 
 func FromContent(repo string, f ContentFinding) Finding {
 	n := Finding{
 		ID:          f.ID,
+		RuleID:      f.RuleID,
+		Fingerprint: f.Fingerprint,
 		Source:      "live",
 		Scanner:     firstNonEmpty(f.Tool, "github-content"),
 		Asset:       repo,
@@ -72,7 +86,7 @@ func FromContent(repo string, f ContentFinding) Finding {
 		Line:        f.Line,
 		Algorithm:   f.Algorithm,
 		KeyLength:   f.KeyLength,
-		Confidence:  0.72,
+		Confidence:  contentConfidence(f.Confidence),
 		Controls:    f.Compliance,
 		Remediation: f.Remediation,
 		Status:      "open",
@@ -87,7 +101,9 @@ func FromContent(repo string, f ContentFinding) Finding {
 	}
 	if f.CVE != "" {
 		n.Scanner = firstNonEmpty(f.Tool, "sca")
-		n.Confidence = 0.95
+		if n.Confidence < 0.95 {
+			n.Confidence = 0.95
+		}
 		n.KEV = kevCVEs[f.CVE]
 	}
 	n.Risk = ScoreCrypto(n)

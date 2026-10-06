@@ -38,13 +38,18 @@ type ScanManager struct {
 	results   map[string]*ScanResult // tenantID/assetID -> latest completed result
 	scanner   *Scanner
 	persistFn PersistFunc
+	policy    TargetPolicy
 }
 
+// NewScanManager builds a manager with the restrictive default target policy.
+// Tests and single-tenant deployments can widen it via SetPolicy.
 func NewScanManager() *ScanManager {
+	policy := PolicyFromEnv()
 	return &ScanManager{
 		jobs:    make(map[string]*ScanJob),
 		results: make(map[string]*ScanResult),
-		scanner: NewScanner(),
+		scanner: NewScannerWithPolicy(policy),
+		policy:  policy,
 	}
 }
 
@@ -58,6 +63,25 @@ func (sm *ScanManager) SetPersistFunc(fn PersistFunc) {
 // AssetIDFor returns a stable, deterministic asset identifier for a target.
 func (sm *ScanManager) AssetIDFor(target string) string {
 	return uuid.NewSHA1(uuid.NameSpaceURL, []byte(strings.TrimSpace(target))).String()
+}
+
+// SetPolicy replaces the target policy. Used by tests and by deployments that
+// manage the allow-list programmatically.
+func (sm *ScanManager) SetPolicy(p TargetPolicy) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	sm.policy = p
+	// Rebuild the scanner so its connect-time enforcement matches. Without this
+	// the sub-scanners would keep enforcing the previous policy and a widened
+	// allow-list would appear to have no effect.
+	sm.scanner = NewScannerWithPolicy(p)
+}
+
+// Policy returns the active target policy.
+func (sm *ScanManager) Policy() TargetPolicy {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	return sm.policy
 }
 
 func resultKey(tenantID, assetID string) string {
@@ -77,11 +101,18 @@ func (sm *ScanManager) GetResultForTenant(tenantID, assetID string) (*ScanResult
 	return result, ok
 }
 
-func (sm *ScanManager) StartScan(target, scanType string) *ScanJob {
+func (sm *ScanManager) StartScan(target, scanType string) (*ScanJob, error) {
 	return sm.StartScanForTenant(tenant.PublicTenantID, target, scanType)
 }
 
-func (sm *ScanManager) StartScanForTenant(tenantID, target, scanType string) *ScanJob {
+// StartScanForTenant queues a scan after validating the target against the
+// manager's policy. A blocked target returns ErrTargetBlocked and never opens a
+// socket or reads a file.
+func (sm *ScanManager) StartScanForTenant(tenantID, target, scanType string) (*ScanJob, error) {
+	if err := sm.policy.ValidateTarget(target); err != nil {
+		return nil, err
+	}
+
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
@@ -101,7 +132,7 @@ func (sm *ScanManager) StartScanForTenant(tenantID, target, scanType string) *Sc
 	sm.jobs[job.ID] = job
 
 	go sm.executeScan(job)
-	return job
+	return job, nil
 }
 
 func (sm *ScanManager) executeScan(job *ScanJob) {
@@ -472,8 +503,19 @@ func isFile(path string) bool {
 	return err == nil && !info.IsDir()
 }
 
-var defaultScanManager = NewScanManager()
+var (
+	defaultScanManager     *ScanManager
+	defaultScanManagerOnce sync.Once
+)
 
+// GetScanManager returns the process-wide scan manager, building it on first
+// use.
+//
+// Initialisation is lazy so the target policy is read from the environment
+// after the process has configured it, rather than during package init.
 func GetScanManager() *ScanManager {
+	defaultScanManagerOnce.Do(func() {
+		defaultScanManager = NewScanManager()
+	})
 	return defaultScanManager
 }

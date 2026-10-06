@@ -9,15 +9,12 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/api/enterprise"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
-	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -45,25 +42,33 @@ func newTestEnv(t *testing.T) (*gin.Engine, string) {
 	}
 	logger := logrus.New()
 	logger.SetLevel(logrus.FatalLevel)
-	db := &database.DB{}
-	enterprise.SetupRoutes(apiGroup, db, logger, cfg)
+	// nil, not &database.DB{}: the enterprise bootstrap must not dial a
+	// developer machine's PostgreSQL just because one happens to be running.
+	enterprise.SetupRoutes(apiGroup, nil, logger, cfg)
 
 	token := generateJWT()
 	return r, token
 }
 
+// generateJWT mints an access token through the real token manager.
+//
+// It previously hand-rolled a MapClaims token with no issuer, audience or
+// token_use. The hardened validator rejects exactly that, so these tests were
+// asserting 401 while claiming to assert 503/200. Minting through the manager
+// keeps them honest.
 func generateJWT() string {
-	claims := jwt.MapClaims{
-		"sub":       uuid.New().String(),
-		"email":     "admin@enterprise.com",
-		"role":      "admin",
-		"tenant_id": uuid.New().String(),
-		"exp":       time.Now().Add(time.Hour).Unix(),
-		"iat":       time.Now().Unix(),
+	tm := auth.NewTokenManager(testJWTSecret)
+	token, err := tm.GenerateToken(&auth.User{
+		ID:       uuid.New().String(),
+		TenantID: uuid.New().String(),
+		Email:    "admin@enterprise.com",
+		Name:     "Admin",
+		Role:     "admin",
+	}, "enterprise")
+	if err != nil {
+		panic("generate token: " + err.Error())
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, _ := token.SignedString([]byte(testJWTSecret))
-	return tokenStr
+	return token
 }
 
 func authHeaders(token string) map[string]string {
@@ -102,7 +107,7 @@ func TestAPIKeysNoDB(t *testing.T) {
 	}
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
-	assert.Equal(t, 503, w.Code, "expected 503 when no enterprise DB")
+	assert.Equal(t, 503, w.Code, "expected 503 when no enterprise DB, got body: %s", w.Body.String())
 }
 
 func TestWebhooksNoDB(t *testing.T) {
@@ -119,7 +124,7 @@ func TestWebhooksNoDB(t *testing.T) {
 	}
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
-	assert.Equal(t, 503, w.Code, "expected 503 when no enterprise DB")
+	assert.Equal(t, 503, w.Code, "expected 503 when no enterprise DB, got body: %s", w.Body.String())
 }
 
 func TestAuditEventsNoDB(t *testing.T) {

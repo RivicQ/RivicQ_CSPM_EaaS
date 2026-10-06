@@ -47,7 +47,7 @@ func (v *AuditViewer) SetupRoutes(router *gin.RouterGroup, authMW gin.HandlerFun
 }
 
 func (v *AuditViewer) ListEvents(c *gin.Context) {
-	if v.db == nil {
+	if !enterpriseDBReady(v.db) {
 		c.JSON(http.StatusOK, gin.H{"events": []AuditEvent{}, "total": 0})
 		return
 	}
@@ -120,8 +120,7 @@ func (v *AuditViewer) ListEvents(c *gin.Context) {
 }
 
 func (v *AuditViewer) GetEvent(c *gin.Context) {
-	if v.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, v.db) {
 		return
 	}
 	id := c.Param("id")
@@ -148,7 +147,7 @@ func (v *AuditViewer) GetEvent(c *gin.Context) {
 }
 
 func (v *AuditViewer) GetSummary(c *gin.Context) {
-	if v.db == nil {
+	if !enterpriseDBReady(v.db) {
 		c.JSON(http.StatusOK, gin.H{"total_events": 0, "errors_4xx": 0, "errors_5xx": 0})
 		return
 	}
@@ -180,8 +179,7 @@ func (v *AuditViewer) GetSummary(c *gin.Context) {
 }
 
 func (v *AuditViewer) ExportEvents(c *gin.Context) {
-	if v.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, v.db) {
 		return
 	}
 	tenantID := c.GetString("tenant_id")

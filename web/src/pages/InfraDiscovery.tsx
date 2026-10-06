@@ -622,6 +622,10 @@ const InfraDiscovery: React.FC = () => {
     >
       <Alert severity="info" sx={{ mb: 2, bgcolor: '#0a0a0f', color: '#d1d5db', border: '1px solid #1f1f2e' }}>
         Seed rows are fixtures, not a customer estate. Live scanning needs the Community API.
+        {' '}
+        <Box component="span" sx={{ fontFamily: 'monospace', opacity: 0.8 }}>
+          source: {lastScanId}
+        </Box>
       </Alert>
       <ScanButton onScanComplete={handleScanComplete} />
       <ScanSummaryBar summary={summary} />

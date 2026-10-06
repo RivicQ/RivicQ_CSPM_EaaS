@@ -28,12 +28,12 @@ type PolicyViolation struct {
 
 // ComplianceReport is the result of evaluating a CryptoAsset.
 type ComplianceReport struct {
-	AssetID    string            `json:"asset_id"`
-	AssetName  string            `json:"asset_name"`
-	Violations []PolicyViolation `json:"violations"`
-	Frameworks []string          `json:"frameworks_checked"`
-	Compliant  bool              `json:"compliant"`
-	EvaluatedAt time.Time        `json:"evaluated_at"`
+	AssetID     string            `json:"asset_id"`
+	AssetName   string            `json:"asset_name"`
+	Violations  []PolicyViolation `json:"violations"`
+	Frameworks  []string          `json:"frameworks_checked"`
+	Compliant   bool              `json:"compliant"`
+	EvaluatedAt time.Time         `json:"evaluated_at"`
 }
 
 // ComplianceEngine evaluates a CryptoAsset against one or more compliance frameworks.
@@ -99,11 +99,11 @@ func (e *OSSComplianceEngine) Evaluate(_ context.Context, asset *CryptoAsset) (*
 	}
 
 	return &ComplianceReport{
-		AssetID:    asset.ID,
-		AssetName:  asset.Name,
-		Violations: violations,
-		Frameworks: e.Frameworks(),
-		Compliant:  len(violations) == 0,
+		AssetID:     asset.ID,
+		AssetName:   asset.Name,
+		Violations:  violations,
+		Frameworks:  e.Frameworks(),
+		Compliant:   len(violations) == 0,
 		EvaluatedAt: time.Now().UTC(),
 	}, nil
 }

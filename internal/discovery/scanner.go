@@ -8,17 +8,30 @@ import (
 	"github.com/google/uuid"
 )
 
-// Scanner orchestrates scanning across all target types
+// Scanner orchestrates scanning across all target types.
+//
+// The policy travels with the scanner so each sub-scanner can enforce it at
+// connect time. Validation alone is not enough: a name that passed the policy
+// can be rebound to an internal address before the socket opens.
 type Scanner struct {
 	tlsScanner  *TLSScanner
 	sshScanner  *SSHScanner
 	httpScanner *HTTPScanner
-} // NewScanner creates a new Scanner instance
+}
+
+// NewScanner creates a Scanner that enforces the policy from the environment.
 func NewScanner() *Scanner {
+	return NewScannerWithPolicy(PolicyFromEnv())
+}
+
+// NewScannerWithPolicy creates a Scanner bound to a specific policy. The policy
+// is copied by value, so a later change to the caller's policy cannot silently
+// alter an in-flight scan.
+func NewScannerWithPolicy(policy TargetPolicy) *Scanner {
 	return &Scanner{
-		tlsScanner:  &TLSScanner{},
-		sshScanner:  &SSHScanner{},
-		httpScanner: &HTTPScanner{},
+		tlsScanner:  &TLSScanner{policy: policy, hasOwnPolicy: true},
+		sshScanner:  &SSHScanner{policy: policy, hasOwnPolicy: true},
+		httpScanner: &HTTPScanner{policy: policy, hasOwnPolicy: true},
 	}
 }
 

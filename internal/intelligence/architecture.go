@@ -32,8 +32,11 @@ type Phase struct {
 // PQCReadiness scores the four workbook layers (SBOM/CBOM/HBOM/AIBOM) plus HNDL and DORA/NIS2/BSI mapping.
 // Community returns JSON scores. Enterprise adds pack_available when the control plane is licensed.
 type PQCReadiness struct {
-	Overall          int            `json:"overall"`
-	Layers           map[string]int `json:"layers"`
+	Overall int            `json:"overall"`
+	Layers  map[string]int `json:"layers"`
+	// TaxonomyVersion pins the vocabulary behind Classifications, so a stored
+	// readiness score remains interpretable after the taxonomy changes.
+	TaxonomyVersion  string         `json:"taxonomy_version"`
 	Classifications  map[string]int `json:"classifications"`
 	SupportedNISTPQC []string       `json:"supported_nist_pqc"`
 	HNDLExposure     int            `json:"hndl_exposure"`
@@ -191,7 +194,11 @@ func buildPQCReadiness(findings []Finding, disc *discovery.ScanResult) *PQCReadi
 		Migration:        pqcMitigations(findings),
 		Compliance:       complianceMaps(findings, cfg.Features.DORAPack),
 		PackAvailable:    cfg.Features.DORAPack,
-		Note:             "PQC classes are a local taxonomy (pqc-ready / hybrid-ready / migration-required / high-risk / unknown). HBOM/AIBOM layer scores are placeholders, not engines. Not CAVP and not a certification.",
+		TaxonomyVersion:  TaxonomyVersion,
+		Note: "PQC classes follow " + TaxonomyVersion +
+			" (legacy / high_risk / migration_required / hybrid_ready / pqc_ready / unknown). " +
+			"HBOM and AIBOM layer scores are placeholders, not engines. " +
+			"These are inventory classes derived from declared algorithm and key length: not CAVP validation, not a hardware attestation, and not a certification.",
 	}
 }
 

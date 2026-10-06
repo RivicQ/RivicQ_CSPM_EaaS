@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chip, Tooltip } from '@mui/material';
-import { Shield, CheckCircle, Cancel } from '@mui/icons-material';
+import { CheckCircle, Cancel } from '@mui/icons-material';
 
 type ComplianceStandard = 'FIPS-140-3' | 'BSI-TR-02102' | 'DORA' | 'eIDAS' | 'NIST-PQC';
 

@@ -50,7 +50,7 @@ func (m *APIKeyManager) SetupRoutes(router *gin.RouterGroup, authMW gin.HandlerF
 }
 
 func (m *APIKeyManager) ListKeys(c *gin.Context) {
-	if m.db == nil {
+	if !enterpriseDBReady(m.db) {
 		c.JSON(http.StatusOK, gin.H{"api_keys": []APIKey{}})
 		return
 	}
@@ -84,8 +84,7 @@ func (m *APIKeyManager) ListKeys(c *gin.Context) {
 }
 
 func (m *APIKeyManager) CreateKey(c *gin.Context) {
-	if m.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, m.db) {
 		return
 	}
 
@@ -134,8 +133,7 @@ func (m *APIKeyManager) CreateKey(c *gin.Context) {
 }
 
 func (m *APIKeyManager) RevokeKey(c *gin.Context) {
-	if m.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, m.db) {
 		return
 	}
 	tenantID, ok := jwtTenantOrAbort(c)
@@ -152,8 +150,7 @@ func (m *APIKeyManager) RevokeKey(c *gin.Context) {
 }
 
 func (m *APIKeyManager) UpdateKey(c *gin.Context) {
-	if m.db == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	if !abortIfNoDB(c, m.db) {
 		return
 	}
 	tenantID, ok := jwtTenantOrAbort(c)
@@ -185,8 +182,7 @@ func (m *APIKeyManager) UpdateKey(c *gin.Context) {
 // APIKeyAuthMiddleware validates API key from Authorization header.
 func (m *APIKeyManager) APIKeyAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if m.db == nil {
-			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+		if !abortIfNoDB(c, m.db) {
 			return
 		}
 

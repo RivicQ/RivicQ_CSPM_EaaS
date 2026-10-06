@@ -58,7 +58,12 @@
     if (host.includes('github.io')) {
       const parts = window.location.pathname.split('/').filter(Boolean);
       const repo = parts[0] || 'RivicQ_CSPM_EaaS';
-      return `/${repo}/platform`;
+      // The SPA is deployed at the repo root. Its React Router basename is
+      // process.env.PUBLIC_URL, which package.json sets to
+      // /<repo>, so every app route already carries the repo prefix. Adding
+      // another segment here produced /<repo>/platform/... and a 404 on every
+      // marketing CTA.
+      return `/${repo}`;
     }
     if (window.location.port === '5500' || window.location.port === '8080') {
       return 'http://localhost:3000/platform';

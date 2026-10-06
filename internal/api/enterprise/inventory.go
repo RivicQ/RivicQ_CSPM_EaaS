@@ -163,7 +163,7 @@ type InfrastructureAsset struct {
 }
 
 func (h *InventoryHandler) ListAssets(c *gin.Context) {
-	if h.db == nil {
+	if !enterpriseDBReady(h.db) {
 		c.JSON(http.StatusOK, demoAssetsList())
 		return
 	}
@@ -236,7 +236,7 @@ func (h *InventoryHandler) ListAssets(c *gin.Context) {
 }
 
 func (h *InventoryHandler) GetAsset(c *gin.Context) {
-	if h.db == nil {
+	if !enterpriseDBReady(h.db) {
 		c.JSON(http.StatusOK, gin.H{"id": c.Param("id"), "name": "Demo Asset", "category": "certificate", "risk": "medium"})
 		return
 	}
@@ -703,7 +703,10 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 	}
 
 	if h.db != nil {
-		tenantID := tenantIDFor(c)
+		tenantID, ok := mutatingTenantIDFor(c)
+		if !ok {
+			return
+		}
 		for _, comp := range sbomResult.Components {
 			assetID := uuid.New()
 			invAssetID := uuid.New()
@@ -817,7 +820,7 @@ type InventorySummary struct {
 }
 
 func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
-	if h.db == nil {
+	if !enterpriseDBReady(h.db) {
 		c.JSON(http.StatusOK, demoInventorySummary())
 		return
 	}
