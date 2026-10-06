@@ -1,4 +1,8 @@
-/** RivicQ Security Cloud — deep-space nebula tokens (black canvas, violet accent). */
+/**
+ * RivicQ Security Cloud — deep-space nebula tokens (black canvas, violet accent).
+ * Design rule: `crypto` severity is the ONLY place hue carries meaning.
+ * Brand = violet ramp; everything else is neutral surface/ink.
+ */
 export const tokens = {
   colors: {
     rivicq: {
@@ -13,11 +17,6 @@ export const tokens = {
       800: '#4c1d95',
       900: '#2e1065',
     },
-    gold: {
-      50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
-      400: '#a78bfa', 500: '#7c3aed', 600: '#6d28d9', 700: '#5b21b6',
-      800: '#4c1d95', 900: '#2e1065',
-    },
     crypto: {
       critical: '#ef4444',
       high: '#f97316',
@@ -28,15 +27,6 @@ export const tokens = {
       classic: '#9ca3af',
       success: '#22c55e',
     },
-    brand: {
-      blue: '#7c3aed',
-      blueLight: '#a78bfa',
-      blueDark: '#5b21b6',
-      gulf: '#000000',
-      gulfDeep: '#000000',
-      gold: '#7c3aed',
-      cyan: '#a78bfa',
-    },
     navy: { 0: '#000000', 1: '#0a0a0f', 2: '#12121a', 3: '#1f1f2e' },
     surface: { 0: '#f8fafc', 1: '#ffffff', 2: '#f1f5f9', 3: '#e5e7eb' },
     surfaceLight: { 0: '#000000', 1: '#0a0a0f', 2: '#12121a', 3: '#1f1f2e' },
@@ -45,8 +35,6 @@ export const tokens = {
     border: '#e5e7eb',
     borderLight: '#1f1f2e',
     brandGradient: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(124,58,237,0.35), transparent 70%)',
-    brandBlue: '#7c3aed',
-    brandGold: '#7c3aed',
   },
   spacing: (n: number) => `${n * 8}px`,
   typography: {

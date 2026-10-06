@@ -29,7 +29,7 @@ const ThemeToggle: React.FC<Props> = ({ mode, onToggle, compact = false }) => {
                     ? 'rgba(255,255,255,0.06)'
                     : 'rgba(255,255,255,0.85)',
                 color: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(226,232,240,0.82)' : '#0f2744',
+                  theme.palette.mode === 'dark' ? 'rgba(226,232,240,0.82)' : '#0a0a0f',
                 width: 36,
                 height: 36,
                 '&:hover': {

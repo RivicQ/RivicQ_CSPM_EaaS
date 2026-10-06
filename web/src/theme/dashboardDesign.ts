@@ -3,10 +3,10 @@ import { tokens } from './tokens';
 /** Designer-level dashboard design tokens */
 export const dashboardDesign = {
   radius: {
-    sm: 6,
-    md: 10,
-    lg: 14,
-    xl: 20,
+    sm: tokens.borderRadius.sm,
+    md: tokens.borderRadius.md,
+    lg: tokens.borderRadius.lg,
+    xl: tokens.borderRadius.xl,
   },
   spacing: {
     page: 24,
@@ -18,7 +18,7 @@ export const dashboardDesign = {
     grid: 'rgba(100,116,139,0.08)',
     gridDark: 'rgba(148,163,184,0.1)',
     barGradient: [tokens.colors.rivicq[600], tokens.colors.rivicq[400]] as const,
-    barGradientAlt: [tokens.colors.brand.blue, tokens.colors.rivicq[500]] as const,
+    barGradientAlt: [tokens.colors.rivicq[500], tokens.colors.rivicq[400]] as const,
     tooltipShadow: '0 8px 32px rgba(15,23,42,0.12)',
   },
   severity: {

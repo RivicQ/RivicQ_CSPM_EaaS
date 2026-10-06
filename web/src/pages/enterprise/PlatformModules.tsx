@@ -31,8 +31,8 @@ const PlatformModules: React.FC = () => {
       }
     >
       {locked && (
-        <Box sx={{ mb: 3, p: 2.5, borderRadius: 3, border: '1px solid rgba(212,175,55,0.3)', bgcolor: 'rgba(212,175,55,0.06)', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Lock sx={{ color: tokens.colors.gold[400] }} />
+        <Box sx={{ mb: 3, p: 2.5, borderRadius: 3, border: '1px solid rgba(124,58,237,0.3)', bgcolor: 'rgba(124,58,237,0.06)', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Lock sx={{ color: tokens.colors.rivicq[400] }} />
           <Typography variant="body2" sx={{ color: tokens.colors.text.secondary }}>
             You are viewing the Community edition. Modules activate with Professional or Enterprise. Switch your edition to unlock.
           </Typography>

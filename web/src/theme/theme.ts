@@ -25,12 +25,6 @@ const LIGHT_PRIMARY = {
 
 const DARK_PRIMARY = LIGHT_PRIMARY;
 
-const LIGHT_GOLD = {
-  50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#7c3aed', 600: '#6d28d9', 700: '#5b21b6', 800: '#4c1d95', 900: '#2e1065',
-};
-
-const DARK_GOLD = LIGHT_GOLD;
-
 const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
   const isDark = mode === 'dark';
 
@@ -39,7 +33,6 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
   const border = isDark ? tokens.colors.borderLight : tokens.colors.border;
 
   const primary = isDark ? DARK_PRIMARY : LIGHT_PRIMARY;
-  const gold = isDark ? DARK_GOLD : LIGHT_GOLD;
 
   return createTheme({
     palette: {
@@ -57,10 +50,10 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
         contrastText: '#ffffff',
       },
       tertiary: {
-        main: gold[500],
-        light: gold[400],
-        dark: gold[700],
-        contrastText: isDark ? '#ffffff' : '#ffffff',
+        main: primary[500],
+        light: primary[400],
+        dark: primary[700],
+        contrastText: '#ffffff',
       },
       error: { main: tokens.colors.crypto.critical },
       warning: { main: tokens.colors.crypto.high },

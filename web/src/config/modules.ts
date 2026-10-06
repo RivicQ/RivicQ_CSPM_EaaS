@@ -120,8 +120,8 @@ const COLOR_BY_CATEGORY: Record<CategoryName, string> = {
   'Incident Response': tokens.colors.crypto.critical,
   'Digital Forensics': tokens.colors.crypto.classic,
   'Red Team': tokens.colors.crypto.critical,
-  'Compliance': tokens.colors.gold[500],
-  'Enterprise Analytics': tokens.colors.brand.blue,
+  'Compliance': tokens.colors.rivicq[500],
+  'Enterprise Analytics': tokens.colors.rivicq[400],
 };
 
 const KPI_LABELS: Record<CategoryName, string[]> = {
@@ -585,14 +585,14 @@ const UMBRELLA_MODULES: SecurityModuleConfig[] = [
     description: 'Map every control to DORA, NIS2, ISO 27001, SOC 2, PCI DSS, HIPAA, GDPR, FedRAMP, CIS, NIST CSF 2.0, ISO 42001, the EU AI Act, and the Cyber Resilience Act with evidence automation.',
     category: 'Compliance',
     icon: FactCheck,
-    color: tokens.colors.gold[500],
+    color: tokens.colors.rivicq[500],
     score: 80,
     connected: false,
     umbrella: true,
     kpis: [
       { label: 'Controls', value: '1,204', color: tokens.colors.rivicq[300] },
       { label: 'Pass rate', value: '88%', color: tokens.colors.crypto.low },
-      { label: 'Frameworks', value: '14', color: tokens.colors.gold[400] },
+      { label: 'Frameworks', value: '14', color: tokens.colors.rivicq[400] },
       { label: 'Open gaps', value: '37', color: tokens.colors.crypto.high },
     ],
     capabilities: [
@@ -619,14 +619,14 @@ const UMBRELLA_MODULES: SecurityModuleConfig[] = [
     description: 'Global, cyber, quantum, AI, compliance, and identity risk scores feeding executive, SOC, CISO, and board dashboards with a real-time unified risk graph and digital twin.',
     category: 'Enterprise Analytics',
     icon: Insights,
-    color: tokens.colors.brand.blue,
+    color: tokens.colors.rivicq[400],
     score: 85,
     connected: false,
     umbrella: true,
     kpis: [
       { label: 'Global risk score', value: '72', color: tokens.colors.crypto.high },
       { label: 'Predictions', value: '124', color: tokens.colors.rivicq[300] },
-      { label: 'Dashboards', value: '8', color: tokens.colors.gold[400] },
+      { label: 'Dashboards', value: '8', color: tokens.colors.rivicq[400] },
       { label: 'Correlation', value: '96%', color: tokens.colors.crypto.low },
     ],
     capabilities: [

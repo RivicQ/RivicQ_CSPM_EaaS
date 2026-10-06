@@ -20,7 +20,7 @@ const CAPABILITIES: Capability[] = [
   { label: 'CBOM', hint: 'Cryptographic inventory', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[500] },
   { label: 'SBOM', hint: 'Software + crypto libraries', icon: <GitHub />, path: '/bom', accent: tokens.colors.crypto.quantum },
   { label: 'Scanner', hint: 'Website, host, repo scans', icon: <Memory />, path: '/scanner', accent: tokens.colors.crypto.quantum },
-  { label: 'PQC', hint: 'Quantum readiness', icon: <Psychology />, path: '/migration', accent: tokens.colors.gold[500] },
+  { label: 'PQC', hint: 'Quantum readiness', icon: <Psychology />, path: '/migration', accent: tokens.colors.rivicq[500] },
   { label: 'Governance', hint: 'Control mapping', icon: <FactCheck />, path: '/governance', accent: tokens.colors.crypto.low },
   { label: 'Pipeline', hint: 'Eight-stage DevSecOps', icon: <Hub />, path: '/pipeline', accent: tokens.colors.crypto.info },
 ];

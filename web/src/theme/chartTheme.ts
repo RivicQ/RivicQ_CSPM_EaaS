@@ -10,12 +10,12 @@ export const chartTheme = {
     tokens.colors.rivicq[400],
     tokens.colors.rivicq[800],
     tokens.colors.rivicq[700],
-    tokens.colors.brand.blue,
+    tokens.colors.rivicq[300],
   ] as const,
   categories: {
     cryptographic: tokens.colors.rivicq[600],
     ai: tokens.colors.rivicq[500],
-    hardware: tokens.colors.gold[500],
+    hardware: tokens.colors.rivicq[400],
     software: tokens.colors.crypto.low,
     infrastructure: tokens.colors.rivicq[800],
   } as Record<string, string>,
@@ -43,7 +43,7 @@ export const chartTheme = {
     tokens.colors.rivicq[700],
     tokens.colors.crypto.high,
     tokens.colors.rivicq[800],
-    tokens.colors.gold[500],
+    tokens.colors.rivicq[400],
   ] as const,
 } as const;
 
