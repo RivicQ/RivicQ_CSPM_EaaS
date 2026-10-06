@@ -24,9 +24,6 @@ type Migration struct {
 	Statements []string
 }
 
-// migrationLog implements the logrus.FieldLogger subset used here.
-type migrationLog struct{ logger *logrus.Logger }
-
 func migrationTableDDL() string {
 	return `CREATE TABLE IF NOT EXISTS schema_migrations (
 		id TEXT PRIMARY KEY,

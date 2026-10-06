@@ -78,22 +78,25 @@ func New(logger *logrus.Logger) (*DB, error) {
 	}, nil
 }
 
-// NewOptional connects to the database, returning nil only when the operator
-// has explicitly enabled demo mode. The boolean reports whether the returned
-// database is usable, so callers can log the mode accurately.
+// NewOptional connects to the database and reports whether the handle is usable.
+//
+// It deliberately does not kill the process when the database is unreachable.
+// Readiness is already expressed by /readyz, which answers 503 without a
+// database; a process that exits instead cannot answer a probe at all, so the
+// outage degrades into an unobservable crash loop with no endpoint to inspect.
+// Callers must keep demo responses gated on availability so that an outage is
+// never presented as real data, and must keep /readyz honest.
 func NewOptional(logger *logrus.Logger) (*DB, bool) {
 	db, err := New(logger)
 	if err == nil {
 		return db, true
 	}
-	if !DemoMode() {
-		if logger != nil {
-			logger.WithError(err).Fatal("Database required and unreachable — refusing to serve")
-		}
-		panic("database required and unreachable: " + err.Error())
-	}
 	if logger != nil {
-		logger.WithError(err).Error("Demo mode explicitly enabled (RIVICQ_ALLOW_DEMO_MODE) — data is fabricated and in-memory")
+		if DemoMode() {
+			logger.WithError(err).Error("Demo mode explicitly enabled (RIVICQ_ALLOW_DEMO_MODE) — data is fabricated and in-memory")
+		} else {
+			logger.WithError(err).Error("Database unavailable — starting degraded; /readyz reports not_ready until it reconnects")
+		}
 	}
 	return nil, false
 }

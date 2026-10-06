@@ -15,6 +15,7 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/api/oss"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
 	"github.com/rivic-q/cryptobom-saas/internal/middleware"
 	"github.com/sirupsen/logrus"
 )
@@ -24,18 +25,23 @@ func main() {
 	logger.SetLevel(logrus.InfoLevel)
 	logger.SetFormatter(&logrus.TextFormatter{FullTimestamp: true})
 
+	// Must precede any read of JWT_SECRET / CRYPTOBOM_DB_* below. config.LoadOSS
+	// does not load the file itself, so dropping this call left the OSS binary
+	// silently ignoring .env.
+	config.LoadDotEnv()
+
 	cfg, err := config.LoadOSS()
 	if err != nil {
 		log.Fatal("Failed to load OSS configuration: ", err)
 	}
 
-	// Demo mode must be opted into explicitly. NewOptional exits otherwise.
+	// No database means a degraded instance: /healthz still answers so a probe
+	// can see it, /readyz reports 503, and demo stubs stay labelled.
 	db, dbOK := database.NewOptional(logger)
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(gin.Recovery(), gin.Logger())
-	router.Use(middleware.CORS(middleware.DefaultCORSConfig()))
 
 	if dbOK {
 		if err := database.RunMigrations(db); err != nil {
@@ -43,9 +49,17 @@ func main() {
 		}
 	}
 
+	// middleware.Setup installs RequestID, SecurityHeaders, Audit, RateLimit and
+	// CORS, none of which the previous bootstrap had.
 	middleware.Setup(router, nil, logger, db)
 
 	registerLivenessRoutes(router, db, dbOK, logger)
+
+	// Root-level, not under /api/v1: the frontend builds this URL as
+	// host:port/edition before it picks a console shell (config/editions.ts).
+	router.GET("/edition", func(c *gin.Context) {
+		c.JSON(http.StatusOK, edition.Detect().Public())
+	})
 
 	apiGroup := router.Group("/api/v1")
 	oss.SetupRoutes(apiGroup, db, logger, cfg)

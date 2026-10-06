@@ -15,6 +15,15 @@ NC='\033[0m' # No Color
 EDITION="${1:-oss}"
 ACTION="${2:-start}"
 
+# Local convenience only. The server binaries run in gin release mode, which is
+# treated as production, so they refuse to start on an empty JWT_SECRET. This
+# keeps `./run-edition.sh oss start` working out of the box; real deployments
+# must set JWT_SECRET themselves and should never see this fallback.
+export JWT_SECRET="${JWT_SECRET:-local-dev-only-not-for-production}"
+# Same reasoning: the no-database auth store refuses to bootstrap on an
+# unset or published password, which would kill the quick start outright.
+export AUTH_BOOTSTRAP_PASSWORD="${AUTH_BOOTSTRAP_PASSWORD:-local-dev-only-not-for-production}"
+
 # Find CryptoBOM directory
 find_cryptobom() {
     if [ -f "go.mod" ] && grep -q "cryptobom-saas" go.mod; then

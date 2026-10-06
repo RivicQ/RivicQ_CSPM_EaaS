@@ -204,6 +204,13 @@ jobs:
     permissions:
       contents: read
 
+    # Both server binaries run in gin release mode, which isProductionRuntime()
+    # treats as production, so they refuse to start on an empty JWT_SECRET.
+    # Production Validation already sets one; this job needs the same.
+    env:
+      JWT_SECRET: integration-tests-please-replace
+      AUTH_BOOTSTRAP_PASSWORD: integration-tests-bootstrap-please-replace
+
     services:
       postgres:
         image: postgres:15
@@ -278,6 +285,7 @@ jobs:
     env:
       DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_validation?sslmode=disable
       JWT_SECRET: production-validation-secret-please-replace
+      AUTH_BOOTSTRAP_PASSWORD: production-validation-bootstrap-please-replace
       KUBE_CONFIG_STAGING: dummy
       KUBE_CONFIG_PROD: dummy
       IBMQ_API_KEY: dummy

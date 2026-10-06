@@ -60,9 +60,28 @@ var safeTenantResolvers = map[string]bool{
 // rule that tenancy.go documents.
 func TestMutatingHandlersFailClosedOnMissingTenant(t *testing.T) {
 	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, ".", nil, 0)
+	names, err := filepath.Glob("*.go")
 	if err != nil {
-		t.Fatalf("parse enterprise package: %v", err)
+		t.Fatalf("list enterprise package files: %v", err)
+	}
+	if len(names) == 0 {
+		t.Fatal("no Go files in enterprise package")
+	}
+
+	// Parsed per file rather than with parser.ParseDir, which is deprecated and
+	// drops the relationship between build tags and packages. An audit wants
+	// every file in the directory, tag or no tag.
+	type parsedFile struct {
+		name string
+		file *ast.File
+	}
+	var files []parsedFile
+	for _, name := range names {
+		f, err := parser.ParseFile(fset, name, nil, 0)
+		if err != nil {
+			t.Fatalf("parse %s: %v", name, err)
+		}
+		files = append(files, parsedFile{name: name, file: f})
 	}
 
 	type finding struct {
@@ -73,40 +92,38 @@ func TestMutatingHandlersFailClosedOnMissingTenant(t *testing.T) {
 
 	var findings []finding
 
-	for _, pkg := range pkgs {
-		for filename, file := range pkg.Files {
-			for _, decl := range file.Decls {
-				fn, ok := decl.(*ast.FuncDecl)
-				if !ok || fn.Body == nil {
-					continue
-				}
-				name := fn.Name.Name
-				if !looksMutating(name) {
-					continue
-				}
-				if !returnsGinContext(fn) {
-					continue
-				}
-
-				ast.Inspect(fn.Body, func(n ast.Node) bool {
-					call, ok := n.(*ast.CallExpr)
-					if !ok {
-						return true
-					}
-					ident, ok := call.Fun.(*ast.Ident)
-					if !ok {
-						return true
-					}
-					if reason, bad := failingTenantResolvers[ident.Name]; bad {
-						findings = append(findings, finding{
-							file: filepath.Base(filename),
-							fn:   name,
-							call: reason,
-						})
-					}
-					return true
-				})
+	for _, pf := range files {
+		for _, decl := range pf.file.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Body == nil {
+				continue
 			}
+			name := fn.Name.Name
+			if !looksMutating(name) {
+				continue
+			}
+			if !returnsGinContext(fn) {
+				continue
+			}
+
+			ast.Inspect(fn.Body, func(n ast.Node) bool {
+				call, ok := n.(*ast.CallExpr)
+				if !ok {
+					return true
+				}
+				ident, ok := call.Fun.(*ast.Ident)
+				if !ok {
+					return true
+				}
+				if reason, bad := failingTenantResolvers[ident.Name]; bad {
+					findings = append(findings, finding{
+						file: filepath.Base(pf.name),
+						fn:   name,
+						call: reason,
+					})
+				}
+				return true
+			})
 		}
 	}
 

@@ -55,7 +55,7 @@ services:
       - CRYPTOBOM_DB_SSLMODE=disable
       - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-change-in-production-min-32-chars}
       - AUTH_BOOTSTRAP_EMAIL=${AUTH_BOOTSTRAP_EMAIL:-admin@rivicq.local}
-      - AUTH_BOOTSTRAP_PASSWORD=${AUTH_BOOTSTRAP_PASSWORD:-DemoPass123!}
+      - AUTH_BOOTSTRAP_PASSWORD=${AUTH_BOOTSTRAP_PASSWORD:-change-me}
       - FRONTEND_REDIRECT_URL=http://localhost:3000/platform
       - FRONTEND_BASE_PATH=/platform
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
