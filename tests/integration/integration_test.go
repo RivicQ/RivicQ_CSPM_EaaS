@@ -17,12 +17,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	ossHealthURL         = "http://localhost:8080/healthz"
-	enterpriseHealthURL  = "http://localhost:9090/healthz"
+// The health URLs stay overridable so the smoke test can be pointed at a
+// machine where 8080 is already taken. Unset, they are exactly what CI uses.
+var (
+	ossHealthURL         = envOr("RIVICQ_OSS_HEALTH_URL", "http://localhost:8080/healthz")
+	enterpriseHealthURL  = envOr("RIVICQ_ENTERPRISE_HEALTH_URL", "http://localhost:9090/healthz")
 	serverStartTimeout   = 30 * time.Second
 	serverStartPollEvery = 2 * time.Second
 )
+
+func envOr(key, fallback string) string {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		return v
+	}
+	return fallback
+}
 
 func waitForHealth(t *testing.T, url string) map[string]interface{} {
 	t.Helper()
@@ -63,7 +72,12 @@ func TestServersHealthy(t *testing.T) {
 
 	ent := waitForHealth(t, enterpriseHealthURL)
 	assert.Equal(t, "healthy", ent["status"])
-	assert.Equal(t, "Enterprise", ent["edition"])
+	// Compared case-insensitively for the same reason the OSS check above is:
+	// edition.Detect() reports the lowercase constant, and a deployment that is
+	// genuinely Enterprise is the thing under test, not its capitalisation.
+	eed := strings.ToLower(fmt.Sprint(ent["edition"]))
+	assert.Truef(t, strings.Contains(eed, "enterprise"),
+		"unexpected Enterprise edition %v", ent["edition"])
 }
 
 func TestDatabaseConnectivity(t *testing.T) {

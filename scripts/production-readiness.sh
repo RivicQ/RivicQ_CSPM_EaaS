@@ -27,6 +27,7 @@ REQUIRED_VARS=(
   AWS_SECRET_ACCESS_KEY
   IBM_CLOUD_API_KEY
   IBM_HPCS_INSTANCE
+  AUTH_BOOTSTRAP_PASSWORD
 )
 
 usage() {
@@ -84,15 +85,35 @@ check_health() {
   ok "health check passed: $health_url"
 }
 
+# login_token signs in as the bootstrap admin. POST /scans is a mutating
+# endpoint and is not public, so the check has to authenticate the way a real
+# deployment does instead of curling an endpoint no unauthenticated caller may
+# reach.
+login_token() {
+  local email="${AUTH_BOOTSTRAP_EMAIL:-admin@rivicq.local}"
+  local password="${AUTH_BOOTSTRAP_PASSWORD:-}"
+  [[ -n "$password" ]] || return 1
+  curl -s --connect-timeout 5 -X POST "$API_URL/auth/login" \
+    -H 'Content-Type: application/json' \
+    --data "$(jq -n --arg e "$email" --arg p "$password" '{email: $e, password: $p}')" \
+    | jq -r '.access_token // empty'
+}
+
 check_scanner() {
   [[ "$CHECK_SCANNER" == "true" ]] || return 0
 
-  local payload scan_id scan_status
+  local token payload scan_id scan_status
+  token=$(login_token)
+  [[ -n "$token" ]] || die "scanner check could not authenticate (set AUTH_BOOTSTRAP_EMAIL and AUTH_BOOTSTRAP_PASSWORD)"
+
   payload='{"target":"production-readiness-check","scan_type":"cbom"}'
-  scan_id=$(curl -s -X POST "$API_URL/scans" -H 'Content-Type: application/json' -d "$payload" | jq -r '.scan_id // .scanId // empty')
+  scan_id=$(curl -s -X POST "$API_URL/scans" \
+    -H 'Content-Type: application/json' \
+    -H "Authorization: Bearer $token" \
+    -d "$payload" | jq -r '.scan_id // .scanId // empty')
   [[ -n "$scan_id" ]] || die "scanner check did not return a scan id"
 
-  scan_status=$(curl -s "$API_URL/scans/$scan_id" | jq -r '.status // empty')
+  scan_status=$(curl -s -H "Authorization: Bearer $token" "$API_URL/scans/$scan_id" | jq -r '.status // empty')
   [[ -n "$scan_status" ]] || die "scanner status lookup failed for scan $scan_id"
 
   ok "scanner check passed: $scan_id ($scan_status)"

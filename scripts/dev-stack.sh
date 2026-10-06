@@ -31,7 +31,7 @@ case "$MODE" in
   enterprise|ent)
     make build-enterprise
     export CRYPTOBOM_PORT=9090
-    export CRYPTOBOM_LICENSE_KEY="${CRYPTOBOM_LICENSE_KEY:-ENT-dev-local}"
+    export CRYPTOBOM_LICENSE_KEY="${CRYPTOBOM_LICENSE_KEY:-ENT-dev-local-not-a-license-key}"
     export FRONTEND_REDIRECT_URL="http://localhost:3000/platform"
     export FRONTEND_BASE_PATH="/platform"
     export REACT_APP_API_URL="http://localhost:9090/api/v1"

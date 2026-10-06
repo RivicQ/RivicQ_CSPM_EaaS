@@ -90,6 +90,13 @@ start_enterprise() {
     # Use build system
     ./build.sh enterprise latest
     
+    # edition.Detect() only reports Enterprise for an "ENT-" key of at least 20
+    # characters, so without one the enterprise binary advertises "oss" on
+    # /healthz and the deployment smoke test fails. Local/CI only — real
+    # deployments supply their own key. Exported after the build so the OSS
+    # edition is never handed a license it should not claim.
+    export CRYPTOBOM_LICENSE_KEY="${CRYPTOBOM_LICENSE_KEY:-ENT-local-dev-not-a-license-key}"
+    
     echo -e "${YELLOW}🚀 Starting CryptoBOM Enterprise server...${NC}"
     nohup ./bin/cryptobom-enterprise > server-enterprise.log 2>&1 &
     
