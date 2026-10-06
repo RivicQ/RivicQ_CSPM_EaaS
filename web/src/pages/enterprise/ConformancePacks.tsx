@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Avatar, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Typography,
+  Avatar, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography,
 } from '@mui/material';
 import {
   Assessment, CheckCircle, FactCheck, PlayArrow, Warning,
@@ -147,34 +147,36 @@ const ConformancePacks: React.FC = () => {
             <Chip size="small" label={`${CONTROLS.length} findings`} color="error" />
           </Box>
           <Box sx={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  {['Control', 'Control ID', 'Pack', 'Severity', 'Status', 'Resources'].map((h) => (
-                    <th key={h} style={{ textAlign: 'left', padding: '10px 12px', borderBottom: `1px solid ${tokens.colors.border}`, color: tokens.colors.text.secondary, fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {CONTROLS.map((c) => {
-                  const color = SEVERITY_COLORS[c.severity] || tokens.colors.text.muted;
-                  return (
-                    <tr key={c.id} style={{ borderBottom: `1px solid ${tokens.colors.border}` }}>
-                      <td style={{ padding: '10px 12px', color: tokens.colors.text.primary, fontWeight: 600 }}>{c.title}</td>
-                      <td style={{ padding: '10px 12px', fontFamily: tokens.typography.mono, fontSize: 12, color: tokens.colors.text.secondary }}>{c.id}</td>
-                      <td style={{ padding: '10px 12px', color: tokens.colors.text.secondary }}>{c.pack}</td>
-                      <td style={{ padding: '10px 12px' }}>
-                        <Chip size="small" label={c.severity.toUpperCase()} sx={{ bgcolor: `${color}22`, color, fontWeight: 700 }} />
-                      </td>
-                      <td style={{ padding: '10px 12px' }}>
-                        <Chip size="small" label="FAIL" sx={{ bgcolor: `${tokens.colors.crypto.critical}22`, color: tokens.colors.crypto.critical, fontWeight: 700 }} />
-                      </td>
-                      <td style={{ padding: '10px 12px', color: tokens.colors.text.secondary }}>{c.resources}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    {['Control', 'Control ID', 'Pack', 'Severity', 'Status', 'Resources'].map((h) => (
+                      <TableCell key={h}>{h}</TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {CONTROLS.map((c) => {
+                    const color = SEVERITY_COLORS[c.severity] || tokens.colors.text.muted;
+                    return (
+                      <TableRow key={c.id} hover>
+                        <TableCell sx={{ fontWeight: 600 }}>{c.title}</TableCell>
+                        <TableCell sx={{ fontFamily: tokens.typography.mono, fontSize: 12, color: 'text.secondary' }}>{c.id}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary' }}>{c.pack}</TableCell>
+                        <TableCell>
+                          <Chip size="small" label={c.severity.toUpperCase()} sx={{ bgcolor: `${color}22`, color, fontWeight: 700 }} />
+                        </TableCell>
+                        <TableCell>
+                          <Chip size="small" label="FAIL" sx={{ bgcolor: `${tokens.colors.crypto.critical}22`, color: tokens.colors.crypto.critical, fontWeight: 700 }} />
+                        </TableCell>
+                        <TableCell sx={{ color: 'text.secondary' }}>{c.resources}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Box>
         </CardContent>
       </Card>

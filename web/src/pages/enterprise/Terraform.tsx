@@ -33,6 +33,7 @@ import {
   Cell,
 } from 'recharts';
 import { terraformService } from '../../services/api';
+import { tokens } from '../../theme/tokens';
 
 const TerraformIaC: React.FC = () => {
   const [, setResources] = useState<any[]>([]);
@@ -176,9 +177,9 @@ const TerraformIaC: React.FC = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#da1e28">
+                  <Bar dataKey="count" fill={tokens.colors.crypto.critical}>
                     {severityData.map((_entry, index) => (
-                      <Cell key={`bar-${index}`} fill={index === 0 ? '#da1e28' : index === 1 ? '#ff832b' : '#7c3aed'} />
+                      <Cell key={`bar-${index}`} fill={index === 0 ? tokens.colors.crypto.critical : index === 1 ? tokens.colors.crypto.high : '#7c3aed'} />
                     ))}
                   </Bar>
                 </BarChart>

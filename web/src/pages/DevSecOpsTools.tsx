@@ -25,7 +25,7 @@ const tools = [
     category: 'CI/CD',
     description: 'Automate build, test, security scan, and deployment pipelines.',
     icon: <GitHub />,
-    accent: '#d4af37',
+    accent: '#9ca3af',
     docs: 'https://docs.github.com/actions',
   },
   {
@@ -33,7 +33,7 @@ const tools = [
     category: 'IaC',
     description: 'Provision cloud and Kubernetes infrastructure reproducibly.',
     icon: <AccountTree />,
-    accent: '#7c3aed',
+    accent: '#844fba',
     docs: 'https://www.terraform.io/docs',
   },
   {
@@ -41,7 +41,7 @@ const tools = [
     category: 'Runtime',
     description: 'Deploy and manage containers with policies, autoscaling, and observability.',
     icon: <Cloud />,
-    accent: '#24a148',
+    accent: '#326ce5',
     docs: 'https://kubernetes.io/docs',
   },
   {
@@ -49,7 +49,7 @@ const tools = [
     category: 'Observability',
     description: 'Scrape metrics and alert on security and platform health.',
     icon: <Analytics />,
-    accent: '#ff832b',
+    accent: '#e6522c',
     docs: 'https://prometheus.io/docs/introduction/overview/',
   },
   {
@@ -57,7 +57,7 @@ const tools = [
     category: 'Observability',
     description: 'Visualize compliance, runtime, and security dashboards.',
     icon: <Visibility />,
-    accent: '#8b5cf6',
+    accent: '#f46800',
     docs: 'https://grafana.com/docs/',
   },
   {
@@ -65,7 +65,7 @@ const tools = [
     category: 'Security',
     description: 'Scan containers, filesystems, and IaC for vulnerabilities.',
     icon: <Security />,
-    accent: '#da1e28',
+    accent: '#0fbfbf',
     docs: 'https://aquasecurity.github.io/trivy/',
   },
   {
@@ -81,7 +81,7 @@ const tools = [
     category: 'Supply Chain',
     description: 'Generate SBOMs for apps, containers, and filesystem images. Invoked by rivicq scan when on PATH.',
     icon: <Science />,
-    accent: '#d4af37',
+    accent: '#38bdf8',
     docs: 'https://github.com/anchore/syft',
   },
   {
@@ -298,13 +298,13 @@ const DevSecOpsTools: React.FC = () => {
               OSS vs Enterprise Access
             </Typography>
             <Stack spacing={1.5}>
-              <Box sx={{ p: 2, borderRadius: `${tokens.borderRadius.md}px`, bgcolor: 'rgba(212,175,55,0.08)', border: 1, borderColor: 'divider' }}>
+              <Box sx={{ p: 2, borderRadius: `${tokens.borderRadius.md}px`, bgcolor: 'rgba(124,58,237,0.08)', border: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" fontWeight={700}>Community / OSS</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                   Core dashboard, CBOM scanner, local demos, and dev tooling.
                 </Typography>
               </Box>
-              <Box sx={{ p: 2, borderRadius: `${tokens.borderRadius.md}px`, bgcolor: 'rgba(79,70,229,0.08)', border: 1, borderColor: 'divider' }}>
+              <Box sx={{ p: 2, borderRadius: `${tokens.borderRadius.md}px`, bgcolor: 'rgba(124,58,237,0.08)', border: 1, borderColor: 'divider' }}>
                 <Typography variant="subtitle2" fontWeight={700} sx={{ color: 'primary.main' }}>Enterprise</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                   CISO, CSPM, compliance, quantum readiness, AWS/GCP integrations, and advanced reporting.

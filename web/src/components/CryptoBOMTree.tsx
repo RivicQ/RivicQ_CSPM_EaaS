@@ -18,6 +18,7 @@ import {
   CheckCircle,
   AccountTree,
 } from '@mui/icons-material';
+import { tokens } from '../theme/tokens';
 
 export interface CryptoBOMNode {
   id: string;
@@ -37,8 +38,8 @@ interface CryptoBOMTreeProps {
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   asset: <AccountTree fontSize="small" style={{ color: '#7c3aed' }} />,
   library: <Lock fontSize="small" style={{ color: '#7c3aed' }} />,
-  algorithm: <Lock fontSize="small" style={{ color: '#ff832b' }} />,
-  key: <Lock fontSize="small" style={{ color: '#24a148' }} />,
+  algorithm: <Lock fontSize="small" style={{ color: tokens.colors.crypto.high }} />,
+  key: <Lock fontSize="small" style={{ color: tokens.colors.crypto.success }} />,
 };
 
 const CryptoBOMTree: React.FC<CryptoBOMTreeProps> = ({ root, depth = 0 }) => {
@@ -78,8 +79,8 @@ const CryptoBOMTree: React.FC<CryptoBOMTreeProps> = ({ root, depth = 0 }) => {
               )}
               {root.quantumSafe !== undefined && (
                 root.quantumSafe
-                  ? <CheckCircle style={{ fontSize: 14, color: '#24a148' }} />
-                  : <Warning style={{ fontSize: 14, color: '#ff832b' }} />
+                  ? <CheckCircle style={{ fontSize: 14, color: tokens.colors.crypto.success }} />
+                  : <Warning style={{ fontSize: 14, color: tokens.colors.crypto.high }} />
               )}
             </Box>
           }

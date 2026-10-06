@@ -18,6 +18,7 @@ import {
 import { Psychology, Shield, Assessment } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { quantumAttestationService } from '../../services/api';
+import { tokens } from '../../theme/tokens';
 
 const QuantumAttestation: React.FC = () => {
   const { data: assessmentData, isLoading, error } = useQuery({
@@ -83,10 +84,10 @@ const QuantumAttestation: React.FC = () => {
           <Card>
             <CardContent>
               <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <Shield sx={{ color: '#24a148' }} />
+                <Shield sx={{ color: tokens.colors.crypto.success }} />
                 <Typography variant="body2" color="text.secondary">PQC Readiness</Typography>
               </Box>
-              <Typography variant="h4" fontWeight="bold" color="#16a34a">{pqcReadiness == null ? '—' : `${pqcReadiness}%`}</Typography>
+              <Typography variant="h4" fontWeight="bold" color={tokens.colors.crypto.success}>{pqcReadiness == null ? '—' : `${pqcReadiness}%`}</Typography>
               <LinearProgress
                 variant="determinate"
                 value={typeof pqcReadiness === 'number' ? pqcReadiness : 0}
@@ -100,10 +101,10 @@ const QuantumAttestation: React.FC = () => {
           <Card>
             <CardContent>
               <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <Assessment sx={{ color: '#ff832b' }} />
+                <Assessment sx={{ color: tokens.colors.crypto.high }} />
                 <Typography variant="body2" color="text.secondary">Assets at Risk</Typography>
               </Box>
-              <Typography variant="h4" fontWeight="bold" color="#ff832b">{assetsAtRisk}</Typography>
+              <Typography variant="h4" fontWeight="bold" color={tokens.colors.crypto.high}>{assetsAtRisk}</Typography>
               <Typography variant="caption" color="text.secondary">Quantum-vulnerable assets</Typography>
             </CardContent>
           </Card>

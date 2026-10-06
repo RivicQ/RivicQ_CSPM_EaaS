@@ -1,6 +1,7 @@
 import React from 'react';
 import { Chip, Tooltip } from '@mui/material';
 import { CheckCircle, Cancel } from '@mui/icons-material';
+import { tokens } from '../theme/tokens';
 
 type ComplianceStandard = 'FIPS-140-3' | 'BSI-TR-02102' | 'DORA' | 'eIDAS' | 'NIST-PQC';
 
@@ -39,13 +40,13 @@ const ComplianceBadge: React.FC<ComplianceBadgeProps> = ({
         icon={
           compliant
             ? <CheckCircle style={{ fontSize: 13, color: colors.text }} />
-            : <Cancel style={{ fontSize: 13, color: '#da1e28' }} />
+            : <Cancel style={{ fontSize: 13, color: tokens.colors.crypto.critical }} />
         }
         label={label}
         style={{
-          backgroundColor: compliant ? colors.bg : '#fee2e2',
-          color: compliant ? colors.text : '#da1e28',
-          borderColor: compliant ? colors.text : '#da1e28',
+          backgroundColor: compliant ? colors.bg : 'rgba(239,68,68,0.12)',
+          color: compliant ? colors.text : tokens.colors.crypto.critical,
+          borderColor: compliant ? colors.text : tokens.colors.crypto.critical,
           fontSize: '0.68rem',
           height: 22,
           fontWeight: 600,

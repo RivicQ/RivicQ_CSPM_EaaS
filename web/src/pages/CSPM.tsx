@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Skeleton, Stack, Typography,
+  Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Skeleton, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography,
 } from '@mui/material';
 import { Warning, Cloud, Dns, Security, Assessment, Storage } from '@mui/icons-material';
 import { providerColor } from '../theme/chartTheme';
@@ -162,68 +162,56 @@ const CSPM: React.FC = () => {
         <Grid item xs={12} md={7}>
           <DashboardPanel title="Algorithm Risk Breakdown" delay={1}>
             <Box sx={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr>
-                    {['Algorithm', 'Usage', 'Risk', 'Quantum-Safe', 'Action'].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          textAlign: 'left',
-                          padding: '10px 12px',
-                          borderBottom: `1px solid ${tokens.colors.border}`,
-                          color: tokens.colors.text.secondary,
-                          fontWeight: 600,
-                          fontSize: 11,
-                          textTransform: 'uppercase',
-                          letterSpacing: 0.8,
-                        }}
-                      >
-                        {h}
-                      </th>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      {['Algorithm', 'Usage', 'Risk', 'Quantum-Safe', 'Action'].map((h) => (
+                        <TableCell key={h}>{h}</TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {algorithms.map((alg: any) => (
+                      <TableRow key={alg.name} hover>
+                        <TableCell sx={{ fontWeight: 600 }}>{alg.name}</TableCell>
+                        <TableCell sx={{ fontFamily: tokens.typography.mono, color: 'text.secondary' }}>
+                          {alg.usage}
+                        </TableCell>
+                        <TableCell>
+                          <SeverityBadge severity={alg.risk_level || alg.risk} />
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={alg.quantum_safe ? 'Yes' : 'No'}
+                            size="small"
+                            sx={{
+                              bgcolor: alg.quantum_safe ? `${tokens.colors.crypto.low}18` : `${tokens.colors.crypto.critical}18`,
+                              color: alg.quantum_safe ? tokens.colors.crypto.low : tokens.colors.crypto.critical,
+                              fontWeight: 600,
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ py: 0.75 }}>
+                          <Button
+                            size="small"
+                            variant={alg.migration?.includes('Migrate') ? 'contained' : 'outlined'}
+                            color={alg.migration?.includes('Migrate') ? 'warning' : 'inherit'}
+                            sx={{ minWidth: 100 }}
+                            onClick={() => {
+                              const match = findings.find((f) => (f.title || '').includes(alg.name) || (f.message || '').includes(alg.name));
+                              if (match) setSelectedFinding(match);
+                              else if (findings[0]) setSelectedFinding(findings[0]);
+                            }}
+                          >
+                            {alg.migration || 'Monitored'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {algorithms.map((alg: any) => (
-                    <tr key={alg.name} style={{ borderBottom: `1px solid ${tokens.colors.border}` }}>
-                      <td style={{ padding: '12px', fontWeight: 600 }}>{alg.name}</td>
-                      <td style={{ padding: '12px', color: tokens.colors.text.secondary, fontFamily: tokens.typography.mono }}>
-                        {alg.usage}
-                      </td>
-                      <td style={{ padding: '12px' }}>
-                        <SeverityBadge severity={alg.risk_level || alg.risk} />
-                      </td>
-                      <td style={{ padding: '12px' }}>
-                        <Chip
-                          label={alg.quantum_safe ? 'Yes' : 'No'}
-                          size="small"
-                          sx={{
-                            bgcolor: alg.quantum_safe ? `${tokens.colors.crypto.low}18` : `${tokens.colors.crypto.critical}18`,
-                            color: alg.quantum_safe ? tokens.colors.crypto.low : tokens.colors.crypto.critical,
-                            fontWeight: 600,
-                          }}
-                        />
-                      </td>
-                      <td style={{ padding: '12px' }}>
-                        <Button
-                          size="small"
-                          variant={alg.migration?.includes('Migrate') ? 'contained' : 'outlined'}
-                          color={alg.migration?.includes('Migrate') ? 'warning' : 'inherit'}
-                          sx={{ minWidth: 100 }}
-                          onClick={() => {
-                            const match = findings.find((f) => (f.title || '').includes(alg.name) || (f.message || '').includes(alg.name));
-                            if (match) setSelectedFinding(match);
-                            else if (findings[0]) setSelectedFinding(findings[0]);
-                          }}
-                        >
-                          {alg.migration || 'Monitored'}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </DashboardPanel>
         </Grid>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Chip, Tooltip } from '@mui/material';
 import { VpnKey, Warning } from '@mui/icons-material';
+import { tokens } from '../theme/tokens';
 
 type HSMProvider = 'ibm' | 'aws' | 'gcp';
 
@@ -32,13 +33,13 @@ const HSMStatusBadge: React.FC<HSMStatusBadgeProps> = ({
         icon={
           healthy
             ? <VpnKey style={{ fontSize: 14, color: '#7c3aed' }} />
-            : <Warning style={{ fontSize: 14, color: '#da1e28' }} />
+            : <Warning style={{ fontSize: 14, color: tokens.colors.crypto.critical }} />
         }
         label={label}
         variant="outlined"
         style={{
-          borderColor: healthy ? '#7c3aed' : '#da1e28',
-          color: healthy ? '#7c3aed' : '#da1e28',
+          borderColor: healthy ? '#7c3aed' : tokens.colors.crypto.critical,
+          color: healthy ? '#7c3aed' : tokens.colors.crypto.critical,
           fontSize: '0.7rem',
           height: 24,
         }}

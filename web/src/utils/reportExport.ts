@@ -30,8 +30,8 @@ export function printBrandedReport(opts: {
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e0e0e0; }
   th { background: #f4f4f4; }
-  .ok { color: #24a148; font-weight: 600; }
-  .bad { color: #da1e28; font-weight: 600; }
+  .ok { color: #22c55e; font-weight: 600; }
+  .bad { color: #ef4444; font-weight: 600; }
 </style></head><body>
   <h1>${escapeHtml(opts.title)}</h1>
   ${opts.subtitle ? `<div class="sub">${escapeHtml(opts.subtitle)}</div>` : ''}

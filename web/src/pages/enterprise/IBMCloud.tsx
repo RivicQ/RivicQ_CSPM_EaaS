@@ -16,6 +16,7 @@ import {
 import { Security, Key, Storage } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { ibmCloudService } from '../../services/api';
+import { tokens } from '../../theme/tokens';
 
 const IBMCloud: React.FC = () => {
   const { data: statusData, isLoading: statusLoading, error: statusError } = useQuery({
@@ -77,7 +78,7 @@ const IBMCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Key sx={{ color: '#24a148', fontSize: 40 }} />
+              <Key sx={{ color: tokens.colors.crypto.success, fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>{keys.length}</Typography>
               <Typography variant="caption" color="text.secondary">Managed Keys</Typography>
             </CardContent>

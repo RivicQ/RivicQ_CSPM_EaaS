@@ -3,6 +3,7 @@ import { Box, Chip, Tooltip, CircularProgress } from '@mui/material';
 import { CheckCircle, Cancel, HelpOutline } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { cloudService } from '../services/api';
+import { tokens } from '../theme/tokens';
 
 type CloudProvider = 'gcp' | 'aws' | 'ibm';
 
@@ -32,7 +33,7 @@ const CloudConnectionStatus: React.FC<CloudConnectionStatusProps> = ({
     return (
       <Box display="inline-flex" alignItems="center" gap={0.5}>
         <CircularProgress size={14} />
-        <span style={{ fontSize: '0.75rem', color: '#888' }}>{PROVIDER_LABELS[provider]}</span>
+        <span style={{ fontSize: '0.75rem', color: tokens.colors.textLight.muted }}>{PROVIDER_LABELS[provider]}</span>
       </Box>
     );
   }
@@ -50,18 +51,18 @@ const CloudConnectionStatus: React.FC<CloudConnectionStatusProps> = ({
         size="small"
         icon={
           connected ? (
-            <CheckCircle style={{ fontSize: 14, color: '#24a148' }} />
+            <CheckCircle style={{ fontSize: 14, color: tokens.colors.crypto.success }} />
           ) : isError ? (
-            <Cancel style={{ fontSize: 14, color: '#da1e28' }} />
+            <Cancel style={{ fontSize: 14, color: tokens.colors.crypto.critical }} />
           ) : (
-            <HelpOutline style={{ fontSize: 14, color: '#ff832b' }} />
+            <HelpOutline style={{ fontSize: 14, color: tokens.colors.crypto.high }} />
           )
         }
         label={label}
         variant="outlined"
         style={{
-          borderColor: connected ? '#24a148' : isError ? '#da1e28' : '#ff832b',
-          color: connected ? '#24a148' : isError ? '#da1e28' : '#ff832b',
+          borderColor: connected ? tokens.colors.crypto.success : isError ? tokens.colors.crypto.critical : tokens.colors.crypto.high,
+          color: connected ? tokens.colors.crypto.success : isError ? tokens.colors.crypto.critical : tokens.colors.crypto.high,
           fontSize: '0.7rem',
           height: 24,
         }}

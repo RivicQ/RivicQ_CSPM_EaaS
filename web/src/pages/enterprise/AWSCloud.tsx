@@ -16,6 +16,7 @@ import {
 import { Security, VpnKey, CloudQueue } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { awsCloudService } from '../../services/api';
+import { tokens } from '../../theme/tokens';
 
 const AWSCloud: React.FC = () => {
   const { data: hsmData, isLoading, error } = useQuery({
@@ -66,7 +67,7 @@ const AWSCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <Security sx={{ color: '#ff832b', fontSize: 40 }} />
+              <Security sx={{ color: tokens.colors.crypto.high, fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>
                 {(hsmData as any)?.cluster_count ?? 0}
               </Typography>
@@ -86,7 +87,7 @@ const AWSCloud: React.FC = () => {
         <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
-              <CloudQueue sx={{ color: '#24a148', fontSize: 40 }} />
+              <CloudQueue sx={{ color: tokens.colors.crypto.success, fontSize: 40 }} />
               <Typography variant="h5" fontWeight="bold" mt={1}>{auditEvents.length}</Typography>
               <Typography variant="caption" color="text.secondary">Audit Events</Typography>
             </CardContent>

@@ -44,17 +44,18 @@ import { useAuth } from '../../context/AuthContext';
 import { buildDemoComplianceDashboards, buildDemoRisks } from '../../demo/demoViews';
 import ProvenanceChip from '../../components/dashboard/ProvenanceChip';
 import { EmptyState } from '../../components/ui';
+import { tokens } from '../../theme/tokens';
 
 const FRAMEWORKS = [
-	{ id: 'iso27001', name: 'ISO 27001', color: '#24a148' },
+	{ id: 'iso27001', name: 'ISO 27001', color: tokens.colors.crypto.success },
   { id: 'nis2', name: 'NIS2', color: '#a78bfa' },
-  { id: 'dora', name: 'DORA', color: '#ff832b' },
+  { id: 'dora', name: 'DORA', color: tokens.colors.crypto.high },
   { id: 'gdpr', name: 'GDPR', color: '#7c3aed' },
   { id: 'bsi', name: 'BSI TR-02102', color: '#64748b' },
   { id: 'eu_ai_act', name: 'EU AI Act', color: '#8b5cf6' },
   { id: 'soc2', name: 'SOC 2', color: '#7c3aed' },
-  { id: 'nist', name: 'NIST', color: '#ff832b' },
-  { id: 'pqc', name: 'PQC', color: '#da1e28' },
+  { id: 'nist', name: 'NIST', color: tokens.colors.crypto.high },
+  { id: 'pqc', name: 'PQC', color: tokens.colors.crypto.critical },
 ];
 
 interface Dashboard {
@@ -307,7 +308,7 @@ const ComplianceDashboard: React.FC = () => {
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="score" fill="#7c3aed" name="Score" />
-                  <Bar dataKey="failed" fill="#da1e28" name="Failed" />
+                  <Bar dataKey="failed" fill={tokens.colors.crypto.critical} name="Failed" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

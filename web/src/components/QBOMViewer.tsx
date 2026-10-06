@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, Box, Button, Card, CardContent, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Grid, LinearProgress, Stack, Typography, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import { CheckCircle, Warning, Error, Download } from '@mui/icons-material';
+import { tokens } from '../theme/tokens';
 
 interface QBOMAlgorithm {
   name: string;
@@ -124,12 +125,12 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
                 borderRadius: 4,
                 background:
                   qbom.quantum_readiness_score >= 80
-                    ? 'linear-gradient(90deg, #24a148, #198038)'
+                    ? `linear-gradient(90deg, ${tokens.colors.crypto.success}, #15803d)`
                     : qbom.quantum_readiness_score >= 60
-                    ? 'linear-gradient(90deg, #7c3aed, #1e40af)'
+                    ? `linear-gradient(90deg, #7c3aed, #5b21b6)`
                     : qbom.quantum_readiness_score >= 40
-                    ? 'linear-gradient(90deg, #ff832b, #d97706)'
-                    : 'linear-gradient(90deg, #da1e28, #a2191f)',
+                    ? `linear-gradient(90deg, ${tokens.colors.crypto.high}, #c2410c)`
+                    : `linear-gradient(90deg, ${tokens.colors.crypto.critical}, #b91c1c)`,
               },
             }}
           />
@@ -145,8 +146,8 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
       {qbom.critical_actions.length > 0 && (
         <Card sx={{ mb: 3, borderLeft: '4px solid', borderColor: 'error.main', ...nebulaCard }}>
           <CardContent>
-            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5, color: 'error.main' }}>
-              ⚠️ Critical Actions Required
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5, color: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Error fontSize="small" /> Critical Actions Required
             </Typography>
             <List dense>
               {qbom.critical_actions.map((action, idx) => (
@@ -271,10 +272,10 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
                       '& .MuiLinearProgress-bar': {
                         background:
                           algo.quantum_score >= 60
-                            ? '#24a148'
+                            ? tokens.colors.crypto.success
                             : algo.quantum_score >= 40
-                            ? '#ff832b'
-                            : '#da1e28',
+                            ? tokens.colors.crypto.high
+                            : tokens.colors.crypto.critical,
                       },
                     }}
                   />

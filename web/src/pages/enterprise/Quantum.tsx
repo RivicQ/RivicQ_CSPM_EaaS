@@ -44,6 +44,7 @@ import {
   Cell,
 } from 'recharts';
 import { quantumService } from '../../services/api';
+import { tokens } from '../../theme/tokens';
 
 const ALGORITHMS = [
   { name: 'ML-KEM (FIPS 203)', type: 'KEM', status: 'NIST standard', security_level: 5 },
@@ -199,8 +200,8 @@ const QuantumReadiness: React.FC = () => {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="quantum_safe" stroke="#24a148" strokeWidth={2} name="Quantum Safe %" />
-                  <Line type="monotone" dataKey="at_risk" stroke="#da1e28" strokeWidth={2} name="At Risk %" />
+                  <Line type="monotone" dataKey="quantum_safe" stroke={tokens.colors.crypto.success} strokeWidth={2} name="Quantum Safe %" />
+                  <Line type="monotone" dataKey="at_risk" stroke={tokens.colors.crypto.critical} strokeWidth={2} name="At Risk %" />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>

@@ -54,8 +54,15 @@ import {
 } from 'recharts';
 import { inventoryService } from '../../services/api';
 import PageFrame from '../../components/PageFrame';
+import { tokens } from '../../theme/tokens';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+const COLORS = [
+  tokens.colors.rivicq[500],
+  tokens.colors.crypto.success,
+  tokens.colors.crypto.medium,
+  tokens.colors.crypto.high,
+  tokens.colors.rivicq[400],
+];
 
 interface Asset {
   id: string;

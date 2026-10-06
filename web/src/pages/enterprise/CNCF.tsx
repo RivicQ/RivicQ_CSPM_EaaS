@@ -21,18 +21,25 @@ import {
   CheckCircle,
   Warning,
   Refresh,
+  QueryStats,
+  Insights,
+  Bolt,
+  Hub,
+  Link,
+  Security,
+  IntegrationInstructions,
 } from '@mui/icons-material';
 import { cncfService } from '../../services/api';
 
 const TOOLS = [
-  { name: 'Prometheus', type: 'monitoring', icon: '📊' },
-  { name: 'Grafana', type: 'visualization', icon: '📈' },
-  { name: 'ArgoCD', type: 'gitops', icon: '🔄' },
-  { name: 'Flux', type: 'gitops', icon: '⚡' },
-  { name: 'Istio', type: 'service_mesh', icon: '🌐' },
-  { name: 'Linkerd', type: 'service_mesh', icon: '🔗' },
-  { name: 'Cilium', type: 'networking', icon: '🛡️' },
-  { name: 'K3s', type: 'kubernetes', icon: '☸️' },
+  { name: 'Prometheus', type: 'monitoring', icon: <QueryStats /> },
+  { name: 'Grafana', type: 'visualization', icon: <Insights /> },
+  { name: 'ArgoCD', type: 'gitops', icon: <Sync /> },
+  { name: 'Flux', type: 'gitops', icon: <Bolt /> },
+  { name: 'Istio', type: 'service_mesh', icon: <Hub /> },
+  { name: 'Linkerd', type: 'service_mesh', icon: <Link /> },
+  { name: 'Cilium', type: 'networking', icon: <Security /> },
+  { name: 'K3s', type: 'kubernetes', icon: <IntegrationInstructions /> },
 ];
 
 const CNCF: React.FC = () => {
@@ -183,8 +190,21 @@ const CNCF: React.FC = () => {
                 <TableRow key={tool.name} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <span style={{ fontSize: '1.5rem' }}>{tool.icon}</span>
-                      <Typography variant="body1" fontWeight="medium">{tool.name}</Typography>
+                      <Box
+                        sx={{
+                          width: 30,
+                          height: 30,
+                          borderRadius: `${8}px`,
+                          display: 'grid',
+                          placeItems: 'center',
+                          bgcolor: 'rgba(124,58,237,0.12)',
+                          color: 'primary.main',
+                          '& svg': { fontSize: 16 },
+                        }}
+                      >
+                        {tool.icon}
+                      </Box>
+                      <Typography variant="body2" fontWeight={600}>{tool.name}</Typography>
                     </Box>
                   </TableCell>
                   <TableCell sx={{ textTransform: 'capitalize' }}>{tool.type}</TableCell>
