@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Box, Button, Chip, CircularProgress, Grid, IconButton, InputAdornment,
+  Box, Button, Checkbox, Chip, CircularProgress, Grid, IconButton, InputAdornment,
   LinearProgress, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField, Typography,
 } from '@mui/material';
@@ -105,11 +105,16 @@ const Assets: React.FC = () => {
           {rows.map((asset) => (
             <TableRow key={asset.id} hover selected={selectedAssets.includes(asset.id)}>
               <TableCell padding="checkbox">
-                <input type="checkbox" checked={selectedAssets.includes(asset.id)} onChange={() => toggleSelect(asset.id)} />
+                <Checkbox
+                  size="small"
+                  checked={selectedAssets.includes(asset.id)}
+                  onChange={() => toggleSelect(asset.id)}
+                  inputProps={{ 'aria-label': `Select ${asset.name}` }}
+                />
               </TableCell>
               <TableCell><Typography variant="body2" fontWeight={600}>{asset.name}</Typography></TableCell>
-              <TableCell>{asset.algorithm || asset.crypto_algorithm || 'N/A'}</TableCell>
-              <TableCell>{asset.key_size || asset.keySize || '—'}</TableCell>
+              <TableCell sx={{ fontFamily: tokens.typography.mono, fontSize: 12 }}>{asset.algorithm || asset.crypto_algorithm || 'N/A'}</TableCell>
+              <TableCell sx={{ fontFamily: tokens.typography.mono, fontSize: 12 }}>{asset.key_size || asset.keySize || '—'}</TableCell>
               <TableCell>{asset.cloud_provider || asset.cloudProvider || '—'}</TableCell>
               <TableCell><Typography variant="caption" color="text.secondary">{asset.owner || '—'}</Typography></TableCell>
               <TableCell><Chip label={asset.risk_level || asset.riskLevel || 'UNKNOWN'} color={getRiskColor(asset.risk_level || asset.riskLevel)} size="small" /></TableCell>

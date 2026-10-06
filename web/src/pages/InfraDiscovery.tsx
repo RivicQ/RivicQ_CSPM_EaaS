@@ -30,8 +30,16 @@ import {
   PlayArrow,
   ExpandMore,
   ExpandLess,
+  ErrorOutline,
+  WarningAmber,
+  Psychology,
+  Language,
+  CheckCircle,
+  Cancel,
+  Terminal,
 } from '@mui/icons-material';
 import PageFrame from '../components/PageFrame';
+import { tokens } from '../theme/tokens';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -79,7 +87,7 @@ interface ScanResult {
   summary: ScanSummary;
 }
 
-// ── Seed data ─────────────────────────────────────────────────────────────────
+// ── Seed fixtures ─────────────────────────────────────────────────────────────
 
 const SEED_FINDINGS: Finding[] = [
   {
@@ -209,98 +217,96 @@ const SEED_SUMMARY: ScanSummary = {
   critical: 4, high: 3, medium: 3, low: 2, quantum_unsafe: 12, bsi_compliant: 0,
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Severity / protocol styling ───────────────────────────────────────────────
 
 const SEVERITY_COLORS: Record<SeverityLevel, string> = {
-  CRITICAL: '#da1e28',
-  HIGH: '#f97316',
-  MEDIUM: '#eab308',
-  LOW: '#22c55e',
-  INFO: '#6b7280',
+  CRITICAL: tokens.colors.crypto.critical,
+  HIGH: tokens.colors.crypto.high,
+  MEDIUM: tokens.colors.crypto.medium,
+  LOW: tokens.colors.crypto.low,
+  INFO: tokens.colors.crypto.classic,
 };
 
-const SEVERITY_BG: Record<SeverityLevel, string> = {
-  CRITICAL: 'rgba(239,68,68,0.16)',
-  HIGH: 'rgba(249,115,22,0.16)',
-  MEDIUM: 'rgba(234,179,8,0.14)',
-  LOW: 'rgba(34,197,94,0.12)',
-  INFO: 'rgba(31,31,46,0.9)',
-};
-
-function SeverityBadge({ severity }: { severity: SeverityLevel }) {
+function tintedChip(color: string, label: React.ReactNode, size: 'small' | 'medium' = 'small') {
   return (
     <Chip
-      label={severity}
-      size="small"
+      label={label}
+      size={size}
       sx={{
-        bgcolor: SEVERITY_COLORS[severity],
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: '0.7rem',
+        bgcolor: `${color}14`,
+        color,
+        border: `1px solid ${color}44`,
+        fontWeight: 600,
+        letterSpacing: '0.04em',
+        fontSize: '0.66rem',
+        height: 20,
       }}
     />
   );
 }
 
+function SeverityBadge({ severity }: { severity: SeverityLevel }) {
+  return tintedChip(SEVERITY_COLORS[severity], severity);
+}
+
 function ProtocolBadge({ protocol }: { protocol: string }) {
-  const colors: Record<string, string> = { tls: '#7c3aed', ssh: '#7c3aed', http: '#24a148' };
-  return (
-    <Chip
-      label={protocol.toUpperCase()}
-      size="small"
-      sx={{ bgcolor: colors[protocol] ?? '#6b7280', color: 'white', fontWeight: 'bold', fontSize: '0.65rem' }}
-    />
-  );
+  const color = protocol === 'http' ? tokens.colors.crypto.low : tokens.colors.rivicq[400];
+  return tintedChip(color, protocol.toUpperCase());
 }
 
 function CompliancePills({ bsiRef, doraRef, eidasRef }: { bsiRef: string; doraRef: string; eidasRef: string }) {
   return (
-    <Box display="flex" gap={0.5} flexWrap="wrap">
+    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
       {bsiRef && (
-        <Tooltip title={bsiRef}>
-          <Chip label="BSI TR-02102" size="small" sx={{ bgcolor: '#1d4ed8', color: 'white', fontSize: '0.6rem', height: 20 }} />
-        </Tooltip>
+        <Tooltip title={bsiRef}>{tintedChip(tokens.colors.rivicq[400], 'BSI TR-02102')}</Tooltip>
       )}
       {doraRef && (
-        <Tooltip title={doraRef}>
-          <Chip label="DORA Art.9" size="small" sx={{ bgcolor: '#7c3aed', color: 'white', fontSize: '0.6rem', height: 20 }} />
-        </Tooltip>
+        <Tooltip title={doraRef}>{tintedChip(tokens.colors.rivicq[500], 'DORA Art.9')}</Tooltip>
       )}
       {eidasRef && (
-        <Tooltip title={eidasRef}>
-          <Chip label="eIDAS 2.0" size="small" sx={{ bgcolor: '#0891b2', color: 'white', fontSize: '0.6rem', height: 20 }} />
-        </Tooltip>
+        <Tooltip title={eidasRef}>{tintedChip(tokens.colors.crypto.low, 'eIDAS 2.0')}</Tooltip>
       )}
     </Box>
   );
 }
 
-// ── ScanSummaryBar ─────────────────────────────────────────────────────────────
+// ── Scan summary cards ─────────────────────────────────────────────────────────
 
 function ScanSummaryBar({ summary }: { summary: ScanSummary }) {
   const cards = [
-    { label: 'Targets Scanned', value: summary.scanned_targets, icon: '🌐', bg: '#0a0a0f', color: '#a78bfa' },
-    { label: 'CRITICAL Findings', value: summary.critical, icon: '🔴', bg: '#0a0a0f', color: '#ef4444' },
-    { label: 'HIGH Findings', value: summary.high, icon: '🟠', bg: '#0a0a0f', color: '#f97316' },
-    { label: 'Quantum-Unsafe Assets', value: summary.quantum_unsafe, icon: '⚛', bg: '#0a0a0f', color: '#7c3aed' },
+    { label: 'Targets scanned', value: summary.scanned_targets, icon: <Language />, color: tokens.colors.rivicq[400] },
+    { label: 'Critical findings', value: summary.critical, icon: <ErrorOutline />, color: tokens.colors.crypto.critical },
+    { label: 'High findings', value: summary.high, icon: <WarningAmber />, color: tokens.colors.crypto.high },
+    { label: 'Quantum-unsafe assets', value: summary.quantum_unsafe, icon: <Psychology />, color: tokens.colors.crypto.quantum },
   ];
 
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
       {cards.map((card) => (
         <Grid item xs={12} sm={6} md={3} key={card.label}>
-          <Card sx={{ bgcolor: card.bg, border: '1px solid #1f1f2e' }}>
-            <CardContent sx={{ py: 2 }}>
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Box>
-                  <Typography variant="h3" fontWeight="bold" sx={{ color: card.color, lineHeight: 1 }}>
-                    {card.value}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    {card.label}
-                  </Typography>
-                </Box>
-                <Typography variant="h4">{card.icon}</Typography>
+          <Card sx={{ bgcolor: '#0a0a0f', border: '1px solid #1f1f2e' }}>
+            <CardContent sx={{ py: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Typography variant="h3" fontWeight={700} sx={{ color: card.color, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                  {card.value}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {card.label}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: `${tokens.borderRadius.sm}px`,
+                  display: 'grid',
+                  placeItems: 'center',
+                  bgcolor: `${card.color}18`,
+                  color: card.color,
+                  '& svg': { fontSize: 18 },
+                }}
+              >
+                {card.icon}
               </Box>
             </CardContent>
           </Card>
@@ -310,65 +316,77 @@ function ScanSummaryBar({ summary }: { summary: ScanSummary }) {
   );
 }
 
-// ── TargetStatusGrid ───────────────────────────────────────────────────────────
+// ── Target status grid ─────────────────────────────────────────────────────────
+
+const TARGETS = [
+  { id: 'tls-1', label: 'NGINX TLS 1.0', port: 4431, protocol: 'tls' },
+  { id: 'tls-2', label: 'NGINX TLS 1.2 (Weak)', port: 4432, protocol: 'tls' },
+  { id: 'tls-3', label: 'NGINX TLS 1.3 (Good)', port: 4433, protocol: 'tls' },
+  { id: 'ssh-1', label: 'SSH Weak KEX', port: 2222, protocol: 'ssh' },
+  { id: 'http-1', label: 'MD5 Hash API', port: 5001, protocol: 'http' },
+  { id: 'tls-4', label: 'Java Legacy HTTPS', port: 8443, protocol: 'tls' },
+];
 
 function TargetStatusGrid({ findings }: { findings: Finding[] }) {
-  const targets = [
-    { id: 'tls-1', label: 'NGINX TLS 1.0', port: 4431, protocol: 'tls' },
-    { id: 'tls-2', label: 'NGINX TLS 1.2 (Weak)', port: 4432, protocol: 'tls' },
-    { id: 'tls-3', label: 'NGINX TLS 1.3 (Good)', port: 4433, protocol: 'tls' },
-    { id: 'ssh-1', label: 'SSH Weak KEX', port: 2222, protocol: 'ssh' },
-    { id: 'http-1', label: 'MD5 Hash API', port: 5001, protocol: 'http' },
-    { id: 'tls-4', label: 'Java Legacy HTTPS', port: 8443, protocol: 'tls' },
-  ];
-
   const getWorstSeverity = (targetId: string): SeverityLevel | null => {
     const tf = findings.filter((f) => f.target_id === targetId);
     if (tf.length === 0) return null;
     const order: SeverityLevel[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'];
-    for (const sev of order) {
-      if (tf.some((f) => f.severity === sev)) return sev;
-    }
-    return null;
-  };
-
-  const statusIcon = (sev: SeverityLevel | null) => {
-    if (!sev) return '🟢';
-    const icons: Record<SeverityLevel, string> = { CRITICAL: '🔴', HIGH: '🟠', MEDIUM: '🟡', LOW: '🟢', INFO: '⚪' };
-    return icons[sev];
+    return order.find((sev) => tf.some((f) => f.severity === sev)) ?? null;
   };
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Typography variant="h6" fontWeight="bold" sx={{ mb: 1.5 }}>
-        Target Status
+      <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
+        Target status
       </Typography>
       <Grid container spacing={1.5}>
-        {targets.map((t) => {
+        {TARGETS.map((t) => {
           const worst = getWorstSeverity(t.id);
+          const color = worst ? SEVERITY_COLORS[worst] : tokens.colors.crypto.classic;
           const count = findings.filter((f) => f.target_id === t.id).length;
           return (
             <Grid item xs={12} sm={6} md={4} key={t.id}>
               <Card
                 sx={{
-                  border: `2px solid ${worst ? SEVERITY_COLORS[worst] + '40' : '#22c55e40'}`,
-                  bgcolor: worst ? SEVERITY_BG[worst] : '#0a0a0f',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  bgcolor: worst ? `${color}0d` : '#0a0a0f',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 2,
+                    background: color,
+                  },
                 }}
               >
                 <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Box>
-                      <Typography variant="body2" fontWeight="bold">{t.label}</Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" fontWeight={700} noWrap>{t.label}</Typography>
                       <Box display="flex" gap={0.5} alignItems="center" mt={0.5}>
                         <ProtocolBadge protocol={t.protocol} />
-                        <Typography variant="caption" color="text.secondary">:{t.port}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: tokens.typography.mono }}>
+                          :{t.port}
+                        </Typography>
                       </Box>
                     </Box>
                     <Box textAlign="right">
-                      <Typography fontSize="1.8rem" lineHeight={1}>{statusIcon(worst)}</Typography>
-                      {worst && (
-                        <Typography variant="caption" sx={{ color: SEVERITY_COLORS[worst], fontWeight: 'bold' }}>
-                          {count} finding{count !== 1 ? 's' : ''}
+                      {worst ? (
+                        <>
+                          <Typography variant="caption" sx={{ color, fontWeight: 700, letterSpacing: '0.06em' }}>
+                            {worst}
+                          </Typography>
+                          <Typography variant="caption" display="block" color="text.secondary">
+                            {count} finding{count !== 1 ? 's' : ''}
+                          </Typography>
+                        </>
+                      ) : (
+                        <Typography variant="caption" sx={{ color: tokens.colors.crypto.success, fontWeight: 700 }}>
+                          NO FINDINGS
                         </Typography>
                       )}
                     </Box>
@@ -383,7 +401,7 @@ function TargetStatusGrid({ findings }: { findings: Finding[] }) {
   );
 }
 
-// ── FindingsTable ──────────────────────────────────────────────────────────────
+// ── Findings table ──────────────────────────────────────────────────────────────
 
 function FindingsTable({ findings }: { findings: Finding[] }) {
   const [severityFilter, setSeverityFilter] = useState<string>('All');
@@ -400,11 +418,10 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight="bold" sx={{ mb: 1.5 }}>
+      <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
         Findings ({filtered.length})
       </Typography>
 
-      {/* Filters */}
       <Box display="flex" gap={2} flexWrap="wrap" sx={{ mb: 2 }}>
         <FormControl size="small" sx={{ minWidth: 140 }}>
           <InputLabel>Severity</InputLabel>
@@ -424,22 +441,22 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
         </FormControl>
         <FormControlLabel
           control={<Switch checked={quantumOnly} onChange={(e) => setQuantumOnly(e.target.checked)} size="small" color="secondary" />}
-          label={<Typography variant="body2">Quantum Unsafe Only</Typography>}
+          label={<Typography variant="body2">Quantum unsafe only</Typography>}
         />
       </Box>
 
-      <TableContainer component={Paper} variant="outlined" sx={{ bgcolor: '#0a0a0f', borderColor: '#1f1f2e', color: '#e5e7eb' }}>
-        <Table size="small" sx={{ '& .MuiTableCell-root': { color: '#e5e7eb', borderColor: '#1f1f2e' } }}>
+      <TableContainer component={Paper} variant="outlined">
+        <Table size="small">
           <TableHead>
-            <TableRow sx={{ bgcolor: '#111118' }}>
-              <TableCell><Typography variant="caption" fontWeight="bold">Severity</Typography></TableCell>
-              <TableCell><Typography variant="caption" fontWeight="bold">Target</Typography></TableCell>
-              <TableCell><Typography variant="caption" fontWeight="bold">Protocol</Typography></TableCell>
-              <TableCell><Typography variant="caption" fontWeight="bold">Finding</Typography></TableCell>
-              <TableCell><Typography variant="caption" fontWeight="bold">Algorithm</Typography></TableCell>
-              <TableCell><Typography variant="caption" fontWeight="bold">Key Len</Typography></TableCell>
-              <TableCell><Typography variant="caption" fontWeight="bold">QS</Typography></TableCell>
-              <TableCell><Typography variant="caption" fontWeight="bold">Compliance</Typography></TableCell>
+            <TableRow>
+              <TableCell>Severity</TableCell>
+              <TableCell>Target</TableCell>
+              <TableCell>Protocol</TableCell>
+              <TableCell>Finding</TableCell>
+              <TableCell>Algorithm</TableCell>
+              <TableCell>Key Len</TableCell>
+              <TableCell>QS</TableCell>
+              <TableCell>Compliance</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -448,7 +465,7 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
                 <TableRow
                   hover
                   onClick={() => setExpandedRow(expandedRow === f.id ? null : f.id)}
-                  sx={{ cursor: 'pointer', bgcolor: expandedRow === f.id ? '#111118' : 'transparent' }}
+                  sx={{ cursor: 'pointer', bgcolor: expandedRow === f.id ? 'action.hover' : 'transparent' }}
                 >
                   <TableCell><SeverityBadge severity={f.severity} /></TableCell>
                   <TableCell>
@@ -457,15 +474,29 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
                   <TableCell><ProtocolBadge protocol={f.protocol} /></TableCell>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={0.5}>
-                      <Typography variant="caption" fontWeight="medium">{f.title}</Typography>
+                      <Typography variant="caption" fontWeight={600}>{f.title}</Typography>
                       {expandedRow === f.id ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
                     </Box>
                   </TableCell>
-                  <TableCell><Typography variant="caption">{f.algorithm || '—'}</Typography></TableCell>
-                  <TableCell><Typography variant="caption">{f.key_length > 0 ? `${f.key_length}b` : '—'}</Typography></TableCell>
                   <TableCell>
-                    <Tooltip title={f.quantum_safe ? 'Quantum Safe' : 'Not Quantum Safe'}>
-                      <Typography>{f.quantum_safe ? '✅' : '❌'}</Typography>
+                    {f.algorithm ? (
+                      <Typography variant="caption" sx={{ fontFamily: tokens.typography.mono }}>{f.algorithm}</Typography>
+                    ) : (
+                      <Typography variant="caption" color="text.secondary">—</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" sx={{ fontFamily: tokens.typography.mono }}>
+                      {f.key_length > 0 ? `${f.key_length}b` : '—'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip title={f.quantum_safe ? 'Quantum safe' : 'Not quantum safe'}>
+                      {f.quantum_safe ? (
+                        <CheckCircle sx={{ fontSize: 16, color: tokens.colors.crypto.success }} />
+                      ) : (
+                        <Cancel sx={{ fontSize: 16, color: tokens.colors.crypto.critical }} />
+                      )}
                     </Tooltip>
                   </TableCell>
                   <TableCell>
@@ -475,10 +506,10 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
                 <TableRow>
                   <TableCell colSpan={8} sx={{ py: 0, border: expandedRow === f.id ? undefined : 'none' }}>
                     <Collapse in={expandedRow === f.id} timeout="auto" unmountOnExit>
-                      <Box sx={{ p: 2, bgcolor: '#111118', borderRadius: 1, my: 1, border: '1px solid #1f1f2e' }}>
+                      <Box sx={{ px: 2, py: 1.5, bgcolor: 'action.hover', my: 1, borderRadius: `${tokens.borderRadius.sm}px`, border: '1px solid', borderColor: 'divider' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{f.description}</Typography>
                         <Typography variant="caption" component="div" sx={{ mb: 0.5 }}>
-                          <strong>Evidence:</strong> {f.evidence}
+                          <strong>Evidence:</strong> <Box component="span" sx={{ fontFamily: tokens.typography.mono }}>{f.evidence}</Box>
                         </Typography>
                         <Typography variant="caption" component="div">
                           <strong>Remediation:</strong> {f.remediation}
@@ -496,25 +527,43 @@ function FindingsTable({ findings }: { findings: Finding[] }) {
   );
 }
 
-// ── ScanButton ────────────────────────────────────────────────────────────────
+// ── Scan progress stream ────────────────────────────────────────────────────────
 
-const SCAN_STEPS = [
-  '🔍 Connecting to NGINX TLS 1.0 (port 4431)...',
-  '⚠️  CRITICAL: TLS 1.0 detected on port 4431',
-  '⚠️  CRITICAL: RC4 cipher suite detected',
-  '🔍 Connecting to NGINX TLS 1.2 (port 4432)...',
-  '⚠️  HIGH: No forward secrecy on port 4432',
-  '🔍 Checking SSH server (port 2222)...',
-  '⚠️  CRITICAL: DSA host key detected',
-  '⚠️  HIGH: Weak KEX (group1-sha1) offered',
-  '🔍 Probing MD5 Hash API (port 5001)...',
-  '⚠️  MEDIUM: Missing HSTS header',
-  '🔍 Connecting to Java Legacy HTTPS (port 8443)...',
-  '⚠️  CRITICAL: RSA-512 key detected',
-  '✅ NGINX TLS 1.3 (port 4433) — No critical findings',
-  '📊 Aggregating findings...',
-  '✅ Scan complete!',
+type ScanEvent =
+  | { kind: 'connect'; text: string }
+  | { kind: 'finding'; severity: SeverityLevel; text: string }
+  | { kind: 'good'; text: string }
+  | { kind: 'note'; text: string };
+
+const SCAN_EVENTS: ScanEvent[] = [
+  { kind: 'connect', text: 'Connecting to NGINX TLS 1.0 (port 4431)' },
+  { kind: 'finding', severity: 'CRITICAL', text: 'TLS 1.0 detected on port 4431' },
+  { kind: 'finding', severity: 'CRITICAL', text: 'RC4 cipher suite detected' },
+  { kind: 'connect', text: 'Connecting to NGINX TLS 1.2 (port 4432)' },
+  { kind: 'finding', severity: 'HIGH', text: 'No forward secrecy on port 4432' },
+  { kind: 'connect', text: 'Checking SSH server (port 2222)' },
+  { kind: 'finding', severity: 'CRITICAL', text: 'DSA host key detected' },
+  { kind: 'finding', severity: 'HIGH', text: 'Weak KEX (group1-sha1) offered' },
+  { kind: 'connect', text: 'Probing MD5 Hash API (port 5001)' },
+  { kind: 'finding', severity: 'MEDIUM', text: 'Missing HSTS header' },
+  { kind: 'connect', text: 'Connecting to Java Legacy HTTPS (port 8443)' },
+  { kind: 'finding', severity: 'CRITICAL', text: 'RSA-512 key detected' },
+  { kind: 'good', text: 'NGINX TLS 1.3 (port 4433) — no critical findings' },
+  { kind: 'note', text: 'Aggregating findings' },
 ];
+
+function eventColor(event: ScanEvent): string {
+  switch (event.kind) {
+    case 'finding':
+      return SEVERITY_COLORS[event.severity];
+    case 'good':
+      return tokens.colors.crypto.success;
+    case 'note':
+      return tokens.colors.textLight.muted;
+    default:
+      return tokens.colors.rivicq[400];
+  }
+}
 
 interface ScanButtonProps {
   onScanComplete: (result: ScanResult) => void;
@@ -522,29 +571,27 @@ interface ScanButtonProps {
 
 function ScanButton({ onScanComplete }: ScanButtonProps) {
   const [scanning, setScanning] = useState(false);
-  const [steps, setSteps] = useState<string[]>([]);
+  const [events, setEvents] = useState<ScanEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const handleScan = useCallback(async () => {
     setScanning(true);
-    setSteps([]);
+    setEvents([]);
     setError(null);
 
-    // Show simulated progress
-    for (let i = 0; i < SCAN_STEPS.length - 1; i++) {
-      await new Promise((r) => setTimeout(r, 400));
-      setSteps((prev) => [...prev, SCAN_STEPS[i]]);
+    for (let i = 0; i < SCAN_EVENTS.length; i++) {
+      await new Promise((r) => setTimeout(r, 340));
+      setEvents((prev) => [...prev, SCAN_EVENTS[i]]);
     }
 
     try {
       const resp = await fetch('/api/v1/demo/scan');
       if (resp.ok) {
         const data: ScanResult = await resp.json();
-        setSteps((prev) => [...prev, '✅ Live scan complete!']);
+        setEvents((prev) => [...prev, { kind: 'good', text: 'Live scan complete' }]);
         onScanComplete(data);
       } else {
-        // Fall back to seeded data
-        setSteps((prev) => [...prev, '📄 Using seeded demo findings (backend not running)']);
+        setEvents((prev) => [...prev, { kind: 'note', text: 'Using seeded demo findings (backend not running)' }]);
         onScanComplete({
           scan_id: 'demo-local',
           started_at: new Date().toISOString(),
@@ -554,7 +601,7 @@ function ScanButton({ onScanComplete }: ScanButtonProps) {
         });
       }
     } catch {
-      setSteps((prev) => [...prev, '📄 Using seeded demo findings (backend not running)']);
+      setEvents((prev) => [...prev, { kind: 'note', text: 'Using seeded demo findings (backend not running)' }]);
       onScanComplete({
         scan_id: 'demo-local',
         started_at: new Date().toISOString(),
@@ -574,25 +621,71 @@ function ScanButton({ onScanComplete }: ScanButtonProps) {
         startIcon={scanning ? <CircularProgress size={18} color="inherit" /> : <PlayArrow />}
         onClick={handleScan}
         disabled={scanning}
-        sx={{
-          background: 'linear-gradient(45deg, #7c3aed 30%, #7c3aed 90%)',
-          color: 'white',
-          fontWeight: 'bold',
-          px: 3,
-        }}
+        sx={{ px: 3 }}
       >
-        {scanning ? 'Scanning infrastructure...' : 'Run Live Scan'}
+        {scanning ? 'Scanning infrastructure…' : 'Run live scan'}
       </Button>
 
-      {scanning && <LinearProgress sx={{ mt: 1, borderRadius: 1 }} />}
+      {scanning && <LinearProgress sx={{ mt: 1.5 }} />}
 
-      {steps.length > 0 && (
-        <Paper variant="outlined" sx={{ mt: 2, p: 2, bgcolor: '#0f172a', maxHeight: 200, overflow: 'auto' }}>
-          {steps.map((step, i) => (
-            <Typography key={i} variant="caption" display="block" sx={{ color: step.startsWith('⚠️') ? '#fbbf24' : step.startsWith('✅') ? '#34d399' : '#94a3b8', fontFamily: 'monospace' }}>
-              {step}
+      {events.length > 0 && (
+        <Paper
+          variant="outlined"
+          sx={{
+            mt: 2,
+            borderColor: 'divider',
+            bgcolor: '#05050a',
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 1.5,
+              py: 0.75,
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              bgcolor: '#0a0a0f',
+            }}
+          >
+            <Terminal sx={{ fontSize: 13, color: tokens.colors.rivicq[400] }} />
+            <Typography variant="caption" sx={{ fontFamily: tokens.typography.mono, color: 'text.secondary', letterSpacing: '0.08em' }}>
+              rivicq discover --network localhost --ports 2222,4431,4432,4433,5001,8443
             </Typography>
-          ))}
+          </Box>
+          <Box sx={{ p: 1.5, maxHeight: 220, overflow: 'auto', fontFamily: tokens.typography.mono, fontSize: '0.72rem' }}>
+            {events.map((event, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'baseline', gap: 1, py: 0.15 }}>
+                <Box component="span" sx={{ color: 'text.disabled', userSelect: 'none' }}>
+                  {String(i + 1).padStart(2, '0')}
+                </Box>
+                <Box
+                  component="span"
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: eventColor(event),
+                    alignSelf: 'center',
+                    flexShrink: 0,
+                  }}
+                />
+                <Box
+                  component="span"
+                  sx={{
+                    color: eventColor(event),
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {event.text}
+                </Box>
+              </Box>
+            ))}
+          </Box>
         </Paper>
       )}
 
@@ -601,7 +694,7 @@ function ScanButton({ onScanComplete }: ScanButtonProps) {
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// ── Page ─────────────────────────────────────────────────────────────────────
 
 const InfraDiscovery: React.FC = () => {
   const [findings, setFindings] = useState<Finding[]>(SEED_FINDINGS);
@@ -620,10 +713,17 @@ const InfraDiscovery: React.FC = () => {
       title="Infrastructure discovery"
       subtitle="Network cryptographic discovery. The table below is labeled sample data until you run a live scan against the RivicQ engine. Mappings are not certifications."
     >
-      <Alert severity="info" sx={{ mb: 2, bgcolor: '#0a0a0f', color: '#d1d5db', border: '1px solid #1f1f2e' }}>
+      <Alert severity="info" sx={{ mb: 2.5 }}>
         Seed rows are fixtures, not a customer estate. Live scanning needs the Community API.
         {' '}
-        <Box component="span" sx={{ fontFamily: 'monospace', opacity: 0.8 }}>
+        <Box
+          component="span"
+          sx={{
+            fontFamily: tokens.typography.mono,
+            fontSize: '0.72rem',
+            color: 'text.secondary',
+          }}
+        >
           source: {lastScanId}
         </Box>
       </Alert>

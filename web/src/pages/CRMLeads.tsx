@@ -4,6 +4,7 @@ import PageFrame from '../components/PageFrame';
 import { GlassCard } from '../components/ui';
 import { platformService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { tokens } from '../theme/tokens';
 
 type Lead = {
   id: string;
@@ -59,7 +60,7 @@ const CRMLeads: React.FC = () => {
             <GlassCard key={lead.id} hover={false} padding={2}>
               <Stack direction="row" justifyContent="space-between" spacing={2} flexWrap="wrap">
                 <BoxBlock title={lead.company || lead.name || 'Lead'} detail={`${lead.intent} · ${lead.stage} · ${lead.source}`} />
-                <Typography variant="body2" sx={{ fontFamily: 'JetBrains Mono, monospace' }}>{lead.email}</Typography>
+                <Typography variant="body2" sx={{ fontFamily: tokens.typography.mono }}>{lead.email}</Typography>
               </Stack>
             </GlassCard>
           ))}

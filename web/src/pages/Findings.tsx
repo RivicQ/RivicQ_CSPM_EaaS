@@ -16,6 +16,7 @@ import {
 } from '../ops/findings';
 import ProvenanceChip from '../components/dashboard/ProvenanceChip';
 import OpsHeroVisual from '../components/ops/OpsHeroVisual';
+import { tokens } from '../theme/tokens';
 
 const SEV_ORDER: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
 
@@ -205,7 +206,7 @@ const Findings: React.FC = () => {
                       <Typography variant="caption" color="text.secondary">{f.id}</Typography>
                     </TableCell>
                     <TableCell>{f.asset || '—'}</TableCell>
-                    <TableCell sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{f.algorithm || '—'}</TableCell>
+                    <TableCell sx={{ fontFamily: tokens.typography.mono, fontSize: 12 }}>{f.algorithm || '—'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -236,7 +237,7 @@ const Findings: React.FC = () => {
                 </Box>
                 <Box>
                   <Typography variant="subtitle2" fontWeight={800}>Evidence</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'pre-wrap', fontSize: 12 }}>
+                  <Typography variant="body2" sx={{ fontFamily: tokens.typography.mono, whiteSpace: 'pre-wrap', fontSize: 12 }}>
                     {open.evidence || 'No evidence payload on this finding.'}
                   </Typography>
                 </Box>

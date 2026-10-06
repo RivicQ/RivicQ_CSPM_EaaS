@@ -3,6 +3,7 @@ import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import { motion, useReducedMotion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
+import { tokens } from '../../theme/tokens';
 
 type QueueItem = {
   id: string;
@@ -105,7 +106,7 @@ const InboxHero: React.FC<InboxHeroProps> = ({
                 </Typography>
               </Stack>
               {item.resource && (
-                <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'text.secondary' }}>
+                <Typography sx={{ fontFamily: tokens.typography.mono, fontSize: 11, color: 'text.secondary' }}>
                   {item.resource}
                 </Typography>
               )}

@@ -5,6 +5,7 @@ import {
 import { Close } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { helpFor } from '../../ops/helpCopy';
+import { tokens } from '../../theme/tokens';
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -21,8 +22,8 @@ const HelpDrawer: React.FC<Props> = ({ open, onClose }) => {
       <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>{help.body}</Typography>
       <Box sx={{ mt: 3, p: 1.5, border: 1, borderColor: 'divider', borderRadius: 1 }}>
         <Typography variant="caption" color="text.secondary" display="block">Shortcuts</Typography>
-        <Typography variant="body2" sx={{ fontFamily: 'JetBrains Mono, monospace', mt: 0.5 }}>⌘K / Ctrl+K — search</Typography>
-        <Typography variant="body2" sx={{ fontFamily: 'JetBrains Mono, monospace' }}>? — this panel</Typography>
+        <Typography variant="body2" sx={{ fontFamily: tokens.typography.mono, mt: 0.5 }}>⌘K / Ctrl+K — search</Typography>
+        <Typography variant="body2" sx={{ fontFamily: tokens.typography.mono }}>? — this panel</Typography>
       </Box>
     </Drawer>
   );

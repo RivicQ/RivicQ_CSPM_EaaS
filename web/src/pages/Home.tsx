@@ -370,7 +370,7 @@ const Home: React.FC = () => {
           <MotionSection>
             <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: panel, borderRadius: 2, p: { xs: 2, md: 2.5 } }}>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
-                <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'text.secondary' }}>
+                <Typography sx={{ fontFamily: tokens.typography.mono, fontSize: 12, color: 'text.secondary' }}>
                   $ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate
                 </Typography>
                 <Chip

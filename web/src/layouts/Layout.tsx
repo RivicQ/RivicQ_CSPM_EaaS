@@ -81,7 +81,8 @@ import TrademarkNotice from '../components/TrademarkNotice';
 import { useDemoTrail } from '../context/DemoTrailContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cbomService, inventoryService } from '../services/api';
-import { OPS_ROUTES, titleFor } from '../ops/navigation';
+import { OPS_ROUTES, type OpsSection, titleFor } from '../ops/navigation';
+import { tokens } from '../theme/tokens';
 import { parseFindingsPayload, scanStatus } from '../ops/findings';
 import { loadPersona, persistPersona, PERSONA_LABEL, type OpsPersona } from '../ops/persona';
 import CommandPalette from '../components/ops/CommandPalette';
@@ -260,29 +261,15 @@ const Layout: React.FC = () => {
     disabled,
   });
 
+  const bySection = (section: OpsSection) => OPS_ROUTES.filter((r) => r.section === section);
   const operationsItems: NavItem[] = [
-    toNav('/dashboard', 'Overview'),
-    toNav('/findings', 'Findings'),
-    toNav('/assets', 'Assets'),
-    toNav('/scanner', 'Scans'),
-    toNav('/bom', 'CBOM'),
-    toNav('/migration', 'PQC Migration'),
-    ...(isDemo ? [toNav('/demo', 'Demo Trail')] : []),
+    ...bySection('Operations').map((r) => toNav(r.path, r.text)),
+    ...(isDemo ? [toNav('/demo', 'Demo Trail', 'Operations')] : []),
   ];
-  const postureItems: NavItem[] = [
-    toNav('/cspm', 'Crypto Posture', 'Posture'),
-    toNav('/governance', 'Governance', 'Posture'),
-    toNav('/security/api', 'API Security', 'Posture'),
-    toNav('/analytics', 'Reports', 'Posture'),
-  ];
-  const integrationItems: NavItem[] = [
-    toNav('/tools', 'PATH Scanners', 'Integrations'),
-    toNav('/ecosystem', 'Ecosystem', 'Integrations'),
-    toNav('/pipeline', 'Pipeline', 'Integrations'),
-    toNav('/contact', 'Contact', 'Integrations'),
-    toNav('/ibm', 'IBM Partner Plus', 'Integrations'),
-    ...(isAdminRole(user?.role) ? [toNav('/crm', 'CRM', 'Integrations')] : []),
-  ];
+  const postureItems: NavItem[] = bySection('Posture').map((r) => toNav(r.path, r.text, 'Posture'));
+  const integrationItems: NavItem[] = bySection('Integrations')
+    .filter((r) => !r.adminOnly || isAdminRole(user?.role))
+    .map((r) => toNav(r.path, r.text, 'Integrations'));
 
   const settingsItem: NavItem = { text: 'Settings', icon: <Settings />, path: '/settings' };
   const adminItem: NavItem = { text: 'Admin', icon: <AdminPanelSettings />, path: '/admin' };
@@ -668,7 +655,7 @@ const Layout: React.FC = () => {
             <Typography noWrap sx={{ fontSize: '0.8125rem', fontWeight: 500, flexGrow: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', color: isDarkMode ? blue.textMuted : '#71717a' }}>
               Search
             </Typography>
-            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: 'JetBrains Mono, monospace' }}>
+            <Typography component="kbd" sx={{ fontSize: 11, color: 'text.disabled', fontFamily: tokens.typography.mono }}>
               ⌘K
             </Typography>
           </Box>

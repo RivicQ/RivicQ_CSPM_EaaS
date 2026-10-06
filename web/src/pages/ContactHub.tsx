@@ -3,6 +3,7 @@ import { Box, Button, Grid, Stack, Typography } from '@mui/material';
 import SitePage, { siteCardSx } from './SitePage';
 import { publishedContacts, mailto } from '../data/contacts';
 import { websiteCtaSx } from '../theme/websiteChrome';
+import { tokens } from '../theme/tokens';
 
 const ContactHub: React.FC = () => (
   <SitePage
@@ -20,7 +21,7 @@ const ContactHub: React.FC = () => (
             <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#a78bfa' }}>
               {c.label}
             </Typography>
-            <Typography sx={{ fontFamily: '"JetBrains Mono", ui-monospace, monospace', fontWeight: 700, my: 1 }}>
+            <Typography sx={{ fontFamily: tokens.typography.mono, fontWeight: 700, my: 1 }}>
               {c.email}
             </Typography>
             <Typography variant="body2" sx={{ color: '#d1d5db', mb: 1.5 }}>{c.purpose}</Typography>
