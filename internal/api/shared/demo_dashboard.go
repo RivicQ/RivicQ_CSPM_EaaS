@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -33,48 +34,108 @@ func SetupDashboardDemoRoutes(router *gin.RouterGroup, logger *logrus.Logger) {
 	}
 }
 
+// Demo inventory is a deterministic simulation: every endpoint derives its
+// counts from the same 36 rows and every payload declares "dataset":
+// "simulated", so no screen ever contradicts another during a pitch and the
+// data is never mistaken for a connected cloud estate.
+
+const demoAssetCount = 36
+
+type demoCounts struct {
+	total          int
+	quantumSafe    int
+	nonQuantumSafe int
+	vulnerable     int
+	byCategory     map[string]int
+	byProvider     map[string]int
+}
+
+func buildDemoAssets() ([]gin.H, demoCounts) {
+	now := time.Now().UTC().Format(time.RFC3339)
+	templates := []gin.H{
+		{"category": "cryptographic", "cloud_provider": "aws", "algorithm": "RSA-2048", "crypto_algorithm": "RSA-2048", "risk_level": "HIGH", "quantum_safe": false},
+		{"category": "cryptographic", "cloud_provider": "azure", "algorithm": "AES-256", "crypto_algorithm": "AES-256", "risk_level": "LOW", "quantum_safe": true},
+		{"category": "cryptographic", "cloud_provider": "gcp", "algorithm": "ECDSA", "crypto_algorithm": "ECDSA", "risk_level": "MEDIUM", "quantum_safe": false},
+		{"category": "cryptographic", "cloud_provider": "kubernetes", "algorithm": "ML-KEM", "crypto_algorithm": "ML-KEM", "risk_level": "LOW", "quantum_safe": true},
+		{"category": "cryptographic", "cloud_provider": "aws", "algorithm": "3DES", "crypto_algorithm": "3DES", "risk_level": "CRITICAL", "quantum_safe": false},
+	}
+	vendors := []string{"tls", "kms", "hsm", "signing", "database", "vault", "sdk", "egress", "ingress", "mesh", "queue", "cd"}
+
+	counts := demoCounts{byCategory: map[string]int{}, byProvider: map[string]int{}}
+	assets := make([]gin.H, 0, demoAssetCount)
+	for i := 0; i < demoAssetCount; i++ {
+		base := templates[i%len(templates)]
+		row := gin.H{}
+		for k, v := range base {
+			row[k] = v
+		}
+		row["id"] = fmt.Sprintf("asset-%d", i+1)
+		row["name"] = fmt.Sprintf("%s-%03d-%s", row["cloud_provider"], i+1, vendors[i%len(vendors)])
+		row["discovered_at"] = now
+
+		assets = append(assets, row)
+		counts.total++
+		provider := row["cloud_provider"].(string)
+		counts.byProvider[provider]++
+		category := row["category"].(string)
+		counts.byCategory[category]++
+		if row["quantum_safe"] == true {
+			counts.quantumSafe++
+		} else {
+			counts.nonQuantumSafe++
+		}
+		switch row["risk_level"] {
+		case "HIGH", "CRITICAL":
+			counts.vulnerable++
+		}
+	}
+	return assets, counts
+}
+
 func demoInventoryAssets(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Debug("Serving demo inventory assets")
-		now := time.Now().UTC().Format(time.RFC3339)
+		assets, _ := buildDemoAssets()
 		c.JSON(http.StatusOK, gin.H{
-			"assets": []gin.H{
-				{"id": "asset-1", "name": "prod-api TLS cert", "category": "cryptographic", "cloud_provider": "aws", "algorithm": "RSA-2048", "crypto_algorithm": "RSA-2048", "risk_level": "HIGH", "quantum_safe": false, "discovered_at": now},
-				{"id": "asset-2", "name": "azure-keyvault-prod", "category": "cryptographic", "cloud_provider": "azure", "algorithm": "AES-256", "crypto_algorithm": "AES-256", "risk_level": "LOW", "quantum_safe": true, "discovered_at": now},
-				{"id": "asset-3", "name": "gcs-bucket-keys", "category": "cryptographic", "cloud_provider": "gcp", "algorithm": "ECDSA", "crypto_algorithm": "ECDSA", "risk_level": "MEDIUM", "quantum_safe": false, "discovered_at": now},
-				{"id": "asset-4", "name": "k8s-secrets-tls", "category": "cryptographic", "cloud_provider": "kubernetes", "algorithm": "ML-KEM", "crypto_algorithm": "ML-KEM", "risk_level": "LOW", "quantum_safe": true, "discovered_at": now},
-				{"id": "asset-5", "name": "legacy-3des-hsm", "category": "cryptographic", "cloud_provider": "aws", "algorithm": "3DES", "crypto_algorithm": "3DES", "risk_level": "CRITICAL", "quantum_safe": false, "discovered_at": now},
-			},
-			"total": 5,
+			"assets":  assets,
+			"total":   len(assets),
+			"dataset": "simulated",
 		})
 	}
 }
 
 func demoInventoryAsset(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		logger.Debug("Serving demo inventory asset")
 		id := c.Param("id")
-		c.JSON(http.StatusOK, gin.H{
-			"id": id, "name": "Demo Asset", "category": "cryptographic", "cloud_provider": "aws",
-			"algorithm": "RSA-2048", "risk_level": "HIGH", "quantum_safe": false,
-		})
+		assets, _ := buildDemoAssets()
+		for _, a := range assets {
+			if a["id"] == id {
+				a["dataset"] = "simulated"
+				c.JSON(http.StatusOK, a)
+				return
+			}
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "asset not found"})
 	}
 }
 
 func demoInventorySummary(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Debug("Serving demo inventory summary")
+		_, counts := buildDemoAssets()
 		c.JSON(http.StatusOK, gin.H{
-			"total_assets":       18742,
+			"total_assets":       counts.total,
 			"compliance_score":   0,
-			"by_category":        gin.H{"cryptographic": 2140, "compute": 3214, "containers": 4860, "storage": 1280, "databases": 436, "identity": 12680},
-			"by_cloud_provider":  gin.H{"aws": 11480, "azure": 3880, "gcp": 3382},
-			"quantum_safe_count": 1391,
-			"non_quantum_safe":   749,
-			"vulnerable_assets":  842,
+			"by_category":        counts.byCategory,
+			"by_cloud_provider":  counts.byProvider,
+			"quantum_safe_count": counts.quantumSafe,
+			"non_quantum_safe":   counts.nonQuantumSafe,
+			"vulnerable_assets":  counts.vulnerable,
 			"last_scan_time":     time.Now().UTC().Format(time.RFC3339),
-			"source":             "enterprise_simulation",
+			"source":             "demo_simulation",
 			"data_kind":          "demo",
-			"note":               "Deterministic enterprise simulation. Scores are calculated in the UI scoring engine, not hardcoded here.",
+			"note":               "Simulated inventory consistent with /inventory/assets. Scores are calculated in the UI scoring engine, not hardcoded here.",
 		})
 	}
 }
@@ -82,23 +143,21 @@ func demoInventorySummary(logger *logrus.Logger) gin.HandlerFunc {
 func demoCloudResourcesSummary(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Debug("Serving demo cloud resources summary")
+		_, counts := buildDemoAssets()
+		critical := counts.vulnerable / 2
 		c.JSON(http.StatusOK, gin.H{
-			"total_resources": 18742,
-			"by_provider": gin.H{
-				"aws":   11480,
-				"azure": 3880,
-				"gcp":   3382,
-			},
+			"total_resources": counts.total,
+			"by_provider":     counts.byProvider,
 			"security_findings": gin.H{
-				"critical": 49,
-				"high":     279,
-				"medium":   874,
-				"low":      1040,
+				"critical": critical,
+				"high":     counts.vulnerable - critical,
+				"medium":   counts.total / 4,
+				"low":      counts.total / 3,
 			},
-			"scan_coverage":  94.7,
-			"scans_today":    14,
-			"active_threats": 14,
-			"source":         "enterprise_simulation",
+			"scan_coverage":  100,
+			"scans_today":    1,
+			"active_threats": counts.vulnerable,
+			"source":         "demo_simulation",
 			"data_kind":      "demo",
 		})
 	}
@@ -112,6 +171,7 @@ func demoCloudAccounts(logger *logrus.Logger) gin.HandlerFunc {
 				{"id": "gcp-prod", "provider": "gcp", "name": "Production", "status": "connected", "resources": 45},
 				{"id": "azure-prod", "provider": "azure", "name": "Production", "status": "connected", "resources": 5},
 			},
+			"dataset": "simulated",
 		})
 	}
 }
@@ -124,6 +184,7 @@ func demoComplianceDashboards(logger *logrus.Logger) gin.HandlerFunc {
 			dashboards = append(dashboards, gin.H{
 				"id": fw, "framework": fw, "name": fw, "score": 75, "status": "active",
 				"total_controls": 100, "passed_controls": 75, "failed_controls": 10, "pending_controls": 15,
+				"source": "simulated",
 			})
 		}
 		c.JSON(http.StatusOK, gin.H{
@@ -133,6 +194,7 @@ func demoComplianceDashboards(logger *logrus.Logger) gin.HandlerFunc {
 				"frameworks_count":  len(frameworks),
 				"critical_findings": 2,
 				"high_findings":     8,
+				"source":            "simulated",
 			},
 		})
 	}
@@ -153,7 +215,8 @@ func demoAnalyticsInsights(logger *logrus.Logger) gin.HandlerFunc {
 				{"type": "posture_summary", "title": "Post-quantum readiness improving", "severity": "medium", "confidence": 0.88},
 				{"type": "critical_algorithm", "title": "3DES keys require migration", "severity": "critical", "confidence": 0.92},
 			},
-			"total": 2,
+			"total":    2,
+			"dataset":  "simulated",
 		})
 	}
 }
@@ -164,6 +227,7 @@ func demoAnalyticsReports(logger *logrus.Logger) gin.HandlerFunc {
 			"reports": []gin.H{
 				{"id": "rpt-1", "name": "Weekly Posture Report", "generated_at": time.Now().UTC().Format(time.RFC3339)},
 			},
+			"dataset": "simulated",
 		})
 	}
 }
