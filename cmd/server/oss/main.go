@@ -41,7 +41,7 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(gin.Recovery(), gin.Logger())
+	router.Use(gin.Recovery())
 
 	if dbOK {
 		if err := database.RunMigrations(db); err != nil {

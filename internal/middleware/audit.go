@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +15,7 @@ func Audit(logger *logrus.Logger, db *database.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
-		raw := c.Request.URL.RawQuery
+		raw := redactQuery(c.Request.URL.RawQuery)
 		if raw != "" {
 			path = path + "?" + raw
 		}
@@ -62,4 +64,29 @@ func Audit(logger *logrus.Logger, db *database.DB) gin.HandlerFunc {
 			_ = db.Queries.InsertAuditEvent(tenantID, eventType, rid, method, path, status, latencyMs, ip, ua, actorID)
 		}
 	}
+}
+
+// sensitiveQueryKeys lists substrings that identify credentials in query
+// strings. Any parameter whose (lowercased) name contains one of these is
+// replaced before the path enters the logs or the audit database.
+var sensitiveQueryKeys = []string{"token", "secret", "password", "passwd", "key", "api_key", "apikey", "private_key", "access_token", "refresh_token", "authorization", "code", "client_secret", "sig"}
+
+func redactQuery(raw string) string {
+	if raw == "" {
+		return ""
+	}
+	q, err := url.ParseQuery(raw)
+	if err != nil {
+		return "[unparsable]"
+	}
+	for k := range q {
+		lk := strings.ToLower(k)
+		for _, s := range sensitiveQueryKeys {
+			if strings.Contains(lk, s) {
+				q.Set(k, "[REDACTED]")
+				break
+			}
+		}
+	}
+	return q.Encode()
 }

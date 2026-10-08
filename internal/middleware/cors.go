@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -15,11 +16,12 @@ type CORSConfig struct {
 	AllowedHeaders   []string
 	ExposedHeaders   []string
 	AllowCredentials bool
+	AllowLocalDev    bool
 	MaxAge           time.Duration
 }
 
 func DefaultCORSConfig() CORSConfig {
-	origins := []string{"*", "https://rivicq.github.io"}
+	origins := []string{"https://rivicq.github.io"}
 	if extra := strings.TrimSpace(os.Getenv("CORS_ORIGINS")); extra != "" {
 		for _, o := range strings.Split(extra, ",") {
 			o = strings.TrimSpace(o)
@@ -34,6 +36,7 @@ func DefaultCORSConfig() CORSConfig {
 		AllowedHeaders:   []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Request-ID", "Idempotency-Key"},
 		ExposedHeaders:   []string{"X-Request-ID", "X-CryptoBOM-Edition", "Retry-After"},
 		AllowCredentials: true,
+		AllowLocalDev:    true,
 		MaxAge:           12 * time.Hour,
 	}
 }
@@ -48,21 +51,8 @@ func CORS(cfg CORSConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 
-		// Browsers reject Access-Control-Allow-Origin: * when credentials are
-		// enabled. When the config permits credentials, reflect the request
-		// origin (after allow-list validation when one is configured) instead
-		// of sending a wildcard, otherwise the web dashboard gets CORS errors
-		// on every authenticated request.
-		if allowAll {
-			if cfg.AllowCredentials {
-				if origin != "" {
-					c.Header("Access-Control-Allow-Origin", origin)
-					c.Header("Vary", "Origin")
-				}
-			} else {
-				c.Header("Access-Control-Allow-Origin", "*")
-			}
-		} else if originMap[strings.ToLower(origin)] {
+		allowed := allowAll || originMap[strings.ToLower(origin)] || (cfg.AllowLocalDev && isLocalDevOrigin(origin))
+		if allowed {
 			c.Header("Access-Control-Allow-Origin", origin)
 			c.Header("Vary", "Origin")
 		}
@@ -89,4 +79,20 @@ func CORS(cfg CORSConfig) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// isLocalDevOrigin reports whether the origin is a plain-http localhost /
+// 127.0.0.1 request (react-scripts picks the first free port, e.g. 3000 or
+// 3001). Local development origins are always allowed so credentials-bearing
+// requests work no matter which port the dev server lands on.
+func isLocalDevOrigin(origin string) bool {
+	u, err := url.Parse(origin)
+	if err != nil || u.Scheme != "http" {
+		return false
+	}
+	switch u.Hostname() {
+	case "localhost", "127.0.0.1", "::1":
+		return true
+	}
+	return false
 }
