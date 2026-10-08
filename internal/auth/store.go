@@ -125,10 +125,13 @@ func NewWorkDomainUserStore() (*WorkDomainUserStore, error) {
 	}
 	bootstrapPassword := BootstrapPasswordFromEnv()
 	if bootstrapPassword == "" {
-		return nil, fmt.Errorf("AUTH_BOOTSTRAP_PASSWORD must be set; there is no default password")
+		return nil, fmt.Errorf("AUTH_BOOTSTRAP_PASSWORD must be set; there is no default password — add AUTH_BOOTSTRAP_PASSWORD=... to .env or the environment")
 	}
 	if bootstrapPassword == DefaultBootstrapPasswordRefused {
-		return nil, fmt.Errorf("AUTH_BOOTSTRAP_PASSWORD must not be the published demo password %q", DefaultBootstrapPasswordRefused)
+		return nil, fmt.Errorf("AUTH_BOOTSTRAP_PASSWORD must not be the published demo password %q: pick a unique 12+ char password and set it in .env, then restart", DefaultBootstrapPasswordRefused)
+	}
+	if len(bootstrapPassword) < MinPasswordLength {
+		return nil, fmt.Errorf("AUTH_BOOTSTRAP_PASSWORD must be at least %d characters (got %d)", MinPasswordLength, len(bootstrapPassword))
 	}
 	bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
 	if bootstrapName == "" {

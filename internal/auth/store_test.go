@@ -82,6 +82,19 @@ func TestNewWorkDomainUserStore_RefusesPublishedDemoPassword(t *testing.T) {
 	}
 }
 
+func TestNewWorkDomainUserStore_RefusesShortBootstrapPassword(t *testing.T) {
+	t.Setenv("AUTH_ALLOWED_DOMAINS", "")
+	t.Setenv("AUTH_BOOTSTRAP_EMAIL", "")
+	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "short")
+	t.Setenv("AUTH_BOOTSTRAP_NAME", "")
+	t.Setenv("AUTH_BOOTSTRAP_ROLE", "")
+
+	_, err := auth.NewWorkDomainUserStore()
+	if err == nil {
+		t.Fatal("expected a below-minimum bootstrap password to be rejected")
+	}
+}
+
 func TestNewWorkDomainUserStore_UsesDefaultsWhenUnset(t *testing.T) {
 	t.Setenv("AUTH_ALLOWED_DOMAINS", "")
 	t.Setenv("AUTH_BOOTSTRAP_EMAIL", "")

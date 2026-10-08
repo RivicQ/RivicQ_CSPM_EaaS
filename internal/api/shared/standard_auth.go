@@ -134,7 +134,7 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 	} else {
 		store, err := auth.NewWorkDomainUserStore()
 		if err != nil {
-			logger.WithError(err).Fatal("Unable to initialize auth store")
+			logger.WithError(err).Fatal("Unable to initialize auth store: set AUTH_BOOTSTRAP_PASSWORD in .env to a unique 12+ char password and restart")
 		}
 		userStore = store
 		logger.Warn("Auth using in-memory user store (demo mode)")
