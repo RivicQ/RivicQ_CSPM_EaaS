@@ -215,8 +215,8 @@ func demoAnalyticsInsights(logger *logrus.Logger) gin.HandlerFunc {
 				{"type": "posture_summary", "title": "Post-quantum readiness improving", "severity": "medium", "confidence": 0.88},
 				{"type": "critical_algorithm", "title": "3DES keys require migration", "severity": "critical", "confidence": 0.92},
 			},
-			"total":    2,
-			"dataset":  "simulated",
+			"total":   2,
+			"dataset": "simulated",
 		})
 	}
 }
