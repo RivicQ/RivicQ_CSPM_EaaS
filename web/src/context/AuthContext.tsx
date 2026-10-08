@@ -82,7 +82,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const init = async () => {
       const stored = readStoredAuth();
 
-      const sbSession = await supabaseAuthService.getSession();
+      let sbSession: Awaited<ReturnType<typeof supabaseAuthService.getSession>> | null = null;
+      try {
+        sbSession = await supabaseAuthService.getSession();
+      } catch {
+        sbSession = null;
+      }
       let sbUser: AuthUser | null = null;
       let sbToken: string | null = null;
       if (sbSession?.user?.email) {
@@ -154,7 +159,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     };
 
-    init();
+    init().catch(() => {
+      if (!cancelled) setLoading(false);
+    });
     return () => { cancelled = true; };
   }, []);
 

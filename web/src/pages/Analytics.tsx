@@ -12,6 +12,7 @@ import StatCard from '../components/dashboard/StatCard';
 import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { EmptyState, DetailTabs, TabPanel } from '../components/ui';
 import { analyticsService, inventoryService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { categoryColor, chartGridStroke, chartTheme, chartTickFill, providerColor } from '../theme/chartTheme';
 import designSystem from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
@@ -27,6 +28,7 @@ const Analytics: React.FC = () => {
   const gridStroke = chartGridStroke(theme);
   const tickFill = chartTickFill(theme);
   const [tab, setTab] = useState(0);
+  const { isDemo } = useAuth();
 
   const { data: inventory } = useQuery({
     queryKey: ['analytics-inventory'],
@@ -78,7 +80,7 @@ const Analytics: React.FC = () => {
     : 62;
 
   return (
-    <PageFrame eyebrow="Insights" title="Analytics" subtitle="Executive trends, ML intelligence, compliance reports, and PQC forecasts." badge="Live">
+    <PageFrame eyebrow="Insights" title="Analytics" subtitle="Executive trends, ML intelligence, compliance reports, and PQC forecasts." badge={isDemo ? 'Demo data' : 'Live'}>
       <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         <Grid item xs={6} md={3}><StatCard label="Total Assets" value={summary.total_assets} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
         <Grid item xs={6} md={3}><StatCard label="PQC Readiness" value={`${pqcPct}%`} accent={tokens.colors.crypto.low} delay={1} /></Grid>
