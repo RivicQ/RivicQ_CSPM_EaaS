@@ -215,6 +215,16 @@ export const setEditionPreference = (edition: Edition) => {
 
 const editionClient = axios.create({ timeout: 3000 });
 
+// configuredAPIPort extracts the :port from REACT_APP_API_URL (e.g. "9090" from
+// "http://localhost:9090/api/v1"). Returns null when not set, so the probe can
+// prefer the configured backend before falling back to the well-known ports.
+function configuredAPIPort(): number | null {
+  const env = process.env.REACT_APP_API_URL;
+  if (!env) return null;
+  const match = env.match(/https?:\/\/[^/]+:(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
 export const getEditionFromBackend = async (): Promise<{ edition: string; features: Record<string, any>; baseURL: string } | null> => {
   // Port probing is only valid in local dev (http://localhost). On https
   // deployments (GitHub Pages, production) plain-http probes are mixed
@@ -225,7 +235,10 @@ export const getEditionFromBackend = async (): Promise<{ edition: string; featur
     (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local'));
 
   if (isLocalHttp) {
-    for (const port of [OSS_PORT, ENTERPRISE_PORT]) {
+    const candidates = [configuredAPIPort(), OSS_PORT, ENTERPRISE_PORT].filter(
+      (p): p is number => p !== null
+    );
+    for (const port of candidates.filter((p, i) => candidates.indexOf(p) === i)) {
       try {
         // Try the backend directly on each port for edition detection.
         const resp = await editionClient.get(`http://${host}:${port}/edition`, { timeout: 2000 });

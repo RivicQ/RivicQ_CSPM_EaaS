@@ -35,11 +35,11 @@ dev-core: $(ENV_FILE) build-core
 
 ## Start the Go backend in demo mode (no database required)
 dev-backend: $(ENV_FILE) build-oss
-	@set -a && . ./$(ENV_FILE) && set +a && CRYPTOBOM_PORT=8080 ./$(BIN_DIR)/cryptobom-oss
+	@set -a && . ./$(ENV_FILE) && set +a && CRYPTOBOM_PORT=9090 ./$(BIN_DIR)/cryptobom-oss
 
 ## Start the Enterprise backend on :9090 (demo mode without DB, or with DATABASE_URL)
 dev-enterprise: $(ENV_FILE) build-enterprise
-	@set -a && . ./$(ENV_FILE) && set +a && CRYPTOBOM_PORT=9090 CRYPTOBOM_LICENSE_KEY=$${CRYPTOBOM_LICENSE_KEY:-ENT-dev-local} ./$(BIN_DIR)/cryptobom-enterprise
+	@set -a && . ./$(ENV_FILE) && set +a && CRYPTOBOM_PORT=9090 CRYPTOBOM_LICENSE_KEY=$${CRYPTOBOM_LICENSE_KEY:-ENT-dev-local-2026Pitch} ./$(BIN_DIR)/cryptobom-enterprise
 
 ## Start the React frontend (requires backend running on :8080 or :9090)
 dev-frontend:
