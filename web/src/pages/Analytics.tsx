@@ -46,7 +46,10 @@ const Analytics: React.FC = () => {
   };
 
   const shareReport = (report: any) => {
-    navigator.clipboard.writeText(`${window.location.origin}/platform/analytics#${encodeURIComponent(report.id)}`).catch(() => undefined);
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = encodeURIComponent(report.id);
+    navigator.clipboard.writeText(url.toString()).catch(() => undefined);
     setCopiedId(report.id);
     if (copiedTimer.current) clearTimeout(copiedTimer.current);
     copiedTimer.current = setTimeout(() => setCopiedId(null), 1500);
