@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Box, Button, Chip, Grid, Stack, Typography, useTheme } from '@mui/material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Cell,
@@ -28,7 +28,29 @@ const Analytics: React.FC = () => {
   const gridStroke = chartGridStroke(theme);
   const tickFill = chartTickFill(theme);
   const [tab, setTab] = useState(0);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const { isDemo } = useAuth();
+
+  const downloadReport = (report: any, index: number) => {
+    const header = ['name', 'type', 'format', 'pages', 'generated_at'];
+    const row = [report.name, report.type, report.format || 'PDF', report.pages ?? '', report.generated_at];
+    const csv = [header.join(','), row.map((v) => JSON.stringify(String(v ?? ''))).join(',')].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rivicq-report-${index + 1}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const shareReport = (report: any) => {
+    navigator.clipboard.writeText(`${window.location.origin}/platform/analytics#${encodeURIComponent(report.id)}`).catch(() => undefined);
+    setCopiedId(report.id);
+    if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => setCopiedId(null), 1500);
+  };
 
   const { data: inventory } = useQuery({
     queryKey: ['analytics-inventory'],
@@ -196,7 +218,7 @@ const Analytics: React.FC = () => {
           <EmptyState title="No reports" description="Reports generate after your first weekly scan cycle." />
         ) : (
           <Stack spacing={1.5}>
-            {reports.map((report: any) => (
+            {reports.map((report: any, idx: number) => (
               <Box key={report.id} sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider', display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
                 <Box sx={{ flex: 1, minWidth: 200 }}>
                   <Typography fontWeight={700}>{report.name}</Typography>
@@ -205,8 +227,8 @@ const Analytics: React.FC = () => {
                   </Typography>
                 </Box>
                 <Chip label={report.format || 'PDF'} size="small" variant="outlined" />
-                <Button size="small" variant="outlined">Download</Button>
-                <Button size="small">Share</Button>
+                <Button size="small" variant="outlined" onClick={() => downloadReport(report, idx)} startIcon={<Description fontSize="small" />}>CSV</Button>
+                <Button size="small" onClick={() => shareReport(report)}>{copiedId === report.id ? 'Link copied' : 'Share'}</Button>
               </Box>
             ))}
           </Stack>

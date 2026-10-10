@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Avatar, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography,
@@ -74,6 +75,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 
 const ConformancePacks: React.FC = () => {
+  const navigate = useNavigate();
   const { data } = useQuery({
     queryKey: ['conformance-packs'],
     queryFn: () => postureService.getConformancePacks().then((r) => r.data),
@@ -95,7 +97,7 @@ const ConformancePacks: React.FC = () => {
       subtitle="Continuously validate cloud infrastructure against industry-standard security, compliance, and audit frameworks."
       badge="CSPM"
       action={
-        <Button variant="contained" startIcon={<PlayArrow />} onClick={() => {}}>
+        <Button variant="contained" startIcon={<PlayArrow />} onClick={() => navigate('/scanner')}>
           Run all assessments
         </Button>
       }
@@ -129,7 +131,7 @@ const ConformancePacks: React.FC = () => {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="caption" sx={{ color: tokens.colors.text.muted }}>{pack.total} controls</Typography>
-                  <Button size="small" variant="outlined">Run assessment</Button>
+                  <Button size="small" variant="outlined" onClick={() => navigate(`/scanner?framework=${encodeURIComponent(pack.id)}`)}>Run assessment</Button>
                 </Box>
               </CardContent>
             </Card>

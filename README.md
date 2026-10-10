@@ -137,6 +137,7 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Topic | Link |
 |-------|------|
 | Docs hub | [docs/README.md](docs/README.md) |
+| Ops runbook (local demo & operations) | [docs/OPS_RUNBOOK.md](docs/OPS_RUNBOOK.md) |
 | Known limitations | [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) |
 | Editions (OSS vs Enterprise) | [docs/editions.md](docs/editions.md) |
 | Client architecture | [docs/CLIENT_ARCHITECTURE.md](docs/CLIENT_ARCHITECTURE.md) |

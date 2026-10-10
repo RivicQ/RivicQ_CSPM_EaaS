@@ -86,6 +86,7 @@ jobs:
           cp docs/DESIGN_SYSTEM.md web/build/docs/DESIGN_SYSTEM.md
           cp docs/CORE_ENGINE.md web/build/docs/CORE_ENGINE.md
           cp docs/ENGINEERING_AUDIT.md web/build/docs/ENGINEERING_AUDIT.md
+          cp docs/OPS_RUNBOOK.md web/build/docs/OPS_RUNBOOK.md
           cp docs/ROADMAP.md web/build/docs/ROADMAP.md
           cp docs/QISKIT_PIPELINE.md web/build/docs/QISKIT_PIPELINE.md
           cp docs/ARCHITECTURE.md web/build/docs/ARCHITECTURE.md

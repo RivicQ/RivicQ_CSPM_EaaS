@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
-# Local development stack: PostgreSQL (optional), backend, frontend.
+# RivicQ local development stack: builds + runs backend (:9090) and frontend (:3000).
+# Run this in YOUR OWN terminal — the processes stay alive while it runs.
 # Usage:
-#   ./scripts/dev-stack.sh              # OSS backend on :8080 + frontend
-#   ./scripts/dev-stack.sh enterprise   # Enterprise backend on :9090 + frontend
-#   ./scripts/dev-stack.sh docker       # Full stack via docker compose
+#   ./scripts/dev-stack.sh                 # OSS (Community) backend on :9090 + frontend :3000
+#   ./scripts/dev-stack.sh enterprise      # Enterprise backend on :9090 + frontend :3000 (needs license)
+#   ./scripts/dev-stack.sh docker          # Full stack via docker compose
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 MODE="${1:-oss}"
-export JWT_SECRET="${JWT_SECRET:-dev-jwt-secret-change-in-production-min-32-chars}"
-export AUTH_BOOTSTRAP_EMAIL="${AUTH_BOOTSTRAP_EMAIL:-admin@rivicq.local}"
-export AUTH_BOOTSTRAP_PASSWORD="${AUTH_BOOTSTRAP_PASSWORD:-change-me}"
 
 if [[ ! -f .env ]]; then
   cp .env.example .env
@@ -24,6 +22,11 @@ set -a
 source .env
 set +a
 
+# Kill stale dev servers so the new bundle on :3000 is the only one running.
+for pid in $(pgrep -f "react-scripts/scripts/start.js" || true); do
+  kill "$pid" 2>/dev/null || true
+done
+
 case "$MODE" in
   docker)
     exec docker compose up --build
@@ -31,28 +34,29 @@ case "$MODE" in
   enterprise|ent)
     make build-enterprise
     export CRYPTOBOM_PORT=9090
-    export CRYPTOBOM_LICENSE_KEY="${CRYPTOBOM_LICENSE_KEY:-ENT-dev-local-not-a-license-key}"
+    export CRYPTOBOM_LICENSE_KEY="${CRYPTOBOM_LICENSE_KEY:-ENT-dev-local-2026Pitch}"
     export FRONTEND_REDIRECT_URL="http://localhost:3000/platform"
     export FRONTEND_BASE_PATH="/platform"
     export REACT_APP_API_URL="http://localhost:9090/api/v1"
     echo "Starting Enterprise backend on :9090 and frontend on :3000"
-    echo "  API:  http://localhost:9090/api/v1"
+    echo "  API:  http://localhost:9090/api/v1  (health: http://localhost:9090/healthz)"
     echo "  UI:   http://localhost:3000/platform/"
     trap 'kill 0' EXIT
     ./bin/cryptobom-enterprise &
-    cd web && PUBLIC_URL=/platform REACT_APP_API_URL="$REACT_APP_API_URL" npm run dev
+    cd web && npm run dev
     ;;
   oss|*)
     make build-oss
-    export CRYPTOBOM_PORT=8080
+    export CRYPTOBOM_PORT=9090
     export FRONTEND_REDIRECT_URL="http://localhost:3000/platform"
     export FRONTEND_BASE_PATH="/platform"
-    export REACT_APP_API_URL="http://localhost:8080/api/v1"
-    echo "Starting OSS backend on :8080 and frontend on :3000"
-    echo "  API:  http://localhost:8080/api/v1"
-    echo "  UI:   http://localhost:3000/platform/"
+    export REACT_APP_API_URL="http://localhost:9090/api/v1"
+    echo "Starting OSS backend on :9090 and frontend on :3000"
+    echo "  API:  http://localhost:9090/api/v1  (health: http://localhost:9090/healthz)"
+    echo "  UI:   http://localhost:3000/platform/login"
+    echo "  Login: admin@rivicq.com / <AUTH_BOOTSTRAP_PASSWORD from .env>"
     trap 'kill 0' EXIT
     ./bin/cryptobom-oss &
-    cd web && PUBLIC_URL=/platform REACT_APP_API_URL="$REACT_APP_API_URL" npm run dev
+    cd web && npm run dev
     ;;
 esac

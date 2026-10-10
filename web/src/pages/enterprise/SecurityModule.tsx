@@ -39,7 +39,7 @@ const SecurityModulePage: React.FC = () => {
       subtitle={m.tagline}
       badge={m.category.toUpperCase()}
       action={
-        <Button variant="contained" startIcon={<PlayArrow />} onClick={() => {}}>
+        <Button variant="contained" startIcon={<PlayArrow />} onClick={() => navigate(`/scanner?type=module&q=${encodeURIComponent(m.id)}`)}>
           Run assessment
         </Button>
       }

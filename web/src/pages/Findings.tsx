@@ -114,7 +114,7 @@ const Findings: React.FC = () => {
     >
       {isError && (
         <Alert severity="warning" sx={{ mb: 2 }} action={<Button color="inherit" size="small" onClick={() => refetch()}>Retry</Button>}>
-          Findings API unreachable. Start the Community API on :8080 (or Enterprise :9090). GitHub Pages has no API.
+          Findings API unreachable. Start the backend on :9090 (make dev-backend). GitHub Pages has no API.
         </Alert>
       )}
 
