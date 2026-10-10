@@ -63,6 +63,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v7
 
+    # The stock runner's Go is older than the go.mod `toolchain` directive
+    # (go1.26.9), which breaks CodeQL's Go extractor. Install the project
+    # toolchain before extraction so the weekly scheduled run stays green.
+    - name: Setup Go toolchain for CodeQL extraction
+      if: matrix.language == 'go'
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+        cache: false
+
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.
