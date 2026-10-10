@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RivicQ CryptoBOM — Enterprise cryptographic security posture management. CBOM discovery, PQC readiness, and multi-cloud compliance." />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" type="image/svg+xml" href="assets/rivicq-mark.svg" />
+  <link rel="icon" type="image/png" href="assets/rivicq-mark.png" />
+  <title>RivicQ — Cryptographic Security & Quantum Readiness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <img src="assets/rivicq-mark.svg" alt="" width="28" height="28" />
+        </div>
+        RivicQ
+      </a>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#features">Products</a></li>
+        <li><a href="#cloud">Solutions</a></li>
+        <li><a href="#compliance">Compliance Centre</a></li>
+        <li><a href="#trust">Trust &amp; Security</a></li>
+        <li><a href="showcase.html">Resources</a></li>
+        <li><a href="#" data-platform-link data-platform-path="/contact">Company</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="#" class="btn btn-primary" data-platform-link data-platform-path="/register">Get Started</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container hero-content">
+      <div>
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Security Cloud — cryptographic SaaS
+        </div>
+        <h1 class="hero-title">
+          Cryptographic Security &amp; Quantum Readiness
+        </h1>
+        <p class="hero-desc">
+          RivicQ discovers, inventories and assesses cryptographic assets across your infrastructure,
+          helping organizations manage risk, meet compliance requirements and plan their transition
+          to post-quantum cryptography.
+        </p>
+        <div class="hero-cta">
+          <a href="#" class="btn btn-primary btn-lg" data-platform-link data-platform-path="/register">
+            Start Free CBOM Pilot ↗
+          </a>
+          <a href="showcase.html" class="btn btn-secondary btn-lg">Book a Demo</a>
+        </div>
+        <div>
+          <p class="hero-stat-note">Live quantum and posture scores come from a scan or API. This page is static.</p>
+          <div class="hero-stats">
+          <div>
+            <div class="hero-stat-value" data-count="5">0</div>
+            <div class="hero-stat-label">BOM types</div>
+          </div>
+          <div>
+            <div class="hero-stat-value" data-count="6">0</div>
+            <div class="hero-stat-label">Operating domains</div>
+          </div>
+          <div>
+            <div class="hero-stat-value" data-count="10">0</div>
+            <div class="hero-stat-label">Control mappings</div>
+          </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-canvas-wrap">
+          <canvas id="heroNetwork"></canvas>
+          <div class="hero-visual-overlay">
+            <div class="hero-metric-card critical">
+              <div class="value" id="heroCritical">23</div>
+              <div class="label">Findings from scan</div>
+            </div>
+            <div class="hero-metric-card quantum">
+              <div class="value" id="heroPQC">67%</div>
+              <div class="label">PQC readiness</div>
+            </div>
+            <div class="hero-metric-card success">
+              <div class="value" id="heroCompliant">10</div>
+              <div class="label">Control mappings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Bar -->
+  <section class="trust-bar" id="trust">
+    <div class="container trust-bar-inner">
+      <span class="trust-label">Control mappings — not certifications of RivicQ</span>
+      <div class="trust-logos">
+        <span class="trust-logo">NIST PQC</span>
+        <span class="trust-logo">ISO 27001</span>
+        <span class="trust-logo">SOC 2 TSC</span>
+        <span class="trust-logo">BSI TR-02102</span>
+        <span class="trust-logo">DORA</span>
+        <span class="trust-logo">eIDAS 2.0</span>
+        <span class="trust-logo">FedRAMP mapping</span>
+        <span class="trust-logo">PCI DSS</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">Platform Capabilities</span>
+        <h2 class="section-title">Complete cryptographic<br /><span class="gradient-text">visibility &amp; control</span></h2>
+        <p class="section-subtitle">
+          From source code to cloud infrastructure — discover, assess, and remediate cryptographic risks across your entire attack surface.
+        </p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card featured reveal reveal-delay-1">
+          <div>
+            <div class="feature-icon blue"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg></div>
+            <h3>CBOM Discovery Engine</h3>
+            <p>
+              Automated cryptographic bill of materials across repositories, containers, clusters, and TLS endpoints. Inventory is scan-backed — not a silent live estate on this page.
+            </p>
+          </div>
+          <div class="feature-visual">
+            <canvas id="featureChart"></canvas>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon purple"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4.5"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(120 12 12)"/></svg></div>
+          <h3>Quantum Risk Assessment</h3>
+          <p>PQC readiness and harvest-now exposure from scan intelligence (CLI or API). GitHub Pages does not attach a live customer estate.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon green"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19a4.5 4.5 0 1 0-1.2-8.9 6 6 0 0 0-11.4 2A3.5 3.5 0 0 0 6.5 19Z"/></svg></div>
+          <h3>Cloud security</h3>
+          <p>CSPM from declared and scanned assets. Live cloud attach needs customer credentials and an Enterprise license.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon gold"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg></div>
+          <h3>GRC &amp; compliance risk</h3>
+          <p>DORA, NIS2, NIST, ISO, PCI, and SOC 2 operator mappings with evidence collection. Mappings are not audits or certifications of RivicQ.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon blue"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.5"/></svg></div>
+          <h3>DevSecOps</h3>
+          <p>Scan → inventory → policy gate in CI. The GitHub Action is Community; continuous monitoring is Enterprise.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon purple"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></svg></div>
+          <h3>AI engineering &amp; API security</h3>
+          <p>AIBOM for models, datasets, and AI identities. TLS/HTTPS hygiene from website and host scans. Gateway inventory is Enterprise when a connector exists.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Posture Score -->
+  <section class="section posture-section" id="posture">
+    <div class="container" id="postureSection">
+      <div class="reveal">
+        <span class="section-label">Security Posture</span>
+        <h2 class="section-title">Scan-backed cryptographic<br /><span class="gradient-text">risk scoring</span></h2>
+        <p class="section-subtitle">
+          Severity-weighted scores across algorithms, key sizes, protocols, and control gaps. Numbers below are a labeled sample. Live scores need the CLI or a running API.
+        </p>
+      </div>
+      <div class="posture-grid">
+        <div class="posture-ring-wrap reveal">
+          <svg viewBox="0 0 260 260">
+            <defs>
+              <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#7C3AED"/>
+                <stop offset="55%" stop-color="#A78BFA"/>
+                <stop offset="100%" stop-color="#C4B5FD"/>
+              </linearGradient>
+            </defs>
+            <circle class="posture-ring-bg" cx="130" cy="130" r="120"/>
+            <circle class="posture-ring-fill" id="postureRing" cx="130" cy="130" r="120"/>
+          </svg>
+          <div class="posture-score-center">
+            <div class="posture-score-value" id="postureScoreValue">0</div>
+            <div class="posture-score-label">Posture Score</div>
+          </div>
+        </div>
+        <div class="posture-breakdown reveal reveal-delay-1">
+          <div class="posture-item">
+            <span class="posture-item-label">Algorithm Strength</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill low" data-width="85"></div></div>
+            <span class="posture-item-score">85</span>
+          </div>
+          <div class="posture-item">
+            <span class="posture-item-label">Key Management</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill medium" data-width="72"></div></div>
+            <span class="posture-item-score">72</span>
+          </div>
+          <div class="posture-item">
+            <span class="posture-item-label">Protocol Security</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill low" data-width="91"></div></div>
+            <span class="posture-item-score">91</span>
+          </div>
+          <div class="posture-item">
+            <span class="posture-item-label">PQC Readiness</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill high" data-width="67"></div></div>
+            <span class="posture-item-score">67</span>
+          </div>
+          <div class="posture-item">
+            <span class="posture-item-label">Compliance Coverage</span>
+            <div class="posture-bar-track"><div class="posture-bar-fill low" data-width="94"></div></div>
+            <span class="posture-item-score">94</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compliance -->
+  <section class="section" id="compliance">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">Compliance Frameworks</span>
+        <h2 class="section-title">Automated compliance<br /><span class="gradient-text">across frameworks</span></h2>
+        <p class="section-subtitle">
+          Map cryptographic findings to regulatory requirements with continuous evidence collection and audit-ready reporting.
+        </p>
+      </div>
+      <div class="compliance-grid">
+        <div class="compliance-card active reveal">
+          <div class="compliance-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5Z"/></svg></div>
+          <div class="compliance-name">NIST CSF 2.0</div>
+          <div class="compliance-status pass">✓ 98% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-1">
+          <div class="compliance-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></div>
+          <div class="compliance-name">ISO 27001:2022</div>
+          <div class="compliance-status pass">✓ 96% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-2">
+          <div class="compliance-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M6 10v8M10 10v8M14 10v8M18 10v8"/><path d="M12 3 2 8h20Z"/><path d="M4 21h16"/></svg></div>
+          <div class="compliance-name">DORA</div>
+          <div class="compliance-status pass">✓ 94% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-3">
+          <div class="compliance-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4.5"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(120 12 12)"/></svg></div>
+          <div class="compliance-name">NIST PQC</div>
+          <div class="compliance-status pass">✓ 89% Compliant</div>
+        </div>
+        <div class="compliance-card reveal">
+          <div class="compliance-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.5"/></svg></div>
+          <div class="compliance-name">SOC 2 Type II</div>
+          <div class="compliance-status pass">✓ 97% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-1">
+          <div class="compliance-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4a1 1 0 0 1 .5-.9L20 2v15l-15 2.2"/><path d="M9 6v11M14 5.6v11"/></svg></div>
+          <div class="compliance-name">GDPR / eIDAS</div>
+          <div class="compliance-status pass">✓ 95% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-2">
+          <div class="compliance-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20M6 15h4"/></svg></div>
+          <div class="compliance-name">PCI DSS 4.0</div>
+          <div class="compliance-status pass">✓ 92% Compliant</div>
+        </div>
+        <div class="compliance-card reveal reveal-delay-3">
+          <div class="compliance-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 8a6 6 0 0 0 6 0"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/><path d="M9 17h6"/></svg></div>
+          <div class="compliance-name">EU AI Act</div>
+          <div class="compliance-status pass">✓ 88% Compliant</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Multi-Cloud -->
+  <section class="section cloud-section" id="cloud">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">Multi-Cloud CSPM</span>
+        <h2 class="section-title">Unified posture across<br /><span class="gradient-text">every cloud</span></h2>
+        <p class="section-subtitle">
+          Connect AWS, Azure, GCP, and Kubernetes clusters for centralized cryptographic asset discovery and key management visibility.
+        </p>
+      </div>
+      <div class="cloud-visual reveal">
+        <div class="cloud-hub">
+          <div class="cloud-center">CryptoBOM<br/>Hub</div>
+          <div class="cloud-providers">
+            <button class="cloud-provider" data-provider="aws">Amazon AWS</button>
+            <button class="cloud-provider" data-provider="azure">Microsoft Azure</button>
+            <button class="cloud-provider" data-provider="gcp">Google Cloud</button>
+            <button class="cloud-provider" data-provider="k8s">Kubernetes</button>
+          </div>
+        </div>
+        <div class="cloud-stats">
+          <div class="cloud-stat">
+            <div class="cloud-stat-value" id="cloudAssets">4,821</div>
+            <div class="cloud-stat-label">Crypto Assets</div>
+          </div>
+          <div class="cloud-stat">
+            <div class="cloud-stat-value" id="cloudKeys">892</div>
+            <div class="cloud-stat-label">Managed Keys</div>
+          </div>
+          <div class="cloud-stat">
+            <div class="cloud-stat-value" id="cloudFindings">47</div>
+            <div class="cloud-stat-label">Active Findings</div>
+          </div>
+          <div class="cloud-stat">
+            <div class="cloud-stat-value" id="cloudScore">82</div>
+            <div class="cloud-stat-label">Posture Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PQC Timeline -->
+  <section class="section">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">PQC Migration</span>
+        <h2 class="section-title">Your path to<br /><span class="gradient-text">quantum readiness</span></h2>
+        <p class="section-subtitle">
+          Structured migration roadmap from classical cryptography to NIST-standardized post-quantum algorithms.
+        </p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Phase 1 — Now</div>
+          <div class="timeline-title">Cryptographic Discovery &amp; Inventory</div>
+          <div class="timeline-desc">Automated CBOM generation across all environments. Identify RSA, ECDSA, and SHA-1 dependencies with quantum vulnerability scoring.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Phase 2 — Q1 2026</div>
+          <div class="timeline-title">Hybrid Cryptography Deployment</div>
+          <div class="timeline-desc">Deploy CRYSTALS-Kyber and Dilithium alongside existing algorithms. Enable crypto-agility with algorithm negotiation.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Phase 3 — Q3 2026</div>
+          <div class="timeline-title">Quantum-safe attestation</div>
+          <div class="timeline-desc">Validate PQC implementations against policy and local scoring pipelines. Produce evidence packs for operators — mappings, not certifications.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Phase 4 — 2027</div>
+          <div class="timeline-title">Full PQC Migration</div>
+          <div class="timeline-desc">Complete transition to quantum-safe cryptography. Deprecate classical algorithms. Continuous monitoring and re-certification.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card reveal">
+        <h2>Ready to secure your cryptographic posture?</h2>
+        <p>Start with a free CBOM scan in under 5 minutes. No credit card required. Enterprise features available on request.</p>
+        <div class="cta-actions">
+          <a href="#" class="btn btn-primary btn-lg" data-platform-link data-platform-path="/register">Start Free Scan</a>
+          <a href="showcase.html" class="btn btn-secondary btn-lg">Explore Live Demo</a>
+          <a href="https://rivicq.com/enterprise" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">Contact Enterprise</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">
+              <img src="assets/rivicq-mark.svg" alt="" width="28" height="28" />
+            </div>
+            RivicQ
+          </a>
+          <p>German-engineered cryptographic security posture management. Made in Berlin.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="#features">CBOM Discovery</a></li>
+            <li><a href="#posture">Posture Scoring</a></li>
+            <li><a href="#compliance">Compliance</a></li>
+            <li><a href="showcase.html">Live Demo</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="../docs/">Documentation</a></li>
+            <li><a href="../docs/contact.html">Contact</a></li>
+            <li><a href="../docs/quantum-sdk.md">Quantum SDK</a></li>
+            <li><a href="../contact">Platform contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="https://rivicq.com" target="_blank" rel="noopener">About RivicQ</a></li>
+            <li><a href="mailto:hello@rivicq.com">hello@rivicq.com</a></li>
+            <li><a href="mailto:sales@rivicq.com">sales@rivicq.com</a></li>
+            <li><a href="mailto:security@rivicq.com">security@rivicq.com</a></li>
+            <li><a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 RivicQ GmbH. All rights reserved.</span>
+        <span>LEAP BERLIN · Rudower Chaussee 29 · 12489 Berlin, Germany</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/visuals.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
