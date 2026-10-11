@@ -1,31 +1,28 @@
 package shared
 
 import (
+	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 	"github.com/rivic-q/cryptobom-saas/internal/platform"
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	defaultJWTSecret = "oss-default-secret-not-for-production"
-	// PublishedBootstrapPassword appeared in RivicQ documentation and in the
-	// default .env, so it must never be accepted as a real credential.
-	PublishedBootstrapPassword = "DemoPass123!"
-)
-
-// DemoModeEnabled reports whether the operator explicitly allowed serving
-// fabricated, in-memory data.
+// DemoModeEnabled reports whether the operator explicitly allowed serving the
+// labeled demo identity and fabricated demo data.
 func DemoModeEnabled() bool {
-	v := strings.ToLower(strings.TrimSpace(os.Getenv("RIVICQ_ALLOW_DEMO_MODE")))
-	return v == "1" || v == "true" || v == "yes"
+	v := strings.ToLower(strings.TrimSpace(os.Getenv("DEMO_MODE")))
+	if v == "true" || v == "1" || v == "yes" {
+		return true
+	}
+	v = strings.ToLower(strings.TrimSpace(os.Getenv("RIVICQ_ALLOW_DEMO_MODE")))
+	return v == "true" || v == "1" || v == "yes"
 }
 
 func isProductionRuntime() bool {
@@ -38,120 +35,87 @@ func isProductionRuntime() bool {
 	return gin.Mode() == gin.ReleaseMode
 }
 
-func resolveJWTSecret(raw string, production bool) (string, error) {
-	secret := strings.TrimSpace(raw)
-	if secret == "" || secret == defaultJWTSecret {
-		if production {
-			return "", fmt.Errorf("JWT_SECRET must be a unique value in production")
-		}
-		if secret == "" {
-			secret = defaultJWTSecret
-		}
-	}
-	return secret, nil
-}
-
-// SetupStandardAuth configures JWT auth with PostgreSQL or in-memory user store.
-func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger) *auth.AuthService {
-	production := isProductionRuntime()
-	jwtSecret, err := resolveJWTSecret(os.Getenv("JWT_SECRET"), production)
+// SetupStandardAuth builds the authn lifecycle backed by PostgreSQL (when a
+// database is configured) or the in-memory store, seeds the bootstrap admin and
+// (when DEMO_MODE is on) the demo identities, then wires the deny-by-default
+// authentication gate, the authorization model, and every /auth route.
+func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger) *authn.Service {
+	cfg, err := authn.LoadConfig()
 	if err != nil {
-		logger.WithError(err).Fatal("refusing to start with an unsafe JWT secret")
+		logger.WithError(err).Fatal("refusing to start: configuration error")
 	}
-	if jwtSecret == defaultJWTSecret {
-		logger.Warn("JWT_SECRET not set — using default secret for development only")
+	production := isProductionRuntime()
+	if production && cfg.DemoMode {
+		logger.Warn("DEMO_MODE is enabled in a production runtime; the demo identity and demo data are reachable")
 	}
 
-	allowedDomains := auth.AllowedDomainsFromEnv()
-	var userStore auth.UserStore
-
+	var store authn.Store
 	if db != nil && db.DB != nil {
-		userStore = auth.NewDatabaseUserStore(db.DB)
-		logger.Info("Auth using PostgreSQL database user store")
-
-		bootstrapEmail := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_EMAIL"))
-		if bootstrapEmail == "" {
-			bootstrapEmail = "admin@rivicq.local"
+		if err := ensureDefaultTenant(db.DB, logger); err != nil {
+			logger.WithError(err).Warn("default tenant not ensured; bootstrap seeding may fail")
 		}
-		bootstrapPassword := auth.BootstrapPasswordFromEnv()
-		if bootstrapPassword == "" {
-			if production || !DemoModeEnabled() {
-				logger.Fatal("AUTH_BOOTSTRAP_PASSWORD must be set; RivicQ does not ship a default bootstrap password")
-			}
-			bootstrapPassword = PublishedBootstrapPassword
-		}
-		if bootstrapPassword == PublishedBootstrapPassword && !DemoModeEnabled() {
-			logger.Fatal("AUTH_BOOTSTRAP_PASSWORD must not be the published demo password")
-		}
-		bootstrapName := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_NAME"))
-		if bootstrapName == "" {
-			bootstrapName = "Admin"
-		}
-		bootstrapRole := strings.TrimSpace(os.Getenv("AUTH_BOOTSTRAP_ROLE"))
-		if bootstrapRole == "" {
-			bootstrapRole = "admin"
-		}
-
-		var tenantCount int
-		if err := db.DB.QueryRow("SELECT COUNT(*) FROM tenants").Scan(&tenantCount); err == nil && tenantCount == 0 {
-			_, _ = db.Exec(`INSERT INTO tenants (id, name, domain) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
-				"tenant-1", "Default Organization", "rivicq.local")
-		}
-
-		var userCount int
-		if err := db.DB.QueryRow("SELECT COUNT(*) FROM users").Scan(&userCount); err == nil && userCount == 0 {
-			if hashedPassword, hashErr := auth.HashPassword(bootstrapPassword); hashErr == nil {
-				_, execErr := db.Exec(`
-					INSERT INTO users (id, tenant_id, email, name, role, password)
-					VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (email) DO NOTHING`,
-					uuid.New().String(), "tenant-1", bootstrapEmail, bootstrapName, bootstrapRole, hashedPassword)
-				if execErr == nil {
-					logger.WithField("email", bootstrapEmail).Info("Bootstrap admin user created")
-				}
-				// The demo operator is seeded on a fresh install so there is
-				// something to sign in with. The runtime reports release mode,
-				// so gating on !production alone would drop it; an explicit
-				// RIVICQ_ALLOW_DEMO_MODE is the operator asking for it back.
-				if !production || DemoModeEnabled() {
-					demoEmail := strings.TrimSpace(os.Getenv("AUTH_DEMO_EMAIL"))
-					if demoEmail == "" {
-						demoEmail = "demo@rivicq.local"
-					}
-					demoPass := strings.TrimSpace(os.Getenv("AUTH_DEMO_PASSWORD"))
-					if demoPass == "" {
-						demoPass = bootstrapPassword
-					}
-					if hashedDemo, demoErr := auth.HashPassword(demoPass); demoErr == nil {
-						_, _ = db.Exec(`
-							INSERT INTO users (id, tenant_id, email, name, role, password)
-							VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (email) DO NOTHING`,
-							uuid.New().String(), "tenant-1", demoEmail, "Community demo", "operator", hashedDemo)
-						logger.WithField("email", demoEmail).Info("Bootstrap Community demo operator created")
-					}
-				}
-			}
-		}
+		store = authn.NewSQLStore(db.DB)
+		logger.Info("Auth using PostgreSQL-backed store (authn lifecycle)")
 	} else {
-		store, err := auth.NewWorkDomainUserStore()
-		if err != nil {
-			logger.WithError(err).Fatal("Unable to initialize auth store: set AUTH_BOOTSTRAP_PASSWORD in .env to a unique 12+ char password and restart")
-		}
-		userStore = store
-		logger.Warn("Auth using in-memory user store (demo mode)")
+		store = authn.NewMemStore()
+		logger.Warn("Auth using in-memory store (no database configured)")
 	}
 
-	authService := auth.NewAuthService(jwtSecret, userStore)
+	authService, err := authn.NewService(cfg, store)
+	if err != nil {
+		logger.WithError(err).Fatal("refusing to start without a strong auth signing secret")
+	}
+
+	if err := authService.SeedBootstrap(context.Background()); err != nil {
+		logger.WithError(err).Warn("bootstrap seeding skipped")
+	}
+
 	// Deny by default: every /api/v1 route requires a valid access token
 	// unless it appears in auth.PublicRoutes.
 	router.Use(authService.EnforceAuth())
 	// Authentication is not authorization. Without this, every role that could
 	// log in could also delete reports and mint API keys.
 	router.Use(auth.RequireRoutePermission())
-	SetupAuthRoutes(router, logger, authService, allowedDomains)
+
+	handlers := authn.NewHandlers(authService, logger)
+	authGroup := router.Group("/auth")
+	handlers.RegisterRoutes(authGroup)
+	SetupOAuthRoutes(authGroup, logger, authService, cfg.AllowedDomains, cfg.DemoMode)
+
 	var sqlDB *sql.DB
 	if db != nil {
 		sqlDB = db.DB
 	}
 	platform.SetupRoutes(router, logger, authService, sqlDB)
 	return authService
+}
+
+func ensureDefaultTenant(db *sql.DB, logger *logrus.Logger) error {
+	var tenantCount int
+	if err := db.QueryRow("SELECT COUNT(*) FROM tenants").Scan(&tenantCount); err != nil {
+		return err
+	}
+	if tenantCount == 0 {
+		_, err := db.Exec(`INSERT INTO tenants (id, name, domain) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
+			"tenant-1", "Default Organization", "rivicq.local")
+		if err != nil {
+			return err
+		}
+		logger.Info("Default tenant created")
+	}
+	return nil
+}
+
+// SetupOAuthRoutes mounts the provider handshakes on the auth group.
+func SetupOAuthRoutes(authGroup *gin.RouterGroup, logger *logrus.Logger, authService *authn.Service, allowedDomains []string, _ bool) {
+	authGroup.GET("/google/login", GoogleLoginHandler(logger))
+	authGroup.POST("/google/exchange", GoogleExchangeHandler(logger, authService, allowedDomains))
+	authGroup.GET("/google/callback", GoogleCallbackHandler(logger, authService, allowedDomains))
+	authGroup.POST("/google/callback", GoogleCallbackHandler(logger, authService, allowedDomains))
+	authGroup.GET("/google/status", GoogleOAuthStatusHandler(logger))
+
+	authGroup.GET("/github/login", GitHubLoginHandler(logger))
+	authGroup.GET("/github/callback", GitHubCallbackHandler(logger, authService, allowedDomains))
+	authGroup.POST("/github/callback", GitHubCallbackHandler(logger, authService, allowedDomains))
+	authGroup.GET("/github/status", GitHubOAuthStatusHandler(logger))
 }

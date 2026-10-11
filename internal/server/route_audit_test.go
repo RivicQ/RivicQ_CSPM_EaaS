@@ -25,8 +25,10 @@ var expectedPublicRoutes = map[string]bool{
 	"POST /auth/mfa/verify":      true,
 	"POST /auth/forgot-password": true,
 	"POST /auth/reset-password":  true,
+	"POST /auth/verify-email":    true,
 	"GET /auth/editions":         true,
 	"GET /auth/providers":        true,
+	"GET /auth/verify-email":     true,
 	"GET /auth/demo":             true,
 	"GET /auth/google/login":     true,
 	"POST /auth/google/exchange": true,
@@ -71,6 +73,7 @@ func buildAuditRouter(t *testing.T) *gin.Engine {
 	t.Setenv("RIVICQ_ALLOW_DEMO_MODE", "true")
 	// The auth store has no default password in any mode, including demo.
 	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "Route-Audit-Passphrase-42!")
+	t.Setenv("JWT_SECRET", "route-audit-signing-secret-0123456789abcdef")
 	gin.SetMode(gin.TestMode)
 
 	s := New()

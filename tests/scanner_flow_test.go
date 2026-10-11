@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +41,7 @@ func scannerTestRouter(t *testing.T) (*gin.Engine, string) {
 	logger.SetLevel(logrus.FatalLevel)
 	svc := oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
 
-	resp, err := svc.Login(testBootstrapEmail, testBootstrapPassword)
+	resp, err := svc.Login(context.Background(), testBootstrapEmail, testBootstrapPassword, "oss", "go-tests", "127.0.0.1")
 	require.NoError(t, err, "bootstrap admin must be able to log in")
 	return router, resp.AccessToken
 }

@@ -3,14 +3,12 @@ package shared
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -83,7 +81,7 @@ func GitHubLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
 	}
 }
 
-func GitHubCallbackHandler(logger *logrus.Logger, service *auth.AuthService, allowedDomains []string) gin.HandlerFunc {
+func GitHubCallbackHandler(logger *logrus.Logger, service *authn.Service, allowedDomains []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		config := initGitHubOAuthConfig()
 		if config == nil {
@@ -160,47 +158,29 @@ func GitHubCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 			ghUserName = ghUser.Login
 		}
 
-		existingUser, err := service.GetUserByEmail(ghUser.Email)
+		existingUser, err := service.EnsureExternalUser(c.Request.Context(), ghUser.Email, ghUserName, "")
 		if err != nil {
-			newUser := &auth.User{
-				Email:    strings.ToLower(strings.TrimSpace(ghUser.Email)),
-				Name:     ghUserName,
-				Password: fmt.Sprintf("github-oauth-%d", ghUser.ID),
-				Role:     "viewer",
-			}
-			if err := service.Register(newUser); err != nil {
-				logger.WithError(err).Error("Failed to create user from GitHub OAuth")
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
-				return
-			}
-			existingUser = newUser
+			logger.WithError(err).Error("Failed to resolve user from GitHub OAuth")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+			return
 		}
 
 		edition := normalizeAuthEdition(requestedEdition)
-		if edition == "" {
-			edition = editionForRole(existingUser.Role, "")
-		}
 
-		accessToken, err := service.TokenManager().GenerateToken(existingUser, edition)
+		pair, err := service.IssueTokens(c.Request.Context(), existingUser, edition, c.Request.UserAgent(), c.ClientIP())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 			return
 		}
 
-		refreshToken, err := service.TokenManager().GenerateRefreshToken(existingUser)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
-			return
-		}
-
 		params := url.Values{}
-		params.Set("access_token", accessToken)
-		params.Set("refresh_token", refreshToken)
-		params.Set("edition", edition)
+		params.Set("access_token", pair.AccessToken)
+		params.Set("refresh_token", pair.RefreshToken)
+		params.Set("edition", editionForRole(string(existingUser.Role), requestedEdition))
 		params.Set("user_id", existingUser.ID)
 		params.Set("user_name", existingUser.Name)
 		params.Set("user_email", existingUser.Email)
-		params.Set("user_role", existingUser.Role)
+		params.Set("user_role", string(existingUser.Role))
 		if token.AccessToken != "" {
 			params.Set("github_token", token.AccessToken)
 		}

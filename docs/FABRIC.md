@@ -49,7 +49,7 @@ Red edges are attack path. Magenta edges are cryptographic. Control mappings on 
 
 Enterprise rights are licensed separately. See [LEGAL.md](../LEGAL.md) and [editions.md](editions.md).
 
-Do not open issues or pull requests that contain customer hostnames, secrets, or production telemetry. See [PRIVACY.md](../PRIVACY.md) and [DATASETS.md](DATASETS.md).
+Do not open issues or pull requests that contain customer hostnames, secrets, or production telemetry. See [PRIVACY.md](../PRIVACY.md) and [DATASETS.md](../DATASETS.md).
 
 ## Visual language
 

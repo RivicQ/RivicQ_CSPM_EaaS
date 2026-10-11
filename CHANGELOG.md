@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Embedded (Infineon) and identity (G+D) vertical slice** — vendor-neutral domain profiles (`internal/profile`), unified crypto artifact model (`internal/cryptoart`), static firmware analysis (`internal/firmware`), identity/certificate analysis (`internal/identity`, `internal/certeng`). Metadata only: no firmware execution and no private-key/SIM/SE secret extraction.
+- **CLI:** `rivicq firmware scan|cbom|pqc|compare`, `rivicq identity scan|cbom|pqc`.
+- **API:** `POST/GET /api/v1/firmware/*` and `/api/v1/identity/*` (`analyze`, `compare`, `profiles`, `limits`) with RBAC (`cbom:read` / `scans:start`), tenant isolation, size caps, timeouts and audit logging. Wired via `shared.SetupFirmwareIdentityRoutes` so both OSS and Enterprise editions serve them.
+- **Fixtures:** `fixtures/partners/infineon/`, `fixtures/partners/gd/` (synthetic only).
+- **Docs:** INFINEON, GD, EMBEDDED_CRYPTO, FIRMWARE_ANALYSIS, IDENTITY_CRYPTO, DEVICE_TO_CLOUD, PQC_EMBEDDED, PQC_IDENTITY, CRYPTO_AGILITY, PARTNER_VALIDATION, FIRMWARE_IDENTITY_API, plus a working POC at `scripts/poc/partner_artifact_analysis.sh`.
+
 ### Changed
 - **Cryptographic Security Posture Management** — Community is CBOM + SBOM. QBOM, HBOM, AIBOM, and IBOM are Enterprise (APIs return 403 on OSS). Local PQC classes on CBOM findings stay Community.
 - **Public website chrome** — Home, Product, CSPM, CBOM, PQC, Enterprise, Security, Pricing, Request demo, IBM Partner Plus, and Contact share the rivicq.com nebula shell (black `#000000`, violet `#7C3AED`, Inter, pill CTAs). Contact is a marketing page, not a cream Command Center card. Console Overview keeps the same tokens.

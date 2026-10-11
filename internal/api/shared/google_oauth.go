@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -108,7 +108,7 @@ func GoogleLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
 	}
 }
 
-func GoogleCallbackHandler(logger *logrus.Logger, service *auth.AuthService, allowedDomains []string) gin.HandlerFunc {
+func GoogleCallbackHandler(logger *logrus.Logger, service *authn.Service, allowedDomains []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		config := initGoogleOAuthConfig()
 		if config == nil {
@@ -154,7 +154,7 @@ func GoogleCallbackHandler(logger *logrus.Logger, service *auth.AuthService, all
 		params.Set("user_id", result.User.ID)
 		params.Set("user_name", result.User.Name)
 		params.Set("user_email", result.User.Email)
-		params.Set("user_role", result.User.Role)
+		params.Set("user_role", string(result.User.Role))
 		c.Redirect(http.StatusTemporaryRedirect, buildOAuthFrontendRedirect(params))
 	}
 }
@@ -163,12 +163,12 @@ type googleOAuthCompletion struct {
 	AccessToken  string
 	RefreshToken string
 	Edition      string
-	User         *auth.User
+	User         *authn.User
 }
 
 func completeGoogleOAuth(
 	logger *logrus.Logger,
-	service *auth.AuthService,
+	service *authn.Service,
 	allowedDomains []string,
 	config *oauth2.Config,
 	code string,
@@ -208,45 +208,28 @@ func completeGoogleOAuth(
 		return nil, fmt.Errorf("email domain not allowed")
 	}
 
-	existingUser, err := service.GetUserByEmail(googleUser.Email)
+	user, err := service.EnsureExternalUser(context.Background(), googleUser.Email, googleUser.Name, "")
 	if err != nil {
-		newUser := &auth.User{
-			Email:    strings.ToLower(strings.TrimSpace(googleUser.Email)),
-			Name:     googleUser.Name,
-			Password: fmt.Sprintf("google-oauth-%s", googleUser.Sub),
-			Role:     "viewer",
-		}
-		if err := service.Register(newUser); err != nil {
-			logger.WithError(err).Error("Failed to create user from Google OAuth")
-			return nil, fmt.Errorf("failed to create user")
-		}
-		existingUser = newUser
+		logger.WithError(err).Error("Failed to resolve user from Google OAuth")
+		return nil, fmt.Errorf("failed to create user")
 	}
 
 	edition := normalizeAuthEdition(requestedEdition)
-	if edition == "" {
-		edition = editionForRole(existingUser.Role, "")
-	}
 
-	accessToken, err := service.TokenManager().GenerateToken(existingUser, edition)
+	pair, err := service.IssueTokens(context.Background(), user, edition, "", "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token")
 	}
 
-	refreshToken, err := service.TokenManager().GenerateRefreshToken(existingUser)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate refresh token")
-	}
-
 	return &googleOAuthCompletion{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		Edition:      edition,
-		User:         existingUser,
+		AccessToken:  pair.AccessToken,
+		RefreshToken: pair.RefreshToken,
+		Edition:      editionForRole(string(user.Role), requestedEdition),
+		User:         user,
 	}, nil
 }
 
-func GoogleExchangeHandler(logger *logrus.Logger, service *auth.AuthService, allowedDomains []string) gin.HandlerFunc {
+func GoogleExchangeHandler(logger *logrus.Logger, service *authn.Service, allowedDomains []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		config := initGoogleOAuthConfig()
 		if config == nil {
@@ -283,7 +266,7 @@ func GoogleExchangeHandler(logger *logrus.Logger, service *auth.AuthService, all
 				ID:    result.User.ID,
 				Name:  result.User.Name,
 				Email: result.User.Email,
-				Role:  result.User.Role,
+				Role:  string(result.User.Role),
 			},
 			"edition": result.Edition,
 		})

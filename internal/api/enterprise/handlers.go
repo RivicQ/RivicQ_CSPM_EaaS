@@ -26,7 +26,7 @@ import (
 // SetupRoutes configures Enterprise API routes with IBMQ integration
 func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) {
 	authService := shared.SetupStandardAuth(router, db, logger)
-	enterpriseAuth := authService.JWTAuthMiddleware(nil)
+	enterpriseAuth := authService.AuthenticateMiddleware()
 
 	// Initialize Enterprise database with fallback.
 	//

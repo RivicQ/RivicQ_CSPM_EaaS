@@ -30,6 +30,22 @@ func main() {
 			}
 			os.Exit(1)
 		}
+	case "firmware":
+		if err := runFirmware(args); err != nil {
+			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
+			if _, ok := err.(failOnError); ok {
+				os.Exit(intelligence.ExitFailOn)
+			}
+			os.Exit(1)
+		}
+	case "identity":
+		if err := runIdentity(args); err != nil {
+			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
+			if _, ok := err.(failOnError); ok {
+				os.Exit(intelligence.ExitFailOn)
+			}
+			os.Exit(1)
+		}
 	case "version", "-version", "--version":
 		fmt.Println("rivicq 0.1.0")
 	case "help", "-h", "--help":
@@ -47,6 +63,8 @@ func usage() {
 Usage:
   rivicq scan <path> [flags]
   rivicq sbom|cbom|vuln|secrets|iac|compliance|policy <path>
+  rivicq firmware scan|cbom|pqc|compare <file-or-dir> [flags]
+  rivicq identity scan|cbom|pqc <file-or-dir> [flags]
 
 Flags:
   --format table|json     output format (default table)
@@ -66,6 +84,8 @@ Examples:
   rivicq scan . --fail-on high
   rivicq cbom ./src --format json
   rivicq scan fixtures/crypto-test --include-fixtures --fail-on NONE --format json
+  rivicq firmware scan device.bin --profile embedded/infineon --device-lifetime 10y+
+  rivicq identity scan device.pem --profile identity/gd --format json
 `)
 }
 
@@ -274,6 +294,10 @@ func walkRepo(root string, includeFixtures bool) ([]shared.RepoFile, error) {
 		// Scanner implementations speak weak crypto on purpose (probe clients / detectors).
 		switch name {
 		case "tls_scanner.go", "ssh_scanner.go", "http_scanner.go", "github_content_scan.go":
+			return nil
+		}
+		// Detection catalogs list algorithm names (incl. 3DES/RC4) as data, not usage.
+		if rel == "internal/cryptoscan/detect.go" || rel == "internal/intelligence/pqc_class.go" {
 			return nil
 		}
 		ext := strings.ToLower(filepath.Ext(path))

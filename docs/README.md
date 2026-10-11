@@ -42,6 +42,18 @@ UI colors follow the **Security Cloud** nebula ledger (`#000000` canvas, `#0A0A0
 - [Optional scanners](INTEGRATIONS.md) — Syft, Trivy, Grype, Gitleaks, OSV on PATH
 - [Rollback Runbook](ROLLBACK_RUNBOOK.md)
 
+## Partners (Infineon / G+D)
+
+One vendor-neutral platform; Infineon and G+D are domain profiles, not forks.
+
+- [Partner technical audit](PARTNER_TECHNICAL_AUDIT.md) — inventory, gaps, plan
+- [Infineon readiness](INFINEON.md) · [G+D readiness](GD.md)
+- [Firmware static analysis](FIRMWARE_ANALYSIS.md) · [Identity & certificate analysis](IDENTITY_CRYPTO.md)
+- [Embedded crypto model](EMBEDDED_CRYPTO.md) · [Device-to-cloud path](DEVICE_TO_CLOUD.md)
+- [PQC: embedded](PQC_EMBEDDED.md) · [PQC: identity](PQC_IDENTITY.md) · [Crypto-agility](CRYPTO_AGILITY.md)
+- [Partner validation](PARTNER_VALIDATION.md) · [fixtures](../fixtures/partners/README.md)
+- [Firmware & identity analysis API](FIRMWARE_IDENTITY_API.md) · [POC script](../scripts/poc/partner_artifact_analysis.sh)
+
 ## Developers
 
 - [OpenAPI spec](openapi.yaml)

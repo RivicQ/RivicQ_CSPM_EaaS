@@ -198,6 +198,163 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /api/v1/firmware/analyze:
+    post:
+      tags:
+        - Firmware
+      summary: Statically analyze a firmware artifact
+      description: >-
+        Metadata-only static analysis of untrusted firmware. The artifact is
+        never executed and no keys are extracted. Requires the scans:start
+        permission. Accepts multipart/form-data (file, profile,
+        device_lifetime) or application/json (file_name, content_base64).
+      operationId: analyzeFirmware
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                profile:
+                  type: string
+                  example: embedded/infineon
+                device_lifetime:
+                  type: string
+                  example: 10y+
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                content_base64:
+                  type: string
+                profile:
+                  type: string
+                device_lifetime:
+                  type: string
+      responses:
+        '200':
+          description: Firmware report with CBOM, PQC plan and gate decision
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '413':
+          description: Artifact exceeds the size limit
+        '422':
+          description: Artifact could not be analyzed
+
+  /api/v1/firmware/compare:
+    post:
+      tags:
+        - Firmware
+      summary: Diff two firmware artifacts
+      description: Static metadata diff. Requires scans:start.
+      operationId: compareFirmware
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                  format: binary
+                to:
+                  type: string
+                  format: binary
+                profile:
+                  type: string
+      responses:
+        '200':
+          description: Firmware diff
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/firmware/profiles:
+    get:
+      tags:
+        - Firmware
+      summary: List embedded-domain analysis profiles
+      operationId: listFirmwareProfiles
+      responses:
+        '200':
+          description: Data-driven detection profiles
+
+  /api/v1/firmware/limits:
+    get:
+      tags:
+        - Firmware
+      summary: Firmware analysis safety limits
+      operationId: firmwareLimits
+      responses:
+        '200':
+          description: Hard artifact-processing limits
+
+  /api/v1/identity/analyze:
+    post:
+      tags:
+        - Identity
+      summary: Statically analyze an identity/connectivity artifact
+      description: >-
+        Metadata-only. No private keys, credentials, SIM or secure-element
+        secrets are read or emitted. Requires scans:start.
+      operationId: analyzeIdentity
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                profile:
+                  type: string
+                  example: identity/gd
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                content_base64:
+                  type: string
+                profile:
+                  type: string
+      responses:
+        '200':
+          description: Identity report with certificates, PKI, CBOM and PQC plan
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '413':
+          description: Artifact exceeds the size limit
+
+  /api/v1/identity/profiles:
+    get:
+      tags:
+        - Identity
+      summary: List identity-domain analysis profiles
+      operationId: listIdentityProfiles
+      responses:
+        '200':
+          description: Data-driven detection profiles
+
+  /api/v1/identity/limits:
+    get:
+      tags:
+        - Identity
+      summary: Identity analysis safety limits
+      operationId: identityLimits
+      responses:
+        '200':
+          description: Hard artifact-processing limits
+
   /api/v1/engine/discover:
     post:
       tags:

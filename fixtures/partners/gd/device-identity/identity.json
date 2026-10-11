@@ -1,0 +1,7 @@
+{
+  "device_identity": "certificate-bound",
+  "euicc": "ISD-R",
+  "secure_element": "GlobalPlatform JavaCard",
+  "crypto": {"library": "mbedtls", "tls": "TLS1.3"},
+  "note": "synthetic fixture, no subscriber secrets"
+}

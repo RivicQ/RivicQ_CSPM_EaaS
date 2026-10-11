@@ -15,6 +15,18 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 ## Scanner accuracy
 
 - RSA-2048 is **classified**, not automatically marked vulnerable.
+- Firmware/identity analysis (`rivicq firmware|identity`) is **static and
+  evidence-based** (strings/sections/records). It does not disassemble, execute,
+  flash, read fuses, or reverse engineer silicon, and it never extracts private
+  keys or SIM/SE/subscriber secrets. See [FIRMWARE_ANALYSIS.md](FIRMWARE_ANALYSIS.md)
+  and [IDENTITY_CRYPTO.md](IDENTITY_CRYPTO.md).
+- Library *presence* is reported distinctly from algorithm *use*. Detection is
+  token-boundary matched to avoid cross-algorithm false positives.
+- `firmware`/`identity` API routes (`/api/v1/firmware/*`, `/api/v1/identity/*`)
+  are available in both OSS and Enterprise editions (reads require `cbom:read`,
+  analysis requires `scans:start`); the CLI remains a first-class surface. See
+  [FIRMWARE_IDENTITY_API.md](FIRMWARE_IDENTITY_API.md). Live Infineon/G+D
+  connectors are **P2** and marked `CONNECTOR REQUIRED`.
 - CVE overlay uses **exact** package versions. Rejected NVD entries are not treated as vulns.
 - Optional PATH tools (Syft, Trivy, Grype, Gitleaks, OSV Scanner) run on local directory scans when installed. They are skipped when missing. Set `RIVICQ_EXTERNAL_TOOLS=0` to disable. Gitleaks findings never include secret values. See [INTEGRATIONS.md](INTEGRATIONS.md).
 - `rivicq scan . --fail-on critical|high` (severity) in addition to policy BLOCK/WARN. See [CORE_ENGINE.md](CORE_ENGINE.md).
@@ -50,4 +62,4 @@ Optional cloud or quantum connectors use customer credentials. Control mappings 
 
 ## Datasets
 
-See [DATASETS.md](DATASETS.md). Samples are synthetic. Do not commit secrets.
+See [DATASETS.md](../DATASETS.md). Samples are synthetic. Do not commit secrets.

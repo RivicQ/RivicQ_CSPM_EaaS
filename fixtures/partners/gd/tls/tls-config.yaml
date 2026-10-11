@@ -1,0 +1,4 @@
+tls:
+  library: OpenSSL
+  min_version: TLS1.2
+  ciphers: [ECDHE, AES-256-GCM, SHA-256]

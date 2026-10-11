@@ -14,19 +14,30 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 )
 
-func setupPlatform(t *testing.T) (*gin.Engine, *auth.AuthService) {
+func newTestAuth(t *testing.T) *authn.Service {
+	t.Helper()
+	svc, err := authn.NewService(authn.Config{
+		Secret:     "platform-test-signing-secret-0123456789abcdef",
+		Issuer:     "rivicq-platform-test",
+		Audience:   "rivicq-platform-test",
+		AccessTTL:  15 * 60, // seconds
+		RefreshTTL: 24 * 60 * 60,
+	}, authn.NewMemStore())
+	require.NoError(t, err)
+	return svc
+}
+
+func setupPlatform(t *testing.T) (*gin.Engine, *authn.Service) {
 	t.Helper()
 	t.Setenv("CRYPTOBOM_BOOTSTRAP_PASSWORD", "test-secure-password-1234")
 	t.Setenv("DISCORD_WEBHOOK_URL", "")
 	t.Setenv("RIVICQ_PAYMENTS_WEBHOOK_SECRET", "")
 	t.Setenv("STRIPE_SECRET_KEY", "")
 	gin.SetMode(gin.TestMode)
-	store, err := auth.NewMockUserStore()
-	require.NoError(t, err)
-	svc := auth.NewAuthService("test-secret", store)
+	svc := newTestAuth(t)
 	r := gin.New()
 	g := r.Group("/api/v1")
 	SetupRoutes(g, logrus.New(), svc, nil)
@@ -108,9 +119,7 @@ func TestPaymentWebhookIdempotentWhenConfigured(t *testing.T) {
 	t.Setenv("CRYPTOBOM_BOOTSTRAP_PASSWORD", "test-secure-password-1234")
 	t.Setenv("RIVICQ_PAYMENTS_WEBHOOK_SECRET", "whsec_test")
 	gin.SetMode(gin.TestMode)
-	store, err := auth.NewMockUserStore()
-	require.NoError(t, err)
-	svc := auth.NewAuthService("test-secret", store)
+	svc := newTestAuth(t)
 	r := gin.New()
 	g := r.Group("/api/v1")
 	SetupRoutes(g, logrus.New(), svc, nil)

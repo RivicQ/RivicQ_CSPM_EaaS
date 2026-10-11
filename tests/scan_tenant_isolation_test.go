@@ -2,24 +2,25 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/rivic-q/cryptobom-saas/internal/api/oss"
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 )
 
-const scanTenantSecret = "scan-tenant-isolation-secret"
+const scanTenantSecret = "scan-tenant-isolation-secret-0123456789"
 
 func scanTenantRouter(t *testing.T) *gin.Engine {
 	t.Helper()
@@ -38,21 +39,34 @@ func scanTenantRouter(t *testing.T) *gin.Engine {
 	return router
 }
 
-// tenantBearer mints a real access token through the production TokenManager.
+// newTenantMinter builds a standalone authn service sharing the router's
+// signing secret so tests can mint real access tokens for arbitrary tenants.
+func newTenantMinter(t *testing.T) *authn.Service {
+	t.Helper()
+	svc, err := authn.NewService(authn.Config{
+		Secret:     scanTenantSecret,
+		Issuer:     "rivicq",
+		Audience:   "rivicq-api",
+		AccessTTL:  15 * time.Minute,
+		RefreshTTL: 7 * 24 * time.Hour,
+	}, authn.NewMemStore())
+	require.NoError(t, err)
+	return svc
+}
+
+// tenantBearer mints a real access token through the production authn issuer.
 // Hand-rolling JWT claims is no longer sufficient because validation is strict
-// about issuer, audience, token use and expiry.
+// about issuer, audience and expiry.
 func tenantBearer(t *testing.T, tenantID string) string {
 	t.Helper()
-	tm := auth.NewTokenManager(scanTenantSecret)
-	tok, err := tm.GenerateToken(&auth.User{
-		ID:       uuid.New().String(),
-		TenantID: tenantID,
-		Email:    tenantID + "@example.com",
-		Name:     "Isolation " + tenantID,
-		Role:     "operator",
-	}, "oss")
+	svc := newTenantMinter(t)
+	u, err := svc.EnsureExternalUser(context.Background(), tenantID+"@example.com", "Isolation "+tenantID, "")
 	require.NoError(t, err)
-	return tok
+	u.TenantID = tenantID
+	u.Role = "operator"
+	pair, err := svc.IssueTokens(context.Background(), u, "oss", "go-tests", "127.0.0.1")
+	require.NoError(t, err)
+	return pair.AccessToken
 }
 
 func postScan(t *testing.T, router *gin.Engine, token, target string) string {
@@ -139,13 +153,14 @@ func TestInvalidBearerDoesNotFallBackToPublicTenant(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// A token signed with the right secret but the wrong claims must also fail.
-	tm := auth.NewTokenManager(scanTenantSecret)
-	refresh, err := tm.GenerateRefreshToken(&auth.User{
-		ID: uuid.New().String(), TenantID: "tenant-a",
-		Email: "tenant-a@example.com", Role: "operator",
-	})
+	svc := newTenantMinter(t)
+	u, err := svc.EnsureExternalUser(context.Background(), "tenant-a@example.com", "Isolation tenant-a", "")
 	require.NoError(t, err)
-	w = getScan(router, refresh, id, nil)
+	u.TenantID = "tenant-a"
+	u.Role = "operator"
+	refreshPair, err := svc.IssueTokens(context.Background(), u, "oss", "go-tests", "127.0.0.1")
+	require.NoError(t, err)
+	w = getScan(router, refreshPair.RefreshToken, id, nil)
 	assert.Equal(t, http.StatusUnauthorized, w.Code, "a refresh token must not work as an access token")
 }
 

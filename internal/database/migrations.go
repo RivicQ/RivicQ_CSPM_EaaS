@@ -372,5 +372,43 @@ func coreMigrations() []Migration {
 				EXCEPTION WHEN others THEN RAISE NOTICE 'quantum_attestations ownership constraint not added'; END $$;`,
 			},
 		},
+		{
+			ID:   "0008_authn_lifecycle",
+			Name: "auth lifecycle: users flags, refresh sessions, single-use tokens",
+			Statements: []string{
+				// User lifecycle flags. Existing rows default to verified so a
+				// converging deployment does not lock out current accounts.
+				`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT TRUE;`,
+				`ALTER TABLE users ADD COLUMN IF NOT EXISTS disabled BOOLEAN NOT NULL DEFAULT FALSE;`,
+
+				// Refresh sessions. Raw refresh tokens are never stored, only their
+				// SHA-256. RotatedTo/RevokedAt make token reuse detectable.
+				`CREATE TABLE IF NOT EXISTS auth_sessions (
+					id TEXT PRIMARY KEY,
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					refresh_hash TEXT NOT NULL UNIQUE,
+					user_agent TEXT NOT NULL DEFAULT '',
+					ip TEXT NOT NULL DEFAULT '',
+					created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+					expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+					rotated_to TEXT NOT NULL DEFAULT '',
+					revoked_at TIMESTAMP WITH TIME ZONE
+				);`,
+				`CREATE INDEX IF NOT EXISTS idx_auth_sessions_user ON auth_sessions(user_id);`,
+				`CREATE INDEX IF NOT EXISTS idx_auth_sessions_expires ON auth_sessions(expires_at);`,
+
+				// Single-use out-of-band tokens (email verification, password reset,
+				// MFA login challenge), addressed by SHA-256 hash.
+				`CREATE TABLE IF NOT EXISTS auth_tokens (
+					hash TEXT PRIMARY KEY,
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					purpose TEXT NOT NULL,
+					expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+					used_at TIMESTAMP WITH TIME ZONE,
+					created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+				);`,
+				`CREATE INDEX IF NOT EXISTS idx_auth_tokens_user_purpose ON auth_tokens(user_id, purpose);`,
+			},
+		},
 	}
 }

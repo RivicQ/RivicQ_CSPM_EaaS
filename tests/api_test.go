@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -15,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/benchmarks"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 )
@@ -25,7 +26,7 @@ type TestSuite struct {
 	suite.Suite
 	router *gin.Engine
 	db     *database.DB
-	auth   *auth.AuthService
+	auth   *authn.Service
 }
 
 // SetupSuite initializes the test suite
@@ -37,10 +38,19 @@ func (suite *TestSuite) SetupSuite() {
 	suite.db = &database.DB{}
 
 	// Initialize auth service — use a test-only bootstrap password
-	suite.T().Setenv("CRYPTOBOM_BOOTSTRAP_PASSWORD", "test-bootstrap-password")
-	mockStore, err := auth.NewMockUserStore()
-	require.NoError(suite.T(), err, "NewMockUserStore must succeed when CRYPTOBOM_BOOTSTRAP_PASSWORD is set")
-	suite.auth = auth.NewAuthService("test-secret", mockStore)
+	var err error
+	suite.auth, err = authn.NewService(authn.Config{
+		Secret:            "tests-api-signing-secret-0123456789abcdef",
+		Issuer:            "rivicq-tests",
+		Audience:          "rivicq-tests",
+		AccessTTL:         15 * 60,
+		RefreshTTL:        24 * 60 * 60,
+		DemoMode:          true,
+		BootstrapPassword: testBootstrapPassword,
+		DefaultTenantID:   "tenant-1",
+	}, authn.NewMemStore())
+	require.NoError(suite.T(), err, "auth service must build")
+	require.NoError(suite.T(), suite.auth.SeedBootstrap(context.Background()))
 }
 
 // TearDownSuite cleans up after tests
@@ -165,6 +175,9 @@ func (suite *TestSuite) TestCryptoAssetsList() {
 // TestAuthentication tests JWT authentication
 func (suite *TestSuite) TestAuthentication() {
 	bootstrapPwd := os.Getenv("CRYPTOBOM_BOOTSTRAP_PASSWORD")
+	if bootstrapPwd == "" {
+		bootstrapPwd = testBootstrapPassword
+	}
 
 	// Test successful login
 	loginData := map[string]string{
@@ -186,7 +199,12 @@ func (suite *TestSuite) TestAuthentication() {
 
 		// Mock authentication
 		if login["email"] == "analyst@rivicq.com" && login["password"] == bootstrapPwd {
-			token, _ := suite.auth.Login(login["email"], login["password"])
+			res, err := suite.auth.Login(context.Background(), login["email"], login["password"], "oss", "test", "127.0.0.1")
+			require.NoError(suite.T(), err)
+			var token string
+			if res != nil {
+				token = res.AccessToken
+			}
 			c.JSON(200, gin.H{
 				"token":   token,
 				"user":    gin.H{"id": "user-1", "email": login["email"], "role": "admin"},

@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/middleware"
 	"github.com/sirupsen/logrus"
 )
@@ -32,7 +33,7 @@ func NewService(logger *logrus.Logger) *Service {
 }
 
 // SetupRoutes registers versioned commercial endpoints on /api/v1.
-func SetupRoutes(router *gin.RouterGroup, logger *logrus.Logger, authService *auth.AuthService, db *sql.DB) {
+func SetupRoutes(router *gin.RouterGroup, logger *logrus.Logger, authService *authn.Service, db *sql.DB) {
 	svc := NewService(logger)
 	svc.DB = db
 	leadLimit := middleware.RateLimit(8)
@@ -49,7 +50,7 @@ func SetupRoutes(router *gin.RouterGroup, logger *logrus.Logger, authService *au
 
 	if authService != nil {
 		admin := router.Group("")
-		admin.Use(authService.JWTAuthMiddleware(nil), auth.RequireRole("admin"))
+		admin.Use(authService.AuthenticateMiddleware(), auth.RequireRole("admin"))
 		admin.GET("/leads", svc.listLeads)
 		admin.GET("/opportunities", svc.listOpportunities)
 		admin.POST("/integrations/discord/test", svc.discordTest)

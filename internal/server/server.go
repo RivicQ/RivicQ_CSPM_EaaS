@@ -357,6 +357,57 @@ func (s *Server) registerOpenAPISpec() {
 						"responses": gin.H{"200": gin.H{"description": "CSPM posture data"}},
 					},
 				},
+				"/api/v1/firmware/analyze": gin.H{
+					"post": gin.H{
+						"summary":     "Statically analyze a firmware artifact (multipart file or JSON base64)",
+						"description": "Metadata-only static analysis. The artifact is never executed and no keys are extracted. Requires scans:start.",
+						"responses": gin.H{
+							"200": gin.H{"description": "Firmware report with CBOM, PQC plan and gate decision"},
+							"413": gin.H{"description": "Artifact exceeds size limit"},
+						},
+					},
+				},
+				"/api/v1/firmware/compare": gin.H{
+					"post": gin.H{
+						"summary":     "Diff two firmware artifacts (multipart from/to or JSON base64)",
+						"description": "Static metadata diff. Requires scans:start.",
+						"responses":   gin.H{"200": gin.H{"description": "Firmware diff"}},
+					},
+				},
+				"/api/v1/firmware/profiles": gin.H{
+					"get": gin.H{
+						"summary":   "List embedded-domain analysis profiles",
+						"responses": gin.H{"200": gin.H{"description": "Data-driven detection profiles"}},
+					},
+				},
+				"/api/v1/firmware/limits": gin.H{
+					"get": gin.H{
+						"summary":   "Firmware analysis safety limits",
+						"responses": gin.H{"200": gin.H{"description": "Hard artifact-processing limits"}},
+					},
+				},
+				"/api/v1/identity/analyze": gin.H{
+					"post": gin.H{
+						"summary":     "Statically analyze an identity artifact (multipart file or JSON base64)",
+						"description": "Metadata-only. No private keys, credentials, SIM or secure-element secrets are read or emitted. Requires scans:start.",
+						"responses": gin.H{
+							"200": gin.H{"description": "Identity report with certificates, PKI, CBOM and PQC plan"},
+							"413": gin.H{"description": "Artifact exceeds size limit"},
+						},
+					},
+				},
+				"/api/v1/identity/profiles": gin.H{
+					"get": gin.H{
+						"summary":   "List identity-domain analysis profiles",
+						"responses": gin.H{"200": gin.H{"description": "Data-driven detection profiles"}},
+					},
+				},
+				"/api/v1/identity/limits": gin.H{
+					"get": gin.H{
+						"summary":   "Identity analysis safety limits",
+						"responses": gin.H{"200": gin.H{"description": "Hard artifact-processing limits"}},
+					},
+				},
 			},
 		})
 	})

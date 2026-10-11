@@ -105,7 +105,17 @@ Same nebula chrome as the website (black / violet / Inter). Discovery, each dete
 make build-rivicq
 ./bin/rivicq scan .
 ./bin/rivicq scan . --format json --fail-on BLOCK
+
+# Embedded (Infineon) and identity (G+D) static analysis
+./bin/rivicq firmware scan    fixtures/partners/infineon/classical-mcu/firmware.bin
+./bin/rivicq firmware compare fixtures/partners/infineon/firmware-diff/v1.bin \
+                              fixtures/partners/infineon/firmware-diff/v2.bin
+./bin/rivicq identity scan    fixtures/partners/gd/certificate/device-rsa2048.pem
 ```
+
+Static, metadata-only analysis: no firmware execution, no private-key/SIM/SE secret extraction.
+See [docs/FIRMWARE_ANALYSIS.md](docs/FIRMWARE_ANALYSIS.md), [docs/IDENTITY_CRYPTO.md](docs/IDENTITY_CRYPTO.md),
+and the [API](docs/FIRMWARE_IDENTITY_API.md) (`/api/v1/firmware/*`, `/api/v1/identity/*`).
 
 Composite action: [`.github/actions/rivicq-scan`](.github/actions/rivicq-scan). Workflow: [`.github/workflows/rivicq-security.yml`](.github/workflows/rivicq-security.yml).
 
@@ -152,6 +162,10 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Datasets | [DATASETS.md](DATASETS.md) |
 | Security intelligence | [docs/security-intelligence.md](docs/security-intelligence.md) |
 | Optional scanners | [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) |
+| Partners (Infineon / G+D) | [docs/PARTNER_TECHNICAL_AUDIT.md](docs/PARTNER_TECHNICAL_AUDIT.md) · [INFINEON](docs/INFINEON.md) · [G+D](docs/GD.md) |
+| Firmware analysis | [docs/FIRMWARE_ANALYSIS.md](docs/FIRMWARE_ANALYSIS.md) · [PQC embedded](docs/PQC_EMBEDDED.md) |
+| Identity analysis | [docs/IDENTITY_CRYPTO.md](docs/IDENTITY_CRYPTO.md) · [PQC identity](docs/PQC_IDENTITY.md) |
+| Firmware & identity API | [docs/FIRMWARE_IDENTITY_API.md](docs/FIRMWARE_IDENTITY_API.md) · [POC](scripts/poc/partner_artifact_analysis.sh) |
 | CBOM quickstart | [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md) |
 | Deployment | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | Environment | [docs/DEPLOY_ENV.md](docs/DEPLOY_ENV.md) |
@@ -167,14 +181,20 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 ## Repository layout
 
 ```
-cmd/rivicq/             Community CLI
+cmd/rivicq/             Community CLI (scan/sbom/cbom/vuln/secrets/iac/compliance/policy + firmware/identity)
 cmd/server/             OSS (:8080) and Enterprise (:9090) API
 internal/discovery/     TLS, SSH, HTTP, SBOM scanners
 internal/intelligence/  Findings, risk, policy, CycloneDX
-internal/auth/          JWT, MFA, RBAC helpers
-web/                    React SaaS (sky-blue and white theme)
+internal/auth/          RBAC helpers and route permission table
+internal/authn/         JWT, MFA, accounts, sessions, tokens
+internal/profile/       Vendor-neutral domain profiles (embedded/*, identity/*)
+internal/cryptoart/     Unified crypto artifact + relation model
+internal/certeng/       Shared X.509 metadata engine
+internal/firmware/      Static firmware analysis (no execution)
+internal/identity/      Static identity/certificate analysis (no secrets)
+web/                    React SaaS (deep-space nebula: black / violet / Inter)
 datasets/               Expected results for fixture scans
-fixtures/               Synthetic known-bad / known-good samples
+fixtures/               Synthetic known-bad / known-good samples (incl. fixtures/partners/)
 deploy/helm/            OSS and Enterprise charts
 ```
 

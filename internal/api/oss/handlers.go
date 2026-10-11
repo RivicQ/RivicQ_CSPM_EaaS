@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/api/shared"
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/core"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
@@ -16,7 +16,7 @@ import (
 
 // SetupRoutes configures OSS API routes (Open Source edition) and returns the
 // auth service so callers (and tests) can mint tokens.
-func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger, cfg *config.OSSConfig) *auth.AuthService {
+func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger, cfg *config.OSSConfig) *authn.Service {
 	authService := shared.SetupStandardAuth(router, db, logger)
 
 	// Core CBOM Management (OSS Features)
@@ -136,6 +136,7 @@ func RegisterSupplementalRoutes(router *gin.RouterGroup, logger *logrus.Logger) 
 	}
 
 	shared.SetupIntelligenceRoutes(router, logger)
+	shared.SetupFirmwareIdentityRoutes(router, logger)
 }
 
 func attestCBOMReportOSS(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {

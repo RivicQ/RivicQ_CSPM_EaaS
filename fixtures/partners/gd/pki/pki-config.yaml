@@ -1,0 +1,5 @@
+pki:
+  ca: RivicQ Test Root CA
+  enrollment: SCEP
+  revocation: OCSP
+  crypto: {algorithms: [ECDSA, RSA, SHA-256]}

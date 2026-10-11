@@ -1,0 +1,10 @@
+# Synthetic eUICC / eSIM configuration fixture (metadata only)
+profile: GSMA SGP.22
+euicc: ISD-R enabled
+isd_p: MNO-SD present
+rsp: SM-DP+ referenced
+tokens: none
+crypto:
+  libraries: OpenSSL
+  tls: TLS1.3
+  algorithms: ECDSA, AES-256, SHA-256

@@ -77,6 +77,11 @@ var resourcePermissionTable = map[string]resourcePermissions{
 	"security":     {read: PermFindingsRead, write: PermFindingsWrite},
 	"kubernetes":   {read: PermCloudRead, write: PermCloudManage},
 	"monitoring":   {read: "", write: PermIntegrations},
+	// Firmware and identity static analysis reuse the scan/read permissions:
+	// reading profiles is CBOM metadata, and triggering an analysis is the same
+	// capability as starting a scan (starts work, changes no stored state).
+	"firmware": {read: PermCBOMRead, write: PermScansStart},
+	"identity": {read: PermCBOMRead, write: PermScansStart},
 }
 
 // exactPathPermissions covers routes whose permission is not a function of
@@ -91,12 +96,16 @@ var exactPathPermissions = map[string]Permission{
 	"/auth/logout":          "",
 	"/auth/forgot-password": "",
 	"/auth/reset-password":  "",
+	"/auth/verify-email":    "",
 	"/auth/change-password": "",
 	"/auth/mfa/setup":       "",
 	"/auth/mfa/verify":      "",
 	"/auth/mfa/confirm":     "",
 	"/auth/mfa/disable":     "",
 	"/auth/me":              "",
+	// Users revoke their own sessions; handler-level checks enforce ownership.
+	"/auth/sessions":     "",
+	"/auth/sessions/:id": "",
 	// Changing another user's role is an administrative act.
 	"/auth/workspace/users/:id/role": PermUsersManage,
 
