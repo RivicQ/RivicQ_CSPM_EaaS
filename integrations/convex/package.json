@@ -1,0 +1,20 @@
+{
+  "name": "rivicq-convex",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Inert Convex backend scaffold for the RivicQ CSPM stack pivot.",
+  "type": "module",
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy",
+    "codegen": "convex codegen"
+  },
+  "dependencies": {
+    "convex": "^1.31.0",
+    "@convex-dev/better-auth": "^0.12.5",
+    "better-auth": "~1.6.15"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

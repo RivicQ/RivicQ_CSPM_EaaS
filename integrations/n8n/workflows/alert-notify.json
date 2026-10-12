@@ -1,0 +1,94 @@
+{
+  "name": "alert-notify",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "finding-critical",
+        "method": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-finding-critical",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "129f4cf6-05c7-42bb-a244-042474f414a8"
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/{{$env[\"GITHUB_REPO_OWNER\"] || \"re1\"}}/{{$env[\"GITHUB_REPO_NAME\"] || \"CSPM\"}}/issues",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "2022-11-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "CRITICAL: {{$json[\"title\"] || \"Unknown finding\"}}"
+            },
+            {
+              "name": "body",
+              "value": "Tenant: `{{$json[\"tenantId\"] || \"n/a\"}}`\\nFinding ID: `{{$json[\"findingId\"] || \"n/a\"}}`\\nScan ID: `{{$json[\"scanId\"] || \"n/a\"}}`\\nSeverity: `{{$json[\"severity\"] || \"critical\"}}`\\nURL: {{$json[\"url\"] || \"n/a\"}}"
+            },
+            {
+              "name": "labels",
+              "value": "[\"security\", \"critical\"]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "create-github-issue",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [520, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PLACEHOLDER_GITHUB_CRED_ID",
+          "name": "github-token"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "local"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-10-12T00:00:00.000Z",
+      "updatedAt": "2025-10-12T00:00:00.000Z",
+      "id": "sec",
+      "name": "security"
+    }
+  ]
+}

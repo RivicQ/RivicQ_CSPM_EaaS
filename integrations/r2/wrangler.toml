@@ -1,0 +1,16 @@
+name = "rivicq-r2"
+main = "src/worker.ts"
+compatibility_date = "2026-01-01"
+
+# R2 bucket binding. The bucket is pre-created; the worker only signs URLs and
+# performs head/delete, it does not need public access.
+[[r2_buckets]]
+binding = "ARTIFACTS"
+bucket_name = "rivicq-artifacts"
+
+# Non-secret vars. Secrets (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
+# R2_ACCOUNT_ID) are set with `wrangler secret put`, never committed here.
+[vars]
+R2_BUCKET = "rivicq-artifacts"
+ALLOWED_ORIGIN = "https://rivicq.example"
+MAX_UPLOAD_BYTES = "10485760"

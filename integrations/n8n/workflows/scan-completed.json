@@ -1,0 +1,62 @@
+{
+  "name": "scan-completed",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "scan-completed",
+        "method": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-scan-completed",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "6c0e9d89-746e-470c-9e7a-9b2d343da28a"
+    },
+    {
+      "parameters": {
+        "message": "={{$json[\"scanId\"]}} completed for tenant {{$json[\"tenantId\"]}} ({{$json[\"findingsCount\"]}} findings).",
+        "textFormat": "markdown"
+      },
+      "id": "slack-notify",
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [520, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "PLACEHOLDER_SLACK_CRED_ID",
+          "name": "slack"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "local"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-10-12T00:00:00.000Z",
+      "updatedAt": "2025-10-12T00:00:00.000Z",
+      "id": "sca",
+      "name": "scans"
+    }
+  ]
+}

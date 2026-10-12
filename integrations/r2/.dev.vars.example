@@ -1,0 +1,8 @@
+# Local dev placeholders for `wrangler dev --config integrations/r2/wrangler.toml`.
+# Copy to .dev.vars (gitignored). Placeholders only; no real credentials.
+
+R2_ACCESS_KEY_ID=replace-me
+R2_SECRET_ACCESS_KEY=replace-me
+R2_ACCOUNT_ID=replace-me
+R2_BUCKET=rivicq-artifacts
+ALLOWED_ORIGIN=http://localhost:3000
