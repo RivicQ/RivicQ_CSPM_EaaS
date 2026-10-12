@@ -6,7 +6,6 @@ import { websiteCtaSx, websiteOutlineCtaSx } from '../../theme/websiteChrome';
 import {
   PUBLIC_ENGINE_CHIP_DEMO,
   PUBLIC_ENGINE_CHIP_DISCONNECTED,
-  PUBLIC_ENGINE_CHIP_LIVE,
   PUBLIC_ENGINE_DEMO_COPY,
   PUBLIC_ENGINE_DEPLOY_HINT,
   PUBLIC_ENGINE_IBM_PAGES,
