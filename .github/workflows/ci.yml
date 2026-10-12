@@ -91,3 +91,26 @@ jobs:
           version: v2.4.0
           install-mode: goinstall
           args: --timeout=5m ./...
+
+  datasets:
+    name: CBOM golden corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Build RivicQ CLI
+        run: go build -o bin/rivicq ./cmd/rivicq
+
+      - name: Analyze datasets (CBOM accuracy vs expected.json)
+        # Enforces datasets/**/expected.json (must_match / must_not_match /
+        # min_findings / max_block). Fails the job on any regression.
+        run: python3 scripts/analyze-datasets.py

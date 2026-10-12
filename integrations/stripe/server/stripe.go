@@ -90,7 +90,11 @@ func CheckoutHandler(w http.ResponseWriter, r *http.Request) {
 	//   w.WriteHeader(http.StatusCreated)
 	//   _ = json.NewEncoder(w).Encode(CheckoutResponse{URL: s.URL})
 	w.WriteHeader(http.StatusNotImplemented)
-	_ = json.NewEncoder(w).Encode(map[string]string{"error": "not wired; use official stripe-go checkout.SessionNew"})
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"error":      "not wired; use official stripe-go checkout.SessionNew",
+		"successUrl": successURL,
+		"cancelUrl":  cancelURL,
+	})
 }
 
 // WebhookHandler verifies the Stripe signature and records the event. The raw

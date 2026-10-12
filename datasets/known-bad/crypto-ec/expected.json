@@ -1,0 +1,12 @@
+{
+  "id": "crypto-ec-weak",
+  "title": "Elliptic-curve and PQC-era crypto markers",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/crypto-test-ec",
+  "include_fixtures": true,
+  "must_match": ["ecdsa", "pqc"],
+  "must_not_match": ["ghp_live", "aws_secret"],
+  "min_findings": 1,
+  "notes": "ECDSA (migration_required) and PQC-era identifiers (ML-KEM/ML-DSA/SLH-DSA) must appear. Declared only — nothing is executed."
+}

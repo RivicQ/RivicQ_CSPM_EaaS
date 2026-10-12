@@ -88,6 +88,29 @@ func postScan(t *testing.T, router *gin.Engine, token, target string) string {
 	return id
 }
 
+func TestScanReportIsTenantScoped(t *testing.T) {
+	router := scanTenantRouter(t)
+	tokenA := tenantBearer(t, "report-tenant-a")
+	tokenB := tenantBearer(t, "report-tenant-b")
+	idA := postScan(t, router, tokenA, "127.0.0.1")
+
+	// Cross-tenant caller must never be able to fetch another tenant's report.
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+idA+"/report", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenB)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code, w.Body.String())
+
+	// Owner: 200 when ready, or 409 while the job is still running — never a leak.
+	reqOK := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+idA+"/report", nil)
+	reqOK.Header.Set("Authorization", "Bearer "+tokenA)
+	wOK := httptest.NewRecorder()
+	router.ServeHTTP(wOK, reqOK)
+	if wOK.Code != http.StatusOK && wOK.Code != http.StatusConflict {
+		t.Fatalf("owner report status %d %s", wOK.Code, wOK.Body.String())
+	}
+}
+
 func getScan(router *gin.Engine, token, id string, extra map[string]string) *httptest.ResponseRecorder {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+id, nil)
 	if token != "" {

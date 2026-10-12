@@ -17,6 +17,13 @@ All notable changes to this project will be documented in this file.
 - **API:** `POST/GET /api/v1/firmware/*` and `/api/v1/identity/*` (`analyze`, `compare`, `profiles`, `limits`) with RBAC (`cbom:read` / `scans:start`), tenant isolation, size caps, timeouts and audit logging. Wired via `shared.SetupFirmwareIdentityRoutes` so both OSS and Enterprise editions serve them.
 - **Fixtures:** `fixtures/partners/infineon/`, `fixtures/partners/gd/` (synthetic only).
 - **Docs:** INFINEON, GD, EMBEDDED_CRYPTO, FIRMWARE_ANALYSIS, IDENTITY_CRYPTO, DEVICE_TO_CLOUD, PQC_EMBEDDED, PQC_IDENTITY, CRYPTO_AGILITY, PARTNER_VALIDATION, FIRMWARE_IDENTITY_API, plus a working POC at `scripts/poc/partner_artifact_analysis.sh`.
+- **Repository audit for G+D / Infineon evaluation** — `docs/audit/` (BASELINE, TEST_RESULTS, FEATURE_MATRIX, SECURITY_FINDINGS, CBOM_CORRECTNESS, DEVSECOPS_VERIFICATION, SECURITY_TENANCY, RELIABILITY, GRAPH_BOM, FINAL_REPORT) and dedicated `docs/partners/GD_VALIDATION.md` / `docs/partners/INFINEON_VALIDATION.md`. Every result is command-backed; features are classified implemented/tested/partial/connector-dependent/demo-only/not-implemented.
+- **CBOM golden corpus enforced in CI** — new `datasets` job runs `scripts/analyze-datasets.py` (`make analyze-datasets`). New datasets/fixtures: `fixtures/crypto-test-ec` + `datasets/known-bad/crypto-ec` (ECDSA + PQC identifiers) and `fixtures/malformed` + `datasets/known-good/malformed` (negative/robustness: arbitrary binary → 0 findings, no crash, no BLOCK). Corpus now 7/7.
+
+### Fixed
+- **Build break** — `integrations/stripe/server/stripe.go` declared `successURL`/`cancelURL` only used in comments; `go build ./...` failed. Values now surfaced in the not-implemented response.
+- **CBOM `components` was always empty** — `internal/intelligence/cyclonedx.go` accepted a `findings` argument it never used, and the content-scan path supplies no discovery components, so the embedded CycloneDX BOM had `components: []`. Cryptographic findings are now folded into `components` (deduped by algorithm|location; library-presence-only records excluded), `serialNumber` is a real `urn:uuid:<v4>`, and the tool version is `ScannerVersion`. Regression test `internal/intelligence/cyclonedx_test.go`. Verified `components` 0 → 5 for `fixtures/crypto-test`.
+- **Cross-tenant report test** — added `TestScanReportIsTenantScoped` (cross-tenant `/scans/:id/report` → 404).
 
 ### Changed
 - **Cryptographic Security Posture Management** — Community is CBOM + SBOM. QBOM, HBOM, AIBOM, and IBOM are Enterprise (APIs return 403 on OSS). Local PQC classes on CBOM findings stay Community.

@@ -1,0 +1,13 @@
+{
+  "id": "malformed-binary",
+  "title": "Malformed / non-text binary input must not crash the scanner",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/malformed",
+  "include_fixtures": true,
+  "must_match": [],
+  "must_not_match": [],
+  "min_findings": 0,
+  "max_block": true,
+  "notes": "Negative/robustness dataset: arbitrary binary bytes. The scanner must complete without error and must not emit a BLOCK decision. No findings are required."
+}
