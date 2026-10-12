@@ -1,0 +1,20 @@
+# Cloudflare Pages project config (wrangler v3+).
+# Used by `.github/workflows/cloudflare-pages.yml` and local
+# `npx wrangler pages deploy web/build`.
+#
+# Deploying requires (set as GitHub secrets, never committed):
+#   CLOUDFLARE_API_TOKEN   — scoped token with "Cloudflare Pages: Edit"
+#   CLOUDFLARE_ACCOUNT_ID  — your account id
+#
+# Create the project once:
+#   npx wrangler pages project create rivicq-cspm
+#
+# The composite site is produced by scripts/build-pages.sh into web/build/.
+
+name = "rivicq-cspm"
+pages_build_output_dir = "web/build"
+compatibility_date = "2026-10-01"
+
+# The GitHub Pages subpath is stripped by cloudflare/_redirects so the same
+# artifact serves at the Cloudflare root. Set a custom domain in the Cloudflare
+# dashboard (Pages project -> Custom domains) for production.

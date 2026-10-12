@@ -1,0 +1,65 @@
+name: Deploy Cloudflare Pages
+
+# Parallel/canary deployment alongside GitHub Pages (pages.yml). Runs the same
+# composite build via scripts/build-pages.sh and deploys to Cloudflare Pages.
+#
+# The deploy step is guarded on CLOUDFLARE_API_TOKEN so this workflow is a no-op
+# (green) until the secret is configured. Add these repository secrets to enable:
+#   CLOUDFLARE_API_TOKEN   (Cloudflare Pages: Edit)
+#   CLOUDFLARE_ACCOUNT_ID
+# Optional build-time values (else the defaults in build-pages.sh apply):
+#   REACT_APP_API_URL
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Deploy to Cloudflare Pages"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: Build & deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: |
+            web/package-lock.json
+            fabric/package-lock.json
+
+      - name: Build composite site
+        env:
+          REACT_APP_EDITION: community
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+          REACT_APP_SUPABASE_URL: https://suhoabdijefnsoxveewn.supabase.co
+          REACT_APP_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8q50RgRBzXcuvjdaF7qBpg_E0GKHPt4
+        run: bash scripts/build-pages.sh
+
+      - name: Deploy to Cloudflare Pages
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && (github.event_name == 'push' || inputs.deploy) }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/build --project-name=rivicq-cspm --branch=${{ github.ref_name }}
+
+      - name: Skip notice (secrets not configured)
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN == '' }}
+        run: echo "CLOUDFLARE_API_TOKEN not set; skipping Cloudflare Pages deploy (build-only run)."
