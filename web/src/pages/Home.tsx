@@ -51,7 +51,7 @@ const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', '
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const isDark = useTheme().palette.mode === 'dark';
-  const { isAuthenticated, backendReachable } = useAuth();
+  const { isAuthenticated, backendReachable, demoLogin, isDemo } = useAuth();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
   const [progress, setProgress] = React.useState(0);
@@ -103,7 +103,7 @@ const Home: React.FC = () => {
 
   const handleScan = async () => {
     if (!repoUrl.trim()) return;
-    if (!backendReachable) {
+    if (!backendReachable && !isDemo) {
       setScanStatus('error');
       setProgress(0);
       setReport(null);
@@ -344,7 +344,7 @@ const Home: React.FC = () => {
             Know what cryptography protects your business before attackers do.
           </Typography>
           <Typography sx={{ color: '#d1d5db', maxWidth: 720, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
-            RivicQ discovers cryptographic assets, cloud risks and migration exposure — then inventories them as CBOM evidence for PQC planning.
+            RivicQ discovers cryptographic assets, cloud risks and migration exposure — then inventories them as CBOM evidence for PQC planning. Point it at an IoT device, a website, or a repo.
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center">
             <Button
@@ -359,8 +359,20 @@ const Home: React.FC = () => {
             <Button
               variant="outlined"
               size="large"
-              onClick={() => navigate('/request-demo')}
+              endIcon={<VerifiedUser />}
+              onClick={async () => {
+                await demoLogin('community');
+                navigate('/scanner');
+              }}
               sx={{ px: 3, py: 1.2, color: '#fff', borderColor: 'rgba(255,255,255,0.55)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.06)' } }}
+            >
+              Try the live demo
+            </Button>
+            <Button
+              variant="text"
+              size="large"
+              onClick={() => navigate('/request-demo')}
+              sx={{ px: 3, py: 1.2, color: '#d1d5db', '&:hover': { color: '#fff' } }}
             >
               Request enterprise demo
             </Button>
@@ -378,12 +390,12 @@ const Home: React.FC = () => {
                 </Typography>
                 <Chip
                   size="small"
-                  label={backendReachable ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DISCONNECTED}
-                  color={backendReachable ? 'success' : 'default'}
-                  variant="outlined"
+                  label={isDemo && !backendReachable ? 'LIVE DEMO · sample data' : (backendReachable ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DISCONNECTED)}
+                  color={(isDemo && !backendReachable) || backendReachable ? 'success' : 'default'}
+                  variant={isDemo && !backendReachable ? 'filled' : 'outlined'}
                 />
               </Stack>
-              {!backendReachable && <PublicEngineNotice variant="scan" compact />}
+              {!backendReachable && !isDemo && <PublicEngineNotice variant="scan" compact />}
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
                 <TextField
                   fullWidth
@@ -400,7 +412,7 @@ const Home: React.FC = () => {
                   onClick={handleScan}
                   loading={scanStatus === 'scanning'}
                   loadingText="Scanning…"
-                  disabled={!repoUrl.trim() || !backendReachable}
+                  disabled={!repoUrl.trim() || (!backendReachable && !isDemo)}
                   sx={{ minWidth: 168 }}
                 >
                   Run scan

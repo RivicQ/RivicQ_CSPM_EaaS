@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { getAPIBaseURL, setAPIBaseURL, Edition } from '../config/editions';
 import { isClientDemoToken, DEMO_STORAGE_KEY } from '../demo/constants';
+import { demoAwareAdapter } from '../demo/scanDemo';
 
 const api = axios.create({
   baseURL: getAPIBaseURL(),
@@ -8,6 +9,11 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// When a client-side demo session is active (static GitHub Pages, no backend),
+// answer CBOM scan endpoints in-browser so the Scanner and Findings stay
+// interactive. Everything else still goes to the network fallthrough.
+api.defaults.adapter = demoAwareAdapter;
 
 // Auto-update base URL when edition detection changes it
 export function syncAPIBaseURL(): void {
