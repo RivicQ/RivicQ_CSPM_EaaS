@@ -45,4 +45,12 @@ We will not pursue legal action against researchers who:
 - Do not log secrets. Do not commit credentials.
 - Tenant identity on Enterprise mutating APIs must come from authenticated context (JWT / API key), not spoofable headers.
 
+## Secret history remediation
+
+A history audit found two encrypted OpenSSH private keys (`rsaande`, `rsande`)
+committed and later deleted. They were removed from the working tree; the keys
+must be rotated by their owner. Full details, required actions, and the optional
+history-purge procedure are in
+[docs/SECURITY_SECRET_REMEDIATION.md](docs/SECURITY_SECRET_REMEDIATION.md).
+
 Thank you for helping keep RivicQ secure.

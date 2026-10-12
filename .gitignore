@@ -97,3 +97,6 @@ __pycache__/
 *.pyc
 .env
 .env.*
+
+# Accidental nested clone of this repository (never commit)
+/RivicQ_CSPM_EaaS/
