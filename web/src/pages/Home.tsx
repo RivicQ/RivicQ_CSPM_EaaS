@@ -17,7 +17,8 @@ import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
-import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
+import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
+import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -386,11 +387,15 @@ const Home: React.FC = () => {
             <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: panel, borderRadius: 2, p: { xs: 2, md: 2.5 } }}>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
                 <Typography sx={{ fontFamily: tokens.typography.mono, fontSize: 12, color: 'text.secondary' }}>
-                  $ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate
+                  {isDemo
+                    ? '$ rivicq · interactive demo · sample data · nothing is claimed as a live result'
+                    : backendReachable
+                      ? '$ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate'
+                      : '$ rivicq scan · engine not hosted on this build · disabled · run it locally or deploy (docs/RENDER.md)'}
                 </Typography>
                 <Chip
                   size="small"
-                  label={isDemo && !backendReachable ? 'LIVE DEMO · sample data' : (backendReachable ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DISCONNECTED)}
+                  label={isDemo && !backendReachable ? PUBLIC_ENGINE_CHIP_DEMO : (backendReachable ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DISCONNECTED)}
                   color={(isDemo && !backendReachable) || backendReachable ? 'success' : 'default'}
                   variant={isDemo && !backendReachable ? 'filled' : 'outlined'}
                 />
@@ -418,6 +423,13 @@ const Home: React.FC = () => {
                   Run scan
                 </LoadingButton>
               </Stack>
+              {!backendReachable && !isDemo && (
+                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary', lineHeight: 1.5 }}>
+                  Why is the button disabled? Scanning runs on the RivicQ CBOM engine, which is not hosted on this static
+                  build. Deploy the API (<code>docs/RENDER.md</code>) or run it locally for live scans — or use the
+                  interactive demo above to explore the workflow on sample data.
+                </Typography>
+              )}
             </Box>
           </MotionSection>
         </Box>
@@ -433,6 +445,8 @@ const Home: React.FC = () => {
             />
           </Box>
         )}
+
+        <ScanWorkflowStrip />
 
         <Box id="platform" sx={{ mt: 10, scrollMarginTop: 80 }}>
           <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary', mb: 1 }}>

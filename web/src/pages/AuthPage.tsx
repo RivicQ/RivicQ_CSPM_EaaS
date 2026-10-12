@@ -226,7 +226,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
   const title = mode === 'register' ? 'Create your workspace' : 'Welcome back';
   const submitLabel = mode === 'register' ? 'Create account' : 'Sign in';
-  const providerName = backendReachable ? 'RivicQ Identity' : 'Supabase';
+  const providerName = backendReachable
+    ? 'RivicQ Identity'
+    : supabaseEnabled
+      ? 'Supabase'
+      : 'browser authentication (no engine deployed)';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
@@ -253,6 +257,43 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
             </Button>
           ))}
         </Stack>
+
+        {!backendReachable && (
+          <Box
+            sx={{
+              mb: 2.5, p: 2.25, borderRadius: 3,
+              border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper',
+            }}
+          >
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
+              <Chip size="small" variant="outlined" label="Needs the RivicQ engine" />
+              <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
+                Network / engine status
+              </Typography>
+            </Stack>
+            <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1 }}>
+              This GitHub Pages build is static and hosts no RivicQ engine, so real sign-in and scanning are turned off
+              here — that is a network/engine limitation, not a bug. Nothing is faked: real, evidence-backed results need
+              the deployed engine (<code>docs/RENDER.md</code>) or a local run.
+            </Typography>
+            <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1.75 }}>
+              To try everything now, use the <strong>interactive demo</strong> below — it runs fully in your browser on
+              clearly-labelled sample data.
+            </Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+              <Button variant="contained" startIcon={<AutoAwesome />} disabled={loading} onClick={() => handleDemo(true)}>
+                Enter the interactive demo
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/docs/RENDER.md`, '_blank', 'noopener,noreferrer')}
+              >
+                How to deploy the engine
+              </Button>
+            </Stack>
+          </Box>
+        )}
+
         <Grid container spacing={0}>
           <Grid item xs={12}>
             <Card sx={{ height: '100%', borderRadius: 2 }}>
@@ -314,8 +355,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                         Current workspace
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {editionLabel} edition · signed in via <strong>{providerName}</strong>
-                        {!backendReachable && ' (browser authentication)'}
+                        {backendReachable
+                          ? <>{editionLabel} edition · signing in via <strong>{providerName}</strong></>
+                          : <>{editionLabel} edition · engine not connected — demo access runs in this browser only (sample data)</>}
                       </Typography>
                     </Box>
 
