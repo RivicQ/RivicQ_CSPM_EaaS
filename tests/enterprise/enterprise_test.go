@@ -4,6 +4,7 @@ package enterprise
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/rivic-q/cryptobom-saas/internal/api/enterprise"
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -57,18 +58,25 @@ func newTestEnv(t *testing.T) (*gin.Engine, string) {
 // asserting 401 while claiming to assert 503/200. Minting through the manager
 // keeps them honest.
 func generateJWT() string {
-	tm := auth.NewTokenManager(testJWTSecret)
-	token, err := tm.GenerateToken(&auth.User{
+	cfg, err := authn.LoadConfig()
+	if err != nil {
+		panic("load auth config: " + err.Error())
+	}
+	svc, err := authn.NewService(cfg, authn.NewMemStore())
+	if err != nil {
+		panic("new auth service: " + err.Error())
+	}
+	pair, err := svc.IssueTokens(context.Background(), &authn.User{
 		ID:       uuid.New().String(),
 		TenantID: uuid.New().String(),
 		Email:    "admin@enterprise.com",
 		Name:     "Admin",
 		Role:     "admin",
-	}, "enterprise")
+	}, "enterprise", "go-tests", "127.0.0.1")
 	if err != nil {
 		panic("generate token: " + err.Error())
 	}
-	return token
+	return pair.AccessToken
 }
 
 func authHeaders(token string) map[string]string {
@@ -147,12 +155,15 @@ func TestAuditEventsNoDB(t *testing.T) {
 func TestAuthRejectsNoToken(t *testing.T) {
 	r, _ := newTestEnv(t)
 
-	store, err := auth.NewMockUserStore()
+	cfg, err := authn.LoadConfig()
 	if err != nil {
-		t.Skip("auth.NewMockUserStore requires CRYPTOBOM_BOOTSTRAP_PASSWORD, skipping")
+		t.Fatalf("load auth config: %v", err)
 	}
-	authSvc := auth.NewAuthService(testJWTSecret, store)
-	r.GET("/test-auth", authSvc.JWTAuthMiddleware(nil), func(c *gin.Context) {
+	authSvc, err := authn.NewService(cfg, authn.NewMemStore())
+	if err != nil {
+		t.Fatalf("new auth service: %v", err)
+	}
+	r.GET("/test-auth", authSvc.AuthenticateMiddleware(), func(c *gin.Context) {
 		c.JSON(200, gin.H{"ok": true})
 	})
 

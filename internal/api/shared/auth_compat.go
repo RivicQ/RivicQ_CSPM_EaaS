@@ -15,13 +15,6 @@ type authUserResponse struct {
 	Role  string `json:"role,omitempty"`
 }
 
-func toUserResponse(u *authn.User) authUserResponse {
-	if u == nil {
-		return authUserResponse{}
-	}
-	return authUserResponse{ID: u.ID, Name: u.Name, Email: u.Email, Role: string(u.Role)}
-}
-
 // editionForRole normalises a frontend edition request, falling back to the
 // highest edition a role is entitled to.
 func editionForRole(role, requested string) string {

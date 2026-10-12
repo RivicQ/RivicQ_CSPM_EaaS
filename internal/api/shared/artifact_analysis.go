@@ -310,7 +310,7 @@ func parseMultipart(c *gin.Context, bodyCap int64, fields ...string) ([]uploaded
 		return nil, "", "", err
 	}
 	if c.Request.MultipartForm != nil {
-		defer c.Request.MultipartForm.RemoveAll()
+		defer func() { _ = c.Request.MultipartForm.RemoveAll() }()
 	}
 	arts := make([]uploadedArtifact, 0, len(fields))
 	for _, field := range fields {
@@ -332,7 +332,7 @@ func readFormFile(c *gin.Context, field string) (uploadedArtifact, error) {
 	if err != nil {
 		return uploadedArtifact{}, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	data, err := io.ReadAll(f)
 	if err != nil {
 		return uploadedArtifact{}, err

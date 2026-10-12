@@ -17,8 +17,8 @@ import (
 func mustGzip(in []byte) []byte {
 	var buf bytes.Buffer
 	zw := gzip.NewWriter(&buf)
-	zw.Write(in)
-	zw.Close()
+	_, _ = zw.Write(in)
+	_ = zw.Close()
 	return buf.Bytes()
 }
 

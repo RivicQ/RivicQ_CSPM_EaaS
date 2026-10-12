@@ -68,9 +68,6 @@ func DetectFormat(name string, data []byte) Format {
 	case ".zip":
 		return FormatZIP
 	case ".bin", ".img", ".fw", ".elf":
-		if bytes.Contains(data, []byte{0x7F}) {
-			// fall through to unknown/bin
-		}
 		return FormatBIN
 	}
 	if len(data) > 0 {
@@ -306,7 +303,7 @@ func extractZip(data []byte, limits Limits) ([]archiveEntry, []string, error) {
 		}
 		limited := io.LimitReader(rc, limits.MaxDecompressedBytes-total+1)
 		b, err := io.ReadAll(limited)
-		rc.Close()
+		_ = rc.Close()
 		if err != nil {
 			warnings = append(warnings, "zip: read failed "+name)
 			continue
@@ -344,7 +341,7 @@ func extractTar(r io.Reader, limits Limits) ([]archiveEntry, []string, error) {
 			continue
 		}
 		switch hdr.Typeflag {
-		case tar.TypeReg, tar.TypeRegA:
+		case tar.TypeReg, '\x00':
 		default:
 			warnings = append(warnings, "tar: skipped non-regular "+name)
 			continue

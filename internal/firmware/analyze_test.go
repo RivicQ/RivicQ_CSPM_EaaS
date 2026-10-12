@@ -179,10 +179,10 @@ func TestExtractZipSkipsTraversal(t *testing.T) {
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
 	w, _ := zw.Create("../evil.bin")
-	w.Write([]byte("mbedtls_aes"))
+	_, _ = w.Write([]byte("mbedtls_aes"))
 	w2, _ := zw.Create("good.bin")
-	w2.Write([]byte("mbedtls_aes"))
-	zw.Close()
+	_, _ = w2.Write([]byte("mbedtls_aes"))
+	_ = zw.Close()
 
 	entries, warns, err := extractZip(buf.Bytes(), DefaultLimits())
 	if err != nil {
@@ -201,9 +201,9 @@ func TestExtractZipEntryCap(t *testing.T) {
 	zw := zip.NewWriter(&buf)
 	for i := 0; i < 5; i++ {
 		w, _ := zw.Create("f" + string(rune('a'+i)) + ".bin")
-		w.Write([]byte("x"))
+		_, _ = w.Write([]byte("x"))
 	}
-	zw.Close()
+	_ = zw.Close()
 	lim := DefaultLimits()
 	lim.MaxArchiveEntries = 2
 	entries, _, _ := extractZip(buf.Bytes(), lim)
@@ -215,10 +215,10 @@ func TestExtractZipEntryCap(t *testing.T) {
 func TestExtractTarSkipsSymlink(t *testing.T) {
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
-	tw.WriteHeader(&tar.Header{Name: "link", Typeflag: tar.TypeSymlink, Linkname: "/etc/passwd", Mode: 0o777})
-	tw.WriteHeader(&tar.Header{Name: "real.bin", Typeflag: tar.TypeReg, Mode: 0o644, Size: 5})
-	tw.Write([]byte("hello"))
-	tw.Close()
+	_ = tw.WriteHeader(&tar.Header{Name: "link", Typeflag: tar.TypeSymlink, Linkname: "/etc/passwd", Mode: 0o777})
+	_ = tw.WriteHeader(&tar.Header{Name: "real.bin", Typeflag: tar.TypeReg, Mode: 0o644, Size: 5})
+	_, _ = tw.Write([]byte("hello"))
+	_ = tw.Close()
 
 	entries, warns, err := extractTar(bytes.NewReader(buf.Bytes()), DefaultLimits())
 	if err != nil {

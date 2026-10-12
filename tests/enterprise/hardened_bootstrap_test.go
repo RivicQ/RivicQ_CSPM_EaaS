@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
+	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/server"
 )
 
@@ -58,7 +59,15 @@ func TestEnterpriseIBMQRoutesAreAuthenticated(t *testing.T) {
 
 	r := gin.New()
 	api := r.Group(auth.APIPrefix)
-	api.Use(auth.NewAuthService("enterprise-test-secret-at-least-32-bytes", nil).EnforceAuth())
+	svc, err := authn.NewService(authn.Config{
+		Secret:   "enterprise-test-secret-at-least-32-bytes",
+		Issuer:   "rivicq",
+		Audience: "rivicq-api",
+	}, authn.NewMemStore())
+	if err != nil {
+		t.Fatalf("new auth service: %v", err)
+	}
+	api.Use(svc.EnforceAuth())
 	ibmq := api.Group("/ibmq")
 	ibmq.GET("/status", func(c *gin.Context) { c.Status(http.StatusOK) })
 	ibmq.POST("/attest", func(c *gin.Context) { c.Status(http.StatusOK) })

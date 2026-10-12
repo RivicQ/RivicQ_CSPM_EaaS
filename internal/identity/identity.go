@@ -134,8 +134,6 @@ func AnalyzeBytes(ctx context.Context, name string, data []byte, p profile.Profi
 	if limits.Timeout <= 0 {
 		limits = DefaultLimits()
 	}
-	ctx, cancel := context.WithTimeout(ctx, limits.Timeout)
-	defer cancel()
 
 	start := time.Now()
 	sum := sha256.Sum256(data)

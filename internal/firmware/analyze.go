@@ -197,7 +197,7 @@ func analyzeDepth(ctx context.Context, name string, data []byte, p profile.Profi
 		}
 		limited := io.LimitReader(zr, limits.MaxDecompressedBytes)
 		inner, err := io.ReadAll(limited)
-		zr.Close()
+		_ = zr.Close()
 		if err != nil {
 			rep.Warnings = append(rep.Warnings, "gzip: "+err.Error())
 			break
