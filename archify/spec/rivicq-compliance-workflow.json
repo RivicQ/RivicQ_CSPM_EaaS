@@ -1,0 +1,210 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "RivicQ CSPM — Compliance & Evidence",
+    "output": "archify/diagrams/rivicq-compliance-workflow.html",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "collect",
+      "label": "Collection"
+    },
+    {
+      "id": "map",
+      "label": "Control Mapping"
+    },
+    {
+      "id": "assess",
+      "label": "Assessment & Evidence"
+    },
+    {
+      "id": "exceptions",
+      "label": "Waivers",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "map",
+      "label": "Map",
+      "fromCol": 0,
+      "toCol": 1,
+      "variant": "emphasis"
+    },
+    {
+      "id": "assess",
+      "label": "Assess",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "evidence",
+      "label": "Evidence",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "mapping",
+      "label": "Framework mapping",
+      "lane": "map",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "collect",
+    "normalize",
+    "frameworks",
+    "standards",
+    "gap",
+    "evidence"
+  ],
+  "nodes": [
+    {
+      "id": "collect",
+      "lane": "collect",
+      "col": 0,
+      "type": "backend",
+      "label": "Collect Results",
+      "sublabel": "CBOM · scans · policy",
+      "width": 184
+    },
+    {
+      "id": "normalize",
+      "lane": "collect",
+      "col": 1,
+      "type": "backend",
+      "label": "Normalize",
+      "sublabel": "control-ready",
+      "width": 184
+    },
+    {
+      "id": "frameworks",
+      "lane": "map",
+      "col": 2,
+      "type": "security",
+      "label": "Map Frameworks",
+      "sublabel": "DORA · BSI · eIDAS",
+      "tag": "framework data",
+      "width": 184
+    },
+    {
+      "id": "standards",
+      "lane": "map",
+      "col": 3,
+      "type": "security",
+      "label": "Map Standards",
+      "sublabel": "NIST · ISO 27001",
+      "width": 184
+    },
+    {
+      "id": "gap",
+      "lane": "assess",
+      "col": 4,
+      "type": "backend",
+      "label": "Gap / Attest",
+      "sublabel": "pass or gap",
+      "width": 184
+    },
+    {
+      "id": "evidence",
+      "lane": "assess",
+      "col": 5,
+      "type": "database",
+      "label": "Evidence Pack",
+      "sublabel": "signed · retained",
+      "width": 184
+    },
+    {
+      "id": "waiver",
+      "lane": "exceptions",
+      "col": 3,
+      "type": "security",
+      "label": "Waiver",
+      "sublabel": "time-boxed",
+      "width": 184
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "collect",
+      "to": "normalize"
+    },
+    {
+      "id": "e2",
+      "from": "normalize",
+      "to": "frameworks",
+      "label": "normalize",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e3",
+      "from": "frameworks",
+      "to": "standards"
+    },
+    {
+      "id": "e4",
+      "from": "standards",
+      "to": "gap",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e5",
+      "from": "gap",
+      "to": "evidence",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e6",
+      "from": "standards",
+      "to": "waiver",
+      "label": "exception",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e7",
+      "from": "waiver",
+      "to": "evidence",
+      "label": "documented",
+      "variant": "dashed",
+      "role": "branch"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Frameworks are data",
+      "items": [
+        "DORA, BSI, eIDAS, NIST and ISO are mappings, not code",
+        "Results normalize once, then map to every framework"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Gaps are honest",
+      "items": [
+        "Assessment reports pass or gap with evidence attached",
+        "Waivers are time-boxed and never silent"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Audit-ready output",
+      "items": [
+        "Every attestation links to retained, signed evidence",
+        "The pack exports without re-running analysis"
+      ]
+    }
+  ]
+}

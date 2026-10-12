@@ -1,0 +1,186 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "RivicQ CSPM — Post-Quantum Migration",
+    "output": "archify/diagrams/rivicq-pqc-migration.html",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "inventory",
+      "label": "Inventory"
+    },
+    {
+      "id": "risk",
+      "label": "Quantum Risk"
+    },
+    {
+      "id": "plan",
+      "label": "Replacement Plan"
+    },
+    {
+      "id": "migrate",
+      "label": "Migration & Verification"
+    }
+  ],
+  "phases": [
+    {
+      "id": "assess",
+      "label": "Assess",
+      "fromCol": 0,
+      "toCol": 1,
+      "variant": "emphasis"
+    },
+    {
+      "id": "plan",
+      "label": "Plan",
+      "fromCol": 2,
+      "toCol": 3
+    },
+    {
+      "id": "verify",
+      "label": "Migrate + verify",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "replace",
+      "label": "Crypto-agile replacement",
+      "lane": "plan",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "inventory",
+    "risk",
+    "hybrid",
+    "schedule",
+    "migrate",
+    "verify"
+  ],
+  "nodes": [
+    {
+      "id": "inventory",
+      "lane": "inventory",
+      "col": 0,
+      "type": "database",
+      "label": "Crypto Inventory",
+      "sublabel": "assets · algorithms",
+      "width": 184
+    },
+    {
+      "id": "risk",
+      "lane": "risk",
+      "col": 1,
+      "type": "security",
+      "label": "Quantum Risk",
+      "sublabel": "HNDL · shelf-life",
+      "tag": "classify",
+      "width": 184
+    },
+    {
+      "id": "hybrid",
+      "lane": "plan",
+      "col": 2,
+      "type": "backend",
+      "label": "Hybrid Plan",
+      "sublabel": "ML-KEM · ML-DSA",
+      "tag": "no cert claim",
+      "width": 184
+    },
+    {
+      "id": "schedule",
+      "lane": "plan",
+      "col": 3,
+      "type": "backend",
+      "label": "Phased Rollout",
+      "sublabel": "crypto-agility",
+      "width": 184
+    },
+    {
+      "id": "migrate",
+      "lane": "migrate",
+      "col": 4,
+      "type": "backend",
+      "label": "Migrate",
+      "sublabel": "TLS · code-sign · PKI",
+      "width": 184
+    },
+    {
+      "id": "verify",
+      "lane": "migrate",
+      "col": 5,
+      "type": "backend",
+      "label": "Re-scan & Attest",
+      "sublabel": "before / after",
+      "width": 184
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "inventory",
+      "to": "risk",
+      "label": "inventory",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e2",
+      "from": "risk",
+      "to": "hybrid",
+      "label": "risk",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e3",
+      "from": "hybrid",
+      "to": "schedule"
+    },
+    {
+      "id": "e4",
+      "from": "schedule",
+      "to": "migrate",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e5",
+      "from": "migrate",
+      "to": "verify",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Inventory first",
+      "items": [
+        "Every algorithm is classified classical, hybrid, or PQC-ready",
+        "Shelf-life and harvest-now-decrypt-later drive priority"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Migration is planned",
+      "items": [
+        "Replacements target ML-KEM and ML-DSA via crypto-agility",
+        "Rollouts are phased and reversible"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "No overclaiming",
+      "items": [
+        "RivicQ plans and verifies; it claims no FIPS or vendor certification",
+        "Verification compares before and after with a fresh scan"
+      ]
+    }
+  ]
+}

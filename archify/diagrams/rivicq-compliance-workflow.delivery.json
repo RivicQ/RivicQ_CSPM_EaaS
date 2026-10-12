@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "979eeb54-ca29-4a9c-8430-fb4e8f7484e1",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/re1/re1/CSPM/archify/spec/rivicq-compliance-workflow.json",
+  "output": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-compliance-workflow.html",
+  "specification": {
+    "sha256": "b9a8fb079a4942dc9b57254721a6b35b8a2b5ef43d9913a6556a03e653c5d08c",
+    "bytes": 4174
+  },
+  "artifact": {
+    "sha256": "dd7f52d63e3acafa35fe57a9b1e1afe96ab0e6f7f4c39ac1049880382d0078cb",
+    "bytes": 755696
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "RivicQ CSPM — Scan Request Sequence",
+    "output": "archify/diagrams/rivicq-scanning-sequence.html",
+    "viewBox": [
+      900,
+      820
+    ],
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Console",
+      "sublabel": "operator UI"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "RivicQ API",
+      "sublabel": "Gin edge"
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Authn / RBAC",
+      "sublabel": "JWT + permissions"
+    },
+    {
+      "id": "scanner",
+      "type": "backend",
+      "label": "Scanner",
+      "sublabel": "built-in engines"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "BOM Store",
+      "sublabel": "unified BOM"
+    },
+    {
+      "id": "evidence",
+      "type": "backend",
+      "label": "Evidence",
+      "sublabel": "audit log"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 300,
+      "label": "Authenticate"
+    },
+    {
+      "from": 300,
+      "to": 540,
+      "label": "Scan + analyze"
+    },
+    {
+      "from": 540,
+      "to": 720,
+      "label": "Persist + report"
+    }
+  ],
+  "messages": [
+    {
+      "from": "web",
+      "to": "api",
+      "y": 180,
+      "label": "POST /api/v1/scans",
+      "variant": "emphasis"
+    },
+    {
+      "from": "api",
+      "to": "auth",
+      "y": 222,
+      "label": "verify JWT",
+      "variant": "default"
+    },
+    {
+      "from": "auth",
+      "to": "api",
+      "y": 264,
+      "label": "roles + claims",
+      "variant": "return"
+    },
+    {
+      "from": "api",
+      "to": "web",
+      "y": 320,
+      "label": "202 accepted",
+      "variant": "return"
+    },
+    {
+      "from": "api",
+      "to": "scanner",
+      "y": 362,
+      "label": "dispatch scan",
+      "variant": "emphasis"
+    },
+    {
+      "from": "scanner",
+      "to": "api",
+      "y": 404,
+      "label": "findings + BOM",
+      "variant": "return"
+    },
+    {
+      "from": "api",
+      "to": "db",
+      "y": 446,
+      "label": "persist CBOM",
+      "variant": "emphasis"
+    },
+    {
+      "from": "db",
+      "to": "api",
+      "y": 488,
+      "label": "stored",
+      "variant": "return"
+    },
+    {
+      "from": "api",
+      "to": "evidence",
+      "y": 560,
+      "label": "audit event",
+      "variant": "dashed"
+    },
+    {
+      "from": "api",
+      "to": "db",
+      "y": 602,
+      "label": "read decision",
+      "variant": "default"
+    },
+    {
+      "from": "api",
+      "to": "web",
+      "y": 644,
+      "label": "200 report",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "api",
+      "from": 174,
+      "to": 660,
+      "type": "backend"
+    },
+    {
+      "participant": "auth",
+      "from": 216,
+      "to": 270,
+      "type": "security"
+    },
+    {
+      "participant": "scanner",
+      "from": 356,
+      "to": 410,
+      "type": "backend"
+    },
+    {
+      "participant": "db",
+      "from": 440,
+      "to": 494,
+      "type": "database"
+    },
+    {
+      "participant": "evidence",
+      "from": 554,
+      "to": 608,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Authenticate first",
+      "items": [
+        "Every scan carries a JWT that resolves to RBAC roles",
+        "Catalog reads allow; mutation verbs require an explicit grant"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Bounded work",
+      "items": [
+        "The API acknowledges before heavy analysis runs",
+        "Built-in scanners need no external binaries"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Evidence, always",
+      "items": [
+        "Findings, BOM, and the gate decision are persisted together",
+        "An audit event is written for the request"
+      ]
+    }
+  ]
+}

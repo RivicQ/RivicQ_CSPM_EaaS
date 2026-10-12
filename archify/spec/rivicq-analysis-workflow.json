@@ -1,0 +1,226 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "RivicQ CSPM — Analysis Pipeline",
+    "output": "archify/diagrams/rivicq-analysis-workflow.html",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "submit",
+      "label": "Submitter"
+    },
+    {
+      "id": "engine",
+      "label": "Analysis Engine"
+    },
+    {
+      "id": "policy",
+      "label": "Policy & Recovery",
+      "variant": "exception"
+    },
+    {
+      "id": "deliver",
+      "label": "Evidence & Delivery"
+    }
+  ],
+  "phases": [
+    {
+      "id": "intake",
+      "label": "Intake",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "analyze",
+      "label": "Analyze",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "report",
+      "label": "Decide + report",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "engine_checks",
+      "label": "Deterministic checks",
+      "lane": "engine",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "submit",
+    "fingerprint",
+    "classify",
+    "gate",
+    "evidence",
+    "publish"
+  ],
+  "nodes": [
+    {
+      "id": "submit",
+      "lane": "submit",
+      "col": 0,
+      "type": "frontend",
+      "label": "Submit Artifact",
+      "sublabel": "firmware · identity",
+      "width": 184
+    },
+    {
+      "id": "fingerprint",
+      "lane": "engine",
+      "col": 2,
+      "type": "backend",
+      "label": "Fingerprint",
+      "sublabel": "hash + origin",
+      "width": 184
+    },
+    {
+      "id": "classify",
+      "lane": "engine",
+      "col": 3,
+      "type": "backend",
+      "label": "Classify",
+      "sublabel": "risk · PQC",
+      "tag": "deterministic",
+      "width": 184
+    },
+    {
+      "id": "gate",
+      "lane": "policy",
+      "col": 3,
+      "type": "security",
+      "label": "Policy Gate",
+      "sublabel": "BLOCK/WARN/PASS",
+      "tag": "fail-on",
+      "width": 184
+    },
+    {
+      "id": "rejected",
+      "lane": "policy",
+      "col": 4,
+      "type": "security",
+      "label": "Reject",
+      "sublabel": "over limit",
+      "width": 184
+    },
+    {
+      "id": "replay",
+      "lane": "policy",
+      "col": 5,
+      "type": "messagebus",
+      "label": "Replay",
+      "sublabel": "operator retry",
+      "width": 184
+    },
+    {
+      "id": "evidence",
+      "lane": "deliver",
+      "col": 4,
+      "type": "backend",
+      "label": "Evidence Pack",
+      "sublabel": "signed JSON",
+      "width": 184
+    },
+    {
+      "id": "publish",
+      "lane": "deliver",
+      "col": 5,
+      "type": "external",
+      "label": "Publish",
+      "sublabel": "CLI · API · UI",
+      "width": 184
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "submit",
+      "to": "fingerprint",
+      "label": "submit",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e2",
+      "from": "fingerprint",
+      "to": "classify"
+    },
+    {
+      "id": "e3",
+      "from": "classify",
+      "to": "gate",
+      "label": "classify?",
+      "variant": "security"
+    },
+    {
+      "id": "e4",
+      "from": "gate",
+      "to": "evidence",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e5",
+      "from": "evidence",
+      "to": "publish"
+    },
+    {
+      "id": "e6",
+      "from": "gate",
+      "to": "rejected",
+      "label": "over limit",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e7",
+      "from": "rejected",
+      "to": "replay",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "e8",
+      "from": "replay",
+      "to": "classify",
+      "variant": "dashed",
+      "role": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "One deterministic path",
+      "items": [
+        "Every artifact is fingerprinted then classified",
+        "The same input always yields the same classification"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Fail closed",
+      "items": [
+        "Size or authz failures are rejected before delivery",
+        "The policy gate yields BLOCK / WARN / PASS"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Evidence by default",
+      "items": [
+        "Each decision is written to a signed evidence pack",
+        "Results publish identically via CLI, API, and UI"
+      ]
+    }
+  ]
+}

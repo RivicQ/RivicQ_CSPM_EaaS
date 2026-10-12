@@ -1,0 +1,242 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "RivicQ CSPM — Delivery Roadmap",
+    "output": "archify/diagrams/rivicq-roadmap.html",
+    "animation": "none",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "community",
+      "label": "Community (OSS)"
+    },
+    {
+      "id": "enterprise",
+      "label": "Enterprise"
+    },
+    {
+      "id": "partners",
+      "label": "Partner Programs"
+    },
+    {
+      "id": "quantum",
+      "label": "Quantum / PQC"
+    }
+  ],
+  "phases": [
+    {
+      "id": "now",
+      "label": "Now",
+      "fromCol": 0,
+      "toCol": 1,
+      "variant": "emphasis"
+    },
+    {
+      "id": "next",
+      "label": "Next",
+      "fromCol": 2,
+      "toCol": 3
+    },
+    {
+      "id": "later",
+      "label": "Later",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "nodes": [
+    {
+      "id": "oss1",
+      "lane": "community",
+      "col": 0,
+      "type": "backend",
+      "label": "CBOM · SBOM + CLI",
+      "sublabel": "self-scan",
+      "tag": "shipped",
+      "width": 328
+    },
+    {
+      "id": "oss2",
+      "lane": "community",
+      "col": 2,
+      "type": "backend",
+      "label": "GitHub Action",
+      "sublabel": "CI gate",
+      "tag": "planned",
+      "width": 328
+    },
+    {
+      "id": "oss3",
+      "lane": "community",
+      "col": 4,
+      "type": "cloud",
+      "label": "Multi-cloud OSS",
+      "sublabel": "more sources",
+      "width": 328
+    },
+    {
+      "id": "ent1",
+      "lane": "enterprise",
+      "col": 0,
+      "type": "security",
+      "label": "RBAC · SSO · audit",
+      "sublabel": "Admin / Operator",
+      "tag": "shipped",
+      "width": 328
+    },
+    {
+      "id": "ent2",
+      "lane": "enterprise",
+      "col": 2,
+      "type": "cloud",
+      "label": "Cloud connectors",
+      "sublabel": "AWS · Azure · GCP",
+      "width": 328
+    },
+    {
+      "id": "ent3",
+      "lane": "enterprise",
+      "col": 4,
+      "type": "security",
+      "label": "DORA evidence packs",
+      "sublabel": "regulator-ready",
+      "width": 328
+    },
+    {
+      "id": "p1",
+      "lane": "partners",
+      "col": 0,
+      "type": "external",
+      "label": "Infineon embedded",
+      "sublabel": "firmware analysis",
+      "tag": "shipped",
+      "width": 328
+    },
+    {
+      "id": "p2",
+      "lane": "partners",
+      "col": 2,
+      "type": "external",
+      "label": "G+D identity",
+      "sublabel": "eSIM · eID",
+      "tag": "shipped",
+      "width": 328
+    },
+    {
+      "id": "p3",
+      "lane": "partners",
+      "col": 4,
+      "type": "external",
+      "label": "Live connectors",
+      "sublabel": "vendor APIs",
+      "width": 328
+    },
+    {
+      "id": "q1",
+      "lane": "quantum",
+      "col": 0,
+      "type": "backend",
+      "label": "PQC classify",
+      "sublabel": "ML-KEM · ML-DSA",
+      "tag": "shipped",
+      "width": 328
+    },
+    {
+      "id": "q2",
+      "lane": "quantum",
+      "col": 2,
+      "type": "backend",
+      "label": "Hybrid plans",
+      "sublabel": "migration path",
+      "width": 328
+    },
+    {
+      "id": "q3",
+      "lane": "quantum",
+      "col": 4,
+      "type": "security",
+      "label": "Quantum attestation",
+      "sublabel": "before / after",
+      "width": 328
+    }
+  ],
+  "edges": [
+    {
+      "id": "c1",
+      "from": "oss1",
+      "to": "oss2",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c2",
+      "from": "oss2",
+      "to": "oss3",
+      "variant": "dashed"
+    },
+    {
+      "id": "e1",
+      "from": "ent1",
+      "to": "ent2",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e2",
+      "from": "ent2",
+      "to": "ent3",
+      "variant": "dashed"
+    },
+    {
+      "id": "p1e",
+      "from": "p1",
+      "to": "p2",
+      "variant": "emphasis"
+    },
+    {
+      "id": "p2e",
+      "from": "p2",
+      "to": "p3",
+      "variant": "dashed"
+    },
+    {
+      "id": "q1e",
+      "from": "q1",
+      "to": "q2",
+      "variant": "emphasis"
+    },
+    {
+      "id": "q2e",
+      "from": "q2",
+      "to": "q3",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Shipped today",
+      "items": [
+        "CBOM/SBOM plus CLI, RBAC/SSO, and PQC classification",
+        "Infineon embedded and G+D identity partner analysis"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Next",
+      "items": [
+        "GitHub Action gate and managed cloud connectors",
+        "Hybrid PQC migration planning across estates"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Later",
+      "items": [
+        "Live partner connectors behind explicit opt-in",
+        "Quantum attestation with before/after evidence"
+      ]
+    }
+  ]
+}

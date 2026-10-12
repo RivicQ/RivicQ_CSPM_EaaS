@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "57a4257c-232d-4ba2-9f70-75e55f6fce18",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/re1/re1/CSPM/archify/spec/rivicq-scanning-sequence.json",
+  "output": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-scanning-sequence.html",
+  "specification": {
+    "sha256": "6424c8775a56819f823863439e8a7cac627cc07de79876266b92ae218aca1142",
+    "bytes": 3975
+  },
+  "artifact": {
+    "sha256": "d11d4acdc5c14186e871a15ae6925d20754e59e102780dd44db3dd834d893127",
+    "bytes": 757554
+  }
+}

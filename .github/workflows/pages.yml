@@ -124,6 +124,16 @@ jobs:
           mkdir -p web/build/marketing
           cp -r marketing/. web/build/marketing/
 
+      - name: Publish archify diagram site
+        run: |
+          # Architect-the-product explorer. Preserve the two-level layout so the
+          # site's ../diagrams/* embeds and ../../docs/* links keep resolving:
+          #   /archify/site/index.html  ->  ../diagrams = /archify/diagrams
+          #                                 ../../docs   = /docs
+          mkdir -p web/build/archify/site web/build/archify/diagrams
+          cp -r archify/site/. web/build/archify/site/
+          cp -r archify/diagrams/. web/build/archify/diagrams/
+
       - name: Deploy to GitHub Pages (gh-pages branch)
         uses: peaceiris/actions-gh-pages@v4
         with:

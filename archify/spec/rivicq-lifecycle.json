@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "RivicQ CSPM — Cryptographic Finding Lifecycle",
+    "output": "archify/diagrams/rivicq-lifecycle.html",
+    "quality_profile": "showcase",
+    "animation": "trace"
+  },
+  "lanes": [
+    { "id": "main", "label": "Finding path" },
+    { "id": "waiting", "label": "Waiting on owners" },
+    { "id": "recovery", "label": "Re-scan controller" },
+    { "id": "terminal", "label": "Terminal outcomes" }
+  ],
+  "states": [
+    { "id": "discovered", "type": "start", "label": "Discovered", "sublabel": "new crypto finding", "lane": "main", "col": 0, "step": "01", "tag": "observed" },
+    { "id": "triaged", "type": "active", "label": "Triaged", "sublabel": "owner + severity", "lane": "main", "col": 1, "step": "02", "tag": "in review" },
+    { "id": "planned", "type": "active", "label": "Planned", "sublabel": "target + phase", "lane": "main", "col": 2, "step": "03", "tag": "scheduled" },
+    { "id": "migrating", "type": "active", "label": "Migrating", "sublabel": "replace algorithm", "lane": "main", "col": 3, "step": "04", "tag": "in progress" },
+    { "id": "remediated", "type": "success", "label": "Remediated", "sublabel": "verified by re-scan", "lane": "main", "col": 4, "step": "05", "tag": "done" },
+    { "id": "awaiting", "type": "waiting", "label": "Awaiting Owner", "sublabel": "no assignee", "lane": "waiting", "col": 1, "tag": "pause" },
+    { "id": "deferred", "type": "waiting", "label": "Deferred", "sublabel": "blocked on dependency", "lane": "waiting", "col": 3, "tag": "pause" },
+    { "id": "rescan", "type": "active", "label": "Re-scan", "sublabel": "regression check", "lane": "recovery", "col": 3, "tag": "automatic" },
+    { "id": "accepted", "type": "neutral", "label": "Accepted Risk", "sublabel": "documented exception", "lane": "terminal", "col": 4, "tag": "terminal" },
+    { "id": "falsepos", "type": "failure", "label": "False Positive", "sublabel": "not cryptography", "lane": "terminal", "col": 2, "tag": "terminal" },
+    { "id": "wontfix", "type": "neutral", "label": "Won't Fix", "sublabel": "out of scope", "lane": "terminal", "col": 3, "tag": "terminal" }
+  ],
+  "transitions": [
+    { "from": "discovered", "to": "triaged" },
+    { "from": "triaged", "to": "planned" },
+    { "from": "triaged", "to": "awaiting", "variant": "security", "label": "unassigned" },
+    { "from": "awaiting", "to": "planned", "label": "assigned" },
+    { "from": "triaged", "to": "falsepos", "variant": "security", "label": "not crypto" },
+    { "from": "planned", "to": "migrating" },
+    { "from": "planned", "to": "accepted", "variant": "dashed", "label": "risk accepted" },
+    { "from": "planned", "to": "wontfix", "variant": "dashed" },
+    { "from": "migrating", "to": "deferred", "variant": "dashed", "label": "blocked" },
+    { "from": "deferred", "to": "migrating", "label": "unblocked" },
+    { "from": "migrating", "to": "remediated", "variant": "emphasis" },
+    { "from": "migrating", "to": "rescan", "variant": "dashed", "label": "regression" },
+    { "from": "rescan", "to": "remediated", "variant": "emphasis", "label": "clean" },
+    { "from": "rescan", "to": "planned", "variant": "security", "label": "still at risk" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Finding rail", "items": ["A finding moves Discovered → Triaged → Planned → Migrating → Remediated", "Remediated means a re-scan proved the fix"] },
+    { "dot": "amber", "title": "Waits are explicit", "items": ["Unassigned or blocked findings pause without losing their place", "Every wait names the event that resumes it"] },
+    { "dot": "rose", "title": "Honest endings", "items": ["Accepted risk and won't-fix are documented terminals", "False positives are dismissed, not silently dropped"] }
+  ]
+}

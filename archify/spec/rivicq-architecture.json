@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "RivicQ CSPM — Platform Architecture",
+    "output": "archify/diagrams/rivicq-architecture.html",
+    "quality_profile": "showcase",
+    "subtitle": "One engine, two editions — Community (OSS) and Enterprise"
+  },
+  "components": [
+    { "id": "clients", "type": "external", "label": "Clients & CI", "sublabel": "browser · CLI · action", "pos": [24, 340], "size": [140, 64] },
+    { "id": "console", "type": "frontend", "label": "Web Console", "sublabel": "React :3000", "pos": [270, 340], "size": [150, 64] },
+    { "id": "graph", "type": "frontend", "label": "RivicQ Graph", "sublabel": "/fabric demo", "pos": [270, 530], "size": [150, 64] },
+    { "id": "api", "type": "backend", "label": "RivicQ API", "sublabel": "OSS :8080 · Ent :9090", "pos": [526, 340], "size": [156, 64] },
+    { "id": "auth", "type": "security", "label": "Auth & RBAC", "sublabel": "JWT · OIDC · SSO", "pos": [524, 150], "size": [160, 64], "tag": "deny by default" },
+    { "id": "discovery", "type": "backend", "label": "Discovery Scanners", "sublabel": "TLS · SSH · HTTP · SBOM", "pos": [788, 340], "size": [156, 64] },
+    { "id": "ext", "type": "cloud", "label": "Optional Scanners", "sublabel": "Syft · Trivy · Grype", "pos": [786, 150], "size": [160, 64], "tag": "on PATH" },
+    { "id": "engines", "type": "backend", "label": "Firmware & Identity", "sublabel": "embedded · eSIM", "pos": [788, 530], "size": [156, 64], "tag": "static, no exec" },
+    { "id": "intelligence", "type": "backend", "label": "Intelligence Engine", "sublabel": "risk · PQC · policy", "pos": [1050, 340], "size": [156, 64] },
+    { "id": "policy", "type": "security", "label": "Policy Gate", "sublabel": "BLOCK · WARN · PASS", "pos": [1053, 530], "size": [151, 64] },
+    { "id": "boms", "type": "backend", "label": "BOM Layer", "sublabel": "CBOM · SBOM · QBOM…", "pos": [1312, 340], "size": [146, 64] },
+    { "id": "audit", "type": "messagebus", "label": "Audit Log", "sublabel": "immutable events", "pos": [1310, 530], "size": [150, 64] },
+    { "id": "db", "type": "database", "label": "PostgreSQL", "sublabel": "tenants · findings", "pos": [1564, 340], "size": [140, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "RivicQ control plane", "wraps": ["api", "auth", "discovery", "intelligence", "engines", "policy", "boms", "audit", "db"] },
+    { "kind": "security-group", "label": "Auth boundary", "wraps": ["api", "auth"] }
+  ],
+  "connections": [
+    { "id": "clients-https", "from": "clients", "to": "console", "label": "HTTPS", "variant": "emphasis" },
+    { "id": "console-rest", "from": "console", "to": "api", "label": "REST /api/v1" },
+    { "id": "console-graph", "from": "console", "to": "graph", "label": "opens /fabric", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "api-verify", "from": "api", "to": "auth", "label": "verify JWT", "variant": "security", "fromSide": "top", "toSide": "bottom" },
+    { "id": "api-dispatch", "from": "api", "to": "discovery", "label": "dispatch scan", "variant": "emphasis" },
+    { "id": "discovery-ext", "from": "discovery", "to": "ext", "label": "PATH scanners", "variant": "dashed", "fromSide": "top", "toSide": "bottom" },
+    { "id": "discovery-engines", "from": "discovery", "to": "engines", "label": "partner artifacts", "fromSide": "bottom", "toSide": "top" },
+    { "id": "discovery-normalize", "from": "discovery", "to": "intelligence", "label": "raw results" },
+    { "id": "intelligence-policy", "from": "intelligence", "to": "policy", "label": "classify + gate", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "id": "intelligence-boms", "from": "intelligence", "to": "boms", "label": "normalized BOMs" },
+    { "id": "boms-audit", "from": "boms", "to": "audit", "label": "audit events", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "boms-persist", "from": "boms", "to": "db", "label": "persist" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Frontends", "items": ["React Security Cloud console on :3000", "RivicQ Graph labeled demo at /fabric"] },
+    { "dot": "emerald", "title": "One engine, two editions", "items": ["Community OSS :8080 and Enterprise :9090 share the engine", "Editions are licenses and entitlements, not a second scanner"] },
+    { "dot": "rose", "title": "Security & trust", "items": ["authn: JWT / OIDC / SSO with role RBAC", "Deny-by-default routes and audit logging", "Tenant comes from the JWT claim, never a spoofable header"] },
+    { "dot": "amber", "title": "Partner domains", "items": ["Embedded firmware and identity/eSIM analysis", "Profiles are data, not vendor forks", "Static and metadata-only: no execution, no secret extraction"] }
+  ]
+}

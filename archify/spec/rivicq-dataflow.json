@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "RivicQ CSPM — Cryptographic Asset Data Flow",
+    "output": "archify/diagrams/rivicq-dataflow.html",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "viewBox": [
+      1080,
+      500
+    ]
+  },
+  "stages": [
+    {
+      "label": "Assets"
+    },
+    {
+      "label": "Discover"
+    },
+    {
+      "label": "Analyze"
+    },
+    {
+      "label": "Deliver"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "assets",
+      "type": "cloud",
+      "label": "Asset Sources",
+      "sublabel": "repos · TLS · eSIM",
+      "stage": 0,
+      "row": 1,
+      "width": 132,
+      "height": 58,
+      "tag": "declared + live"
+    },
+    {
+      "id": "scanners",
+      "type": "backend",
+      "label": "Built-in Scanners",
+      "sublabel": "no external deps",
+      "stage": 1,
+      "row": 1,
+      "width": 128,
+      "height": 58,
+      "tag": "TLS · SSH · SBOM"
+    },
+    {
+      "id": "profiles",
+      "type": "database",
+      "label": "Profile Registry",
+      "sublabel": "embedded · identity",
+      "stage": 1,
+      "row": 2,
+      "width": 128,
+      "height": 58,
+      "tag": "registry data"
+    },
+    {
+      "id": "intel",
+      "type": "backend",
+      "label": "Intelligence Engine",
+      "sublabel": "risk · PQC · gate",
+      "stage": 2,
+      "row": 1,
+      "width": 128,
+      "height": 58,
+      "tag": "one engine"
+    },
+    {
+      "id": "bom",
+      "type": "database",
+      "label": "Unified BOM",
+      "sublabel": "CBOM · SBOM · QBOM",
+      "stage": 3,
+      "row": 0,
+      "width": 128,
+      "height": 58,
+      "tag": "deliverable"
+    },
+    {
+      "id": "evidence",
+      "type": "backend",
+      "label": "Evidence",
+      "sublabel": "JSON · DORA pack",
+      "stage": 3,
+      "row": 1,
+      "width": 128,
+      "height": 58,
+      "tag": "audit"
+    },
+    {
+      "id": "surface",
+      "type": "frontend",
+      "label": "CLI · API · UI",
+      "sublabel": "operator surfaces",
+      "stage": 3,
+      "row": 2,
+      "width": 128,
+      "height": 58,
+      "tag": "consumer"
+    }
+  ],
+  "flows": [
+    {
+      "id": "assets-scan",
+      "from": "assets",
+      "to": "scanners",
+      "label": "sources",
+      "classification": "input",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "id": "scan-intel",
+      "from": "scanners",
+      "to": "intel",
+      "label": "findings",
+      "classification": "normalized",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "id": "profiles-intel",
+      "from": "profiles",
+      "to": "intel",
+      "label": "rules",
+      "classification": "config",
+      "variant": "dashed",
+      "route": "straight"
+    },
+    {
+      "id": "intel-bom",
+      "from": "intel",
+      "to": "bom",
+      "label": "BOMs",
+      "classification": "CBOM · SBOM",
+      "variant": "emphasis",
+      "route": "top-channel"
+    },
+    {
+      "id": "intel-evidence",
+      "from": "intel",
+      "to": "evidence",
+      "label": "gate",
+      "classification": "decision",
+      "variant": "default",
+      "route": "straight",
+      "labelDy": 0
+    },
+    {
+      "id": "intel-surface",
+      "from": "intel",
+      "to": "surface",
+      "label": "served",
+      "classification": "output",
+      "variant": "dashed",
+      "route": "bottom-channel"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Left-to-right journey",
+      "items": [
+        "Sources are discovered, analyzed, then delivered",
+        "Labels name data assets, not generic verbs"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "One engine decides",
+      "items": [
+        "The intelligence engine classifies risk and quantum exposure",
+        "Its policy gate yields BLOCK / WARN / PASS for every surface"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Partner artifacts",
+      "items": [
+        "Firmware and identity metadata is added without execution",
+        "Profiles are registry data, not vendor code"
+      ]
+    }
+  ]
+}
