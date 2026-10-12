@@ -39,6 +39,8 @@ Thumbs.db
 secrets/
 *.pem
 *.key
+!fixtures/partners/gd/certificate/*.pem
+!fixtures/partners/gd/pki/*.pem
 rsaande
 rsaande.pub
 rsande

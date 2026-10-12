@@ -82,7 +82,7 @@ jobs:
 
       - name: Start enterprise backend in demo mode (uses mock IBMQ)
         run: |
-          DATABASE_URL="" JWT_SECRET=enterprise-smoke AUTH_BOOTSTRAP_PASSWORD=enterprise-smoke-bootstrap-please-replace \
+          DATABASE_URL="" JWT_SECRET=enterprise-smoke-secret-0123456789abcdef AUTH_BOOTSTRAP_PASSWORD=enterprise-smoke-bootstrap-please-replace \
             CRYPTOBOM_PORT=8081 IBMQ_ENDPOINT="http://localhost:8089" ./bin/cryptobom-enterprise &
           echo $! > /tmp/cryptobom-enterprise.pid
 
