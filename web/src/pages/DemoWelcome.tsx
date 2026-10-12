@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Container, Grid, Stack, Typography,
+  Box, Button, Container, Grid, Stack, Typography, useTheme,
 } from '@mui/material';
 import { Dashboard, Explore, Science } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +17,7 @@ const DemoWelcome: React.FC = () => {
   const navigate = useNavigate();
   const { demoLogin, isAuthenticated, isDemo, backendReachable } = useAuth();
   const { start, skip } = useDemoTrail();
+  const isDark = useTheme().palette.mode === 'dark';
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
 
@@ -41,11 +42,11 @@ const DemoWelcome: React.FC = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', py: { xs: 4, md: 8 }, bgcolor: '#000', position: 'relative', overflow: 'hidden' }}>
-      <NebulaBackdrop />
+    <Box sx={{ minHeight: '100vh', py: { xs: 4, md: 8 }, bgcolor: 'background.default', position: 'relative', overflow: 'hidden' }}>
+      {isDark && <NebulaBackdrop />}
       <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
         <Stack spacing={1} sx={{ mb: 3 }} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-          <BrandLogo dark />
+          <BrandLogo dark={isDark} />
           <Typography variant="overline" color="primary" fontWeight={800} letterSpacing="0.16em">
             Interactive demo trail
           </Typography>

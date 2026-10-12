@@ -87,21 +87,21 @@ const IBMPartner: React.FC = () => {
       engineNotice="ibm"
     >
       {!backendReachable && (
-        <Typography sx={{ color: '#9ca3af', mb: 2, fontSize: '0.875rem' }}>
+        <Typography sx={{ color: 'text.secondary', mb: 2, fontSize: '0.875rem' }}>
           Checklist below is a published snapshot of RivicQ readiness. It is not live IBM Partner Plus API state.
         </Typography>
       )}
       {error && (
-        <Box sx={{ p: 1.75, mb: 3, bgcolor: '#0a0a0f', border: '1px solid #7f1d1d', borderRadius: 2, color: '#fecaca' }}>
+        <Box sx={{ p: 1.75, mb: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'error.main', borderRadius: 2, color: 'error.light' }}>
           {error}
         </Box>
       )}
 
       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 4 }}>
-        <Chip label={data?.status || 'selected — readiness tracking only'} sx={{ bgcolor: 'rgba(124,58,237,0.2)', color: '#fff', border: '1px solid #1f1f2e' }} />
-        <Chip label={`IBM APIs connected: ${data?.ibm_apis_connected ? 'yes' : 'no'}`} variant="outlined" sx={{ color: '#d1d5db', borderColor: '#1f1f2e' }} />
-        <Chip label={`Marketplace live: ${data?.marketplace_live ? 'yes' : 'no'}`} variant="outlined" sx={{ color: '#d1d5db', borderColor: '#1f1f2e' }} />
-        <Chip label={`Co-sell records: ${(data?.cosell_records || []).length}`} variant="outlined" sx={{ color: '#d1d5db', borderColor: '#1f1f2e' }} />
+        <Chip label={data?.status || 'selected — readiness tracking only'} sx={{ bgcolor: 'action.selected', color: 'text.primary', border: '1px solid', borderColor: 'divider' }} />
+        <Chip label={`IBM APIs connected: ${data?.ibm_apis_connected ? 'yes' : 'no'}`} variant="outlined" sx={{ color: 'text.secondary', borderColor: 'divider' }} />
+        <Chip label={`Marketplace live: ${data?.marketplace_live ? 'yes' : 'no'}`} variant="outlined" sx={{ color: 'text.secondary', borderColor: 'divider' }} />
+        <Chip label={`Co-sell records: ${(data?.cosell_records || []).length}`} variant="outlined" sx={{ color: 'text.secondary', borderColor: 'divider' }} />
       </Stack>
 
       <Typography sx={{ fontWeight: 700, mb: 1.5 }}>Technology mapping</Typography>
@@ -109,11 +109,11 @@ const IBMPartner: React.FC = () => {
         {mappings.map((m) => (
           <Grid item xs={12} md={6} key={m.ibm_technology}>
             <Box sx={siteCardSx}>
-              <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#a78bfa' }}>{m.status}</Typography>
+              <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'primary.main' }}>{m.status}</Typography>
               <Typography fontWeight={700} sx={{ mt: 0.75 }}>{m.ibm_technology}</Typography>
-              <Typography variant="body2" sx={{ color: '#d1d5db', mt: 0.5 }}>{m.rivicq_capability}</Typography>
-              <Typography variant="caption" display="block" sx={{ mt: 1, color: '#9ca3af' }}>{m.integration_type}</Typography>
-              <Typography variant="caption" sx={{ color: '#9ca3af' }}>{m.commercial_value}</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>{m.rivicq_capability}</Typography>
+              <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.disabled' }}>{m.integration_type}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.disabled' }}>{m.commercial_value}</Typography>
             </Box>
           </Grid>
         ))}
@@ -126,10 +126,10 @@ const IBMPartner: React.FC = () => {
             <Box sx={siteCardSx}>
               <Stack direction="row" justifyContent="space-between" spacing={1} sx={{ mb: 0.75 }}>
                 <Typography variant="subtitle2">{item.area}</Typography>
-                <Chip size="small" label={item.status} variant="outlined" sx={{ color: '#d1d5db', borderColor: '#1f1f2e' }} />
+                <Chip size="small" label={item.status} variant="outlined" sx={{ color: 'text.secondary', borderColor: 'divider' }} />
               </Stack>
-              <Typography variant="body2" sx={{ color: '#d1d5db' }}>{item.detail}</Typography>
-              <Typography variant="caption" sx={{ color: '#9ca3af' }}>{item.stage}</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>{item.detail}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.disabled' }}>{item.stage}</Typography>
             </Box>
           </Grid>
         ))}

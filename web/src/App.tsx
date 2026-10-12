@@ -1,10 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
 import { MotionConfig } from 'framer-motion';
 import designSystem from './theme/designSystem';
+import { getAppTheme } from './theme/theme';
 
 import Layout from './layouts/Layout';
 import { ThemeModeProvider } from './theme/ThemeContext';
@@ -15,62 +16,65 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PageErrorBoundary } from './components/PageErrorBoundary';
 import { PageSkeleton } from './components/LoadingScreen';
-
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import VerifyEmail from './pages/VerifyEmail';
-import EditionSwitcher from './pages/EditionSwitcher';
-import Dashboard from './pages/Dashboard';
-import AssetDetails from './pages/AssetDetails';
-import Assets from './pages/Assets';
-import Findings from './pages/Findings';
-import Scanner from './pages/Scanner';
-import Analytics from './pages/Analytics';
-import Settings from './pages/Settings';
-import Admin from './pages/Admin';
-import DevSecOpsTools from './pages/DevSecOpsTools';
-import RivicQEcosystem from './pages/RivicQEcosystem';
-import OAuthCallback from './pages/OAuthCallback';
-import DemoWelcome from './pages/DemoWelcome';
 import { DemoTrailProvider } from './context/DemoTrailContext';
 
-import Inventory from './pages/enterprise/Inventory';
-import Compliance from './pages/enterprise/Compliance';
-import Quantum from './pages/enterprise/Quantum';
-import MultiCloud from './pages/enterprise/MultiCloud';
-import CNCF from './pages/enterprise/CNCF';
-import TerraformIaC from './pages/enterprise/Terraform';
+// Routes are code-split: each page is loaded on demand so the initial bundle
+// stays small. Layout, auth providers and route guards stay eager because they
+// are always needed to render the shell.
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const EditionSwitcher = lazy(() => import('./pages/EditionSwitcher'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AssetDetails = lazy(() => import('./pages/AssetDetails'));
+const Assets = lazy(() => import('./pages/Assets'));
+const Findings = lazy(() => import('./pages/Findings'));
+const Scanner = lazy(() => import('./pages/Scanner'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Admin = lazy(() => import('./pages/Admin'));
+const DevSecOpsTools = lazy(() => import('./pages/DevSecOpsTools'));
+const RivicQEcosystem = lazy(() => import('./pages/RivicQEcosystem'));
+const OAuthCallback = lazy(() => import('./pages/OAuthCallback'));
+const DemoWelcome = lazy(() => import('./pages/DemoWelcome'));
 
-import IBMCloud from './pages/enterprise/IBMCloud';
-import AWSCloud from './pages/enterprise/AWSCloud';
-import QuantumAttestation from './pages/enterprise/QuantumAttestation';
-import CloudPosture from './pages/enterprise/CloudPosture';
-import ConformancePacks from './pages/enterprise/ConformancePacks';
-import SecurityModulePage from './pages/enterprise/SecurityModule';
-import PlatformModules from './pages/enterprise/PlatformModules';
-import CSPM from './pages/CSPM';
-import InfraDiscovery from './pages/InfraDiscovery';
-import BomIntelligence from './pages/BomIntelligence';
-import DevSecOpsPipeline from './pages/DevSecOpsPipeline';
-import ApiSecurity from './pages/ApiSecurity';
-import AiSecurity from './pages/AiSecurity';
-import HsmQuantum from './pages/HsmQuantum';
-import GovernanceHub from './pages/GovernanceHub';
-import MigrationHub from './pages/MigrationHub';
-import ContactHub from './pages/ContactHub';
-import RequestDemo from './pages/RequestDemo';
-import Pricing from './pages/Pricing';
-import IBMPartner from './pages/IBMPartner';
-import CRMLeads from './pages/CRMLeads';
-import Product from './pages/Product';
-import CspmPublic from './pages/CspmPublic';
-import CbomPublic from './pages/CbomPublic';
-import PqcPublic from './pages/PqcPublic';
-import EnterprisePublic from './pages/EnterprisePublic';
-import SecurityPublic from './pages/SecurityPublic';
+const Inventory = lazy(() => import('./pages/enterprise/Inventory'));
+const Compliance = lazy(() => import('./pages/enterprise/Compliance'));
+const Quantum = lazy(() => import('./pages/enterprise/Quantum'));
+const MultiCloud = lazy(() => import('./pages/enterprise/MultiCloud'));
+const CNCF = lazy(() => import('./pages/enterprise/CNCF'));
+const TerraformIaC = lazy(() => import('./pages/enterprise/Terraform'));
+
+const IBMCloud = lazy(() => import('./pages/enterprise/IBMCloud'));
+const AWSCloud = lazy(() => import('./pages/enterprise/AWSCloud'));
+const QuantumAttestation = lazy(() => import('./pages/enterprise/QuantumAttestation'));
+const CloudPosture = lazy(() => import('./pages/enterprise/CloudPosture'));
+const ConformancePacks = lazy(() => import('./pages/enterprise/ConformancePacks'));
+const SecurityModulePage = lazy(() => import('./pages/enterprise/SecurityModule'));
+const PlatformModules = lazy(() => import('./pages/enterprise/PlatformModules'));
+const CSPM = lazy(() => import('./pages/CSPM'));
+const InfraDiscovery = lazy(() => import('./pages/InfraDiscovery'));
+const BomIntelligence = lazy(() => import('./pages/BomIntelligence'));
+const DevSecOpsPipeline = lazy(() => import('./pages/DevSecOpsPipeline'));
+const ApiSecurity = lazy(() => import('./pages/ApiSecurity'));
+const AiSecurity = lazy(() => import('./pages/AiSecurity'));
+const HsmQuantum = lazy(() => import('./pages/HsmQuantum'));
+const GovernanceHub = lazy(() => import('./pages/GovernanceHub'));
+const MigrationHub = lazy(() => import('./pages/MigrationHub'));
+const ContactHub = lazy(() => import('./pages/ContactHub'));
+const RequestDemo = lazy(() => import('./pages/RequestDemo'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const IBMPartner = lazy(() => import('./pages/IBMPartner'));
+const CRMLeads = lazy(() => import('./pages/CRMLeads'));
+const Product = lazy(() => import('./pages/Product'));
+const CspmPublic = lazy(() => import('./pages/CspmPublic'));
+const CbomPublic = lazy(() => import('./pages/CbomPublic'));
+const PqcPublic = lazy(() => import('./pages/PqcPublic'));
+const EnterprisePublic = lazy(() => import('./pages/EnterprisePublic'));
+const SecurityPublic = lazy(() => import('./pages/SecurityPublic'));
 
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
@@ -100,10 +104,7 @@ const App: React.FC = () => {
     }
     return 'dark';
   });
-  const theme = React.useMemo(() => {
-    const { getAppTheme } = require('./theme/theme');
-    return getAppTheme(mode);
-  }, [mode]);
+  const theme = React.useMemo(() => getAppTheme(mode), [mode]);
 
   const toggleMode = React.useCallback(() => {
     setMode((m) => {

@@ -49,25 +49,25 @@ const RequestDemo: React.FC = () => {
         <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
           Sales · RivicQ GmbH · Berlin
         </Typography>
-        <Typography sx={{ fontSize: { xs: '2rem', md: '2.6rem' }, fontWeight: 750, letterSpacing: '-0.03em', color: '#fff', mt: 1 }}>
+        <Typography sx={{ fontSize: { xs: '2rem', md: '2.6rem' }, fontWeight: 750, letterSpacing: '-0.03em', color: 'text.primary', mt: 1 }}>
           Request an enterprise demo
         </Typography>
-        <Typography sx={{ color: '#d1d5db', mt: 1.5, mb: 3 }}>
+        <Typography sx={{ color: 'text.secondary', mt: 1.5, mb: 3 }}>
           Tell us who you are. This is not the labeled product demo. Sample dashboards stay on the Demo trail.
         </Typography>
         {done ? (
-          <Box sx={{ p: 2, bgcolor: '#0a0a0f', border: '1px solid #1f1f2e', borderRadius: 2, color: '#d1d5db' }}>
+          <Box sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2, color: 'text.secondary' }}>
             Request recorded. Sales follows up from sales@rivicq.com. Nothing was sent to Discord with your email.
           </Box>
         ) : (
-          <Box component="form" onSubmit={submit} sx={{ p: 3, bgcolor: '#0a0a0f', border: '1px solid #1f1f2e', borderRadius: 2 }}>
+          <Box component="form" onSubmit={submit} sx={{ p: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
             {!backendReachable && (
-              <Box sx={{ p: 1.75, mb: 2, bgcolor: '#000', border: '1px solid #1f1f2e', borderRadius: 2, color: '#d1d5db' }}>
+              <Box sx={{ p: 1.75, mb: 2, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider', borderRadius: 2, color: 'text.secondary' }}>
                 {PUBLIC_PAGES_SALES_FORM}
               </Box>
             )}
             {error && (
-              <Box sx={{ p: 1.75, mb: 2, bgcolor: '#000', border: '1px solid #7f1d1d', borderRadius: 2, color: '#fecaca' }}>
+              <Box sx={{ p: 1.75, mb: 2, bgcolor: 'background.default', border: '1px solid', borderColor: 'error.main', borderRadius: 2, color: 'error.light' }}>
                 {error}
               </Box>
             )}
@@ -80,7 +80,7 @@ const RequestDemo: React.FC = () => {
                   <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
                 ))}
               </TextField>
-              <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ borderRadius: 999, bgcolor: '#7c3aed', '&:hover': { bgcolor: '#6d28d9' } }}>
+              <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ borderRadius: 999, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}>
                 {loading ? 'Sending…' : backendReachable ? 'Submit request' : 'Email sales@'}
               </Button>
               <Stack direction="row" spacing={1}>

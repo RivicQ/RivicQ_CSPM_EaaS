@@ -9,9 +9,10 @@ import AuthChrome from '../components/brand/AuthChrome';
 const cardSx = {
   mt: 1,
   borderRadius: 2,
-  bgcolor: '#0a0a0f',
-  color: '#fff',
-  border: '1px solid #1f1f2e',
+  bgcolor: 'background.paper',
+  color: 'text.primary',
+  border: '1px solid',
+  borderColor: 'divider',
 };
 
 const ForgotPassword: React.FC = () => {

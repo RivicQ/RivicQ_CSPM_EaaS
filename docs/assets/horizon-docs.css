@@ -377,3 +377,48 @@ section { padding: 0 0 3.5rem; }
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ---------------------------------------------------------------- light theme
+   The docs are dark-first, but every surface is driven by the variables above.
+   Flipping `data-theme="light"` on <html> remaps the neutral ramp to graphite
+   on white while keeping the RivicQ violet accent. Init + toggle live in
+   assets/theme.js so the choice persists and follows the OS by default. */
+[data-theme="light"] {
+  --ink: #ffffff;
+  --surface: #ffffff;
+  --raised: #f1f5f9;
+  --ivory: #0a0a0f;
+  --muted: #4b5563;
+  --faint: #6b7280;
+  --line: #e5e7eb;
+}
+[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse 55% 48% at 50% 12%, rgba(124,58,237,0.12), transparent 68%),
+    #f8fafc;
+}
+/* Sparse starfield is only legible on the dark canvas. */
+[data-theme="light"] body::before { display: none; }
+[data-theme="light"] .btn-outline { color: var(--ivory); border-color: var(--line); }
+[data-theme="light"] .btn-outline:hover { border-color: var(--accent); }
+[data-theme="light"] .preview-thumb { color: var(--ivory); }
+[data-theme="light"] .thumb-oss { color: #15803d; }
+[data-theme="light"] .badge-yes { background: rgba(21,128,61,0.12); color: #15803d; }
+[data-theme="light"] .badge-no { background: rgba(180,83,9,0.12); color: #b45309; }
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }

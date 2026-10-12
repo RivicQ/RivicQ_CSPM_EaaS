@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../../theme/websiteChrome';
@@ -15,6 +15,7 @@ type Variant = 'scan' | 'ibm';
 const PublicEngineNotice: React.FC<{ variant?: Variant; force?: boolean; compact?: boolean }> = ({ variant = 'scan', force = false, compact = false }) => {
   const { backendReachable } = useAuth();
   const navigate = useNavigate();
+  const isDark = useTheme().palette.mode === 'dark';
 
   if (backendReachable && !force) return null;
 
@@ -25,10 +26,11 @@ const PublicEngineNotice: React.FC<{ variant?: Variant; force?: boolean; compact
       sx={{
         p: 2,
         mb: compact ? 1.5 : 3,
-        bgcolor: '#0a0a0f',
-        border: '1px solid #1f1f2e',
+        bgcolor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
         borderRadius: 2,
-        color: '#d1d5db',
+        color: 'text.secondary',
       }}
     >
       <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#a78bfa', mb: 0.75 }}>
@@ -39,11 +41,11 @@ const PublicEngineNotice: React.FC<{ variant?: Variant; force?: boolean; compact
         <Button size="small" variant="contained" onClick={() => navigate('/login')} sx={websiteCtaSx}>
           Sign in to the engine
         </Button>
-        <Button size="small" variant="outlined" onClick={() => navigate('/demo')} sx={websiteOutlineCtaSx}>
+        <Button size="small" variant="outlined" onClick={() => navigate('/demo')} sx={websiteOutlineCtaSx(isDark)}>
           Labeled Community demo
         </Button>
         {variant === 'ibm' && (
-          <Button size="small" variant="outlined" onClick={() => navigate('/request-demo')} sx={websiteOutlineCtaSx}>
+          <Button size="small" variant="outlined" onClick={() => navigate('/request-demo')} sx={websiteOutlineCtaSx(isDark)}>
             Request enterprise demo
           </Button>
         )}

@@ -48,10 +48,10 @@ const EditionSwitcher: React.FC = () => {
   ];
 
   const pageBg = isDark ? designSystem.gradient.meshDark : designSystem.gradient.meshLight;
-  const cardBg = '#0a0a0f';
+  const cardBg = 'background.paper';
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#000', background: pageBg, py: 8, position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', background: pageBg, py: 8, position: 'relative', overflow: 'hidden' }}>
       {isDark && <NebulaBackdrop />}
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
@@ -80,7 +80,7 @@ const EditionSwitcher: React.FC = () => {
                   '&:hover': { transform: 'none', boxShadow: 'none', borderColor: `${card.accent}88` },
                 }}
               >
-                <CardContent sx={{ p: 4, color: '#fff' }}>
+                <CardContent sx={{ p: 4, color: 'text.primary' }}>
                   <Stack spacing={2}>
                     <Box sx={{ color: card.accent }}>
                       {card.icon}
@@ -115,7 +115,7 @@ const EditionSwitcher: React.FC = () => {
 
         <Grid container spacing={2} sx={{ mt: 4 }}>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' }}>
+            <Card sx={{ height: '100%', bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
               <CardContent>
                 <Storage color="primary" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Community quick start</Typography>
@@ -124,7 +124,7 @@ const EditionSwitcher: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' }}>
+            <Card sx={{ height: '100%', bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
               <CardContent>
                 <CloudQueue color="secondary" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Professional unlocks</Typography>
@@ -133,7 +133,7 @@ const EditionSwitcher: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' }}>
+            <Card sx={{ height: '100%', bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
               <CardContent>
                 <Psychology color="success" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Enterprise extends</Typography>
@@ -143,7 +143,7 @@ const EditionSwitcher: React.FC = () => {
           </Grid>
         </Grid>
 
-        <Box sx={{ mt: 4, p: 3, borderRadius: 3, border: '1px solid #1f1f2e', bgcolor: '#0a0a0f', color: '#fff' }}>
+        <Box sx={{ mt: 4, p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
           <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
             What gets locked in Community
           </Typography>

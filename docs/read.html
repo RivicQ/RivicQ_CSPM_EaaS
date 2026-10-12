@@ -14,6 +14,19 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assets/horizon-docs.css?v=20260911c" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('rivicq.theme');
+          if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -25,6 +38,7 @@
         <a href="index.html#workflow">Workflow</a>
         <a href="contact.html">Directory</a>
         <a href="../">Console</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">&#9788;</button>
       </nav>
       </div>
     </header>
@@ -112,5 +126,6 @@
           });
       }
     </script>
+    <script src="assets/theme.js" defer></script>
   </body>
 </html>

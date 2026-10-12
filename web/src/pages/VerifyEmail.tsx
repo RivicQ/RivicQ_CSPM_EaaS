@@ -12,7 +12,7 @@ const VerifyEmail: React.FC = () => {
 
   return (
     <AuthChrome>
-      <Card sx={{ mt: 1, borderRadius: 2, bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' }} elevation={0}>
+      <Card sx={{ mt: 1, borderRadius: 2, bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' }} elevation={0}>
         <CardContent sx={{ p: 4 }}>
           <Stack spacing={2}>
             <MarkEmailRead color="primary" sx={{ fontSize: 40 }} />

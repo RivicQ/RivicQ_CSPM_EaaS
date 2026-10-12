@@ -18,13 +18,13 @@ const ContactHub: React.FC = () => (
       {publishedContacts().map((c) => (
         <Grid item xs={12} sm={6} key={c.email}>
           <Box sx={siteCardSx}>
-            <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#a78bfa' }}>
+            <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'primary.main' }}>
               {c.label}
             </Typography>
             <Typography sx={{ fontFamily: tokens.typography.mono, fontWeight: 700, my: 1 }}>
               {c.email}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#d1d5db', mb: 1.5 }}>{c.purpose}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }}>{c.purpose}</Typography>
             <Button size="small" variant="contained" href={mailto(c.email)} sx={websiteCtaSx}>
               Email
             </Button>
@@ -33,9 +33,9 @@ const ContactHub: React.FC = () => (
       ))}
     </Grid>
     <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 4 }}>
-      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/index.html`} sx={{ color: '#d1d5db' }}>Documentation</Button>
-      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/read.html?doc=LEGAL.md`} sx={{ color: '#d1d5db' }}>Legal</Button>
-      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/contact.html`} sx={{ color: '#d1d5db' }}>Docs directory</Button>
+      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/index.html`} sx={{ color: 'text.secondary' }}>Documentation</Button>
+      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/read.html?doc=LEGAL.md`} sx={{ color: 'text.secondary' }}>Legal</Button>
+      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/contact.html`} sx={{ color: 'text.secondary' }}>Docs directory</Button>
     </Stack>
   </SitePage>
 );

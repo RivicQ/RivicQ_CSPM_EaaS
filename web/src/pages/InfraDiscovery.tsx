@@ -284,7 +284,7 @@ function ScanSummaryBar({ summary }: { summary: ScanSummary }) {
     <Grid container spacing={2} sx={{ mb: 3 }}>
       {cards.map((card) => (
         <Grid item xs={12} sm={6} md={3} key={card.label}>
-          <Card sx={{ bgcolor: '#0a0a0f', border: '1px solid #1f1f2e' }}>
+          <Card sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
             <CardContent sx={{ py: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box>
                 <Typography variant="h3" fontWeight={700} sx={{ color: card.color, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
@@ -351,7 +351,7 @@ function TargetStatusGrid({ findings }: { findings: Finding[] }) {
                 sx={{
                   position: 'relative',
                   overflow: 'hidden',
-                  bgcolor: worst ? `${color}0d` : '#0a0a0f',
+                  bgcolor: worst ? `${color}0d` : 'background.paper',
                   '&::before': {
                     content: '""',
                     position: 'absolute',
@@ -634,7 +634,7 @@ function ScanButton({ onScanComplete }: ScanButtonProps) {
           sx={{
             mt: 2,
             borderColor: 'divider',
-            bgcolor: '#05050a',
+            bgcolor: 'background.default',
             overflow: 'hidden',
           }}
         >
@@ -647,7 +647,7 @@ function ScanButton({ onScanComplete }: ScanButtonProps) {
               py: 0.75,
               borderBottom: '1px solid',
               borderColor: 'divider',
-              bgcolor: '#0a0a0f',
+              bgcolor: 'background.paper',
             }}
           >
             <Terminal sx={{ fontSize: 13, color: tokens.colors.rivicq[400] }} />

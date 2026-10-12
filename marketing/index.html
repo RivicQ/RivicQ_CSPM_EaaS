@@ -12,6 +12,94 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('rivicq.theme');
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link rel="canonical" href="https://rivicq.com/" />
+  <!-- Structured data: only factual values are emitted. See docs/STRUCTURED_DATA.md -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://rivicq.com/#organization",
+        "name": "RivicQ GmbH",
+        "url": "https://rivicq.com/",
+        "logo": "https://rivicq.com/assets/rivicq-mark.png",
+        "email": "hello@rivicq.com",
+        "description": "German-engineered cryptographic security posture management (CSPM) and CryptoBOM platform.",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Rudower Chaussee 29",
+          "addressLocality": "Berlin",
+          "postalCode": "12489",
+          "addressCountry": "DE"
+        },
+        "contactPoint": [
+          { "@type": "ContactPoint", "contactType": "general", "email": "hello@rivicq.com", "areaServed": "Worldwide", "availableLanguage": ["en", "de"] },
+          { "@type": "ContactPoint", "contactType": "sales", "email": "sales@rivicq.com", "areaServed": "Worldwide" },
+          { "@type": "ContactPoint", "contactType": "customer support", "email": "support@rivicq.com" },
+          { "@type": "ContactPoint", "contactType": "security", "email": "security@rivicq.com" }
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://rivicq.com/#website",
+        "url": "https://rivicq.com/",
+        "name": "RivicQ",
+        "publisher": { "@id": "https://rivicq.com/#organization" },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://rivicq.com/#webpage",
+        "url": "https://rivicq.com/",
+        "name": "RivicQ — Cryptographic Security & Quantum Readiness",
+        "isPartOf": { "@id": "https://rivicq.com/#website" },
+        "about": { "@id": "https://rivicq.com/#service" }
+      },
+      {
+        "@type": "Service",
+        "@id": "https://rivicq.com/#service",
+        "name": "RivicQ Cryptographic Security Posture Management",
+        "serviceType": "Cryptographic Security Posture Management (CSPM) and CryptoBOM",
+        "provider": { "@id": "https://rivicq.com/#organization" },
+        "areaServed": "Worldwide",
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "RivicQ editions",
+          "itemListElement": [
+            { "@type": "Offer", "name": "Community", "description": "Open-source CBOM scan engine and GitHub Action (Apache License 2.0).", "price": "0", "priceCurrency": "EUR", "availability": "https://schema.org/InStock", "url": "https://rivicq.com/" },
+            { "@type": "Offer", "name": "Enterprise", "description": "Continuous monitoring, multi-cloud coverage, tenancy, SSO, and contracted support.", "availability": "https://schema.org/InStock", "url": "https://rivicq.com/enterprise" }
+          ]
+        }
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://rivicq.com/#capabilities",
+        "name": "RivicQ capabilities",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "CBOM discovery" },
+          { "@type": "ListItem", "position": 2, "name": "PQC readiness" },
+          { "@type": "ListItem", "position": 3, "name": "Multi-cloud compliance" },
+          { "@type": "ListItem", "position": 4, "name": "SBOM and AIBOM" },
+          { "@type": "ListItem", "position": 5, "name": "GitHub Action scanning" }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
@@ -34,6 +122,7 @@
         <li><a href="#" data-platform-link data-platform-path="/contact">Company</a></li>
       </ul>
       <div class="nav-actions">
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">&#9788;</button>
         <a href="#" class="btn btn-primary" data-platform-link data-platform-path="/register">Get Started</a>
       </div>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
@@ -436,5 +525,6 @@
 
   <script src="js/visuals.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/theme.js" defer></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment,
+  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment, useTheme,
 } from '@mui/material';
 import {
   ArrowForward, CheckCircle, GitHub, GppGood, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
@@ -50,6 +50,7 @@ const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', '
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const isDark = useTheme().palette.mode === 'dark';
   const { isAuthenticated, backendReachable } = useAuth();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
@@ -212,8 +213,8 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const ink = '#000000';
-  const panel = '#0a0a0f';
+  const ink = 'background.default';
+  const panel = 'background.paper';
   const [navMenu, setNavMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
 
   const NAV = [
@@ -280,19 +281,21 @@ const Home: React.FC = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: ink, color: 'text.primary', position: 'relative' }}>
-      <Box sx={{ height: 3, bgcolor: '#7c3aed', position: 'sticky', top: 0, zIndex: 21 }} />
+      <Box sx={{ height: 3, bgcolor: 'primary.main', position: 'sticky', top: 0, zIndex: 21 }} />
       <Box
         sx={{
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: 'rgba(0,0,0,0.72)',
+          bgcolor: isDark ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.78)',
           backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
         }}
       >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
-            <BrandLogo dark />
+            <BrandLogo dark={isDark} />
             <Stack direction="row" spacing={0.25} flexWrap="wrap" useFlexGap sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
                 <Button
@@ -303,13 +306,13 @@ const Home: React.FC = () => {
                     if ('items' in item && item.items) setNavMenu({ id: item.id, el: e.currentTarget });
                     else item.onClick?.();
                   }}
-                  sx={{ color: '#fff', fontWeight: 500 }}
+                  sx={{ color: 'text.primary', fontWeight: 500 }}
                 >
                   {item.label}
                 </Button>
               ))}
             </Stack>
-            <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={{ borderRadius: 999, bgcolor: '#7c3aed', '&:hover': { bgcolor: '#6d28d9' } }}>
+            <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={{ borderRadius: 999, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}>
               Request demo
             </Button>
           </Stack>
@@ -318,7 +321,7 @@ const Home: React.FC = () => {
           anchorEl={navMenu?.el}
           open={Boolean(navMenu)}
           onClose={() => setNavMenu(null)}
-          slotProps={{ paper: { sx: { bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' } } }}
+          slotProps={{ paper: { sx: { bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' } } }}
         >
           {(NAV.find((n) => n.id === navMenu?.id) as { items?: { label: string; action: () => void }[] } | undefined)?.items?.map((it) => (
             <MenuItem
@@ -349,7 +352,7 @@ const Home: React.FC = () => {
               size="large"
               endIcon={<NorthEast />}
               onClick={() => scrollToId('scan')}
-              sx={{ px: 3, py: 1.2, bgcolor: '#7c3aed', '&:hover': { bgcolor: '#6d28d9' } }}
+              sx={{ px: 3, py: 1.2, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
             >
               Start security assessment
             </Button>
@@ -520,7 +523,7 @@ const Home: React.FC = () => {
         <Box sx={{ mt: 8, py: 3, borderTop: 1, borderColor: 'divider' }}>
           <Stack spacing={1.25} alignItems="center">
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="center">
-              <BrandLogo compact dark />
+              <BrandLogo compact dark={isDark} />
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
             </Stack>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">

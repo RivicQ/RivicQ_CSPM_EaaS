@@ -13,6 +13,41 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/showcase.css" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('rivicq.theme');
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link rel="canonical" href="https://rivicq.com/showcase" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://rivicq.com/showcase#webpage",
+        "url": "https://rivicq.com/showcase",
+        "name": "Live Demo — RivicQ CryptoBOM",
+        "isPartOf": { "@id": "https://rivicq.com/#website" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://rivicq.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Live Demo", "item": "https://rivicq.com/showcase" }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body class="showcase-body">
 
@@ -31,6 +66,7 @@
         <li><a href="showcase.html">Live Demo</a></li>
       </ul>
       <div class="nav-actions">
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">&#9788;</button>
         <a href="#" class="btn btn-ghost" data-platform-link data-platform-path="/login">Sign In</a>
         <a href="#" class="btn btn-primary" data-platform-link data-platform-path="/dashboard">Open Platform</a>
       </div>
@@ -300,5 +336,6 @@
 
   <script src="js/main.js"></script>
   <script src="js/showcase.js"></script>
+  <script src="js/theme.js" defer></script>
 </body>
 </html>

@@ -7,9 +7,13 @@ export const websiteCtaSx = {
   '&:hover': { bgcolor: '#6d28d9 !important', boxShadow: 'none' },
 } as const;
 
-export const websiteOutlineCtaSx = {
+/** Outline CTA — adapts to the surrounding surface so it stays legible in light and dark. */
+export const websiteOutlineCtaSx = (isDark: boolean) => ({
   borderRadius: 999,
-  color: '#ffffff !important',
-  borderColor: 'rgba(255,255,255,0.45) !important',
-  '&:hover': { borderColor: '#ffffff !important', bgcolor: 'rgba(124,58,237,0.16) !important' },
-} as const;
+  color: isDark ? '#ffffff !important' : '#0a0a0f !important',
+  borderColor: isDark ? 'rgba(255,255,255,0.45) !important' : 'rgba(10,10,15,0.30) !important',
+  '&:hover': {
+    borderColor: isDark ? '#ffffff !important' : '#0a0a0f !important',
+    bgcolor: isDark ? 'rgba(124,58,237,0.16) !important' : 'rgba(124,58,237,0.08) !important',
+  },
+});

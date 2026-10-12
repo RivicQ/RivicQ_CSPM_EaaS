@@ -1,11 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Divider, IconButton, Menu, MenuItem, MenuList, Stack, Typography } from '@mui/material';
-import { KeyboardArrowDown, Menu as MenuIcon } from '@mui/icons-material';
+import { Box, Button, Container, Divider, IconButton, Menu, MenuItem, MenuList, Stack, Tooltip, Typography } from '@mui/material';
+import { DarkModeOutlined, KeyboardArrowDown, LightModeOutlined, Menu as MenuIcon } from '@mui/icons-material';
 import BrandLogo from '../BrandLogo';
 import NebulaBackdrop from './NebulaBackdrop';
 import TrademarkNotice from '../TrademarkNotice';
 import { websiteCtaSx } from '../../theme/websiteChrome';
+import { useThemeMode } from '../../theme/ThemeContext';
 
 type NavItem = {
   id: string;
@@ -36,6 +37,8 @@ const NAV: NavItem[] = [
 
 const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = ({ children, nebula = true }) => {
   const navigate = useNavigate();
+  const { mode, toggleMode } = useThemeMode();
+  const isDark = mode === 'dark';
   const [menu, setMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
   const [mobileMenu, setMobileMenu] = React.useState<HTMLElement | null>(null);
 
@@ -55,14 +58,24 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#000', color: '#fff', position: 'relative' }}>
-      {nebula && (
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary', position: 'relative' }}>
+      {nebula && isDark && (
         <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
           <NebulaBackdrop />
         </Box>
       )}
-      <Box sx={{ height: 3, bgcolor: '#7c3aed', position: 'sticky', top: 0, zIndex: 21 }} />
-      <Box sx={{ position: 'sticky', top: 3, zIndex: 20, bgcolor: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)' }}>
+      <Box sx={{ height: 3, bgcolor: 'primary.main', position: 'sticky', top: 0, zIndex: 21 }} />
+      <Box
+        sx={{
+          position: 'sticky',
+          top: 3,
+          zIndex: 20,
+          bgcolor: isDark ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.78)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
             <Box
@@ -81,7 +94,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
                 '&:focus-visible': { outline: '2px solid #7c3aed', outlineOffset: 2 },
               }}
             >
-              <BrandLogo dark />
+              <BrandLogo dark={isDark} />
             </Box>
             <Stack direction="row" spacing={0.25} sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
@@ -93,20 +106,30 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
                     if (item.items) setMenu({ id: item.id, el: e.currentTarget });
                     else if (item.to) go(item.to);
                   }}
-                  sx={{ color: '#fff', fontWeight: 500 }}
+                  sx={{ color: 'text.primary', fontWeight: 500 }}
                 >
                   {item.label}
                 </Button>
               ))}
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
+              <Tooltip title={isDark ? 'Switch to light' : 'Switch to dark'}>
+                <IconButton
+                  size="small"
+                  aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+                  onClick={toggleMode}
+                  sx={{ color: 'text.secondary', border: '1px solid', borderColor: 'divider' }}
+                >
+                  {isDark ? <LightModeOutlined fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
+                </IconButton>
+              </Tooltip>
               <IconButton
                 size="small"
                 aria-label="Open navigation menu"
                 aria-haspopup="menu"
                 aria-expanded={Boolean(mobileMenu)}
                 onClick={(e) => setMobileMenu(e.currentTarget)}
-                sx={{ display: { xs: 'inline-flex', md: 'none' }, color: '#fff' }}
+                sx={{ display: { xs: 'inline-flex', md: 'none' }, color: 'text.primary' }}
               >
                 <MenuIcon />
               </IconButton>
@@ -120,20 +143,20 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
           anchorEl={mobileMenu}
           open={Boolean(mobileMenu)}
           onClose={() => setMobileMenu(null)}
-          slotProps={{ paper: { sx: { bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e', minWidth: 220 } } }}
+          slotProps={{ paper: { sx: { bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider', minWidth: 220 } } }}
         >
           <MenuList aria-label="Main navigation" sx={{ py: 0.5 }}>
             {NAV.map((item, index) => (
               <React.Fragment key={item.id}>
-                {index > 0 && <Divider sx={{ borderColor: '#1f1f2e' }} />}
+                {index > 0 && <Divider sx={{ borderColor: 'divider' }} />}
                 {item.items ? (
                   item.items.map((sub) => (
-                    <MenuItem key={sub.to} onClick={() => goAndCloseMobile(sub.to)} sx={{ color: '#fff' }}>
+                    <MenuItem key={sub.to} onClick={() => goAndCloseMobile(sub.to)} sx={{ color: 'text.primary' }}>
                       {sub.label}
                     </MenuItem>
                   ))
                 ) : (
-                  <MenuItem onClick={() => goAndCloseMobile(item.to || '/')} sx={{ color: '#fff' }}>
+                  <MenuItem onClick={() => goAndCloseMobile(item.to || '/')} sx={{ color: 'text.primary' }}>
                     {item.label}
                   </MenuItem>
                 )}
@@ -145,7 +168,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
           anchorEl={menu?.el}
           open={Boolean(menu)}
           onClose={() => setMenu(null)}
-          slotProps={{ paper: { sx: { bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' } } }}
+          slotProps={{ paper: { sx: { bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' } } }}
         >
           {NAV.find((n) => n.id === menu?.id)?.items?.map((it) => (
             <MenuItem key={it.to} onClick={() => { go(it.to); setMenu(null); }}>{it.label}</MenuItem>
@@ -155,11 +178,11 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
 
       <Box sx={{ position: 'relative', zIndex: 1 }}>{children}</Box>
 
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, py: 3, borderTop: '1px solid #1f1f2e' }}>
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, py: 3, borderTop: '1px solid', borderColor: 'divider' }}>
         <Stack spacing={1.25} alignItems="center">
           <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="center">
-            <BrandLogo compact dark />
-            <Typography variant="body2" sx={{ color: '#d1d5db' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
+            <BrandLogo compact dark={isDark} />
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
           </Stack>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">
             <Button size="small" href="mailto:hello@rivicq.com">hello@</Button>

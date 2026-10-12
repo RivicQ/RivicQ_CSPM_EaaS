@@ -18,6 +18,54 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assets/horizon-docs.css?v=20260911c" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('rivicq.theme');
+          if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://rivicq.com/#organization",
+          "name": "RivicQ GmbH",
+          "url": "https://rivicq.com/",
+          "email": "hello@rivicq.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rudower Chaussee 29",
+            "addressLocality": "Berlin",
+            "postalCode": "12489",
+            "addressCountry": "DE"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://rivicq.github.io/RivicQ_CSPM_EaaS/docs/#webpage",
+          "url": "https://rivicq.github.io/RivicQ_CSPM_EaaS/docs/",
+          "name": "RivicQ documentation — cryptographic control plane",
+          "publisher": { "@id": "https://rivicq.com/#organization" }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Console", "item": "https://rivicq.github.io/RivicQ_CSPM_EaaS/" },
+            { "@type": "ListItem", "position": 2, "name": "Documentation", "item": "https://rivicq.github.io/RivicQ_CSPM_EaaS/docs/" }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -32,8 +80,10 @@
         <a href="#workflow">Workflow</a>
         <a href="#library">Library</a>
         <a href="contact.html">Contact</a>
+        <a href="../archify/site/index.html">Diagrams</a>
         <a href="../api/index.html">API</a>
         <a href="../">Console</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">&#9788;</button>
       </nav>
       </div>
     </header>
@@ -233,5 +283,6 @@
         <a href="contact.html">Contact</a>
       </p>
     </footer>
+    <script src="assets/theme.js" defer></script>
   </body>
 </html>
