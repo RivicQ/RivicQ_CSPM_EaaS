@@ -1,183 +1,162 @@
-# RivicQ CryptoBOM — Enterprise SaaS architecture
+# Architecture: RivicQ CSPM / CryptoBOM EaaS
 
-Honest product architecture for operators, evaluators, and customer conversations.
-This is not a certification, and it does not claim firmware reverse-engineering.
+This document describes the concrete system architecture of the repository and its deployment topology. Companion reading: `docs/TRD.md` (requirements), `docs/CORE_ENGINE.md` (engine contract), `docs/editions.md` (edition split), `docs/DEPLOYMENT.md` (helm/compose), `docs/CLIENT_ARCHITECTURE.md` (discover/mitigate/report).
 
-**Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data only).
+Honest boundaries: this product does not claim certifications, does not reverse-engineer firmware at runtime, and cloud/HSM/quantum connectors require customer-supplied credentials.
 
-Core engine contract (findings, fingerprints, PQC classes, CLI fail-on): [CORE_ENGINE.md](CORE_ENGINE.md).
+## 1. Component diagram
 
-## Core SaaS layers
+```mermaid
+flowchart TB
+    subgraph Operator["Operators"]
+        CLI["cmd/rivicq CLI"]
+        GA["GitHub Action\n.github/actions/rivicq-scan"]
+        WH["GitHub webhook\nPOST /api/v1/github/webhook"]
+    end
 
-Four-layer CBOM architecture (input → engine → PQC operationalization → outputs), with a client path of **discover → mitigate → report**, plus the five-BOM DevSecOps overlay ([BOM_FRAMEWORK.md](BOM_FRAMEWORK.md)). Details: [CLIENT_ARCHITECTURE.md](CLIENT_ARCHITECTURE.md).
+    subgraph Edge["Gin API server (internal/server/server.go)"]
+        MW["middleware: RequestID, SecurityHeaders,\nAudit, RateLimit, CORS\n(internal/middleware)"]
+        ED["edition.Detect()\ninternal/edition"]
+        TN["tenant.Resolve()\nfrom JWT tenant_id\ninternal/tenant"]
+        AUTH["internal/authn: JWT, bcrypt,\nTOTP, OAuth"]
+    end
 
+    subgraph Engine["Shared engine (both editions)"]
+        DISC["internal/discovery\ntls.go ssh_scanner.go http_scanner.go\nsbom_scanner.go target_policy.go"]
+        INT["internal/intelligence\nnormalize.go risk.go policy.go\npqc_class.go cyclonedx.go"]
+        BOM["internal/bom + cryptoart\nCBOM framework, artifact model"]
+        FW["internal/firmware / identity / certeng\nstatic metadata analysis"]
+        QUANT["internal/quantum\nlocal Qiskit taxonomy, attestation"]
+        COMP["internal/compliance\ncontrol mappings (not certification)"]
+    end
+
+    subgraph Ent["Enterprise control plane (internal/api/enterprise)"]
+        APIK["apikeys.go webhooks.go tenancy.go\ninventory.go compliance.go multicloud.go\nquantum_attestation.go cspm.go"]
+        CLOUD["internal/awscloud azurecloud gcpcloud ibmcloud\n(customer credentials required)"]
+        AUDIT["audit_events / audit.go"]
+    end
+
+    subgraph Data["Storage"]
+        PG[("PostgreSQL >= 15\ntables in internal/database/migrations.go\n+ deploy/migrations/*.sql")]
+        MEM[("in-memory demo store\nwhen no DB configured")]
+    end
+
+    subgraph Ui["Frontends"]
+        REACT["web/ React 18 + MUI 5\nroutes in web/src/App.tsx"]
+        FABRIC["fabric/ RivicQ Graph (labeled demo)"]
+        MARKETING["marketing/ static site"]
+        ARCH["archify/ product diagram site"]
+        DOCS["docs/ + ReDoc from openapi.yaml"]
+    end
+
+    CLI --> DISC
+    GA --> CLI
+    WH --> MW
+    Operator -->|"HTTPS"| MW
+    MW --> ED
+    MW --> AUTH
+    AUTH --> TN
+    ED --> Ent
+    MW --> DISC
+    DISC --> INT
+    INT --> BOM
+    INT --> QUANT
+    INT --> COMP
+    FW --> DISC
+    QUANT --> Ent
+    BOM --> PG & MEM
+    INT --> PG & MEM
+    CLOUD --> PG
+    AUDIT --> PG
+    APIK --> PG
+    Ent --> REACT
+    REACT -->|"axios /api/v1"| MW
+    Docs deploy --> Ui
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ 1. Input                                                    │
-│    Website · host/IP · server · k8s pod · path · HSM/QSIC   │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────┐
-│ 2. CBOM engine (shared, do not break ScanResult)            │
-│    Discovery → normalize → risk → policy → Qiskit scores    │
-│    CycloneDX 1.6 CBOM                                       │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-        ┌──────────────────┼──────────────────┐
-        ▼                  ▼                  ▼
-┌───────────────┐  ┌───────────────┐  ┌─────────────────────┐
-│ 3. Control    │  │ 4. Outputs    │  │ 5. Hardware/QSIC    │
-│    plane      │  │  Report       │  │  declared inventory │
-│  (Enterprise) │  │  + DORA pack  │  │  (not shipped chip) │
-└───────────────┘  └───────────────┘  └─────────────────────┘
+
+## 2. Runtime and listens
+
+| Surface | Port | Binary |
+|---|---|---|
+| OSS (Community) API | `:8080` | `cmd/server/oss/main.go` |
+| Enterprise API | `:9090` | `cmd/server/enterprise/main.go` (gin release mode) |
+| React dev server | `:3000` | `web/` (`npm run dev`) |
+| GitHub Pages static | 443 (managed) | built output of `web/build` |
+
+Edition activation: `internal/edition/edition.go` -> `Detect()` checks `CRYPTOBOM_LICENSE_KEY` for an `ENT-` prefix of >= 20 characters. OSS and Enterprise ship the **same engine**; the Enterprise binary adds control-plane routes (`cmd/server/server.go` `routeHooks`, `internal/api/enterprise/SetupRoutes`).
+
+## 3. Request lifecycle
+
+1. Gin engine runs middleware wired in `internal/middleware/middleware.go` (Setup): `RequestID` -> `SecurityHeaders` -> `Audit` -> `RateLimit` -> `CORS` -> edition header.
+2. `TRUSTED_PROXIES` opt-in governs whether `X-Forwarded-For` is honored (default: trust none, so audit + rate limit cannot be bypassed by header spoofing).
+3. Auth middleware (`internal/authn/middleware.go`, `internal/api/shared/standard_auth.go`) validates JWT/API key/optional auth and stores `tenant_id` on the gin context.
+4. `internal/tenant.Resolve(c)` reads the context value; unauthenticated traffic maps to `PublicTenantID` (`00000000-0000-0000-0000-000000000001`).
+5. Route handlers partition every scan/inventory/finding/GitHub/BOM query by tenant; cross-tenant or unknown scan IDs return `404` rather than leaking data.
+6. Scan jobs return `202` and stream progress over SSE (`/api/v1/scans/:id/stream`).
+
+## 4. Shared engine contracts (do not break)
+
+- `discovery.ScanResult` is the core JSON report shape (`GET /scans/:id/report`). Do not change it for UI or auth work (`docs/CORE_ENGINE.md`).
+- `internal/intelligence.Finding` is the single normalized finding model (source, scanner, rule, fingerprint, severity, risk breakdown, PQC class) consumed by API, CLI, and dashboard.
+- Policy gate actions: `BLOCK` / `WARN` / `ALLOW` / `INFORM`; `--fail-on severity` supported (`internal/intelligence/failon.go`).
+- CycloneDX 1.6 CBOM export from `/scans/:id/cyclonedx`.
+
+## 5. Data plane
+
+- Scanners: `internal/discovery` (TLS, SSH, HTTP headers/MD5, SBOM directory scan with the `cryptoLibraries` profile map, declared k8s/hardware targets), GitHub content scan (`internal/api/shared/github_scanning.go`), and optional external tools (Syft/Trivy/Grype/Gitleaks/OSV, `internal/intelligence/adapters_external.go`).
+- SBOM to CBOM conversion (`internal/discovery/sbom_scanner.go`) maps package names to algorithmic profiles with BSI references and PQC status.
+- Firmware/identity analysis (`internal/firmware`, `internal/identity`, `internal/certeng`, `internal/profile`) is static and evidence-based with size caps and RBAC (`scans:start`). See `docs/FIRMWARE_ANALYSIS.md` and `docs/IDENTITY_CRYPTO.md`.
+
+## 6. Control plane (Enterprise only)
+
+Backed by `internal/api/enterprise/`:
+
+- API keys (`apikeys.go`), webhooks (`webhooks.go`), tenancy enforcement (`tenancy.go`), audit viewer (`audit.go`), compliance/conformance packs (`compliance.go`, `cncf.go`), inventory (`inventory.go`), multi-cloud connectors (`multicloud.go`, `cloud_sdk.go`), quantum attestation (`quantum_attestation.go`), Terraform IaC (`terraform.go`), threat engine (`threat_engine.go`), AI analysis (`ai_analysis.go`).
+- RBAC roles Viewer < Analyst < Operator < Admin enforced server-side via `RequireRole` (`internal/auth/rbac.go`).
+- Mutating SSO, cloud-connector, API-key, webhook, and workspace-role routes require Admin.
+
+## 7. Deployment topology
+
+```mermaid
+flowchart LR
+    subgraph Pages["GitHub Pages (static, no API)"]
+        WEB["web/build React (Community edition)"]
+        FAB["/fabric RivicQ Graph"]
+        MARKET["/marketing"]
+        DOC["/docs ReDoc hub"]
+        ARCH["/archify/site + /archify/diagrams"]
+    end
+
+    subgraph SelfHosted["Self-hosted / production"]
+        GW["Ingress / LB\n(TLS, Trusted proxies)"]
+        API["cryptobom-oss :8080\nor cryptobom-enterprise :9090"]
+        PGX[("PostgreSQL 15\n(internal/database/migrations.go)")]
+        IDP["IdP for SSO/OIDC\n(operator task)"]
+        CLOUDS["AWS / Azure / GCP / IBM\ncustomer credentials"]
+    end
+
+    WEB & FAB & MARKET & DOC & ARCH -->|"synthetic only"| Pages
+    API --> PGX
+    API --> CLOUDS
+    IDP -.->|"SAML ACS / OIDC"| API
+    WEB -.->|"REACT_APP_API_URL"| API
 ```
 
-### Client path — discover / mitigate / report
+- **GitHub Pages** (`docs/GITHUB_ACTIONS_AND_PAGES.md`): `.github/workflows/pages.yml` builds `web/` with `REACT_APP_EDITION=community`, ReDoc from `docs/openapi.yaml`, `fabric/`, `marketing/`, `docs/`, and `archify/`, then publishes to the `gh-pages` branch via `peaceiris/actions-gh-pages`.
+- **Local demo**: `docker-compose.yml` (db + migrate + app + web + scanner) or `make dev-backend` / `make dev-enterprise` / `make dev-frontend`. In-memory demo mode when no DB is configured; `/readyz` returns 503 in demo mode and `/healthz` stays independent.
+- **Helm**: OSS chart `deploy/helm/cryptobom-oss`, SaaS/Enterprise charts `deploy/helm/cryptobom-saas` and `deploy/helm/cryptobom-enterprise`; `deploy/kubernetes` yaml for enterprise deployments.
+- **Cloudflare Pages**: `_headers`, `_redirects`, and `wrangler.toml` are being added at the repo root (not yet committed at the time of writing) as a static Publish-Only host; the same built `web/` output is hosted there with Pages-managed TLS.
 
-| Phase | Community (OSS, limited) | Enterprise |
-|---|---|---|
-| Discover | Website, host, IP, server, declared pod, local SBOM, QSIC catalog | Same + live kube attach and cloud/HSM connectors when credentials exist |
-| Mitigate | JSON PQC mapping to ML-KEM / ML-DSA / SLH-DSA | Same + DORA pack |
-| Report | `ScanResult` + intelligence + Qiskit/audit scores | Same JSON + licensed evidence pack, audit, API keys |
+## 8. Observability
 
-Live GitHub Pages demo is **Community-limited** (labeled sample data, no production API).
+- Structured logging via `logrus` (level `CRYPTOBOM_LOG_LEVEL`).
+- Audit events to `audit_events` (tenant, actor, action vocabulary, request id) for the Enterprise viewer.
+- OpenTelemetry tracing opt-in: `internal/observability/otel.go` exports OTLP/HTTP when `OTEL_EXPORTER_OTLP_ENDPOINT` is set; otherwise spans are in-process and dropped. Tracing middleware is wired per-service in the Enterprise main.
+- `/healthz` (liveness, never fails on dependencies) and `/readyz` (readiness, 503 without DB or in demo mode), plus `PrometheusRule` templates in Helm charts.
 
-### 1. Client architecture
+## 9. Known boundaries
 
-| Surface | Who | Home |
-|---|---|---|
-| Public | Anonymous | Marketing home, Product / CSPM / CBOM / PQC / Enterprise / Security / Pricing / Request demo / IBM / Contact, **limited Community** Interactive Demo, RivicQ Graph (`/fabric`) |
-| Community | Authenticated OSS | Overview, Scanner, **CBOM/SBOM CSPM**, Pipeline, API security, Assets, Analytics, Settings |
-| Enterprise | Authenticated paid workspace | Community surfaces + QBOM, HBOM, AIBOM, IBOM, inventory, compliance, multi-cloud, quantum, admin |
-| Enterprise | Authenticated paid workspace | Community surfaces + inventory, compliance, multi-cloud, quantum, admin |
-
-Fast path: visit → Demo or Register → Overview → first CBOM in the scanner (CLI: `rivicq scan .`).
-
-Editions: **Community** (Apache-2.0, limited engine), **Professional**, **Enterprise** (commercial control plane). UI edition preference is client-selected; license enforcement belongs on the Enterprise binary (`CRYPTOBOM_LICENSE_KEY`).
-
-### 2. Data / intelligence plane (do not break)
-
-Shared by Community and Enterprise:
-
-- `internal/discovery` — TLS, SSH, HTTP(S) websites, SBOM/package cryptographic discovery
-- `internal/intelligence` — normalized findings, crypto risk, policy gate, Qiskit profile, audit score
-- `internal/bom` — CBOM/SBOM Community; QBOM, HBOM, AIBOM, IBOM Enterprise. Does not change ScanResult.
-- CycloneDX CBOM via `/scans/:id/cyclonedx` and the intelligence pipeline
-- Qiskit pipeline via `/scans/:id/qiskit` (local taxonomy; not IBM Quantum hardware)
-- Scan report JSON is `discovery.ScanResult` (`GetCBOMScanReport`)
-
-Do not change those contracts for UI or auth work.
-
-### 3. Control plane (Enterprise)
-
-Shipped or in progress:
-
-| Capability | Today | Honest boundary |
-|---|---|---|
-| Multi-tenancy | JWT `tenant_id` on scan, inventory, findings, GitHub scans, QBOM, intelligence, BOM, and Enterprise inventory/compliance/quantum/cloud paths | Unauthenticated Community traffic shares the public tenant (Home CBOM pilot). SSO/audit viewer remain Enterprise |
-| RBAC | Viewer < Analyst < Operator < Admin (`RequireRole`) | Enforced on mutating SSO, cloud connectors, API keys, webhooks, workspace role changes |
-| Auth | Login, register, JWT refresh, TOTP MFA, Google/GitHub OAuth | Password reset is in-memory; no mailbox product |
-| SSO | `POST /sso/saml` and `/sso/ldap` store config | No live SAML ACS / OIDC login handshake yet |
-| Audit | `GET /audit/events` (JWT tenant) | Empty when Enterprise DB is unavailable |
-| MFA | Setup / confirm / disable / login challenge | TOTP only |
-| Scheduled scans | Not implemented | Build 2 |
-| Multi-cloud | Connector APIs + graceful empty inventory | Needs real credentials |
-| Compliance pack | Control mappings in UI | Mappings, not certifications |
-
-### 4. Delivery plane
-
-- CLI: `cmd/rivicq` (`rivicq scan .`)
-- REST: `/api/v1`
-- Dashboard: React Overview (`/dashboard`)
-- GitHub Action policy gate (do not change the gate contract)
-- Air-gapped: Helm/Compose documented in `docs/DEPLOYMENT.md`
-
-### 5. Hardware / firmware extension (practical scope)
-
-**Supported or implementable without reverse-engineering closed firmware:**
-
-- Firmware package / image **metadata**
-- Embedded Linux **rootfs / package inventories**
-- Static **binary/library indicators** where analysis is feasible
-- Certificates and crypto config found in firmware **bundles**
-- **Declared** inventory of keys/certs for SE / HSM / TPM (connectors or operator-supplied)
-- Algorithms declared or detected in device **software stacks**
-- PQC risk flags for long-lived devices (NIST ML-KEM, ML-DSA, SLH-DSA; BSI-aligned guidance)
-- Hybrid (classical + PQC) posture as a recommendation, not a runtime protocol engine
-
-**Not claimed today:**
-
-- Automated reverse-engineering of arbitrary closed firmware images
-- Extracting keys from secure elements
-- Full MCU flash dump analysis as a product feature
-
-`POST /inventory/hardware/discover` is a stub that acknowledges a job; it is not a firmware RE engine.
-
-## Community vs Enterprise
-
-| | Community (limited) | Enterprise |
-|---|---|---|
-| License | Apache-2.0 | Commercial |
-| Engine | Full CBOM discovery + CycloneDX | Same engine |
-| Scan targets | Website, host, IP, server, declared pod, QSIC catalog | Same + live kube attach, cloud connectors |
-| Auth | Login, register, MFA, OAuth | + SSO config, audit, API keys, webhooks |
-| DORA / GRC | JSON mappings | Pack flag + control-plane evidence |
-| BOM layers | CBOM + SBOM | + QBOM + HBOM + AIBOM + IBOM + HSM connector |
-| Workspaces | JWT tenant on scan/inventory; unauthenticated → public tenant | JWT tenant isolation on control-plane APIs |
-| Demo on Pages | Limited Community session (`rivicq-demo-session`) | Same demo label; not a customer tenant |
-
-## Current honest capability boundaries
-
-- GitHub Pages has **no production API**. Demo Access there is an isolated client marker, not a JWT.
-- Cloud inventory without credentials is empty, not simulated as a customer estate (except the labeled demo).
-- Compliance dashboards are **control mappings**, not ISO/SOC/NIST certifications.
-- Firmware/hardware crypto visibility is inventory + static/package/config + connectors.
-
-## Prioritized builds
-
-Full list: [ROADMAP.md](ROADMAP.md). Product snapshot: [PRODUCT_STATUS.md](PRODUCT_STATUS.md). Qiskit wiring: [QISKIT_PIPELINE.md](QISKIT_PIPELINE.md).
-
-### Build 1 — Client architecture + auth + admin (this delivery)
-
-1. Finalize login / register / edition selection (Community, Professional, Enterprise).
-2. Overview as operational home; strong empty states.
-3. Complete authentication: login, signup, MFA enroll/confirm/disable, forgot/reset password, profile, change password.
-4. Admin console: workspace users/roles, audit viewer, API keys, webhooks, SSO **config** (not live IdP login).
-5. Persist theme; nebula black/violet UI; labeled demo only.
-6. Website HTTPS detection (TLS + headers/cookies; SSH skipped unless `full`) and Qiskit-aligned scores in the client.
-
-### Build 2 — Enterprise SaaS control plane
-
-1. Tenant isolation on remaining scan/inventory write paths.
-2. Scheduled / continuous scanning.
-3. Live OIDC login; SAML ACS as an operations path.
-4. One high-quality PQC / compliance report pack (mappings, not certification).
-5. Multi-cloud connectors with explicit degradation copy.
-
-### Build 3 — Cryptography discovery hardening
-
-1. Stronger app crypto detection (code, containers, TLS/certs) without changing export contracts.
-2. CycloneDX CBOM consistency checks.
-3. Practical firmware/hardware ingest paths (packages, rootfs, certs, declared HSM/TPM).
-4. PQC scoring + migration recommendations for long-lived devices.
-
-### Build 4 — DevSecOps and delivery
-
-1. Harden GitHub Action policy gate (behavior unchanged unless tests require it).
-2. Client-ready CLI docs; first CBOM in 10 minutes.
-3. Keep dataset accuracy pipeline green.
-4. Usable air-gapped Helm/Compose path.
-
-### Build 5 — Demo confidence
-
-1. 30-minute customer meeting flow (software + embedded/industrial).
-2. Internal checklist: what we can demo today vs roadmap.
-3. Messaging that does not oversell firmware RE.
-
-## Hardware / firmware task list (Build 3+)
-
-1. Ingest firmware SBOM / package lists into the existing discovery normalizer.
-2. Parse certificate and key material from uploaded bundles (PEM/DER/JKS where practical).
-3. Declared hardware-anchor inventory (TPM/HSM/SE) with CBOM component classification.
-4. Long-lifetime PQC flagging (algorithm + device longevity), NIST/BSI guidance text.
-5. Document supported artifact types vs roadmap in-product (no RE claims).
+- GitHub Pages exposes **no** production API; demo access is a client marker, not a JWT.
+- Disconnected cloud connectors show empty states, never fabricated customer estates (except the labeled demo).
+- Compliance dashboards and PDF packs are control mappings, not certifications.
+- Qiskit/algo scores are a local classical taxonomy; no IBM Quantum hardware is run by default.

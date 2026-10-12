@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Theme-aware design system across every surface** (2026-10-12). One RivicQ visual system now runs in light **and** dark on the React app (`web/`), static `docs/`, static `marketing/`, and the RivicQ Graph (`fabric/`). All public/auth chrome moved from hardcoded dark hexes to MUI palette tokens (`background.default`/`background.paper`/`text.*`/`divider`/`primary.main`); `NebulaBackdrop` is dark-only; a theme toggle persists to `localStorage['rivicq.theme']` (shared key). Static sites gained a pre-paint theme bootstrap, `[data-theme="light"]` variable overrides, and a `.theme-toggle` control.
+- **`web/` code-splitting** — `App.tsx` routes converted to `React.lazy`; fixed a `require()` call inside `useMemo` by hoisting `getAppTheme` to a top-level import. Main bundle **578 kB → 339.85 kB gzip (−41%)**.
+- **archify diagram site wired into Pages** — `pages.yml` copies `archify/site` → `/archify/site` and `archify/diagrams` → `/archify/diagrams` (two-level layout preserves `../diagrams` and `../../docs` links); `docs/index.html` links to it.
+- **Cloudflare Pages (parallel)** — `cloudflare/_headers` (CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, cache policy), `cloudflare/_redirects` (base-path strip + SPA fallback), `wrangler.toml`, and `.github/workflows/cloudflare-pages.yml` (secret-gated; no-op until `CLOUDFLARE_API_TOKEN` is set). `scripts/build-pages.sh` is the single source of truth for the composite build.
+- **Schema.org JSON-LD** on `marketing/index.html` (Organization, WebSite, WebPage, Service, OfferCatalog, ItemList), `marketing/showcase.html` (WebPage, BreadcrumbList), and `docs/index.html` (Organization, WebPage, BreadcrumbList). Only factual values are emitted; templates for LocalBusiness/GeoCoordinates/OpeningHours/Review/AggregateRating/Person/FAQPage/BlogPosting live in `docs/STRUCTURED_DATA.md`.
+- **Governance & engineering docs**: `docs/MASTER_RULES.md` (19 house rules), `SECURITY_GUIDE`, `DATABASE_GUIDE`, `API_GUIDE`, `CODE_STYLE`, `PRD`, `TRD`, `ARCHITECTURE`, `DATA_MODEL`, `DATA_SOURCE`, `DEVSECOPS`, `SCRAPING`, `OPENSOURCE`, `ENTERPRISE`, `UI`, `ERROR_HANDLING`, `GITHUB_ACTIONS_AND_PAGES`, `TESTING`, `PRODUCTION_CHECKLIST`, `MICROTASKS`, `DECISIONS`, `ADMOB`, `CLOUDFLARE_PAGES`, `SECURITY_SECRET_REMEDIATION`.
+- **Integration scaffolds** (`integrations/`, inert by default, credential-gated): Convex (schema + tenant-scoped functions), Better Auth, PostHog, Cloudflare R2 (signed-URL worker), Stripe (Go handlers + client), and n8n workflows. See `integrations/README.md` for the phased cutover plan.
 - **Embedded (Infineon) and identity (G+D) vertical slice** — vendor-neutral domain profiles (`internal/profile`), unified crypto artifact model (`internal/cryptoart`), static firmware analysis (`internal/firmware`), identity/certificate analysis (`internal/identity`, `internal/certeng`). Metadata only: no firmware execution and no private-key/SIM/SE secret extraction.
 - **CLI:** `rivicq firmware scan|cbom|pqc|compare`, `rivicq identity scan|cbom|pqc`.
 - **API:** `POST/GET /api/v1/firmware/*` and `/api/v1/identity/*` (`analyze`, `compare`, `profiles`, `limits`) with RBAC (`cbom:read` / `scans:start`), tenant isolation, size caps, timeouts and audit logging. Wired via `shared.SetupFirmwareIdentityRoutes` so both OSS and Enterprise editions serve them.
@@ -19,6 +26,12 @@ All notable changes to this project will be documented in this file.
 - JWT **tenant isolation** on Community scan/inventory/findings/GitHub/intelligence paths. QBOM/HBOM/AIBOM APIs 403 on Community. Unauthenticated Home CBOM pilot stays on the public tenant. Enterprise inventory, compliance, quantum, multi-cloud, Terraform, and CNCF handlers ignore spoofable `X-Tenant-ID`.
 - **Operator UX:** workflow nav (Overview / Findings / Scans), command palette (⌘K), breadcrumbs, persona layout, findings investigation from `GET /scans/findings`. Scan progress is indeterminate unless the API sends a percent. Fake notification counts, schedule toggles, and default compliance 75 were removed.
 - Optional **outsourced scanners** (Syft, Trivy, Grype, Gitleaks, OSV) run on local `rivicq scan .` / scan intelligence when the binary is on PATH. Exit codes that mean “findings exist” are still parsed. Core status no longer claims Trivy/Syft/CodeQL are present unless `LookPath` succeeds.
+- **Static sites are theme-aware** — `docs/`, `marketing/`, and `fabric/` share the `rivicq.theme` preference and default to the OS color scheme.
+
+### Security
+- **Git-history audit** — found two encrypted OpenSSH private keys (`rsaande`, `rsande`) committed and later deleted. Removed from the working tree; rotation required by the owner. Details and the optional history-purge procedure: `docs/SECURITY_SECRET_REMEDIATION.md`. No real secrets exist in the current tree (only synthetic test fixtures).
+- `.gitignore` hardened for `.env*`, `secrets/`, `*.pem`, `*.key`, and accidental nested clones of this repository.
+- Referenced from `SECURITY.md`; institutionalized in `docs/MASTER_RULES.md` and `docs/SECURITY_GUIDE.md`.
 
 ## [1.6.4] - 2026-09-06
 

@@ -154,3 +154,91 @@ Recorded after commit/push in this session.
 - Dedicated CISO metrics page fed only from scan evidence (dashboard still uses mixed live + fallback inventory)
 - E2E three-device visual QA in a browser farm
 - Persistent scan history in PostgreSQL (in-memory job store today)
+
+---
+
+# Design System Overhaul — theme-aware all surfaces
+
+Date: 2026-10-12
+
+Objective: apply one coherent RivicQ design language (violet/graphite, light **and** dark)
+across every existing surface — the React app (`web/`), the RivicQ Graph (`fabric/`),
+static `docs/`, and static `marketing/` — and wire the existing `archify/` diagram site
+into GitHub Pages plus the docs nav. No routes, APIs, contracts, auth, permissions, or
+tenant isolation were changed. No parallel demo app was introduced.
+
+## 1. React app (`web/`)
+
+- **Code-splitting.** `web/src/App.tsx` converted the ~50 static page imports to
+  `React.lazy(() => import('./pages/...'))`. Also fixed a latent bug where
+  `const { getAppTheme } = require('./theme/theme')` ran inside a `useMemo`; it is now a
+  top-level ES import `import { getAppTheme } from './theme/theme'`.
+  Result: main bundle **578 kB → 339.85 kB gzip (−41%)**; the build emits dozens of async chunks.
+- **Theme mechanism.** Public/auth chrome moved from hardcoded dark hexes to MUI `sx`
+  palette shorthands that resolve per theme: `background.default`, `background.paper`,
+  `text.primary` / `text.secondary` / `text.disabled`, `divider`, `primary.main`,
+  `error.main` / `error.light`.
+- **Nebula policy.** `NebulaBackdrop` is now rendered **dark-only** (`{isDark && <NebulaBackdrop />}`);
+  the marketing hero band remains intentionally dark in both themes.
+- **`BrandLogo`.** Uses the `dark={isDark}` variant so light text is chosen only on dark surfaces.
+- **Theme-aware surfaces converted:** `components/brand/{PublicShell,AuthChrome,PublicEngineNotice}.tsx`,
+  `pages/{SitePage,Home,AuthPage,Pricing,RequestDemo,ContactHub,IBMPartner,EditionSwitcher,DemoWelcome,
+  InfraDiscovery,ForgotPassword,ResetPassword,VerifyEmail}.tsx`. `PublicShell` gained a
+  `LightModeOutlined`/`DarkModeOutlined` toggle; `websiteChrome.ts` `websiteOutlineCtaSx`
+  became `function (isDark: boolean)` for legible outline CTAs on both backgrounds.
+- **Intentionally dark surfaces preserved.** A small set of "creative/nebula" cards keep a
+  fixed dark look by design — e.g. `PageFrame` `creative ? '#0a0a0f' : 'background.paper'`,
+  the `HomeScanReport` featured card, and the nebula dashboard widget cards.
+
+## 2. Static docs (`docs/`)
+
+- `docs/assets/horizon-docs.css` gained a `[data-theme="light"]` block remapping the CSS
+  variables (`--ink`, `--surface`, `--raised`, `--ivory`, `--muted`, `--faint`, `--line`) plus
+  light body background, starfield suppression, and `.theme-toggle` styles.
+- New `docs/assets/theme.js` reads/writes `localStorage['rivicq.theme']` and flips
+  `document.documentElement[data-theme]`.
+- `docs/index.html`, `docs/read.html`, `docs/contact.html` got a pre-paint init script in
+  `<head>` (stored theme → `prefers-color-scheme` fallback), a `.theme-toggle` button, and the
+  `theme.js` include. `docs/index.html` also links to the archify site.
+
+## 3. Static marketing (`marketing/`)
+
+- `marketing/css/tokens.css` gained `[data-theme="light"]` overrides
+  (`--bg-base`/`--bg-elevated`/`--bg-surface`/`--bg-card`/`--bg-glass`, text, borders, hero
+  gradient, shadows) plus light `.hero-bg` handling and `.theme-toggle` styles.
+- New `marketing/js/theme.js` (same contract as docs).
+- `marketing/index.html` and `marketing/showcase.html` got the head init script, the
+  `.theme-toggle` button in `.nav-actions`, and the deferred `theme.js` include.
+
+## 4. RivicQ Graph (`fabric/`)
+
+- `fabric/src/styles/tokens.css` gained a `[data-theme="light"]` block and light overrides for
+  the four white-`rgba` hover/bar surfaces in `app.css`.
+- `fabric/index.html` applies the stored theme before first paint.
+- `fabric/src/components/layout/Shell.tsx` added a topbar theme toggle persisting to
+  `localStorage['rivicq.theme']` (shared key across all surfaces).
+
+## 5. archify wiring (Pages + docs)
+
+- `.github/workflows/pages.yml`: new step copies `archify/site` → `web/build/archify/site` and
+  `archify/diagrams` → `web/build/archify/diagrams`. The two-level layout is preserved so the
+  site's `../diagrams/*` iframe embeds and `../../docs/*` links keep resolving after deploy.
+- `docs/index.html` nav now links to `../archify/site/index.html`.
+
+## Verification
+
+- `web/` (run from `web/`): `npm run type-check` (tsc) clean, `npm run lint` clean,
+  `npm test` 27 passing, `CI=false npm run build` succeeds with code-split chunks.
+- `fabric/` (run from `fabric/`): `npm run build` (`tsc --noEmit && vite build`) clean —
+  80 modules, CSS 9.56 kB (2.88 kB gzip), JS 265.73 kB (80.16 kB gzip).
+- `.github/workflows/pages.yml` parses (validated with a YAML loader).
+- Headless Chrome/CDP smoke test over `docs/index.html`, `docs/contact.html`,
+  `marketing/index.html`, `marketing/showcase.html`: each toggles dark↔light, persists
+  `rivicq.theme`, and emits **zero console errors**.
+- `node --check` passes on `docs/assets/theme.js` and `marketing/js/theme.js`.
+
+## Remaining (optional)
+
+- Unify archify's own theme key (`archify-theme`) with `rivicq.theme` for a single cross-site preference.
+- Revisit whether any "creative" dark panels should also expose a light variant (currently intentional).
+- Headless visual diff per breakpoint (desktop/tablet/mobile) in a browser farm.
