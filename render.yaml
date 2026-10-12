@@ -1,0 +1,43 @@
+# Render blueprint for the RivicQ OSS API (real login + live scanning).
+#
+# Docs: docs/RENDER.md
+#
+# Import this repo into Render (Blueprint), or create a Web Service manually:
+#   Runtime: Docker
+#   Dockerfile: deploy/docker/Dockerfile.render
+#   Health check: /readyz
+#   Env: JWT_SECRET (>=32 bytes), AUTH_BOOTSTRAP_EMAIL / AUTH_BOOTSTRAP_PASSWORD,
+#        and DATABASE_URL from the Postgres instance.
+#
+# The frontend on static GitHub Pages reaches this service through the
+# `REACT_APP_API_URL` Pages secret — see docs/RENDER.md step 4.
+
+services:
+  - type: web
+    name: rivicq-api
+    runtime: docker
+    repo: https://github.com/RivicQ/RivicQ_CSPM_EaaS
+    plan: free
+    branch: main
+    dockerfilePath: ./deploy/docker/Dockerfile.render
+    autoDeploy: true
+    healthCheckPath: /readyz
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: AUTH_BOOTSTRAP_EMAIL
+        value: admin@demo.rivicq.local
+      - key: AUTH_BOOTSTRAP_PASSWORD
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://rivicq.github.io
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rivicq-db
+          property: connectionString
+
+databases:
+  - name: rivicq-db
+    databaseName: rivicq
+    user: rivicq
+    plan: free

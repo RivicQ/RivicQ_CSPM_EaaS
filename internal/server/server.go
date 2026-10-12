@@ -110,6 +110,10 @@ func New(opts ...Option) *Server {
 
 func (s *Server) Start() {
 	if s.Port == "" {
+		// 12-factor hosts (Render, Railway, Fly, Heroku) inject a $PORT.
+		s.Port = os.Getenv("PORT")
+	}
+	if s.Port == "" {
 		if s.Edition == edition.Enterprise {
 			s.Port = "9090"
 		} else {

@@ -1,0 +1,27 @@
+# Self-contained image for Platform-as-a-Service hosts (Render/Railway/Fly).
+#
+# Unlike deploy/docker/Dockerfile.oss it does NOT wait on a separate
+# migration container: the OSS server runs in-process migrations when the
+# database is reachable (internal/database). The server also honors the
+# 12-factor $PORT that platforms inject (internal/server/server.go).
+FROM golang:1.26-alpine AS builder
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags "-X main.version=latest -X main.edition=oss" \
+    -o /app/cryptobom-server \
+    ./cmd/server/oss/main.go
+
+FROM alpine:3.18
+
+RUN apk --no-cache add ca-certificates tzdata
+
+WORKDIR /app
+COPY --from=builder /app/cryptobom-server /app/cryptobom-server
+
+EXPOSE 10000
+CMD ["/app/cryptobom-server"]
