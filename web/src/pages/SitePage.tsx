@@ -22,13 +22,16 @@ const noticeSx = {
   mb: 4,
   color: NEBULA.muted,
   fontSize: '0.9375rem',
-  lineHeight: 1.6,
+  lineHeight: 1.65,
 };
 
 export const siteCardSx = {
   ...nebulaPanelSx,
-  p: 2.25,
+  p: 2.5,
   height: '100%',
+  minHeight: { xs: 0, sm: 168 },
+  display: 'flex',
+  flexDirection: 'column' as const,
   transition: 'border-color 0.18s ease',
   '&:hover': { borderColor: 'rgba(255,255,255,0.28)' },
 };
@@ -38,13 +41,32 @@ const SitePage: React.FC<{
   title: string;
   lede: string;
   blocks?: SiteBlock[];
+  sectionEyebrow?: string;
+  sectionTitle?: string;
   primary?: { label: string; to: string };
   secondary?: { label: string; to: string };
   notice?: string;
   engineNotice?: 'scan' | 'ibm';
+  diagramKicker?: string;
+  diagramTitle?: string;
   maxWidth?: 'md' | 'lg';
   children?: React.ReactNode;
-}> = ({ eyebrow, title, lede, blocks = [], primary, secondary, notice, engineNotice, maxWidth = 'md', children }) => {
+}> = ({
+  eyebrow,
+  title,
+  lede,
+  blocks = [],
+  sectionEyebrow = 'On this page',
+  sectionTitle,
+  primary,
+  secondary,
+  notice,
+  engineNotice,
+  diagramKicker,
+  diagramTitle,
+  maxWidth = 'lg',
+  children,
+}) => {
   const navigate = useNavigate();
   const go = (to: string) => {
     if (to.startsWith('mailto:') || to.startsWith('http') || to.includes('.html')) {
@@ -65,7 +87,7 @@ const SitePage: React.FC<{
             component="h1"
             sx={{
               ...archifyTitleSx,
-              fontSize: { xs: '2.1rem', md: '3rem' },
+              fontSize: { xs: '2rem', md: '2.75rem' },
               mt: 1.25,
               mb: 2,
               maxWidth: 820,
@@ -77,10 +99,10 @@ const SitePage: React.FC<{
           <Typography
             sx={{
               color: 'rgba(209,213,219,0.92)',
-              fontSize: { xs: '1rem', md: '1.1rem' },
+              fontSize: { xs: '1rem', md: '1.0625rem' },
               lineHeight: 1.65,
               mb: 3,
-              maxWidth: '64ch',
+              maxWidth: '62ch',
             }}
           >
             {lede}
@@ -98,6 +120,7 @@ const SitePage: React.FC<{
                   color: '#0a0b0d',
                   fontWeight: 600,
                   textTransform: 'none',
+                  minHeight: 44,
                   '&:hover': { bgcolor: NEBULA.accent, color: '#fff' },
                 }}
               >
@@ -115,6 +138,7 @@ const SitePage: React.FC<{
                   borderColor: NEBULA.lineHi,
                   color: NEBULA.text,
                   textTransform: 'none',
+                  minHeight: 44,
                   bgcolor: 'rgba(255,255,255,0.03)',
                   '&:hover': { borderColor: 'rgba(255,255,255,0.4)', bgcolor: 'rgba(255,255,255,0.06)' },
                 }}
@@ -126,35 +150,53 @@ const SitePage: React.FC<{
           {notice && <Box sx={noticeSx}>{notice}</Box>}
           {engineNotice && <PublicEngineNotice variant={engineNotice} />}
           {blocks.length > 0 && (
-            <Grid container spacing={1.5} sx={{ mb: children ? 2 : 0 }}>
-              {blocks.map((b, i) => (
-                <Grid item xs={12} sm={6} key={b.title}>
-                  <Box sx={siteCardSx}>
-                    <Typography
-                      sx={{
-                        fontFamily: ARCHIFY_FONTS.mono,
-                        fontSize: '0.6875rem',
-                        fontWeight: 600,
-                        color: NEBULA.accentSoft,
-                        letterSpacing: '0.04em',
-                        mb: 1,
-                      }}
-                    >
-                      {String(i + 1).padStart(2, '0')}
-                    </Typography>
-                    <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, letterSpacing: '-0.02em', mb: 0.75 }}>
-                      {b.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(209,213,219,0.88)', lineHeight: 1.55 }}>
-                      {b.body}
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
+            <Box sx={{ mt: 1, mb: children ? 3 : 0 }}>
+              <Typography sx={{ ...archifyEyebrowSx, mb: 1 }}>{sectionEyebrow}</Typography>
+              {sectionTitle && (
+                <Typography
+                  sx={{
+                    fontFamily: ARCHIFY_FONTS.title,
+                    fontWeight: 500,
+                    fontSize: { xs: '1.35rem', md: '1.6rem' },
+                    letterSpacing: '-0.03em',
+                    mb: 2.25,
+                    maxWidth: 560,
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {sectionTitle}
+                </Typography>
+              )}
+              <Grid container spacing={1.5} alignItems="stretch">
+                {blocks.map((b, i) => (
+                  <Grid item xs={12} sm={6} key={b.title}>
+                    <Box sx={siteCardSx}>
+                      <Typography
+                        sx={{
+                          fontFamily: ARCHIFY_FONTS.mono,
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          color: NEBULA.accentSoft,
+                          letterSpacing: '0.04em',
+                          mb: 1,
+                        }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </Typography>
+                      <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, letterSpacing: '-0.02em', mb: 0.75 }}>
+                        {b.title}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'rgba(209,213,219,0.88)', lineHeight: 1.6, flex: 1 }}>
+                        {b.body}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
           )}
           {children}
-          <ArchifyWorkflowEmbed />
+          <ArchifyWorkflowEmbed kicker={diagramKicker} title={diagramTitle} />
         </Container>
       </Box>
     </PublicShell>

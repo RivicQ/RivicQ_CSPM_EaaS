@@ -2,28 +2,32 @@
   --bg: #000000;
   --bg-elev: #0a0a0f;
   --bg-panel: #12121a;
-  --bg-glass: rgba(10, 10, 15, 0.72);
-  --line: rgba(255, 255, 255, 0.1);
-  --line-strong: rgba(255, 255, 255, 0.18);
+  --bg-glass: rgba(10, 10, 15, 0.78);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.22);
   --text: #ffffff;
   --muted: #d1d5db;
   --faint: #9ca3af;
   --healthy: #22c55e;
-  --info: #38bdf8;
+  --info: #a78bfa;
   --intel: #a78bfa;
   --warn: #f97316;
   --critical: #ef4444;
   --quantum: #7c3aed;
+  --accent: #7c3aed;
   --focus: #c4b5fd;
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
   --radius: 12px;
-  --font: Inter, "Helvetica Neue", Arial, sans-serif;
+  --font: "Space Grotesk", Inter, "Helvetica Neue", Arial, sans-serif;
+  --font-body: Inter, "Helvetica Neue", Arial, sans-serif;
+  --font-display: Fraunces, Georgia, serif;
   --mono: "JetBrains Mono", ui-monospace, monospace;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --t-micro: 140ms;
   --t-ui: 240ms;
   --t-intel: 560ms;
   --t-graph: 900ms;
+  color-scheme: dark;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -35,29 +39,16 @@
   }
 }
 
-/* ---------------------------------------------------------------- light theme
-   Graph is dark-first; every surface reads these tokens so a data-theme swap is
-   enough. The Shell exposes a toggle and fabric/index.html applies the stored
-   theme before first paint. */
+/* Nebula-only: light theme is not offered. */
 [data-theme="light"] {
-  --bg: #ffffff;
-  --bg-elev: #f8fafc;
-  --bg-panel: #f1f5f9;
-  --bg-glass: rgba(255, 255, 255, 0.72);
-  --line: rgba(10, 10, 15, 0.1);
-  --line-strong: rgba(10, 10, 15, 0.18);
-  --text: #0a0a0f;
-  --muted: #4b5563;
-  --faint: #6b7280;
-  --shadow: 0 18px 40px rgba(10, 10, 15, 0.12);
+  --bg: #000000;
+  --bg-elev: #0a0a0f;
+  --bg-panel: #12121a;
+  --bg-glass: rgba(10, 10, 15, 0.78);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --text: #ffffff;
+  --muted: #d1d5db;
+  --faint: #9ca3af;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 }
-[data-theme="light"] body {
-  background:
-    radial-gradient(1200px 480px at 50% 20%, rgba(124, 58, 237, 0.1), transparent 58%),
-    var(--bg);
-}
-[data-theme="light"] .nav a:hover,
-[data-theme="light"] .nav button.linkish:hover { background: rgba(10, 10, 15, 0.04); }
-[data-theme="light"] table.data tr:hover td { background: rgba(10, 10, 15, 0.03); }
-[data-theme="light"] .palette .linkish:hover { background: rgba(10, 10, 15, 0.05); }
-[data-theme="light"] .timeline .bar { background: rgba(10, 10, 15, 0.08); }
