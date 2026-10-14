@@ -64,7 +64,7 @@ const ArchifyWorkflowEmbed: React.FC<ArchifyWorkflowEmbedProps> = ({
       <Box
         component="iframe"
         title="RivicQ CSPM operator workflow"
-        src={`${DIAGRAM}?embed=1`}
+        src={`${DIAGRAM}?embed=1&theme=dark`}
         sx={{ width: '100%', height: '100%', border: 0, display: 'block', bgcolor: NEBULA.ink }}
       />
     </Box>
