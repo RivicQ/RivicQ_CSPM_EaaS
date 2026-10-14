@@ -340,11 +340,70 @@ const Home: React.FC = () => {
 
       <Box sx={{ position: 'relative', minHeight: { xs: 560, md: 640 }, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
         <NebulaBackdrop />
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: `
+              radial-gradient(ellipse 50% 45% at 50% 0%, rgba(56,189,248,0.06), transparent 70%),
+              radial-gradient(ellipse 55% 48% at 50% 18%, rgba(124,58,237,0.28), transparent 68%)
+            `,
+          }}
+        />
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: { xs: 8, md: 12 } }}>
-          <Typography sx={{ fontSize: { xs: '2.2rem', md: '3.35rem' }, fontWeight: 750, letterSpacing: '-0.04em', lineHeight: 1.08, color: '#fff', mb: 2.5 }}>
-            Know what cryptography protects your business before attackers do.
+          <Typography
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 1.1,
+              py: 0.4,
+              pl: 0.45,
+              mb: 2.5,
+              border: '1px solid rgba(255,255,255,0.14)',
+              borderRadius: 999,
+              bgcolor: 'rgba(255,255,255,0.03)',
+              color: 'rgba(209,213,219,0.92)',
+              fontSize: '0.8125rem',
+            }}
+          >
+            <Box component="span" sx={{ px: 0.9, py: 0.35, borderRadius: 999, bgcolor: '#7c3aed', color: '#fff', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.6875rem', fontWeight: 600 }}>
+              CSPM
+            </Box>
+            Cryptographic Security Posture Management · Berlin
           </Typography>
-          <Typography sx={{ color: '#d1d5db', maxWidth: 720, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
+          <Typography
+            component="h1"
+            sx={{
+              fontFamily: '"Space Grotesk", Inter, system-ui, sans-serif',
+              fontSize: { xs: '2.4rem', md: '3.6rem' },
+              fontWeight: 500,
+              letterSpacing: '-0.045em',
+              lineHeight: 0.98,
+              color: '#fff',
+              mb: 2.5,
+              textWrap: 'balance',
+            }}
+          >
+            Know what cryptography protects your business{' '}
+            <Box
+              component="em"
+              sx={{
+                fontFamily: 'Fraunces, Georgia, serif',
+                fontStyle: 'italic',
+                fontWeight: 400,
+                background: 'linear-gradient(100deg, #a78bfa 0%, #7c3aed 45%, #7c3aed 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+              }}
+            >
+              before attackers do.
+            </Box>
+          </Typography>
+          <Typography sx={{ color: 'rgba(209,213,219,0.92)', maxWidth: 720, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
             RivicQ discovers cryptographic assets, cloud risks and migration exposure — then inventories them as CBOM evidence for PQC planning. Point it at an IoT device, a website, or a repo.
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center">
@@ -353,7 +412,7 @@ const Home: React.FC = () => {
               size="large"
               endIcon={<NorthEast />}
               onClick={() => scrollToId('scan')}
-              sx={{ px: 3, py: 1.2, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
+              sx={{ px: 3, py: 1.2, borderRadius: '10px', bgcolor: '#fff', color: '#0a0b0d', fontWeight: 600, textTransform: 'none', '&:hover': { bgcolor: '#7c3aed', color: '#fff' } }}
             >
               Start security assessment
             </Button>
@@ -365,7 +424,7 @@ const Home: React.FC = () => {
                 await demoLogin('community');
                 navigate('/scanner');
               }}
-              sx={{ px: 3, py: 1.2, color: '#fff', borderColor: 'rgba(255,255,255,0.55)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.06)' } }}
+              sx={{ px: 3, py: 1.2, borderRadius: '10px', color: '#fff', borderColor: 'rgba(255,255,255,0.22)', bgcolor: 'rgba(255,255,255,0.03)', textTransform: 'none', '&:hover': { borderColor: 'rgba(255,255,255,0.45)', bgcolor: 'rgba(255,255,255,0.06)' } }}
             >
               Try the live demo
             </Button>
@@ -373,7 +432,7 @@ const Home: React.FC = () => {
               variant="text"
               size="large"
               onClick={() => navigate('/request-demo')}
-              sx={{ px: 3, py: 1.2, color: '#d1d5db', '&:hover': { color: '#fff' } }}
+              sx={{ px: 3, py: 1.2, color: '#d1d5db', textTransform: 'none', '&:hover': { color: '#fff' } }}
             >
               Request enterprise demo
             </Button>

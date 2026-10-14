@@ -42,6 +42,7 @@ import BrandLogo from '../components/BrandLogo';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { proBlueContainedButtonSx } from '../theme/designSystem';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
+import { ARCHIFY_FONTS, NEBULA, archifyAuraLayersSx, nebulaCardSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 interface AuthPageProps {
   defaultMode?: 'login' | 'register';
@@ -231,17 +232,19 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       : 'browser authentication (no engine deployed)';
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: NEBULA.ink, color: NEBULA.text, py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
       <NebulaBackdrop />
+      <Box aria-hidden sx={archifyAuraLayersSx.radial} />
+      <Box aria-hidden sx={archifyAuraLayersSx.grid} />
       <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
           <BrandLogo dark />
-          <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
+          <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600, borderColor: 'rgba(255,255,255,0.22)', color: NEBULA.muted }} />
         </Box>
-        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: NEBULA.faint }}>
           {mode === 'register' ? 'Create workspace' : 'Cryptographic security'}
         </Typography>
-        <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', mb: 2, mt: 0.5 }}>
+        <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 500, letterSpacing: '-0.04em', mb: 2, mt: 0.5 }}>
           {mode === 'register' ? 'Stand up a workspace.' : 'Sign in to your workspace.'}
         </Typography>
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
@@ -259,8 +262,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         {!backendReachable && (
           <Box
             sx={{
+              ...nebulaPanelSx,
               mb: 2.5, p: 2.25, borderRadius: 3,
-              border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper',
             }}
           >
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
@@ -294,10 +297,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
         <Grid container spacing={0}>
           <Grid item xs={12}>
-            <Card sx={{ height: '100%', borderRadius: 2 }}>
+            <Card sx={{ ...nebulaCardSx, height: '100%' }} elevation={0}>
               <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                 <Stack spacing={2} sx={{ mb: 3 }}>
-                  <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>
+                  <Typography variant="h5" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, letterSpacing: '-0.02em' }}>
                     {title}
                   </Typography>
                   <Box
@@ -305,7 +308,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       p: 2,
                       borderRadius: 1,
                       border: 1,
-                      borderColor: 'divider',
+                      borderColor: 'rgba(124,58,237,0.35)',
                       bgcolor: 'rgba(124,58,237,0.12)',
                       backdropFilter: 'none',
                     }}

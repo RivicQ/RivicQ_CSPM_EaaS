@@ -121,7 +121,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
             transition: designSystem.motion.smooth,
             '&:hover': {
               boxShadow: 'none',
-              borderColor: isDark ? '#2e1065' : '#c4b5fd',
+              borderColor: 'rgba(255,255,255,0.28)',
             },
           },
         },

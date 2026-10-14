@@ -68,11 +68,12 @@ export const meshBackground = (theme: Theme) => ({
   backgroundColor: theme.palette.background.default,
 });
 
-export const glassSurface = (theme: Theme, elevated = false) => ({
-  background: elevated ? theme.palette.background.paper : '#0a0a0f',
+export const glassSurface = (_theme: Theme, elevated = false) => ({
+  background: elevated ? '#0a0a0f' : '#000000',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  border: `1px solid ${theme.palette.divider}`,
+  border: '1px solid rgba(255,255,255,0.12)',
+  color: '#ffffff',
 });
 
 export const gradientTextSx = {

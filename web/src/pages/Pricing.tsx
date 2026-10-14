@@ -6,7 +6,7 @@ import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { platformService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
-import { nebulaPanelSx } from '../theme/nebulaSurfaces';
+import { ARCHIFY_FONTS, archifyEyebrowSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 type Plan = {
   id: string;
@@ -50,10 +50,10 @@ const Pricing: React.FC = () => {
   return (
     <PublicShell>
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: 96 }}>
-        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Typography sx={archifyEyebrowSx}>
           Pricing · configuration, not a live PSP
         </Typography>
-        <Typography sx={{ fontSize: { xs: '2rem', md: '2.8rem' }, fontWeight: 750, letterSpacing: '-0.03em', color: 'text.primary', mt: 1, maxWidth: 720 }}>
+        <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontSize: { xs: '2rem', md: '2.8rem' }, fontWeight: 500, letterSpacing: '-0.04em', color: 'text.primary', mt: 1, maxWidth: 720 }}>
           Community engine. Licensed control plane.
         </Typography>
         <Typography sx={{ color: 'text.secondary', mt: 2, maxWidth: 640 }}>{note}</Typography>

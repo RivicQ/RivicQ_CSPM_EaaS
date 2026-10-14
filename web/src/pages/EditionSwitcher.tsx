@@ -1,11 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, Divider } from '@mui/material';
+import { Box, Button, Chip, Container, Grid, Stack, Typography } from '@mui/material';
 import { ArrowForward, Lock, Security, WorkspacePremium, CloudQueue, Psychology, Storage, Shield } from '@mui/icons-material';
 import { setEditionPreference, Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
-import designSystem from '../theme/designSystem';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
+import {
+  ARCHIFY_FONTS,
+  NEBULA,
+  archifyAuraLayersSx,
+  archifyEyebrowSx,
+  archifyTitleSx,
+  nebulaPanelSx,
+} from '../theme/nebulaSurfaces';
 
 const EditionSwitcher: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +28,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Cryptographic Security Posture Management: CBOM, SBOM, TLS API hygiene, pipeline stages 1–6, CLI, and GitHub Action.',
       icon: <Security sx={{ fontSize: 34 }} />,
       edition: 'community' as Edition,
-      accent: '#7c3aed',
+      accent: NEBULA.accent,
       highlights: ['CBOM + SBOM CSPM', 'API security from TLS scans', 'Discover → mitigate → report', 'No QBOM, HBOM, AIBOM, IBOM, SSO, or DORA pack'],
       action: 'Continue with Community',
     },
@@ -30,7 +37,7 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Cloud posture, conformance packs, and the full security module suite for growing teams.',
       icon: <Shield sx={{ fontSize: 34 }} />,
       edition: 'professional' as Edition,
-      accent: '#a78bfa',
+      accent: NEBULA.accentSoft,
       highlights: ['CSPM & conformance packs', 'Security module suite', 'Multi-cloud accounts', 'Threat & vuln management'],
       action: 'Continue with Professional',
     },
@@ -39,113 +46,121 @@ const EditionSwitcher: React.FC = () => {
       subtitle: 'Licensed control plane: SSO, audit, DORA pack, PKCS#11/HSM, optional quantum runtime, GRC connectors. Not granted by cloning GitHub.',
       icon: <WorkspacePremium sx={{ fontSize: 34 }} />,
       edition: 'enterprise' as Edition,
-      accent: '#198038',
+      accent: '#22c55e',
       highlights: ['HSM PKCS#11 + quantum connector', 'SSO, audit & RBAC', 'Governance evidence pack', 'Continuous production monitoring'],
       action: 'Continue with Enterprise',
     },
   ];
 
-  const pageBg = designSystem.gradient.meshDark;
-  const cardBg = '#0a0a0f';
-
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', background: pageBg, py: 8, position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: NEBULA.ink, color: NEBULA.text, py: 8, position: 'relative', overflow: 'hidden' }}>
       <NebulaBackdrop />
+      <Box aria-hidden sx={archifyAuraLayersSx.radial} />
+      <Box aria-hidden sx={archifyAuraLayersSx.grid} />
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
           <BrandLogo dark />
         </Box>
-        <Stack spacing={2} sx={{ mb: 4, textAlign: 'center' }}>
-          <Chip icon={<Lock />} label="Edition Selection" color="primary" sx={{ alignSelf: 'center', fontWeight: 600 }} />
-          <Typography variant="h3" fontWeight={900} sx={{ letterSpacing: '-0.02em' }}>
+        <Stack spacing={2} sx={{ mb: 4, textAlign: 'center' }} alignItems="center">
+          <Chip
+            icon={<Lock />}
+            label="Edition selection"
+            sx={{
+              fontFamily: ARCHIFY_FONTS.mono,
+              fontWeight: 600,
+              bgcolor: NEBULA.accent,
+              color: '#fff',
+              '& .MuiChip-icon': { color: '#fff' },
+            }}
+          />
+          <Typography component="h1" sx={{ ...archifyTitleSx, fontSize: { xs: '2.2rem', md: '3rem' }, maxWidth: 720 }}>
             Choose your RivicQ workspace
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 900, mx: 'auto' }}>
+          <Typography sx={{ color: 'rgba(209,213,219,0.92)', maxWidth: 720, lineHeight: 1.65 }}>
             Start free with Community Cryptographic Security Posture Management (CBOM + SBOM), grow into Professional for security modules, and license Enterprise for QBOM, HBOM, AIBOM, IBOM, HSM connectors, and the GRC pack. QSIC is declared research hardware — not a shipped chip.
           </Typography>
         </Stack>
 
-        <Grid container spacing={3}>
-          {cards.map((card) => (
+        <Grid container spacing={2}>
+          {cards.map((card, i) => (
             <Grid item xs={12} md={4} key={card.title}>
-              <Card
+              <Box
                 sx={{
+                  ...nebulaPanelSx,
+                  p: 3,
                   height: '100%',
-                  borderRadius: 3,
-                  border: `1px solid ${card.accent}44`,
-                  background: cardBg,
-                  transition: 'border-color 0.15s ease',
-                  '&:hover': { transform: 'none', boxShadow: 'none', borderColor: `${card.accent}88` },
+                  borderColor: `${card.accent}55`,
+                  transition: 'border-color 0.18s ease',
+                  '&:hover': { borderColor: `${card.accent}aa` },
                 }}
               >
-                <CardContent sx={{ p: 4, color: 'text.primary' }}>
-                  <Stack spacing={2}>
-                    <Box sx={{ color: card.accent }}>
-                      {card.icon}
-                    </Box>
-                    <Typography variant="h5" fontWeight={800} sx={{ letterSpacing: '-0.01em' }}>
-                      {card.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {card.subtitle}
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap">
-                      {card.highlights.map((item) => (
-                        <Chip key={item} size="small" label={item} variant="outlined" />
-                      ))}
-                    </Stack>
-                    <Button
-                      variant="contained"
-                      endIcon={<ArrowForward />}
-                      onClick={() => chooseEdition(card.edition)}
-                      sx={{ alignSelf: 'flex-start', mt: 1 }}
-                    >
-                      {card.action}
-                    </Button>
+                <Stack spacing={2}>
+                  <Typography sx={{ fontFamily: ARCHIFY_FONTS.mono, fontSize: '0.6875rem', fontWeight: 600, color: card.accent, letterSpacing: '0.04em' }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </Typography>
+                  <Box sx={{ color: card.accent }}>{card.icon}</Box>
+                  <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, fontSize: '1.35rem', letterSpacing: '-0.02em' }}>
+                    {card.title}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'rgba(209,213,219,0.88)', lineHeight: 1.55 }}>
+                    {card.subtitle}
+                  </Typography>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    {card.highlights.map((item) => (
+                      <Chip
+                        key={item}
+                        size="small"
+                        label={item}
+                        variant="outlined"
+                        sx={{ borderColor: 'rgba(255,255,255,0.18)', color: NEBULA.muted }}
+                      />
+                    ))}
                   </Stack>
-                </CardContent>
-              </Card>
+                  <Button
+                    variant="contained"
+                    endIcon={<ArrowForward />}
+                    onClick={() => chooseEdition(card.edition)}
+                    sx={{
+                      alignSelf: 'flex-start',
+                      mt: 1,
+                      borderRadius: '10px',
+                      bgcolor: i === 0 ? '#fff' : NEBULA.accent,
+                      color: i === 0 ? '#0a0b0d' : '#fff',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      '&:hover': { bgcolor: NEBULA.accent, color: '#fff' },
+                    }}
+                  >
+                    {card.action}
+                  </Button>
+                </Stack>
+              </Box>
             </Grid>
           ))}
         </Grid>
 
-        <Divider sx={{ my: 4 }} />
-
-        <Grid container spacing={2} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
-              <CardContent>
-                <Storage color="primary" />
-                <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Community quick start</Typography>
-                <Typography variant="body2" color="text.secondary">Login and scan assets locally without cloud credentials.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
-              <CardContent>
-                <CloudQueue color="secondary" />
-                <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Professional unlocks</Typography>
-                <Typography variant="body2" color="text.secondary">Cloud posture, conformance packs, and the full module suite.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
-              <CardContent>
-                <Psychology color="success" />
-                <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Enterprise extends</Typography>
-                <Typography variant="body2" color="text.secondary">Quantum attestation, HSM, SSO, and executive reporting.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+        <Typography sx={{ ...archifyEyebrowSx, mt: 6, mb: 1.5 }}>What each path unlocks</Typography>
+        <Grid container spacing={1.5}>
+          {[
+            { icon: <Storage color="primary" />, title: 'Community quick start', body: 'Login and scan assets locally without cloud credentials.' },
+            { icon: <CloudQueue sx={{ color: NEBULA.accentSoft }} />, title: 'Professional unlocks', body: 'Cloud posture, conformance packs, and the full module suite.' },
+            { icon: <Psychology sx={{ color: '#22c55e' }} />, title: 'Enterprise extends', body: 'Quantum attestation, HSM, SSO, and executive reporting.' },
+          ].map((item) => (
+            <Grid item xs={12} md={4} key={item.title}>
+              <Box sx={{ ...nebulaPanelSx, p: 2.5, height: '100%' }}>
+                {item.icon}
+                <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, mt: 1, mb: 0.5 }}>{item.title}</Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(209,213,219,0.88)' }}>{item.body}</Typography>
+              </Box>
+            </Grid>
+          ))}
         </Grid>
 
-        <Box sx={{ mt: 4, p: 3, borderRadius: 2, border: '1px solid', borderColor: 'divider', bgcolor: '#0a0a0f', color: 'text.primary' }}>
-          <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
+        <Box sx={{ ...nebulaPanelSx, mt: 3, p: 3 }}>
+          <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, mb: 1 }}>
             What gets locked in Community
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'rgba(209,213,219,0.88)', lineHeight: 1.6 }}>
             Cloud posture, conformance packs, live Kubernetes attach, DORA evidence pack, QBOM/HBOM/AIBOM/IBOM, PKCS#11 HSM, quantum runtime, and multi-cloud reporting stay on Enterprise. Community still scans websites, hosts, IPs, servers, and declared pods, and shows CBOM/SBOM Cryptographic Security Posture Management with locked Enterprise tiles.
           </Typography>
         </Box>

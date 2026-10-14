@@ -200,7 +200,7 @@ const RivicQEcosystem: React.FC = () => {
                       sx={{
                         p: 1.25,
                         borderRadius: `${designSystem.radius.sm}px`,
-                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.6)' : 'rgba(15,23,42,0.04)',
+                        bgcolor: 'rgba(18,18,26,0.9)',
                         border: 1,
                         borderColor: 'divider',
                       }}

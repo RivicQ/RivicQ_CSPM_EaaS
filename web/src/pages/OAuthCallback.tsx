@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { normalizeEdition } from '../config/editions';
 import AuthChrome from '../components/brand/AuthChrome';
+import { nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -137,14 +138,14 @@ const OAuthCallback: React.FC = () => {
   if (error) {
     return (
       <AuthChrome>
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error" sx={{ ...nebulaPanelSx, borderColor: 'error.main' }}>{error}</Alert>
       </AuthChrome>
     );
   }
 
   return (
     <AuthChrome>
-      <Container maxWidth="sm" sx={{ textAlign: 'center' }} disableGutters>
+      <Container maxWidth="sm" sx={{ ...nebulaPanelSx, textAlign: 'center', p: 4 }} disableGutters>
         <CircularProgress size={48} sx={{ mb: 2 }} />
         <Typography variant="h6">Completing authentication...</Typography>
         <Typography variant="body2" color="text.secondary">

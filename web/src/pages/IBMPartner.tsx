@@ -92,7 +92,7 @@ const IBMPartner: React.FC = () => {
         </Typography>
       )}
       {error && (
-        <Box sx={{ p: 1.75, mb: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'error.main', borderRadius: 2, color: 'error.light' }}>
+        <Box sx={{ p: 1.75, mb: 3, bgcolor: '#0a0a0f', border: '1px solid', borderColor: 'error.main', borderRadius: 2, color: 'error.light' }}>
           {error}
         </Box>
       )}

@@ -8,7 +8,7 @@ import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { useAuth } from '../context/AuthContext';
 import { platformService } from '../services/api';
 import { PUBLIC_PAGES_SALES_FORM } from '../data/publicInfrastructure';
-import { nebulaPanelSx } from '../theme/nebulaSurfaces';
+import { ARCHIFY_FONTS, archifyEyebrowSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 const INTENTS = [
   { value: 'demo', label: 'Enterprise demo' },
@@ -48,10 +48,10 @@ const RequestDemo: React.FC = () => {
   return (
     <PublicShell>
       <Container maxWidth="sm" sx={{ py: { xs: 6, md: 10 } }}>
-        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Typography sx={archifyEyebrowSx}>
           Sales · RivicQ GmbH · Berlin
         </Typography>
-        <Typography sx={{ fontSize: { xs: '2rem', md: '2.6rem' }, fontWeight: 750, letterSpacing: '-0.03em', color: 'text.primary', mt: 1 }}>
+        <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontSize: { xs: '2rem', md: '2.6rem' }, fontWeight: 500, letterSpacing: '-0.04em', color: 'text.primary', mt: 1 }}>
           Request an enterprise demo
         </Typography>
         <Typography sx={{ color: 'text.secondary', mt: 1.5, mb: 3 }}>

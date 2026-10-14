@@ -4,6 +4,7 @@ import { Alert, Button, Card, CardContent, Stack, Typography } from '@mui/materi
 import { MarkEmailRead } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import AuthChrome from '../components/brand/AuthChrome';
+import { ARCHIFY_FONTS, nebulaCardSx } from '../theme/nebulaSurfaces';
 
 const VerifyEmail: React.FC = () => {
   const [params] = useSearchParams();
@@ -12,11 +13,11 @@ const VerifyEmail: React.FC = () => {
 
   return (
     <AuthChrome>
-      <Card sx={{ mt: 1, borderRadius: 2, bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' }} elevation={0}>
+      <Card sx={{ ...nebulaCardSx, mt: 1 }} elevation={0}>
         <CardContent sx={{ p: 4 }}>
           <Stack spacing={2}>
             <MarkEmailRead color="primary" sx={{ fontSize: 40 }} />
-            <Typography variant="h4" fontWeight={800}>Check your inbox</Typography>
+            <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, letterSpacing: '-0.03em' }}>Check your inbox</Typography>
             <Typography color="text.secondary">
               {email ? <>A confirmation link may have been sent to <strong>{email}</strong>.</> : 'Confirm the address you used to register.'}
             </Typography>
