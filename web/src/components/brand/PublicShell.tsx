@@ -1,12 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Divider, IconButton, Menu, MenuItem, MenuList, Stack, Tooltip, Typography } from '@mui/material';
-import { DarkModeOutlined, KeyboardArrowDown, LightModeOutlined, Menu as MenuIcon } from '@mui/icons-material';
+import { Box, Button, Container, Divider, IconButton, Menu, MenuItem, MenuList, Stack, Typography } from '@mui/material';
+import { KeyboardArrowDown, Menu as MenuIcon } from '@mui/icons-material';
 import BrandLogo from '../BrandLogo';
 import NebulaBackdrop from './NebulaBackdrop';
 import TrademarkNotice from '../TrademarkNotice';
 import { websiteCtaSx } from '../../theme/websiteChrome';
-import { useThemeMode } from '../../theme/ThemeContext';
 
 type NavItem = {
   id: string;
@@ -37,8 +36,6 @@ const NAV: NavItem[] = [
 
 const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = ({ children, nebula = true }) => {
   const navigate = useNavigate();
-  const { mode, toggleMode } = useThemeMode();
-  const isDark = mode === 'dark';
   const [menu, setMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
   const [mobileMenu, setMobileMenu] = React.useState<HTMLElement | null>(null);
 
@@ -113,16 +110,6 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
               ))}
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Tooltip title={isDark ? 'Switch to light' : 'Switch to dark'}>
-                <IconButton
-                  size="small"
-                  aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-                  onClick={toggleMode}
-                  sx={{ color: 'text.secondary', border: '1px solid', borderColor: 'divider' }}
-                >
-                  {isDark ? <LightModeOutlined fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
-                </IconButton>
-              </Tooltip>
               <IconButton
                 size="small"
                 aria-label="Open navigation menu"

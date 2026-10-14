@@ -49,7 +49,7 @@ const InboxHero: React.FC<InboxHeroProps> = ({
       sx={{
         border: '1px solid',
         borderColor: 'divider',
-        bgcolor: 'background.paper',
+        bgcolor: '#0a0a0f',
         borderRadius: `${dashboardDesign.radius.sm}px`,
         mb: dashboardDesign.layout.sectionGap,
         overflow: 'hidden',
@@ -65,7 +65,7 @@ const InboxHero: React.FC<InboxHeroProps> = ({
           <Typography sx={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
             {eyebrow}
           </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', fontSize: { xs: '1.35rem', md: '1.7rem' }, mt: 0.5 }}>
+          <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', fontSize: { xs: '1.35rem', md: '1.7rem' }, mt: 0.5, color: '#ffffff' }}>
             {title}
           </Typography>
           <Typography sx={{ color: 'text.secondary', mt: 1, maxWidth: 640 }}>{subtitle}</Typography>
@@ -77,7 +77,7 @@ const InboxHero: React.FC<InboxHeroProps> = ({
           {meta && <Box sx={{ mt: 1.5 }}>{meta}</Box>}
           {action && <Box sx={{ mt: 2 }}>{action}</Box>}
         </Box>
-        <Box sx={{ bgcolor: (t) => (t.palette.mode === 'dark' ? '#000000' : '#f1f5f9') }}>
+        <Box sx={{ bgcolor: '#000000' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Typography sx={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700 }}>
               Today’s queue

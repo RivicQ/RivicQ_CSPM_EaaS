@@ -1,7 +1,7 @@
 /** Honest copy for the public GitHub Pages front door. No secrets. */
 
 export const PUBLIC_ENGINE_SCAN_COPY =
-  'Live scanning runs against the RivicQ CBOM engine. This GitHub Pages build hosts no engine, which is exactly why the scan panel shows "Needs the RivicQ engine" and the Run button is disabled. We never show fabricated findings: evidence-backed scans only come from the deployed engine (docs/RENDER.md) or a local run — the interactive demo below replays clearly-labelled sample data so you can explore the same workflow now.';
+  'This static build has no CBOM engine. Live scans need the API (docs/RENDER.md) or a local run. The interactive demo uses labelled sample data only.';
 
 export const PUBLIC_ENGINE_DEMO_COPY =
   'Interactive demo active. Scans answer in your browser with clearly-labelled sample data — nothing here is claimed as a live or certified result.';

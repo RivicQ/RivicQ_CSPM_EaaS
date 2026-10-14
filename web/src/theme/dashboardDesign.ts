@@ -39,7 +39,7 @@ export const dashboardDesign = {
     transition: '0.15s ease',
   },
   hero: {
-    light: '#ffffff',
+    light: '#0a0a0f',
     dark: '#0a0a0f',
     glow: 'none',
     glowDark: 'none',

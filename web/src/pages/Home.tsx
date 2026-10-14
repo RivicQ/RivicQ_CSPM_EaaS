@@ -425,9 +425,8 @@ const Home: React.FC = () => {
               </Stack>
               {!backendReachable && !isDemo && (
                 <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary', lineHeight: 1.5 }}>
-                  Why is the button disabled? Scanning runs on the RivicQ CBOM engine, which is not hosted on this static
-                  build. Deploy the API (<code>docs/RENDER.md</code>) or run it locally for live scans — or use the
-                  interactive demo above to explore the workflow on sample data.
+                  Run disabled here — no engine on this static build. Use the interactive demo, or deploy the API
+                  (<code>docs/RENDER.md</code>).
                 </Typography>
               )}
             </Box>
