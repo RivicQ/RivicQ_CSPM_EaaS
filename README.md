@@ -166,6 +166,9 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Firmware analysis | [docs/FIRMWARE_ANALYSIS.md](docs/FIRMWARE_ANALYSIS.md) · [PQC embedded](docs/PQC_EMBEDDED.md) |
 | Identity analysis | [docs/IDENTITY_CRYPTO.md](docs/IDENTITY_CRYPTO.md) · [PQC identity](docs/PQC_IDENTITY.md) |
 | Firmware & identity API | [docs/FIRMWARE_IDENTITY_API.md](docs/FIRMWARE_IDENTITY_API.md) · [POC](scripts/poc/partner_artifact_analysis.sh) |
+| CBOM | [docs/CBOM.md](docs/CBOM.md) · [docs/audit/CBOM_ACCURACY.md](docs/audit/CBOM_ACCURACY.md) |
+| CLI | [docs/CLI.md](docs/CLI.md) |
+| Audit (this branch) | [docs/audit/BASELINE.md](docs/audit/BASELINE.md) · [docs/audit/IMPLEMENTATION_PLAN.md](docs/audit/IMPLEMENTATION_PLAN.md) |
 | CBOM quickstart | [QUICKSTART_CBOM.md](QUICKSTART_CBOM.md) |
 | Deployment | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | Environment | [docs/DEPLOY_ENV.md](docs/DEPLOY_ENV.md) |

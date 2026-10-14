@@ -4,6 +4,8 @@ This document describes the concrete system architecture of the repository and i
 
 Honest boundaries: this product does not claim certifications, does not reverse-engineer firmware at runtime, and cloud/HSM/quantum connectors require customer-supplied credentials.
 
+Processing pipeline (one engine): **Input → Discovery → Normalization (`intelligence.Finding`, including presence/detection/exploitability) → Evidence → Crypto intelligence / PQC taxonomy → Risk/policy gate → BOM (CycloneDX CBOM + unified view) → CLI / API / UI / GitHub Action.** Archify (`archify/`) is a static diagram site, not a second engine. RivicQ Graph (`fabric/`) is a labeled synthetic demo. There is no in-repo module named REA.
+
 ## 1. Component diagram
 
 ```mermaid

@@ -160,7 +160,7 @@ Many flows keep their shape in Go structs and in the in-memory demo store:
 | Model | Location |
 |---|---|
 | `discovery.ScanResult` / `Finding` / `CBOMComponent` / `ScanSummary` | `internal/discovery/scanner.go`, `scanner_test.go` |
-| `intelligence.Finding` + `RiskBreakdown` | `internal/intelligence/finding.go`, `risk.go` |
+| `intelligence.Finding` + `RiskBreakdown` | `internal/intelligence/finding.go`, `risk.go`, `evidence.go` (presence/detection/exploitability) |
 | `GateResult` / `PolicyHit` | `internal/intelligence/policy.go` |
 | `GHScanResult` / `GHFinding` / `GHSummary` | `internal/api/shared/github_scanning.go` |
 | `cryptoart.Artifact` unified crypto/relation model | `internal/cryptoart/artifact.go`, `bom.go` |

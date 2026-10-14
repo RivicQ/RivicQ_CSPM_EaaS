@@ -46,7 +46,11 @@ bin/rivicq identity cbom fixtures/partners/gd/certificate/device-ecdsa-p256.pem 
 bin/rivicq identity pqc  fixtures/partners/gd/certificate/device-ecdsa-p256.pem --format json
 ```
 
-## Expected output (observed, commit `1fa0910`)
+## Expected output (observed)
+
+This branch re-ran the commands (2026-10-14). `--fail-on NONE` identity scans of the ECDSA and RSA-2048 PEMs exited **0**. Go tests: `internal/identity/partner_fixtures_test.go`. **Not** a G+D endorsement.
+
+## Expected output (historical, commit `1fa0910`)
 
 `identity scan … device-ecdsa-p256.pem`:
 

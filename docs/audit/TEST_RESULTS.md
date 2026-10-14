@@ -1,114 +1,86 @@
-# RivicQ CSPM — Test Results (Phase 1)
+# Test results (this session)
 
-All commands were run from the repo root unless a `( cd web && … )` is shown.
-Commit `1fa0910`, date 2026-10-12.
+All commands from the repository root unless noted. Nothing here is inferred from older audit docs.
 
-## 1. Go test suite
+Branch `cursor/cspm-enterprise-readiness-72c9`. Base `1cc1c65`.
 
-```
-go test ./... -count=1
-```
-
-- Packages `ok`: **27**
-- Packages `FAIL`: **0**
-- Test packages with no test files: several (e.g. `internal/config`,
-  `internal/database`, `internal/observability`, `cmd/*`, cloud connectors).
-- Test files: 62 (`*_test.go`, excluding `web/`).
-- Test functions (`func Test…`): 385.
-
-Notable suites that executed green: `internal/discovery` (9 files),
-`internal/api/{shared,enterprise}` (9 files), `internal/quantum/*`,
-`internal/firmware`, `internal/identity`, `internal/hardware`,
-`internal/tenant`, `internal/middleware`, `internal/bom`, `internal/bom`.
-
-Packages with **no tests** that carry logic (gap to close): `internal/database`,
-`internal/config`, `internal/observability`, `internal/{aws,azure,gcp,ibm}cloud`,
-`internal/cilium`, `internal/operator`.
-
-## 2. Static analysis
+## 1. Go
 
 ```
-go build ./...           # PASS
-go vet ./...             # PASS
-golangci-lint run ./...  # FAIL — 19 issues (pre-existing)
+go build ./...          # PASS
+go vet ./...            # PASS
+go test -count=1 ./...  # PASS (logged in /opt/cursor/artifacts/go_test.log)
 ```
 
-The 19 lint issues: 15 `errcheck`, 1 `ineffassign`, 2 `staticcheck`,
-1 `unused`. Files: `internal/firmware/*`, `internal/identity/identity.go`,
-`internal/api/shared/auth_compat.go`.
+Notable packages that executed `ok`: `internal/intelligence`, `internal/api/shared`, `internal/discovery`, `internal/firmware`, `internal/identity`, `internal/auth`, `internal/authn`, `internal/tenant`, `internal/server`, `internal/api/enterprise`, `cmd/rivicq`, `tests`.
 
-## 3. Frontend
+Packages with **no test files** (unchanged gap): `internal/database`, `internal/config`, `internal/observability`, `internal/{aws,azure,gcp,ibm}cloud`, `internal/cilium`, `internal/operator`, most `cmd/server*`.
 
-```
-( cd web && npm run type-check )   # PASS
-( cd web && npm run lint )         # PASS
-( cd web && CI=true npm test -- --watchAll=false )
-```
+New tests added this session:
 
-- Test suites: **11 passed / 11**
-- Tests: **27 passed / 27**
-- Time: ~2.9 s
-- Reported coverage: low overall (most pages 0%); theme modules partially
-  covered (`designSystem.ts` ~72% stmt). Coverage thresholds are not enforced.
+- `internal/intelligence/failon_test.go`
+- `internal/intelligence/evidence_test.go`
+- `internal/intelligence/cyclonedx_test.go` (expanded)
+- `cmd/rivicq/cli_validate_test.go`
+- `internal/identity/partner_fixtures_test.go`
+- `internal/firmware/partner_fixtures_test.go`
+- corpus cases in `internal/api/shared/scanner_corpus_test.go`
 
-## 4. CLI end-to-end (scan / gate / exit codes)
-
-Binary built with `go build -o /tmp/rivicq ./cmd/rivicq`.
-
-| Scenario | Command | Exit | Notes |
-|----------|---------|------|-------|
-| Clean dir | `rivicq scan /tmp/clean --format json` | 0 | 0 findings |
-| Weak fixture, default gate | `rivicq scan fixtures/crypto-test --include-fixtures` | **1** | gate `BLOCK`, 6 findings |
-| Weak fixture, gate off | `rivicq scan fixtures/crypto-test --include-fixtures --fail-on NONE` | 0 | findings still reported |
-| Fixture, severity gate | `rivicq scan fixtures/vulnerable-go --fail-on critical` | 0 | only HIGH found, no CRITICAL |
-| No args | `rivicq` | 2 | usage |
-| Unknown command | `rivicq boguscmd` | 2 | usage |
-| Invalid flag value | `rivicq scan . --fail-on BOGUS` | 0 | **inconsistent** (should be usage error) |
-
-Gate output on the weak fixture (BLOCK semantics verified):
+## 2. Frontend
 
 ```
-gate.decision = BLOCK
-gate.blocked  = 6   (MD5, SHA-1, RSA<2048, TLS1.0, 3DES ×2)
-gate.warned   = 1   (generic secret pattern)
+( cd web && npm run type-check )                         # PASS
+( cd web && npm run lint )                               # PASS
+( cd web && CI=true npm test -- --watchAll=false )       # PASS
 ```
 
-The RSA block is **correct**: `fixtures/crypto-test/weak.go` uses
-`rsa.GenerateKey(rand.Reader, 1024)`, i.e. below the 2048-bit policy. This does
-**not** contradict the "do not auto-label RSA-2048 vulnerable" rule — the policy
-is a minimum key-size policy, and a compliant 2048-bit key is not flagged here.
+- Test suites: **12 passed / 12**
+- Tests: **31 passed / 31** (was 27 on `main`; +4 route-matrix assertions)
+- Coverage is **not** a gate. Most pages remain 0% statement coverage. `web/src/ops/routeMatrix.ts` is 100% in this run.
 
-## 5. Firmware / identity workflows (partner fixtures)
+Browser e2e was **not** run.
+
+## 3. CLI exit codes (built `bin/rivicq`)
+
+| Scenario | Command | Exit | Gate |
+|----------|---------|------|------|
+| No args | `rivicq` | 2 | n/a |
+| Unknown command | `rivicq boguscmd` | 2 | n/a |
+| Invalid fail-on | `rivicq scan . --fail-on BOGUS` | **2** | n/a (usage) |
+| Invalid format | `rivicq scan . --format yaml` | **2** | n/a (usage) |
+| Empty-ish dir | `rivicq scan /tmp --fail-on NONE --format json` | 0 | ALLOW |
+| Weak crypto fixture | `rivicq scan fixtures/crypto-test --include-fixtures --fail-on BLOCK` | **1** | BLOCK |
+| Weak crypto, gate off | same `--fail-on NONE --format json` | 0 | BLOCK reported, process passes |
+| RSA-2048 golden | `fixtures/golden/rsa2048 --fail-on BLOCK` | 0 | ALLOW |
+| AES/SHA inventory | `fixtures/golden/aes-sha --fail-on BLOCK` | 0 | ALLOW |
+| ssh-rsa host key | `fixtures/golden/ssh-rsa --fail-on BLOCK` | **1** | BLOCK |
+| Docs-only ambiguous | `fixtures/golden/ambiguous --fail-on BLOCK` | 0 | ALLOW |
+| Repo self-scan | `rivicq scan . --fail-on BLOCK` | 0 | WARN |
+| Firmware (Infineon fixture) | `rivicq firmware scan … --fail-on NONE --format json` | 0 | n/a |
+| Identity (G+D ECDSA PEM) | `rivicq identity scan … --fail-on NONE --format json` | 0 | n/a |
+| Firmware compare v1/v2 | `rivicq firmware compare …` | 0 | n/a |
+
+## 4. Dataset harness
 
 ```
-rivicq firmware scan fixtures/partners/infineon/classical-mcu/firmware.bin \
-    --profile embedded/infineon --format json          # exit 1 (BLOCK)
-rivicq firmware cbom fixtures/partners/infineon/classical-mcu/firmware.bin \
-    --format json                                       # exit 1 (BLOCK)
-rivicq firmware compare fixtures/partners/infineon/firmware-diff/v1.bin \
-    fixtures/partners/infineon/firmware-diff/v2.bin     # exit 0
-rivicq identity scan fixtures/partners/gd/certificate/device-ecdsa-p256.pem \
-    --profile identity/gd --format json                 # exit 1 (BLOCK)
+python3 scripts/analyze-datasets.py
 ```
 
-Observed (synthetic fixtures, plausible and non-fabricated):
+**12/12 PASS** (log: `/opt/cursor/artifacts/dataset_analysis.log`).
 
-- Detection is **string/marker based** (source `firmware-static`,
-  evidence e.g. `string-evidence: AES, aes_, AES_`), profile `embedded/infineon`.
-- `firmware cbom` emits a JSON array of algorithm objects with
-  `quantum_safe`, `pqc_status` (`migration_required` for ECDH,
-  `migration_recommended` for AES) and `risk_level`.
-- `firmware compare v1→v2` reports `libraries: +[wolfSSL]`,
-  `algorithms: +[ML-KEM] -[SHA-1]`, `pqc-status changed`.
-- `identity scan` parses the X.509 device cert and extracts subject/issuer,
-  profile `identity/gd`.
+An earlier run in this session failed `this-repo-self-scan` (gate BLOCK) because the first ssh-rsa rule matched `internal/intelligence/policy.go`. That regression was fixed before this file was written. The passing run is the recorded result.
 
-These outputs are consistent with a **static analysis** tool. No execution,
-flashing, or key extraction was performed or claimed.
+## 5. Not run / blocked
 
-## 6. Coverage / honesty notes
-
-- Some `cmd/*` and `internal/database` paths are exercised only indirectly.
-- Coverage is not enforced; low-coverage hotspots are listed above.
-- All results above were produced live; nothing in this file is inferred from
-  documentation.
+| Check | Why |
+|-------|-----|
+| `golangci-lint run ./...` | binary not installed |
+| `make lint` | same |
+| Helm/kube dry-run | helm not on PATH |
+| Docker compose | docker not on PATH; start script exit 127 |
+| Live TLS/SSH handshake against the public internet | not required; unit tests cover scanners with fixtures |
+| Live cloud connectors | no customer credentials |
+| Browser UI walkthrough | no GUI executor used |
+| Aikido SAST (`aikido_full_scan`) | **blocked**: MCP requires interactive sign-in; not completed. See F-9 in `SECURITY_FINDINGS.md` |
+| Snyk package health | not applicable; no new third-party dependencies added |
+| Official CycloneDX JSON Schema draft (network schema) | local contract `ValidateCycloneDX` only |
