@@ -44,11 +44,11 @@ const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false })
       <Grid container spacing={2}>
         {STEPS.map((s, i) => (
           <Grid item xs={12} sm={6} md={3} key={s.title}>
-            <Box sx={{ height: '100%', p: 2.25, borderRadius: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', position: 'relative', overflow: 'hidden' }}>
+            <Box sx={{ height: '100%', p: 2.25, borderRadius: 2, bgcolor: '#0a0a0f', border: '1px solid', borderColor: 'divider', position: 'relative', overflow: 'hidden' }}>
               <Stack direction="row" spacing={1.5} alignItems="flex-start">
                 <Box sx={{
                   width: 40, height: 40, borderRadius: 2, flexShrink: 0, display: 'grid', placeItems: 'center',
-                  background: (t) => (t.palette.mode === 'dark' ? 'rgba(124,58,237,0.28)' : 'rgba(124,58,237,0.10)'),
+                  background: 'rgba(124,58,237,0.28)',
                   color: 'primary.main',
                 }}>
                   {s.icon}

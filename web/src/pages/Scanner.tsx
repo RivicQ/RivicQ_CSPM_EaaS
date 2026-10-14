@@ -18,6 +18,7 @@ import ScanReportPanel, { ClientArchitectureView, PQCReadinessView } from '../co
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
 import OpsHeroVisual from '../components/ops/OpsHeroVisual';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 
 interface ScanJob {
   id: string;
@@ -538,6 +539,7 @@ const Scanner: React.FC = () => {
           <GitHubRepoScanPanel />
         </TabPanel>
       </GlassCard>
+      <ArchifyWorkflowEmbed compact />
     </PageFrame>
   );
 };

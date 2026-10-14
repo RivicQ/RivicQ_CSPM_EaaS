@@ -384,18 +384,18 @@ section { padding: 0 0 3.5rem; }
    on white while keeping the RivicQ violet accent. Init + toggle live in
    assets/theme.js so the choice persists and follows the OS by default. */
 [data-theme="light"] {
-  --ink: #ffffff;
-  --surface: #ffffff;
-  --raised: #f1f5f9;
-  --ivory: #0a0a0f;
-  --muted: #4b5563;
-  --faint: #6b7280;
-  --line: #e5e7eb;
+  --ink: #000000;
+  --surface: #0a0a0f;
+  --raised: #12121a;
+  --ivory: #ffffff;
+  --muted: #d1d5db;
+  --faint: #9ca3af;
+  --line: #1f1f2e;
 }
 [data-theme="light"] body {
   background:
-    radial-gradient(ellipse 55% 48% at 50% 12%, rgba(124,58,237,0.12), transparent 68%),
-    #f8fafc;
+    radial-gradient(ellipse 55% 48% at 50% 18%, rgba(124,58,237,0.28), transparent 68%),
+    #000;
 }
 /* Sparse starfield is only legible on the dark canvas. */
 [data-theme="light"] body::before { display: none; }

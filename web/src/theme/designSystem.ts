@@ -20,11 +20,11 @@ export const designSystem = {
     brand: 'linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%)',
     brandPlayful: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 45%, #6d28d9 100%)',
     brandSoft: 'radial-gradient(ellipse 70% 55% at 50% 42%, rgba(124,58,237,0.42), transparent 68%)',
-    heroLight: '#f8fafc',
+    heroLight: '#000000',
     heroDark: '#000000',
     sidebar: '#000000',
     sidebarDark: '#000000',
-    meshLight: '#f8fafc',
+    meshLight: '#000000',
     meshDark: '#000000',
   },
   horizon: {
@@ -69,9 +69,7 @@ export const meshBackground = (theme: Theme) => ({
 });
 
 export const glassSurface = (theme: Theme, elevated = false) => ({
-  background: theme.palette.mode === 'dark'
-    ? elevated ? theme.palette.background.paper : '#0a0a0f'
-    : elevated ? '#ffffff' : '#f8fafc',
+  background: elevated ? theme.palette.background.paper : '#0a0a0f',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
   border: `1px solid ${theme.palette.divider}`,
@@ -299,12 +297,12 @@ export const proBlueBadgeSx = {
 };
 
 /** Top app bar — aligns with pro-blue sidebar & command center */
-export const appBarPaperSx = (mode: 'light' | 'dark') => ({
-  bgcolor: mode === 'dark' ? '#000000' : '#ffffff',
+export const appBarPaperSx = (_mode: 'light' | 'dark') => ({
+  bgcolor: '#000000',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  color: mode === 'dark' ? designSystem.proBlue.textPrimary : '#0a0a0f',
-  borderBottom: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
+  color: designSystem.proBlue.textPrimary,
+  borderBottom: '1px solid #1f1f2e',
   boxShadow: 'none',
   backgroundImage: 'none',
 });
@@ -323,65 +321,53 @@ export const appBarSearchSx = (mode: 'light' | 'dark') => ({
   minWidth: 220,
   width: { lg: 240, xl: 280 },
   whiteSpace: 'nowrap',
-  bgcolor: mode === 'dark' ? '#0a0a0f' : '#f1f5f9',
-  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
+  bgcolor: '#0a0a0f',
+  border: '1px solid #1f1f2e',
   transition: designSystem.motion.smooth,
   '&:focus-within': {
-    bgcolor: mode === 'dark' ? '#0a0a0f' : '#ffffff',
+    bgcolor: '#0a0a0f',
     borderColor: '#7c3aed',
     boxShadow: 'none',
   },
 });
 
-export const appBarIconButtonSx = (mode: 'light' | 'dark') => ({
+export const appBarIconButtonSx = (_mode: 'light' | 'dark') => ({
   borderRadius: `${designSystem.radius.sm}px`,
-  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
-  bgcolor: mode === 'dark' ? '#0a0a0f' : '#ffffff',
-  color: mode === 'dark' ? designSystem.proBlue.textSecondary : '#0a0a0f',
+  border: '1px solid #1f1f2e',
+  bgcolor: '#0a0a0f',
+  color: designSystem.proBlue.textSecondary,
   width: 36,
   height: 36,
   '&:hover': {
-    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(124,58,237,0.08)',
-    borderColor: mode === 'dark' ? designSystem.proBlue.accentMuted : designSystem.proBlue.accent,
+    bgcolor: 'rgba(255,255,255,0.08)',
+    borderColor: designSystem.proBlue.accentMuted,
   },
 });
 
-export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolean) => ({
+export const appBarEditionChipSx = (_mode: 'light' | 'dark', isEnterprise: boolean) => ({
   fontWeight: 600,
   fontSize: '0.6875rem',
   letterSpacing: '0.02em',
   height: 26,
   display: { xs: 'none', sm: 'inline-flex' },
-  bgcolor: isEnterprise
-    ? mode === 'dark'
-      ? 'rgba(124,58,237,0.2)'
-      : 'rgba(109,40,217,0.1)'
-    : mode === 'dark'
-      ? '#0a0a0f'
-      : '#f1f5f9',
-  color: isEnterprise
-    ? mode === 'dark'
-      ? '#ffffff'
-      : '#5b21b6'
-    : mode === 'dark'
-      ? designSystem.proBlue.accentMuted
-      : '#4b5563',
-  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
+  bgcolor: isEnterprise ? 'rgba(124,58,237,0.2)' : '#0a0a0f',
+  color: isEnterprise ? '#ffffff' : designSystem.proBlue.accentMuted,
+  border: '1px solid #1f1f2e',
 });
 
-export const appBarPageTitleSx = (mode: 'light' | 'dark') => ({
+export const appBarPageTitleSx = (_mode: 'light' | 'dark') => ({
   fontFamily: designSystem.font.display,
   fontWeight: 600,
   fontSize: '0.9375rem',
   letterSpacing: '-0.02em',
   lineHeight: 1.2,
-  color: mode === 'dark' ? designSystem.proBlue.textPrimary : designSystem.proBlue.navyMid,
+  color: designSystem.proBlue.textPrimary,
 });
 
-export const appBarPageEyebrowSx = (mode: 'light' | 'dark') => ({
+export const appBarPageEyebrowSx = (_mode: 'light' | 'dark') => ({
   ...appTypography.eyebrow,
   fontSize: '0.625rem',
-  color: mode === 'dark' ? designSystem.proBlue.accentMuted : designSystem.proBlue.accent,
+  color: designSystem.proBlue.accentMuted,
   lineHeight: 1,
   mb: 0.25,
 });

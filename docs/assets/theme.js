@@ -7,9 +7,9 @@
   function read() {
     try {
       var stored = localStorage.getItem(KEY);
-      if (stored === 'light' || stored === 'dark') return stored;
+      if (stored === 'light' || stored === 'dark') return 'dark';
     } catch (e) { /* storage blocked */ }
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    return 'dark';
   }
 
   function apply(mode) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, Divider, useTheme } from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, Container, Grid, Stack, Typography, Divider } from '@mui/material';
 import { ArrowForward, Lock, Security, WorkspacePremium, CloudQueue, Psychology, Storage, Shield } from '@mui/icons-material';
 import { setEditionPreference, Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
@@ -9,8 +9,6 @@ import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 
 const EditionSwitcher: React.FC = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
 
   const chooseEdition = (edition: Edition) => {
     setEditionPreference(edition);
@@ -47,15 +45,15 @@ const EditionSwitcher: React.FC = () => {
     },
   ];
 
-  const pageBg = isDark ? designSystem.gradient.meshDark : designSystem.gradient.meshLight;
-  const cardBg = 'background.paper';
+  const pageBg = designSystem.gradient.meshDark;
+  const cardBg = '#0a0a0f';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', background: pageBg, py: 8, position: 'relative', overflow: 'hidden' }}>
-      {isDark && <NebulaBackdrop />}
+      <NebulaBackdrop />
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-          <BrandLogo dark={isDark} />
+          <BrandLogo dark />
         </Box>
         <Stack spacing={2} sx={{ mb: 4, textAlign: 'center' }}>
           <Chip icon={<Lock />} label="Edition Selection" color="primary" sx={{ alignSelf: 'center', fontWeight: 600 }} />
@@ -115,7 +113,7 @@ const EditionSwitcher: React.FC = () => {
 
         <Grid container spacing={2} sx={{ mt: 4 }}>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
+            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
               <CardContent>
                 <Storage color="primary" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Community quick start</Typography>
@@ -124,7 +122,7 @@ const EditionSwitcher: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
+            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
               <CardContent>
                 <CloudQueue color="secondary" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Professional unlocks</Typography>
@@ -133,7 +131,7 @@ const EditionSwitcher: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
+            <Card sx={{ height: '100%', bgcolor: '#0a0a0f', color: 'text.primary', border: '1px solid', borderColor: 'divider' }}>
               <CardContent>
                 <Psychology color="success" />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 1 }}>Enterprise extends</Typography>
@@ -143,7 +141,7 @@ const EditionSwitcher: React.FC = () => {
           </Grid>
         </Grid>
 
-        <Box sx={{ mt: 4, p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', color: 'text.primary' }}>
+        <Box sx={{ mt: 4, p: 3, borderRadius: 2, border: '1px solid', borderColor: 'divider', bgcolor: '#0a0a0f', color: 'text.primary' }}>
           <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
             What gets locked in Community
           </Typography>

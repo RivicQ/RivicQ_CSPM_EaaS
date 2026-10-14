@@ -20,15 +20,8 @@
     <link rel="stylesheet" href="assets/horizon-docs.css?v=20260911c" />
     <script>
       (function () {
-        try {
-          var t = localStorage.getItem('rivicq.theme');
-          if (t !== 'light' && t !== 'dark') {
-            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-          }
-          document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        }
+        try { localStorage.setItem('rivicq.theme', 'dark'); } catch (e) { /* ignore */ }
+        document.documentElement.setAttribute('data-theme', 'dark');
       })();
     </script>
     <script type="application/ld+json">

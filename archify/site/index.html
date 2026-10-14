@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RivicQ — Cryptographic Security Posture Management</title>
   <meta name="description" content="RivicQ inventories cryptography (CBOM) and software components (SBOM), then classifies risk, quantum exposure, and control gaps. One engine, two editions — every diagram on this page is a validated, interactive Archify artifact.">
-  <meta name="theme-color" content="#f5f6f3">
+  <meta name="theme-color" content="#000000">
   <link rel="canonical" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/marketing/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="RivicQ">
@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/rivicq-site.css">
-  <script>(function () { var t = 'light'; try { t = localStorage.getItem('rivicq-site-theme') || 'light'; } catch (_) {} document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); })();</script>
+  <script>(function () { document.documentElement.setAttribute('data-theme', 'dark'); try { localStorage.setItem('rivicq-site-theme', 'dark'); } catch (_) {} })();</script>
 </head>
 <body>
 
@@ -177,6 +177,14 @@
           <span class="sys-q">Where does each finding stand now?</span>
           <span class="sys-title">Waits, retries, honest endings</span>
           <span class="sys-desc">Discovered → triaged → planned → migrating → remediated — with unassigned pauses, re-scan recovery, and documented terminals.</span>
+        </a>
+
+        <a class="sys-card fade-up" href="../diagrams/rivicq-cspm-operator-workflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-cspm-operator-workflow.html?embed=1" title="RivicQ operator workflow preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-cspm-operator-workflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">How does an operator scan run?</span>
+          <span class="sys-title">Discover → Gate → CBOM</span>
+          <span class="sys-desc">Console or CLI posts a scan, the engine fingerprints and classifies, the policy gate decides, QBOM stays Enterprise (403 on OSS), and the CBOM report publishes.</span>
         </a>
 
         <a class="sys-card fade-up d3" href="../diagrams/rivicq-analysis-workflow.html?present=1" target="_blank" rel="noopener">

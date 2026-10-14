@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment, useTheme,
+  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment,
 } from '@mui/material';
 import {
   ArrowForward, CheckCircle, GitHub, GppGood, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
@@ -18,6 +18,7 @@ import { tokens } from '../theme/tokens';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
@@ -51,7 +52,6 @@ const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', '
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const isDark = useTheme().palette.mode === 'dark';
   const { isAuthenticated, backendReachable, demoLogin, isDemo } = useAuth();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
@@ -214,8 +214,8 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const ink = 'background.default';
-  const panel = 'background.paper';
+  const ink = '#000000';
+  const panel = '#0a0a0f';
   const [navMenu, setNavMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
 
   const NAV = [
@@ -288,15 +288,15 @@ const Home: React.FC = () => {
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: isDark ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.78)',
-          backdropFilter: 'blur(12px)',
+          bgcolor: '#000000',
+          backdropFilter: 'none',
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}
       >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
-            <BrandLogo dark={isDark} />
+            <BrandLogo dark />
             <Stack direction="row" spacing={0.25} flexWrap="wrap" useFlexGap sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
                 <Button
@@ -382,7 +382,7 @@ const Home: React.FC = () => {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
-        <Box id="scan" sx={{ scrollMarginTop: 80 }}>
+        <Box id="scan" sx={{ scrollMarginTop: 96 }}>
           <MotionSection>
             <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: panel, borderRadius: 2, p: { xs: 2, md: 2.5 } }}>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
@@ -447,8 +447,9 @@ const Home: React.FC = () => {
         )}
 
         <ScanWorkflowStrip />
+        <ArchifyWorkflowEmbed />
 
-        <Box id="platform" sx={{ mt: 10, scrollMarginTop: 80 }}>
+        <Box id="platform" sx={{ mt: 10, scrollMarginTop: 96 }}>
           <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary', mb: 1 }}>
             Platform
           </Typography>
@@ -535,7 +536,7 @@ const Home: React.FC = () => {
           </Grid>
         </Box>
 
-        <Box id="plans" sx={{ mt: 8, textAlign: 'center', scrollMarginTop: 80 }}>
+        <Box id="plans" sx={{ mt: 8, textAlign: 'center', scrollMarginTop: 96 }}>
           <Typography variant="caption" sx={{ color: 'text.disabled', letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600 }}>
             Control mappings (not certifications)
           </Typography>
@@ -549,7 +550,7 @@ const Home: React.FC = () => {
         <Box sx={{ mt: 8, py: 3, borderTop: 1, borderColor: 'divider' }}>
           <Stack spacing={1.25} alignItems="center">
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="center">
-              <BrandLogo compact dark={isDark} />
+              <BrandLogo compact dark />
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
             </Stack>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">

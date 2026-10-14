@@ -25,12 +25,13 @@ const LIGHT_PRIMARY = {
 
 const DARK_PRIMARY = LIGHT_PRIMARY;
 
-const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
-  const isDark = mode === 'dark';
+const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
+  const mode: 'light' | 'dark' = 'dark';
+  const isDark = true;
 
-  const surface = isDark ? tokens.colors.surfaceLight : tokens.colors.surface;
-  const text = isDark ? tokens.colors.textLight : tokens.colors.text;
-  const border = isDark ? tokens.colors.borderLight : tokens.colors.border;
+  const surface = tokens.colors.surfaceLight;
+  const text = tokens.colors.textLight;
+  const border = tokens.colors.borderLight;
 
   const primary = isDark ? DARK_PRIMARY : LIGHT_PRIMARY;
 

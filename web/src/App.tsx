@@ -97,8 +97,7 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 const App: React.FC = () => {
   const [mode, setMode] = React.useState<'light' | 'dark'>(() => {
     try {
-      const stored = localStorage.getItem('rivicq.theme');
-      if (stored === 'dark' || stored === 'light') return stored;
+      localStorage.setItem('rivicq.theme', 'dark');
     } catch {
       /* ignore */
     }

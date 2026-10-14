@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Grid, Stack, Typography, useTheme } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
 import PublicEngineNotice from '../components/brand/PublicEngineNotice';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
 
 export type SiteBlock = { title: string; body: string };
@@ -10,7 +11,7 @@ export type SiteBlock = { title: string; body: string };
 const noticeSx = {
   p: 1.75,
   mb: 4,
-  bgcolor: 'background.paper',
+  bgcolor: '#0a0a0f',
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 2,
@@ -22,7 +23,7 @@ const noticeSx = {
 export const siteCardSx = {
   p: 2.25,
   height: '100%',
-  bgcolor: 'background.paper',
+  bgcolor: '#0a0a0f',
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 2,
@@ -52,7 +53,7 @@ const SitePage: React.FC<{
 
   return (
     <PublicShell>
-      <Container maxWidth={maxWidth} sx={{ py: { xs: 8, md: 12 } }}>
+      <Container maxWidth={maxWidth} sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: 96 }}>
         <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.disabled' }}>{eyebrow}</Typography>
         <Typography sx={{ fontSize: { xs: '2rem', md: '2.8rem' }, fontWeight: 750, letterSpacing: '-0.03em', mt: 1, mb: 2, color: 'text.primary' }}>{title}</Typography>
         <Typography sx={{ color: 'text.secondary', fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.65, mb: 3 }}>{lede}</Typography>
@@ -79,6 +80,7 @@ const SitePage: React.FC<{
           </Grid>
         )}
         {children}
+        <ArchifyWorkflowEmbed />
       </Container>
     </PublicShell>
   );

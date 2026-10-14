@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- **Nebula-only product chrome** (2026-10-14). Public site, console, docs, marketing, Archify explorer, GitHub Pages, and Cloudflare Pages share one black/violet identity. Light-canvas “vibe” surfaces are gone. Home/public nav is opaque so headings no longer sit under the sticky bar. GitHub Pages now runs `scripts/build-pages.sh` (same composite as Cloudflare). Operator scan workflow is an Archify diagram on Home, Scanner, and public Site pages.
+
 ### Added
 - **Theme-aware design system across every surface** (2026-10-12). One RivicQ visual system now runs in light **and** dark on the React app (`web/`), static `docs/`, static `marketing/`, and the RivicQ Graph (`fabric/`). All public/auth chrome moved from hardcoded dark hexes to MUI palette tokens (`background.default`/`background.paper`/`text.*`/`divider`/`primary.main`); `NebulaBackdrop` is dark-only; a theme toggle persists to `localStorage['rivicq.theme']` (shared key). Static sites gained a pre-paint theme bootstrap, `[data-theme="light"]` variable overrides, and a `.theme-toggle` control.
 - **`web/` code-splitting** — `App.tsx` routes converted to `React.lazy`; fixed a `require()` call inside `useMemo` by hoisting `getAppTheme` to a top-level import. Main bundle **578 kB → 339.85 kB gzip (−41%)**.
