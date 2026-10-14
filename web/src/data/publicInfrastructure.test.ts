@@ -7,8 +7,8 @@ import {
 
 describe('public infrastructure copy', () => {
   it('refuses fabricated public scans', () => {
-    expect(PUBLIC_ENGINE_SCAN_COPY).toMatch(/RivicQ CBOM engine/i);
-    expect(PUBLIC_ENGINE_SCAN_COPY).toMatch(/never show fabricated findings/i);
+    expect(PUBLIC_ENGINE_SCAN_COPY).toMatch(/static build has no CBOM engine/i);
+    expect(PUBLIC_ENGINE_SCAN_COPY).toMatch(/labelled sample data only/i);
     expect(PUBLIC_ENGINE_CHIP_DISCONNECTED).toBe('Needs the RivicQ engine');
   });
 
