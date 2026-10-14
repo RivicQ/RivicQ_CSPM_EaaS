@@ -1,32 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Grid, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
 import PublicEngineNotice from '../components/brand/PublicEngineNotice';
 import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
+import { nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 export type SiteBlock = { title: string; body: string };
 
 const noticeSx = {
+  ...nebulaPanelSx,
   p: 1.75,
   mb: 4,
-  bgcolor: '#0a0a0f',
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
   color: 'text.secondary',
   fontSize: '0.9375rem',
   lineHeight: 1.6,
 };
 
 export const siteCardSx = {
+  ...nebulaPanelSx,
   p: 2.25,
   height: '100%',
-  bgcolor: '#0a0a0f',
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 2,
 };
 
 const SitePage: React.FC<{
@@ -42,7 +37,6 @@ const SitePage: React.FC<{
   children?: React.ReactNode;
 }> = ({ eyebrow, title, lede, blocks = [], primary, secondary, notice, engineNotice, maxWidth = 'md', children }) => {
   const navigate = useNavigate();
-  const isDark = useTheme().palette.mode === 'dark';
   const go = (to: string) => {
     if (to.startsWith('mailto:') || to.startsWith('http') || to.includes('.html')) {
       window.location.assign(to);
@@ -60,7 +54,7 @@ const SitePage: React.FC<{
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: notice || blocks.length || children ? 4 : 0 }}>
           {primary && <Button variant="contained" size="large" onClick={() => go(primary.to)} sx={websiteCtaSx}>{primary.label}</Button>}
           {secondary && (
-            <Button variant="outlined" size="large" onClick={() => go(secondary.to)} sx={websiteOutlineCtaSx(isDark)}>
+            <Button variant="outlined" size="large" onClick={() => go(secondary.to)} sx={websiteOutlineCtaSx()}>
               {secondary.label}
             </Button>
           )}

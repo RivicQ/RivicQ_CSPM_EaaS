@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Chip, Container, Grid, Typography, useTheme } from '@mui/material';
+import { Box, Button, Chip, Container, Grid, Typography } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { platformService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { websiteOutlineCtaSx } from '../theme/websiteChrome';
+import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
+import { nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 type Plan = {
   id: string;
@@ -34,7 +36,6 @@ const formatPrice = (plan: Plan) => {
 const Pricing: React.FC = () => {
   const navigate = useNavigate();
   const { backendReachable } = useAuth();
-  const isDark = useTheme().palette.mode === 'dark';
   const [plans, setPlans] = React.useState<Plan[]>(fallbackPlans);
   const [note, setNote] = React.useState('List prices are configuration. Checkout is not live. Control mappings are not certifications.');
 
@@ -48,25 +49,22 @@ const Pricing: React.FC = () => {
 
   return (
     <PublicShell>
-      <Box sx={{ position: 'relative', py: { xs: 8, md: 12 } }}>
-        <Container maxWidth="lg">
-          <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
-            Pricing · configuration, not a live PSP
-          </Typography>
-          <Typography sx={{ fontSize: { xs: '2rem', md: '2.8rem' }, fontWeight: 750, letterSpacing: '-0.03em', color: 'text.primary', mt: 1, maxWidth: 720 }}>
-            Community engine. Licensed control plane.
-          </Typography>
-          <Typography sx={{ color: 'text.secondary', mt: 2, maxWidth: 640 }}>{note}</Typography>
-          <Box sx={{ mt: 2, maxWidth: 720, p: 1.75, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2, color: 'text.secondary' }}>
-            Card numbers never touch RivicQ. When a payment adapter is configured, provider-hosted checkout and signed webhooks activate entitlements.
-          </Box>
-        </Container>
-      </Box>
-      <Container maxWidth="lg" sx={{ pb: 8 }}>
-        <Grid container spacing={2}>
+      <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: 96 }}>
+        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
+          Pricing · configuration, not a live PSP
+        </Typography>
+        <Typography sx={{ fontSize: { xs: '2rem', md: '2.8rem' }, fontWeight: 750, letterSpacing: '-0.03em', color: 'text.primary', mt: 1, maxWidth: 720 }}>
+          Community engine. Licensed control plane.
+        </Typography>
+        <Typography sx={{ color: 'text.secondary', mt: 2, maxWidth: 640 }}>{note}</Typography>
+        <Box sx={{ ...nebulaPanelSx, mt: 2, maxWidth: 720, p: 1.75, color: 'text.secondary' }}>
+          Card numbers never touch RivicQ. When a payment adapter is configured, provider-hosted checkout and signed webhooks activate entitlements.
+        </Box>
+
+        <Grid container spacing={2} sx={{ mt: 4 }}>
           {plans.filter((p) => p.id !== 'custom').map((plan) => (
             <Grid item xs={12} sm={6} md={4} key={plan.id}>
-              <Box sx={{ p: 2.5, height: '100%', bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+              <Box sx={{ ...nebulaPanelSx, p: 2.5, height: '100%' }}>
                 <Chip size="small" label={plan.tier} color={plan.enterprise_only ? 'primary' : 'default'} sx={{ mb: 1.5 }} />
                 <Typography variant="h5" fontWeight={700}>{plan.name}</Typography>
                 <Typography sx={{ color: 'primary.main', fontWeight: 700, my: 1 }}>{formatPrice(plan)}</Typography>
@@ -74,7 +72,7 @@ const Pricing: React.FC = () => {
                   <Typography key={n} variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>{n}</Typography>
                 ))}
                 <Button
-                  sx={{ mt: 2, ...(plan.enterprise_only ? { borderRadius: 999, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } } : websiteOutlineCtaSx(isDark)) }}
+                  sx={{ mt: 2, ...(plan.enterprise_only ? websiteCtaSx : websiteOutlineCtaSx()) }}
                   variant={plan.enterprise_only ? 'contained' : 'outlined'}
                   onClick={() => navigate(plan.enterprise_only ? '/request-demo' : '/register')}
                 >
@@ -84,6 +82,8 @@ const Pricing: React.FC = () => {
             </Grid>
           ))}
         </Grid>
+
+        <ArchifyWorkflowEmbed />
       </Container>
     </PublicShell>
   );

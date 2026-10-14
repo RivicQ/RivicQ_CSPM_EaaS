@@ -378,11 +378,7 @@ section { padding: 0 0 3.5rem; }
   border-radius: 4px;
 }
 
-/* ---------------------------------------------------------------- light theme
-   The docs are dark-first, but every surface is driven by the variables above.
-   Flipping `data-theme="light"` on <html> remaps the neutral ramp to graphite
-   on white while keeping the RivicQ violet accent. Init + toggle live in
-   assets/theme.js so the choice persists and follows the OS by default. */
+/* Nebula-only: light theme is not offered. Legacy [data-theme="light"] stays nebula. */
 [data-theme="light"] {
   --ink: #000000;
   --surface: #0a0a0f;
@@ -397,28 +393,46 @@ section { padding: 0 0 3.5rem; }
     radial-gradient(ellipse 55% 48% at 50% 18%, rgba(124,58,237,0.28), transparent 68%),
     #000;
 }
-/* Sparse starfield is only legible on the dark canvas. */
-[data-theme="light"] body::before { display: none; }
 [data-theme="light"] .btn-outline { color: var(--ivory); border-color: var(--line); }
 [data-theme="light"] .btn-outline:hover { border-color: var(--accent); }
 [data-theme="light"] .preview-thumb { color: var(--ivory); }
-[data-theme="light"] .thumb-oss { color: #15803d; }
-[data-theme="light"] .badge-yes { background: rgba(21,128,61,0.12); color: #15803d; }
-[data-theme="light"] .badge-no { background: rgba(180,83,9,0.12); color: #b45309; }
 
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
+.theme-toggle { display: none !important; }
+
+/* Archify operator workflow embed (matches React ArchifyWorkflowEmbed) */
+.archify-embed {
+  margin-top: 2rem;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius);
+  overflow: hidden;
   background: var(--surface);
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.9rem;
-  line-height: 1;
 }
-.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.archify-embed-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.archify-embed-kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 0.35rem;
+}
+.archify-embed-title {
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  max-width: 40rem;
+}
+.archify-embed-frame {
+  display: block;
+  width: 100%;
+  height: min(560px, 70vh);
+  border: 0;
+  background: #000;
+}

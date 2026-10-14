@@ -14,7 +14,8 @@
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function currentTheme() {
-    return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    /* Nebula identity only — light theme is not offered on the product site. */
+    return 'dark';
   }
 
   /* ── Diagram theme sync (best-effort same-origin) ──────────── */
@@ -35,23 +36,25 @@
     for (var i = 0; i < frames.length; i++) syncFrameTheme(frames[i]);
   }
 
-  /* ── Theme toggle ──────────────────────────────────────────── */
+  /* ── Theme (nebula / dark only) ────────────────────────────── */
   var themeMeta = doc.querySelector('meta[name="theme-color"]');
   function applyTheme(theme) {
-    root.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
-    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
-    if (themeMeta) themeMeta.setAttribute('content', theme === 'dark' ? '#07080a' : '#f5f6f3');
+    root.setAttribute('data-theme', 'dark');
+    try { localStorage.setItem(THEME_KEY, 'dark'); } catch (e) {}
+    if (themeMeta) themeMeta.setAttribute('content', '#000000');
     var toggle = doc.querySelector('[data-theme-toggle]');
-    if (toggle) toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    if (toggle) {
+      toggle.setAttribute('hidden', 'true');
+      toggle.style.display = 'none';
+    }
     syncAllFrames();
   }
 
+  applyTheme('dark');
   var themeToggle = doc.querySelector('[data-theme-toggle]');
   if (themeToggle) {
-    themeMeta && themeMeta.setAttribute('content', currentTheme() === 'dark' ? '#07080a' : '#f5f6f3');
-    themeToggle.addEventListener('click', function () {
-      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
-    });
+    themeToggle.setAttribute('hidden', 'true');
+    themeToggle.style.display = 'none';
   }
 
   // Re-apply theme to each diagram right after it finishes loading.

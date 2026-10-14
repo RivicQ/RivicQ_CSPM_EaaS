@@ -88,10 +88,7 @@
   --transition-slow: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ---------------------------------------------------------------- light theme
-   The marketing site is dark-first, but every surface reads from these tokens,
-   so remapping the neutral ramp is enough to ship a real light theme. Init and
-   toggle live in js/theme.js; the header exposes a .theme-toggle button. */
+/* Nebula-only: light theme is not offered. Legacy [data-theme="light"] stays nebula. */
 [data-theme="light"] {
   --bg-base: #000000;
   --bg-elevated: #0a0a0f;
@@ -120,22 +117,45 @@
     #000000;
 }
 [data-theme="light"] .hero-bg::before { display: none; }
-
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-full);
-  background: var(--bg-elevated);
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
-  transition: var(--transition);
-}
-.theme-toggle:hover { color: var(--rivicq-500); border-color: var(--rivicq-500); }
 [data-theme="light"] .nav-logo-icon { background: #0a0a0f; }
+
+.theme-toggle { display: none !important; }
+
+/* Archify operator workflow embed */
+.archify-embed {
+  margin-top: var(--space-10);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+.archify-embed-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.archify-embed-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+.archify-embed-title {
+  font-size: var(--text-xl);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  max-width: 40rem;
+  color: var(--text-primary);
+}
+.archify-embed-frame {
+  display: block;
+  width: 100%;
+  height: min(560px, 70vh);
+  border: 0;
+  background: #000;
+}

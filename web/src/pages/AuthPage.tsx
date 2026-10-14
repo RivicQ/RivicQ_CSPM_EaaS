@@ -20,7 +20,6 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
-  useTheme,
 } from '@mui/material';
 import {
   ArrowForward,
@@ -80,7 +79,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     backendReachable,
   } = useAuth();
   const { start: startTrail } = useDemoTrail();
-  const isDark = useTheme().palette.mode === 'dark';
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -234,10 +232,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
-      {isDark && <NebulaBackdrop />}
+      <NebulaBackdrop />
       <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-          <BrandLogo dark={isDark} />
+          <BrandLogo dark />
           <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
         </Box>
         <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
@@ -308,7 +306,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       borderRadius: 1,
                       border: 1,
                       borderColor: 'divider',
-                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(124,58,237,0.12)' : 'rgba(124,58,237,0.08)'),
+                      bgcolor: 'rgba(124,58,237,0.12)',
                       backdropFilter: 'none',
                     }}
                   >
