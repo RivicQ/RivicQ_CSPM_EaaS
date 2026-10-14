@@ -1,0 +1,184 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "RivicQ CSPM — Operator Scan Workflow",
+    "subtitle": "Community CBOM + SBOM path; Enterprise QBOM is 403 on OSS",
+    "output": ".archify/workflow-cspm-operator-20261014-144800/rivicq-cspm-operator-workflow.html",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:RivicQ/RivicQ_CSPM_EaaS.git",
+      "link_mode": "local-only",
+      "revision": "1cc1c652f9ca8444b2a2480a26889c7f8215bab0"
+    }
+  },
+  "lanes": [
+    { "id": "operator", "label": "Operator" },
+    { "id": "engine", "label": "CBOM Engine" },
+    { "id": "policy", "label": "Policy & Edition", "variant": "exception" },
+    { "id": "delivery", "label": "Evidence" }
+  ],
+  "phases": [
+    { "id": "intake", "label": "Intake", "fromCol": 0, "toCol": 1 },
+    { "id": "analyze", "label": "Analyze", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "decide", "label": "Decide + report", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "engine_core", "label": "Deterministic classify", "lane": "engine", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "edition_gate", "label": "Enterprise layers", "lane": "policy", "fromCol": 4, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": ["console", "postscan", "fingerprint", "classify", "gate", "evidence", "publish"],
+  "nodes": [
+    {
+      "id": "console",
+      "lane": "operator",
+      "col": 0,
+      "type": "frontend",
+      "label": "Console",
+      "sublabel": "Home · Scanner",
+      "width": 168,
+      "sources": [{ "path": "web/src/pages/Scanner.tsx", "line": 260, "end_line": 268 }]
+    },
+    {
+      "id": "cli",
+      "lane": "operator",
+      "col": 1,
+      "type": "external",
+      "label": "CLI",
+      "sublabel": "rivicq scan",
+      "width": 168,
+      "sources": [{ "path": "cmd/rivicq/main.go", "line": 25, "end_line": 32 }]
+    },
+    {
+      "id": "postscan",
+      "lane": "engine",
+      "col": 1,
+      "type": "backend",
+      "label": "POST /scans",
+      "sublabel": "OSS :8080",
+      "width": 168,
+      "sources": [
+        { "path": "internal/api/oss/handlers.go", "line": 43, "end_line": 51 },
+        { "path": "internal/api/shared/handlers.go", "line": 781, "end_line": 817 }
+      ]
+    },
+    {
+      "id": "fingerprint",
+      "lane": "engine",
+      "col": 2,
+      "type": "backend",
+      "label": "Fingerprint",
+      "sublabel": "dedup findings",
+      "width": 168,
+      "sources": [
+        { "path": "internal/intelligence/fingerprint.go", "line": 17, "end_line": 24 },
+        { "path": "internal/intelligence/fingerprint.go", "line": 119, "end_line": 130 }
+      ]
+    },
+    {
+      "id": "classify",
+      "lane": "engine",
+      "col": 3,
+      "type": "backend",
+      "label": "Classify",
+      "sublabel": "CBOM + PQC",
+      "tag": "deterministic",
+      "width": 168,
+      "sources": [
+        { "path": "internal/intelligence/pipeline.go", "line": 20, "end_line": 40 },
+        { "path": "internal/intelligence/normalize.go", "line": 10, "end_line": 40 }
+      ]
+    },
+    {
+      "id": "gate",
+      "lane": "policy",
+      "col": 3,
+      "type": "security",
+      "label": "Policy Gate",
+      "sublabel": "BLOCK / WARN / PASS",
+      "tag": "fail-on",
+      "width": 168,
+      "sources": [{ "path": "internal/intelligence/policy.go", "line": 143, "end_line": 160 }]
+    },
+    {
+      "id": "qbom",
+      "lane": "policy",
+      "col": 4,
+      "type": "security",
+      "label": "QBOM 403",
+      "sublabel": "Enterprise only",
+      "width": 168,
+      "sources": [{ "path": "internal/api/shared/qbom.go", "line": 18, "end_line": 27 }]
+    },
+    {
+      "id": "retry",
+      "lane": "policy",
+      "col": 5,
+      "type": "messagebus",
+      "label": "Stay on CBOM",
+      "sublabel": "local taxonomy",
+      "width": 168,
+      "sources": [{ "path": "internal/api/shared/qbom.go", "line": 16, "end_line": 26 }]
+    },
+    {
+      "id": "evidence",
+      "lane": "delivery",
+      "col": 4,
+      "type": "backend",
+      "label": "CBOM Report",
+      "sublabel": "GET /scans/:id",
+      "width": 168,
+      "sources": [{ "path": "internal/api/shared/handlers.go", "line": 875, "end_line": 896 }]
+    },
+    {
+      "id": "publish",
+      "lane": "delivery",
+      "col": 5,
+      "type": "external",
+      "label": "Publish",
+      "sublabel": "CLI · API · UI",
+      "width": 168,
+      "sources": [{ "path": "cmd/rivicq/main.go", "line": 92, "end_line": 110 }]
+    }
+  ],
+  "edges": [
+    { "id": "e-console-post", "from": "console", "to": "postscan", "label": "trigger", "variant": "emphasis" },
+    { "id": "e-cli-post", "from": "cli", "to": "postscan", "label": "scan ." },
+    { "id": "e-post-fp", "from": "postscan", "to": "fingerprint" },
+    { "id": "e-fp-cls", "from": "fingerprint", "to": "classify" },
+    { "id": "e-cls-gate", "from": "classify", "to": "gate", "label": "classify?", "variant": "security" },
+    { "id": "e-gate-ev", "from": "gate", "to": "evidence", "variant": "emphasis" },
+    { "id": "e-ev-pub", "from": "evidence", "to": "publish" },
+    { "id": "e-gate-qbom", "from": "gate", "to": "qbom", "label": "QBOM?", "variant": "security", "role": "error" },
+    { "id": "e-qbom-retry", "from": "qbom", "to": "retry", "variant": "dashed", "role": "branch" },
+    { "id": "e-retry-cls", "from": "retry", "to": "classify", "variant": "dashed", "role": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Community CSPM",
+      "items": [
+        "CBOM and SBOM stay on this estate",
+        "The same scan input yields the same classification"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Enterprise layers",
+      "items": [
+        "QBOM, HBOM, AIBOM, and IBOM return 403 on OSS",
+        "Community still classifies algorithms on CBOM findings"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Static Pages",
+      "items": [
+        "GitHub Pages hosts no live engine",
+        "Evidence-backed scans require the API or a local CLI run"
+      ]
+    }
+  ]
+}
