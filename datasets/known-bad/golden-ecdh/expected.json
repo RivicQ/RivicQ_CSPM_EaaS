@@ -1,0 +1,12 @@
+{
+  "id": "golden-ecdh",
+  "title": "ECDH and X25519 library presence",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/golden/ecdh",
+  "include_fixtures": true,
+  "must_match": ["ecdh", "x25519"],
+  "must_not_match": ["ghp_live"],
+  "min_findings": 1,
+  "notes": "ECDH/X25519 are classified (Shor). Library presence, not a runtime handshake."
+}

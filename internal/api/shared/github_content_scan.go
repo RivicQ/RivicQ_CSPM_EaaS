@@ -139,7 +139,7 @@ func listGHScanJobs() []*ghScanJob {
 
 // EngineVersion identifies the content-analysis rule set. Bump it when rule
 // behaviour changes so reports can explain a shift in finding counts.
-const EngineVersion = "rivicq-content-scanner/1.1.0"
+const EngineVersion = "rivicq-content-scanner/1.2.0"
 
 // findingFingerprint is the tenant-independent identity of a finding. Repeated
 // scans of unchanged content produce the same fingerprint, which is what makes
@@ -241,24 +241,35 @@ type cryptoRule struct {
 	remediation string
 	// confidence reflects how specific the pattern is. A named weak-algorithm
 	// API call is high confidence; a bare "rsa" substring is low.
-	confidence float64
+	confidence   float64
+	presenceKind string
+	inventory    bool
 }
 
 // cryptoRules is ordered by descending confidence so the strongest evidence for
 // a file wins the CBOM entry. Rule IDs are stable: downstream suppressions,
 // accuracy benchmarks, and report cross-references depend on them.
 var cryptoRules = []cryptoRule{
-	{regexp.MustCompile(`(?i)` + `crypto/` + `md5|hashlib\.` + `md5|MessageDigest\.getInstance\(["']MD5|md5\.Sum\(`), "crypto.weak-hash.md5", "MD5", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Replace MD5 with SHA-256 or SHA-3; do not use MD5 for integrity or passwords.", 0.85},
-	{regexp.MustCompile(`(?i)` + `crypto/` + `sha1|hashlib\.` + `sha1|sha1\.Sum\(`), "crypto.weak-hash.sha1", "SHA-1", "WEAK_HASH", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-327", "Migrate SHA-1 to SHA-256 or SHA-3.", 0.85},
-	{regexp.MustCompile(`(?i)` + `des-` + `ede3|` + `DES` + `ede|triple-des|tripledes`), "crypto.weak-cipher.3des", "3DES", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Remove 3DES; use AES-256-GCM.", 0.8},
-	{regexp.MustCompile(`(?i)arc` + `four|crypto/` + `rc4|rc4\.New(Cipher|Stream)|rc4-` + `sha|RC4-` + `MD5`), "crypto.weak-cipher.rc4", "RC4", "WEAK_CIPHER", "CRITICAL", false, "A02:2021 Cryptographic Failures", "CWE-327", "Disable RC4; use TLS 1.2+ with AEAD ciphers.", 0.8},
-	{regexp.MustCompile(`tls\.VersionTLS10`), "tls.version.1_0", "TLS 1.0", "WEAK_TLS", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Disable TLS 1.0; require TLS 1.2 or TLS 1.3.", 0.9},
-	{regexp.MustCompile(`tls\.VersionTLS11`), "tls.version.1_1", "TLS 1.1", "WEAK_TLS", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Disable TLS 1.1; require TLS 1.2 or TLS 1.3.", 0.9},
-	{regexp.MustCompile(`(?i)ml-kem|ml_dsa|ml-dsa|ml_kem|kyber|dilithium|liboqs|pqcrypto`), "crypto.pqc.library", "PQC", "PQC_LIBRARY", "INFO", true, "A02:2021 Cryptographic Failures", "CWE-327", "PQC library detected — verify it is used for production key exchange, not only imported.", 0.6},
-	{regexp.MustCompile(`(?i)GenerateKey\([^)]*?,\s*(512|768|1024)\s*\)|RSA\.generate\((512|768|1024)\)|key_?size\s*[:=]\s*(512|768|1024)\b|\bRSA_KEY_(SIZE|BITS)\s*=\s*(512|768|1024)\b`), "crypto.rsa.keysize.insufficient", "RSA", "WEAK_KEY_SIZE", "HIGH", false, "A02:2021 Cryptographic Failures", "CWE-326", "Regenerate RSA keys at ≥2048 bits; prefer ≥3072 and plan ML-KEM hybrid migration.", 0.85},
-	{regexp.MustCompile(`(?i)` + `crypto/` + `rsa|RSA\.generate|` + `rsa` + `\.GenerateKey|RSA_PKCS1|algorithm:\s*['"]RS256`), "crypto.import.rsa", "RSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "Review RSA key sizes (prefer ≥3072) and plan ML-KEM / ML-DSA hybrid migration.", 0.5},
-	{regexp.MustCompile(`(?i)` + `crypto/` + `ecdsa|EC_KEY|` + `ecdsa` + `\.GenerateKey`), "crypto.import.ecdsa", "ECDSA", "CRYPTO_IMPORT", "MEDIUM", false, "A02:2021 Cryptographic Failures", "CWE-327", "ECDSA is not quantum-safe; plan ML-DSA migration.", 0.5},
-	{regexp.MustCompile(`(?i)jwt\.sign|json` + `webtoken|jose\.JWT|import\s+jwt\b|\bjwt\.(encode|decode)\(`), "crypto.import.jwt", "JWT", "CRYPTO_IMPORT", "LOW", false, "A02:2021 Cryptographic Failures", "CWE-347", "Prefer EdDSA or PQC-hybrid JWT signing; rotate secrets.", 0.45},
+	{re: regexp.MustCompile(`(?i)` + `crypto/` + `md5|hashlib\.` + `md5|MessageDigest\.getInstance\(["']MD5|md5\.Sum\(`), ruleID: "crypto.weak-hash.md5", algorithm: "MD5", findingType: "WEAK_HASH", severity: "HIGH", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "Replace MD5 with SHA-256 or SHA-3; do not use MD5 for integrity or passwords.", confidence: 0.85, presenceKind: intelligence.PresenceUsage},
+	{re: regexp.MustCompile(`(?i)` + `crypto/` + `sha1"|` + `crypto/` + `sha1$|hashlib\.` + `sha1|sha1\.Sum\(`), ruleID: "crypto.weak-hash.sha1", algorithm: "SHA-1", findingType: "WEAK_HASH", severity: "HIGH", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "Migrate SHA-1 to SHA-256 or SHA-3.", confidence: 0.85, presenceKind: intelligence.PresenceUsage},
+	{re: regexp.MustCompile(`(?i)` + `des-` + `ede3|` + `DES` + `ede|triple-des|tripledes`), ruleID: "crypto.weak-cipher.3des", algorithm: "3DES", findingType: "WEAK_CIPHER", severity: "CRITICAL", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "Remove 3DES; use AES-256-GCM.", confidence: 0.8, presenceKind: intelligence.PresenceUsage},
+	{re: regexp.MustCompile(`(?i)arc` + `four|crypto/` + `rc4|rc4\.New(Cipher|Stream)|rc4-` + `sha|RC4-` + `MD5`), ruleID: "crypto.weak-cipher.rc4", algorithm: "RC4", findingType: "WEAK_CIPHER", severity: "CRITICAL", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "Disable RC4; use TLS 1.2+ with AEAD ciphers.", confidence: 0.8, presenceKind: intelligence.PresenceUsage},
+	{re: regexp.MustCompile(`tls\.VersionTLS10`), ruleID: "tls.version.1_0", algorithm: "TLS 1.0", findingType: "WEAK_TLS", severity: "HIGH", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-326", remediation: "Disable TLS 1.0; require TLS 1.2 or TLS 1.3.", confidence: 0.9, presenceKind: intelligence.PresenceUsage},
+	{re: regexp.MustCompile(`tls\.VersionTLS11`), ruleID: "tls.version.1_1", algorithm: "TLS 1.1", findingType: "WEAK_TLS", severity: "HIGH", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-326", remediation: "Disable TLS 1.1; require TLS 1.2 or TLS 1.3.", confidence: 0.9, presenceKind: intelligence.PresenceUsage},
+	{re: regexp.MustCompile(`(?i)ml-kem|ml_dsa|ml-dsa|ml_kem|kyber|dilithium|liboqs|pqcrypto`), ruleID: "crypto.pqc.library", algorithm: "PQC", findingType: "PQC_LIBRARY", severity: "INFO", quantumSafe: true, owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "PQC library detected — verify it is used for production key exchange, not only imported.", confidence: 0.6, presenceKind: intelligence.PresenceLibrary},
+	{re: regexp.MustCompile(`(?i)GenerateKey\([^)]*?,\s*(512|768|1024)\s*\)|RSA\.generate\((512|768|1024)\)|key_?size\s*[:=]\s*(512|768|1024)\b|\bRSA_KEY_(SIZE|BITS)\s*=\s*(512|768|1024)\b`), ruleID: "crypto.rsa.keysize.insufficient", algorithm: "RSA", findingType: "WEAK_KEY_SIZE", severity: "HIGH", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-326", remediation: "Regenerate RSA keys at ≥2048 bits; prefer ≥3072 and plan ML-KEM hybrid migration.", confidence: 0.85, presenceKind: intelligence.PresenceUsage},
+	{re: regexp.MustCompile(`(?i)` + `crypto/` + `rsa|RSA\.generate|` + `rsa` + `\.GenerateKey|RSA_PKCS1|algorithm:\s*['"]RS256`), ruleID: "crypto.import.rsa", algorithm: "RSA", findingType: "CRYPTO_IMPORT", severity: "MEDIUM", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "Review RSA key sizes (prefer ≥3072) and plan ML-KEM / ML-DSA hybrid migration.", confidence: 0.5, presenceKind: intelligence.PresenceLibrary},
+	{re: regexp.MustCompile(`(?i)` + `crypto/` + `ecdsa|EC_KEY|` + `ecdsa` + `\.GenerateKey`), ruleID: "crypto.import.ecdsa", algorithm: "ECDSA", findingType: "CRYPTO_IMPORT", severity: "MEDIUM", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "ECDSA is not quantum-safe; plan ML-DSA migration.", confidence: 0.5, presenceKind: intelligence.PresenceLibrary},
+	{re: regexp.MustCompile(`(?i)jwt\.sign|json` + `webtoken|jose\.JWT|import\s+jwt\b|\bjwt\.(encode|decode)\(`), ruleID: "crypto.import.jwt", algorithm: "JWT", findingType: "CRYPTO_IMPORT", severity: "LOW", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-347", remediation: "Prefer EdDSA or PQC-hybrid JWT signing; rotate secrets.", confidence: 0.45, presenceKind: intelligence.PresenceLibrary},
+	{re: regexp.MustCompile(`(?i)` + `crypto/` + `ecdh|ecdh\.X25519|ecdh\.P256`), ruleID: "crypto.import.ecdh", algorithm: "ECDH", findingType: "CRYPTO_IMPORT", severity: "MEDIUM", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "ECDH is not quantum-safe; plan ML-KEM / hybrid X25519+ML-KEM migration.", confidence: 0.5, presenceKind: intelligence.PresenceLibrary},
+	{re: regexp.MustCompile(`(?i)x25519|curve25519`), ruleID: "crypto.import.x25519", algorithm: "X25519", findingType: "CRYPTO_IMPORT", severity: "MEDIUM", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "X25519 is classified (Shor). Prefer an X25519+ML-KEM hybrid for new work.", confidence: 0.5, presenceKind: intelligence.PresenceLibrary},
+	{re: regexp.MustCompile(`(?i)diffie-hellman-group[0-9]|dh_generate_key|dhparam\s`), ruleID: "crypto.import.ffdh", algorithm: "FF-DH", findingType: "CRYPTO_IMPORT", severity: "MEDIUM", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "Finite-field Diffie-Hellman is not quantum-safe; plan ML-KEM migration.", confidence: 0.45, presenceKind: intelligence.PresenceLibrary},
+	{re: regexp.MustCompile(`(?i)(?:HostKeyAlgorithms|PubkeyAcceptedAlgorithms|PubkeyAcceptedKeyTypes)\s+[^\n]*ssh-rsa`), ruleID: "crypto.ssh.host-rsa", algorithm: "SSH-RSA", findingType: "WEAK_SSH", severity: "HIGH", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "Disable ssh-rsa host keys; prefer ssh-ed25519 or a PQC-hybrid host key when available.", confidence: 0.8, presenceKind: intelligence.PresenceUsage},
+	{re: regexp.MustCompile(`crypto/` + `aes|aes\.NewCipher|AES-256|aes\.NewGCM`), ruleID: "crypto.inventory.aes", algorithm: "AES", findingType: "CRYPTO_INVENTORY", severity: "INFO", quantumSafe: true, owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "AES is inventoried. AES-256 is Grover-resistant; this is not a policy violation.", confidence: 0.7, presenceKind: intelligence.PresenceInventory, inventory: true},
+	{re: regexp.MustCompile(`crypto/` + `sha256|sha256\.Sum256|SHA-256`), ruleID: "crypto.inventory.sha256", algorithm: "SHA-256", findingType: "CRYPTO_INVENTORY", severity: "INFO", quantumSafe: true, owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-327", remediation: "SHA-256 is inventoried. Not collision-broken; this is not a policy violation.", confidence: 0.7, presenceKind: intelligence.PresenceInventory, inventory: true},
+	{re: regexp.MustCompile(`tls\.VersionTLS12`), ruleID: "crypto.inventory.tls12", algorithm: "TLS 1.2", findingType: "CRYPTO_INVENTORY", severity: "INFO", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-326", remediation: "TLS 1.2 is inventoried. Prefer TLS 1.3; this is not a BLOCK by itself.", confidence: 0.85, presenceKind: intelligence.PresenceInventory, inventory: true},
+	{re: regexp.MustCompile(`tls\.VersionTLS13`), ruleID: "crypto.inventory.tls13", algorithm: "TLS 1.3", findingType: "CRYPTO_INVENTORY", severity: "INFO", quantumSafe: true, owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-326", remediation: "TLS 1.3 is inventoried. Handshake still uses classical key exchange unless a PQC hybrid is configured.", confidence: 0.85, presenceKind: intelligence.PresenceInventory, inventory: true},
+	{re: regexp.MustCompile(`-----BEGIN CERTIFICATE-----`), ruleID: "crypto.x509.certificate", algorithm: "X.509", findingType: "CRYPTO_INVENTORY", severity: "INFO", owasp: "A02:2021 Cryptographic Failures", cwe: "CWE-295", remediation: "X.509 certificate material inventoried from PEM. Public metadata only; private keys are never extracted.", confidence: 0.9, presenceKind: intelligence.PresenceInventory, inventory: true},
 }
 
 // rsaKeyBitsRe captures RSA modulus size from GenerateKey(..., N) or RSA.generate(N).
@@ -306,6 +317,7 @@ var interestingExt = map[string]bool{
 	".java": true, ".rs": true, ".rb": true, ".php": true, ".cs": true, ".c": true, ".cpp": true,
 	".json": true, ".yml": true, ".yaml": true, ".xml": true, ".tf": true, ".mod": true,
 	".sum": true, ".txt": true, ".toml": true, ".gradle": true, ".env": true,
+	".conf": true, ".pem": true, ".crt": true, ".cer": true,
 }
 
 var interestingNames = map[string]bool{
@@ -572,23 +584,30 @@ func AnalyzeRepositoryFiles(repo string, files []RepoFile, demo bool) GHScanResu
 				continue
 			}
 			keyLen := extractKeyLength(rule.algorithm, content)
+			presence := rule.presenceKind
+			if presence == "" {
+				presence = intelligence.InferPresenceKind(rule.ruleID, "github-content", rule.findingType)
+			}
 			findings = append(findings, GHFinding{
-				RuleID:      rule.ruleID,
-				Confidence:  rule.confidence,
-				FilePath:    file.Path,
-				LineNumber:  lineOf(content, loc[0]),
-				FindingType: rule.findingType,
-				Algorithm:   rule.algorithm,
-				KeyLength:   keyLen,
-				Severity:    rule.severity,
-				Description: rule.algorithm + " usage in " + file.Path,
-				Remediation: rule.remediation,
-				QuantumSafe: rule.quantumSafe,
-				OWASP:       rule.owasp,
-				CWE:         rule.cwe,
-				Evidence:    maskSecret(strings.TrimSpace(content[loc[0]:min(loc[1]+40, len(content))])),
-				Tool:        "rivicq-content-analyzer",
-				Demo:        demo,
+				RuleID:          rule.ruleID,
+				Confidence:      rule.confidence,
+				FilePath:        file.Path,
+				LineNumber:      lineOf(content, loc[0]),
+				FindingType:     rule.findingType,
+				Algorithm:       rule.algorithm,
+				KeyLength:       keyLen,
+				Severity:        rule.severity,
+				Description:     rule.algorithm + " usage in " + file.Path,
+				Remediation:     rule.remediation,
+				QuantumSafe:     rule.quantumSafe,
+				OWASP:           rule.owasp,
+				CWE:             rule.cwe,
+				Evidence:        maskSecret(strings.TrimSpace(content[loc[0]:min(loc[1]+40, len(content))])),
+				Tool:            "rivicq-content-analyzer",
+				Demo:            demo,
+				DetectionMethod: intelligence.MethodRegexSAST,
+				PresenceKind:    presence,
+				EvidenceKind:    intelligence.InferEvidenceKind(presence, intelligence.MethodRegexSAST),
 			})
 			cbom = append(cbom, GHComponent{Name: rule.algorithm, Type: "algorithm", Demo: demo})
 		}

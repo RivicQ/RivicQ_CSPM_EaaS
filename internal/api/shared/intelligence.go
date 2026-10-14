@@ -30,9 +30,12 @@ func ToContentFinding(f GHFinding) intelligence.ContentFinding {
 		CWE:         f.CWE,
 		Line:        f.LineNumber,
 		KeyLength:   f.KeyLength,
-		QuantumSafe: f.QuantumSafe,
-		Compliance:  f.Compliance,
-		Demo:        f.Demo,
+		QuantumSafe:     f.QuantumSafe,
+		Compliance:      f.Compliance,
+		Demo:            f.Demo,
+		DetectionMethod: f.DetectionMethod,
+		EvidenceKind:    f.EvidenceKind,
+		PresenceKind:    f.PresenceKind,
 	}
 }
 

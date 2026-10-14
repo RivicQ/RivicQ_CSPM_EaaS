@@ -87,6 +87,15 @@ func DefaultPolicies() []Policy {
 			},
 		},
 		{
+			ID:          "crypto-ssh-rsa",
+			Name:        "No ssh-rsa host keys",
+			Action:      ActionBlock,
+			Description: "BLOCK ssh-rsa host-key / public-key algorithms.",
+			match: func(f Finding) bool {
+				return f.RuleID == "crypto.ssh.host-rsa"
+			},
+		},
+		{
 			ID:          "vuln-kev-critical",
 			Name:        "CISA KEV + critical CVE",
 			Action:      ActionBlock,
@@ -147,6 +156,10 @@ func Evaluate(findings []Finding, policies []Policy) GateResult {
 	gate := GateResult{Passed: true, Action: ActionAllow}
 	for _, f := range findings {
 		if excludedPath(f.Location) {
+			continue
+		}
+		// Inventory observations are CBOM rows, not policy violations.
+		if f.PresenceKind == PresenceInventory {
 			continue
 		}
 		for _, p := range policies {

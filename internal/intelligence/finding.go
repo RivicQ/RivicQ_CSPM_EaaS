@@ -50,6 +50,13 @@ type Finding struct {
 	LastSeen          time.Time         `json:"last_seen,omitempty"`
 	QuantumSafe       bool              `json:"quantum_safe"`
 	PQCClass          string            `json:"pqc_class,omitempty"`
+	DetectionMethod   string            `json:"detection_method,omitempty"`
+	EvidenceKind      string            `json:"evidence_kind,omitempty"` // observation | inference
+	PresenceKind      string            `json:"presence_kind,omitempty"` // library_presence | confirmed_usage | declared | detected | inventory
+	Exploitability    string            `json:"current_exploitability,omitempty"`
+	RiskRationale     string            `json:"risk_rationale,omitempty"`
+	Limitations       string            `json:"limitations,omitempty"`
+	RelatedAssets     []string          `json:"related_assets,omitempty"`
 	Labels            map[string]string `json:"labels,omitempty"`
 }
 

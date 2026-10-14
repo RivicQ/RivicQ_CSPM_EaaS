@@ -1,0 +1,13 @@
+{
+  "id": "golden-rsa2048",
+  "title": "RSA-2048 is classified, not auto-blocked",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/golden/rsa2048",
+  "include_fixtures": true,
+  "must_match": ["rsa"],
+  "must_not_match": ["ghp_live"],
+  "min_findings": 1,
+  "max_block": true,
+  "notes": "RSA-2048 library presence / generation must not BLOCK. Quantum exposure is classification, not current exploitability."
+}
