@@ -181,7 +181,10 @@ func firmwareScan(sub string, args []string) error {
 		}
 	}
 
-	failOn := strings.ToUpper(p.value("fail-on", "BLOCK"))
+	failOn, ferr := parsePartnerFailOn(p.value("fail-on", "BLOCK"))
+	if ferr != nil {
+		return ferr
+	}
 	if firmwareGate(reports, failOn) {
 		return failOnError{threshold: failOn, decision: "firmware"}
 	}
