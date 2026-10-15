@@ -11,7 +11,6 @@ import { layersForEdition, PIPELINE_STAGES } from '../data/bomFramework';
 import { useAuth } from '../context/AuthContext';
 import { isEnterpriseEdition } from '../config/editions';
 import { tokens } from '../theme/tokens';
-import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 
 const ICONS: Record<string, React.ReactNode> = {
   cbom: <Shield />,
@@ -53,7 +52,6 @@ const BomIntelligence: React.FC = () => {
       title="CBOM · SBOM"
       subtitle="Community inventories cryptography and software components. QBOM, HBOM, AIBOM, and IBOM are Enterprise control-plane layers — locked here until the workspace is licensed."
       badge={paid ? 'Enterprise layers' : 'Community engine'}
-      visual={<OpsHeroVisual variant="bom" bom={counts} />}
       action={<Button variant="contained" onClick={() => navigate('/scanner')}>Run a scan</Button>}
     >
       <Stack spacing={2} sx={{ mb: 3 }}>

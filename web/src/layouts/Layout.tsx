@@ -913,7 +913,7 @@ const Layout: React.FC = () => {
           transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
           style={{ minWidth: 0 }}
         >
-          <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: { xs: 2, md: 3 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
+          <Box sx={{ px: { xs: 1.25, sm: 2, md: 2.5 }, py: { xs: 1.25, md: 1.75 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />
             <OpsBreadcrumbs />
             <Outlet />

@@ -15,8 +15,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description, actio
   return (
     <Box
       sx={{
-        py: 6,
-        px: 3,
+        py: 3,
+        px: 2,
         textAlign: 'center',
         borderRadius: `${designSystem.radius.lg}px`,
         border: `1px dashed ${theme.palette.divider}`,

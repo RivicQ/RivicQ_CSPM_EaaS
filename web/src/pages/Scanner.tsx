@@ -17,7 +17,6 @@ import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 import ScanReportPanel, { ClientArchitectureView, PQCReadinessView } from '../components/scanner/ScanReportPanel';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
-import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 
 interface ScanJob {
@@ -306,9 +305,8 @@ const Scanner: React.FC = () => {
     <PageFrame
       eyebrow="Security Cloud"
       title="CBOM Scanner"
-      subtitle="Discover cryptography on websites, hosts, IPs, servers, declared Kubernetes pods, and declared firmware/hardware. Mitigate with NIST PQC mappings. Report is CBOM + Qiskit/audit scores — not a certification. Firmware ingest is CycloneDX/hash inventory, not silicon RE."
+      subtitle="Website, host, IP, repo, or declared pod. CBOM + SBOM evidence. Firmware ingest is inventory, not silicon RE. Scores are not a certification."
       badge={isScanning ? 'Scanning' : (isDemo ? 'Demo · limited' : 'Ready')}
-      visual={<OpsHeroVisual variant="scans" scanning={isScanning} />}
     >
       {error && (
         <Box sx={{ mb: 2.5, p: 1.5, borderRadius: `${designSystem.radius.md}px`, bgcolor: 'warning.main', color: 'warning.contrastText' }}>
