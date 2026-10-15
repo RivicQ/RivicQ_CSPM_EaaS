@@ -1,64 +1,64 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 560" role="img" aria-labelledby="mapTitle mapDesc">
   <title id="mapTitle">RivicQ scan path and BOM lenses</title>
   <desc id="mapDesc">Website, host, repository, firmware, Kubernetes, and cloud targets feed a Community CBOM and SBOM, then a PQC plan and evidence. CSPM, QBOM, HBOM, AIBOM, and IBOM stay Enterprise. GitHub Pages does not run a live engine.</desc>
-  <rect width="980" height="560" rx="18" fill="#f4f1ea"/>
-  <text x="28" y="36" fill="#5c564c" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="1.4">RIVICQ · WHAT THIS BUILD SHOWS</text>
-  <text x="28" y="62" fill="#1c1915" font-family="Inter, Helvetica, sans-serif" font-size="22" font-weight="750">Scan, inventory, plan, evidence</text>
-  <text x="28" y="84" fill="#5c564c" font-family="Inter, Helvetica, sans-serif" font-size="13">GitHub Pages has no live engine. Mappings are not certifications.</text>
+  <rect width="980" height="560" rx="18" fill="#05040a"/>
+  <text x="28" y="36" fill="#a78bfa" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="1.4">RIVICQ ARCHIVE · WHAT THIS BUILD SHOWS</text>
+  <text x="28" y="62" fill="#f6f3fb" font-family="Inter, Helvetica, sans-serif" font-size="22" font-weight="750">Scan, inventory, plan, evidence</text>
+  <text x="28" y="84" fill="#c9c2d6" font-family="Inter, Helvetica, sans-serif" font-size="13">GitHub Pages has no live engine. Mappings are not certifications.</text>
 
-  <text x="28" y="118" fill="#8c5a2b" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">WHERE A SCAN LOOKS</text>
-  <g font-family="Inter, Helvetica, sans-serif" font-size="13" font-weight="650" fill="#1c1915">
-    <rect x="28" y="130" width="140" height="44" rx="10" fill="#fff" stroke="#1e3f36"/>
+  <text x="28" y="118" fill="#e879f9" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">WHERE A SCAN LOOKS</text>
+  <g font-family="Inter, Helvetica, sans-serif" font-size="13" font-weight="650" fill="#f6f3fb">
+    <rect x="28" y="130" width="140" height="44" rx="10" fill="#161222" stroke="#7c3aed"/>
     <text x="98" y="157" text-anchor="middle">Website</text>
-    <rect x="178" y="130" width="120" height="44" rx="10" fill="#fff" stroke="#1e3f36"/>
+    <rect x="178" y="130" width="120" height="44" rx="10" fill="#161222" stroke="#7c3aed"/>
     <text x="238" y="157" text-anchor="middle">Host</text>
-    <rect x="308" y="130" width="140" height="44" rx="10" fill="#fff" stroke="#1e3f36"/>
+    <rect x="308" y="130" width="140" height="44" rx="10" fill="#161222" stroke="#7c3aed"/>
     <text x="378" y="157" text-anchor="middle">Repository</text>
-    <rect x="458" y="130" width="160" height="44" rx="10" fill="#fff" stroke="#1e3f36"/>
+    <rect x="458" y="130" width="160" height="44" rx="10" fill="#161222" stroke="#7c3aed"/>
     <text x="538" y="157" text-anchor="middle">IoT / firmware</text>
-    <rect x="628" y="130" width="150" height="44" rx="10" fill="#fff" stroke="#1e3f36"/>
+    <rect x="628" y="130" width="150" height="44" rx="10" fill="#161222" stroke="#7c3aed"/>
     <text x="703" y="157" text-anchor="middle">Kubernetes</text>
-    <rect x="788" y="130" width="164" height="44" rx="10" fill="#fff" stroke="#8c5a2b"/>
+    <rect x="788" y="130" width="164" height="44" rx="10" fill="#161222" stroke="#e879f9"/>
     <text x="870" y="157" text-anchor="middle">Cloud</text>
   </g>
-  <text x="870" y="190" text-anchor="middle" fill="#8c5a2b" font-family="Inter, Helvetica, sans-serif" font-size="11">Enterprise connector</text>
+  <text x="870" y="190" text-anchor="middle" fill="#e879f9" font-family="Inter, Helvetica, sans-serif" font-size="11">Enterprise connector</text>
 
-  <path d="M490 186 v28" stroke="#1e3f36" stroke-width="1.6" fill="none"/>
-  <path d="M484 208 l6 8 6-8" fill="#1e3f36"/>
+  <path d="M490 186 v28" stroke="#a78bfa" stroke-width="1.6" fill="none"/>
+  <path d="M484 208 l6 8 6-8" fill="#a78bfa"/>
 
-  <text x="28" y="236" fill="#1e3f36" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">COMMUNITY INVENTORY · THIS ENGINE</text>
-  <rect x="28" y="248" width="280" height="72" rx="12" fill="#e7f0ec" stroke="#1e3f36"/>
-  <text x="48" y="278" fill="#1c1915" font-family="Inter, Helvetica, sans-serif" font-size="16" font-weight="750">CBOM</text>
-  <text x="48" y="300" fill="#1c1915" font-family="Inter, Helvetica, sans-serif" font-size="12">Algorithms, keys, certificates, libraries</text>
-  <rect x="324" y="248" width="280" height="72" rx="12" fill="#e7f0ec" stroke="#1e3f36"/>
-  <text x="344" y="278" fill="#1c1915" font-family="Inter, Helvetica, sans-serif" font-size="16" font-weight="750">SBOM</text>
-  <text x="344" y="300" fill="#1c1915" font-family="Inter, Helvetica, sans-serif" font-size="12">Software components, crypto libraries flagged</text>
+  <text x="28" y="236" fill="#a78bfa" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">COMMUNITY INVENTORY · THIS ENGINE</text>
+  <rect x="28" y="248" width="280" height="72" rx="12" fill="#1a1230" stroke="#a78bfa"/>
+  <text x="48" y="278" fill="#f6f3fb" font-family="Inter, Helvetica, sans-serif" font-size="16" font-weight="750">CBOM</text>
+  <text x="48" y="300" fill="#c9c2d6" font-family="Inter, Helvetica, sans-serif" font-size="12">Algorithms, keys, certificates, libraries</text>
+  <rect x="324" y="248" width="280" height="72" rx="12" fill="#1a1230" stroke="#a78bfa"/>
+  <text x="344" y="278" fill="#f6f3fb" font-family="Inter, Helvetica, sans-serif" font-size="16" font-weight="750">SBOM</text>
+  <text x="344" y="300" fill="#c9c2d6" font-family="Inter, Helvetica, sans-serif" font-size="12">Software components, crypto libraries flagged</text>
 
-  <path d="M490 328 v24" stroke="#8c5a2b" stroke-width="1.6" fill="none"/>
-  <path d="M484 346 l6 8 6-8" fill="#8c5a2b"/>
+  <path d="M490 328 v24" stroke="#e879f9" stroke-width="1.6" fill="none"/>
+  <path d="M484 346 l6 8 6-8" fill="#e879f9"/>
 
-  <text x="28" y="376" fill="#8c5a2b" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">PQC PLAN · KEYS ARE NOT ROTATED HERE</text>
-  <rect x="28" y="388" width="576" height="56" rx="12" fill="#fff" stroke="#8c5a2b"/>
-  <text x="48" y="422" fill="#1c1915" font-family="Inter, Helvetica, sans-serif" font-size="14">Hybrid classical + PQC, then ML-KEM, ML-DSA, and SLH-DSA as a plan.</text>
+  <text x="28" y="376" fill="#e879f9" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">PQC PLAN · KEYS ARE NOT ROTATED HERE</text>
+  <rect x="28" y="388" width="576" height="56" rx="12" fill="#161222" stroke="#e879f9"/>
+  <text x="48" y="422" fill="#f6f3fb" font-family="Inter, Helvetica, sans-serif" font-size="14">Hybrid classical + PQC, then ML-KEM, ML-DSA, and SLH-DSA as a plan.</text>
 
-  <text x="28" y="476" fill="#1e3f36" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">EVIDENCE</text>
-  <rect x="28" y="488" width="576" height="48" rx="12" fill="#fff" stroke="#1e3f36"/>
-  <text x="48" y="518" fill="#1c1915" font-family="Inter, Helvetica, sans-serif" font-size="14">A report you can read. Not a certification. Not customer telemetry.</text>
+  <text x="28" y="476" fill="#a78bfa" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">EVIDENCE</text>
+  <rect x="28" y="488" width="576" height="48" rx="12" fill="#161222" stroke="#a78bfa"/>
+  <text x="48" y="518" fill="#f6f3fb" font-family="Inter, Helvetica, sans-serif" font-size="14">A report you can read. Not a certification. Not customer telemetry.</text>
 
-  <rect x="640" y="248" width="312" height="288" rx="14" fill="#fff" stroke="#8c5a2b"/>
-  <text x="660" y="278" fill="#8c5a2b" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">ENTERPRISE · LOCKED ON PAGES</text>
-  <g font-family="Inter, Helvetica, sans-serif" font-size="14" fill="#1c1915">
+  <rect x="640" y="248" width="312" height="288" rx="14" fill="#120c1c" stroke="#e879f9"/>
+  <text x="660" y="278" fill="#e879f9" font-family="Inter, Helvetica, sans-serif" font-size="12" font-weight="700">ENTERPRISE · WRITTEN LICENSE</text>
+  <g font-family="Inter, Helvetica, sans-serif" font-size="14" fill="#f6f3fb">
     <text x="660" y="312" font-weight="750">CSPM</text>
-    <text x="730" y="312" font-size="12" fill="#5c564c">Cloud posture</text>
+    <text x="730" y="312" font-size="12" fill="#c9c2d6">Cloud posture</text>
     <text x="660" y="344" font-weight="750">QBOM</text>
-    <text x="730" y="344" font-size="12" fill="#5c564c">Quantum exposure</text>
+    <text x="730" y="344" font-size="12" fill="#c9c2d6">Quantum exposure</text>
     <text x="660" y="376" font-weight="750">HBOM</text>
-    <text x="730" y="376" font-size="12" fill="#5c564c">Declared hardware</text>
+    <text x="730" y="376" font-size="12" fill="#c9c2d6">Declared hardware</text>
     <text x="660" y="408" font-weight="750">AIBOM</text>
-    <text x="730" y="408" font-size="12" fill="#5c564c">Declared AI inventory</text>
+    <text x="730" y="408" font-size="12" fill="#c9c2d6">Declared AI inventory</text>
     <text x="660" y="440" font-weight="750">IBOM</text>
-    <text x="730" y="440" font-size="12" fill="#5c564c">Identity bindings</text>
-    <text x="660" y="486" font-size="12" fill="#5c564c">Cloning the repo does not</text>
-    <text x="660" y="506" font-size="12" fill="#5c564c">grant these layers.</text>
+    <text x="730" y="440" font-size="12" fill="#c9c2d6">Identity bindings</text>
+    <text x="660" y="486" font-size="12" fill="#8d86a0">Cloning the repo does not</text>
+    <text x="660" y="506" font-size="12" fill="#8d86a0">grant these layers.</text>
   </g>
 </svg>

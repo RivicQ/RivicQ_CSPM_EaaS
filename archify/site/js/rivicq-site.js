@@ -14,26 +14,26 @@
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function choiceOf(raw) {
-    if (raw === 'harbor' || raw === 'dark') return 'harbor';
-    if (raw === 'ledger' || raw === 'light') return 'ledger';
-    return 'auto';
+    if (raw === 'nebula' || raw === 'harbor' || raw === 'dark') return 'nebula';
+    if (raw === 'day' || raw === 'ledger' || raw === 'light') return 'day';
+    if (raw === 'auto') return 'auto';
+    return 'nebula';
   }
 
   function resolvedChoice(choice) {
-    if (choice === 'harbor') return 'dark';
-    if (choice === 'ledger') return 'light';
+    if (choice === 'nebula') return 'dark';
+    if (choice === 'day') return 'light';
     var light = false;
     try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
     return light ? 'light' : 'dark';
   }
 
   function readChoice() {
-    try { return choiceOf(localStorage.getItem(THEME_KEY)); } catch (e) { return 'auto'; }
+    try { return choiceOf(localStorage.getItem(THEME_KEY)); } catch (e) { return 'nebula'; }
   }
 
   function currentTheme() {
-    /* Nebula identity only — light theme is not offered on the product site. */
-    return 'dark';
+    return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
   }
 
   /* ── Diagram theme sync (best-effort same-origin) ──────────── */
@@ -54,14 +54,14 @@
     for (var i = 0; i < frames.length; i++) syncFrameTheme(frames[i]);
   }
 
-  /* ── Theme: Auto follows the OS. Harbor is dark. Ledger is light. ── */
+  /* ── Theme: Nebula is the designed default. Day is the light archive. Auto follows the OS. ── */
   var themeMeta = doc.querySelector('meta[name="theme-color"]');
   function applyChoice(choice) {
     var mode = resolvedChoice(choice);
     root.setAttribute('data-theme', mode);
     root.setAttribute('data-theme-choice', choice);
     try { localStorage.setItem(THEME_KEY, choice); } catch (e) {}
-    if (themeMeta) themeMeta.setAttribute('content', mode === 'dark' ? '#101614' : '#F3EFE6');
+    if (themeMeta) themeMeta.setAttribute('content', mode === 'dark' ? '#05040a' : '#f6f3fb');
     var select = doc.querySelector('[data-theme-choice]');
     if (select && select.value !== choice) select.value = choice;
     syncAllFrames();

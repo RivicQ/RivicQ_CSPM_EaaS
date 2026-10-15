@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RivicQ — Cryptographic Security Posture Management</title>
   <meta name="description" content="RivicQ inventories cryptography (CBOM) and software components (SBOM), then classifies risk, quantum exposure, and control gaps. One engine, two editions — every diagram on this page is a validated, interactive Archify artifact.">
-  <meta name="theme-color" content="#f5f6f3">
+  <meta name="theme-color" content="#05040a">
   <link rel="canonical" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="RivicQ">
@@ -21,24 +21,25 @@
     (function () {
       var KEY = 'rivicq.theme';
       function choiceOf(raw) {
-        if (raw === 'harbor' || raw === 'dark') return 'harbor';
-        if (raw === 'ledger' || raw === 'light') return 'ledger';
-        return 'auto';
+        if (raw === 'nebula' || raw === 'harbor' || raw === 'dark') return 'nebula';
+        if (raw === 'day' || raw === 'ledger' || raw === 'light') return 'day';
+        if (raw === 'auto') return 'auto';
+        return 'nebula';
       }
       function resolved(choice) {
-        if (choice === 'harbor') return 'dark';
-        if (choice === 'ledger') return 'light';
+        if (choice === 'nebula') return 'dark';
+        if (choice === 'day') return 'light';
         var light = false;
         try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
         return light ? 'light' : 'dark';
       }
-      var choice = 'auto';
+      var choice = 'nebula';
       try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
       var mode = resolved(choice);
       document.documentElement.setAttribute('data-theme', mode);
       document.documentElement.setAttribute('data-theme-choice', choice);
       var meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', mode === 'light' ? '#F3EFE6' : '#101614');
+      if (meta) meta.setAttribute('content', mode === 'light' ? '#f6f3fb' : '#05040a');
     })();
   </script>
 </head>
@@ -63,12 +64,12 @@
       <label class="theme-select">
         <span class="sr-only">Color scheme</span>
         <select data-theme-choice aria-label="Color scheme">
+          <option value="nebula" selected>Nebula</option>
+          <option value="day">Day</option>
           <option value="auto">Auto</option>
-          <option value="harbor">Harbor</option>
-          <option value="ledger">Ledger</option>
         </select>
       </label>
-      <a class="btn nav-cta" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/register" target="_blank" rel="noopener">Get started</a>
+      <a class="btn nav-cta" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/demo" target="_blank" rel="noopener">Enter the demo</a>
     </div>
   </nav>
 
@@ -587,9 +588,9 @@
     <div class="cta-glow" aria-hidden="true"></div>
     <div class="container cta-inner">
       <h2 class="cta-h fade-up">Scan it once.<br><em>Share the map.</em></h2>
-      <p class="cta-sub fade-up d1">One command opens your cryptographic inventory — and every map on this page is yours to keep, theme, trace, and export. Community starts free.</p>
+      <p class="cta-sub fade-up d1">Community is the free start. This Pages site is a labelled demo with no live engine. Professional and Enterprise need a written license.</p>
       <div class="cta-actions fade-up d2">
-        <a class="btn btn-primary btn-lg" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/register" target="_blank" rel="noopener">Get started free</a>
+        <a class="btn btn-primary btn-lg" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/demo" target="_blank" rel="noopener">Enter the interactive demo</a>
         <a class="btn btn-ghost btn-lg" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener"><span>Star on GitHub</span> <span aria-hidden="true">↗</span></a>
       </div>
     </div>
