@@ -72,6 +72,7 @@ import { isPaidEdition } from '../config/editions';
 import { isAdminRole } from '../auth/roles';
 import { MODULES } from '../config/modules';
 import { useThemeMode } from '../theme/ThemeContext';
+import ThemeToggle from '../theme/ThemeToggle';
 import BrandLogo from '../components/BrandLogo';
 import RivicQAssistant from '../components/assistant/RivicQAssistant';
 import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';

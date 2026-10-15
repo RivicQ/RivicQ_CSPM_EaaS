@@ -5,6 +5,7 @@ import { publishedContacts, mailto } from '../data/contacts';
 import { websiteCtaSx } from '../theme/websiteChrome';
 import { archifyDocsHref } from '../theme/docsLink';
 import { tokens } from '../theme/tokens';
+import { ARCHIFY_FONTS } from '../theme/nebulaSurfaces';
 
 const ContactHub: React.FC = () => (
   <SitePage
@@ -28,7 +29,7 @@ const ContactHub: React.FC = () => (
                 fontFamily: ARCHIFY_FONTS.mono,
                 fontSize: '0.6875rem',
                 fontWeight: 600,
-                color: '#a78bfa',
+                color: 'text.secondary',
                 letterSpacing: '0.04em',
                 mb: 1,
               }}

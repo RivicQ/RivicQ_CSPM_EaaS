@@ -9,6 +9,15 @@ import { useAuth } from '../context/AuthContext';
 import { platformService } from '../services/api';
 import { PUBLIC_PAGES_SALES_FORM } from '../data/publicInfrastructure';
 import { websiteCtaSx } from '../theme/websiteChrome';
+import { ARCHIFY_FONTS } from '../theme/nebulaSurfaces';
+
+const panelSx = {
+  bgcolor: 'background.paper',
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 2,
+  color: 'text.secondary',
+} as const;
 
 const INTENTS = [
   { value: 'demo', label: 'Enterprise demo' },
@@ -48,7 +57,7 @@ const RequestDemo: React.FC = () => {
   return (
     <PublicShell>
       <Container maxWidth="sm" sx={{ py: { xs: 6, md: 10 } }}>
-        <Typography sx={archifyEyebrowSx}>
+        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
           Sales · RivicQ GmbH · Berlin
         </Typography>
         <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontSize: { xs: '2rem', md: '2.6rem' }, fontWeight: 500, letterSpacing: '-0.04em', color: 'text.primary', mt: 1 }}>
@@ -58,18 +67,18 @@ const RequestDemo: React.FC = () => {
           Tell us who you are. This is not the labeled product demo. Sample dashboards stay on the Demo trail.
         </Typography>
         {done ? (
-          <Box sx={{ ...nebulaPanelSx, p: 2, color: 'text.secondary' }}>
+          <Box sx={{ ...panelSx, p: 2 }}>
             Request recorded. Sales follows up from sales@rivicq.com. Nothing was sent to Discord with your email.
           </Box>
         ) : (
-          <Box component="form" onSubmit={submit} sx={{ ...nebulaPanelSx, p: 3 }}>
+          <Box component="form" onSubmit={submit} sx={{ ...panelSx, p: 3 }}>
             {!backendReachable && (
-              <Box sx={{ ...nebulaPanelSx, p: 1.75, mb: 2, bgcolor: 'background.default', color: 'text.secondary' }}>
+              <Box sx={{ ...panelSx, p: 1.75, mb: 2, bgcolor: 'background.default' }}>
                 {PUBLIC_PAGES_SALES_FORM}
               </Box>
             )}
             {error && (
-              <Box sx={{ ...nebulaPanelSx, p: 1.75, mb: 2, borderColor: 'error.main', color: 'error.light' }}>
+              <Box sx={{ ...panelSx, p: 1.75, mb: 2, borderColor: 'error.main', color: 'error.light' }}>
                 {error}
               </Box>
             )}
