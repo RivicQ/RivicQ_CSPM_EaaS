@@ -114,7 +114,10 @@ func identityScan(sub string, args []string) error {
 		}
 	}
 
-	failOn := strings.ToUpper(p.value("fail-on", "BLOCK"))
+	failOn, err := parsePolicyFailOn(p.value("fail-on", "BLOCK"))
+	if err != nil {
+		return err
+	}
 	if identityGate(reports, failOn) {
 		return failOnError{threshold: failOn, decision: "identity"}
 	}
@@ -176,8 +179,12 @@ func identityGate(reports []*identity.Report, failOn string) bool {
 	switch failOn {
 	case "BLOCK":
 		return blocked
-	default:
+	case "WARN":
 		return blocked || warned
+	case "NONE":
+		return false
+	default:
+		return false
 	}
 }
 

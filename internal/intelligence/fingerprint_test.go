@@ -130,6 +130,22 @@ func TestTaxonomyIsClosedAndVersioned(t *testing.T) {
 	}
 }
 
+func TestParseFailOnRejectsUnknown(t *testing.T) {
+	if _, err := ParseFailOn("BOGUS"); err == nil {
+		t.Fatal("expected usage error for unknown --fail-on")
+	}
+	got, err := ParseFailOn("BLOCK")
+	if err != nil || got != "block" {
+		t.Fatalf("BLOCK: got %q err=%v", got, err)
+	}
+}
+
+func TestParseOutputFormatRejectsUnknown(t *testing.T) {
+	if _, err := ParseOutputFormat("yaml"); err == nil {
+		t.Fatal("expected usage error for unknown --format")
+	}
+}
+
 func TestShouldFailOn(t *testing.T) {
 	rep := &Report{
 		Findings: []Finding{

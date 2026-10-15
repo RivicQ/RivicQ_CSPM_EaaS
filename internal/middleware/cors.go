@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rivic-q/cryptobom-saas/internal/config"
 )
 
 type CORSConfig struct {
@@ -36,7 +37,7 @@ func DefaultCORSConfig() CORSConfig {
 		AllowedHeaders:   []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Request-ID", "Idempotency-Key"},
 		ExposedHeaders:   []string{"X-Request-ID", "X-CryptoBOM-Edition", "Retry-After"},
 		AllowCredentials: true,
-		AllowLocalDev:    true,
+		AllowLocalDev:    !config.IsProductionEnv(),
 		MaxAge:           12 * time.Hour,
 	}
 }
@@ -55,6 +56,9 @@ func CORS(cfg CORSConfig) gin.HandlerFunc {
 		if allowed {
 			c.Header("Access-Control-Allow-Origin", origin)
 			c.Header("Vary", "Origin")
+			if cfg.AllowCredentials {
+				c.Header("Access-Control-Allow-Credentials", "true")
+			}
 		}
 
 		c.Header("Access-Control-Allow-Methods", strings.Join(cfg.AllowedMethods, ", "))
@@ -62,10 +66,6 @@ func CORS(cfg CORSConfig) gin.HandlerFunc {
 
 		if len(cfg.ExposedHeaders) > 0 {
 			c.Header("Access-Control-Expose-Headers", strings.Join(cfg.ExposedHeaders, ", "))
-		}
-
-		if cfg.AllowCredentials {
-			c.Header("Access-Control-Allow-Credentials", "true")
 		}
 
 		if cfg.MaxAge > 0 {

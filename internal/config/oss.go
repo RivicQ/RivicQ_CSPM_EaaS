@@ -343,6 +343,19 @@ func getEnvBool(key string, defaultValue bool) bool {
 	return defaultValue
 }
 
+// IsProductionEnv reports an explicit production runtime from environment
+// variables. It does not use gin.ReleaseMode — the Enterprise binary always
+// sets that, including local `make dev-enterprise`.
+func IsProductionEnv() bool {
+	for _, key := range []string{"CRYPTOBOM_ENV", "RIVICQ_ENV", "APP_ENV", "ENV"} {
+		switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
+		case "production", "prod":
+			return true
+		}
+	}
+	return false
+}
+
 func getEnvInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intValue, err := fmt.Sscanf(value, "%d", new(int)); err == nil && intValue == 1 {

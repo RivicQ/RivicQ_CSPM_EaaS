@@ -91,6 +91,9 @@ func New(opts ...Option) *Server {
 			logger.WithError(err).Fatal("Database migrations failed — refusing to serve against an unknown schema")
 		}
 	} else {
+		if config.IsProductionEnv() && !database.DemoMode() {
+			logger.Fatal("refusing to start without a database in production (set DATABASE_URL, or RIVICQ_ALLOW_DEMO_MODE=1 for a labeled demo)")
+		}
 		logger.Warn("Demo mode: all data is in-memory, fabricated and ephemeral — not for production")
 	}
 

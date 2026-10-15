@@ -43,6 +43,10 @@ func TestCORSAllowsExtraOriginsFromEnv(t *testing.T) {
 }
 
 func TestCORSAllowsLocalDevOriginsOnAnyPort(t *testing.T) {
+	t.Setenv("CRYPTOBOM_ENV", "")
+	t.Setenv("RIVICQ_ENV", "")
+	t.Setenv("APP_ENV", "")
+	t.Setenv("ENV", "")
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	r.Use(CORS(DefaultCORSConfig()))
@@ -72,8 +76,24 @@ func TestCORSRejectsUnknownCrossSiteOrigin(t *testing.T) {
 	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "" {
 		t.Fatalf("unexpected allow origin = %q", got)
 	}
-	if got := w.Header().Get("Access-Control-Allow-Credentials"); got != "true" {
-		t.Fatalf("credentials header = %q, want true (present because it is config, but no origin is echoed)", got)
+	if got := w.Header().Get("Access-Control-Allow-Credentials"); got != "" {
+		t.Fatalf("credentials header = %q, want empty when origin is not allowed", got)
+	}
+}
+
+func TestCORSRejectsLocalDevWhenProductionEnv(t *testing.T) {
+	t.Setenv("CRYPTOBOM_ENV", "production")
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.Use(CORS(DefaultCORSConfig()))
+	r.GET("/api/v1/edition", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"edition": "oss"}) })
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/edition", nil)
+	req.Header.Set("Origin", "http://localhost:3000")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "" {
+		t.Fatalf("production must not echo localhost origin, got %q", got)
 	}
 }
 
