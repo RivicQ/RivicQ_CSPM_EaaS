@@ -1,22 +1,23 @@
 /**
- * RivicQ enterprise palettes.
- * Harbor (dark) is pine ink with a brass signal. Ledger (light) is warm paper
- * with pine buttons. Crypto severity stays the only status hue.
+ * RivicQ archive palette.
+ * Nebula is the designed look: near-black canvas, violet and magenta accent.
+ * Day is the same archive on pale violet paper, with the same violet buttons.
+ * Crypto severity stays the only status hue.
  * CSS variables in enterprise.css mirror these values.
  */
 export const tokens = {
   colors: {
     rivicq: {
-      50: '#F8F1DE',
-      100: '#F0E2C0',
-      200: '#E4C27A',
-      300: '#D7B56A',
-      400: '#C6A15B',
-      500: '#8C5A2B',
-      600: '#1E3F36',
-      700: '#16332C',
-      800: '#102822',
-      900: '#0C1210',
+      50: '#f5f3ff',
+      100: '#ede9fe',
+      200: '#ddd6fe',
+      300: '#c4b5fd',
+      400: '#a78bfa',
+      500: '#7c3aed',
+      600: '#6d28d9',
+      700: '#5b21b6',
+      800: '#4c1d95',
+      900: '#2e1065',
     },
     crypto: {
       critical: '#ef4444',
@@ -28,14 +29,14 @@ export const tokens = {
       classic: '#9ca3af',
       success: '#22c55e',
     },
-    navy: { 0: '#0C1210', 1: '#101614', 2: '#1A2420', 3: '#31403A' },
-    surface: { 0: '#F3EFE6', 1: '#FFFCF7', 2: '#EFE8DC', 3: '#D5CBBA' },
-    surfaceLight: { 0: '#101614', 1: '#1A2420', 2: '#24302B', 3: '#31403A' },
-    text: { primary: '#1C1915', secondary: '#5C564C', muted: '#7A7368' },
-    textLight: { primary: '#F4F7F5', secondary: '#C3CFC9', muted: '#8FA099' },
-    border: '#D5CBBA',
-    borderLight: '#31403A',
-    brandGradient: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(228,194,122,0.28), transparent 70%)',
+    navy: { 0: '#07060e', 1: '#05040a', 2: '#0e0c16', 3: '#2a2438' },
+    surface: { 0: '#f6f3fb', 1: '#ffffff', 2: '#f3eefb', 3: '#ddd4ee' },
+    surfaceLight: { 0: '#05040a', 1: '#0e0c16', 2: '#161222', 3: '#2a2438' },
+    text: { primary: '#140e22', secondary: '#4a415c', muted: '#6b6278' },
+    textLight: { primary: '#f6f3fb', secondary: '#c9c2d6', muted: '#8d86a0' },
+    border: '#ddd4ee',
+    borderLight: '#2a2438',
+    brandGradient: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(124,58,237,0.38), transparent 70%)',
   },
   spacing: (n: number) => `${n * 8}px`,
   typography: {
@@ -48,7 +49,7 @@ export const tokens = {
     glowRed: '0 0 40px rgba(239,68,68,0.18)',
     glowPurple: '0 0 48px rgba(124,58,237,0.35)',
     glowBlue: '0 0 40px rgba(124,58,237,0.28)',
-    glowGold: '0 0 40px rgba(167,139,250,0.22)',
+    glowGold: '0 0 40px rgba(232,121,249,0.22)',
     panel: '0 18px 48px rgba(0,0,0,0.45)',
   },
 };

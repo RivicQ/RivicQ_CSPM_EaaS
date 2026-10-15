@@ -14,7 +14,7 @@
 
 The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
 
-Color scheme is Auto (follows the device), Harbor (dark), or Ledger (light). Control mappings are not certifications. HTML hub: [docs/index.html](index.html), which links into the Archify reader.
+Color scheme is Nebula (the designed near-black violet archive), Day (the same archive on pale paper), or Auto. Control mappings are not certifications. HTML hub: [docs/index.html](index.html), which links into the Archify reader.
 
 ## Getting started
 

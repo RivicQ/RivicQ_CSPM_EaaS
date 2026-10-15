@@ -24,33 +24,39 @@ describe('theme preference', () => {
     setScheme(false);
   });
 
-  it('normalizes legacy dark and light values', () => {
-    expect(normalizeChoice('dark')).toBe('harbor');
-    expect(normalizeChoice('light')).toBe('ledger');
-    expect(normalizeChoice(null)).toBe('auto');
-    expect(normalizeChoice('nope')).toBe('auto');
+  it('defaults to nebula and keeps legacy harbor and ledger values', () => {
+    expect(normalizeChoice('dark')).toBe('nebula');
+    expect(normalizeChoice('harbor')).toBe('nebula');
+    expect(normalizeChoice('light')).toBe('day');
+    expect(normalizeChoice('ledger')).toBe('day');
+    expect(normalizeChoice(null)).toBe('nebula');
+    expect(normalizeChoice('auto')).toBe('auto');
+    expect(normalizeChoice('nope')).toBe('nebula');
   });
 
-  it('follows the OS in auto and pins Harbor and Ledger', () => {
+  it('follows the OS in auto and pins Nebula and Day', () => {
     setScheme(true);
     expect(resolveTheme('auto')).toBe('light');
     setScheme(false);
     expect(resolveTheme('auto')).toBe('dark');
-    expect(resolveTheme('harbor')).toBe('dark');
-    expect(resolveTheme('ledger')).toBe('light');
+    expect(resolveTheme('nebula')).toBe('dark');
+    expect(resolveTheme('day')).toBe('light');
   });
 
-  it('cycles Auto, Harbor, Ledger', () => {
-    expect(cycleChoice('auto')).toBe('harbor');
-    expect(cycleChoice('harbor')).toBe('ledger');
-    expect(cycleChoice('ledger')).toBe('auto');
-    expect(choiceLabel('auto')).toBe('Auto');
+  it('cycles Auto, Nebula, Day', () => {
+    expect(cycleChoice('auto')).toBe('nebula');
+    expect(cycleChoice('nebula')).toBe('day');
+    expect(cycleChoice('day')).toBe('auto');
+    expect(choiceLabel('nebula')).toBe('Nebula');
+    expect(choiceLabel('day')).toBe('Day');
   });
 
   it('persists the choice and the resolved palette', () => {
-    persistChoice('ledger');
-    expect(localStorage.getItem('rivicq.theme')).toBe('ledger');
+    persistChoice('day');
+    expect(localStorage.getItem('rivicq.theme')).toBe('day');
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-    expect(document.documentElement.getAttribute('data-theme-choice')).toBe('ledger');
+    expect(document.documentElement.getAttribute('data-theme-choice')).toBe('day');
+    persistChoice('nebula');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 });

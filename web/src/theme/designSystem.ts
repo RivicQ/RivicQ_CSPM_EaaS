@@ -17,19 +17,19 @@ export const designSystem = {
     metric: appTypography.metric.fontFamily,
   },
   gradient: {
-    brand: 'linear-gradient(180deg, #E4C27A 0%, #C6A15B 100%)',
-    brandPlayful: 'linear-gradient(135deg, #F0D59A 0%, #E4C27A 45%, #1E3F36 100%)',
-    brandSoft: 'radial-gradient(ellipse 70% 55% at 50% 42%, rgba(228,194,122,0.32), transparent 68%)',
-    heroLight: 'var(--rq-bg, #F3EFE6)',
-    heroDark: 'var(--rq-bg, #101614)',
-    sidebar: 'var(--rq-sidebar, #0C1210)',
-    sidebarDark: 'var(--rq-sidebar, #0C1210)',
-    meshLight: 'var(--rq-bg, #F3EFE6)',
-    meshDark: 'var(--rq-bg, #101614)',
+    brand: 'linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%)',
+    brandPlayful: 'linear-gradient(135deg, #e879f9 0%, #7c3aed 45%, #4c1d95 100%)',
+    brandSoft: 'radial-gradient(ellipse 70% 55% at 50% 42%, rgba(124,58,237,0.32), transparent 68%)',
+    heroLight: 'var(--rq-bg, #f6f3fb)',
+    heroDark: 'var(--rq-bg, #05040a)',
+    sidebar: 'var(--rq-sidebar, #07060e)',
+    sidebarDark: 'var(--rq-sidebar, #07060e)',
+    meshLight: 'var(--rq-bg, #f6f3fb)',
+    meshDark: 'var(--rq-bg, #05040a)',
   },
   horizon: {
-    wash: 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(228,194,122,0.28), transparent 70%)',
-    band: 'var(--rq-accent, #D7B56A)',
+    wash: 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.32), transparent 70%)',
+    band: 'var(--rq-accent, #a78bfa)',
   },
   shadow: {
     sm: '0 1px 2px rgba(2,6,23,0.06), 0 1px 3px rgba(2,6,23,0.05)',
@@ -41,7 +41,7 @@ export const designSystem = {
     spring: '0.15s ease',
     smooth: '0.15s ease',
   },
-  /** Console chrome. Values are CSS variables so the Harbor/Ledger toggle restyles the shell. */
+  /** Console chrome. Values are CSS variables so Nebula and Day restyle the same archive. */
   proBlue: {
     navy: 'var(--rq-bg)',
     navyMid: 'var(--rq-surface)',
@@ -187,7 +187,7 @@ export const commandCenterTitleSx = {
   color: designSystem.proBlue.textPrimary,
 };
 
-/** Primary CTA. Brass on Harbor, pine on Ledger. Label color is never the background. */
+/** Primary CTA. Violet fill, white label, in Nebula and Day. */
 export const heroPrimaryCtaSx = {
   px: 3,
   py: 1.15,
@@ -197,21 +197,21 @@ export const heroPrimaryCtaSx = {
   fontSize: '0.875rem',
   letterSpacing: '-0.01em',
   textTransform: 'none',
-  color: 'var(--rq-btn-fg, #f6f1e6) !important',
-  WebkitTextFillColor: 'var(--rq-btn-fg, #f6f1e6)',
+  color: 'var(--rq-btn-fg, #ffffff) !important',
+  WebkitTextFillColor: 'var(--rq-btn-fg, #ffffff)',
   border: 'none',
   boxShadow: 'none',
   backgroundImage: 'none !important',
-  backgroundColor: 'var(--rq-btn-bg, #1e3f36) !important',
+  backgroundColor: 'var(--rq-btn-bg, #7c3aed) !important',
   '& span, & .MuiButton-endIcon, & .MuiButton-startIcon': {
     color: 'inherit !important',
     WebkitTextFillColor: 'inherit',
   },
   '&:hover': {
-    backgroundColor: 'var(--rq-btn-bg-hover, #16332c) !important',
+    backgroundColor: 'var(--rq-btn-bg-hover, #6d28d9) !important',
     backgroundImage: 'none !important',
-    color: 'var(--rq-btn-fg, #f6f1e6) !important',
-    WebkitTextFillColor: 'var(--rq-btn-fg, #f6f1e6)',
+    color: 'var(--rq-btn-fg, #ffffff) !important',
+    WebkitTextFillColor: 'var(--rq-btn-fg, #ffffff)',
     boxShadow: 'none',
     transform: 'none',
   },
@@ -242,12 +242,12 @@ export const heroSecondaryCtaSx = {
   },
 };
 
-/** Primary CTA — Harbor brass or Ledger pine, with a contrasting label. */
+/** Primary CTA — violet fill and a white label in both palettes. */
 export const proBlueContainedButtonSx = {
-  backgroundColor: 'var(--rq-btn-bg, #1e3f36) !important',
+  backgroundColor: 'var(--rq-btn-bg, #7c3aed) !important',
   backgroundImage: 'none !important',
-  color: 'var(--rq-btn-fg, #f6f1e6) !important',
-  WebkitTextFillColor: 'var(--rq-btn-fg, #f6f1e6)',
+  color: 'var(--rq-btn-fg, #ffffff) !important',
+  WebkitTextFillColor: 'var(--rq-btn-fg, #ffffff)',
   border: '1px solid transparent',
   boxShadow: 'none',
   '& span, & .MuiButton-endIcon, & .MuiButton-startIcon': {
@@ -255,10 +255,10 @@ export const proBlueContainedButtonSx = {
     WebkitTextFillColor: 'inherit',
   },
   '&:hover': {
-    backgroundColor: 'var(--rq-btn-bg-hover, #16332c) !important',
+    backgroundColor: 'var(--rq-btn-bg-hover, #6d28d9) !important',
     backgroundImage: 'none !important',
-    color: 'var(--rq-btn-fg, #f6f1e6) !important',
-    WebkitTextFillColor: 'var(--rq-btn-fg, #f6f1e6)',
+    color: 'var(--rq-btn-fg, #ffffff) !important',
+    WebkitTextFillColor: 'var(--rq-btn-fg, #ffffff)',
     boxShadow: 'none',
     transform: 'none',
   },

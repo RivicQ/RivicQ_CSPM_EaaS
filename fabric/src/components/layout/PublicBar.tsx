@@ -4,30 +4,33 @@ import Mark from '../../brand/Mark';
 
 const THEME_KEY = 'rivicq.theme';
 
-type ThemeChoice = 'auto' | 'harbor' | 'ledger';
+type ThemeChoice = 'auto' | 'nebula' | 'day';
 
 function normalizeChoice(value: string | null): ThemeChoice {
   switch (value) {
+    case 'nebula':
     case 'harbor':
     case 'dark':
-      return 'harbor';
+      return 'nebula';
+    case 'day':
     case 'ledger':
     case 'light':
-      return 'ledger';
+      return 'day';
     case 'auto':
+      return 'auto';
     case '':
     case null:
-      return 'auto';
+      return 'nebula';
     default:
-      return 'auto';
+      return 'nebula';
   }
 }
 
 function resolveChoice(choice: ThemeChoice): 'light' | 'dark' {
   switch (choice) {
-    case 'harbor':
+    case 'nebula':
       return 'dark';
-    case 'ledger':
+    case 'day':
       return 'light';
     case 'auto':
       return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
@@ -42,10 +45,10 @@ function choiceLabel(choice: ThemeChoice): string {
   switch (choice) {
     case 'auto':
       return 'Auto';
-    case 'harbor':
-      return 'Harbor';
-    case 'ledger':
-      return 'Ledger';
+    case 'nebula':
+      return 'Nebula';
+    case 'day':
+      return 'Day';
     default: {
       const unexpected: never = choice;
       return unexpected;
@@ -69,14 +72,14 @@ export function applyTheme(choice: ThemeChoice) {
   }
 }
 
-const CHOICES: ThemeChoice[] = ['auto', 'harbor', 'ledger'];
+const CHOICES: ThemeChoice[] = ['auto', 'nebula', 'day'];
 
 export const ThemeToggle: React.FC = () => {
   const [choice, setChoice] = useState<ThemeChoice>(() => {
     try {
       return normalizeChoice(localStorage.getItem(THEME_KEY));
     } catch {
-      return 'auto';
+      return 'nebula';
     }
   });
 

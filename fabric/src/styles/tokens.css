@@ -1,28 +1,28 @@
-/* Harbor (dark) and Ledger (light). Hex values match web/src/theme/enterprise.css. */
+/* Nebula (dark) and Day (light). Hex values match web/src/theme/enterprise.css. */
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #101614;
-  --bg-elev: #1a2420;
-  --bg-panel: #24302b;
-  --bg-glass: rgba(16, 22, 20, 0.78);
-  --sidebar: #0c1210;
-  --line: #31403a;
-  --line-strong: #4a6158;
-  --text: #f4f7f5;
-  --muted: #c3cfc9;
-  --faint: #8fa099;
+  --bg: #05040a;
+  --bg-elev: #0e0c16;
+  --bg-panel: #161222;
+  --bg-glass: rgba(5, 4, 10, 0.78);
+  --sidebar: #07060e;
+  --line: #2a2438;
+  --line-strong: #4a4060;
+  --text: #f6f3fb;
+  --muted: #c9c2d6;
+  --faint: #8d86a0;
   --healthy: #22c55e;
-  --info: #7eb8a8;
-  --intel: #d7b56a;
+  --info: #a78bfa;
+  --intel: #e879f9;
   --warn: #f97316;
   --critical: #ef4444;
-  --quantum: #d7b56a;
-  --focus: #f0d59a;
-  --btn-bg: #e4c27a;
-  --btn-bg-hover: #f0d59a;
-  --btn-fg: #1a1408;
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  --quantum: #a78bfa;
+  --focus: #c4b5fd;
+  --btn-bg: #7c3aed;
+  --btn-bg-hover: #6d28d9;
+  --btn-fg: #ffffff;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
   --radius: 12px;
   --font: "Space Grotesk", Inter, "Helvetica Neue", Arial, sans-serif;
   --font-body: Inter, "Helvetica Neue", Arial, sans-serif;
@@ -33,32 +33,32 @@
   --t-ui: 240ms;
   --t-intel: 560ms;
   --t-graph: 900ms;
-  --nav-hover: rgba(244, 247, 245, 0.06);
-  --nav-active: rgba(228, 194, 122, 0.18);
+  --nav-hover: rgba(246, 243, 251, 0.06);
+  --nav-active: rgba(124, 58, 237, 0.28);
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #f3efe6;
-  --bg-elev: #fffcf7;
-  --bg-panel: #efe8dc;
-  --bg-glass: rgba(255, 252, 247, 0.86);
-  --sidebar: #e7e1d4;
-  --line: #d5cbba;
-  --line-strong: #b7ab98;
-  --text: #1c1915;
-  --muted: #5c564c;
-  --faint: #7a7368;
-  --info: #1e3f36;
-  --intel: #8c5a2b;
-  --quantum: #1e3f36;
-  --focus: #1e3f36;
-  --btn-bg: #1e3f36;
-  --btn-bg-hover: #16332c;
-  --btn-fg: #f6f1e6;
-  --shadow: 0 18px 40px rgba(28, 25, 21, 0.08);
-  --nav-hover: rgba(28, 25, 21, 0.05);
-  --nav-active: rgba(30, 63, 54, 0.12);
+  --bg: #f6f3fb;
+  --bg-elev: #ffffff;
+  --bg-panel: #f3eefb;
+  --bg-glass: rgba(255, 255, 255, 0.86);
+  --sidebar: #efeaf7;
+  --line: #ddd4ee;
+  --line-strong: #c4b5d8;
+  --text: #140e22;
+  --muted: #4a415c;
+  --faint: #6b6278;
+  --info: #6d28d9;
+  --intel: #a21caf;
+  --quantum: #6d28d9;
+  --focus: #6d28d9;
+  --btn-bg: #6d28d9;
+  --btn-bg-hover: #5b21b6;
+  --btn-fg: #ffffff;
+  --shadow: 0 18px 40px rgba(20, 14, 34, 0.08);
+  --nav-hover: rgba(20, 14, 34, 0.05);
+  --nav-active: rgba(109, 40, 217, 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {

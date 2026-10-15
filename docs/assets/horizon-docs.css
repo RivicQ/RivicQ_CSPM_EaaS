@@ -3,17 +3,17 @@
 
 :root,
 [data-theme="dark"] {
-  --ink: #101614;
-  --surface: #1a2420;
-  --raised: #24302b;
-  --accent: #d7b56a;
-  --accent-deep: #c6a15b;
-  --ivory: #f4f7f5;
-  --muted: #c3cfc9;
-  --faint: #8fa099;
-  --line: #31403a;
-  --btn-bg: #e4c27a;
-  --btn-fg: #1a1408;
+  --ink: #05040a;
+  --surface: #0e0c16;
+  --raised: #161222;
+  --accent: #a78bfa;
+  --accent-deep: #7c3aed;
+  --ivory: #f6f3fb;
+  --muted: #c9c2d6;
+  --faint: #8d86a0;
+  --line: #2a2438;
+  --btn-bg: #7c3aed;
+  --btn-fg: #ffffff;
   --ok: #22c55e;
   --warn: #f97316;
   --radius: 12px;
@@ -25,8 +25,9 @@ html { scroll-behavior: smooth; }
 body {
   font-family: var(--font);
   background:
-    radial-gradient(ellipse 55% 48% at 50% 18%, rgba(215,181,106,0.18), transparent 68%),
-    #101614;
+    radial-gradient(ellipse 55% 48% at 50% 18%, rgba(124,58,237,0.32), transparent 68%),
+    radial-gradient(ellipse 32% 24% at 86% 8%, rgba(232,121,249,0.14), transparent 70%),
+    #05040a;
   color: var(--ivory);
   min-height: 100vh;
   position: relative;
@@ -95,7 +96,7 @@ code {
 .logo-mark { width: 28px; height: 28px; border-radius: 6px; display: block; flex-shrink: 0; }
 .logo-badge {
   background: var(--btn-bg, var(--accent));
-  color: var(--btn-fg, #1a1408);
+  color: var(--btn-fg, #ffffff);
   font-size: 0.68rem;
   font-weight: 700;
   padding: 0.15rem 0.5rem;
@@ -387,24 +388,24 @@ section { padding: 0 0 3.5rem; }
   border-radius: 4px;
 }
 
-/* Nebula-only: light theme is not offered. Legacy [data-theme="light"] stays nebula. */
+/* Day is the same archive on pale violet paper. */
 [data-theme="light"] {
-  --ink: #f3efe6;
-  --surface: #fffcf7;
-  --raised: #efe8dc;
-  --ivory: #1c1915;
-  --muted: #5c564c;
-  --faint: #7a7368;
-  --line: #d5cbba;
-  --accent: #8c5a2b;
-  --accent-deep: #6e4520;
-  --btn-bg: #1e3f36;
-  --btn-fg: #f6f1e6;
+  --ink: #f6f3fb;
+  --surface: #ffffff;
+  --raised: #f3eefb;
+  --ivory: #140e22;
+  --muted: #4a415c;
+  --faint: #6b6278;
+  --line: #ddd4ee;
+  --accent: #6d28d9;
+  --accent-deep: #5b21b6;
+  --btn-bg: #6d28d9;
+  --btn-fg: #ffffff;
 }
 [data-theme="light"] body {
   background:
-    radial-gradient(ellipse 55% 48% at 50% 12%, rgba(30,63,54,0.08), transparent 68%),
-    #f3efe6;
+    radial-gradient(ellipse 55% 48% at 50% 12%, rgba(109,40,217,0.1), transparent 68%),
+    #f6f3fb;
 }
 [data-theme="light"] .btn-outline { color: var(--ivory); border-color: var(--line); }
 [data-theme="light"] .btn-outline:hover { border-color: var(--accent); }

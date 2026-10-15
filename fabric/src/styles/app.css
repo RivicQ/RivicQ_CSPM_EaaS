@@ -117,18 +117,18 @@ button, input, select { font: inherit; }
 }
 .btn:hover { border-color: var(--intel); }
 .btn.primary {
-  background: var(--btn-bg, #e4c27a);
+  background: var(--btn-bg, #7c3aed);
   border-color: transparent;
-  color: var(--btn-fg, #1a1408);
-  -webkit-text-fill-color: var(--btn-fg, #1a1408);
+  color: var(--btn-fg, #ffffff);
+  -webkit-text-fill-color: var(--btn-fg, #ffffff);
   font-weight: 650;
   transition: none;
 }
 .btn.primary span { color: inherit; -webkit-text-fill-color: inherit; }
 .btn.primary:hover {
-  background: var(--btn-bg-hover, #f0d59a);
-  color: var(--btn-fg, #1a1408);
-  -webkit-text-fill-color: var(--btn-fg, #1a1408);
+  background: var(--btn-bg-hover, #6d28d9);
+  color: var(--btn-fg, #ffffff);
+  -webkit-text-fill-color: var(--btn-fg, #ffffff);
 }
 .btn.danger { border-color: rgba(212,101,101,0.35); color: #f0c8c8; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -317,7 +317,7 @@ table.data tr.is-selected td { background: rgba(124, 58, 237, 0.12); }
 }
 [data-theme="light"] body {
   background:
-    radial-gradient(1200px 480px at 50% 20%, rgba(30, 63, 54, 0.08), transparent 58%),
+    radial-gradient(1200px 480px at 50% 20%, rgba(109, 40, 217, 0.1), transparent 58%),
     var(--bg);
 }
 @media (max-width: 1100px) {
@@ -331,7 +331,7 @@ table.data tr.is-selected td { background: rgba(124, 58, 237, 0.12); }
   background: var(--nav-hover); color: var(--muted); font-size: 0.8125rem;
 }
 .hero-eyebrow b {
-  padding: 0.22rem 0.55rem; border-radius: 999px; background: var(--intel); color: var(--btn-fg, #1a1408);
+  padding: 0.22rem 0.55rem; border-radius: 999px; background: var(--intel); color: var(--btn-fg, #ffffff);
   font-family: var(--mono); font-size: 0.6875rem; font-weight: 600;
 }
 .hero-title em {

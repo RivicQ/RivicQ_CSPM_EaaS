@@ -1,34 +1,35 @@
-/* RivicQ marketing theme. Auto follows the OS. Harbor is dark. Ledger is light. */
+/* RivicQ marketing theme. Nebula is the designed default. Day is the light archive. Auto follows the OS. */
 (function () {
   var KEY = 'rivicq.theme';
 
   function choiceOf(raw) {
-    if (raw === 'harbor' || raw === 'dark') return 'harbor';
-    if (raw === 'ledger' || raw === 'light') return 'ledger';
-    return 'auto';
+    if (raw === 'nebula' || raw === 'harbor' || raw === 'dark') return 'nebula';
+    if (raw === 'day' || raw === 'ledger' || raw === 'light') return 'day';
+    if (raw === 'auto') return 'auto';
+    return 'nebula';
   }
 
   function resolved(choice) {
-    if (choice === 'harbor') return 'dark';
-    if (choice === 'ledger') return 'light';
+    if (choice === 'nebula') return 'dark';
+    if (choice === 'day') return 'light';
     var light = false;
     try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
     return light ? 'light' : 'dark';
   }
 
   function label(choice) {
-    if (choice === 'harbor') return 'Harbor';
-    if (choice === 'ledger') return 'Ledger';
+    if (choice === 'nebula') return 'Nebula';
+    if (choice === 'day') return 'Day';
     return 'Auto';
   }
 
   function read() {
-    try { return choiceOf(localStorage.getItem(KEY)); } catch (e) { return 'auto'; }
+    try { return choiceOf(localStorage.getItem(KEY)); } catch (e) { return 'nebula'; }
   }
 
   function nextChoice(choice) {
-    if (choice === 'auto') return 'harbor';
-    if (choice === 'harbor') return 'ledger';
+    if (choice === 'auto') return 'nebula';
+    if (choice === 'nebula') return 'day';
     return 'auto';
   }
 
@@ -43,6 +44,8 @@
       buttons[i].setAttribute('aria-label', 'Color scheme ' + label(choice) + '. Switch to ' + label(upcoming));
       buttons[i].setAttribute('title', 'Switch to ' + label(upcoming));
     }
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', mode === 'light' ? '#f6f3fb' : '#05040a');
   }
 
   function persist(choice) {

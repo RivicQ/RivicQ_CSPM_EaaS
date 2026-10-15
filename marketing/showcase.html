@@ -17,24 +17,25 @@
     (function () {
       var KEY = 'rivicq.theme';
       function choiceOf(raw) {
-        if (raw === 'harbor' || raw === 'dark') return 'harbor';
-        if (raw === 'ledger' || raw === 'light') return 'ledger';
-        return 'auto';
+        if (raw === 'nebula' || raw === 'harbor' || raw === 'dark') return 'nebula';
+        if (raw === 'day' || raw === 'ledger' || raw === 'light') return 'day';
+        if (raw === 'auto') return 'auto';
+        return 'nebula';
       }
       function resolved(choice) {
-        if (choice === 'harbor') return 'dark';
-        if (choice === 'ledger') return 'light';
+        if (choice === 'nebula') return 'dark';
+        if (choice === 'day') return 'light';
         var light = false;
         try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
         return light ? 'light' : 'dark';
       }
-      var choice = 'auto';
+      var choice = 'nebula';
       try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
       var mode = resolved(choice);
       document.documentElement.setAttribute('data-theme', mode);
       document.documentElement.setAttribute('data-theme-choice', choice);
       var meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', mode === 'light' ? '#F3EFE6' : '#101614');
+      if (meta) meta.setAttribute('content', mode === 'light' ? '#f6f3fb' : '#05040a');
     })();
   </script>
   <link rel="canonical" href="https://rivicq.com/showcase" />

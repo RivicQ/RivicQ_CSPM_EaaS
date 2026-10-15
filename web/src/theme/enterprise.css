@@ -1,59 +1,67 @@
-/* Harbor (dark) and Ledger (light). Keep hex values aligned with tokens.ts. */
+/* Nebula (dark, designed default) and Day (same archive, light). Keep hex values aligned with tokens.ts. */
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
-  --rq-bg: #101614;
-  --rq-sidebar: #0c1210;
-  --rq-surface: #1a2420;
-  --rq-raised: #24302b;
-  --rq-text: #f4f7f5;
-  --rq-muted: #c3cfc9;
-  --rq-faint: #8fa099;
-  --rq-line: #31403a;
-  --rq-accent: #d7b56a;
-  --rq-accent-2: #f0d59a;
-  --rq-btn-bg: #e4c27a;
-  --rq-btn-bg-hover: #f0d59a;
-  --rq-btn-fg: #1a1408;
-  --rq-nav-active: rgba(228, 194, 122, 0.18);
-  --rq-nav-hover: rgba(244, 247, 245, 0.06);
-  --rq-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-  --rq-focus: #f0d59a;
+  --rq-bg: #05040a;
+  --rq-sidebar: #07060e;
+  --rq-surface: #0e0c16;
+  --rq-raised: #161222;
+  --rq-text: #f6f3fb;
+  --rq-muted: #c9c2d6;
+  --rq-faint: #8d86a0;
+  --rq-line: #2a2438;
+  --rq-accent: #a78bfa;
+  --rq-accent-2: #e879f9;
+  --rq-btn-bg: #7c3aed;
+  --rq-btn-bg-hover: #6d28d9;
+  --rq-btn-fg: #ffffff;
+  --rq-nav-active: rgba(124, 58, 237, 0.28);
+  --rq-nav-hover: rgba(246, 243, 251, 0.06);
+  --rq-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --rq-focus: #c4b5fd;
+  --rq-glow: rgba(124, 58, 237, 0.34);
+  --rq-glow-2: rgba(232, 121, 249, 0.16);
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --rq-bg: #f3efe6;
-  --rq-sidebar: #e7e1d4;
-  --rq-surface: #fffcf7;
-  --rq-raised: #efe8dc;
-  --rq-text: #1c1915;
-  --rq-muted: #5c564c;
-  --rq-faint: #7a7368;
-  --rq-line: #d5cbba;
-  --rq-accent: #8c5a2b;
-  --rq-accent-2: #1e3f36;
-  --rq-btn-bg: #1e3f36;
-  --rq-btn-bg-hover: #16332c;
-  --rq-btn-fg: #f6f1e6;
-  --rq-nav-active: rgba(30, 63, 54, 0.12);
-  --rq-nav-hover: rgba(28, 25, 21, 0.05);
-  --rq-shadow: 0 18px 40px rgba(28, 25, 21, 0.08);
-  --rq-focus: #1e3f36;
+  --rq-bg: #f6f3fb;
+  --rq-sidebar: #efeaf7;
+  --rq-surface: #ffffff;
+  --rq-raised: #f3eefb;
+  --rq-text: #140e22;
+  --rq-muted: #4a415c;
+  --rq-faint: #6b6278;
+  --rq-line: #ddd4ee;
+  --rq-accent: #6d28d9;
+  --rq-accent-2: #a21caf;
+  --rq-btn-bg: #6d28d9;
+  --rq-btn-bg-hover: #5b21b6;
+  --rq-btn-fg: #ffffff;
+  --rq-nav-active: rgba(109, 40, 217, 0.14);
+  --rq-nav-hover: rgba(20, 14, 34, 0.05);
+  --rq-shadow: 0 18px 40px rgba(20, 14, 34, 0.08);
+  --rq-focus: #6d28d9;
+  --rq-glow: rgba(109, 40, 217, 0.12);
+  --rq-glow-2: rgba(162, 28, 175, 0.08);
+}
+
+body {
+  background:
+    radial-gradient(ellipse 55% 42% at 50% 0%, var(--rq-glow), transparent 68%),
+    radial-gradient(ellipse 32% 24% at 88% 8%, var(--rq-glow-2), transparent 70%),
+    var(--rq-bg);
 }
 
 button.MuiButton-contained:not(.Mui-disabled),
 button.MuiButton-containedPrimary:not(.Mui-disabled),
 a.MuiButton-contained:not(.Mui-disabled),
 a.MuiButton-containedPrimary:not(.Mui-disabled) {
-  /* Background must not transition: the label color follows --rq-btn-fg in the
-     same frame, and a 150ms fill animation leaves cream text on brass.
-     Literal fallbacks keep the label visible if a variable is missing. */
   transition: none !important;
-  background-color: var(--rq-btn-bg, #1e3f36) !important;
+  background-color: var(--rq-btn-bg, #7c3aed) !important;
   background-image: none !important;
-  color: var(--rq-btn-fg, #f6f1e6) !important;
-  -webkit-text-fill-color: var(--rq-btn-fg, #f6f1e6) !important;
+  color: var(--rq-btn-fg, #ffffff) !important;
+  -webkit-text-fill-color: var(--rq-btn-fg, #ffffff) !important;
 }
 
 button.MuiButton-contained:not(.Mui-disabled) span,
@@ -68,9 +76,9 @@ button.MuiButton-contained:hover,
 button.MuiButton-containedPrimary:hover,
 a.MuiButton-contained:hover,
 a.MuiButton-containedPrimary:hover {
-  background-color: var(--rq-btn-bg-hover, #16332c) !important;
-  color: var(--rq-btn-fg, #f6f1e6) !important;
-  -webkit-text-fill-color: var(--rq-btn-fg, #f6f1e6) !important;
+  background-color: var(--rq-btn-bg-hover, #6d28d9) !important;
+  color: var(--rq-btn-fg, #ffffff) !important;
+  -webkit-text-fill-color: var(--rq-btn-fg, #ffffff) !important;
 }
 
 .MuiButton-contained.Mui-disabled,
@@ -86,4 +94,10 @@ a.MuiButton-containedPrimary:hover {
 .MuiButton-containedPrimary .MuiButton-endIcon {
   color: inherit !important;
   -webkit-text-fill-color: inherit !important;
+}
+
+.MuiButton-outlined,
+.MuiButton-text {
+  color: var(--rq-text);
+  -webkit-text-fill-color: var(--rq-text);
 }

@@ -19,22 +19,21 @@ declare module '@mui/material/Chip' {
 }
 
 const LIGHT_PRIMARY = {
-  50: '#F6F1E6', 100: '#E7E1D4', 200: '#D5CBBA', 300: '#2F5C50', 400: '#245246',
-  500: '#1E3F36', 600: '#1A3830', 700: '#16332C', 800: '#102822', 900: '#0C1210',
+  50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa',
+  500: '#6d28d9', 600: '#5b21b6', 700: '#4c1d95', 800: '#2e1065', 900: '#140e22',
 };
 
 const DARK_PRIMARY = {
-  50: '#F8F1DE', 100: '#F0E2C0', 200: '#E4C27A', 300: '#D7B56A', 400: '#C6A15B',
-  500: '#E4C27A', 600: '#D7B56A', 700: '#C6A15B', 800: '#8C5A2B', 900: '#1A1408',
+  50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa',
+  500: '#7c3aed', 600: '#6d28d9', 700: '#5b21b6', 800: '#4c1d95', 900: '#2e1065',
 };
 
-const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
-  const mode: 'light' | 'dark' = 'dark';
-  const isDark = true;
+const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
+  const isDark = mode === 'dark';
 
-  const surface = tokens.colors.surfaceLight;
-  const text = tokens.colors.textLight;
-  const border = tokens.colors.borderLight;
+  const surface = isDark ? tokens.colors.surfaceLight : tokens.colors.surface;
+  const text = isDark ? tokens.colors.textLight : tokens.colors.text;
+  const border = isDark ? tokens.colors.borderLight : tokens.colors.border;
 
   const primary = isDark ? DARK_PRIMARY : LIGHT_PRIMARY;
 
@@ -45,7 +44,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         main: primary[500],
         light: primary[400],
         dark: primary[700],
-        contrastText: isDark ? '#1A1408' : '#F6F1E6',
+        contrastText: '#ffffff',
       },
       secondary: {
         main: tokens.colors.crypto.success,
@@ -57,7 +56,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         main: primary[500],
         light: primary[400],
         dark: primary[700],
-        contrastText: isDark ? '#1A1408' : '#F6F1E6',
+        contrastText: '#ffffff',
       },
       error: { main: tokens.colors.crypto.critical },
       warning: { main: tokens.colors.crypto.high },
@@ -73,8 +72,8 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         disabled: text.muted,
       },
       action: {
-        hover: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,15,0.04)',
-        selected: isDark ? 'rgba(228,194,122,0.18)' : 'rgba(30,63,54,0.12)',
+        hover: isDark ? 'rgba(246,243,251,0.06)' : 'rgba(20,14,34,0.05)',
+        selected: isDark ? 'rgba(124,58,237,0.28)' : 'rgba(109,40,217,0.14)',
       },
       divider: border,
     },
@@ -124,7 +123,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
             transition: designSystem.motion.smooth,
             '&:hover': {
               boxShadow: 'none',
-              borderColor: isDark ? '#D7B56A' : '#1E3F36',
+              borderColor: isDark ? '#a78bfa' : '#6d28d9',
             },
           },
         },
@@ -158,8 +157,8 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
           },
           contained: {
             backgroundImage: 'none',
-            color: isDark ? '#1A1408' : '#F6F1E6',
-            WebkitTextFillColor: isDark ? '#1A1408' : '#F6F1E6',
+            color: '#ffffff',
+            WebkitTextFillColor: '#ffffff',
           },
           containedPrimary: {
             ...proBlueContainedButtonSx,
@@ -228,7 +227,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         styleOverrides: {
           root: {
             '&.Mui-selected': {
-              backgroundColor: isDark ? 'rgba(228,194,122,0.18)' : 'rgba(30,63,54,0.12)',
+              backgroundColor: isDark ? 'rgba(124,58,237,0.28)' : 'rgba(109,40,217,0.14)',
             },
           },
         },
@@ -298,7 +297,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
             borderColor: border,
             borderRadius: `${tokens.borderRadius.md}px !important`,
             '&.Mui-selected': {
-              background: isDark ? 'rgba(228,194,122,0.18)' : 'rgba(30,63,54,0.12)',
+              background: isDark ? 'rgba(124,58,237,0.28)' : 'rgba(109,40,217,0.14)',
               color: primary[500],
               borderColor: `${primary[500]}44`,
             },

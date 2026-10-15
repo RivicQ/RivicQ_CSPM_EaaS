@@ -8,7 +8,7 @@ type Props = {
   compact?: boolean;
 };
 
-const CHOICES: ThemeChoice[] = ['auto', 'harbor', 'ledger'];
+const CHOICES: ThemeChoice[] = ['auto', 'nebula', 'day'];
 
 const ThemeToggle: React.FC<Props> = ({ choice, onChoose, compact = false }) => {
   return (

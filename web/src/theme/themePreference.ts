@@ -1,31 +1,37 @@
-export type ThemeChoice = 'auto' | 'harbor' | 'ledger';
+export type ThemeChoice = 'auto' | 'nebula' | 'day';
 export type ResolvedTheme = 'light' | 'dark';
 
 export const THEME_STORAGE_KEY = 'rivicq.theme';
 
+const NEBULA_CANVAS = '#05040a';
+const DAY_CANVAS = '#f6f3fb';
+
 export function normalizeChoice(value: string | null | undefined): ThemeChoice {
   switch (value) {
+    case 'nebula':
     case 'harbor':
     case 'dark':
-      return 'harbor';
+      return 'nebula';
+    case 'day':
     case 'ledger':
     case 'light':
-      return 'ledger';
+      return 'day';
     case 'auto':
+      return 'auto';
     case '':
     case null:
     case undefined:
-      return 'auto';
+      return 'nebula';
     default:
-      return 'auto';
+      return 'nebula';
   }
 }
 
 export function resolveTheme(choice: ThemeChoice): ResolvedTheme {
   switch (choice) {
-    case 'harbor':
+    case 'nebula':
       return 'dark';
-    case 'ledger':
+    case 'day':
       return 'light';
     case 'auto':
       if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: light)').matches) {
@@ -43,10 +49,10 @@ export function choiceLabel(choice: ThemeChoice): string {
   switch (choice) {
     case 'auto':
       return 'Auto';
-    case 'harbor':
-      return 'Harbor';
-    case 'ledger':
-      return 'Ledger';
+    case 'nebula':
+      return 'Nebula';
+    case 'day':
+      return 'Day';
     default: {
       const unexpected: never = choice;
       return unexpected;
@@ -57,10 +63,10 @@ export function choiceLabel(choice: ThemeChoice): string {
 export function cycleChoice(choice: ThemeChoice): ThemeChoice {
   switch (choice) {
     case 'auto':
-      return 'harbor';
-    case 'harbor':
-      return 'ledger';
-    case 'ledger':
+      return 'nebula';
+    case 'nebula':
+      return 'day';
+    case 'day':
       return 'auto';
     default: {
       const unexpected: never = choice;
@@ -73,7 +79,7 @@ export function readStoredChoice(): ThemeChoice {
   try {
     return normalizeChoice(window.localStorage.getItem(THEME_STORAGE_KEY));
   } catch {
-    return 'auto';
+    return 'nebula';
   }
 }
 
@@ -83,7 +89,7 @@ export function persistChoice(choice: ThemeChoice): ResolvedTheme {
     document.documentElement.setAttribute('data-theme', mode);
     document.documentElement.setAttribute('data-theme-choice', choice);
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', mode === 'light' ? '#F3EFE6' : '#101614');
+    if (meta) meta.setAttribute('content', mode === 'light' ? DAY_CANVAS : NEBULA_CANVAS);
   }
   try {
     window.localStorage.setItem(THEME_STORAGE_KEY, choice);

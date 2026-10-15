@@ -20,17 +20,17 @@ export const ARCHIFY_FONTS = {
 } as const;
 
 export const nebulaPanelSx = {
-  bgcolor: NEBULA.panel,
+  bgcolor: 'var(--rq-surface)',
   border: '1px solid',
-  borderColor: 'rgba(255,255,255,0.12)',
+  borderColor: 'var(--rq-line)',
   borderRadius: 2,
-  color: NEBULA.text,
+  color: 'var(--rq-text)',
 } as const;
 
 export const nebulaPageSx = {
   minHeight: '100vh',
-  bgcolor: NEBULA.ink,
-  color: NEBULA.text,
+  bgcolor: 'var(--rq-bg)',
+  color: 'var(--rq-text)',
 } as const;
 
 /** Auth / form cards — higher contrast plate on nebula canvas. */

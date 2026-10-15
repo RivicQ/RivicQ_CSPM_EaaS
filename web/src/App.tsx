@@ -141,7 +141,7 @@ const App: React.FC = () => {
               styles={(theme) => ({
                 '*': { boxSizing: 'border-box' },
                 '::selection': {
-                  background: theme.palette.mode === 'dark' ? 'rgba(228,194,122,0.45)' : 'rgba(30,63,54,0.22)',
+                  background: theme.palette.mode === 'dark' ? 'rgba(124,58,237,0.45)' : 'rgba(109,40,217,0.22)',
                   color: theme.palette.text.primary,
                 },
                 ':focus-visible': {
