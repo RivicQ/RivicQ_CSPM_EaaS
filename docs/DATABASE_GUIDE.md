@@ -203,6 +203,42 @@ repository; operate it in your environment.
 - Never commit a database dump: `.gitignore` blocks `*.sql` and
   `cryptobom_backup.sql`.
 
+## Schema review notes
+
+Reviewed from repository SQL and Go migrations. No live Supabase project is
+connected from this tree (`web/src/services/supabase.ts` stays idle unless
+`REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_PUBLISHABLE_KEY` are both set).
+
+Two schemas are not the same database:
+
+- Go ledger (`internal/database/migrations.go`, `enterprise_database.go`) is what
+  the binary applies. `tenants.id` is `TEXT` in the core ledger and `UUID` in
+  the enterprise bootstrap. `CREATE TABLE IF NOT EXISTS` will not reconcile that.
+- `deploy/migrations/001_initial_schema.sql` uses `TEXT` tenant ids.
+  `002_enterprise_features.sql` declares `org_id UUID REFERENCES tenants(id)`
+  and `quantum_scans.asset_id` references `inventory_assets`, which 001 never
+  creates. That file cannot apply cleanly after 001. Do not edit it in place.
+
+`0009_query_path_indexes` and `deploy/migrations/004_query_path_indexes.sql`
+add idempotent indexes for the list queries (`tenant_id`, `created_at DESC`)
+and for foreign keys that had none (`cloud_accounts.tenant_id`,
+`users.tenant_id`, `bom_reports.asset_id`, `scan_jobs.tenant_id`). Enterprise
+startup also indexes `risk_assessments.framework_id`,
+`quantum_attestations.asset_id`, and `kubernetes_clusters.cloud_account_id`
+when those columns exist.
+
+Still open, and intentionally not applied here:
+
+- Row Level Security is off on every table. A Supabase Data API in front of
+  these tables would expose `users.password` (bcrypt), `users.mfa_secret`, and
+  `cloud_connections.credentials` to the anon key. Enable RLS and revoke
+  `anon`/`authenticated` before exposing the schema. Do not key policies on
+  `user_metadata`.
+- `audit_events.tenant_id` is nullable `ON DELETE SET NULL`, so deleted tenants
+  leave unscoped audit rows.
+- Boolean and severity-only indexes (`quantum_safe`, `severity`) are poor
+  leading keys. Prefer the tenant-prefixed indexes above.
+
 ## Row-level security (Supabase)
 
 `Recommended (not yet implemented)`.
