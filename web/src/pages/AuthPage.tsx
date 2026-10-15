@@ -123,6 +123,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     (mode === 'login' || (displayName !== '' && form.password === form.confirm && form.acceptTerms));
 
   const editionLabel = edition === 'enterprise' ? 'Enterprise' : edition === 'professional' ? 'Professional' : 'Community';
+  const formLive = backendReachable || supabaseEnabled;
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -260,7 +261,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       : 'browser authentication (no engine deployed)';
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: NEBULA.ink, color: NEBULA.text, py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'var(--rq-bg)', color: 'var(--rq-text)', py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
       <NebulaBackdrop />
       <Box aria-hidden sx={archifyAuraLayersSx.radial} />
       <Box aria-hidden sx={archifyAuraLayersSx.grid} />
@@ -269,27 +270,39 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           <BrandLogo dark={isDark} />
           <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
             <ThemeToggle choice={choice} onChoose={setChoice} compact />
-            <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
+            <Chip label={formLive ? `${editionLabel} workspace` : 'Community demo'} variant="outlined" sx={{ fontWeight: 600 }} />
           </Stack>
         </Box>
         <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: NEBULA.faint }}>
           {mode === 'register' ? 'Create workspace' : 'Cryptographic security'}
         </Typography>
-        <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 500, letterSpacing: '-0.04em', mb: 2, mt: 0.5 }}>
-          {mode === 'register' ? 'Stand up a workspace.' : 'Sign in to your workspace.'}
+        <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 500, letterSpacing: '-0.04em', mb: 2, mt: 0.5, maxWidth: 520 }}>
+          {formLive
+            ? (mode === 'register' ? 'Stand up a workspace.' : 'Sign in to your workspace.')
+            : 'Enter the interactive demo.'}
         </Typography>
-        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+        <Stack direction="row" spacing={1} sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
           {([
             { id: 'community' as Edition, title: 'Community' },
             { id: 'professional' as Edition, title: 'Professional' },
             { id: 'enterprise' as Edition, title: 'Enterprise' },
           ]).map((opt) => (
-            <Button key={opt.id} size="small" variant={edition === opt.id ? 'contained' : 'outlined'} onClick={() => setEdition(opt.id)}>
+            <Button
+              key={opt.id}
+              size="small"
+              variant={edition === opt.id ? 'contained' : 'outlined'}
+              onClick={() => {
+                if (!formLive && opt.id !== 'community') {
+                  navigate('/request-demo');
+                  return;
+                }
+                setEdition(opt.id);
+              }}
+            >
               {opt.title}
             </Button>
           ))}
         </Stack>
-
         {!backendReachable && (
           <Box
             sx={{
@@ -299,21 +312,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           >
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
               <Chip size="small" variant="outlined" label={PUBLIC_ENGINE_CHIP_DISCONNECTED} />
-              <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
-                Expected on this build
-              </Typography>
             </Stack>
-            <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1 }}>
+            <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1.75 }}>
               {edition === 'enterprise' || edition === 'professional'
                 ? PUBLIC_ENGINE_ENTERPRISE_AUTH_COPY
                 : PUBLIC_ENGINE_AUTH_COPY}
+              {' '}Email, OAuth, and registration do not create a tenant here.
             </Typography>
-            <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1.75 }}>
-              Start with the <strong>interactive demo</strong> — full console path in this browser on clearly-labelled
-              sample data. Enterprise SSO and connectors stay on a licensed deployment.
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <Button variant="contained" startIcon={<AutoAwesome />} disabled={loading} onClick={() => handleDemo(true)} sx={websiteCtaSx}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} flexWrap="wrap" useFlexGap>
+              <Button variant="contained" startIcon={<AutoAwesome />} disabled={loading} onClick={() => handleDemo(true)} sx={{ ...websiteCtaSx, whiteSpace: 'nowrap' }}>
                 Enter the interactive demo
               </Button>
               <Button variant="outlined" disabled={loading} onClick={() => navigate('/request-demo')}>
@@ -329,7 +336,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           </Box>
         )}
 
-        <Grid container spacing={0}>
+        {formLive && <Grid container spacing={0}>
           <Grid item xs={12}>
             <Card sx={{ ...nebulaCardSx, height: '100%' }} elevation={0}>
               <CardContent sx={{ p: { xs: 3, md: 4 } }}>
@@ -715,7 +722,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
               </CardContent>
             </Card>
           </Grid>
-        </Grid>
+        </Grid>}
       </Container>
     </Box>
   );

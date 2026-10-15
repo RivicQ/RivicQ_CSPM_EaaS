@@ -18,8 +18,12 @@ const EditionSwitcher: React.FC = () => {
   const navigate = useNavigate();
 
   const chooseEdition = (edition: Edition) => {
-    setEditionPreference(edition);
-    navigate('/login', { replace: true });
+    if (edition !== 'community') {
+      navigate('/request-demo');
+      return;
+    }
+    setEditionPreference('community');
+    navigate('/demo', { replace: true });
   };
 
   const cards = [
@@ -30,7 +34,7 @@ const EditionSwitcher: React.FC = () => {
       edition: 'community' as Edition,
       accent: NEBULA.accent,
       highlights: ['CBOM + SBOM CSPM', 'API security from TLS scans', 'Discover → mitigate → report', 'No QBOM, HBOM, AIBOM, IBOM, SSO, or DORA pack'],
-      action: 'Continue with Community',
+      action: 'Start free with Community',
     },
     {
       title: 'RivicQ Professional',
@@ -39,7 +43,7 @@ const EditionSwitcher: React.FC = () => {
       edition: 'professional' as Edition,
       accent: NEBULA.accentSoft,
       highlights: ['CSPM & conformance packs', 'Security module suite', 'Multi-cloud accounts', 'Threat & vuln management'],
-      action: 'Continue with Professional',
+      action: 'Written license required',
     },
     {
       title: 'RivicQ Enterprise',
@@ -48,12 +52,12 @@ const EditionSwitcher: React.FC = () => {
       edition: 'enterprise' as Edition,
       accent: '#22c55e',
       highlights: ['HSM PKCS#11 + quantum connector', 'SSO, audit & RBAC', 'Governance evidence pack', 'Continuous production monitoring'],
-      action: 'Continue with Enterprise',
+      action: 'Written license required',
     },
   ];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: NEBULA.ink, color: NEBULA.text, py: 8, position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'var(--rq-bg)', color: 'var(--rq-text)', py: 8, position: 'relative', overflow: 'hidden' }}>
       <NebulaBackdrop />
       <Box aria-hidden sx={archifyAuraLayersSx.radial} />
       <Box aria-hidden sx={archifyAuraLayersSx.grid} />
@@ -76,8 +80,8 @@ const EditionSwitcher: React.FC = () => {
           <Typography component="h1" sx={{ ...archifyTitleSx, fontSize: { xs: '2.2rem', md: '3rem' }, maxWidth: 720 }}>
             Choose your RivicQ workspace
           </Typography>
-          <Typography sx={{ color: 'rgba(209,213,219,0.92)', maxWidth: 720, lineHeight: 1.65 }}>
-            Start free with Community Cryptographic Security Posture Management (CBOM + SBOM), grow into Professional for security modules, and license Enterprise for QBOM, HBOM, AIBOM, IBOM, HSM connectors, and the GRC pack. QSIC is declared research hardware — not a shipped chip.
+          <Typography sx={{ color: 'var(--rq-muted)', maxWidth: 720, lineHeight: 1.65 }}>
+            Community is the only free start: CBOM and SBOM on labelled sample data. Professional and Enterprise require a written license. Choosing a card does not grant one. QSIC is declared research hardware — not a shipped chip.
           </Typography>
         </Stack>
 
@@ -102,7 +106,7 @@ const EditionSwitcher: React.FC = () => {
                   <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, fontSize: '1.35rem', letterSpacing: '-0.02em' }}>
                     {card.title}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(209,213,219,0.88)', lineHeight: 1.55 }}>
+                  <Typography variant="body2" sx={{ color: 'var(--rq-muted)', lineHeight: 1.55 }}>
                     {card.subtitle}
                   </Typography>
                   <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -124,11 +128,12 @@ const EditionSwitcher: React.FC = () => {
                       alignSelf: 'flex-start',
                       mt: 1,
                       borderRadius: '10px',
-                      bgcolor: i === 0 ? '#fff' : NEBULA.accent,
-                      color: i === 0 ? '#0a0b0d' : '#fff',
+                      bgcolor: 'var(--rq-btn-bg)',
+                      color: 'var(--rq-btn-fg)',
+                      WebkitTextFillColor: 'var(--rq-btn-fg)',
                       textTransform: 'none',
                       fontWeight: 600,
-                      '&:hover': { bgcolor: NEBULA.accent, color: '#fff' },
+                      '&:hover': { bgcolor: 'var(--rq-btn-bg-hover)', color: 'var(--rq-btn-fg)' },
                     }}
                   >
                     {card.action}
@@ -142,9 +147,9 @@ const EditionSwitcher: React.FC = () => {
         <Typography sx={{ ...archifyEyebrowSx, mt: 6, mb: 1.5 }}>What each path unlocks</Typography>
         <Grid container spacing={1.5}>
           {[
-            { icon: <Storage color="primary" />, title: 'Community quick start', body: 'Login and scan assets locally without cloud credentials.' },
-            { icon: <CloudQueue sx={{ color: NEBULA.accentSoft }} />, title: 'Professional unlocks', body: 'Cloud posture, conformance packs, and the full module suite.' },
-            { icon: <Psychology sx={{ color: '#22c55e' }} />, title: 'Enterprise extends', body: 'Quantum attestation, HSM, SSO, and executive reporting.' },
+            { icon: <Storage color="primary" />, title: 'Community is free', body: 'The interactive demo and the Apache-2.0 engine. No license is implied.' },
+            { icon: <CloudQueue sx={{ color: NEBULA.accentSoft }} />, title: 'Professional is licensed', body: 'Cloud posture and the module suite need a written license.' },
+            { icon: <Psychology sx={{ color: '#22c55e' }} />, title: 'Enterprise is licensed', body: 'QBOM, HBOM, AIBOM, IBOM, HSM, and SSO need a written license.' },
           ].map((item) => (
             <Grid item xs={12} md={4} key={item.title}>
               <Box sx={{ ...nebulaPanelSx, p: 2.5, height: '100%' }}>

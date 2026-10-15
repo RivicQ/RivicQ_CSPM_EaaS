@@ -902,8 +902,8 @@ const Layout: React.FC = () => {
           minHeight: '100vh',
           minWidth: 0,
           overflowX: 'hidden',
-          bgcolor: '#000000',
-          background: designSystem.gradient.meshDark,
+          bgcolor: 'var(--rq-bg)',
+          background: 'radial-gradient(ellipse 55% 42% at 50% 0%, var(--rq-glow), transparent 68%), var(--rq-bg)',
           transition: reduceMotion ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           '& .MuiTableContainer-root': { overflowX: 'auto' },
         }}
@@ -915,7 +915,7 @@ const Layout: React.FC = () => {
           transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
           style={{ minWidth: 0 }}
         >
-          <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: { xs: 2, md: 3 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
+          <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: { xs: 2, md: 3 }, maxWidth: 1120, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />
             <OpsBreadcrumbs />
             <Outlet />

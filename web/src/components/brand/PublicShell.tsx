@@ -73,7 +73,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: '#000000',
+          bgcolor: 'var(--rq-bg)',
           backdropFilter: 'none',
           borderBottom: '1px solid',
           borderColor: 'divider',

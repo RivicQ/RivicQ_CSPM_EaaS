@@ -96,6 +96,27 @@ const PageFrame: React.FC<PageFrameProps> = ({
                   {subtitle}
                 </Typography>
               )}
+              {!visual && (
+                <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
+                  {['First look', 'Assessment', 'Inventory', 'PQC plan', 'Evidence'].map((step, index) => (
+                    <Box
+                      key={step}
+                      sx={{
+                        px: 1.1,
+                        py: 0.45,
+                        borderRadius: 999,
+                        border: '1px solid var(--rq-line)',
+                        bgcolor: index === 0 ? 'var(--rq-nav-active)' : 'transparent',
+                        color: 'var(--rq-text)',
+                        fontSize: 12,
+                        fontWeight: 650,
+                      }}
+                    >
+                      {index + 1}. {step}
+                    </Box>
+                  ))}
+                </Stack>
+              )}
             </Box>
             {(action || secondaryAction) && (
               <Stack

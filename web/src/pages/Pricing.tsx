@@ -73,11 +73,11 @@ const Pricing: React.FC = () => {
                   <Typography key={n} variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>{n}</Typography>
                 ))}
                 <Button
-                  sx={{ mt: 2, ...(plan.enterprise_only ? websiteCtaSx : websiteOutlineCtaSx(isDark)) }}
-                  variant={plan.enterprise_only ? 'contained' : 'outlined'}
-                  onClick={() => navigate(plan.enterprise_only ? '/request-demo' : '/register')}
+                  sx={{ mt: 2, ...(plan.tier === 'free' || plan.tier === 'developer' ? websiteCtaSx : websiteOutlineCtaSx(isDark)) }}
+                  variant={plan.tier === 'free' || plan.tier === 'developer' ? 'contained' : 'outlined'}
+                  onClick={() => navigate(plan.tier === 'free' || plan.tier === 'developer' ? '/demo' : '/request-demo')}
                 >
-                  {plan.enterprise_only ? 'Talk to sales' : 'Start'}
+                  {plan.tier === 'free' || plan.tier === 'developer' ? 'Start with Community' : 'Written license'}
                 </Button>
               </Box>
             </Grid>
