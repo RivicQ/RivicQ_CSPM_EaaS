@@ -117,14 +117,19 @@ button, input, select { font: inherit; }
 }
 .btn:hover { border-color: var(--intel); }
 .btn.primary {
-  background: var(--btn-bg);
+  background: var(--btn-bg, #e4c27a);
   border-color: transparent;
-  color: var(--btn-fg);
-  -webkit-text-fill-color: var(--btn-fg);
+  color: var(--btn-fg, #1a1408);
+  -webkit-text-fill-color: var(--btn-fg, #1a1408);
   font-weight: 650;
   transition: none;
 }
-.btn.primary:hover { background: var(--btn-bg-hover); }
+.btn.primary span { color: inherit; -webkit-text-fill-color: inherit; }
+.btn.primary:hover {
+  background: var(--btn-bg-hover, #f0d59a);
+  color: var(--btn-fg, #1a1408);
+  -webkit-text-fill-color: var(--btn-fg, #1a1408);
+}
 .btn.danger { border-color: rgba(212,101,101,0.35); color: #f0c8c8; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
@@ -137,6 +142,39 @@ button, input, select { font: inherit; }
   margin: 0 auto;
   padding: 1.5rem 1.25rem 4rem;
   min-width: 0;
+  width: 100%;
+  overflow: visible;
+}
+.theme-choice {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-panel);
+}
+.theme-choice button {
+  background: transparent;
+  color: var(--text);
+  -webkit-text-fill-color: var(--text);
+  border: 0;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+.theme-choice button[aria-pressed="true"] {
+  background: var(--nav-hover);
+  font-weight: 700;
+}
+.graph-figure { margin: 0; min-width: 0; }
+.graph-figure svg { width: 100%; height: auto; display: block; }
+.graph-caption {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-width: 78ch;
+  overflow-wrap: anywhere;
 }
 .landing p, .landing li, .doc-view p, .doc-view li, .doc-view td, .doc-view th, .doc-view h1, .doc-view h2, .doc-view h3 {
   overflow-wrap: anywhere;

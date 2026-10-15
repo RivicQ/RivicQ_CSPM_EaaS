@@ -1,44 +1,63 @@
-/* RivicQ marketing theme controller — shared by index.html and showcase.html.
-   The inline snippet in each <head> applies the theme before first paint (no
-   flash); this file wires the header toggle and keeps the labels in sync. */
+/* RivicQ marketing theme. Auto follows the OS. Harbor is dark. Ledger is light. */
 (function () {
   var KEY = 'rivicq.theme';
 
-  function read() {
-    try {
-      var stored = localStorage.getItem(KEY);
-      if (stored === 'light' || stored === 'dark') return stored;
-    } catch (e) { /* storage blocked */ }
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  function choiceOf(raw) {
+    if (raw === 'harbor' || raw === 'dark') return 'harbor';
+    if (raw === 'ledger' || raw === 'light') return 'ledger';
+    return 'auto';
   }
 
-  function apply(mode) {
+  function resolved(choice) {
+    if (choice === 'harbor') return 'dark';
+    if (choice === 'ledger') return 'light';
+    var light = false;
+    try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+    return light ? 'light' : 'dark';
+  }
+
+  function label(choice) {
+    if (choice === 'harbor') return 'Harbor';
+    if (choice === 'ledger') return 'Ledger';
+    return 'Auto';
+  }
+
+  function read() {
+    try { return choiceOf(localStorage.getItem(KEY)); } catch (e) { return 'auto'; }
+  }
+
+  function nextChoice(choice) {
+    if (choice === 'auto') return 'harbor';
+    if (choice === 'harbor') return 'ledger';
+    return 'auto';
+  }
+
+  function apply(choice) {
+    var mode = resolved(choice);
     document.documentElement.setAttribute('data-theme', mode);
+    document.documentElement.setAttribute('data-theme-choice', choice);
     var buttons = document.querySelectorAll('.theme-toggle');
     for (var i = 0; i < buttons.length; i++) {
-      var dark = mode === 'dark';
-      buttons[i].textContent = dark ? '\u2600' : '\u263D';
-      buttons[i].setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-      buttons[i].setAttribute('title', dark ? 'Switch to light theme' : 'Switch to dark theme');
+      var upcoming = nextChoice(choice);
+      buttons[i].textContent = label(choice);
+      buttons[i].setAttribute('aria-label', 'Color scheme ' + label(choice) + '. Switch to ' + label(upcoming));
+      buttons[i].setAttribute('title', 'Switch to ' + label(upcoming));
     }
   }
 
-  function toggle() {
-    var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    try { localStorage.setItem(KEY, next); } catch (e) { /* ignore */ }
-    apply(next);
+  function persist(choice) {
+    try { localStorage.setItem(KEY, choice); } catch (e) { /* ignore */ }
+    apply(choice);
   }
 
-  apply(read());
+  persist(read());
   document.addEventListener('click', function (event) {
     var target = event.target;
-    if (target && target.closest && target.closest('.theme-toggle')) toggle();
+    if (target && target.closest && target.closest('.theme-toggle')) persist(nextChoice(read()));
   });
   if (window.matchMedia) {
     var mq = window.matchMedia('(prefers-color-scheme: light)');
-    var onChange = function () {
-      try { if (!localStorage.getItem(KEY)) apply(read()); } catch (e) { apply(read()); }
-    };
+    var onChange = function () { if (read() === 'auto') apply('auto'); };
     if (mq.addEventListener) mq.addEventListener('change', onChange);
     else if (mq.addListener) mq.addListener(onChange);
   }

@@ -13,15 +13,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
     <script>
       (function () {
-        try {
-          var t = localStorage.getItem('rivicq.theme');
-          if (t !== 'light' && t !== 'dark') {
-            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-          }
-          document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
+        var KEY = 'rivicq.theme';
+        function choiceOf(raw) {
+          if (raw === 'harbor' || raw === 'dark') return 'harbor';
+          if (raw === 'ledger' || raw === 'light') return 'ledger';
+          return 'auto';
         }
+        function resolved(choice) {
+          if (choice === 'harbor') return 'dark';
+          if (choice === 'ledger') return 'light';
+          var light = false;
+          try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+          return light ? 'light' : 'dark';
+        }
+        var choice = 'auto';
+        try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
+        var mode = resolved(choice);
+        document.documentElement.setAttribute('data-theme', mode);
+        document.documentElement.setAttribute('data-theme-choice', choice);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode === 'light' ? '#F3EFE6' : '#101614');
       })();
     </script>
   </head>

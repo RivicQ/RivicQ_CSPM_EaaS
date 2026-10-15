@@ -142,7 +142,7 @@ const Layout: React.FC = () => {
       return '24h';
     }
   });
-  const { mode, toggleMode } = useThemeMode();
+  const { mode, choice, setChoice } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
@@ -712,7 +712,7 @@ const Layout: React.FC = () => {
               </IconButton>
             </Tooltip>
 
-            <ThemeToggle mode={mode} onToggle={toggleMode} compact />
+            <ThemeToggle choice={choice} onChoose={setChoice} compact />
 
             <Tooltip title="Refresh workspace data">
               <IconButton

@@ -10,6 +10,7 @@ import './theme/enterprise.css';
 
 import Layout from './layouts/Layout';
 import { ThemeModeProvider } from './theme/ThemeContext';
+import { cycleChoice, persistChoice, readStoredChoice, resolveTheme, ThemeChoice } from './theme/themePreference';
 import RequireAuth from './components/RequireAuth';
 import RequireEnterprise from './components/RequireEnterprise';
 import RequireRole from './components/RequireRole';
@@ -96,37 +97,27 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 );
 
 const App: React.FC = () => {
-  const [mode, setMode] = React.useState<'light' | 'dark'>(() => {
-    const attr = document.documentElement.getAttribute('data-theme');
-    if (attr === 'dark' || attr === 'light') return attr;
-    try {
-      const stored = localStorage.getItem('rivicq.theme');
-      if (stored === 'dark' || stored === 'light') return stored;
-    } catch {
-      /* ignore */
-    }
-    return 'dark';
-  });
+  const [choice, setChoice] = React.useState<ThemeChoice>(() => readStoredChoice());
+  const [mode, setMode] = React.useState<'light' | 'dark'>(() => resolveTheme(readStoredChoice()));
   const theme = React.useMemo(() => getAppTheme(mode), [mode]);
 
+  const applyChoice = React.useCallback((next: ThemeChoice) => {
+    setChoice(next);
+    setMode(persistChoice(next));
+  }, []);
+
   React.useEffect(() => {
-    document.documentElement.setAttribute('data-theme', mode);
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', mode === 'dark' ? '#101614' : '#F3EFE6');
-  }, [mode]);
+    const media = window.matchMedia('(prefers-color-scheme: light)');
+    const onChange = () => {
+      if (choice === 'auto') setMode(persistChoice('auto'));
+    };
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, [choice]);
 
   const toggleMode = React.useCallback(() => {
-    setMode((m) => {
-      const next = m === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
-      try {
-        localStorage.setItem('rivicq.theme', next);
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
-  }, []);
+    applyChoice(cycleChoice(choice));
+  }, [applyChoice, choice]);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -142,7 +133,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ThemeModeProvider mode={mode} toggleMode={toggleMode}>
+          <ThemeModeProvider mode={mode} choice={choice} setChoice={applyChoice} toggleMode={toggleMode}>
             <ThemeProvider theme={theme}>
               <MotionConfig reducedMotion="user">
               <CssBaseline />

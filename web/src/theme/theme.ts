@@ -157,12 +157,32 @@ const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
           },
           contained: {
             backgroundImage: 'none',
-            WebkitTextFillColor: 'currentColor',
+            color: isDark ? '#1A1408' : '#F6F1E6',
+            WebkitTextFillColor: isDark ? '#1A1408' : '#F6F1E6',
           },
           containedPrimary: {
             ...proBlueContainedButtonSx,
           },
-          outlined: { borderColor: border },
+          outlined: { borderColor: border, color: text.primary },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: text.secondary,
+            '&.Mui-focused': { color: primary[500] },
+          },
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: { color: text.primary, backgroundColor: surface[1] },
+          notchedOutline: { borderColor: border },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: { color: text.secondary },
         },
       },
       MuiChip: {

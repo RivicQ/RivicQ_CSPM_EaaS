@@ -1,20 +1,20 @@
 /** Enterprise primary CTA. Label and fill always contrast in Harbor and Ledger. */
 export const websiteCtaSx = {
   borderRadius: 999,
-  bgcolor: 'var(--rq-btn-bg) !important',
+  bgcolor: 'var(--rq-btn-bg, #1e3f36) !important',
   backgroundImage: 'none !important',
-  color: 'var(--rq-btn-fg) !important',
-  WebkitTextFillColor: 'var(--rq-btn-fg)',
+  color: 'var(--rq-btn-fg, #f6f1e6) !important',
+  WebkitTextFillColor: 'var(--rq-btn-fg, #f6f1e6)',
   boxShadow: 'none',
-  '& .MuiButton-startIcon, & .MuiButton-endIcon': {
-    color: 'inherit',
+  '& span, & .MuiButton-startIcon, & .MuiButton-endIcon': {
+    color: 'inherit !important',
     WebkitTextFillColor: 'inherit',
   },
   '&:hover': {
-    bgcolor: 'var(--rq-btn-bg-hover) !important',
+    bgcolor: 'var(--rq-btn-bg-hover, #16332c) !important',
     backgroundImage: 'none !important',
-    color: 'var(--rq-btn-fg) !important',
-    WebkitTextFillColor: 'var(--rq-btn-fg)',
+    color: 'var(--rq-btn-fg, #f6f1e6) !important',
+    WebkitTextFillColor: 'var(--rq-btn-fg, #f6f1e6)',
     boxShadow: 'none',
   },
 } as const;

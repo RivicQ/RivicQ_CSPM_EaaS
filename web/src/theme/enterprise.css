@@ -47,21 +47,30 @@ button.MuiButton-containedPrimary:not(.Mui-disabled),
 a.MuiButton-contained:not(.Mui-disabled),
 a.MuiButton-containedPrimary:not(.Mui-disabled) {
   /* Background must not transition: the label color follows --rq-btn-fg in the
-     same frame, and a 150ms fill animation leaves cream text on brass. */
+     same frame, and a 150ms fill animation leaves cream text on brass.
+     Literal fallbacks keep the label visible if a variable is missing. */
   transition: none !important;
-  background-color: var(--rq-btn-bg) !important;
+  background-color: var(--rq-btn-bg, #1e3f36) !important;
   background-image: none !important;
-  color: var(--rq-btn-fg) !important;
-  -webkit-text-fill-color: var(--rq-btn-fg) !important;
+  color: var(--rq-btn-fg, #f6f1e6) !important;
+  -webkit-text-fill-color: var(--rq-btn-fg, #f6f1e6) !important;
+}
+
+button.MuiButton-contained:not(.Mui-disabled) span,
+button.MuiButton-containedPrimary:not(.Mui-disabled) span,
+a.MuiButton-contained:not(.Mui-disabled) span,
+a.MuiButton-containedPrimary:not(.Mui-disabled) span {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
 }
 
 button.MuiButton-contained:hover,
 button.MuiButton-containedPrimary:hover,
 a.MuiButton-contained:hover,
 a.MuiButton-containedPrimary:hover {
-  background-color: var(--rq-btn-bg-hover) !important;
-  color: var(--rq-btn-fg) !important;
-  -webkit-text-fill-color: var(--rq-btn-fg) !important;
+  background-color: var(--rq-btn-bg-hover, #16332c) !important;
+  color: var(--rq-btn-fg, #f6f1e6) !important;
+  -webkit-text-fill-color: var(--rq-btn-fg, #f6f1e6) !important;
 }
 
 .MuiButton-contained.Mui-disabled,

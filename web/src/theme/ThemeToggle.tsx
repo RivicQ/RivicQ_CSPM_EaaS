@@ -1,39 +1,57 @@
 import React from 'react';
-import { Button, Tooltip } from '@mui/material';
-import { DarkMode, LightMode } from '@mui/icons-material';
+import { Button, Stack } from '@mui/material';
+import { ThemeChoice, choiceLabel } from './themePreference';
 
 type Props = {
-  mode: 'light' | 'dark';
-  onToggle: () => void;
+  choice: ThemeChoice;
+  onChoose: (choice: ThemeChoice) => void;
   compact?: boolean;
 };
 
-const ThemeToggle: React.FC<Props> = ({ mode, onToggle, compact = false }) => {
-  const current = mode === 'dark' ? 'Harbor' : 'Ledger';
-  const next = mode === 'dark' ? 'Ledger' : 'Harbor';
+const CHOICES: ThemeChoice[] = ['auto', 'harbor', 'ledger'];
+
+const ThemeToggle: React.FC<Props> = ({ choice, onChoose, compact = false }) => {
   return (
-    <Tooltip title={`Switch to ${next}`}>
-      <Button
-        onClick={onToggle}
-        size="small"
-        aria-label={`Theme ${current}. Switch to ${next}`}
-        startIcon={mode === 'light' ? <DarkMode sx={{ fontSize: 16 }} /> : <LightMode sx={{ fontSize: 16 }} />}
-        sx={{
-          borderRadius: 999,
-          border: '1px solid var(--rq-line)',
-          bgcolor: 'var(--rq-surface)',
-          color: 'var(--rq-text)',
-          WebkitTextFillColor: 'var(--rq-text)',
-          minHeight: compact ? 36 : 40,
-          px: compact ? 1.25 : 1.5,
-          fontWeight: 650,
-          letterSpacing: '0.01em',
-          '&:hover': { bgcolor: 'var(--rq-nav-hover)', borderColor: 'var(--rq-accent)' },
-        }}
-      >
-        {current}
-      </Button>
-    </Tooltip>
+    <Stack
+      direction="row"
+      role="group"
+      aria-label="Color scheme"
+      sx={{
+        border: '1px solid var(--rq-line)',
+        borderRadius: 999,
+        overflow: 'hidden',
+        bgcolor: 'var(--rq-surface)',
+        flexShrink: 0,
+      }}
+    >
+      {CHOICES.map((item) => {
+        const selected = item === choice;
+        const label = choiceLabel(item);
+        return (
+          <Button
+            key={item}
+            size="small"
+            onClick={() => onChoose(item)}
+            aria-pressed={selected}
+            sx={{
+              minHeight: compact ? 32 : 36,
+              minWidth: compact ? 0 : 64,
+              px: compact ? 1 : 1.25,
+              borderRadius: 0,
+              color: 'var(--rq-text)',
+              WebkitTextFillColor: 'var(--rq-text)',
+              bgcolor: selected ? 'var(--rq-nav-active)' : 'transparent',
+              fontWeight: selected ? 750 : 550,
+              fontSize: compact ? 12 : 13,
+              lineHeight: 1.2,
+              '&:hover': { bgcolor: 'var(--rq-nav-hover)' },
+            }}
+          >
+            {label}
+          </Button>
+        );
+      })}
+    </Stack>
   );
 };
 

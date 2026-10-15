@@ -1,17 +1,32 @@
 import React from 'react';
+import { ThemeChoice, ResolvedTheme } from './themePreference';
 
 type ThemeContextType = {
-  mode: 'light' | 'dark';
+  mode: ResolvedTheme;
+  choice: ThemeChoice;
+  setChoice: (choice: ThemeChoice) => void;
   toggleMode: () => void;
 };
 
 export const ThemeModeContext = React.createContext<ThemeContextType>({
-  mode: 'light',
+  mode: 'dark',
+  choice: 'auto',
+  setChoice: () => {},
   toggleMode: () => {},
 });
 
-export const ThemeModeProvider: React.FC<{ mode: 'light' | 'dark'; toggleMode: () => void; children: React.ReactNode }> = ({ mode, toggleMode, children }) => {
-  return <ThemeModeContext.Provider value={{ mode, toggleMode }}>{children}</ThemeModeContext.Provider>;
+export const ThemeModeProvider: React.FC<{
+  mode: ResolvedTheme;
+  choice: ThemeChoice;
+  setChoice: (choice: ThemeChoice) => void;
+  toggleMode: () => void;
+  children: React.ReactNode;
+}> = ({ mode, choice, setChoice, toggleMode, children }) => {
+  return (
+    <ThemeModeContext.Provider value={{ mode, choice, setChoice, toggleMode }}>
+      {children}
+    </ThemeModeContext.Provider>
+  );
 };
 
 export const useThemeMode = () => React.useContext(ThemeModeContext);

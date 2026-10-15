@@ -9,14 +9,37 @@
     <meta name="theme-color" content="#101614" />
     <script>
       (function () {
-        try {
-          var t = localStorage.getItem('rivicq.theme');
-          if (t !== 'light' && t !== 'dark') t = 'dark';
-          document.documentElement.setAttribute('data-theme', t);
-          var meta = document.querySelector('meta[name="theme-color"]');
-          if (meta) meta.setAttribute('content', t === 'light' ? '#F3EFE6' : '#101614');
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
+        var KEY = 'rivicq.theme';
+        function choiceOf(raw) {
+          if (raw === 'harbor' || raw === 'dark') return 'harbor';
+          if (raw === 'ledger' || raw === 'light') return 'ledger';
+          return 'auto';
+        }
+        function resolved(choice) {
+          if (choice === 'harbor') return 'dark';
+          if (choice === 'ledger') return 'light';
+          var light = false;
+          try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+          return light ? 'light' : 'dark';
+        }
+        var choice = 'auto';
+        try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
+        var mode = resolved(choice);
+        var root = document.documentElement;
+        root.setAttribute('data-theme', mode);
+        root.setAttribute('data-theme-choice', choice);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode === 'light' ? '#F3EFE6' : '#101614');
+        var path = location.pathname;
+        var notice = path.match(/^(.*)\/NOTICE$/);
+        var md = path.match(/^(.*)\/([^/]+)\.md$/i);
+        if (notice) {
+          var noticePrefix = notice[1].replace(/\/docs$/, '');
+          location.replace(noticePrefix + '/archify/site/index.html#types/notice');
+        } else if (md) {
+          var prefix = md[1].replace(/\/docs$/, '');
+          var slug = md[2].replace(/\.md$/i, '').toLowerCase();
+          location.replace(prefix + '/archify/site/index.html#types/' + encodeURIComponent(slug));
         }
       })();
     </script>
