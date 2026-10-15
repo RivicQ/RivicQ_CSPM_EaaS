@@ -18,8 +18,8 @@ const STEPS: Step[] = [
 
 /**
  * "How scanning works" strip with a live engine-status legend, so a visitor
- * on static Pages can see (a) the workflow and (b) exactly why scanning is
- * disabled here and which mode they are in.
+ * on static Pages can see (a) the workflow and (b) which mode they are in.
+ * Static Pages never claim scanning is permanently blocked — Run demo scan works.
  */
 const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const { backendReachable, isDemo } = useAuth();
@@ -28,7 +28,7 @@ const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false })
     ? { label: 'RivicQ engine · live', color: 'success', desc: 'Scans here are real and evidence-backed.' }
     : isDemo
       ? { label: 'Interactive demo · sample data', color: 'info', desc: 'This session answers in-browser with clearly-labelled sample data.' }
-      : { label: 'Engine not hosted · scanning disabled', color: 'default', desc: 'Deploy the API (docs/RENDER.md) or run it locally, or enter the interactive demo.' };
+      : { label: 'Static Pages · demo scan ready', color: 'info', desc: 'Press Run demo scan for labelled sample findings. Live evidence needs the API or a local run.' };
 
   return (
     <Box sx={{ mt: compact ? 3 : 6 }}>

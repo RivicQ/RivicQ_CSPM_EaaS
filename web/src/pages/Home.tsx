@@ -103,23 +103,26 @@ const Home: React.FC = () => {
   const isWebsiteTarget = (value: string) => /^(https?:\/\/|www\.)/i.test(value) || /^[\w.-]+\.[a-z]{2,}(:\d+)?(\/.*)?$/i.test(value);
 
   const handleScan = async () => {
-    if (!repoUrl.trim()) return;
+    // On static Pages, allow one-click demo even with an empty field.
+    const target = repoUrl.trim() || (!backendReachable ? 'https://demo.example.com' : '');
+    if (!target) return;
+    if (!repoUrl.trim() && !backendReachable) setRepoUrl(target);
+
+    // Show progress immediately so clients never see a dead click.
+    setScanStatus('scanning');
+    setProgress(5);
+    setReport(null);
+
     // Static Pages: enter labelled interactive demo, then run in-browser sample scan.
-    // Never leave the Run button disabled — that blocked client evaluations.
     if (!backendReachable && !isDemo) {
       try {
         await demoLogin('community');
       } catch {
         setScanStatus('error');
         setProgress(0);
-        setReport(null);
         return;
       }
     }
-    setScanStatus('scanning');
-    setProgress(0);
-    setReport(null);
-    const target = repoUrl.trim();
     const githubSpec = (() => {
       const m = target.match(/github\.com[:/]+([^/]+)\/([^/#\s]+)/i);
       if (m) return `${m[1]}/${m[2].replace(/\.git$/, '')}`;
@@ -483,7 +486,7 @@ const Home: React.FC = () => {
                   onClick={handleScan}
                   loading={scanStatus === 'scanning'}
                   loadingText="Scanning…"
-                  disabled={!repoUrl.trim()}
+                  disabled={backendReachable && !repoUrl.trim()}
                   sx={{ minWidth: 168 }}
                 >
                   {backendReachable ? 'Run scan' : 'Run demo scan'}
