@@ -10,7 +10,7 @@ import (
 
 // ScannerVersion is the intelligence engine identifier stamped on findings.
 // Bump when detection rules change in a way that should invalidate fingerprints.
-const ScannerVersion = "rivicq-intelligence/1.0.0"
+const ScannerVersion = "rivicq-intelligence/1.1.0"
 
 // FingerprintKey is the canonical, tenant-independent identity of a finding.
 // Repeated scans of the same evidence produce the same fingerprint.
@@ -90,11 +90,35 @@ func FinalizeFinding(f Finding) Finding {
 	fp := Fingerprint(f)
 	f.Fingerprint = fp
 	f.ID = "rvq-" + fp[:16]
-	f.PQCClass = ClassifyPQC(f)
+	rationaleSrc := f
+	rationaleSrc.PQCClass = ""
+	reason := ClassifyPQCWithReason(rationaleSrc)
+	if f.PQCClass == "" {
+		f.PQCClass = reason.Class
+	}
 	if f.RecommendedAction == "" {
 		f.RecommendedAction = PQCRecommendedAction(f.PQCClass)
 	}
 	f.Risk.RecommendedAction = f.RecommendedAction
+	if f.PresenceKind == "" {
+		f.PresenceKind = InferPresenceKind(f.RuleID, f.Scanner, f.Usage)
+	}
+	if f.DetectionMethod == "" {
+		f.DetectionMethod = InferDetectionMethod(f.Scanner, f.RuleID)
+	}
+	if f.EvidenceKind == "" {
+		f.EvidenceKind = InferEvidenceKind(f.PresenceKind, f.DetectionMethod)
+	}
+	if f.Exploitability == "" {
+		f.Exploitability = InferExploitability(f.PQCClass, f.QuantumSafe)
+	}
+	if f.Limitations == "" {
+		f.Limitations = DefaultLimitations(f.DetectionMethod, f.PresenceKind)
+	}
+	if f.RiskRationale == "" {
+		f.RiskRationale = reason.Reason
+		f.Labels["pqc_taxonomy"] = reason.Version
+	}
 	now := time.Now().UTC()
 	if f.CreatedAt.IsZero() {
 		f.CreatedAt = now

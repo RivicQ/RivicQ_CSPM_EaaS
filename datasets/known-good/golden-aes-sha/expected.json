@@ -1,0 +1,13 @@
+{
+  "id": "golden-aes-sha",
+  "title": "AES and SHA-256 inventory without policy BLOCK",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/golden/aes-sha",
+  "include_fixtures": true,
+  "must_match": ["aes", "sha-256"],
+  "must_not_match": ["ghp_live"],
+  "min_findings": 1,
+  "max_block": true,
+  "notes": "Inventory observations for AES/SHA-256. Not weak-crypto findings."
+}

@@ -26,6 +26,8 @@ needs (it does not fabricate a single vendor score):
 
 ## Relationship to the PQC plan
 
+The operator workflow this engine supports is **Discover → Inventory → Classify → Prioritize → Plan**. **Execute** (key/algorithm change in production) is an authorized operator process outside this product. This repository does not rotate production keys.
+
 Agility is the *capacity* to migrate; the PQC plan (`PQC_EMBEDDED.md`,
 `PQC_IDENTITY.md`) is the *schedule* to migrate. Together they tell a partner
 where to spend effort first.

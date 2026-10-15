@@ -82,6 +82,9 @@ type GHFinding struct {
 	CVE         string   `json:"cve,omitempty"`
 	Compliance  []string `json:"compliance,omitempty"`
 	Demo        bool     `json:"demo,omitempty"`
+	DetectionMethod string `json:"detection_method,omitempty"`
+	EvidenceKind    string `json:"evidence_kind,omitempty"`
+	PresenceKind    string `json:"presence_kind,omitempty"`
 }
 
 type GHSummary struct {

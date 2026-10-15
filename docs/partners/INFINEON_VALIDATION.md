@@ -53,7 +53,15 @@ bin/rivicq firmware compare \
     fixtures/partners/infineon/firmware-diff/v2.bin
 ```
 
-## Expected output (observed, commit `1fa0910`)
+## This session (2026-10-14)
+
+- `internal/firmware/partner_fixtures_test.go` **PASS**
+- CLI `firmware scan … --fail-on NONE --format json` exit **0**
+- CLI `firmware compare v1.bin v2.bin` exit **0**
+
+String/static analysis only. **Not** an Infineon endorsement, not silicon analysis, not key extraction.
+
+## Expected output (historical, commit `1fa0910`)
 
 `firmware scan … classical-mcu/firmware.bin`:
 

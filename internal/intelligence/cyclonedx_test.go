@@ -1,6 +1,10 @@
 package intelligence
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/rivic-q/cryptobom-saas/internal/discovery"
+)
 
 func TestCycloneDXBOMFromFindings(t *testing.T) {
 	findings := []Finding{
@@ -11,14 +15,63 @@ func TestCycloneDXBOMFromFindings(t *testing.T) {
 	}
 	doc := CycloneDXBOM("demo", nil, findings)
 
+	if errs := ValidateCycloneDX(doc); len(errs) > 0 {
+		t.Fatalf("schema: %v", errs)
+	}
 	list, _ := doc["components"].([]map[string]any)
 	if len(list) != 2 {
 		t.Fatalf("expected 2 crypto components (MD5, ECDH), got %d: %+v", len(list), list)
 	}
-	if list[0]["name"] != "MD5" || list[0]["type"] != "cryptographic-asset" {
-		t.Fatalf("unexpected component[0]: %+v", list[0])
+	names := map[string]bool{}
+	for _, c := range list {
+		name, _ := c["name"].(string)
+		names[name] = true
+		if c["type"] != "cryptographic-asset" {
+			t.Fatalf("unexpected type: %+v", c)
+		}
+		if c["bom-ref"] == "" {
+			t.Fatalf("missing bom-ref: %+v", c)
+		}
 	}
-	if list[1]["name"] != "ECDH" {
-		t.Fatalf("unexpected component[1]: %+v", list[1])
+	if !names["MD5"] || !names["ECDH"] {
+		t.Fatalf("unexpected names: %+v", names)
+	}
+}
+
+func TestCycloneDXDeterministicSerial(t *testing.T) {
+	findings := []Finding{
+		{Algorithm: "RSA", Location: "k.go", KeyLength: 2048},
+		{Algorithm: "AES", Location: "k.go", PresenceKind: PresenceInventory},
+	}
+	a := CycloneDXBOM("demo", nil, findings)
+	b := CycloneDXBOM("demo", nil, findings)
+	if a["serialNumber"] != b["serialNumber"] {
+		t.Fatalf("serialNumber not deterministic: %v vs %v", a["serialNumber"], b["serialNumber"])
+	}
+	la, _ := a["components"].([]map[string]any)
+	lb, _ := b["components"].([]map[string]any)
+	if la[0]["bom-ref"] != lb[0]["bom-ref"] {
+		t.Fatalf("bom-ref not deterministic: %v vs %v", la[0]["bom-ref"], lb[0]["bom-ref"])
+	}
+}
+
+func TestCycloneDXIncludesDiscoveryComponents(t *testing.T) {
+	comps := []discovery.CBOMComponent{{
+		Algorithm: "RSA", KeySize: 2048, Library: "crypto/rsa", Location: "tls",
+	}}
+	doc := CycloneDXBOM("demo", comps, nil)
+	if errs := ValidateCycloneDX(doc); len(errs) > 0 {
+		t.Fatalf("schema: %v", errs)
+	}
+	list, _ := doc["components"].([]map[string]any)
+	if len(list) != 1 || list[0]["name"] != "RSA" {
+		t.Fatalf("components %+v", list)
+	}
+}
+
+func TestValidateCycloneDXRejectsEmpty(t *testing.T) {
+	errs := ValidateCycloneDX(nil)
+	if len(errs) == 0 {
+		t.Fatal("expected errors for nil document")
 	}
 }

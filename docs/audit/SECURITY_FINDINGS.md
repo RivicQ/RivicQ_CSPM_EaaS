@@ -1,6 +1,6 @@
 # RivicQ CSPM — Security Findings (Phase 1)
 
-Scope: repository working tree at commit `1fa0910`, static review + live CLI runs.
+Scope: branch `cursor/cspm-enterprise-readiness-72c9` based on `main` @ `1cc1c652f9ca8444b2a2480a26889c7f8215bab0`, static review + live CLI runs. Prior-audit SHA `1fa0910` is **not** this checkout.
 Severity: **High / Medium / Low / Info**.
 
 ## Positive controls observed (verified in source)
@@ -36,10 +36,9 @@ reads return `ErrForbidden`/`ErrNotFound` (see Phase 6 tests).
 origins. Safe for dev, but must be forced off in production config.
 **Action:** gate on `ENV`/`APP_ENV != production`.
 
-### F-4 — Low — CLI flag-value validation
-`rivicq … --fail-on BOGUS` / `--format bogus` exit `0` (silent fallback) instead
-of a usage error (exit `2`). A CI job that typos the gate value could pass
-unexpectedly. **Action:** validate enum values, return exit 2.
+### F-4 — Low — CLI flag-value validation — **FIXED this branch**
+`rivicq … --fail-on BOGUS` / `--format yaml` now exit **2** with a usage error
+(`intelligence.ParseFailOn` / `ParseFormat`). Verified: see `docs/audit/TEST_RESULTS.md`.
 
 ### F-5 — Low — 19 static-analysis issues (lint)
 `golangci-lint run ./...` fails with 15 `errcheck`, 1 `ineffassign`,
@@ -60,6 +59,12 @@ Documented in `integrations/README.md`.
 ### F-8 — Info — SSO not implemented
 No IdP handshake exists. Do **not** claim "SSO complete" for enterprise
 evaluations until a live IdP login is tested and evidenced.
+
+### F-9 — Info — Aikido SAST not completed in this session
+`aikido_full_scan` / `aikido_login` require an interactive browser sign-in
+(`https://app.aikido.dev/settings/integrations/ide/mcp?...`). The Cloud Agent
+cannot complete that handshake. No Aikido findings are claimed. Local
+evidence remains `go vet ./...` (PASS) and the tenant/auth unit tests.
 
 ## What was NOT claimed (guardrails upheld)
 

@@ -1,0 +1,13 @@
+{
+  "id": "golden-ambiguous-docs",
+  "title": "Documentation naming banned algorithms must stay silent",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/golden/ambiguous",
+  "include_fixtures": true,
+  "must_match": [],
+  "must_not_match": [],
+  "min_findings": 0,
+  "max_block": true,
+  "notes": "Negative case: README prose is not code."
+}

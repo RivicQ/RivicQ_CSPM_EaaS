@@ -1,80 +1,66 @@
-# RivicQ CSPM — Baseline Audit (Phase 1)
+# RivicQ CSPM — Baseline audit
 
-Status: **first pass, evidence-based**. Every result below was produced by running a
-command against the working tree, not copied from documentation.
+Status: **evidence-based, this checkout**. Commands were run in this session.
 
-- Repository: `RivicQ/RivicQ_CSPM_EaaS`
-- Go module path: `github.com/rivic-q/cryptobom-saas`
-- Branch: `cursor/cspm-enterprise-boms-86cc`
-- Commit: `1fa09106f5439798b96d2858c8db9ca147b6f95b`
-- Default branch: `main` (tip `75d6245`; an ancestor of the audited commit)
-- Date of run: 2026-10-12
+- Repository: `RivicQ/RivicQ_CSPM_EaaS` (module `github.com/rivic-q/cryptobom-saas`)
+- Branch: `cursor/cspm-enterprise-readiness-72c9` (created from `main`)
+- Base SHA: `1cc1c652f9ca8444b2a2480a26889c7f8215bab0` (`fix(web): drop unused import breaking CI eslint build`)
+- Date: 2026-10-14
 
 ## Toolchain (as observed)
 
 | Tool | Version |
 |------|---------|
 | go | 1.26.9 |
-| node | 26.7.0 |
-| npm | 11.19.0 |
-| golangci-lint | 2.12.2 |
-| python3 | 3.9.6 |
+| node | 22.14.0 |
+| npm | 10.9.9 |
+| python3 | 3.12.3 |
+| golangci-lint | **not installed** |
+| docker / helm | not on PATH |
 
-`gh` CLI is **not installed** and the stored GitHub credential is expired
-(API returns `401 Bad credentials`), so no workflow dispatch / PR / branch
-protection action was possible during this audit.
+`/tmp/cursor/start-user/start-user.status` exited **127** (start script failed). No Compose/Helm stack was assumed up.
 
-## Repository shape
+## Repository shape (discovered, not assumed)
 
-- Tracked files: 861 (pack size 32.92 MiB).
-- Backend: Go, Gin router, `internal/*` domain packages, `cmd/*` binaries.
-- Frontend: CRA + TypeScript under `web/`.
-- Static surfaces: `docs/`, `marketing/`, `fabric/` (RivicQ Graph), `archify/`.
-- Persistence: PostgreSQL optional; in-memory demo mode when unset.
-- Editions: OSS (`:8080`) and Enterprise (`:9090`, license-gated via `CRYPTOBOM_LICENSE_KEY`).
+Present: `cmd/`, `internal/`, `web/`, `sdk/`, `tests/`, `fixtures/`, `datasets/`, `deploy/`, `.github/`, `docs/`, `fabric/`, `archify/`, `integrations/`, `Makefile`, `go.mod`.
 
-## Build / test / lint results
+No separate `api/` Go package except `api/v1alpha1`. OpenAPI lives at `docs/openapi.yaml`.
 
-| Check | Command | Result | Notes |
-|-------|---------|--------|-------|
-| Go build | `go build ./...` | **PASS** (after fix) | Failed initially on `integrations/stripe/server/stripe.go` (unused vars). Fixed in this audit. |
-| Go vet | `go vet ./...` | **PASS** | |
-| Go tests | `go test ./...` | **PASS** | All packages `ok`; several test-packages otherwise (see TEST_RESULTS.md). |
-| golangci-lint | `golangci-lint run ./...` | **FAIL: 19 issues** | All pre-existing; see below. |
-| Web type-check | `npm run type-check` (web/) | **PASS** | `tsc --noEmit` clean. |
-| Web lint | `npm run lint` (web/) | **PASS** | `eslint src --ext .ts,.tsx` clean. |
-| Web tests | `CI=true npm test` (web/) | **PASS** | 11 suites / 27 tests. |
-| CLI scan | `bin/rivicq scan <dir>` | **PASS** | Exit 0 clean, 1 on gate block. |
+## Commands and observed results
 
-### Lint issues (pre-existing, 19)
+| Check | Command | Result |
+|-------|---------|--------|
+| Go build | `go build ./...` | **PASS** |
+| Go vet | `go vet ./...` | **PASS** |
+| Go tests | `go test -count=1 ./...` | **PASS** (packages `ok`; several have no test files) |
+| Datasets | `python3 scripts/analyze-datasets.py` | **PASS 12/12** after this branch's CBOM/CLI fixes |
+| Web type-check | `cd web && npm run type-check` | **PASS** |
+| Web lint | `cd web && npm run lint` | **PASS** |
+| Web tests | `cd web && CI=true npm test -- --watchAll=false` | **PASS** 12 suites / 31 tests |
+| CLI usage | `./bin/rivicq` | exit **2** |
+| CLI invalid gate | `./bin/rivicq scan . --fail-on BOGUS` | exit **2** (was silently 0 on `main`) |
+| CLI invalid format | `./bin/rivicq scan . --format yaml` | exit **2** |
+| Weak fixture | `./bin/rivicq scan fixtures/crypto-test --include-fixtures --fail-on BLOCK` | exit **1**, gate BLOCK |
+| RSA-2048 golden | `./bin/rivicq scan fixtures/golden/rsa2048 --include-fixtures --fail-on BLOCK` | exit **0** |
+| Self-scan | `./bin/rivicq scan . --fail-on BLOCK` | exit **0**, gate WARN |
 
-| Linter | Count | Location |
-|--------|-------|----------|
-| errcheck | 15 | `internal/firmware/{analyze_test.go,helpers_test.go,format.go}` |
-| ineffassign | 1 | `internal/identity/identity.go:137` |
-| staticcheck | 2 | `internal/firmware/format.go:71` (empty branch), `:347` (`tar.TypeRegA` deprecated) |
-| unused | 1 | `internal/api/shared/auth_compat.go:18` (`toUserResponse`) |
+`golangci-lint` was **not run** (binary missing). Do not treat lint as passing.
 
-None of these are in security-critical paths; all predate this audit. Recommended
-fix: a small hygiene PR (see SECURITY_FINDINGS.md for severity).
+## Defects found on `main` and disposition
 
-## Defects found during baseline (and disposition)
-
-1. **P0 — build-breaking scaffold.** `integrations/stripe/server/stripe.go`
-   declared `successURL` / `cancelURL` but only referenced them inside comments,
-   so `go build ./...` failed. **Fixed** in this audit (values now surfaced in the
-   not-implemented response).
-2. **P2 — lint debt (19).** Described above. Not fixed here (out of the smallest-
-   high-value-fix budget; tracked for a hygiene PR).
-3. **P3 — CLI flag-value validation.** `--fail-on BOGUS` and `--format bogus`
-   return exit 0 (silently fall back) rather than a usage error. Exit code `2` is
-   only produced for missing/unknown commands. Documented inconsistency.
+1. **CLI `--fail-on` / `--format` typos exited 0** by falling back to BLOCK/table. **Fixed** (usage error, exit 2).
+2. **CycloneDX serial numbers were random UUIDs** and components lacked `bom-ref`. **Fixed** (UUID v5 + `bom-ref`).
+3. **CBOM inventoried weak algorithms only** — AES, SHA-256, TLS 1.2/1.3, X.509 PEM, ECDH, X25519, FF-DH, ssh-rsa host keys were missing or incomplete. **Fixed** with tests/fixtures.
+4. **Partner fixtures had no Go tests** referencing `fixtures/partners/**`. **Added**.
+5. **Self-scan BLOCK** after the first ssh-rsa rule (matched `policy.go` source). **Fixed** by requiring SSH config context + matching on `rule_id`.
 
 ## Reproduce
 
 ```sh
-go build ./... && go vet ./... && go test ./...
-golangci-lint run ./...
+go build ./... && go vet ./... && go test -count=1 ./...
+go build -o bin/rivicq ./cmd/rivicq
+python3 scripts/analyze-datasets.py
 ( cd web && npm ci && npm run type-check && npm run lint && CI=true npm test -- --watchAll=false )
-go build -o /tmp/rivicq ./cmd/rivicq && /tmp/rivicq scan . --format json
+./bin/rivicq scan fixtures/crypto-test --include-fixtures --fail-on BLOCK
+./bin/rivicq scan . --fail-on BOGUS ; echo $?   # expect 2
 ```

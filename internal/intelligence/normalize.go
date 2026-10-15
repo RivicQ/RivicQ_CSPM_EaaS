@@ -27,8 +27,10 @@ func FromDiscovery(f discovery.Finding) Finding {
 		Status:      "open",
 		CreatedAt:   f.ScannedAt,
 		UpdatedAt:   f.ScannedAt,
-		QuantumSafe: f.QuantumSafe,
-		Usage:       usageFromType(f.FindingType, f.Protocol),
+		QuantumSafe:     f.QuantumSafe,
+		Usage:           usageFromType(f.FindingType, f.Protocol),
+		DetectionMethod: InferDetectionMethod(f.Protocol, ""),
+		PresenceKind:    InferPresenceKind("", f.Protocol, f.FindingType),
 	}
 	if f.BSIRef != "" {
 		n.Controls = append(n.Controls, f.BSIRef)
@@ -54,10 +56,13 @@ type ContentFinding struct {
 	Line, KeyLength                                                                                                         int
 	// Confidence is the detector's own confidence in 0..1. Zero means the
 	// detector did not report one and the legacy default applies.
-	Confidence  float64
-	QuantumSafe bool
-	Compliance  []string
-	Demo        bool
+	Confidence      float64
+	QuantumSafe     bool
+	Compliance      []string
+	Demo            bool
+	DetectionMethod string
+	EvidenceKind    string
+	PresenceKind    string
 }
 
 // contentConfidence maps a detector confidence into the 0..1 range, falling back
@@ -90,8 +95,14 @@ func FromContent(repo string, f ContentFinding) Finding {
 		Controls:    f.Compliance,
 		Remediation: f.Remediation,
 		Status:      "open",
-		QuantumSafe: f.QuantumSafe,
-		Usage:       usageFromType(f.FindingType, ""),
+		QuantumSafe:     f.QuantumSafe,
+		Usage:           usageFromType(f.FindingType, ""),
+		DetectionMethod: f.DetectionMethod,
+		EvidenceKind:    f.EvidenceKind,
+		PresenceKind:    f.PresenceKind,
+	}
+	if n.PresenceKind == "" {
+		n.PresenceKind = InferPresenceKind(f.RuleID, n.Scanner, f.FindingType)
 	}
 	if f.Demo {
 		n.Source = "demo"

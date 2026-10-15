@@ -1,0 +1,12 @@
+{
+  "id": "golden-ssh-rsa",
+  "title": "ssh-rsa host key algorithm is a confirmed-usage finding",
+  "license": "Apache-2.0",
+  "sensitive": false,
+  "source": "fixtures/golden/ssh-rsa",
+  "include_fixtures": true,
+  "must_match": ["ssh-rsa"],
+  "must_not_match": ["ghp_live"],
+  "min_findings": 1,
+  "notes": "Declared SSH host-key algorithm ssh-rsa. Synthetic config, no keys."
+}

@@ -24,27 +24,15 @@ func main() {
 	switch cmd {
 	case "scan", "sbom", "cbom", "vuln", "secrets", "iac", "compliance", "policy":
 		if err := runScan(cmd, args); err != nil {
-			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
-			if _, ok := err.(failOnError); ok {
-				os.Exit(intelligence.ExitFailOn)
-			}
-			os.Exit(1)
+			exitCLI(err)
 		}
 	case "firmware":
 		if err := runFirmware(args); err != nil {
-			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
-			if _, ok := err.(failOnError); ok {
-				os.Exit(intelligence.ExitFailOn)
-			}
-			os.Exit(1)
+			exitCLI(err)
 		}
 	case "identity":
 		if err := runIdentity(args); err != nil {
-			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
-			if _, ok := err.(failOnError); ok {
-				os.Exit(intelligence.ExitFailOn)
-			}
-			os.Exit(1)
+			exitCLI(err)
 		}
 	case "version", "-version", "--version":
 		fmt.Println("rivicq 0.1.0")
@@ -97,7 +85,7 @@ func runScan(mode string, args []string) error {
 	includeFixtures := fs.Bool("include-fixtures", false, "scan fixtures/ and testdata/ (dataset analysis only)")
 	flagArgs, positional := splitCLIArgs(args)
 	if err := fs.Parse(flagArgs); err != nil {
-		return err
+		return usageError{msg: err.Error()}
 	}
 	root := "."
 	if len(positional) > 0 {
@@ -111,6 +99,15 @@ func runScan(mode string, args []string) error {
 	}
 	if *asJSON {
 		*format = "json"
+	}
+	normalizedFormat, err := intelligence.ParseFormat(*format)
+	if err != nil {
+		return usageError{msg: err.Error()}
+	}
+	*format = normalizedFormat
+	normalizedFailOn, err := intelligence.ParseFailOn(*failOn)
+	if err != nil {
+		return usageError{msg: err.Error()}
 	}
 
 	files, err := walkRepo(abs, *includeFixtures)
@@ -155,9 +152,9 @@ func runScan(mode string, args []string) error {
 		printTable(mode, abs, content, rep)
 	}
 
-	failed := intelligence.ShouldFailOn(*failOn, rep)
+	failed := intelligence.ShouldFailOn(normalizedFailOn, rep)
 	if failed {
-		return failOnError{threshold: *failOn, decision: rep.Gate.Decision}
+		return failOnError{threshold: normalizedFailOn, decision: rep.Gate.Decision}
 	}
 	return nil
 }
@@ -165,6 +162,41 @@ func runScan(mode string, args []string) error {
 type failOnError struct {
 	threshold string
 	decision  string
+}
+
+type usageError struct {
+	msg string
+}
+
+func (e usageError) Error() string { return e.msg }
+
+func parsePartnerFailOn(raw string) (string, error) {
+	v, err := intelligence.ParseFailOn(raw)
+	if err != nil {
+		return "", usageError{msg: err.Error()}
+	}
+	switch v {
+	case "block":
+		return "BLOCK", nil
+	case "warn":
+		return "WARN", nil
+	case "none":
+		return "NONE", nil
+	default:
+		return "", usageError{msg: "firmware/identity --fail-on must be BLOCK, WARN, or NONE"}
+	}
+}
+
+func exitCLI(err error) {
+	fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
+	switch err.(type) {
+	case failOnError:
+		os.Exit(intelligence.ExitFailOn)
+	case usageError:
+		os.Exit(intelligence.ExitUsage)
+	default:
+		os.Exit(1)
+	}
 }
 
 func (e failOnError) Error() string {
@@ -297,7 +329,11 @@ func walkRepo(root string, includeFixtures bool) ([]shared.RepoFile, error) {
 			return nil
 		}
 		// Detection catalogs list algorithm names (incl. 3DES/RC4) as data, not usage.
-		if rel == "internal/cryptoscan/detect.go" || rel == "internal/intelligence/pqc_class.go" {
+		switch rel {
+		case "internal/cryptoscan/detect.go",
+			"internal/intelligence/pqc_class.go",
+			"internal/intelligence/policy.go",
+			"internal/api/shared/github_content_scan.go":
 			return nil
 		}
 		ext := strings.ToLower(filepath.Ext(path))

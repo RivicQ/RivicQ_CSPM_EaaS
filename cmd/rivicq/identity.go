@@ -114,7 +114,10 @@ func identityScan(sub string, args []string) error {
 		}
 	}
 
-	failOn := strings.ToUpper(p.value("fail-on", "BLOCK"))
+	failOn, ferr := parsePartnerFailOn(p.value("fail-on", "BLOCK"))
+	if ferr != nil {
+		return ferr
+	}
 	if identityGate(reports, failOn) {
 		return failOnError{threshold: failOn, decision: "identity"}
 	}
