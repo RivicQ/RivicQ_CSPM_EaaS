@@ -481,13 +481,15 @@ const Home: React.FC = () => {
                   }}
                 />
                 <LoadingButton
+                  type="button"
                   variant="contained"
                   endIcon={<ArrowForward />}
-                  onClick={handleScan}
+                  onClick={() => { void handleScan(); }}
                   loading={scanStatus === 'scanning'}
                   loadingText="Scanning…"
                   disabled={backendReachable && !repoUrl.trim()}
                   sx={{ minWidth: 168 }}
+                  aria-label={backendReachable ? 'Run scan' : 'Run demo scan'}
                 >
                   {backendReachable ? 'Run scan' : 'Run demo scan'}
                 </LoadingButton>

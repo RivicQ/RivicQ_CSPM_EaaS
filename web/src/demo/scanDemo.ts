@@ -158,9 +158,30 @@ function okResponse(config: InternalAxiosRequestConfig, data: unknown, status = 
 }
 
 function urlOf(config: InternalAxiosRequestConfig): string {
-  let url = config.url || '';
-  if (!url.startsWith('/')) url = `/${url}`;
-  return url.replace(/^\/api\/v1/, '');
+  const raw = String(config.url || '');
+  const base = String(config.baseURL || '');
+
+  // Axios may pass an absolute URL (baseURL + path merged) once a prior session
+  // stored api_base_url. Always reduce to an API-relative path so demo routes match.
+  const asPath = (value: string): string => {
+    if (/^https?:\/\//i.test(value)) {
+      try {
+        return new URL(value).pathname || '/';
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  };
+
+  let path = asPath(raw);
+  if (!/^https?:\/\//i.test(raw) && base) {
+    const basePath = asPath(base).replace(/\/+$/, '');
+    const rel = path.startsWith('/') ? path : `/${path}`;
+    path = `${basePath}${rel}`;
+  }
+  if (!path.startsWith('/')) path = `/${path}`;
+  return path.replace(/^\/api\/v1/, '') || '/';
 }
 
 function isScanIdSegment(seg: string): boolean {

@@ -15,6 +15,18 @@ describe('scanDemo adapter', () => {
     expect(isDemoSessionActive()).toBe(false);
   });
 
+  it('matches demo routes when axios merges an absolute baseURL', async () => {
+    localStorage.setItem(DEMO_STORAGE_KEY, '1');
+    const started = await demoScanRespond(cfg({
+      method: 'post',
+      url: '/scans',
+      baseURL: 'http://localhost:8080/api/v1',
+      data: { target: 'https://example.com', scan_type: 'website' },
+    } as Partial<InternalAxiosRequestConfig> & { method: string; url: string; data?: unknown }));
+    expect(started?.status).toBe(201);
+    expect(String(started?.data.scan_id)).toMatch(/^demo-/);
+  });
+
   it('progresses a labelled demo scan to completion', async () => {
     localStorage.setItem(DEMO_STORAGE_KEY, '1');
     localStorage.setItem('auth_token', CLIENT_DEMO_TOKEN);
