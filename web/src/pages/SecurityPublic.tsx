@@ -1,12 +1,13 @@
 import React from 'react';
 import SitePage from './SitePage';
+import { archifyDocsHref } from '../theme/docsLink';
 
 const SecurityPublic: React.FC = () => (
   <SitePage
     eyebrow="Security"
     title="How RivicQ handles secrets, tenants, and Pages."
     lede="GitHub Pages is a public static site. It must never hold database credentials, admin tools, or customer estates. Production scans need the CLI or a running API."
-    primary={{ label: 'Security policy', to: `${process.env.PUBLIC_URL || ''}/docs/read.html?doc=SECURITY.md` }}
+    primary={{ label: 'Security policy', to: archifyDocsHref('security') }}
     secondary={{ label: 'Report a vulnerability', to: 'mailto:security@rivicq.com' }}
     engineNotice="scan"
     blocks={[

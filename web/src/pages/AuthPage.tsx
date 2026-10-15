@@ -42,6 +42,10 @@ import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { proBlueContainedButtonSx } from '../theme/designSystem';
+import { websiteCtaSx } from '../theme/websiteChrome';
+import { archifyDocsHref } from '../theme/docsLink';
+import ThemeToggle from '../theme/ThemeToggle';
+import { useThemeMode } from '../theme/ThemeContext';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 
 interface AuthPageProps {
@@ -81,6 +85,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
   } = useAuth();
   const { start: startTrail } = useDemoTrail();
   const isDark = useTheme().palette.mode === 'dark';
+  const { choice, setChoice } = useThemeMode();
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -238,7 +243,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
           <BrandLogo dark={isDark} />
-          <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
+          <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+            <ThemeToggle choice={choice} onChoose={setChoice} compact />
+            <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600 }} />
+          </Stack>
         </Box>
         <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
           {mode === 'register' ? 'Create workspace' : 'Cryptographic security'}
@@ -281,12 +289,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
               clearly-labelled sample data.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <Button variant="contained" startIcon={<AutoAwesome />} disabled={loading} onClick={() => handleDemo(true)}>
+              <Button variant="contained" startIcon={<AutoAwesome />} disabled={loading} onClick={() => handleDemo(true)} sx={websiteCtaSx}>
                 Enter the interactive demo
               </Button>
               <Button
                 variant="outlined"
-                onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/docs/RENDER.md`, '_blank', 'noopener,noreferrer')}
+                onClick={() => window.open(archifyDocsHref('render'), '_blank', 'noopener,noreferrer')}
               >
                 How to deploy the engine
               </Button>
@@ -308,7 +316,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       borderRadius: 1,
                       border: 1,
                       borderColor: 'divider',
-                      bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(124,58,237,0.12)' : 'rgba(124,58,237,0.08)'),
+                      bgcolor: 'background.paper',
                       backdropFilter: 'none',
                     }}
                   >
@@ -322,6 +330,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       disabled={loading}
                       onClick={() => handleDemo(true)}
                       aria-label="Try interactive demo"
+                      sx={websiteCtaSx}
                     >
                       Try Interactive Demo
                     </Button>
@@ -665,9 +674,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
                         <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
                           By continuing you agree to the{' '}
-                          <a href={`${process.env.PUBLIC_URL || ''}/docs/read.html?doc=LEGAL.md`} style={{ color: 'inherit' }}>legal terms</a>
+                          <a href={archifyDocsHref('legal')} style={{ color: 'inherit' }}>legal terms</a>
                           {' '}and{' '}
-                          <a href={`${process.env.PUBLIC_URL || ''}/docs/read.html?doc=PRIVACY.md`} style={{ color: 'inherit' }}>privacy notice</a>.
+                          <a href={archifyDocsHref('privacy')} style={{ color: 'inherit' }}>privacy notice</a>.
                           Authentication is handled by {providerName}.
                         </Typography>
                         <TrademarkNotice compact sx={{ textAlign: 'center', mx: 'auto' }} />

@@ -18,6 +18,8 @@ import { tokens } from '../theme/tokens';
 import { websiteCtaSx } from '../theme/websiteChrome';
 import ThemeToggle from '../theme/ThemeToggle';
 import { useThemeMode } from '../theme/ThemeContext';
+import { archifyDocsHref } from '../theme/docsLink';
+import ConsoleStory from '../components/ops/ConsoleStory';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
@@ -43,7 +45,7 @@ type HomeDoc = {
 };
 
 const DOCS: HomeDoc[] = [
-  { icon: <MenuBook />, title: 'Documentation', desc: 'Architecture, EaaS, CBOM, and PQC guides.', href: 'docs/index.html' },
+  { icon: <MenuBook />, title: 'Documentation', desc: 'Architecture, editions, CBOM, and PQC notes, rendered in Archify.', href: archifyDocsHref() },
   { icon: <MailOutline />, title: 'Contact', desc: 'Public desks on @rivicq.com.', to: '/contact' },
   { icon: <AccountTree />, title: 'RivicQ Graph', desc: 'Labeled security-graph demo. Synthetic data only.', href: 'fabric/' },
   { icon: <Api />, title: 'API reference', desc: 'OpenAPI for the RivicQ platform API.', href: 'api/index.html' },
@@ -54,8 +56,8 @@ const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', '
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { choice, setChoice } = useThemeMode();
   const isDark = useTheme().palette.mode === 'dark';
-  const { mode, toggleMode } = useThemeMode();
   const { isAuthenticated, backendReachable, demoLogin, isDemo } = useAuth();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
@@ -214,7 +216,9 @@ const Home: React.FC = () => {
   };
 
   const openExternal = (href: string) => {
-    const url = href.startsWith('http') ? href : `${process.env.PUBLIC_URL || ''}/${href.replace(/^\//, '')}`;
+    const url = href.startsWith('http') || href.startsWith('/')
+      ? href
+      : `${process.env.PUBLIC_URL || ''}/${href.replace(/^\//, '')}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -257,15 +261,15 @@ const Home: React.FC = () => {
       id: 'trust',
       label: 'Trust & Security',
       items: [
-        { label: 'Security policy', action: () => openExternal('docs/read.html?doc=SECURITY.md') },
-        { label: 'Privacy', action: () => openExternal('docs/read.html?doc=PRIVACY.md') },
+        { label: 'Security policy', action: () => openExternal(archifyDocsHref('security')) },
+        { label: 'Privacy', action: () => openExternal(archifyDocsHref('privacy')) },
       ],
     },
     {
       id: 'resources',
       label: 'Resources',
       items: [
-        { label: 'Documentation', action: () => openExternal('docs/index.html') },
+        { label: 'Documentation', action: () => openExternal(archifyDocsHref()) },
         { label: 'RivicQ Graph demo', action: () => openExternal('fabric/') },
         { label: 'API reference', action: () => openExternal('api/index.html') },
         { label: 'GitHub', action: () => openExternal('https://github.com/RivicQ/RivicQ_CSPM_EaaS') },
@@ -317,7 +321,7 @@ const Home: React.FC = () => {
                 </Button>
               ))}
             </Stack>
-            <ThemeToggle mode={mode} onToggle={toggleMode} compact />
+            <ThemeToggle choice={choice} onChoose={setChoice} compact />
             <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={websiteCtaSx}>
               Request demo
             </Button>
@@ -343,13 +347,13 @@ const Home: React.FC = () => {
         </Menu>
       </Box>
 
-      <Box sx={{ position: 'relative', minHeight: { xs: 560, md: 640 }, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-        <NebulaBackdrop />
+      <Box sx={{ position: 'relative', minHeight: { xs: 560, md: 640 }, display: 'flex', alignItems: 'center', overflow: 'hidden', bgcolor: isDark ? 'transparent' : 'background.default' }}>
+        {isDark && <NebulaBackdrop />}
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: { xs: 8, md: 12 } }}>
-          <Typography sx={{ fontSize: { xs: '2.2rem', md: '3.35rem' }, fontWeight: 750, letterSpacing: '-0.04em', lineHeight: 1.08, color: '#fff', mb: 2.5 }}>
+          <Typography sx={{ fontSize: { xs: '2.2rem', md: '3.35rem' }, fontWeight: 750, letterSpacing: '-0.04em', lineHeight: 1.08, color: isDark ? '#fff' : 'text.primary', mb: 2.5 }}>
             Know what cryptography protects your business before attackers do.
           </Typography>
-          <Typography sx={{ color: '#d1d5db', maxWidth: 720, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
+          <Typography sx={{ color: isDark ? '#d1d5db' : 'text.secondary', maxWidth: 720, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
             RivicQ discovers cryptographic assets, cloud risks and migration exposure — then inventories them as CBOM evidence for PQC planning. Point it at an IoT device, a website, or a repo.
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center">
@@ -373,10 +377,13 @@ const Home: React.FC = () => {
               sx={{
                 px: 3,
                 py: 1.2,
-                color: '#F4F7F5',
-                WebkitTextFillColor: '#F4F7F5',
-                borderColor: 'rgba(244,247,245,0.55)',
-                '&:hover': { borderColor: '#F4F7F5', bgcolor: 'rgba(244,247,245,0.06)' },
+                color: isDark ? '#F4F7F5' : '#1C1915',
+                WebkitTextFillColor: isDark ? '#F4F7F5' : '#1C1915',
+                borderColor: isDark ? 'rgba(244,247,245,0.55)' : 'rgba(28,25,21,0.35)',
+                '&:hover': {
+                  borderColor: isDark ? '#F4F7F5' : '#1C1915',
+                  bgcolor: isDark ? 'rgba(244,247,245,0.06)' : 'rgba(30,63,54,0.08)',
+                },
               }}
             >
               Try the live demo
@@ -385,7 +392,7 @@ const Home: React.FC = () => {
               variant="text"
               size="large"
               onClick={() => navigate('/request-demo')}
-              sx={{ px: 3, py: 1.2, color: '#d1d5db', '&:hover': { color: '#fff' } }}
+              sx={{ px: 3, py: 1.2, color: isDark ? '#d1d5db' : 'text.secondary', '&:hover': { color: isDark ? '#fff' : 'text.primary' } }}
             >
               Request enterprise demo
             </Button>
@@ -459,6 +466,10 @@ const Home: React.FC = () => {
         )}
 
         <ScanWorkflowStrip />
+
+        <Box id="funnel" sx={{ mt: 6, scrollMarginTop: 80 }}>
+          <ConsoleStory focus="funnel" />
+        </Box>
 
         <Box id="platform" sx={{ mt: 10, scrollMarginTop: 80 }}>
           <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary', mb: 1 }}>

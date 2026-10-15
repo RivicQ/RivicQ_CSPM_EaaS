@@ -7,6 +7,7 @@ import PublicShell from '../components/brand/PublicShell';
 import { useAuth } from '../context/AuthContext';
 import { platformService } from '../services/api';
 import { PUBLIC_PAGES_SALES_FORM } from '../data/publicInfrastructure';
+import { websiteCtaSx } from '../theme/websiteChrome';
 
 const INTENTS = [
   { value: 'demo', label: 'Enterprise demo' },
@@ -80,7 +81,7 @@ const RequestDemo: React.FC = () => {
                   <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
                 ))}
               </TextField>
-              <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ borderRadius: 999, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}>
+              <Button type="submit" variant="contained" size="large" disabled={loading} sx={websiteCtaSx}>
                 {loading ? 'Sending…' : backendReachable ? 'Submit request' : 'Email sales@'}
               </Button>
               <Stack direction="row" spacing={1}>

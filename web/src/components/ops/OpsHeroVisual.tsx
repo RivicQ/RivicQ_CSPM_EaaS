@@ -49,13 +49,13 @@ const OpsHeroVisual: React.FC<OpsHeroVisualProps> = ({
     ];
     return (
       <Box sx={{ width: '100%', minWidth: 200, height: 132 }} aria-label="Findings severity chart">
-        <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', mb: 0.5 }}>
+        <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--rq-muted)', mb: 0.5 }}>
           {empty ? 'Severity · no scan series yet' : 'Severity in this workspace'}
         </Typography>
         <ResponsiveContainer width="100%" height={108}>
           <BarChart data={data} barSize={18} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-            <XAxis dataKey="name" tick={{ fill: 'rgba(255,255,255,0.55)', fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis allowDecimals={false} tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} axisLine={false} tickLine={false} width={24} />
+            <XAxis dataKey="name" tick={{ fill: 'var(--rq-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis allowDecimals={false} tick={{ fill: 'var(--rq-faint)', fontSize: 10 }} axisLine={false} tickLine={false} width={24} />
             <Bar dataKey="value" radius={[6, 6, 0, 0]}>
               {data.map((d) => (
                 <Cell key={d.name} fill={d.fill} />
@@ -71,7 +71,7 @@ const OpsHeroVisual: React.FC<OpsHeroVisualProps> = ({
     const steps = PIPELINE_STAGES.filter((s) => s.oss).slice(0, 4);
     return (
       <Box sx={{ width: '100%', minWidth: 220 }} aria-label="Scan pipeline">
-        <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', mb: 1 }}>
+        <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--rq-muted)', mb: 1 }}>
           Discover → score → report
         </Typography>
         <Stack direction="row" spacing={0.75} alignItems="center">
@@ -91,10 +91,10 @@ const OpsHeroVisual: React.FC<OpsHeroVisualProps> = ({
                   flex: 1,
                 }}
               >
-                <Typography sx={{ fontSize: 10, fontWeight: 700, color: '#fff', lineHeight: 1.2 }} noWrap>
+                <Typography sx={{ fontSize: 10, fontWeight: 700, color: 'var(--rq-text)', lineHeight: 1.2 }} noWrap>
                   {s.name}
                 </Typography>
-                <Typography sx={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', lineHeight: 1.2 }} noWrap>
+                <Typography sx={{ fontSize: 9, color: 'var(--rq-faint)', lineHeight: 1.2 }} noWrap>
                   {s.artifact}
                 </Typography>
               </Box>
@@ -120,17 +120,17 @@ const OpsHeroVisual: React.FC<OpsHeroVisualProps> = ({
     const max = Math.max(1, ...rows.map((r) => r.n));
     return (
       <Box sx={{ width: '100%', minWidth: 200 }} aria-label="BOM layer coverage">
-        <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', mb: 1 }}>
+        <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--rq-muted)', mb: 1 }}>
           Layer coverage from scans
         </Typography>
         <Stack spacing={0.6}>
           {rows.map((r) => (
             <Stack key={r.id} direction="row" spacing={1} alignItems="center">
-              <Typography sx={{ width: 44, fontSize: 10, fontWeight: 700, color: '#fff' }}>{r.id}</Typography>
+              <Typography sx={{ width: 44, fontSize: 10, fontWeight: 700, color: 'var(--rq-text)' }}>{r.id}</Typography>
               <Box sx={{ flex: 1, height: 8, borderRadius: 99, bgcolor: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                 <Box sx={{ width: `${(r.n / max) * 100}%`, height: '100%', bgcolor: tokens.colors.rivicq[400], borderRadius: 99 }} />
               </Box>
-              <Typography sx={{ width: 24, fontSize: 10, color: 'rgba(255,255,255,0.65)', textAlign: 'right' }}>{r.n}</Typography>
+              <Typography sx={{ width: 24, fontSize: 10, color: 'var(--rq-muted)', textAlign: 'right' }}>{r.n}</Typography>
             </Stack>
           ))}
         </Stack>
@@ -147,7 +147,7 @@ const OpsHeroVisual: React.FC<OpsHeroVisualProps> = ({
     ];
     return (
       <Box sx={{ width: '100%', minWidth: 200 }} aria-label="PQC migration stages">
-        <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', mb: 1 }}>
+        <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--rq-muted)', mb: 1 }}>
           Cut-over model · keys are not rotated here
         </Typography>
         <Stack direction="row" spacing={0.75}>
@@ -163,8 +163,8 @@ const OpsHeroVisual: React.FC<OpsHeroVisualProps> = ({
                 bgcolor: i === 0 ? 'rgba(124,58,237,0.28)' : 'rgba(255,255,255,0.04)',
               }}
             >
-              <Typography sx={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>{s.id}</Typography>
-              <Typography sx={{ fontSize: 9, color: 'rgba(255,255,255,0.5)' }}>{s.hint}</Typography>
+              <Typography sx={{ fontSize: 10, fontWeight: 700, color: 'var(--rq-text)' }}>{s.id}</Typography>
+              <Typography sx={{ fontSize: 9, color: 'var(--rq-faint)' }}>{s.hint}</Typography>
             </Box>
           ))}
         </Stack>
@@ -174,17 +174,17 @@ const OpsHeroVisual: React.FC<OpsHeroVisualProps> = ({
 
   return (
     <Box sx={{ width: '100%', minWidth: 180 }} aria-label="Governance mapping coverage">
-      <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', mb: 1 }}>
+      <Typography sx={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--rq-muted)', mb: 1 }}>
         Mappings · not certifications
       </Typography>
       <Stack direction="row" spacing={1}>
         <Box sx={{ flex: 1, p: 1.25, borderRadius: 1.5, bgcolor: 'rgba(124,58,237,0.28)', border: '1px solid rgba(167,139,250,0.35)' }}>
-          <Typography sx={{ fontSize: 22, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{mapped}</Typography>
-          <Typography sx={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>Mapped</Typography>
+          <Typography sx={{ fontSize: 22, fontWeight: 800, color: 'var(--rq-text)', lineHeight: 1 }}>{mapped}</Typography>
+          <Typography sx={{ fontSize: 10, color: 'var(--rq-muted)' }}>Mapped</Typography>
         </Box>
         <Box sx={{ flex: 1, p: 1.25, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)' }}>
-          <Typography sx={{ fontSize: 22, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{locked}</Typography>
-          <Typography sx={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>Enterprise pack</Typography>
+          <Typography sx={{ fontSize: 22, fontWeight: 800, color: 'var(--rq-text)', lineHeight: 1 }}>{locked}</Typography>
+          <Typography sx={{ fontSize: 10, color: 'var(--rq-muted)' }}>Enterprise pack</Typography>
         </Box>
       </Stack>
     </Box>

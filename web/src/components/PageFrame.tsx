@@ -124,14 +124,14 @@ const PageFrame: React.FC<PageFrameProps> = ({
             sx={{
               mx: { xs: 1.5, md: 2 },
               mb: { xs: 1.5, md: 2 },
-              px: 1.75,
-              py: 1.5,
+              px: { xs: 1.25, md: 1.75 },
+              py: { xs: 1.25, md: 1.5 },
               borderRadius: 2,
-              bgcolor: '#101614',
-              color: '#f4f7f5',
-              border: '1px solid #31403a',
+              bgcolor: 'var(--rq-bg)',
+              color: 'var(--rq-text)',
+              border: '1px solid var(--rq-line)',
               backgroundImage: 'none',
-              minHeight: 120,
+              minWidth: 0,
             }}
           >
             {visual}

@@ -17,7 +17,7 @@ import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 import ScanReportPanel, { ClientArchitectureView, PQCReadinessView } from '../components/scanner/ScanReportPanel';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
-import OpsHeroVisual from '../components/ops/OpsHeroVisual';
+import ConsoleStory from '../components/ops/ConsoleStory';
 
 interface ScanJob {
   id: string;
@@ -290,7 +290,7 @@ const Scanner: React.FC = () => {
       title="CBOM Scanner"
       subtitle="Discover cryptography on websites, hosts, IPs, servers, declared Kubernetes pods, and declared firmware/hardware. Mitigate with NIST PQC mappings. Report is CBOM + Qiskit/audit scores — not a certification. Firmware ingest is CycloneDX/hash inventory, not silicon RE."
       badge={isScanning ? 'Scanning' : (isDemo ? 'Demo · limited' : 'Ready')}
-      visual={<OpsHeroVisual variant="scans" scanning={isScanning} />}
+      visual={<ConsoleStory focus="scan" />}
     >
       {error && (
         <Box sx={{ mb: 2.5, p: 1.5, borderRadius: `${designSystem.radius.md}px`, bgcolor: 'warning.main', color: 'warning.contrastText' }}>
