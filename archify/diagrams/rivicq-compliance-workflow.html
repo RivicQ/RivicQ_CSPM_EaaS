@@ -175,8 +175,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
        ========================================================== */
     :root,
     [data-theme="dark"] {
-      --bg: #020617;
-      --grid: #1e293b;
+      --bg: #05040a;
+      --grid: #2a2438;
       --canvas-dot: rgba(148, 163, 184, 0.16);
       --text: #ffffff;
       --text-muted: #94a3b8;
@@ -184,17 +184,17 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       /* UI chrome and menu hints need more contrast than SVG .t-dim accents */
       --text-faint: #7d8da1;
 
-      --panel: rgba(15, 23, 42, 0.5);
-      --panel-border: #1e293b;
-      --lane-fill: rgba(15, 23, 42, 0.22);
-      --lane-stroke: #334155;
+      --panel: rgba(10, 8, 18, 0.72);
+      --panel-border: #2a2438;
+      --lane-fill: rgba(10, 8, 18, 0.35);
+      --lane-stroke: #3b3358;
 
       --arrow: #64748b;
       --arrow-emphasis: #34d399;
 
       /* Opaque mask color used behind semi-transparent component fills
          so the arrows drawn underneath are properly hidden. */
-      --mask: #0f172a;
+      --mask: #0a0812;
 
       --frontend-fill:    rgba(8, 51, 68, 0.4);
       --frontend-stroke:  #22d3ee;
@@ -211,18 +211,18 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       --external-fill:    rgba(30, 41, 59, 0.5);
       --external-stroke:  #94a3b8;
 
-      --toolbar-bg:       rgba(15, 23, 42, 0.8);
-      --toolbar-border:   #334155;
+      --toolbar-bg:       rgba(10, 8, 18, 0.88);
+      --toolbar-border:   #3b3358;
       --toolbar-text:     #e2e8f0;
-      --toolbar-hover:    rgba(15, 23, 42, 0.95);
-      --toolbar-menu-bg:  #0f172a;
+      --toolbar-hover:    rgba(10, 8, 18, 0.96);
+      --toolbar-menu-bg:  #0a0812;
     }
 
     [data-theme="light"] {
-      --bg: #f4f5f7;
-      --grid: #e9edf2;
-      --canvas-dot: #d9dee5;
-      --text: #111827;
+      --bg: #f6f3fb;
+      --grid: #e6dff2;
+      --canvas-dot: #ddd4ee;
+      --text: #140e22;
       --text-muted: #5b6474;
       --text-dim: #9aa3b2;
       --text-faint: #6b7280;
@@ -522,12 +522,19 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
     /* Gallery/embed mode keeps the generated artifact as the source of truth
        while presenting only its diagram surface inside a proof card. */
+    html[data-embed="true"],
     html[data-embed="true"] body {
-      min-height: 0;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+    }
+    html[data-embed="true"] body {
       padding: 0;
       overflow: hidden;
       background: var(--bg);
       background-image: none;
+      display: flex;
+      flex-direction: column;
     }
     html[data-embed="true"] .toolbar,
     html[data-embed="true"] .header,
@@ -540,14 +547,32 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     html[data-embed="true"] .diagram-guide,
     html[data-embed="true"] .node-finder,
     html[data-embed="true"] .node-outline { display: none !important; }
-    html[data-embed="true"] .container { max-width: none; }
+    html[data-embed="true"] .container {
+      max-width: none;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
     html[data-embed="true"] .diagram-container {
       padding: 0.5rem;
       border: 0;
       border-radius: 0;
       box-shadow: none;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    html[data-embed="true"] .diagram-container svg { min-width: 0; }
+    html[data-embed="true"] .diagram-container svg {
+      min-width: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+    }
 
     /* Presentation Stage is a viewer-only layer: it gives the live diagram
        the viewport while keeping guided views, theme, focus, and exports real.

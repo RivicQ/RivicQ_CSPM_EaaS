@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SecurityGraph from '../components/graph/SecurityGraph';
+import PublicBar from '../components/layout/PublicBar';
 import { DISCOVERY_STAGES, discoveryNodeIds, nodes } from '../data/graph';
 
 const Discover: React.FC = () => {
@@ -15,6 +16,7 @@ const Discover: React.FC = () => {
   const visibleIds = discoveryNodeIds(Math.min(i + 1, DISCOVERY_STAGES.length));
   return (
     <div className="landing">
+      <PublicBar />
       <h1 className="h1">Initial discovery</h1>
       <p className="lede">Each step adds nodes to the security graph. Progressive inventory of the labeled Northbridge fixture. No live cloud credentials are used on GitHub Pages.</p>
       <ol style={{ color: 'var(--muted)', paddingLeft: 18 }}>

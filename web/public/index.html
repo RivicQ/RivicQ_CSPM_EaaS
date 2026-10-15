@@ -6,7 +6,63 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#05040a" />
+    <script>
+      (function () {
+        var KEY = 'rivicq.theme';
+        function choiceOf(raw) {
+          if (raw === 'nebula' || raw === 'harbor' || raw === 'dark') return 'nebula';
+          if (raw === 'day' || raw === 'ledger' || raw === 'light') return 'day';
+          if (raw === 'auto') return 'auto';
+          return 'nebula';
+        }
+        function resolved(choice) {
+          if (choice === 'nebula') return 'dark';
+          if (choice === 'day') return 'light';
+          var light = false;
+          try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+          return light ? 'light' : 'dark';
+        }
+        var choice = 'nebula';
+        try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
+        var mode = resolved(choice);
+        var root = document.documentElement;
+        root.setAttribute('data-theme', mode);
+        root.setAttribute('data-theme-choice', choice);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode === 'light' ? '#f6f3fb' : '#05040a');
+        var path = location.pathname;
+        var notice = path.match(/^(.*)\/NOTICE$/);
+        var md = path.match(/^(.*)\/([^/]+)\.md$/i);
+        if (notice) {
+          var noticePrefix = notice[1].replace(/\/docs$/, '');
+          location.replace(noticePrefix + '/archify/site/index.html#types/notice');
+        } else if (md) {
+          var prefix = md[1].replace(/\/docs$/, '');
+          var slug = md[2].replace(/\.md$/i, '').toLowerCase();
+          location.replace(prefix + '/archify/site/index.html#types/' + encodeURIComponent(slug));
+        }
+      })();
+    </script>
+    <style>
+      :root, [data-theme="dark"] {
+        --rq-bg: #05040a; --rq-sidebar: #07060e; --rq-surface: #0e0c16; --rq-raised: #161222;
+        --rq-text: #f6f3fb; --rq-muted: #c9c2d6; --rq-faint: #8d86a0; --rq-line: #2a2438;
+        --rq-accent: #a78bfa; --rq-accent-2: #e879f9;
+        --rq-btn-bg: #7c3aed; --rq-btn-bg-hover: #6d28d9; --rq-btn-fg: #ffffff;
+        --rq-nav-active: rgba(124,58,237,0.28); --rq-nav-hover: rgba(246,243,251,0.06);
+        --rq-shadow: 0 18px 40px rgba(0,0,0,0.55); --rq-focus: #c4b5fd;
+      }
+      [data-theme="light"] {
+        --rq-bg: #f6f3fb; --rq-sidebar: #efeaf7; --rq-surface: #ffffff; --rq-raised: #f3eefb;
+        --rq-text: #140e22; --rq-muted: #4a415c; --rq-faint: #6b6278; --rq-line: #ddd4ee;
+        --rq-accent: #6d28d9; --rq-accent-2: #a21caf;
+        --rq-btn-bg: #6d28d9; --rq-btn-bg-hover: #5b21b6; --rq-btn-fg: #ffffff;
+        --rq-nav-active: rgba(109,40,217,0.14); --rq-nav-hover: rgba(20,14,34,0.05);
+        --rq-shadow: 0 18px 40px rgba(20,14,34,0.08); --rq-focus: #6d28d9;
+      }
+      body { background: var(--rq-bg); color: var(--rq-text); }
+    </style>
     <meta name="description" content="RivicQ — Cryptographic Security Posture Management. Discover, inventory, and assess cryptographic assets. Community CBOM/SBOM (Apache 2.0) and Enterprise QBOM/HBOM/AIBOM/IBOM." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

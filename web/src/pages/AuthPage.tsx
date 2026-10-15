@@ -20,6 +20,7 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
+  useTheme,
 } from '@mui/material';
 import {
   ArrowForward,
@@ -41,6 +42,10 @@ import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { proBlueContainedButtonSx } from '../theme/designSystem';
+import { websiteCtaSx } from '../theme/websiteChrome';
+import { archifyDocsHref } from '../theme/docsLink';
+import ThemeToggle from '../theme/ThemeToggle';
+import { useThemeMode } from '../theme/ThemeContext';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import { ARCHIFY_FONTS, NEBULA, archifyAuraLayersSx, nebulaCardSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
 import {
@@ -85,6 +90,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     backendReachable,
   } = useAuth();
   const { start: startTrail } = useDemoTrail();
+  const isDark = useTheme().palette.mode === 'dark';
+  const { choice, setChoice } = useThemeMode();
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -116,6 +123,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     (mode === 'login' || (displayName !== '' && form.password === form.confirm && form.acceptTerms));
 
   const editionLabel = edition === 'enterprise' ? 'Enterprise' : edition === 'professional' ? 'Professional' : 'Community';
+  const formLive = backendReachable || supabaseEnabled;
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -253,33 +261,48 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       : 'browser authentication (no engine deployed)';
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: NEBULA.ink, color: NEBULA.text, py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'var(--rq-bg)', color: 'var(--rq-text)', py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
       <NebulaBackdrop />
       <Box aria-hidden sx={archifyAuraLayersSx.radial} />
       <Box aria-hidden sx={archifyAuraLayersSx.grid} />
       <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-          <BrandLogo dark />
-          <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600, borderColor: 'rgba(255,255,255,0.22)', color: NEBULA.muted }} />
+          <BrandLogo dark={isDark} />
+          <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+            <ThemeToggle choice={choice} onChoose={setChoice} compact />
+            <Chip label={formLive ? `${editionLabel} workspace` : 'Community demo'} variant="outlined" sx={{ fontWeight: 600 }} />
+          </Stack>
         </Box>
         <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: NEBULA.faint }}>
           {mode === 'register' ? 'Create workspace' : 'Cryptographic security'}
         </Typography>
-        <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 500, letterSpacing: '-0.04em', mb: 2, mt: 0.5 }}>
-          {mode === 'register' ? 'Stand up a workspace.' : 'Sign in to your workspace.'}
+        <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 500, letterSpacing: '-0.04em', mb: 2, mt: 0.5, maxWidth: 520 }}>
+          {formLive
+            ? (mode === 'register' ? 'Stand up a workspace.' : 'Sign in to your workspace.')
+            : 'Enter the interactive demo.'}
         </Typography>
-        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+        <Stack direction="row" spacing={1} sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
           {([
             { id: 'community' as Edition, title: 'Community' },
             { id: 'professional' as Edition, title: 'Professional' },
             { id: 'enterprise' as Edition, title: 'Enterprise' },
           ]).map((opt) => (
-            <Button key={opt.id} size="small" variant={edition === opt.id ? 'contained' : 'outlined'} onClick={() => setEdition(opt.id)}>
+            <Button
+              key={opt.id}
+              size="small"
+              variant={edition === opt.id ? 'contained' : 'outlined'}
+              onClick={() => {
+                if (!formLive && opt.id !== 'community') {
+                  navigate('/request-demo');
+                  return;
+                }
+                setEdition(opt.id);
+              }}
+            >
               {opt.title}
             </Button>
           ))}
         </Stack>
-
         {!backendReachable && (
           <Box
             sx={{
@@ -289,21 +312,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           >
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
               <Chip size="small" variant="outlined" label={PUBLIC_ENGINE_CHIP_DISCONNECTED} />
-              <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
-                Expected on this build
-              </Typography>
             </Stack>
-            <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1 }}>
+            <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1.75 }}>
               {edition === 'enterprise' || edition === 'professional'
                 ? PUBLIC_ENGINE_ENTERPRISE_AUTH_COPY
                 : PUBLIC_ENGINE_AUTH_COPY}
-            </Typography>
-            <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1.75 }}>
-              Start with the <strong>interactive demo</strong> — full console path in this browser on clearly-labelled
-              sample data. Enterprise SSO and connectors stay on a licensed deployment.
+              {' '}Email, OAuth, and registration do not create a tenant here.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} flexWrap="wrap" useFlexGap>
-              <Button variant="contained" startIcon={<AutoAwesome />} disabled={loading} onClick={() => handleDemo(true)}>
+              <Button variant="contained" startIcon={<AutoAwesome />} disabled={loading} onClick={() => handleDemo(true)} sx={{ ...websiteCtaSx, whiteSpace: 'nowrap' }}>
                 Enter the interactive demo
               </Button>
               <Button variant="outlined" disabled={loading} onClick={() => navigate('/request-demo')}>
@@ -311,7 +328,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
               </Button>
               <Button
                 variant="outlined"
-                onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/docs/RENDER.md`, '_blank', 'noopener,noreferrer')}
+                onClick={() => window.open(archifyDocsHref('render'), '_blank', 'noopener,noreferrer')}
               >
                 Deploy the engine
               </Button>
@@ -319,7 +336,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
           </Box>
         )}
 
-        <Grid container spacing={0}>
+        {formLive && <Grid container spacing={0}>
           <Grid item xs={12}>
             <Card sx={{ ...nebulaCardSx, height: '100%' }} elevation={0}>
               <CardContent sx={{ p: { xs: 3, md: 4 } }}>
@@ -332,8 +349,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       p: 2,
                       borderRadius: 1,
                       border: 1,
-                      borderColor: 'rgba(124,58,237,0.35)',
-                      bgcolor: 'rgba(124,58,237,0.12)',
+                      borderColor: 'divider',
+                      bgcolor: 'background.paper',
                       backdropFilter: 'none',
                     }}
                   >
@@ -347,6 +364,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                       disabled={loading}
                       onClick={() => handleDemo(true)}
                       aria-label="Try interactive demo"
+                      sx={websiteCtaSx}
                     >
                       Try Interactive Demo
                     </Button>
@@ -690,9 +708,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
                         <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
                           By continuing you agree to the{' '}
-                          <a href={`${process.env.PUBLIC_URL || ''}/docs/LEGAL.md`} style={{ color: 'inherit' }}>legal terms</a>
+                          <a href={archifyDocsHref('legal')} style={{ color: 'inherit' }}>legal terms</a>
                           {' '}and{' '}
-                          <a href={`${process.env.PUBLIC_URL || ''}/docs/PRIVACY.md`} style={{ color: 'inherit' }}>privacy notice</a>.
+                          <a href={archifyDocsHref('privacy')} style={{ color: 'inherit' }}>privacy notice</a>.
                           Authentication is handled by {providerName}.
                         </Typography>
                         <TrademarkNotice compact sx={{ textAlign: 'center', mx: 'auto' }} />
@@ -704,7 +722,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
               </CardContent>
             </Card>
           </Grid>
-        </Grid>
+        </Grid>}
       </Container>
     </Box>
   );

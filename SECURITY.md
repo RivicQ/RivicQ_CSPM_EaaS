@@ -1,5 +1,7 @@
 # Security Policy
 
+Rendered copy: https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/security
+
 RivicQ GmbH takes the security of the Community and Enterprise products seriously. This policy covers the software in https://github.com/RivicQ/RivicQ_CSPM_EaaS.
 
 ## Scope

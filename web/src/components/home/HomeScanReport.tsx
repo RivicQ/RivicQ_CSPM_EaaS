@@ -149,7 +149,7 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
               </Alert>
               <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
                 <Button variant="contained" endIcon={<ArrowForward />} onClick={onRegister} sx={websiteCtaSx}>
-                  Start free — run a real scan
+                  Enter the interactive demo
                 </Button>
                 <Button variant="outlined" startIcon={<GitHub />} onClick={onOpenApp}>
                   Open the scanner

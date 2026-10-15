@@ -6,6 +6,9 @@ import BrandLogo from '../BrandLogo';
 import NebulaBackdrop from './NebulaBackdrop';
 import TrademarkNotice from '../TrademarkNotice';
 import { websiteCtaSx } from '../../theme/websiteChrome';
+import { useThemeMode } from '../../theme/ThemeContext';
+import ThemeToggle from '../../theme/ThemeToggle';
+import { archifyDocsHref } from '../../theme/docsLink';
 
 type NavItem = {
   id: string;
@@ -28,7 +31,7 @@ const NAV: NavItem[] = [
   ] },
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
   { id: 'resources', label: 'Resources', items: [
-    { label: 'Documentation', to: 'docs/index.html' },
+    { label: 'Documentation', to: archifyDocsHref() },
     { label: 'RivicQ Graph demo', to: 'fabric/' },
     { label: 'Contact', to: '/contact' },
   ] },
@@ -36,13 +39,16 @@ const NAV: NavItem[] = [
 
 const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = ({ children, nebula = true }) => {
   const navigate = useNavigate();
+  const { choice, setChoice } = useThemeMode();
   const [menu, setMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
   const [mobileMenu, setMobileMenu] = React.useState<HTMLElement | null>(null);
 
   const go = (to: string) => {
-    const staticAsset = to.startsWith('http') || to.includes('.html') || !to.startsWith('/');
+    const staticAsset = to.startsWith('http') || to.includes('.html') || to.includes('#types');
     if (staticAsset) {
-      const url = to.startsWith('http') ? to : `${process.env.PUBLIC_URL || ''}/${to.replace(/^\//, '')}`;
+      const url = to.startsWith('http') || to.startsWith('/')
+        ? to
+        : `${process.env.PUBLIC_URL || ''}/${to.replace(/^\//, '')}`;
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
@@ -67,7 +73,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: '#000000',
+          bgcolor: 'var(--rq-bg)',
           backdropFilter: 'none',
           borderBottom: '1px solid',
           borderColor: 'divider',
@@ -110,6 +116,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
               ))}
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
+              <ThemeToggle choice={choice} onChoose={setChoice} compact />
               <IconButton
                 size="small"
                 aria-label="Open navigation menu"

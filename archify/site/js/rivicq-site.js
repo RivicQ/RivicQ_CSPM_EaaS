@@ -10,12 +10,30 @@
   var doc = document;
   doc.documentElement.classList.add('js');
 
-  var THEME_KEY = 'rivicq-site-theme';
+  var THEME_KEY = 'rivicq.theme';
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  function choiceOf(raw) {
+    if (raw === 'nebula' || raw === 'harbor' || raw === 'dark') return 'nebula';
+    if (raw === 'day' || raw === 'ledger' || raw === 'light') return 'day';
+    if (raw === 'auto') return 'auto';
+    return 'nebula';
+  }
+
+  function resolvedChoice(choice) {
+    if (choice === 'nebula') return 'dark';
+    if (choice === 'day') return 'light';
+    var light = false;
+    try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+    return light ? 'light' : 'dark';
+  }
+
+  function readChoice() {
+    try { return choiceOf(localStorage.getItem(THEME_KEY)); } catch (e) { return 'nebula'; }
+  }
+
   function currentTheme() {
-    /* Nebula identity only — light theme is not offered on the product site. */
-    return 'dark';
+    return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
   }
 
   /* ── Diagram theme sync (best-effort same-origin) ──────────── */
@@ -36,31 +54,60 @@
     for (var i = 0; i < frames.length; i++) syncFrameTheme(frames[i]);
   }
 
-  /* ── Theme (nebula / dark only) ────────────────────────────── */
+  /* ── Theme: Nebula is the designed default. Day is the light archive. Auto follows the OS. ── */
   var themeMeta = doc.querySelector('meta[name="theme-color"]');
-  function applyTheme(theme) {
-    root.setAttribute('data-theme', 'dark');
-    try { localStorage.setItem(THEME_KEY, 'dark'); } catch (e) {}
-    if (themeMeta) themeMeta.setAttribute('content', '#000000');
-    var toggle = doc.querySelector('[data-theme-toggle]');
-    if (toggle) {
-      toggle.setAttribute('hidden', 'true');
-      toggle.style.display = 'none';
-    }
+  function applyChoice(choice) {
+    var mode = resolvedChoice(choice);
+    root.setAttribute('data-theme', mode);
+    root.setAttribute('data-theme-choice', choice);
+    try { localStorage.setItem(THEME_KEY, choice); } catch (e) {}
+    if (themeMeta) themeMeta.setAttribute('content', mode === 'dark' ? '#05040a' : '#f6f3fb');
+    var select = doc.querySelector('[data-theme-choice]');
+    if (select && select.value !== choice) select.value = choice;
     syncAllFrames();
   }
 
-  applyTheme('dark');
-  var themeToggle = doc.querySelector('[data-theme-toggle]');
-  if (themeToggle) {
-    themeToggle.setAttribute('hidden', 'true');
-    themeToggle.style.display = 'none';
+  var themeSelect = doc.querySelector('[data-theme-choice]');
+  if (themeSelect) {
+    var initialChoice = readChoice();
+    themeSelect.value = initialChoice;
+    applyChoice(initialChoice);
+    themeSelect.addEventListener('change', function () {
+      applyChoice(choiceOf(themeSelect.value));
+    });
+  }
+  if (window.matchMedia) {
+    var scheme = window.matchMedia('(prefers-color-scheme: light)');
+    var onScheme = function () { if (readChoice() === 'auto') applyChoice('auto'); };
+    if (scheme.addEventListener) scheme.addEventListener('change', onScheme);
+    else if (scheme.addListener) scheme.addListener(onScheme);
   }
 
   // Re-apply theme to each diagram right after it finishes loading.
+  function diagramFills(frame) {
+    try {
+      var cdoc = frame.contentDocument;
+      if (!cdoc) return false;
+      var node = cdoc.querySelector('.diagram-container svg, svg');
+      if (!node) return false;
+      var box = node.getBoundingClientRect();
+      return box.width > 120 && box.height > 80;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function markFrame(frame) {
+    syncFrameTheme(frame);
+    var host = frame.closest ? frame.closest('.hero-frame') : null;
+    if (!host) return;
+    if (diagramFills(frame)) host.classList.add('is-ready');
+    else host.classList.remove('is-ready');
+  }
+
   doc.addEventListener('load', function (e) {
     if (e.target && e.target.tagName === 'IFRAME' && e.target.hasAttribute('data-sync-theme')) {
-      syncFrameTheme(e.target);
+      markFrame(e.target);
     }
   }, true);
 

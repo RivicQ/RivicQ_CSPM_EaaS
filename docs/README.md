@@ -2,17 +2,19 @@
 
 **Live app:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) · **Demo:** [interactive trail](https://rivicq.github.io/RivicQ_CSPM_EaaS/demo) · **Company:** [rivicq.com](https://rivicq.com)
 
+**Rendered docs:** [Archify library](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types). Source files stay in the repository. The Pages site does not publish raw markdown.
+
 | Legal | Product honesty |
 |-------|-----------------|
-| [LEGAL.md](../LEGAL.md) — dual license, warranty, export | [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) |
-| [PRIVACY.md](../PRIVACY.md) — Pages vs self-host | [DATASETS.md](../DATASETS.md) — synthetic samples only |
-| [Contact](contact.html) — public desks on @rivicq.com | [editions.md](editions.md) — Community vs Enterprise |
-| [TRADEMARKS.md](../TRADEMARKS.md) — RivicQ marks and third-party names | [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) |
-| [NOTICE](../NOTICE) · [LICENSE](../LICENSE) | |
+| [Legal](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/legal) — dual license, warranty, export | [Known limitations](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/known_limitations) |
+| [Privacy](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/privacy) — Pages vs self-host | [Datasets](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/datasets) — synthetic samples only |
+| [Contact](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/contact) — public desks on @rivicq.com | [Editions](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/editions) — Community vs Enterprise |
+| [Trademarks](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/trademarks) — RivicQ marks and third-party names | [Launch checklist](LAUNCH_CHECKLIST.md) |
+| [Notice](https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/notice) · [LICENSE](../LICENSE) | |
 
 The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
 
-UI colors follow the **Security Cloud** nebula ledger (`#000000` canvas, `#0A0A0F` surface, violet `#7C3AED`). Control mappings are not certifications. Designed HTML hub: [docs/index.html](index.html).
+Color scheme is Nebula (the designed near-black violet archive), Day (the same archive on pale paper), or Auto. Control mappings are not certifications. HTML hub: [docs/index.html](index.html), which links into the Archify reader.
 
 ## Getting started
 

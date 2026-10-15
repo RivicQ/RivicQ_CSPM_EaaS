@@ -1,53 +1,57 @@
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
-import { DarkMode, LightMode } from '@mui/icons-material';
+import { Button, Stack } from '@mui/material';
+import { ThemeChoice, choiceLabel } from './themePreference';
 
 type Props = {
-  mode: 'light' | 'dark';
-  onToggle: () => void;
+  choice: ThemeChoice;
+  onChoose: (choice: ThemeChoice) => void;
   compact?: boolean;
 };
 
-const ThemeToggle: React.FC<Props> = ({ mode, onToggle, compact = false }) => {
+const CHOICES: ThemeChoice[] = ['auto', 'nebula', 'day'];
+
+const ThemeToggle: React.FC<Props> = ({ choice, onChoose, compact = false }) => {
   return (
-    <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
-      <IconButton
-        onClick={onToggle}
-        size={compact ? 'small' : 'large'}
-        sx={
-          compact
-            ? {
-                borderRadius: `${8}px`,
-                border: (theme) =>
-                  `1px solid ${
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(124,58,237,0.28)'
-                      : 'rgba(124,58,237,0.16)'
-                  }`,
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.06)'
-                    : 'rgba(255,255,255,0.85)',
-                color: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(226,232,240,0.82)' : '#0a0a0f',
-                width: 36,
-                height: 36,
-                '&:hover': {
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(255,255,255,0.12)'
-                      : 'rgba(124,58,237,0.08)',
-                },
-              }
-            : {
-                border: (theme) => `1px solid ${theme.palette.divider}`,
-                bgcolor: 'background.paper',
-              }
-        }
-      >
-        {mode === 'light' ? <DarkMode sx={{ fontSize: 18 }} /> : <LightMode sx={{ fontSize: 18 }} />}
-      </IconButton>
-    </Tooltip>
+    <Stack
+      direction="row"
+      role="group"
+      aria-label="Color scheme"
+      sx={{
+        border: '1px solid var(--rq-line)',
+        borderRadius: 999,
+        overflow: 'hidden',
+        bgcolor: 'var(--rq-surface)',
+        flexShrink: 0,
+      }}
+    >
+      {CHOICES.map((item) => {
+        const selected = item === choice;
+        const label = choiceLabel(item);
+        return (
+          <Button
+            key={item}
+            size="small"
+            onClick={() => onChoose(item)}
+            aria-pressed={selected}
+            sx={{
+              minHeight: compact ? 32 : 36,
+              minWidth: compact ? 0 : 64,
+              px: compact ? 1 : 1.25,
+              borderRadius: 0,
+              color: 'var(--rq-text)',
+              WebkitTextFillColor: 'var(--rq-text)',
+              bgcolor: selected ? 'var(--rq-nav-active)' : 'transparent',
+              fontWeight: selected ? 750 : 550,
+              fontSize: compact ? 12 : 13,
+              lineHeight: 1.2,
+              '&:hover': { bgcolor: 'var(--rq-nav-hover)' },
+            }}
+          >
+            {label}
+          </Button>
+        );
+      })}
+    </Stack>
   );
 };
 

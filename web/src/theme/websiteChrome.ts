@@ -1,19 +1,36 @@
-/** rivicq.com nebula CTAs — never inherit cream/terracotta from an older theme. */
+/** Primary CTA. Violet fill and a white label in Nebula and Day. */
 export const websiteCtaSx = {
   borderRadius: 999,
-  bgcolor: '#7c3aed !important',
-  color: '#ffffff !important',
+  bgcolor: 'var(--rq-btn-bg, #7c3aed) !important',
+  backgroundImage: 'none !important',
+  color: 'var(--rq-btn-fg, #ffffff) !important',
+  WebkitTextFillColor: 'var(--rq-btn-fg, #ffffff)',
   boxShadow: 'none',
-  '&:hover': { bgcolor: '#6d28d9 !important', boxShadow: 'none' },
+  '& span, & .MuiButton-startIcon, & .MuiButton-endIcon': {
+    color: 'inherit !important',
+    WebkitTextFillColor: 'inherit',
+  },
+  '&:hover': {
+    bgcolor: 'var(--rq-btn-bg-hover, #6d28d9) !important',
+    backgroundImage: 'none !important',
+    color: 'var(--rq-btn-fg, #ffffff) !important',
+    WebkitTextFillColor: 'var(--rq-btn-fg, #ffffff)',
+    boxShadow: 'none',
+  },
 } as const;
 
-/** Outline CTA — adapts to the surrounding surface so it stays legible in light and dark. */
-export const websiteOutlineCtaSx = (_isDark?: boolean) => ({
+/** Outline CTA — ink on the archive surface, in both palettes. */
+export const websiteOutlineCtaSx = (_isDark: boolean) => ({
   borderRadius: 999,
-  color: '#ffffff !important',
-  borderColor: 'rgba(255,255,255,0.45) !important',
+  color: 'var(--rq-text) !important',
+  WebkitTextFillColor: 'var(--rq-text)',
+  borderColor: 'var(--rq-line) !important',
+  backgroundColor: 'transparent',
+  backgroundImage: 'none',
   '&:hover': {
-    borderColor: '#ffffff !important',
-    bgcolor: 'rgba(124,58,237,0.16) !important',
+    borderColor: 'var(--rq-accent) !important',
+    bgcolor: 'var(--rq-nav-hover) !important',
+    color: 'var(--rq-text) !important',
+    WebkitTextFillColor: 'var(--rq-text)',
   },
 });

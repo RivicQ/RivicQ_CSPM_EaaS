@@ -1,8 +1,9 @@
 import React from 'react';
-import { Box, Button, Chip, Stack, Typography } from '@mui/material';
+import { Box, Button, Chip, Stack, Typography, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../../theme/websiteChrome';
+import { archifyDocsHref } from '../../theme/docsLink';
 import {
   PUBLIC_ENGINE_CHIP_DEMO,
   PUBLIC_ENGINE_CHIP_DISCONNECTED,
@@ -16,7 +17,7 @@ type Variant = 'scan' | 'ibm';
 const panelSx = {
   p: 2,
   mb: 3,
-  bgcolor: '#0a0a0f',
+  bgcolor: 'background.paper',
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 2,
@@ -33,6 +34,8 @@ const PublicEngineNotice: React.FC<{ variant?: Variant; force?: boolean; compact
 }) => {
   const { backendReachable, isDemo } = useAuth();
   const navigate = useNavigate();
+  const isDark = useTheme().palette.mode === 'dark';
+  const outlineSx = websiteOutlineCtaSx(isDark);
   const diagramHref = `${process.env.PUBLIC_URL || ''}/archify/diagrams/rivicq-cspm-operator-workflow.html`;
 
   if (backendReachable && !force) return null;
@@ -53,7 +56,7 @@ const PublicEngineNotice: React.FC<{ variant?: Variant; force?: boolean; compact
           <Button size="small" variant="contained" onClick={() => navigate('/scanner')} sx={websiteCtaSx}>
             Open the Scanner
           </Button>
-          <Button size="small" variant="outlined" onClick={() => navigate('/dashboard')} sx={websiteOutlineCtaSx()}>
+          <Button size="small" variant="outlined" onClick={() => navigate('/dashboard')} sx={outlineSx}>
             Dashboard
           </Button>
         </Stack>
@@ -76,19 +79,19 @@ const PublicEngineNotice: React.FC<{ variant?: Variant; force?: boolean; compact
         <Button size="small" variant="contained" onClick={() => navigate('/demo')} sx={websiteCtaSx}>
           Try the interactive demo
         </Button>
-        <Button size="small" variant="outlined" onClick={() => navigate('/request-demo')} sx={websiteOutlineCtaSx()}>
+        <Button size="small" variant="outlined" onClick={() => navigate('/request-demo')} sx={outlineSx}>
           Request Enterprise demo
         </Button>
-        <Button size="small" variant="outlined" href={diagramHref} target="_blank" rel="noopener noreferrer" sx={websiteOutlineCtaSx()}>
+        <Button size="small" variant="outlined" href={diagramHref} target="_blank" rel="noopener noreferrer" sx={outlineSx}>
           Operator workflow
         </Button>
         <Button
           size="small"
           variant="outlined"
-          href={`${process.env.PUBLIC_URL || ''}/docs/RENDER.md`}
+          href={archifyDocsHref('render')}
           target="_blank"
           rel="noopener noreferrer"
-          sx={websiteOutlineCtaSx()}
+          sx={outlineSx}
         >
           Deploy the engine
         </Button>

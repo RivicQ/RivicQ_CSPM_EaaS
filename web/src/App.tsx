@@ -6,9 +6,11 @@ import { CssBaseline, GlobalStyles } from '@mui/material';
 import { MotionConfig } from 'framer-motion';
 import designSystem from './theme/designSystem';
 import { getAppTheme } from './theme/theme';
+import './theme/enterprise.css';
 
 import Layout from './layouts/Layout';
 import { ThemeModeProvider } from './theme/ThemeContext';
+import { cycleChoice, persistChoice, readStoredChoice, resolveTheme, ThemeChoice } from './theme/themePreference';
 import RequireAuth from './components/RequireAuth';
 import RequireEnterprise from './components/RequireEnterprise';
 import RequireRole from './components/RequireRole';
@@ -95,24 +97,27 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 );
 
 const App: React.FC = () => {
-  const [mode, setMode] = React.useState<'light' | 'dark'>(() => {
-    try {
-      localStorage.setItem('rivicq.theme', 'dark');
-    } catch {
-      /* ignore */
-    }
-    return 'dark';
-  });
+  const [choice, setChoice] = React.useState<ThemeChoice>(() => readStoredChoice());
+  const [mode, setMode] = React.useState<'light' | 'dark'>(() => resolveTheme(readStoredChoice()));
   const theme = React.useMemo(() => getAppTheme(mode), [mode]);
 
-  const toggleMode = React.useCallback(() => {
-    try {
-      localStorage.setItem('rivicq.theme', 'dark');
-    } catch {
-      /* ignore */
-    }
-    setMode('dark');
+  const applyChoice = React.useCallback((next: ThemeChoice) => {
+    setChoice(next);
+    setMode(persistChoice(next));
   }, []);
+
+  React.useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: light)');
+    const onChange = () => {
+      if (choice === 'auto') setMode(persistChoice('auto'));
+    };
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, [choice]);
+
+  const toggleMode = React.useCallback(() => {
+    applyChoice(cycleChoice(choice));
+  }, [applyChoice, choice]);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -128,7 +133,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ThemeModeProvider mode={mode} toggleMode={toggleMode}>
+          <ThemeModeProvider mode={mode} choice={choice} setChoice={applyChoice} toggleMode={toggleMode}>
             <ThemeProvider theme={theme}>
               <MotionConfig reducedMotion="user">
               <CssBaseline />

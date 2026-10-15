@@ -1,0 +1,103 @@
+/* Nebula (dark, designed default) and Day (same archive, light). Keep hex values aligned with tokens.ts. */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --rq-bg: #05040a;
+  --rq-sidebar: #07060e;
+  --rq-surface: #0e0c16;
+  --rq-raised: #161222;
+  --rq-text: #f6f3fb;
+  --rq-muted: #c9c2d6;
+  --rq-faint: #8d86a0;
+  --rq-line: #2a2438;
+  --rq-accent: #a78bfa;
+  --rq-accent-2: #e879f9;
+  --rq-btn-bg: #7c3aed;
+  --rq-btn-bg-hover: #6d28d9;
+  --rq-btn-fg: #ffffff;
+  --rq-nav-active: rgba(124, 58, 237, 0.28);
+  --rq-nav-hover: rgba(246, 243, 251, 0.06);
+  --rq-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --rq-focus: #c4b5fd;
+  --rq-glow: rgba(124, 58, 237, 0.34);
+  --rq-glow-2: rgba(232, 121, 249, 0.16);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --rq-bg: #f6f3fb;
+  --rq-sidebar: #efeaf7;
+  --rq-surface: #ffffff;
+  --rq-raised: #f3eefb;
+  --rq-text: #140e22;
+  --rq-muted: #4a415c;
+  --rq-faint: #6b6278;
+  --rq-line: #ddd4ee;
+  --rq-accent: #6d28d9;
+  --rq-accent-2: #a21caf;
+  --rq-btn-bg: #6d28d9;
+  --rq-btn-bg-hover: #5b21b6;
+  --rq-btn-fg: #ffffff;
+  --rq-nav-active: rgba(109, 40, 217, 0.14);
+  --rq-nav-hover: rgba(20, 14, 34, 0.05);
+  --rq-shadow: 0 18px 40px rgba(20, 14, 34, 0.08);
+  --rq-focus: #6d28d9;
+  --rq-glow: rgba(109, 40, 217, 0.12);
+  --rq-glow-2: rgba(162, 28, 175, 0.08);
+}
+
+body {
+  background:
+    radial-gradient(ellipse 55% 42% at 50% 0%, var(--rq-glow), transparent 68%),
+    radial-gradient(ellipse 32% 24% at 88% 8%, var(--rq-glow-2), transparent 70%),
+    var(--rq-bg);
+}
+
+button.MuiButton-contained:not(.Mui-disabled),
+button.MuiButton-containedPrimary:not(.Mui-disabled),
+a.MuiButton-contained:not(.Mui-disabled),
+a.MuiButton-containedPrimary:not(.Mui-disabled) {
+  transition: none !important;
+  background-color: var(--rq-btn-bg, #7c3aed) !important;
+  background-image: none !important;
+  color: var(--rq-btn-fg, #ffffff) !important;
+  -webkit-text-fill-color: var(--rq-btn-fg, #ffffff) !important;
+}
+
+button.MuiButton-contained:not(.Mui-disabled) span,
+button.MuiButton-containedPrimary:not(.Mui-disabled) span,
+a.MuiButton-contained:not(.Mui-disabled) span,
+a.MuiButton-containedPrimary:not(.Mui-disabled) span {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+button.MuiButton-contained:hover,
+button.MuiButton-containedPrimary:hover,
+a.MuiButton-contained:hover,
+a.MuiButton-containedPrimary:hover {
+  background-color: var(--rq-btn-bg-hover, #6d28d9) !important;
+  color: var(--rq-btn-fg, #ffffff) !important;
+  -webkit-text-fill-color: var(--rq-btn-fg, #ffffff) !important;
+}
+
+.MuiButton-contained.Mui-disabled,
+.MuiButton-containedPrimary.Mui-disabled {
+  background-color: var(--rq-raised) !important;
+  color: var(--rq-faint) !important;
+  -webkit-text-fill-color: var(--rq-faint) !important;
+}
+
+.MuiButton-contained .MuiButton-startIcon,
+.MuiButton-contained .MuiButton-endIcon,
+.MuiButton-containedPrimary .MuiButton-startIcon,
+.MuiButton-containedPrimary .MuiButton-endIcon {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+.MuiButton-outlined,
+.MuiButton-text {
+  color: var(--rq-text);
+  -webkit-text-fill-color: var(--rq-text);
+}

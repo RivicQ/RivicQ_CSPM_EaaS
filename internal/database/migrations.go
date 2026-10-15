@@ -410,5 +410,22 @@ func coreMigrations() []Migration {
 				`CREATE INDEX IF NOT EXISTS idx_auth_tokens_user_purpose ON auth_tokens(user_id, purpose);`,
 			},
 		},
+		{
+			ID:   "0009_query_path_indexes",
+			Name: "indexes for tenant list ordering and unindexed foreign keys",
+			Statements: []string{
+				// List queries filter by tenant_id and sort by created_at. A
+				// tenant-only index still sorts the matching rows in memory.
+				`CREATE INDEX IF NOT EXISTS idx_cbom_reports_tenant_created ON cbom_reports (tenant_id, created_at DESC);`,
+				`CREATE INDEX IF NOT EXISTS idx_security_events_tenant_created ON security_events (tenant_id, created_at DESC);`,
+				`CREATE INDEX IF NOT EXISTS idx_kubernetes_clusters_tenant_created ON kubernetes_clusters (tenant_id, created_at DESC);`,
+				`CREATE INDEX IF NOT EXISTS idx_crypto_assets_report_created ON crypto_assets (cbom_report_id, created_at DESC);`,
+				`CREATE INDEX IF NOT EXISTS idx_quantum_attestations_report_created ON quantum_attestations (cbom_report_id, created_at DESC);`,
+				`CREATE INDEX IF NOT EXISTS idx_cloud_accounts_tenant_id ON cloud_accounts (tenant_id);`,
+				`CREATE INDEX IF NOT EXISTS idx_commercial_leads_created ON commercial_leads (created_at DESC);`,
+				// Open-event counts are WHERE tenant_id AND resolved = false.
+				`CREATE INDEX IF NOT EXISTS idx_security_events_tenant_open ON security_events (tenant_id, created_at DESC) WHERE resolved = false;`,
+			},
+		},
 	}
 }

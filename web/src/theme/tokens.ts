@@ -1,7 +1,9 @@
 /**
- * RivicQ Security Cloud — deep-space nebula tokens (black canvas, violet accent).
- * Design rule: `crypto` severity is the ONLY place hue carries meaning.
- * Brand = violet ramp; everything else is neutral surface/ink.
+ * RivicQ archive palette.
+ * Nebula is the designed look: near-black canvas, violet and magenta accent.
+ * Day is the same archive on pale violet paper, with the same violet buttons.
+ * Crypto severity stays the only status hue.
+ * CSS variables in enterprise.css mirror these values.
  */
 export const tokens = {
   colors: {
@@ -27,14 +29,14 @@ export const tokens = {
       classic: '#9ca3af',
       success: '#22c55e',
     },
-    navy: { 0: '#000000', 1: '#0a0a0f', 2: '#12121a', 3: '#1f1f2e' },
-    surface: { 0: '#000000', 1: '#0a0a0f', 2: '#12121a', 3: '#1f1f2e' },
-    surfaceLight: { 0: '#000000', 1: '#0a0a0f', 2: '#12121a', 3: '#1f1f2e' },
-    text: { primary: '#ffffff', secondary: '#d1d5db', muted: '#9ca3af' },
-    textLight: { primary: '#ffffff', secondary: '#d1d5db', muted: '#9ca3af' },
-    border: '#1f1f2e',
-    borderLight: '#1f1f2e',
-    brandGradient: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(124,58,237,0.35), transparent 70%)',
+    navy: { 0: '#07060e', 1: '#05040a', 2: '#0e0c16', 3: '#2a2438' },
+    surface: { 0: '#f6f3fb', 1: '#ffffff', 2: '#f3eefb', 3: '#ddd4ee' },
+    surfaceLight: { 0: '#05040a', 1: '#0e0c16', 2: '#161222', 3: '#2a2438' },
+    text: { primary: '#140e22', secondary: '#4a415c', muted: '#6b6278' },
+    textLight: { primary: '#f6f3fb', secondary: '#c9c2d6', muted: '#8d86a0' },
+    border: '#ddd4ee',
+    borderLight: '#2a2438',
+    brandGradient: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(124,58,237,0.38), transparent 70%)',
   },
   spacing: (n: number) => `${n * 8}px`,
   typography: {
@@ -47,7 +49,7 @@ export const tokens = {
     glowRed: '0 0 40px rgba(239,68,68,0.18)',
     glowPurple: '0 0 48px rgba(124,58,237,0.35)',
     glowBlue: '0 0 40px rgba(124,58,237,0.28)',
-    glowGold: '0 0 40px rgba(167,139,250,0.22)',
+    glowGold: '0 0 40px rgba(232,121,249,0.22)',
     panel: '0 18px 48px rgba(0,0,0,0.45)',
   },
 };

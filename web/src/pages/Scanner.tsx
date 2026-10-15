@@ -17,7 +17,7 @@ import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 import ScanReportPanel, { ClientArchitectureView, PQCReadinessView } from '../components/scanner/ScanReportPanel';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
-import OpsHeroVisual from '../components/ops/OpsHeroVisual';
+import ConsoleStory from '../components/ops/ConsoleStory';
 import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 
 interface ScanJob {
@@ -166,20 +166,20 @@ const Scanner: React.FC = () => {
 
   useEffect(() => () => { if (pollTimerRef.current) window.clearInterval(pollTimerRef.current); }, []);
 
-  const clearPolling = () => {
+  const clearPolling = useCallback(() => {
     if (pollTimerRef.current) { window.clearInterval(pollTimerRef.current); pollTimerRef.current = null; }
-  };
+  }, []);
 
-  const updateJob = (jobId: string, updater: (job: ScanJob) => ScanJob) => {
+  const updateJob = useCallback((jobId: string, updater: (job: ScanJob) => ScanJob) => {
     setScanJobs((prev) => prev.map((job) => (job.id === jobId ? updater(job) : job)));
-  };
+  }, []);
 
   const refreshScanData = useCallback(() => {
     refetchScans();
     refetchFindings();
   }, [refetchScans, refetchFindings]);
 
-  const pollScanStatus = (jobId: string, scanId: string) => {
+  const pollScanStatus = useCallback((jobId: string, scanId: string) => {
     clearPolling();
     pollAttemptsRef.current = 0;
     pollTimerRef.current = window.setInterval(async () => {
@@ -239,7 +239,7 @@ const Scanner: React.FC = () => {
         }
       }
     }, POLL_INTERVAL_MS);
-  };
+  }, [clearPolling, refreshScanData, updateJob]);
 
   const startScan = useCallback(async (overrideTarget?: string) => {
     const target = (typeof overrideTarget === 'string' ? overrideTarget : scanTarget).trim();
@@ -275,7 +275,7 @@ const Scanner: React.FC = () => {
       );
       setScanJobs((prev) => prev.filter((j) => j.id !== newJob.id));
     }
-  }, [isDemo, paid, scanTarget, scanType, targetClass]);
+  }, [clearPolling, isDemo, paid, pollScanStatus, scanTarget, scanType, targetClass, updateJob]);
 
   useEffect(() => {
     if (autostartRef.current) return;
@@ -308,7 +308,7 @@ const Scanner: React.FC = () => {
       title="CBOM Scanner"
       subtitle="Discover cryptography on websites, hosts, IPs, servers, declared Kubernetes pods, and declared firmware/hardware. Mitigate with NIST PQC mappings. Report is CBOM + Qiskit/audit scores — not a certification. Firmware ingest is CycloneDX/hash inventory, not silicon RE."
       badge={isScanning ? 'Scanning' : (isDemo ? 'Demo · limited' : 'Ready')}
-      visual={<OpsHeroVisual variant="scans" scanning={isScanning} />}
+      visual={<ConsoleStory focus="scan" />}
     >
       {error && (
         <Box sx={{ mb: 2.5, p: 1.5, borderRadius: `${designSystem.radius.md}px`, bgcolor: 'warning.main', color: 'warning.contrastText' }}>

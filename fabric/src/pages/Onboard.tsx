@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PublicBar from '../components/layout/PublicBar';
 
 const steps = [
   'Create organization',
@@ -22,6 +23,7 @@ const Onboard: React.FC = () => {
   const [i, setI] = useState(0);
   return (
     <div className="landing">
+      <PublicBar />
       <h1 className="h1">Enterprise onboarding</h1>
       <p className="lede">Guided setup. Connectors stay disconnected on GitHub Pages — no customer credentials are collected.</p>
       <div className="workflow" style={{ margin: '16px 0' }}>

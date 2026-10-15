@@ -503,6 +503,34 @@ func createEnterpriseIndexes(db *EnterpriseDB) error {
 		`CREATE INDEX IF NOT EXISTS idx_webhooks_tenant ON webhooks(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_webhook ON webhook_deliveries(webhook_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_delivered ON webhook_deliveries(delivered_at);`,
+		// Foreign keys Postgres does not index automatically. Guarded so a
+		// core-schema table that predates the enterprise column is left alone.
+		`CREATE INDEX IF NOT EXISTS idx_users_tenant_id ON users(tenant_id);`,
+		`CREATE INDEX IF NOT EXISTS idx_cbom_reports_tenant_created ON cbom_reports (tenant_id, created_at DESC);`,
+		`DO $$ BEGIN
+			IF EXISTS (
+				SELECT 1 FROM information_schema.columns
+				WHERE table_schema = 'public' AND table_name = 'risk_assessments' AND column_name = 'framework_id'
+			) THEN
+				CREATE INDEX IF NOT EXISTS idx_risk_assessments_framework ON risk_assessments(framework_id);
+			END IF;
+		END $$;`,
+		`DO $$ BEGIN
+			IF EXISTS (
+				SELECT 1 FROM information_schema.columns
+				WHERE table_schema = 'public' AND table_name = 'quantum_attestations' AND column_name = 'asset_id'
+			) THEN
+				CREATE INDEX IF NOT EXISTS idx_quantum_attestations_asset ON quantum_attestations(asset_id);
+			END IF;
+		END $$;`,
+		`DO $$ BEGIN
+			IF EXISTS (
+				SELECT 1 FROM information_schema.columns
+				WHERE table_schema = 'public' AND table_name = 'kubernetes_clusters' AND column_name = 'cloud_account_id'
+			) THEN
+				CREATE INDEX IF NOT EXISTS idx_kubernetes_clusters_cloud_account ON kubernetes_clusters(cloud_account_id);
+			END IF;
+		END $$;`,
 	}
 
 	for _, idx := range indexes {

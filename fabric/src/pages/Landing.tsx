@@ -1,19 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Mark from '../brand/Mark';
 import SecurityGraph from '../components/graph/SecurityGraph';
+import PublicBar from '../components/layout/PublicBar';
 
 const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
     <div className="landing">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <Mark size={36} />
-        <div>
-          <strong style={{ fontFamily: 'var(--font)', letterSpacing: '-0.02em', fontSize: '1.125rem' }}>RivicQ Graph</strong>
-          <div style={{ color: 'var(--muted)', fontSize: 13 }}>Labeled Community demo · synthetic estate only</div>
-        </div>
-      </div>
+      <PublicBar />
       <div className="hero-eyebrow">
         <b>Graph</b>
         <span>Cryptographic Security Posture Management · Berlin</span>

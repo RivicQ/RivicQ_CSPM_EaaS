@@ -88,38 +88,86 @@
   --transition-slow: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Nebula-only: light theme is not offered. Legacy [data-theme="light"] stays nebula. */
+/* Day: the same violet archive on pale paper. */
 [data-theme="light"] {
-  --bg-base: #000000;
-  --bg-elevated: #0a0a0f;
-  --bg-surface: #12121a;
-  --bg-card: rgba(10, 10, 15, 0.78);
-  --bg-card-hover: rgba(18, 18, 26, 0.9);
-  --bg-glass: rgba(0, 0, 0, 0.55);
+  --bg-base: #f6f3fb;
+  --bg-elevated: #ffffff;
+  --bg-surface: #f3eefb;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-hover: #ffffff;
+  --bg-glass: rgba(246, 243, 251, 0.86);
 
-  --text-primary: #ffffff;
-  --text-secondary: #d1d5db;
-  --text-muted: #9ca3af;
+  --text-primary: #140e22;
+  --text-secondary: #4a415c;
+  --text-muted: #6b6278;
 
-  --border: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.22);
+  --border: rgba(20, 14, 34, 0.12);
+  --border-strong: rgba(109, 40, 217, 0.35);
 
-  --brand-gradient-dark: linear-gradient(180deg, #000000 0%, #2e1065 100%);
-  --hero-gradient: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(124, 58, 237, 0.42), transparent 70%),
-                   radial-gradient(ellipse 40% 30% at 80% 20%, rgba(167, 139, 250, 0.12), transparent);
+  --brand-gradient-dark: linear-gradient(180deg, #f6f3fb 0%, #efeaf7 100%);
+  --hero-gradient: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(109, 40, 217, 0.16), transparent 70%),
+                   radial-gradient(ellipse 40% 30% at 80% 20%, rgba(162, 28, 175, 0.08), transparent);
 
-  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-panel: 0 1px 2px rgba(20, 14, 34, 0.06), 0 8px 24px rgba(20, 14, 34, 0.06);
+  --shadow-lg: 0 16px 48px rgba(20, 14, 34, 0.08);
 }
 [data-theme="light"] .hero-bg {
   background:
-    radial-gradient(ellipse 55% 48% at 50% 42%, rgba(124, 58, 237, 0.28), transparent 68%),
-    #000000;
+    radial-gradient(ellipse 55% 48% at 50% 42%, rgba(109, 40, 217, 0.14), transparent 68%),
+    #f6f3fb;
 }
 [data-theme="light"] .hero-bg::before { display: none; }
-[data-theme="light"] .nav-logo-icon { background: #0a0a0f; }
+[data-theme="light"] .nav-logo-icon { background: #6d28d9; color: #ffffff; }
 
-.theme-toggle { display: none !important; }
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 5.5rem;
+  height: 36px;
+  padding: 0 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.archify-embed-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.archify-embed-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+.archify-embed-title {
+  font-size: var(--text-xl);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  max-width: 40rem;
+  color: var(--text-primary);
+}
+.archify-embed-frame {
+  display: block;
+  width: 100%;
+  height: min(560px, 70vh);
+  border: 0;
+  background: #000;
+}
 
 /* Archify operator workflow embed */
 .archify-embed {

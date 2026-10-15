@@ -1,5 +1,6 @@
 import React from 'react';
 import SitePage from './SitePage';
+import { archifyDocsHref } from '../theme/docsLink';
 
 const PqcPublic: React.FC = () => (
   <SitePage
@@ -7,7 +8,7 @@ const PqcPublic: React.FC = () => (
     title="Plan the migration before harvest-now becomes decrypt-later."
     lede="RivicQ scores PQC exposure from scan intelligence. Those scores are a local taxonomy for operators — not IBM Quantum Runtime jobs and not hardware attestation."
     primary={{ label: 'Assess a public target', to: '/' }}
-    secondary={{ label: 'PQC migration notes', to: `${process.env.PUBLIC_URL || ''}/docs/read.html?doc=PQC_MIGRATION.md` }}
+    secondary={{ label: 'PQC migration notes', to: archifyDocsHref('pqc_migration') }}
     notice="Hybrid ML-KEM / ML-DSA language helps plan cut-over. Migration remains an operator decision, not an automatic key rotation."
     engineNotice="scan"
     sectionEyebrow="PQC planning"

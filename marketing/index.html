@@ -14,12 +14,27 @@
   <link rel="stylesheet" href="css/main.css" />
   <script>
     (function () {
-      try {
-        var t = localStorage.getItem('rivicq.theme');
-        document.documentElement.setAttribute('data-theme', 'dark');
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'dark');
+      var KEY = 'rivicq.theme';
+      function choiceOf(raw) {
+        if (raw === 'nebula' || raw === 'harbor' || raw === 'dark') return 'nebula';
+        if (raw === 'day' || raw === 'ledger' || raw === 'light') return 'day';
+        if (raw === 'auto') return 'auto';
+        return 'nebula';
       }
+      function resolved(choice) {
+        if (choice === 'nebula') return 'dark';
+        if (choice === 'day') return 'light';
+        var light = false;
+        try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+        return light ? 'light' : 'dark';
+      }
+      var choice = 'nebula';
+      try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
+      var mode = resolved(choice);
+      document.documentElement.setAttribute('data-theme', mode);
+      document.documentElement.setAttribute('data-theme-choice', choice);
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', mode === 'light' ? '#f6f3fb' : '#05040a');
     })();
   </script>
   <link rel="canonical" href="https://rivicq.com/" />

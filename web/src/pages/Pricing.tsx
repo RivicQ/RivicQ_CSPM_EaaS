@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Chip, Container, Grid, Typography } from '@mui/material';
+import { Box, Button, Chip, Container, Grid, Typography, useTheme } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
 import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { platformService } from '../services/api';
@@ -35,6 +35,7 @@ const formatPrice = (plan: Plan) => {
 
 const Pricing: React.FC = () => {
   const navigate = useNavigate();
+  const isDark = useTheme().palette.mode === 'dark';
   const { backendReachable } = useAuth();
   const [plans, setPlans] = React.useState<Plan[]>(fallbackPlans);
   const [note, setNote] = React.useState('List prices are configuration. Checkout is not live. Control mappings are not certifications.');
@@ -72,11 +73,11 @@ const Pricing: React.FC = () => {
                   <Typography key={n} variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>{n}</Typography>
                 ))}
                 <Button
-                  sx={{ mt: 2, ...(plan.enterprise_only ? websiteCtaSx : websiteOutlineCtaSx()) }}
-                  variant={plan.enterprise_only ? 'contained' : 'outlined'}
-                  onClick={() => navigate(plan.enterprise_only ? '/request-demo' : '/register')}
+                  sx={{ mt: 2, ...(plan.tier === 'free' || plan.tier === 'developer' ? websiteCtaSx : websiteOutlineCtaSx(isDark)) }}
+                  variant={plan.tier === 'free' || plan.tier === 'developer' ? 'contained' : 'outlined'}
+                  onClick={() => navigate(plan.tier === 'free' || plan.tier === 'developer' ? '/demo' : '/request-demo')}
                 >
-                  {plan.enterprise_only ? 'Talk to sales' : 'Start'}
+                  {plan.tier === 'free' || plan.tier === 'developer' ? 'Start with Community' : 'Written license'}
                 </Button>
               </Box>
             </Grid>

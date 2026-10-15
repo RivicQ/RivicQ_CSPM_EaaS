@@ -20,18 +20,20 @@ declare module '@mui/material/Chip' {
 
 const LIGHT_PRIMARY = {
   50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa',
+  500: '#6d28d9', 600: '#5b21b6', 700: '#4c1d95', 800: '#2e1065', 900: '#140e22',
+};
+
+const DARK_PRIMARY = {
+  50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa',
   500: '#7c3aed', 600: '#6d28d9', 700: '#5b21b6', 800: '#4c1d95', 900: '#2e1065',
 };
 
-const DARK_PRIMARY = LIGHT_PRIMARY;
+const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
+  const isDark = mode === 'dark';
 
-const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
-  const mode: 'light' | 'dark' = 'dark';
-  const isDark = true;
-
-  const surface = tokens.colors.surfaceLight;
-  const text = tokens.colors.textLight;
-  const border = tokens.colors.borderLight;
+  const surface = isDark ? tokens.colors.surfaceLight : tokens.colors.surface;
+  const text = isDark ? tokens.colors.textLight : tokens.colors.text;
+  const border = isDark ? tokens.colors.borderLight : tokens.colors.border;
 
   const primary = isDark ? DARK_PRIMARY : LIGHT_PRIMARY;
 
@@ -42,7 +44,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         main: primary[500],
         light: primary[400],
         dark: primary[700],
-        contrastText: isDark ? '#ffffff' : '#ffffff',
+        contrastText: '#ffffff',
       },
       secondary: {
         main: tokens.colors.crypto.success,
@@ -70,8 +72,8 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         disabled: text.muted,
       },
       action: {
-        hover: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(10,10,15,0.04)',
-        selected: isDark ? 'rgba(124,58,237,0.22)' : 'rgba(109,40,217,0.1)',
+        hover: isDark ? 'rgba(246,243,251,0.06)' : 'rgba(20,14,34,0.05)',
+        selected: isDark ? 'rgba(124,58,237,0.28)' : 'rgba(109,40,217,0.14)',
       },
       divider: border,
     },
@@ -121,7 +123,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
             transition: designSystem.motion.smooth,
             '&:hover': {
               boxShadow: 'none',
-              borderColor: 'rgba(255,255,255,0.28)',
+              borderColor: isDark ? '#a78bfa' : '#6d28d9',
             },
           },
         },
@@ -146,17 +148,41 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
             textTransform: 'none',
             fontWeight: 600,
             padding: '8px 18px',
-            transition: 'background-color 0.15s ease, border-color 0.15s ease',
+            transition: 'border-color 0.15s ease',
             '&:hover': { transform: 'none' },
             '&:active': { transform: 'none' },
             '&.Mui-focusVisible': {
               boxShadow: `0 0 0 2px ${primary[500]}33`,
             },
           },
+          contained: {
+            backgroundImage: 'none',
+            color: '#ffffff',
+            WebkitTextFillColor: '#ffffff',
+          },
           containedPrimary: {
             ...proBlueContainedButtonSx,
           },
-          outlined: { borderColor: border },
+          outlined: { borderColor: border, color: text.primary },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: text.secondary,
+            '&.Mui-focused': { color: primary[500] },
+          },
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: { color: text.primary, backgroundColor: surface[1] },
+          notchedOutline: { borderColor: border },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: { color: text.secondary },
         },
       },
       MuiChip: {
@@ -201,7 +227,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         styleOverrides: {
           root: {
             '&.Mui-selected': {
-              backgroundColor: isDark ? 'rgba(124,58,237,0.22)' : 'rgba(109,40,217,0.1)',
+              backgroundColor: isDark ? 'rgba(124,58,237,0.28)' : 'rgba(109,40,217,0.14)',
             },
           },
         },
@@ -271,7 +297,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
             borderColor: border,
             borderRadius: `${tokens.borderRadius.md}px !important`,
             '&.Mui-selected': {
-              background: isDark ? 'rgba(124,58,237,0.22)' : 'rgba(109,40,217,0.1)',
+              background: isDark ? 'rgba(124,58,237,0.28)' : 'rgba(109,40,217,0.14)',
               color: primary[500],
               borderColor: `${primary[500]}44`,
             },

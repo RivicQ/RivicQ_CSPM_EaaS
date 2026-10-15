@@ -44,7 +44,7 @@ const PageFrame: React.FC<PageFrameProps> = ({
         sx={{
           ...commandCenterCardSx,
           borderRadius: `${designSystem.radius.xl}px`,
-          bgcolor: '#0a0a0f',
+          ...(creative ? {} : { bgcolor: 'background.paper' }),
           backgroundImage: 'none',
           boxShadow: 'none',
         }}
@@ -96,6 +96,27 @@ const PageFrame: React.FC<PageFrameProps> = ({
                   {subtitle}
                 </Typography>
               )}
+              {!visual && (
+                <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
+                  {['First look', 'Assessment', 'Inventory', 'PQC plan', 'Evidence'].map((step, index) => (
+                    <Box
+                      key={step}
+                      sx={{
+                        px: 1.1,
+                        py: 0.45,
+                        borderRadius: 999,
+                        border: '1px solid var(--rq-line)',
+                        bgcolor: index === 0 ? 'var(--rq-nav-active)' : 'transparent',
+                        color: 'var(--rq-text)',
+                        fontSize: 12,
+                        fontWeight: 650,
+                      }}
+                    >
+                      {index + 1}. {step}
+                    </Box>
+                  ))}
+                </Stack>
+              )}
             </Box>
             {(action || secondaryAction) && (
               <Stack
@@ -117,13 +138,14 @@ const PageFrame: React.FC<PageFrameProps> = ({
             sx={{
               mx: { xs: 1.5, md: 2 },
               mb: { xs: 1.5, md: 2 },
-              px: 1.75,
-              py: 1.5,
+              px: { xs: 1.25, md: 1.75 },
+              py: { xs: 1.25, md: 1.5 },
               borderRadius: 2,
-              bgcolor: '#000000',
-              border: '1px solid #1f1f2e',
+              bgcolor: 'var(--rq-bg)',
+              color: 'var(--rq-text)',
+              border: '1px solid var(--rq-line)',
               backgroundImage: 'none',
-              minHeight: 120,
+              minWidth: 0,
             }}
           >
             {visual}

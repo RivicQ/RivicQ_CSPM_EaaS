@@ -1,5 +1,7 @@
 # Privacy notice — RivicQ Community project
 
+Rendered copy: https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/privacy
+
 **Effective:** 3 September 2026 · **Controller (this GitHub project):** RivicQ GmbH, Berlin
 
 This notice describes how the **public Community repository and GitHub Pages demo** relate to personal data. It is not a customer Data Processing Agreement. Enterprise customers receive contractual privacy terms with their commercial license.

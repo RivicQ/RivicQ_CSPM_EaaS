@@ -13,8 +13,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;600&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
     <script>
       (function () {
-        try { localStorage.setItem('rivicq.theme', 'dark'); } catch (e) { /* ignore */ }
-        document.documentElement.setAttribute('data-theme', 'dark');
+        var KEY = 'rivicq.theme';
+        function choiceOf(raw) {
+          if (raw === 'nebula' || raw === 'harbor' || raw === 'dark') return 'nebula';
+          if (raw === 'day' || raw === 'ledger' || raw === 'light') return 'day';
+          if (raw === 'auto') return 'auto';
+          return 'nebula';
+        }
+        function resolved(choice) {
+          if (choice === 'nebula') return 'dark';
+          if (choice === 'day') return 'light';
+          var light = false;
+          try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+          return light ? 'light' : 'dark';
+        }
+        var choice = 'nebula';
+        try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
+        var mode = resolved(choice);
+        document.documentElement.setAttribute('data-theme', mode);
+        document.documentElement.setAttribute('data-theme-choice', choice);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode === 'light' ? '#f6f3fb' : '#05040a');
       })();
     </script>
   </head>

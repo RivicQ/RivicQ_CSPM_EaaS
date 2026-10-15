@@ -1,8 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PublicBar from '../components/layout/PublicBar';
+
+const ARCHIFY = '/RivicQ_CSPM_EaaS/archify/site/index.html';
 
 const LegalPage: React.FC = () => (
   <div className="landing">
+    <PublicBar>
+      <Link className="btn" to="/">Back</Link>
+    </PublicBar>
     <h1 className="h1">Legal, editions, and public-safety notes</h1>
     <p className="lede">
       RivicQ Graph is the labeled security-graph demo in this repository. Community source is Apache-2.0.
@@ -17,9 +23,9 @@ const LegalPage: React.FC = () => (
       <li>Do not contribute customer data or secrets to this repository.</li>
     </ul>
     <div className="btn-row" style={{ marginTop: 16 }}>
-      <a className="btn" href="/RivicQ_CSPM_EaaS/docs/LEGAL.md">LEGAL.md</a>
-      <a className="btn" href="/RivicQ_CSPM_EaaS/docs/PRIVACY.md">PRIVACY.md</a>
-      <a className="btn" href="/RivicQ_CSPM_EaaS/docs/SECURITY.md">SECURITY.md</a>
+      <a className="btn" href={`${ARCHIFY}#types/legal`}>Legal</a>
+      <a className="btn" href={`${ARCHIFY}#types/privacy`}>Privacy</a>
+      <a className="btn" href={`${ARCHIFY}#types/security`}>Security</a>
       <Link className="btn" to="/">Back</Link>
     </div>
   </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import SitePage from './SitePage';
+import { archifyDocsHref } from '../theme/docsLink';
 
 const CbomPublic: React.FC = () => (
   <SitePage
@@ -7,7 +8,7 @@ const CbomPublic: React.FC = () => (
     title="A cryptographic bill of materials you can export."
     lede="Community produces CBOM and SBOM from `rivicq scan` and the GitHub Action. QBOM, HBOM, AIBOM, and IBOM are Enterprise control-plane layers — never implied by a Pages screenshot."
     primary={{ label: 'Start free CBOM pilot', to: '/' }}
-    secondary={{ label: 'Read the workflow', to: `${process.env.PUBLIC_URL || ''}/docs/index.html` }}
+    secondary={{ label: 'Read the workflow', to: archifyDocsHref('client_architecture') }}
     notice="A CBOM is evidence of what was scanned. It is not an ISO, SOC 2, or DORA certification."
     engineNotice="scan"
     sectionEyebrow="CBOM pipeline"

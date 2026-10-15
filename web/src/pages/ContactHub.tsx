@@ -3,8 +3,9 @@ import { Box, Button, Grid, Stack, Typography } from '@mui/material';
 import SitePage, { siteCardSx } from './SitePage';
 import { publishedContacts, mailto } from '../data/contacts';
 import { websiteCtaSx } from '../theme/websiteChrome';
-import { ARCHIFY_FONTS } from '../theme/nebulaSurfaces';
+import { archifyDocsHref } from '../theme/docsLink';
 import { tokens } from '../theme/tokens';
+import { ARCHIFY_FONTS } from '../theme/nebulaSurfaces';
 
 const ContactHub: React.FC = () => (
   <SitePage
@@ -28,7 +29,7 @@ const ContactHub: React.FC = () => (
                 fontFamily: ARCHIFY_FONTS.mono,
                 fontSize: '0.6875rem',
                 fontWeight: 600,
-                color: '#a78bfa',
+                color: 'text.secondary',
                 letterSpacing: '0.04em',
                 mb: 1,
               }}
@@ -46,10 +47,10 @@ const ContactHub: React.FC = () => (
         </Grid>
       ))}
     </Grid>
-    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 2 }}>
-      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/index.html`} sx={{ color: 'text.secondary', textTransform: 'none' }}>Documentation</Button>
-      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/read.html?doc=LEGAL.md`} sx={{ color: 'text.secondary', textTransform: 'none' }}>Legal</Button>
-      <Button size="small" href={`${process.env.PUBLIC_URL || ''}/docs/contact.html`} sx={{ color: 'text.secondary', textTransform: 'none' }}>Docs directory</Button>
+    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 4 }}>
+      <Button size="small" href={archifyDocsHref()} sx={{ color: 'text.secondary' }}>Documentation</Button>
+      <Button size="small" href={archifyDocsHref('legal')} sx={{ color: 'text.secondary' }}>Legal</Button>
+      <Button size="small" href={archifyDocsHref('contact')} sx={{ color: 'text.secondary' }}>Contact notes</Button>
     </Stack>
   </SitePage>
 );
