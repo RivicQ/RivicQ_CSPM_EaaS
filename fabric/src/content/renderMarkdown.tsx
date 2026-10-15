@@ -11,10 +11,13 @@ type Block =
   | { kind: 'hr' }
   | { kind: 'table'; headers: string[]; rows: string[][] };
 
+const ARCHIFY = '/RivicQ_CSPM_EaaS/archify/site/index.html';
+
 const DOC_ROUTES: Record<string, string> = {
-  'LEGAL.md': '/docs/legal',
-  'PRIVACY.md': '/docs/privacy',
-  'SECURITY.md': '/docs/security',
+  'LEGAL.md': `${ARCHIFY}#types/legal`,
+  'PRIVACY.md': `${ARCHIFY}#types/privacy`,
+  'SECURITY.md': `${ARCHIFY}#types/security`,
+  'TRADEMARKS.md': `${ARCHIFY}#types/trademarks`,
 };
 
 function internalPath(href: string): string | null {
@@ -50,7 +53,9 @@ function renderInline(source: string, keyPrefix: string): React.ReactNode[] {
         const href = link[2];
         const internal = internalPath(href);
         const external = safeExternal(href);
-        if (internal) nodes.push(<Link key={key} to={internal}>{label}</Link>);
+        if (internal && (internal.includes('.html') || internal.startsWith('http'))) {
+          nodes.push(<a key={key} href={internal}>{label}</a>);
+        } else if (internal) nodes.push(<Link key={key} to={internal}>{label}</Link>);
         else if (external) nodes.push(<a key={key} href={external} rel="noreferrer">{label}</a>);
         else nodes.push(<span key={key}>{label}</span>);
       } else {

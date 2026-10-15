@@ -14,15 +14,26 @@
   <link rel="stylesheet" href="assets/horizon-docs.css?v=20261015b" />
   <script>
     (function () {
-      try {
-        var t = localStorage.getItem('rivicq.theme');
-        if (t !== 'light' && t !== 'dark') {
-          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        }
-        document.documentElement.setAttribute('data-theme', t);
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'dark');
+      var KEY = 'rivicq.theme';
+      function choiceOf(raw) {
+        if (raw === 'harbor' || raw === 'dark') return 'harbor';
+        if (raw === 'ledger' || raw === 'light') return 'ledger';
+        return 'auto';
       }
+      function resolved(choice) {
+        if (choice === 'harbor') return 'dark';
+        if (choice === 'ledger') return 'light';
+        var light = false;
+        try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+        return light ? 'light' : 'dark';
+      }
+      var choice = 'auto';
+      try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
+      var mode = resolved(choice);
+      document.documentElement.setAttribute('data-theme', mode);
+      document.documentElement.setAttribute('data-theme-choice', choice);
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', mode === 'light' ? '#F3EFE6' : '#101614');
     })();
   </script>
 </head>
@@ -35,7 +46,7 @@
       <a href="index.html">Docs</a>
       <a href="../">Console</a>
       <a href="contact.html" aria-current="page">Contact</a>
-      <a href="read.html?doc=LEGAL.md">Legal</a>
+      <a href="../archify/site/index.html#types/legal">Legal</a>
       <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS">GitHub</a>
       <button class="theme-toggle" type="button" aria-label="Toggle theme">&#9788;</button>
     </nav>

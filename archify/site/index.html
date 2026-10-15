@@ -6,7 +6,7 @@
   <title>RivicQ — Cryptographic Security Posture Management</title>
   <meta name="description" content="RivicQ inventories cryptography (CBOM) and software components (SBOM), then classifies risk, quantum exposure, and control gaps. One engine, two editions — every diagram on this page is a validated, interactive Archify artifact.">
   <meta name="theme-color" content="#f5f6f3">
-  <link rel="canonical" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/marketing/">
+  <link rel="canonical" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="RivicQ">
   <meta property="og:title" content="RivicQ — Cryptographic Security Posture Management">
@@ -17,7 +17,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/rivicq-site.css">
-  <script>(function () { var t = 'light'; try { t = localStorage.getItem('rivicq-site-theme') || 'light'; } catch (_) {} document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); })();</script>
+  <script>
+    (function () {
+      var KEY = 'rivicq.theme';
+      function choiceOf(raw) {
+        if (raw === 'harbor' || raw === 'dark') return 'harbor';
+        if (raw === 'ledger' || raw === 'light') return 'ledger';
+        return 'auto';
+      }
+      function resolved(choice) {
+        if (choice === 'harbor') return 'dark';
+        if (choice === 'ledger') return 'light';
+        var light = false;
+        try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+        return light ? 'light' : 'dark';
+      }
+      var choice = 'auto';
+      try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
+      var mode = resolved(choice);
+      document.documentElement.setAttribute('data-theme', mode);
+      document.documentElement.setAttribute('data-theme-choice', choice);
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', mode === 'light' ? '#F3EFE6' : '#101614');
+    })();
+  </script>
 </head>
 <body>
 
@@ -31,15 +54,20 @@
       <div class="nav-links">
         <a class="nav-link" href="#tour">Live map</a>
         <a class="nav-link" href="#diagrams">Diagrams</a>
-        <a class="nav-link" href="#types">Questions</a>
+        <a class="nav-link" href="#types">Docs</a>
+        <a class="nav-link" href="#diagram-kinds">Questions</a>
         <a class="nav-link" href="#features">Output</a>
         <a class="nav-link" href="#quickstart">Quick start</a>
         <a class="nav-link" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">GitHub</a>
       </div>
-      <button class="btn-theme" type="button" data-theme-toggle aria-label="Switch to dark theme">
-        <svg class="theme-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 9.6A5.8 5.8 0 0 1 6.4 2.5a5.8 5.8 0 1 0 7.1 7.1Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path></svg>
-        <svg class="theme-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"></circle><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
-      </button>
+      <label class="theme-select">
+        <span class="sr-only">Color scheme</span>
+        <select data-theme-choice aria-label="Color scheme">
+          <option value="auto">Auto</option>
+          <option value="harbor">Harbor</option>
+          <option value="ledger">Ledger</option>
+        </select>
+      </label>
       <a class="btn nav-cta" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/register" target="_blank" rel="noopener">Get started</a>
     </div>
   </nav>
@@ -116,6 +144,7 @@
           </a>
         </div>
         <div class="hero-frame" id="hero-proof-panel" role="tabpanel" aria-labelledby="proof-tab-architecture">
+          <img class="system-map" src="assets/system-map.svg" alt="RivicQ system map. Scan surfaces feed Community CBOM and SBOM, then a PQC plan and evidence. CSPM, QBOM, HBOM, AIBOM, and IBOM stay Enterprise. GitHub Pages has no live engine.">
           <iframe id="hero-proof-frame" data-proof="architecture" data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1&amp;theme=dark#overview" title="RivicQ Platform Architecture — live proof" loading="eager"></iframe>
         </div>
         <div class="beat-card" aria-live="polite">
@@ -127,10 +156,29 @@
           </div>
           <p class="beat-meta"><span class="proof-live">Live</span><span id="proof-meta">Architecture · Blueprint · 13 nodes · 12 edges</span></p>
           <h3 class="beat-title" id="beat-title">The whole system, in one readable frame.</h3>
-          <p class="beat-body" id="beat-body">This is the real generated artifact, not a screenshot. Lanes, boundaries, and every authored edge — scroll to move its camera.</p>
+          <p class="beat-body" id="beat-body">Readable system map. Community CBOM and SBOM are what a scan can inventory. CSPM, QBOM, HBOM, AIBOM, and IBOM stay Enterprise. This Pages build does not run a production scan.</p>
           <strong class="sr-only" id="proof-title">Platform Architecture — one engine, two editions, deny by default</strong>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="lens-strip" aria-label="Product lenses">
+    <div class="container">
+      <header class="section-head">
+        <p class="section-label"><span>Lenses</span><span>What a scan covers</span></p>
+        <h2 class="section-heading">Name the lens. <em>Then the edition.</em></h2>
+      </header>
+      <ul class="lens-list">
+        <li><b>CSPM</b><span>Enterprise cloud posture. Not executed by this static site.</span></li>
+        <li><b>CBOM</b><span>Community. Algorithms, keys, certificates, and libraries.</span></li>
+        <li><b>SBOM</b><span>Community. Software components, including crypto libraries.</span></li>
+        <li><b>HBOM</b><span>Enterprise. Declared hardware, HSM, and TPM inventory.</span></li>
+        <li><b>AIBOM</b><span>Enterprise. Declared models and datasets.</span></li>
+        <li><b>IBOM</b><span>Enterprise. Identities bound to cryptographic assets.</span></li>
+        <li><b>QBOM</b><span>Enterprise quantum layer. Community still classifies algorithms on the CBOM.</span></li>
+      </ul>
+      <p class="honesty-note"><span>GitHub Pages has no live engine</span><span>Mappings are not certifications</span><span>No customer telemetry and no secret values</span></p>
     </div>
   </section>
 
@@ -226,6 +274,20 @@
 
   <!-- ═════════════════ DIAGRAM TYPES ═════════════════ -->
   <section id="types">
+    <div class="container">
+      <header class="section-head" style="padding-top:4rem;">
+        <p class="section-label"><span>Docs</span><span>Rendered in the page</span></p>
+        <h2 class="section-heading">Policies and product notes. <em>Not raw markdown.</em></h2>
+        <p class="section-body">Legal, privacy, security, and the scan story render here. Tables scroll. This Pages build is a labeled synthetic demo. Mappings are not certifications. Secret values are not published.</p>
+      </header>
+      <div class="docs-layout">
+        <nav id="doc-nav" aria-label="Documents"></nav>
+        <article id="doc-article" class="doc-article"></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="diagram-kinds">
     <div class="container">
       <header class="section-head fade-up" style="padding-top:4rem;">
         <p class="section-label"><span>02</span><span>Diagram types</span></p>
@@ -505,8 +567,8 @@
         <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">Read the engine README ↗</a>
         <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Published releases ↗</a>
         <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/LICENSE" target="_blank" rel="noopener">Apache-2.0 license ↗</a>
-        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/LEGAL.md" target="_blank" rel="noopener">Legal pack ↗</a>
-        <a href="../../docs/README.md">Open the docs →</a>
+        <a href="#types/legal">Legal pack</a>
+        <a href="#types">Open the docs</a>
       </nav>
       <p class="facts-channel">Community source is this public repository. Options shown as "Enterprise" require a commercial license and, where noted, your identity provider or cloud credentials. The maps on this page are illustrative of the product; they are not a compliance certification of RivicQ.</p>
     </div>
@@ -536,17 +598,18 @@
       </div>
       <div class="footer-links">
         <a href="#diagrams">Diagrams</a>
-        <a href="#types">Questions</a>
+        <a href="#types">Docs</a>
+        <a href="#diagram-kinds">Questions</a>
         <a href="#features">Output</a>
         <a href="#palette">Design system</a>
-        <a href="../../docs/README.md">Documentation</a>
+        <a href="#types/security">Security</a>
+        <a href="#types/privacy">Privacy</a>
         <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
-        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/SECURITY.md" target="_blank" rel="noopener">Security</a>
       </div>
     </div>
   </footer>
 
+  <script src="js/docs-reader.js"></script>
   <script src="js/rivicq-site.js"></script>
 </body>
 </html>

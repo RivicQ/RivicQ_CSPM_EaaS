@@ -10,8 +10,26 @@
   var doc = document;
   doc.documentElement.classList.add('js');
 
-  var THEME_KEY = 'rivicq-site-theme';
+  var THEME_KEY = 'rivicq.theme';
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function choiceOf(raw) {
+    if (raw === 'harbor' || raw === 'dark') return 'harbor';
+    if (raw === 'ledger' || raw === 'light') return 'ledger';
+    return 'auto';
+  }
+
+  function resolvedChoice(choice) {
+    if (choice === 'harbor') return 'dark';
+    if (choice === 'ledger') return 'light';
+    var light = false;
+    try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+    return light ? 'light' : 'dark';
+  }
+
+  function readChoice() {
+    try { return choiceOf(localStorage.getItem(THEME_KEY)); } catch (e) { return 'auto'; }
+  }
 
   function currentTheme() {
     return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
@@ -35,29 +53,60 @@
     for (var i = 0; i < frames.length; i++) syncFrameTheme(frames[i]);
   }
 
-  /* ── Theme toggle ──────────────────────────────────────────── */
+  /* ── Theme: Auto follows the OS. Harbor is dark. Ledger is light. ── */
   var themeMeta = doc.querySelector('meta[name="theme-color"]');
-  function applyTheme(theme) {
-    root.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
-    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
-    if (themeMeta) themeMeta.setAttribute('content', theme === 'dark' ? '#07080a' : '#f5f6f3');
-    var toggle = doc.querySelector('[data-theme-toggle]');
-    if (toggle) toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  function applyChoice(choice) {
+    var mode = resolvedChoice(choice);
+    root.setAttribute('data-theme', mode);
+    root.setAttribute('data-theme-choice', choice);
+    try { localStorage.setItem(THEME_KEY, choice); } catch (e) {}
+    if (themeMeta) themeMeta.setAttribute('content', mode === 'dark' ? '#101614' : '#F3EFE6');
+    var select = doc.querySelector('[data-theme-choice]');
+    if (select && select.value !== choice) select.value = choice;
     syncAllFrames();
   }
 
-  var themeToggle = doc.querySelector('[data-theme-toggle]');
-  if (themeToggle) {
-    themeMeta && themeMeta.setAttribute('content', currentTheme() === 'dark' ? '#07080a' : '#f5f6f3');
-    themeToggle.addEventListener('click', function () {
-      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+  var themeSelect = doc.querySelector('[data-theme-choice]');
+  if (themeSelect) {
+    var initialChoice = readChoice();
+    themeSelect.value = initialChoice;
+    applyChoice(initialChoice);
+    themeSelect.addEventListener('change', function () {
+      applyChoice(choiceOf(themeSelect.value));
     });
+  }
+  if (window.matchMedia) {
+    var scheme = window.matchMedia('(prefers-color-scheme: light)');
+    var onScheme = function () { if (readChoice() === 'auto') applyChoice('auto'); };
+    if (scheme.addEventListener) scheme.addEventListener('change', onScheme);
+    else if (scheme.addListener) scheme.addListener(onScheme);
   }
 
   // Re-apply theme to each diagram right after it finishes loading.
+  function diagramFills(frame) {
+    try {
+      var cdoc = frame.contentDocument;
+      if (!cdoc) return false;
+      var node = cdoc.querySelector('.diagram-container svg, svg');
+      if (!node) return false;
+      var box = node.getBoundingClientRect();
+      return box.width > 120 && box.height > 80;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function markFrame(frame) {
+    syncFrameTheme(frame);
+    var host = frame.closest ? frame.closest('.hero-frame') : null;
+    if (!host) return;
+    if (diagramFills(frame)) host.classList.add('is-ready');
+    else host.classList.remove('is-ready');
+  }
+
   doc.addEventListener('load', function (e) {
     if (e.target && e.target.tagName === 'IFRAME' && e.target.hasAttribute('data-sync-theme')) {
-      syncFrameTheme(e.target);
+      markFrame(e.target);
     }
   }, true);
 

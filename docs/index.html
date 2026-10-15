@@ -20,15 +20,26 @@
     <link rel="stylesheet" href="assets/horizon-docs.css?v=20261015b" />
     <script>
       (function () {
-        try {
-          var t = localStorage.getItem('rivicq.theme');
-          if (t !== 'light' && t !== 'dark') {
-            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-          }
-          document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
+        var KEY = 'rivicq.theme';
+        function choiceOf(raw) {
+          if (raw === 'harbor' || raw === 'dark') return 'harbor';
+          if (raw === 'ledger' || raw === 'light') return 'ledger';
+          return 'auto';
         }
+        function resolved(choice) {
+          if (choice === 'harbor') return 'dark';
+          if (choice === 'ledger') return 'light';
+          var light = false;
+          try { light = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) {}
+          return light ? 'light' : 'dark';
+        }
+        var choice = 'auto';
+        try { choice = choiceOf(localStorage.getItem(KEY)); } catch (e) {}
+        var mode = resolved(choice);
+        document.documentElement.setAttribute('data-theme', mode);
+        document.documentElement.setAttribute('data-theme-choice', choice);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode === 'light' ? '#F3EFE6' : '#101614');
       })();
     </script>
     <script type="application/ld+json">
@@ -222,14 +233,14 @@
           <article class="doc-card">
             <h3>Start here</h3>
             <ul>
-              <li><a href="read.html?doc=CLIENT_ARCHITECTURE.md">Client architecture — discover / mitigate / report</a></li>
-              <li><a href="read.html?doc=CORE_ENGINE.md">CBOM core engine — findings, PQC classes, CLI</a></li>
-              <li><a href="read.html?doc=PQC_MIGRATION.md">PQC migration — classical to post-quantum</a></li>
-              <li><a href="read.html?doc=editions.md">Community vs Enterprise</a></li>
-              <li><a href="read.html?doc=KNOWN_LIMITATIONS.md">Known limitations</a></li>
-              <li><a href="read.html?doc=DATASETS.md">Datasets policy (no customer secrets)</a></li>
-              <li><a href="read.html?doc=PRODUCT_STATUS.md">Product status</a></li>
-              <li><a href="read.html?doc=INTEGRATIONS.md">Optional scanners (Syft, Trivy, Gitleaks)</a></li>
+              <li><a href="../archify/site/index.html#types/client_architecture">Client architecture — discover / mitigate / report</a></li>
+              <li><a href="../archify/site/index.html#types/core_engine">CBOM core engine — findings, PQC classes, CLI</a></li>
+              <li><a href="../archify/site/index.html#types/pqc_migration">PQC migration — classical to post-quantum</a></li>
+              <li><a href="../archify/site/index.html#types/editions">Community vs Enterprise</a></li>
+              <li><a href="../archify/site/index.html#types/known_limitations">Known limitations</a></li>
+              <li><a href="../archify/site/index.html#types/datasets">Datasets policy (no customer secrets)</a></li>
+              <li><a href="../archify/site/index.html#types/product_status">Product status</a></li>
+              <li><a href="../archify/site/index.html#types/integrations">Optional scanners (Syft, Trivy, Gitleaks)</a></li>
             </ul>
           </article>
           <article class="doc-card">
@@ -238,29 +249,29 @@
               <li><a href="../product">Product</a> · <a href="../product/cspm">CSPM</a> · <a href="../cbom">CBOM</a> · <a href="../pqc">PQC</a></li>
               <li><a href="../enterprise">Enterprise</a> · <a href="../security">Security</a> · <a href="../pricing">Pricing</a></li>
               <li><a href="../request-demo">Request demo</a> · <a href="../ibm">IBM Partner Plus</a> · <a href="../contact">Contact</a></li>
-              <li><a href="read.html?doc=BOM_FRAMEWORK.md">BOM framework (CBOM/SBOM + Enterprise layers)</a></li>
-              <li><a href="read.html?doc=ARCHITECTURE.md">Architecture</a></li>
-              <li><a href="read.html?doc=CORE_ENGINE.md">Core engine contract</a></li>
-              <li><a href="read.html?doc=UX_DESIGN.md">Security Cloud UX</a></li>
-              <li><a href="read.html?doc=ux/README.md">Operator UX scorecard</a></li>
-              <li><a href="read.html?doc=ROADMAP.md">Roadmap</a></li>
-              <li><a href="read.html?doc=QISKIT_PIPELINE.md">Qiskit pipeline</a></li>
+              <li><a href="../archify/site/index.html#types/bom_framework">BOM framework (CBOM/SBOM + Enterprise layers)</a></li>
+              <li><a href="../archify/site/index.html#types/architecture">Architecture</a></li>
+              <li><a href="../archify/site/index.html#types/core_engine">Core engine contract</a></li>
+              <li><a href="../archify/site/index.html#types/ux_design">Security Cloud UX</a></li>
+              <li><a href="../archify/site/index.html#types/readme">Operator UX scorecard</a></li>
+              <li><a href="../archify/site/index.html#types/roadmap">Roadmap</a></li>
+              <li><a href="../archify/site/index.html#types/qiskit_pipeline">Qiskit pipeline</a></li>
               <li><a href="../fabric/">RivicQ Graph demo</a></li>
-              <li><a href="read.html?doc=FABRIC.md">Graph notes (FABRIC.md)</a> · <a href="read.html?doc=GRAPH.md">Rename note</a></li>
+              <li><a href="../archify/site/index.html#types/fabric">Graph notes (FABRIC.md)</a> · <a href="../archify/site/index.html#types/graph">Rename note</a></li>
             </ul>
           </article>
           <article class="doc-card">
             <h3>Company &amp; legal</h3>
             <ul>
               <li><a href="contact.html">Contact</a></li>
-              <li><a href="read.html?doc=PLATFORM.md">Enterprise platform audit</a></li>
-              <li><a href="read.html?doc=ENGINEERING_AUDIT.md">Engineering + UX audit</a></li>
-              <li><a href="read.html?doc=DESIGN_SYSTEM.md">Design tokens</a></li>
-              <li><a href="read.html?doc=CONTACT.md">Public desks</a></li>
-              <li><a href="read.html?doc=LEGAL.md">LEGAL.md</a></li>
-              <li><a href="read.html?doc=PRIVACY.md">PRIVACY.md</a></li>
-              <li><a href="read.html?doc=TRADEMARKS.md">TRADEMARKS.md</a></li>
-              <li><a href="read.html?doc=SECURITY.md">SECURITY.md</a></li>
+              <li><a href="../archify/site/index.html#types/platform">Enterprise platform audit</a></li>
+              <li><a href="../archify/site/index.html#types/engineering_audit">Engineering + UX audit</a></li>
+              <li><a href="../archify/site/index.html#types/design_system">Design tokens</a></li>
+              <li><a href="../archify/site/index.html#types/contact">Public desks</a></li>
+              <li><a href="../archify/site/index.html#types/legal">LEGAL.md</a></li>
+              <li><a href="../archify/site/index.html#types/privacy">PRIVACY.md</a></li>
+              <li><a href="../archify/site/index.html#types/trademarks">TRADEMARKS.md</a></li>
+              <li><a href="../archify/site/index.html#types/security">SECURITY.md</a></li>
             </ul>
           </article>
         </div>

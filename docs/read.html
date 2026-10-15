@@ -16,15 +16,11 @@
     <link rel="stylesheet" href="assets/horizon-docs.css?v=20261015b" />
     <script>
       (function () {
-        try {
-          var t = localStorage.getItem('rivicq.theme');
-          if (t !== 'light' && t !== 'dark') {
-            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-          }
-          document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        }
+        var params = new URLSearchParams(location.search);
+        var doc = params.get('doc') || 'README.md';
+        var name = (doc.split('/').pop() || 'readme');
+        var slug = name === 'NOTICE' ? 'notice' : name.replace(/\.md$/i, '').toLowerCase();
+        location.replace('../archify/site/index.html#types/' + encodeURIComponent(slug));
       })();
     </script>
   </head>

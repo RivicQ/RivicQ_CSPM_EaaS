@@ -1,5 +1,7 @@
 # Legal information — RivicQ
 
+Rendered copy: https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#types/legal
+
 **Copyright © 2026 RivicQ GmbH, Berlin, Germany.**
 
 This document is informational. It does not replace the Apache License 2.0 text in [LICENSE](LICENSE) or a signed Enterprise agreement. For binding commercial terms, contact [rivicq.com](https://rivicq.com).

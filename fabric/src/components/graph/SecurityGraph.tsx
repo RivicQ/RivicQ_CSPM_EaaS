@@ -60,6 +60,7 @@ const SecurityGraph: React.FC<Props> = ({ onSelect, selected, focusIds, hideUnfo
     : nodes;
   const shownIds = new Set(shownNodes.map((n) => n.id));
   return (
+    <figure className="graph-figure">
     <svg viewBox="0 0 780 330" role="img" aria-label={label || 'Enterprise security graph for the labeled Northbridge demo'}>
       {edges.map((e) => {
         const a = nodes.find((n) => n.id === e.from);
@@ -117,6 +118,10 @@ const SecurityGraph: React.FC<Props> = ({ onSelect, selected, focusIds, hideUnfo
         );
       })}
     </svg>
+    <figcaption className="graph-caption">
+      Labeled synthetic graph. CSPM is cloud posture and stays Enterprise. Community inventories are CBOM (cryptography) and SBOM (software). HBOM, AIBOM, IBOM, and QBOM stay Enterprise. This Pages build does not run a production scan, and the picture is not a certification.
+    </figcaption>
+    </figure>
   );
 };
 

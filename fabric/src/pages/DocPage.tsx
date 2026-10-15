@@ -34,6 +34,7 @@ const DocPage: React.FC = () => {
   return (
     <article className="doc-view">
       <PublicBar>
+        <a className="btn" href={`/RivicQ_CSPM_EaaS/archify/site/index.html#types/${docId}`}>Open in Archify</a>
         <Link className="btn" to="/legal">Legal notes</Link>
         <Link className="btn" to="/">Back</Link>
       </PublicBar>

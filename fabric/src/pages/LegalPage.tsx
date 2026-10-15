@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PublicBar from '../components/layout/PublicBar';
 
+const ARCHIFY = '/RivicQ_CSPM_EaaS/archify/site/index.html';
+
 const LegalPage: React.FC = () => (
   <div className="landing">
     <PublicBar>
@@ -21,9 +23,9 @@ const LegalPage: React.FC = () => (
       <li>Do not contribute customer data or secrets to this repository.</li>
     </ul>
     <div className="btn-row" style={{ marginTop: 16 }}>
-      <Link className="btn" to="/docs/legal">LEGAL.md</Link>
-      <Link className="btn" to="/docs/privacy">PRIVACY.md</Link>
-      <Link className="btn" to="/docs/security">SECURITY.md</Link>
+      <a className="btn" href={`${ARCHIFY}#types/legal`}>Legal</a>
+      <a className="btn" href={`${ARCHIFY}#types/privacy`}>Privacy</a>
+      <a className="btn" href={`${ARCHIFY}#types/security`}>Security</a>
       <Link className="btn" to="/">Back</Link>
     </div>
   </div>
