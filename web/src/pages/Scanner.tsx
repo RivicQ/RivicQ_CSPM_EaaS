@@ -113,7 +113,7 @@ const Scanner: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [targetClass, setTargetClass] = useState<TargetClass>('website');
   const [scanType, setScanType] = useState<'quick' | 'full' | 'compliance' | 'cbom' | 'website' | 'host' | 'ip' | 'server' | 'pod' | 'hardware' | 'firmware'>('website');
-  const [scanTarget, setScanTarget] = useState('https://example.com');
+  const [scanTarget, setScanTarget] = useState(() => searchParams.get('target') || 'https://example.com');
   const [scanJobs, setScanJobs] = useState<ScanJob[]>([]);
   const [liveFindings, setLiveFindings] = useState<ScanFinding[]>([]);
   const [policyGate, setPolicyGate] = useState<PolicyGate | null>(null);
@@ -126,9 +126,12 @@ const Scanner: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const pollTimerRef = useRef<number | null>(null);
   const pollAttemptsRef = useRef(0);
+  const autostartRef = useRef(false);
 
   useEffect(() => {
     if (searchParams.get('tab') === 'github') setTab(5);
+    const targetParam = searchParams.get('target');
+    if (targetParam) setScanTarget(targetParam);
   }, [searchParams]);
 
   const { data: scanList, refetch: refetchScans } = useQuery({
@@ -238,8 +241,8 @@ const Scanner: React.FC = () => {
     }, POLL_INTERVAL_MS);
   };
 
-  const startScan = async () => {
-    const target = scanTarget.trim();
+  const startScan = useCallback(async (overrideTarget?: string) => {
+    const target = (typeof overrideTarget === 'string' ? overrideTarget : scanTarget).trim();
     if (!target) { setError('Specify a scan target (website, host, IP, server, pod://ns/name, or qsic://).'); return; }
     const looksLikeWebsite = /^(https?:\/\/|www\.)/i.test(target);
     const looksLikeIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(target) || (target.includes(':') && target.includes('.'));
@@ -265,10 +268,24 @@ const Scanner: React.FC = () => {
       pollScanStatus(scanId, scanId);
     } catch {
       clearPolling(); setIsScanning(false);
-      setError('Could not reach the CBOM scan API. Start the backend on :9090 or use GitHub Pages demo mode.');
+      setError(
+        isDemo
+          ? 'Demo scan could not start in this browser session. Refresh and try again, or open Interactive Demo from /demo.'
+          : 'Could not reach the CBOM scan API. Start the backend on :9090 or use GitHub Pages demo mode.'
+      );
       setScanJobs((prev) => prev.filter((j) => j.id !== newJob.id));
     }
-  };
+  }, [isDemo, paid, scanTarget, scanType, targetClass]);
+
+  useEffect(() => {
+    if (autostartRef.current) return;
+    if (searchParams.get('autostart') !== '1') return;
+    const targetParam = (searchParams.get('target') || scanTarget || '').trim();
+    if (!targetParam) return;
+    autostartRef.current = true;
+    setScanTarget(targetParam);
+    void startScan(targetParam);
+  }, [searchParams, scanTarget, startScan]);
 
   const statusIcon = (status: string) => {
     if (status === 'completed') return <CheckCircle color="success" fontSize="small" />;
@@ -426,7 +443,7 @@ const Scanner: React.FC = () => {
             </Box>
           )}
           <Stack direction="row" spacing={1.5}>
-            <Button variant="contained" startIcon={<PlayArrow />} onClick={startScan} disabled={isScanning} size="large" sx={{ background: designSystem.gradient.brand, px: 3 }}>
+            <Button variant="contained" startIcon={<PlayArrow />} onClick={() => { void startScan(); }} disabled={isScanning} size="large" sx={{ background: designSystem.gradient.brand, px: 3 }}>
               {isScanning ? 'Scanning…' : 'Start CBOM Scan'}
             </Button>
             <Button variant="outlined" startIcon={<Refresh />} onClick={refreshScanData}>Refresh</Button>

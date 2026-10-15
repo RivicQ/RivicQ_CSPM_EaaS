@@ -108,21 +108,26 @@ const Home: React.FC = () => {
     if (!target) return;
     if (!repoUrl.trim() && !backendReachable) setRepoUrl(target);
 
-    // Show progress immediately so clients never see a dead click.
+    // Static Pages: enter labelled demo, then open the Scanner console which
+    // already runs the in-browser demo adapter end-to-end (client-meeting path).
+    if (!backendReachable) {
+      setScanStatus('scanning');
+      setProgress(10);
+      setReport(null);
+      try {
+        if (!isDemo) await demoLogin('community');
+        navigate(`/scanner?target=${encodeURIComponent(target)}&autostart=1`);
+      } catch {
+        setScanStatus('error');
+        setProgress(0);
+      }
+      return;
+    }
+
     setScanStatus('scanning');
     setProgress(5);
     setReport(null);
 
-    // Static Pages: enter labelled interactive demo, then run in-browser sample scan.
-    if (!backendReachable && !isDemo) {
-      try {
-        await demoLogin('community');
-      } catch {
-        setScanStatus('error');
-        setProgress(0);
-        return;
-      }
-    }
     const githubSpec = (() => {
       const m = target.match(/github\.com[:/]+([^/]+)\/([^/#\s]+)/i);
       if (m) return `${m[1]}/${m[2].replace(/\.git$/, '')}`;
@@ -130,9 +135,8 @@ const Home: React.FC = () => {
       return '';
     })();
     try {
-      // Live GitHub Contents scan only when the engine is reachable.
-      // On static Pages / demo sessions, use the CBOM path (demoAwareAdapter).
-      if (backendReachable && githubSpec) {
+      // Live GitHub Contents scan when the engine is reachable.
+      if (githubSpec) {
         const resp = await gitHubScanService.scanRepos([githubSpec], 'full', false);
         const scanId = resp.data.scan_id;
         let ticks = 0;
