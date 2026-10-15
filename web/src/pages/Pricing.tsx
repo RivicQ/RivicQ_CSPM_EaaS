@@ -84,7 +84,8 @@ const Pricing: React.FC = () => {
         </Grid>
 
         <ArchifyWorkflowEmbed
-          kicker="Pricing · operator workflow"
+          diagramId="roadmap"
+          kicker="Pricing · roadmap"
           title="Community scans and exports evidence. Enterprise licenses the continuous control plane — list prices are not a live PSP."
         />
       </Container>

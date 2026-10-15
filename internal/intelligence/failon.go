@@ -1,6 +1,9 @@
 package intelligence
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // FailOnExit codes for the CLI (and GitHub Action). Deterministic for CI.
 const (
@@ -8,6 +11,33 @@ const (
 	ExitFailOn = 1
 	ExitUsage  = 2
 )
+
+// ParseFailOn validates the CLI --fail-on value. Unknown values must not
+// silently behave as BLOCK (a typo in CI would otherwise pass a clean tree).
+func ParseFailOn(failOn string) (string, error) {
+	v := strings.ToLower(strings.TrimSpace(failOn))
+	switch v {
+	case "":
+		return "block", nil
+	case "block", "none", "warn", "critical", "high", "medium":
+		return v, nil
+	default:
+		return "", fmt.Errorf("invalid --fail-on %q (want BLOCK|WARN|NONE|critical|high|medium)", failOn)
+	}
+}
+
+// ParseOutputFormat validates --format. Unknown values must not silently print a table.
+func ParseOutputFormat(format string) (string, error) {
+	v := strings.ToLower(strings.TrimSpace(format))
+	switch v {
+	case "", "table":
+		return "table", nil
+	case "json":
+		return "json", nil
+	default:
+		return "", fmt.Errorf("invalid --format %q (want table|json)", format)
+	}
+}
 
 // ShouldFailOn reports whether a report should fail CI for the given threshold.
 //
@@ -21,8 +51,12 @@ func ShouldFailOn(failOn string, rep *Report) bool {
 	if rep == nil {
 		return false
 	}
-	switch strings.ToLower(strings.TrimSpace(failOn)) {
-	case "", "block":
+	normalized, err := ParseFailOn(failOn)
+	if err != nil {
+		return false
+	}
+	switch normalized {
+	case "block":
 		return rep.Gate.Failed
 	case "none":
 		return false
@@ -35,7 +69,7 @@ func ShouldFailOn(failOn string, rep *Report) bool {
 	case "medium":
 		return countSeverity(rep, "CRITICAL")+countSeverity(rep, "HIGH")+countSeverity(rep, "MEDIUM") > 0
 	default:
-		return rep.Gate.Failed
+		return false
 	}
 }
 

@@ -75,6 +75,7 @@ const CbomPublic = lazy(() => import('./pages/CbomPublic'));
 const PqcPublic = lazy(() => import('./pages/PqcPublic'));
 const EnterprisePublic = lazy(() => import('./pages/EnterprisePublic'));
 const SecurityPublic = lazy(() => import('./pages/SecurityPublic'));
+const ArchifyMaps = lazy(() => import('./pages/ArchifyMaps'));
 
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
@@ -181,6 +182,7 @@ const App: React.FC = () => {
                 <Route path="/pqc" element={wrap(PqcPublic, 'PqcPublic')} />
                 <Route path="/enterprise" element={wrap(EnterprisePublic, 'EnterprisePublic')} />
                 <Route path="/security" element={wrap(SecurityPublic, 'SecurityPublic')} />
+                <Route path="/maps" element={wrap(ArchifyMaps, 'ArchifyMaps')} />
                 <Route path="/logout" element={<LogoutRedirect />} />
                 <Route
                   path="/"

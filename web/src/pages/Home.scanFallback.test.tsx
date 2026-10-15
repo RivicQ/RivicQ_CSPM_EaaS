@@ -45,6 +45,7 @@ jest.mock('../services/api', () => ({
 }));
 
 jest.mock('../components/brand/ArchifyWorkflowEmbed', () => () => null);
+jest.mock('../components/brand/ArchifySystemMaps', () => () => null);
 jest.mock('../components/brand/NebulaBackdrop', () => ({ children }: { children?: React.ReactNode }) => <>{children}</>);
 jest.mock('../motion/primitives', () => ({
   MotionSection: ({ children }: { children?: React.ReactNode }) => <>{children}</>,

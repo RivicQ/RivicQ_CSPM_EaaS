@@ -10,10 +10,11 @@ const SecurityPublic: React.FC = () => (
     secondary={{ label: 'Report a vulnerability', to: 'mailto:security@rivicq.com' }}
     notice="Report security issues to security@rivicq.com. Do not file secrets in public GitHub issues."
     engineNotice="scan"
+    diagramId="compliance"
+    diagramKicker="Security · evidence"
+    diagramTitle="Map standards, attest, or waive — evidence retained. Mappings are not certifications."
     sectionEyebrow="Trust model"
     sectionTitle="Public desks, tenant isolation, and what never ships on Pages."
-    diagramKicker="Security · operator workflow"
-    diagramTitle="Scan public targets safely → keep secrets out of Pages → export evidence without fabricating estates."
     blocks={[
       { title: 'Public desks', body: 'hello@, sales@, support@, security@, privacy@ on rivicq.com. admin@ and finance aliases stay private.' },
       { title: 'Tenant isolation', body: 'JWT tenant_id scopes Community scans. Spoofable X-Tenant-ID headers are ignored by the API.' },

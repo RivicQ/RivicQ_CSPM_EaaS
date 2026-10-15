@@ -29,6 +29,8 @@ const NAV: NavItem[] = [
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
   { id: 'resources', label: 'Resources', items: [
     { label: 'Documentation', to: 'docs/index.html' },
+    { label: 'System maps', to: '/maps' },
+    { label: 'Archify gallery', to: 'archify/site/index.html#diagrams' },
     { label: 'RivicQ Graph demo', to: 'fabric/' },
     { label: 'Contact', to: '/contact' },
   ] },

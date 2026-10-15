@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- **CLI fail-on / format typos** (2026-10-15). Unknown `--fail-on` and `--format` values are usage errors (exit 2) instead of silently behaving as BLOCK / table. Firmware and identity gates accept only BLOCK|WARN|NONE.
+- **Production CORS localhost** — `AllowLocalDev` is off when `CRYPTOBOM_ENV`/`RIVICQ_ENV`/`APP_ENV`/`ENV` is production. `Access-Control-Allow-Credentials` is set only when the origin is allowed.
+- **Production without database** — `server.New` refuses to start in production env unless `DATABASE_URL` works or `RIVICQ_ALLOW_DEMO_MODE=1`.
+
 ### Changed
+- **Archify site system maps across the codebase** (2026-10-15). `archify/site/index.html#diagrams` is the catalog: nine plates, `?embed=1&theme=dark` in iframe, `?present=1` for open. Home, `/maps`, Docs, and Marketing render that gallery. Public pages pick the matching diagram (architecture / operator / PQC / compliance / roadmap) instead of dumping the operator workflow everywhere. Titles use Space Grotesk like the Archify site. Dark CSS on the Archify explorer stays nebula (`#000` / `#0A0A0F` / `#7C3AED`).
 - **Nebula-only product chrome** (2026-10-14). Public site, console, docs, marketing, Archify explorer, GitHub Pages, and Cloudflare Pages share one black/violet identity. Light-canvas “vibe” surfaces are gone. Theme toggle removed; inbox/stat cards/logos forced to nebula. Home/public nav is opaque so headings no longer sit under the sticky bar. GitHub Pages now runs `scripts/build-pages.sh` (same composite as Cloudflare). Operator scan workflow is an Archify diagram on Home, Scanner, Pricing, Request demo, Docs hub, Marketing, and public Site pages. Docs/marketing/archify force dark; `docs/assets/theme.js` is published by `build-pages.sh`. Live `/demo` matches the Archify product-site hero (Space Grotesk / Fraunces, cmd chip, plate receipts, workflow embed). Remaining public shells (`SitePage` product/CBOM/PQC/enterprise/security/contact/IBM, auth forgot/reset/verify/OAuth, edition switcher, Home hero) and console `GlassCard`/`DashboardPanel` plates use the same high-contrast Archify aura + plate tokens. RivicQ Graph (`fabric/`) is nebula-only with Space Grotesk/Fraunces and violet CTAs; each public page carries page-specific section copy and diagram captions so text is even and complete.
 
 ### Added

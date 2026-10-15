@@ -458,6 +458,7 @@ const DemoWelcome: React.FC = () => {
         </Box>
 
         <ArchifyWorkflowEmbed
+          diagramId="operator"
           kicker="Live demo · operator workflow"
           title="Walk the Community trail on labeled DEMO data — same Archify path as Docs and the console."
         />

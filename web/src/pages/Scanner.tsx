@@ -556,7 +556,7 @@ const Scanner: React.FC = () => {
           <GitHubRepoScanPanel />
         </TabPanel>
       </GlassCard>
-      <ArchifyWorkflowEmbed compact />
+      <ArchifyWorkflowEmbed compact diagramId="operator" />
     </PageFrame>
   );
 };

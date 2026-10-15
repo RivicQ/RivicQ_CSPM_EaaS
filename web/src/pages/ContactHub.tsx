@@ -14,10 +14,9 @@ const ContactHub: React.FC = () => (
     primary={{ label: 'Request enterprise demo', to: '/request-demo' }}
     secondary={{ label: 'Start security assessment', to: '/' }}
     notice="admin@ is private. Finance, fundraising, research, and staff addresses are not listed here."
+    diagramId={null}
     sectionEyebrow="Directory"
     sectionTitle="Pick the public desk that matches your request."
-    diagramKicker="Contact · operator workflow"
-    diagramTitle="Talk to the right desk — then follow the same discover → report path in the product."
   >
     <Grid container spacing={1.5} alignItems="stretch" sx={{ mb: 1 }}>
       {publishedContacts().map((c, i) => (

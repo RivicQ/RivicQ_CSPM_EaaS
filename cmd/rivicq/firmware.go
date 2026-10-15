@@ -181,7 +181,10 @@ func firmwareScan(sub string, args []string) error {
 		}
 	}
 
-	failOn := strings.ToUpper(p.value("fail-on", "BLOCK"))
+	failOn, err := parsePolicyFailOn(p.value("fail-on", "BLOCK"))
+	if err != nil {
+		return err
+	}
 	if firmwareGate(reports, failOn) {
 		return failOnError{threshold: failOn, decision: "firmware"}
 	}
@@ -286,8 +289,10 @@ func firmwareGate(reports []*firmware.Report, failOn string) bool {
 		return blocked
 	case "WARN":
 		return blocked || warned
+	case "NONE":
+		return false
 	default:
-		return blocked || warned
+		return false
 	}
 }
 

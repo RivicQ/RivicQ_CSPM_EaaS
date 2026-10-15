@@ -25,26 +25,17 @@ func main() {
 	case "scan", "sbom", "cbom", "vuln", "secrets", "iac", "compliance", "policy":
 		if err := runScan(cmd, args); err != nil {
 			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
-			if _, ok := err.(failOnError); ok {
-				os.Exit(intelligence.ExitFailOn)
-			}
-			os.Exit(1)
+			os.Exit(cliExit(err))
 		}
 	case "firmware":
 		if err := runFirmware(args); err != nil {
 			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
-			if _, ok := err.(failOnError); ok {
-				os.Exit(intelligence.ExitFailOn)
-			}
-			os.Exit(1)
+			os.Exit(cliExit(err))
 		}
 	case "identity":
 		if err := runIdentity(args); err != nil {
 			fmt.Fprintf(os.Stderr, "rivicq: %v\n", err)
-			if _, ok := err.(failOnError); ok {
-				os.Exit(intelligence.ExitFailOn)
-			}
-			os.Exit(1)
+			os.Exit(cliExit(err))
 		}
 	case "version", "-version", "--version":
 		fmt.Println("rivicq 0.1.0")
@@ -92,7 +83,7 @@ Examples:
 func runScan(mode string, args []string) error {
 	fs := flag.NewFlagSet("rivicq "+mode, flag.ContinueOnError)
 	format := fs.String("format", "table", "table|json")
-	failOn := fs.String("fail-on", "BLOCK", "BLOCK|WARN|NONE|critical|high|medium")
+	failOnFlag := fs.String("fail-on", "BLOCK", "BLOCK|WARN|NONE|critical|high|medium")
 	asJSON := fs.Bool("json", false, "json output")
 	includeFixtures := fs.Bool("include-fixtures", false, "scan fixtures/ and testdata/ (dataset analysis only)")
 	flagArgs, positional := splitCLIArgs(args)
@@ -111,6 +102,14 @@ func runScan(mode string, args []string) error {
 	}
 	if *asJSON {
 		*format = "json"
+	}
+	outFormat, err := intelligence.ParseOutputFormat(*format)
+	if err != nil {
+		return usageError{msg: err.Error()}
+	}
+	failOn, err := intelligence.ParseFailOn(*failOnFlag)
+	if err != nil {
+		return usageError{msg: err.Error()}
 	}
 
 	files, err := walkRepo(abs, *includeFixtures)
@@ -144,7 +143,7 @@ func runScan(mode string, args []string) error {
 	rep.Metadata["mode"] = mode
 	rep.Metadata["edition"] = "community"
 
-	switch *format {
+	switch outFormat {
 	case "json":
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
@@ -155,11 +154,39 @@ func runScan(mode string, args []string) error {
 		printTable(mode, abs, content, rep)
 	}
 
-	failed := intelligence.ShouldFailOn(*failOn, rep)
+	failed := intelligence.ShouldFailOn(failOn, rep)
 	if failed {
-		return failOnError{threshold: *failOn, decision: rep.Gate.Decision}
+		return failOnError{threshold: failOn, decision: rep.Gate.Decision}
 	}
 	return nil
+}
+
+type usageError struct {
+	msg string
+}
+
+func (e usageError) Error() string { return e.msg }
+
+func parsePolicyFailOn(failOn string) (string, error) {
+	v := strings.ToUpper(strings.TrimSpace(failOn))
+	switch v {
+	case "":
+		return "BLOCK", nil
+	case "BLOCK", "WARN", "NONE":
+		return v, nil
+	default:
+		return "", usageError{msg: fmt.Sprintf("invalid --fail-on %q (want BLOCK|WARN|NONE)", failOn)}
+	}
+}
+
+func cliExit(err error) int {
+	if _, ok := err.(usageError); ok {
+		return intelligence.ExitUsage
+	}
+	if _, ok := err.(failOnError); ok {
+		return intelligence.ExitFailOn
+	}
+	return 1
 }
 
 type failOnError struct {

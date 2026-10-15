@@ -18,7 +18,7 @@ import { tokens } from '../theme/tokens';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
-import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
+import ArchifySystemMaps from '../components/brand/ArchifySystemMaps';
 import { PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
@@ -278,6 +278,8 @@ const Home: React.FC = () => {
       label: 'Resources',
       items: [
         { label: 'Documentation', action: () => openExternal('docs/index.html') },
+        { label: 'System maps', action: () => navigate('/maps') },
+        { label: 'Archify gallery', action: () => openExternal('archify/site/index.html#diagrams') },
         { label: 'RivicQ Graph demo', action: () => openExternal('fabric/') },
         { label: 'API reference', action: () => openExternal('api/index.html') },
         { label: 'GitHub', action: () => openExternal('https://github.com/RivicQ/RivicQ_CSPM_EaaS') },
@@ -522,7 +524,7 @@ const Home: React.FC = () => {
         )}
 
         <ScanWorkflowStrip />
-        <ArchifyWorkflowEmbed />
+        <ArchifySystemMaps />
 
         <Box id="platform" sx={{ mt: 10, scrollMarginTop: 96 }}>
           <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary', mb: 1 }}>

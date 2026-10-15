@@ -4,6 +4,7 @@ import { Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
 import PublicEngineNotice from '../components/brand/PublicEngineNotice';
 import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
+import { type ArchifyDiagramId } from '../data/archifyDiagrams';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
 import {
   ARCHIFY_FONTS,
@@ -47,6 +48,7 @@ const SitePage: React.FC<{
   secondary?: { label: string; to: string };
   notice?: string;
   engineNotice?: 'scan' | 'ibm';
+  diagramId?: ArchifyDiagramId | null;
   diagramKicker?: string;
   diagramTitle?: string;
   maxWidth?: 'md' | 'lg';
@@ -62,6 +64,7 @@ const SitePage: React.FC<{
   secondary,
   notice,
   engineNotice,
+  diagramId = 'operator',
   diagramKicker,
   diagramTitle,
   maxWidth = 'lg',
@@ -196,7 +199,7 @@ const SitePage: React.FC<{
             </Box>
           )}
           {children}
-          <ArchifyWorkflowEmbed kicker={diagramKicker} title={diagramTitle} />
+          {diagramId && <ArchifyWorkflowEmbed diagramId={diagramId} kicker={diagramKicker} title={diagramTitle} />}
         </Container>
       </Box>
     </PublicShell>

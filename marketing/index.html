@@ -10,7 +10,7 @@
   <title>RivicQ — Cryptographic Security & Quantum Readiness</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <script>
     (function () {
@@ -115,6 +115,8 @@
         <li><a href="#cloud">Solutions</a></li>
         <li><a href="#compliance">Compliance Centre</a></li>
         <li><a href="#trust">Trust &amp; Security</a></li>
+        <li><a href="#diagrams">Maps</a></li>
+        <li><a href="../archify/site/index.html#diagrams">Archify</a></li>
         <li><a href="showcase.html">Resources</a></li>
         <li><a href="#" data-platform-link data-platform-path="/contact">Company</a></li>
       </ul>
@@ -457,30 +459,81 @@
     </div>
   </section>
 
-  <!-- Operator workflow · Archify -->
-  <section class="section" id="operator-workflow">
+  <!-- System maps · Archify site catalog -->
+  <section class="section" id="diagrams">
     <div class="container">
       <div class="reveal">
-        <span class="section-label">Operator workflow</span>
-        <h2 class="section-title">Same diagram as the console</h2>
+        <span class="section-label">Systems · Archify</span>
+        <h2 class="section-title">Same maps as the product site</h2>
         <p class="section-subtitle">
-          Discover → classify → gate → CBOM report. Interactive Archify artifact shared with Docs, Pricing, and the product console.
+          Nine plates from <a href="../archify/site/index.html#diagrams">archify/site/index.html#diagrams</a>.
+          Embeds use <code>?embed=1&amp;theme=dark</code>. Cards open present mode.
         </p>
       </div>
-      <div class="archify-embed">
-        <div class="archify-embed-head">
-          <div>
-            <p class="archify-embed-kicker">Archify · nebula</p>
-            <p class="archify-embed-title">QBOM stays on the licensed control plane. Control mappings are not certifications.</p>
-          </div>
-          <a class="btn btn-secondary" href="../archify/diagrams/rivicq-cspm-operator-workflow.html" target="_blank" rel="noopener noreferrer">Open diagram</a>
-        </div>
-        <iframe
-          class="archify-embed-frame"
-          title="RivicQ CSPM operator workflow"
-          src="../archify/diagrams/rivicq-cspm-operator-workflow.html?embed=1&theme=dark"
-          loading="lazy"
-        ></iframe>
+      <div class="systems-grid">
+        <a class="sys-card" href="../archify/diagrams/rivicq-architecture.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-architecture.html?embed=1&amp;theme=dark" title="RivicQ Platform Architecture preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Architecture</span><span class="sys-file">rivicq-architecture.html</span></span>
+          <span class="sys-q">What is RivicQ made of?</span>
+          <span class="sys-title">One engine, two editions</span>
+          <span class="sys-desc">Control plane, auth boundary, scanners, policy gate, BOM layer, and store — Community OSS and Enterprise sharing one engine.</span>
+        </a>
+        <a class="sys-card" href="../archify/diagrams/rivicq-dataflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-dataflow.html?embed=1&amp;theme=dark" title="RivicQ asset data flow preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Data flow</span><span class="sys-file">rivicq-dataflow.html</span></span>
+          <span class="sys-q">Where does every crypto asset go?</span>
+          <span class="sys-title">Discover → Analyze → Deliver</span>
+          <span class="sys-desc">Asset sources, built-in scanners, profiles, intelligence, then BOMs, evidence, and surfaces in one left-to-right journey.</span>
+        </a>
+        <a class="sys-card" href="../archify/diagrams/rivicq-lifecycle.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-lifecycle.html?embed=1&amp;theme=dark" title="RivicQ finding lifecycle preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Lifecycle</span><span class="sys-file">rivicq-lifecycle.html</span></span>
+          <span class="sys-q">Where does each finding stand now?</span>
+          <span class="sys-title">Waits, retries, honest endings</span>
+          <span class="sys-desc">Discovered → triaged → planned → migrating → remediated — with unassigned pauses, re-scan recovery, and documented terminals.</span>
+        </a>
+        <a class="sys-card" href="../archify/diagrams/rivicq-cspm-operator-workflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-cspm-operator-workflow.html?embed=1&amp;theme=dark" title="RivicQ operator workflow preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-cspm-operator-workflow.html</span></span>
+          <span class="sys-q">How does an operator scan run?</span>
+          <span class="sys-title">Discover → Gate → CBOM</span>
+          <span class="sys-desc">Console or CLI posts a scan, the engine fingerprints and classifies, the policy gate decides, QBOM stays Enterprise (403 on OSS), and the CBOM report publishes.</span>
+        </a>
+        <a class="sys-card" href="../archify/diagrams/rivicq-analysis-workflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-analysis-workflow.html?embed=1&amp;theme=dark" title="RivicQ analysis pipeline preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-analysis-workflow.html</span></span>
+          <span class="sys-q">What happens to each artifact?</span>
+          <span class="sys-title">Fingerprint → Gate → Evidence</span>
+          <span class="sys-desc">Every artifact is fingerprinted, classified deterministically, gated as BLOCK / WARN / PASS, and published with a signed evidence pack.</span>
+        </a>
+        <a class="sys-card" href="../archify/diagrams/rivicq-compliance-workflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-compliance-workflow.html?embed=1&amp;theme=dark" title="RivicQ compliance evidence preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-compliance-workflow.html</span></span>
+          <span class="sys-q">How does evidence get trusted?</span>
+          <span class="sys-title">Map standards, attest, or waive</span>
+          <span class="sys-desc">Collect, normalize once, map to DORA / BSI / eIDAS / NIST / ISO, then attest or issue a time-boxed waiver — evidence retained and signed.</span>
+        </a>
+        <a class="sys-card" href="../archify/diagrams/rivicq-pqc-migration.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-pqc-migration.html?embed=1&amp;theme=dark" title="RivicQ PQC migration preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-pqc-migration.html</span></span>
+          <span class="sys-q">How do you reach quantum readiness?</span>
+          <span class="sys-title">Inventory → Hybrid → Attest</span>
+          <span class="sys-desc">Classify every algorithm, plan ML-KEM / ML-DSA hybrids, roll out in phases, and verify before / after with a fresh scan.</span>
+        </a>
+        <a class="sys-card" href="../archify/diagrams/rivicq-scanning-sequence.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-scanning-sequence.html?embed=1&amp;theme=dark" title="RivicQ scan request sequence preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Sequence</span><span class="sys-file">rivicq-scanning-sequence.html</span></span>
+          <span class="sys-q">Who says what during a scan?</span>
+          <span class="sys-title">Auth first, evidence always</span>
+          <span class="sys-desc">Console → API → Authn/RBAC → Scanner → BOM store → evidence, with every return and audit event in order.</span>
+        </a>
+        <a class="sys-card" href="../archify/diagrams/rivicq-roadmap.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe src="../archify/diagrams/rivicq-roadmap.html?embed=1&amp;theme=dark" title="RivicQ delivery roadmap preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-roadmap.html</span></span>
+          <span class="sys-q">What ships, and when?</span>
+          <span class="sys-title">Now → Next → Later</span>
+          <span class="sys-desc">Community, Enterprise, partner programs, and quantum across three horizons — shipped markers on real items, not adjectives.</span>
+        </a>
       </div>
     </div>
   </section>

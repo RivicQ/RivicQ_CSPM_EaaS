@@ -87,7 +87,8 @@ const IBMPartner: React.FC = () => {
       engineNotice="ibm"
       sectionEyebrow="Partner readiness"
       sectionTitle="Technology mappings and Build checklist — RivicQ state, not IBM API state."
-      diagramKicker="IBM · operator workflow"
+      diagramId="architecture"
+      diagramKicker="IBM · architecture"
       diagramTitle="Keep IBM mappings honest — local taxonomy and optional connectors, never fabricated marketplace claims."
     >
       {!backendReachable && (

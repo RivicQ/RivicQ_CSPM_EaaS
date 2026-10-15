@@ -10,10 +10,11 @@ const EnterprisePublic: React.FC = () => (
     secondary={{ label: 'See pricing', to: '/pricing' }}
     notice="The edition switcher in the UI is a workspace preference. It is not a license grant and does not unlock production connectors on GitHub Pages."
     engineNotice="scan"
+    diagramId="architecture"
+    diagramKicker="Enterprise · architecture"
+    diagramTitle="Same engine. Licensed control plane, SSO, connectors, and evidence packs."
     sectionEyebrow="Enterprise scope"
     sectionTitle="What the commercial control plane adds on top of Community."
-    diagramKicker="Enterprise · operator workflow"
-    diagramTitle="Same discover → gate path — plus licensed connectors, SSO, and continuous monitoring."
     blocks={[
       { title: 'SSO and RBAC', body: 'Workspace roles on the API with audit history. Community stays CLI + labeled console without enterprise IdP.' },
       { title: 'Cloud connectors', body: 'AWS, GCP, Azure, IBM Cloud when credentials and a license exist. Nothing is auto-attached from Pages.' },

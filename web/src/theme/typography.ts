@@ -1,17 +1,19 @@
-/** RivicQ Security Cloud type — Inter + JetBrains Mono. */
+/** RivicQ type — Space Grotesk titles, Inter body, JetBrains Mono. Matches archify/site. */
 export const appTypography = {
   fontFamily: 'Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+  fontFamilyTitle: '"Space Grotesk", Inter, system-ui, sans-serif',
+  fontFamilyDisplay: 'Fraunces, Georgia, serif',
   fontFamilyMono: '"JetBrains Mono", ui-monospace, monospace',
 
   display: {
-    fontFamily: 'Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-    fontWeight: 700,
-    letterSpacing: '-0.03em',
+    fontFamily: '"Space Grotesk", Inter, system-ui, sans-serif',
+    fontWeight: 500,
+    letterSpacing: '-0.04em',
     lineHeight: 1.08,
   },
 
   metric: {
-    fontFamily: 'Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+    fontFamily: '"Space Grotesk", Inter, system-ui, sans-serif',
     fontWeight: 650,
     letterSpacing: '-0.02em',
     fontVariantNumeric: 'tabular-nums' as const,
