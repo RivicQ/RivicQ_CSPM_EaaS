@@ -4,9 +4,11 @@ import {
   Box, Button, Container, MenuItem, Stack, TextField, Typography,
 } from '@mui/material';
 import PublicShell from '../components/brand/PublicShell';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { useAuth } from '../context/AuthContext';
 import { platformService } from '../services/api';
 import { PUBLIC_PAGES_SALES_FORM } from '../data/publicInfrastructure';
+import { ARCHIFY_FONTS, archifyEyebrowSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 const INTENTS = [
   { value: 'demo', label: 'Enterprise demo' },
@@ -46,28 +48,28 @@ const RequestDemo: React.FC = () => {
   return (
     <PublicShell>
       <Container maxWidth="sm" sx={{ py: { xs: 6, md: 10 } }}>
-        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Typography sx={archifyEyebrowSx}>
           Sales · RivicQ GmbH · Berlin
         </Typography>
-        <Typography sx={{ fontSize: { xs: '2rem', md: '2.6rem' }, fontWeight: 750, letterSpacing: '-0.03em', color: 'text.primary', mt: 1 }}>
+        <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontSize: { xs: '2rem', md: '2.6rem' }, fontWeight: 500, letterSpacing: '-0.04em', color: 'text.primary', mt: 1 }}>
           Request an enterprise demo
         </Typography>
         <Typography sx={{ color: 'text.secondary', mt: 1.5, mb: 3 }}>
           Tell us who you are. This is not the labeled product demo. Sample dashboards stay on the Demo trail.
         </Typography>
         {done ? (
-          <Box sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2, color: 'text.secondary' }}>
+          <Box sx={{ ...nebulaPanelSx, p: 2, color: 'text.secondary' }}>
             Request recorded. Sales follows up from sales@rivicq.com. Nothing was sent to Discord with your email.
           </Box>
         ) : (
-          <Box component="form" onSubmit={submit} sx={{ p: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+          <Box component="form" onSubmit={submit} sx={{ ...nebulaPanelSx, p: 3 }}>
             {!backendReachable && (
-              <Box sx={{ p: 1.75, mb: 2, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider', borderRadius: 2, color: 'text.secondary' }}>
+              <Box sx={{ ...nebulaPanelSx, p: 1.75, mb: 2, bgcolor: 'background.default', color: 'text.secondary' }}>
                 {PUBLIC_PAGES_SALES_FORM}
               </Box>
             )}
             {error && (
-              <Box sx={{ p: 1.75, mb: 2, bgcolor: 'background.default', border: '1px solid', borderColor: 'error.main', borderRadius: 2, color: 'error.light' }}>
+              <Box sx={{ ...nebulaPanelSx, p: 1.75, mb: 2, borderColor: 'error.main', color: 'error.light' }}>
                 {error}
               </Box>
             )}
@@ -90,6 +92,11 @@ const RequestDemo: React.FC = () => {
             </Stack>
           </Box>
         )}
+        <ArchifyWorkflowEmbed
+          compact
+          kicker="Sales · operator workflow"
+          title="Enterprise demo requests go to sales@rivicq.com — separate from the labeled product demo trail."
+        />
       </Container>
     </PublicShell>
   );

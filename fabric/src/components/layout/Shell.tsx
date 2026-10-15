@@ -73,21 +73,10 @@ const Shell: React.FC = () => {
   const { mode, setMode, role, tenant, setTenant, tenants } = useSession();
   const [palette, setPalette] = useState(false);
   const [mobile, setMobile] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const current = document.documentElement.getAttribute('data-theme');
-    return current === 'light' ? 'light' : 'dark';
-  });
-
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    try {
-      localStorage.setItem('rivicq.theme', next);
-    } catch {
-      /* storage blocked */
-    }
-    setTheme(next);
-  };
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    try { localStorage.setItem('rivicq.theme', 'dark'); } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -106,8 +95,8 @@ const Shell: React.FC = () => {
         <NavLink to="/" className="mark">
           <Mark />
           <div>
-            <strong>GRAPH</strong>
-            <span>RivicQ Graph</span>
+            <strong>RivicQ Graph</strong>
+            <span>Labeled demo · synthetic data</span>
           </div>
         </NavLink>
         <NavGroups />
@@ -157,15 +146,6 @@ const Shell: React.FC = () => {
             </label>
             <button type="button" className="btn" onClick={() => setPalette(true)}>Command (⌘K)</button>
             <button type="button" className="btn" onClick={() => nav('/app/graph')}>Security graph</button>
-            <button
-              type="button"
-              className="btn"
-              onClick={toggleTheme}
-              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-              title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            >
-              {theme === 'dark' ? '☀' : '☾'}
-            </button>
             <button type="button" className="btn" onClick={() => nav('/legal')}>Legal</button>
           </div>
         </header>

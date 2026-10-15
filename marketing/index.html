@@ -16,10 +16,7 @@
     (function () {
       try {
         var t = localStorage.getItem('rivicq.theme');
-        if (t !== 'light' && t !== 'dark') {
-          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        }
-        document.documentElement.setAttribute('data-theme', t);
+        document.documentElement.setAttribute('data-theme', 'dark');
       } catch (e) {
         document.documentElement.setAttribute('data-theme', 'dark');
       }
@@ -122,7 +119,8 @@
         <li><a href="#" data-platform-link data-platform-path="/contact">Company</a></li>
       </ul>
       <div class="nav-actions">
-        <button class="theme-toggle" type="button" aria-label="Toggle theme">&#9788;</button>
+        <a href="../docs/" class="btn btn-secondary">Docs</a>
+        <a href="#" class="btn btn-secondary" data-platform-link data-platform-path="/pricing">Pricing</a>
         <a href="#" class="btn btn-primary" data-platform-link data-platform-path="/register">Get Started</a>
       </div>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
@@ -455,6 +453,34 @@
           <div class="timeline-title">Full PQC Migration</div>
           <div class="timeline-desc">Complete transition to quantum-safe cryptography. Deprecate classical algorithms. Continuous monitoring and re-certification.</div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Operator workflow · Archify -->
+  <section class="section" id="operator-workflow">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">Operator workflow</span>
+        <h2 class="section-title">Same diagram as the console</h2>
+        <p class="section-subtitle">
+          Discover → classify → gate → CBOM report. Interactive Archify artifact shared with Docs, Pricing, and the product console.
+        </p>
+      </div>
+      <div class="archify-embed">
+        <div class="archify-embed-head">
+          <div>
+            <p class="archify-embed-kicker">Archify · nebula</p>
+            <p class="archify-embed-title">QBOM stays on the licensed control plane. Control mappings are not certifications.</p>
+          </div>
+          <a class="btn btn-secondary" href="../archify/diagrams/rivicq-cspm-operator-workflow.html" target="_blank" rel="noopener noreferrer">Open diagram</a>
+        </div>
+        <iframe
+          class="archify-embed-frame"
+          title="RivicQ CSPM operator workflow"
+          src="../archify/diagrams/rivicq-cspm-operator-workflow.html?embed=1&theme=dark"
+          loading="lazy"
+        ></iframe>
       </div>
     </div>
   </section>

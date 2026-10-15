@@ -72,7 +72,6 @@ import { isPaidEdition } from '../config/editions';
 import { isAdminRole } from '../auth/roles';
 import { MODULES } from '../config/modules';
 import { useThemeMode } from '../theme/ThemeContext';
-import ThemeToggle from '../theme/ThemeToggle';
 import BrandLogo from '../components/BrandLogo';
 import RivicQAssistant from '../components/assistant/RivicQAssistant';
 import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';
@@ -142,7 +141,7 @@ const Layout: React.FC = () => {
       return '24h';
     }
   });
-  const { mode, toggleMode } = useThemeMode();
+  const { mode } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
@@ -314,7 +313,7 @@ const Layout: React.FC = () => {
   }, [location.pathname]);
 
   const blue = designSystem.proBlue;
-  const isDarkMode = mode === 'dark';
+  const isDarkMode = true;
 
   const currentTitle = React.useMemo(() => {
     const all = [...allWorkspaceItems, ...enterpriseItems, ...modulesNav];
@@ -712,7 +711,6 @@ const Layout: React.FC = () => {
               </IconButton>
             </Tooltip>
 
-            <ThemeToggle mode={mode} onToggle={toggleMode} compact />
 
             <Tooltip title="Refresh workspace data">
               <IconButton
@@ -902,8 +900,8 @@ const Layout: React.FC = () => {
           minHeight: '100vh',
           minWidth: 0,
           overflowX: 'hidden',
-          bgcolor: 'transparent',
-          background: mode === 'dark' ? designSystem.gradient.meshDark : designSystem.gradient.meshLight,
+          bgcolor: '#000000',
+          background: designSystem.gradient.meshDark,
           transition: reduceMotion ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           '& .MuiTableContainer-root': { overflowX: 'auto' },
         }}

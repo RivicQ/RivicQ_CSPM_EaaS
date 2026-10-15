@@ -97,8 +97,7 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 const App: React.FC = () => {
   const [mode, setMode] = React.useState<'light' | 'dark'>(() => {
     try {
-      const stored = localStorage.getItem('rivicq.theme');
-      if (stored === 'dark' || stored === 'light') return stored;
+      localStorage.setItem('rivicq.theme', 'dark');
     } catch {
       /* ignore */
     }
@@ -107,15 +106,12 @@ const App: React.FC = () => {
   const theme = React.useMemo(() => getAppTheme(mode), [mode]);
 
   const toggleMode = React.useCallback(() => {
-    setMode((m) => {
-      const next = m === 'light' ? 'dark' : 'light';
-      try {
-        localStorage.setItem('rivicq.theme', next);
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+    try {
+      localStorage.setItem('rivicq.theme', 'dark');
+    } catch {
+      /* ignore */
+    }
+    setMode('dark');
   }, []);
 
   const queryClient = new QueryClient({

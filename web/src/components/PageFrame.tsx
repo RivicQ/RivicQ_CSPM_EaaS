@@ -42,16 +42,9 @@ const PageFrame: React.FC<PageFrameProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
         sx={{
-          ...(creative ? commandCenterCardSx : {
-            position: 'relative',
-            overflow: 'hidden',
-            borderRadius: `${designSystem.radius.xl}px`,
-            border: 1,
-            borderColor: 'divider',
-            bgcolor: 'background.paper',
-          }),
+          ...commandCenterCardSx,
           borderRadius: `${designSystem.radius.xl}px`,
-          bgcolor: creative ? '#0a0a0f' : 'background.paper',
+          bgcolor: '#0a0a0f',
           backgroundImage: 'none',
           boxShadow: 'none',
         }}

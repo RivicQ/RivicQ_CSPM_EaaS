@@ -6,7 +6,7 @@ type ThemeContextType = {
 };
 
 export const ThemeModeContext = React.createContext<ThemeContextType>({
-  mode: 'light',
+  mode: 'dark',
   toggleMode: () => {},
 });
 

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "8a57baa6-d6ea-4d6a-a6c8-b66db9f25dc5",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/re1/re1/CSPM/.archify/workflow-cspm-operator-20261014-144800/candidate.json",
+  "output": "/Users/re1/re1/CSPM/.archify/workflow-cspm-operator-20261014-144800/rivicq-cspm-operator-workflow.html",
+  "specification": {
+    "sha256": "a4cd4ba744825bd3bb2d177f8fed8f5152e9867ed71f4e42ea348341ef8ed094",
+    "bytes": 6163
+  },
+  "artifact": {
+    "sha256": "a76fd0e484efa7520d116578baa68df3a702a2f1e9630199da638c9d478704e1",
+    "bytes": 763514
+  }
+}

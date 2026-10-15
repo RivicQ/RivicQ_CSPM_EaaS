@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment, useTheme,
+  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment,
 } from '@mui/material';
 import {
   ArrowForward, CheckCircle, GitHub, GppGood, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
@@ -18,7 +18,8 @@ import { tokens } from '../theme/tokens';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
-import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
+import { PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -51,7 +52,6 @@ const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', '
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const isDark = useTheme().palette.mode === 'dark';
   const { isAuthenticated, backendReachable, demoLogin, isDemo } = useAuth();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
@@ -103,17 +103,31 @@ const Home: React.FC = () => {
   const isWebsiteTarget = (value: string) => /^(https?:\/\/|www\.)/i.test(value) || /^[\w.-]+\.[a-z]{2,}(:\d+)?(\/.*)?$/i.test(value);
 
   const handleScan = async () => {
-    if (!repoUrl.trim()) return;
-    if (!backendReachable && !isDemo) {
-      setScanStatus('error');
-      setProgress(0);
+    // On static Pages, allow one-click demo even with an empty field.
+    const target = repoUrl.trim() || (!backendReachable ? 'https://demo.example.com' : '');
+    if (!target) return;
+    if (!repoUrl.trim() && !backendReachable) setRepoUrl(target);
+
+    // Static Pages: enter labelled demo, then open the Scanner console which
+    // already runs the in-browser demo adapter end-to-end (client-meeting path).
+    if (!backendReachable) {
+      setScanStatus('scanning');
+      setProgress(10);
       setReport(null);
+      try {
+        if (!isDemo) await demoLogin('community');
+        navigate(`/scanner?target=${encodeURIComponent(target)}&autostart=1`);
+      } catch {
+        setScanStatus('error');
+        setProgress(0);
+      }
       return;
     }
+
     setScanStatus('scanning');
-    setProgress(0);
+    setProgress(5);
     setReport(null);
-    const target = repoUrl.trim();
+
     const githubSpec = (() => {
       const m = target.match(/github\.com[:/]+([^/]+)\/([^/#\s]+)/i);
       if (m) return `${m[1]}/${m[2].replace(/\.git$/, '')}`;
@@ -121,6 +135,7 @@ const Home: React.FC = () => {
       return '';
     })();
     try {
+      // Live GitHub Contents scan when the engine is reachable.
       if (githubSpec) {
         const resp = await gitHubScanService.scanRepos([githubSpec], 'full', false);
         const scanId = resp.data.scan_id;
@@ -155,7 +170,8 @@ const Home: React.FC = () => {
         }, 1500);
         return;
       }
-      const resp = await cbomService.triggerScan(target, isWebsiteTarget(target) ? 'website' : 'cbom');
+      const scanTarget = githubSpec ? `https://github.com/${githubSpec}` : target;
+      const resp = await cbomService.triggerScan(scanTarget, isWebsiteTarget(scanTarget) || Boolean(githubSpec) ? 'website' : 'cbom');
       const scanId = resp.data.scan_id;
       let ticks = 0;
       const interval = setInterval(async () => {
@@ -214,8 +230,8 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const ink = 'background.default';
-  const panel = 'background.paper';
+  const ink = '#000000';
+  const panel = '#0a0a0f';
   const [navMenu, setNavMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
 
   const NAV = [
@@ -288,15 +304,15 @@ const Home: React.FC = () => {
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: isDark ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.78)',
-          backdropFilter: 'blur(12px)',
+          bgcolor: '#000000',
+          backdropFilter: 'none',
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}
       >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
-            <BrandLogo dark={isDark} />
+            <BrandLogo dark />
             <Stack direction="row" spacing={0.25} flexWrap="wrap" useFlexGap sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
                 <Button
@@ -340,11 +356,70 @@ const Home: React.FC = () => {
 
       <Box sx={{ position: 'relative', minHeight: { xs: 560, md: 640 }, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
         <NebulaBackdrop />
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: `
+              radial-gradient(ellipse 50% 45% at 50% 0%, rgba(56,189,248,0.06), transparent 70%),
+              radial-gradient(ellipse 55% 48% at 50% 18%, rgba(124,58,237,0.28), transparent 68%)
+            `,
+          }}
+        />
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: { xs: 8, md: 12 } }}>
-          <Typography sx={{ fontSize: { xs: '2.2rem', md: '3.35rem' }, fontWeight: 750, letterSpacing: '-0.04em', lineHeight: 1.08, color: '#fff', mb: 2.5 }}>
-            Know what cryptography protects your business before attackers do.
+          <Typography
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 1.1,
+              py: 0.4,
+              pl: 0.45,
+              mb: 2.5,
+              border: '1px solid rgba(255,255,255,0.14)',
+              borderRadius: 999,
+              bgcolor: 'rgba(255,255,255,0.03)',
+              color: 'rgba(209,213,219,0.92)',
+              fontSize: '0.8125rem',
+            }}
+          >
+            <Box component="span" sx={{ px: 0.9, py: 0.35, borderRadius: 999, bgcolor: '#7c3aed', color: '#fff', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.6875rem', fontWeight: 600 }}>
+              CSPM
+            </Box>
+            Cryptographic Security Posture Management · Berlin
           </Typography>
-          <Typography sx={{ color: '#d1d5db', maxWidth: 720, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
+          <Typography
+            component="h1"
+            sx={{
+              fontFamily: '"Space Grotesk", Inter, system-ui, sans-serif',
+              fontSize: { xs: '2.4rem', md: '3.6rem' },
+              fontWeight: 500,
+              letterSpacing: '-0.045em',
+              lineHeight: 0.98,
+              color: '#fff',
+              mb: 2.5,
+              textWrap: 'balance',
+            }}
+          >
+            Know what cryptography protects your business{' '}
+            <Box
+              component="em"
+              sx={{
+                fontFamily: 'Fraunces, Georgia, serif',
+                fontStyle: 'italic',
+                fontWeight: 400,
+                background: 'linear-gradient(100deg, #a78bfa 0%, #7c3aed 45%, #7c3aed 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+              }}
+            >
+              before attackers do.
+            </Box>
+          </Typography>
+          <Typography sx={{ color: 'rgba(209,213,219,0.92)', maxWidth: 720, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
             RivicQ discovers cryptographic assets, cloud risks and migration exposure — then inventories them as CBOM evidence for PQC planning. Point it at an IoT device, a website, or a repo.
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center">
@@ -353,7 +428,7 @@ const Home: React.FC = () => {
               size="large"
               endIcon={<NorthEast />}
               onClick={() => scrollToId('scan')}
-              sx={{ px: 3, py: 1.2, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
+              sx={{ px: 3, py: 1.2, borderRadius: '10px', bgcolor: '#fff', color: '#0a0b0d', fontWeight: 600, textTransform: 'none', '&:hover': { bgcolor: '#7c3aed', color: '#fff' } }}
             >
               Start security assessment
             </Button>
@@ -365,7 +440,7 @@ const Home: React.FC = () => {
                 await demoLogin('community');
                 navigate('/scanner');
               }}
-              sx={{ px: 3, py: 1.2, color: '#fff', borderColor: 'rgba(255,255,255,0.55)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.06)' } }}
+              sx={{ px: 3, py: 1.2, borderRadius: '10px', color: '#fff', borderColor: 'rgba(255,255,255,0.22)', bgcolor: 'rgba(255,255,255,0.03)', textTransform: 'none', '&:hover': { borderColor: 'rgba(255,255,255,0.45)', bgcolor: 'rgba(255,255,255,0.06)' } }}
             >
               Try the live demo
             </Button>
@@ -373,7 +448,7 @@ const Home: React.FC = () => {
               variant="text"
               size="large"
               onClick={() => navigate('/request-demo')}
-              sx={{ px: 3, py: 1.2, color: '#d1d5db', '&:hover': { color: '#fff' } }}
+              sx={{ px: 3, py: 1.2, color: '#d1d5db', textTransform: 'none', '&:hover': { color: '#fff' } }}
             >
               Request enterprise demo
             </Button>
@@ -382,22 +457,20 @@ const Home: React.FC = () => {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
-        <Box id="scan" sx={{ scrollMarginTop: 80 }}>
+        <Box id="scan" sx={{ scrollMarginTop: 96 }}>
           <MotionSection>
             <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: panel, borderRadius: 2, p: { xs: 2, md: 2.5 } }}>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
                 <Typography sx={{ fontFamily: tokens.typography.mono, fontSize: 12, color: 'text.secondary' }}>
-                  {isDemo
+                  {isDemo || !backendReachable
                     ? '$ rivicq · interactive demo · sample data · nothing is claimed as a live result'
-                    : backendReachable
-                      ? '$ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate'
-                      : '$ rivicq scan · engine not hosted on this build · disabled · run it locally or deploy (docs/RENDER.md)'}
+                    : '$ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate'}
                 </Typography>
                 <Chip
                   size="small"
-                  label={isDemo && !backendReachable ? PUBLIC_ENGINE_CHIP_DEMO : (backendReachable ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DISCONNECTED)}
-                  color={(isDemo && !backendReachable) || backendReachable ? 'success' : 'default'}
-                  variant={isDemo && !backendReachable ? 'filled' : 'outlined'}
+                  label={backendReachable && !isDemo ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DEMO}
+                  color="success"
+                  variant={backendReachable && !isDemo ? 'outlined' : 'filled'}
                 />
               </Stack>
               {!backendReachable && !isDemo && <PublicEngineNotice variant="scan" compact />}
@@ -412,22 +485,24 @@ const Home: React.FC = () => {
                   }}
                 />
                 <LoadingButton
+                  type="button"
                   variant="contained"
                   endIcon={<ArrowForward />}
-                  onClick={handleScan}
+                  onClick={() => { void handleScan(); }}
                   loading={scanStatus === 'scanning'}
                   loadingText="Scanning…"
-                  disabled={!repoUrl.trim() || (!backendReachable && !isDemo)}
+                  disabled={backendReachable && !repoUrl.trim()}
                   sx={{ minWidth: 168 }}
+                  aria-label={backendReachable ? 'Run scan' : 'Run demo scan'}
                 >
-                  Run scan
+                  {backendReachable ? 'Run scan' : 'Run demo scan'}
                 </LoadingButton>
               </Stack>
-              {!backendReachable && !isDemo && (
+              {!backendReachable && (
                 <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary', lineHeight: 1.5 }}>
-                  Why is the button disabled? Scanning runs on the RivicQ CBOM engine, which is not hosted on this static
-                  build. Deploy the API (<code>docs/RENDER.md</code>) or run it locally for live scans — or use the
-                  interactive demo above to explore the workflow on sample data.
+                  {isDemo
+                    ? 'Interactive demo — labelled sample findings in this browser. Not customer telemetry.'
+                    : 'No engine on this static build. Run demo scan starts the interactive demo with labelled sample data. Live scans need the API (docs/RENDER.md).'}
                 </Typography>
               )}
             </Box>
@@ -447,8 +522,9 @@ const Home: React.FC = () => {
         )}
 
         <ScanWorkflowStrip />
+        <ArchifyWorkflowEmbed />
 
-        <Box id="platform" sx={{ mt: 10, scrollMarginTop: 80 }}>
+        <Box id="platform" sx={{ mt: 10, scrollMarginTop: 96 }}>
           <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary', mb: 1 }}>
             Platform
           </Typography>
@@ -535,7 +611,7 @@ const Home: React.FC = () => {
           </Grid>
         </Box>
 
-        <Box id="plans" sx={{ mt: 8, textAlign: 'center', scrollMarginTop: 80 }}>
+        <Box id="plans" sx={{ mt: 8, textAlign: 'center', scrollMarginTop: 96 }}>
           <Typography variant="caption" sx={{ color: 'text.disabled', letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600 }}>
             Control mappings (not certifications)
           </Typography>
@@ -549,7 +625,7 @@ const Home: React.FC = () => {
         <Box sx={{ mt: 8, py: 3, borderTop: 1, borderColor: 'divider' }}>
           <Stack spacing={1.25} alignItems="center">
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="center">
-              <BrandLogo compact dark={isDark} />
+              <BrandLogo compact dark />
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
             </Stack>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">

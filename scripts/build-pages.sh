@@ -61,7 +61,7 @@ cp docs/quantum-sdk.md docs/plugin-development.md docs/security-intelligence.md 
    web/build/docs/
 cp docs/ux/*.md web/build/docs/ux/ 2>/dev/null || true
 cp docs/contact.html docs/read.html docs/index.html web/build/docs/
-cp docs/assets/horizon-docs.css docs/assets/rivicq-mark.svg docs/assets/rivicq-mark.png web/build/docs/assets/
+cp docs/assets/horizon-docs.css docs/assets/theme.js docs/assets/rivicq-mark.svg docs/assets/rivicq-mark.png web/build/docs/assets/
 cp DATASETS.md LEGAL.md PRIVACY.md TRADEMARKS.md NOTICE CONTRIBUTING.md SECURITY.md web/build/docs/
 cp docs/sdks/README.md docs/sdks/rust.md docs/sdks/python.md docs/sdks/typescript.md \
    docs/sdks/java.md docs/sdks/dotnet.md web/build/docs/sdks/

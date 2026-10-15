@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RivicQ — Cryptographic Security Posture Management</title>
   <meta name="description" content="RivicQ inventories cryptography (CBOM) and software components (SBOM), then classifies risk, quantum exposure, and control gaps. One engine, two editions — every diagram on this page is a validated, interactive Archify artifact.">
-  <meta name="theme-color" content="#f5f6f3">
+  <meta name="theme-color" content="#000000">
   <link rel="canonical" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/marketing/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="RivicQ">
@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/rivicq-site.css">
-  <script>(function () { var t = 'light'; try { t = localStorage.getItem('rivicq-site-theme') || 'light'; } catch (_) {} document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); })();</script>
+  <script>(function () { document.documentElement.setAttribute('data-theme', 'dark'); try { localStorage.setItem('rivicq-site-theme', 'dark'); } catch (_) {} })();</script>
 </head>
 <body>
 
@@ -36,10 +36,6 @@
         <a class="nav-link" href="#quickstart">Quick start</a>
         <a class="nav-link" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">GitHub</a>
       </div>
-      <button class="btn-theme" type="button" data-theme-toggle aria-label="Switch to dark theme">
-        <svg class="theme-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 9.6A5.8 5.8 0 0 1 6.4 2.5a5.8 5.8 0 1 0 7.1 7.1Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path></svg>
-        <svg class="theme-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"></circle><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
-      </button>
       <a class="btn nav-cta" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/register" target="_blank" rel="noopener">Get started</a>
     </div>
   </nav>
@@ -156,7 +152,7 @@
       <div class="systems-grid">
 
         <a class="sys-card fade-up" href="../diagrams/rivicq-architecture.html?present=1" target="_blank" rel="noopener">
-          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1" title="RivicQ Platform Architecture preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1&theme=dark" title="RivicQ Platform Architecture preview" loading="lazy" tabindex="-1"></iframe></span>
           <span class="sys-meta"><span class="sys-kind">Architecture</span><span class="sys-file">rivicq-architecture.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
           <span class="sys-q">What is RivicQ made of?</span>
           <span class="sys-title">One engine, two editions</span>
@@ -164,7 +160,7 @@
         </a>
 
         <a class="sys-card fade-up d1" href="../diagrams/rivicq-dataflow.html?present=1" target="_blank" rel="noopener">
-          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-dataflow.html?embed=1" title="RivicQ asset data flow preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-dataflow.html?embed=1&theme=dark" title="RivicQ asset data flow preview" loading="lazy" tabindex="-1"></iframe></span>
           <span class="sys-meta"><span class="sys-kind">Data flow</span><span class="sys-file">rivicq-dataflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
           <span class="sys-q">Where does every crypto asset go?</span>
           <span class="sys-title">Discover → Analyze → Deliver</span>
@@ -172,15 +168,23 @@
         </a>
 
         <a class="sys-card fade-up d2" href="../diagrams/rivicq-lifecycle.html?present=1" target="_blank" rel="noopener">
-          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-lifecycle.html?embed=1" title="RivicQ finding lifecycle preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-lifecycle.html?embed=1&theme=dark" title="RivicQ finding lifecycle preview" loading="lazy" tabindex="-1"></iframe></span>
           <span class="sys-meta"><span class="sys-kind">Lifecycle</span><span class="sys-file">rivicq-lifecycle.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
           <span class="sys-q">Where does each finding stand now?</span>
           <span class="sys-title">Waits, retries, honest endings</span>
           <span class="sys-desc">Discovered → triaged → planned → migrating → remediated — with unassigned pauses, re-scan recovery, and documented terminals.</span>
         </a>
 
+        <a class="sys-card fade-up" href="../diagrams/rivicq-cspm-operator-workflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-cspm-operator-workflow.html?embed=1&theme=dark" title="RivicQ operator workflow preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-cspm-operator-workflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">How does an operator scan run?</span>
+          <span class="sys-title">Discover → Gate → CBOM</span>
+          <span class="sys-desc">Console or CLI posts a scan, the engine fingerprints and classifies, the policy gate decides, QBOM stays Enterprise (403 on OSS), and the CBOM report publishes.</span>
+        </a>
+
         <a class="sys-card fade-up d3" href="../diagrams/rivicq-analysis-workflow.html?present=1" target="_blank" rel="noopener">
-          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-analysis-workflow.html?embed=1" title="RivicQ analysis pipeline preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-analysis-workflow.html?embed=1&theme=dark" title="RivicQ analysis pipeline preview" loading="lazy" tabindex="-1"></iframe></span>
           <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-analysis-workflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
           <span class="sys-q">What happens to each artifact?</span>
           <span class="sys-title">Fingerprint → Gate → Evidence</span>
@@ -188,7 +192,7 @@
         </a>
 
         <a class="sys-card fade-up" href="../diagrams/rivicq-compliance-workflow.html?present=1" target="_blank" rel="noopener">
-          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-compliance-workflow.html?embed=1" title="RivicQ compliance evidence preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-compliance-workflow.html?embed=1&theme=dark" title="RivicQ compliance evidence preview" loading="lazy" tabindex="-1"></iframe></span>
           <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-compliance-workflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
           <span class="sys-q">How does evidence get trusted?</span>
           <span class="sys-title">Map standards, attest, or waive</span>
@@ -196,7 +200,7 @@
         </a>
 
         <a class="sys-card fade-up d1" href="../diagrams/rivicq-pqc-migration.html?present=1" target="_blank" rel="noopener">
-          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-pqc-migration.html?embed=1" title="RivicQ PQC migration preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-pqc-migration.html?embed=1&theme=dark" title="RivicQ PQC migration preview" loading="lazy" tabindex="-1"></iframe></span>
           <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-pqc-migration.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
           <span class="sys-q">How do you reach quantum readiness?</span>
           <span class="sys-title">Inventory → Hybrid → Attest</span>
@@ -204,7 +208,7 @@
         </a>
 
         <a class="sys-card fade-up d2" href="../diagrams/rivicq-scanning-sequence.html?present=1" target="_blank" rel="noopener">
-          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-scanning-sequence.html?embed=1" title="RivicQ scan request sequence preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-scanning-sequence.html?embed=1&theme=dark" title="RivicQ scan request sequence preview" loading="lazy" tabindex="-1"></iframe></span>
           <span class="sys-meta"><span class="sys-kind">Sequence</span><span class="sys-file">rivicq-scanning-sequence.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
           <span class="sys-q">Who says what during a scan?</span>
           <span class="sys-title">Auth first, evidence always</span>
@@ -212,7 +216,7 @@
         </a>
 
         <a class="sys-card fade-up d3" href="../diagrams/rivicq-roadmap.html?present=1" target="_blank" rel="noopener">
-          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-roadmap.html?embed=1" title="RivicQ delivery roadmap preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-roadmap.html?embed=1&theme=dark" title="RivicQ delivery roadmap preview" loading="lazy" tabindex="-1"></iframe></span>
           <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-roadmap.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
           <span class="sys-q">What ships, and when?</span>
           <span class="sys-title">Now → Next → Later</span>
@@ -284,11 +288,11 @@
 
         <div class="type-preview fade-up d1" id="type-preview">
           <div class="type-plate">
-            <iframe class="is-active" data-type="arch" data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1" title="Architecture diagram" loading="lazy" tabindex="-1"></iframe>
-            <iframe data-type="wf" data-sync-theme src="../diagrams/rivicq-analysis-workflow.html?embed=1" title="Workflow diagram" loading="lazy" tabindex="-1"></iframe>
-            <iframe data-type="seq" data-sync-theme src="../diagrams/rivicq-scanning-sequence.html?embed=1" title="Sequence diagram" loading="lazy" tabindex="-1"></iframe>
-            <iframe data-type="flow" data-sync-theme src="../diagrams/rivicq-dataflow.html?embed=1" title="Data flow diagram" loading="lazy" tabindex="-1"></iframe>
-            <iframe data-type="life" data-sync-theme src="../diagrams/rivicq-lifecycle.html?embed=1" title="Lifecycle diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe class="is-active" data-type="arch" data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1&theme=dark" title="Architecture diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe data-type="wf" data-sync-theme src="../diagrams/rivicq-analysis-workflow.html?embed=1&theme=dark" title="Workflow diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe data-type="seq" data-sync-theme src="../diagrams/rivicq-scanning-sequence.html?embed=1&theme=dark" title="Sequence diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe data-type="flow" data-sync-theme src="../diagrams/rivicq-dataflow.html?embed=1&theme=dark" title="Data flow diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe data-type="life" data-sync-theme src="../diagrams/rivicq-lifecycle.html?embed=1&theme=dark" title="Lifecycle diagram" loading="lazy" tabindex="-1"></iframe>
           </div>
           <a class="type-more" href="#diagrams">
             <span>Open any map, standalone</span>
