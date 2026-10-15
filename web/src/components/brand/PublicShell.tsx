@@ -39,8 +39,7 @@ const NAV: NavItem[] = [
 
 const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = ({ children, nebula = true }) => {
   const navigate = useNavigate();
-  const { mode, choice, setChoice } = useThemeMode();
-  const isDark = mode === 'dark';
+  const { choice, setChoice } = useThemeMode();
   const [menu, setMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
   const [mobileMenu, setMobileMenu] = React.useState<HTMLElement | null>(null);
 
