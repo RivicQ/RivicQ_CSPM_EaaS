@@ -27,10 +27,9 @@ const GlassCard: React.FC<GlassCardProps> = ({
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.25, delay: delay * 0.04, ease: 'easeOut' }}
+      initial={false}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2, delay: delay * 0.04, ease: 'easeOut' }}
       whileHover={undefined}
       onClick={onClick}
       sx={{

@@ -1,13 +1,6 @@
 import React from 'react';
 import { Box, Stack, Typography } from '@mui/material';
-import { motion } from 'framer-motion';
-import designSystem, {
-  commandCenterCardSx,
-  commandCenterEyebrowSx,
-  commandCenterTitleSx,
-  proBlueActionStackSx,
-  proBlueBadgeSx,
-} from '../theme/designSystem';
+import { ARCHIFY_FONTS, NEBULA, nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 type PageFrameProps = {
   eyebrow?: string;
@@ -30,109 +23,110 @@ const PageFrame: React.FC<PageFrameProps> = ({
   secondaryAction,
   visual,
   children,
-  creative = true,
-}) => {
-  const blue = designSystem.proBlue;
-
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Box
-        component={motion.div}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-        sx={{
-          ...commandCenterCardSx,
-          borderRadius: `${designSystem.radius.xl}px`,
-          bgcolor: '#0a0a0f',
-          backgroundImage: 'none',
-          boxShadow: 'none',
-        }}
+}) => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box
+      sx={{
+        ...nebulaPanelSx,
+        flex: '0 0 auto',
+        p: { xs: 1.25, md: 1.5 },
+        borderRadius: '12px',
+        bgcolor: `${NEBULA.panel} !important`,
+        backgroundImage: 'none !important',
+      }}
+    >
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={1.5}
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
       >
-        <Box sx={{ p: { xs: 2, md: 2.5 }, position: 'relative', zIndex: 1 }}>
-          <Stack
-            direction={{ xs: 'column', lg: 'row' }}
-            justifyContent="space-between"
-            alignItems={{ xs: 'flex-start', lg: 'center' }}
-            spacing={2}
-          >
-            <Box sx={{ minWidth: 0, flex: 1 }}>
-              {(eyebrow || badge) && (
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.25 }}>
-                  {eyebrow && (
-                    <Typography sx={creative ? commandCenterEyebrowSx : { ...commandCenterEyebrowSx, color: 'primary.main' }}>
-                      {eyebrow}
-                    </Typography>
-                  )}
-                  {badge && (
-                    <Box sx={creative ? proBlueBadgeSx : {
-                      ...proBlueBadgeSx,
-                      bgcolor: 'action.selected',
-                      color: 'primary.main',
-                      borderColor: 'divider',
-                    }}
-                    >
-                      {badge}
-                    </Box>
-                  )}
-                </Stack>
-              )}
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 0.5 }}>
+            {eyebrow && (
               <Typography
-                variant="h4"
-                sx={creative ? commandCenterTitleSx : { ...commandCenterTitleSx, color: 'text.primary' }}
+                sx={{
+                  fontSize: 11,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: NEBULA.faint,
+                }}
               >
-                {title}
+                {eyebrow}
               </Typography>
-              {subtitle && (
-                <Typography
-                  sx={{
-                    color: creative ? blue.textSecondary : 'text.secondary',
-                    mt: 1,
-                    maxWidth: 680,
-                    lineHeight: 1.65,
-                    fontSize: '0.9375rem',
-                  }}
-                >
-                  {subtitle}
-                </Typography>
-              )}
-            </Box>
-            {(action || secondaryAction) && (
-              <Stack
-                direction="row"
-                spacing={1}
-                useFlexGap
-                flexWrap="wrap"
-                alignItems="center"
-                sx={{ flexShrink: 0, ...(creative ? proBlueActionStackSx : {}) }}
+            )}
+            {badge && (
+              <Box
+                sx={{
+                  px: 0.75,
+                  py: 0.15,
+                  borderRadius: 999,
+                  border: '1px solid',
+                  borderColor: 'rgba(124,58,237,0.45)',
+                  bgcolor: 'rgba(124,58,237,0.16)',
+                  color: NEBULA.accentSoft,
+                  fontSize: 11,
+                  fontWeight: 600,
+                }}
               >
-                {secondaryAction}
-                {action}
-              </Stack>
+                {badge}
+              </Box>
             )}
           </Stack>
-        </Box>
-        {visual && (
-          <Box
+          <Typography
+            component="h1"
             sx={{
-              mx: { xs: 1.5, md: 2 },
-              mb: { xs: 1.5, md: 2 },
-              px: 1.75,
-              py: 1.5,
-              borderRadius: 2,
-              bgcolor: '#000000',
-              border: '1px solid #1f1f2e',
-              backgroundImage: 'none',
-              minHeight: 120,
+              fontFamily: ARCHIFY_FONTS.title,
+              fontWeight: 500,
+              fontSize: { xs: '1.25rem', md: '1.45rem' },
+              letterSpacing: '-0.03em',
+              lineHeight: 1.2,
+              color: NEBULA.text,
             }}
           >
-            {visual}
-          </Box>
+            {title}
+          </Typography>
+          {subtitle && (
+            <Typography
+              sx={{
+                color: NEBULA.muted,
+                mt: 0.5,
+                maxWidth: 720,
+                lineHeight: 1.45,
+                fontSize: '0.8125rem',
+              }}
+            >
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
+        {(action || secondaryAction) && (
+          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ flexShrink: 0 }}>
+            {secondaryAction}
+            {action}
+          </Stack>
         )}
-      </Box>
-      {children}
+      </Stack>
+      {visual && (
+        <Box
+          sx={{
+            mt: 1.25,
+            maxHeight: 88,
+            overflow: 'hidden',
+            borderRadius: '8px',
+            bgcolor: NEBULA.ink,
+            border: '1px solid',
+            borderColor: NEBULA.line,
+            px: 1.25,
+            py: 1,
+          }}
+        >
+          {visual}
+        </Box>
+      )}
     </Box>
-  );
-};
+    {children}
+  </Box>
+);
 
 export default PageFrame;

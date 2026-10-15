@@ -30,7 +30,7 @@ const DashboardPanel: React.FC<DashboardPanelProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: delay * 0.08, ease: [0.4, 0, 0.2, 1] }}
       sx={{
-        height: height ?? '100%',
+        height: height ?? 'auto',
         minWidth: 0,
         bgcolor: '#0a0a0f',
         color: '#ffffff',
