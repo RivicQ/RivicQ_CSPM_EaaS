@@ -12,6 +12,7 @@ const CbomPublic: React.FC = () => (
     engineNotice="scan"
     sectionEyebrow="CBOM pipeline"
     sectionTitle="From scan input to CycloneDX evidence operators can keep."
+    diagramId="operator"
     diagramKicker="CBOM · operator workflow"
     diagramTitle="Inventory cryptography → classify algorithms → fail CI on BLOCK → export CycloneDX CBOM."
     blocks={[

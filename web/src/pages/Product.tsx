@@ -12,7 +12,8 @@ const Product: React.FC = () => (
     engineNotice="scan"
     sectionEyebrow="Product layers"
     sectionTitle="What ships in Community vs what stays licensed."
-    diagramKicker="Product · operator workflow"
+    diagramId="architecture"
+    diagramKicker="Product · architecture"
     diagramTitle="From a public target to CBOM evidence — then Enterprise for continuous monitoring."
     blocks={[
       { title: 'CSPM', body: 'Posture from scanned and declared assets. Live multi-cloud attach needs customer credentials and an Enterprise license.' },

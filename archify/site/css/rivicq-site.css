@@ -30,22 +30,23 @@
   color-scheme:dark;
 }
 :root[data-theme="dark"] {
-  --fg-rgb:238,241,243; --bg-rgb:7,8,10;
-  --accent-rgb:167,139,250; --emerald-rgb:52,211,153;
-  --signal-rgb:94,234,212; --glow-rgb:196,181,253;
+  /* Same nebula identity as :root — no cream/lavender night-plate swap. */
+  --fg-rgb:255,255,255; --bg-rgb:0,0,0;
+  --accent-rgb:124,58,237; --emerald-rgb:34,197,94;
+  --signal-rgb:56,189,248; --glow-rgb:167,139,250;
   --shadow-rgb:0,0,0; --shadow-k:1;
 
-  --bg:#07080a; --bg-2:#0b0d10; --surface:#0c0f13; --surface-2:#13171d;
-  --sunken:#08090c; --plate:#0a0d12;
-  --text:#eef1f3; --text-2:rgba(238,241,243,.66); --text-3:rgba(238,241,243,.56);
-  --line:rgba(238,241,243,.08); --line-hi:rgba(238,241,243,.15); --line-strong:rgba(238,241,243,.38);
-  --accent:#a78bfa; --accent-text:var(--accent); --signal-text:var(--signal);
-  --accent-hover:#c4b5fd; --accent-soft:rgba(167,139,250,.1); --on-accent:#07080a;
-  --btn-bg:#eef1f3; --btn-fg:#0a0b0d; --btn-hover:#ffffff;
-  --title-top:#ffffff; --title-end:rgba(238,241,243,.7);
-  --grad-a:#e9d5ff; --grad-c:#818cf8; --glint:#ffffff;
-  --emerald:#34d399; --signal:#5eead4; --rose:#fb7185; --violet:#a78bfa;
-  --hue-cyan:#22d3ee; --hue-emerald:#34d399; --hue-violet:#a78bfa;
+  --bg:#000000; --bg-2:#0a0a0f; --surface:#0a0a0f; --surface-2:#12121a;
+  --sunken:#000000; --plate:#0a0a0f;
+  --text:#ffffff; --text-2:rgba(209,213,219,.92); --text-3:rgba(156,163,175,.88);
+  --line:rgba(255,255,255,.08); --line-hi:rgba(255,255,255,.14); --line-strong:rgba(255,255,255,.32);
+  --accent:#7c3aed; --accent-text:#a78bfa; --signal-text:#38bdf8;
+  --accent-hover:#6d28d9; --accent-soft:rgba(124,58,237,.16); --on-accent:#fff;
+  --btn-bg:#7c3aed; --btn-fg:#ffffff; --btn-hover:#6d28d9;
+  --title-top:#ffffff; --title-end:rgba(209,213,219,.72);
+  --grad-a:#a78bfa; --grad-c:#7c3aed; --glint:#c4b5fd;
+  --emerald:#22c55e; --signal:#38bdf8; --rose:#ef4444; --violet:#7c3aed;
+  --hue-cyan:#22d3ee; --hue-emerald:#22c55e; --hue-violet:#7c3aed;
   --hue-amber:#fbbf24; --hue-rose:#fb7185; --hue-orange:#fb923c;
   --hue-slate:#94a3b8; --hue-blue:#60a5fa;
   --star:#fbbf24;

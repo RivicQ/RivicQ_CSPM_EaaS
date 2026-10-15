@@ -12,6 +12,7 @@ const CspmPublic: React.FC = () => (
     engineNotice="scan"
     sectionEyebrow="CSPM console"
     sectionTitle="What operators read after a real scan finishes."
+    diagramId="operator"
     diagramKicker="CSPM · operator workflow"
     diagramTitle="Discover assets → classify crypto risk → gate CI → report posture evidence."
     blocks={[

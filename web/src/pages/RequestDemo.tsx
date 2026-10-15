@@ -94,7 +94,8 @@ const RequestDemo: React.FC = () => {
         )}
         <ArchifyWorkflowEmbed
           compact
-          kicker="Sales · operator workflow"
+          diagramId="roadmap"
+          kicker="Sales · roadmap"
           title="Enterprise demo requests go to sales@rivicq.com — separate from the labeled product demo trail."
         />
       </Container>
