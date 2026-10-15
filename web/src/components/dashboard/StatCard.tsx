@@ -31,10 +31,9 @@ const StatCard: React.FC<StatCardProps> = ({
   onClick,
 }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const isZero = value === 0 || value === '0';
-  const color = isZero ? (isDark ? '#a78bfa' : tokens.colors.rivicq[500]) : (accent || theme.palette.primary.main);
-  const valueColor = isZero ? (isDark ? '#ffffff' : 'text.primary') : (accent || 'text.primary');
+  const color = isZero ? '#a78bfa' : (accent || theme.palette.primary.main);
+  const valueColor = isZero ? '#ffffff' : (accent || '#ffffff');
 
   return (
     <Box
@@ -52,12 +51,13 @@ const StatCard: React.FC<StatCardProps> = ({
         overflow: 'hidden',
         px: 1.5,
         py: 1.25,
-        bgcolor: 'background.paper',
+        bgcolor: '#0a0a0f',
         border: 1,
         borderColor: 'divider',
         borderRadius: `${dashboardDesign.radius.md}px`,
         transition: dashboardDesign.motion.transition,
         cursor: onClick ? 'pointer' : 'default',
+        color: '#ffffff',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -72,9 +72,7 @@ const StatCard: React.FC<StatCardProps> = ({
         },
         '&:hover': {
           borderColor: `${color}55`,
-          boxShadow: isDark
-            ? `0 8px 24px rgba(0,0,0,0.28), 0 0 0 1px ${color}22`
-            : `0 6px 20px rgba(79,70,229,0.06), 0 0 0 1px ${color}18`,
+          boxShadow: `0 8px 24px rgba(0,0,0,0.28), 0 0 0 1px ${color}22`,
           transform: dashboardDesign.motion.hoverLift,
         },
       }}
@@ -143,9 +141,7 @@ const StatCard: React.FC<StatCardProps> = ({
               borderRadius: `${dashboardDesign.radius.sm}px`,
               display: 'grid',
               placeItems: 'center',
-              background: isDark
-                ? `linear-gradient(135deg, ${color}22, ${color}08)`
-                : `linear-gradient(135deg, ${color}18, ${color}06)`,
+              background: `linear-gradient(135deg, ${color}22, ${color}08)`,
               color,
               flexShrink: 0,
               border: 1,

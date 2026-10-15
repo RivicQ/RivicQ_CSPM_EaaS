@@ -63,7 +63,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary', position: 'relative' }}>
-      {nebula && isDark && (
+      {nebula && (
         <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
           <NebulaBackdrop />
         </Box>
@@ -74,8 +74,8 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: isDark ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.78)',
-          backdropFilter: 'blur(12px)',
+          bgcolor: '#000000',
+          backdropFilter: 'none',
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}
@@ -98,7 +98,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
                 '&:focus-visible': { outline: '2px solid #7c3aed', outlineOffset: 2 },
               }}
             >
-              <BrandLogo dark={isDark} />
+              <BrandLogo dark />
             </Box>
             <Stack direction="row" spacing={0.25} sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
@@ -176,7 +176,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, py: 3, borderTop: '1px solid', borderColor: 'divider' }}>
         <Stack spacing={1.25} alignItems="center">
           <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="center">
-            <BrandLogo compact dark={isDark} />
+            <BrandLogo compact dark />
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
           </Stack>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">

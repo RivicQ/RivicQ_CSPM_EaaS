@@ -1,5 +1,4 @@
 import { designSystem } from './designSystem';
-import { tokens } from './tokens';
 
 export type LogoVariant = 'light' | 'dark';
 
@@ -11,10 +10,11 @@ export const LOGO_SIZES = {
 
 export type LogoSizeKey = keyof typeof LOGO_SIZES;
 
+/** Nebula-only identity — both variants stay on the dark wordmark. */
 export const LOGO_COLORS = {
   light: {
-    wordmark: tokens.colors.rivicq[600],
-    subtitle: tokens.colors.text.secondary,
+    wordmark: designSystem.proBlue.textPrimary,
+    subtitle: designSystem.proBlue.textMuted,
   },
   dark: {
     wordmark: designSystem.proBlue.textPrimary,

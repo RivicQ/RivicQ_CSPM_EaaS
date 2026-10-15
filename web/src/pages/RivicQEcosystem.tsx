@@ -18,7 +18,6 @@ import {
   Tab,
   Tooltip,
   Typography,
-  useTheme,
 } from '@mui/material';
 import { Search, GitHub, OpenInNew, Category, MailOutline } from '@mui/icons-material';
 import PageFrame from '../components/PageFrame';
@@ -59,7 +58,6 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const RivicQEcosystem: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [tools, setTools] = useState<EcosystemTool[]>([]);
   const [loading, setLoading] = useState(true);
@@ -200,7 +198,7 @@ const RivicQEcosystem: React.FC = () => {
                       sx={{
                         p: 1.25,
                         borderRadius: `${designSystem.radius.sm}px`,
-                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(15,23,42,0.6)' : 'rgba(15,23,42,0.04)',
+                        bgcolor: 'rgba(18,18,26,0.9)',
                         border: 1,
                         borderColor: 'divider',
                       }}

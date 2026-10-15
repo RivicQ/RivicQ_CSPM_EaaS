@@ -1,6 +1,6 @@
 import React from 'react';
 import { authService, syncAPIBaseURL } from '../services/api';
-import { setEditionPreference, getEditionFromBackend, normalizeEdition, Edition } from '../config/editions';
+import { setEditionPreference, getEditionFromBackend, normalizeEdition, setAPIBaseURL, Edition } from '../config/editions';
 import { supabaseAuthService, isSupabaseConfigured } from '../services/supabase';
 import { CLIENT_DEMO_TOKEN, DEMO_STORAGE_KEY, TRAIL_ACTIVE_KEY, TRAIL_STEP_KEY, isClientDemoToken } from '../demo/constants';
 
@@ -121,6 +121,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setBackendReachable(Boolean(remote?.edition));
+      // Static Pages: drop a stale absolute API host so demo scans do not
+      // fall through to a dead network target from a prior local session.
+      if (!remote?.edition) {
+        try {
+          const storedApi = localStorage.getItem('api_base_url');
+          if (storedApi && /^https?:\/\//i.test(storedApi)) {
+            localStorage.removeItem('api_base_url');
+            setAPIBaseURL('/api/v1');
+          }
+        } catch {
+          /* ignore */
+        }
+      }
       const nextToken = sbToken ?? stored.token;
       let nextUser: AuthUser | null = sbUser ?? stored.user;
       let nextEdition = detectedEdition;
@@ -241,7 +254,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
       return { requiresConfirmation: false };
     }
-    throw new Error('No authentication provider is available on this deployment.');
+    throw new Error(
+      'No engine is connected on this Pages build, so password sign-in cannot run here. Use Interactive Demo (labelled sample data) or request an Enterprise workspace via sales@rivicq.com.'
+    );
   }, [backendReachable, completeAuth, persist]);
 
   const register = React.useCallback(async (
@@ -263,7 +278,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isSupabaseConfigured) {
       return supabaseRegister(name, email, password, nextEdition);
     }
-    throw new Error('No authentication provider is available on this deployment.');
+    throw new Error(
+      'No engine is connected on this Pages build, so registration cannot run here. Use Interactive Demo (labelled sample data) or request an Enterprise workspace via sales@rivicq.com.'
+    );
   }, [backendReachable, completeAuth, supabaseRegister]);
 
   const verifyMfa = React.useCallback(async (email: string, code: string, session: string, nextEdition: Edition) => {
@@ -316,9 +333,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     try {
       localStorage.setItem(DEMO_STORAGE_KEY, '1');
+      localStorage.removeItem('api_base_url');
     } catch {
       /* ignore */
     }
+    setAPIBaseURL('/api/v1');
+    syncAPIBaseURL();
     persist(CLIENT_DEMO_TOKEN, demoUser, 'community');
   }, [backendReachable, completeAuth, persist]);
 

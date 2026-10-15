@@ -22,13 +22,16 @@
             document.documentElement.setAttribute('data-present', 'true');
           }
         } catch (_) {}
+        var isEmbed = document.documentElement.getAttribute('data-embed') === 'true';
         if (!theme) {
           try { theme = localStorage.getItem('archify-theme'); } catch (_) {}
         }
+        if (isEmbed) theme = 'dark';
         if (theme !== 'light' && theme !== 'dark') {
-          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          theme = 'dark';
         }
         document.documentElement.setAttribute('data-theme', theme);
+        try { if (isEmbed) localStorage.setItem('archify-theme', 'dark'); } catch (_) {}
       } catch (_) {}
     })();
   </script>

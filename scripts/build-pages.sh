@@ -61,7 +61,7 @@ cp docs/quantum-sdk.md docs/plugin-development.md docs/security-intelligence.md 
    web/build/docs/
 cp docs/ux/*.md web/build/docs/ux/ 2>/dev/null || true
 cp docs/contact.html docs/read.html docs/index.html web/build/docs/
-cp docs/assets/horizon-docs.css docs/assets/rivicq-mark.svg docs/assets/rivicq-mark.png web/build/docs/assets/
+cp docs/assets/horizon-docs.css docs/assets/theme.js docs/assets/rivicq-mark.svg docs/assets/rivicq-mark.png web/build/docs/assets/
 cp DATASETS.md LEGAL.md PRIVACY.md TRADEMARKS.md NOTICE CONTRIBUTING.md SECURITY.md web/build/docs/
 cp docs/sdks/README.md docs/sdks/rust.md docs/sdks/python.md docs/sdks/typescript.md \
    docs/sdks/java.md docs/sdks/dotnet.md web/build/docs/sdks/
@@ -75,6 +75,15 @@ echo "==> Publishing archify diagram site"
 mkdir -p web/build/archify/site web/build/archify/diagrams
 cp -r archify/site/. web/build/archify/site/
 cp -r archify/diagrams/. web/build/archify/diagrams/
+
+echo "==> Publishing Archify doc library and hiding raw markdown"
+mkdir -p web/build/archify/site/library
+if compgen -G "web/build/docs/*.md" > /dev/null; then cp web/build/docs/*.md web/build/archify/site/library/; fi
+if compgen -G "web/build/docs/ux/*.md" > /dev/null; then cp web/build/docs/ux/*.md web/build/archify/site/library/; fi
+if compgen -G "web/build/docs/sdks/*.md" > /dev/null; then cp web/build/docs/sdks/*.md web/build/archify/site/library/; fi
+if [ -f web/build/docs/NOTICE ]; then cp web/build/docs/NOTICE web/build/archify/site/library/NOTICE; fi
+find web/build -name '*.md' -not -path '*/archify/site/library/*' -delete
+find web/build -path '*/docs/NOTICE' -delete
 
 echo "==> Installing Cloudflare Pages host config (_headers, _redirects)"
 cp cloudflare/_headers web/build/_headers

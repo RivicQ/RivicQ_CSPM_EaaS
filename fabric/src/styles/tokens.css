@@ -24,7 +24,9 @@
   --btn-fg: #1a1408;
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
   --radius: 12px;
-  --font: Inter, "Helvetica Neue", Arial, sans-serif;
+  --font: "Space Grotesk", Inter, "Helvetica Neue", Arial, sans-serif;
+  --font-body: Inter, "Helvetica Neue", Arial, sans-serif;
+  --font-display: Fraunces, Georgia, serif;
   --mono: "JetBrains Mono", ui-monospace, monospace;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --t-micro: 140ms;

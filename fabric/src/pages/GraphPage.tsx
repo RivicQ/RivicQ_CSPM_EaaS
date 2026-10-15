@@ -46,7 +46,7 @@ const GraphPage: React.FC = () => {
     <div>
       <PageHeader
         title="Enterprise security graph"
-        lede="Switch the lens: discovery inventory, each detection, attack path, or cryptographic dependence. Magenta is cryptographic. Red is attack path. Labeled Northbridge fixture only."
+        lede="One even lens for the labeled estate: discovery inventory, each detection, attack path, or cryptographic dependence. Magenta is CBOM pressure. Red is attack path. Synthetic Northbridge data only — not a certification."
       />
       <div className="btn-row" style={{ marginTop: 12 }} role="tablist" aria-label="Graph lens">
         {lenses.map((l) => (

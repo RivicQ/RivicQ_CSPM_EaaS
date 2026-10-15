@@ -5,14 +5,11 @@ import { ArrowBack, Mail } from '@mui/icons-material';
 import { authService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import AuthChrome from '../components/brand/AuthChrome';
+import { ARCHIFY_FONTS, nebulaCardSx } from '../theme/nebulaSurfaces';
 
 const cardSx = {
+  ...nebulaCardSx,
   mt: 1,
-  borderRadius: 2,
-  bgcolor: 'background.paper',
-  color: 'text.primary',
-  border: '1px solid',
-  borderColor: 'divider',
 };
 
 const ForgotPassword: React.FC = () => {
@@ -51,7 +48,7 @@ const ForgotPassword: React.FC = () => {
     <AuthChrome>
       <Card sx={cardSx} elevation={0}>
         <CardContent sx={{ p: 4 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: '-0.02em' }}>
+          <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, letterSpacing: '-0.03em' }}>
             Reset your password
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>

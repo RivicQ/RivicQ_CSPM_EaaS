@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment, useTheme,
+  Box, Button, Chip, Container, Grid, Menu, MenuItem, Stack, Typography, TextField, InputAdornment,
 } from '@mui/material';
 import {
   ArrowForward, CheckCircle, GitHub, GppGood, Psychology, FactCheck, Lock, WorkspacePremium, VerifiedUser,
@@ -23,7 +23,8 @@ import ConsoleStory from '../components/ops/ConsoleStory';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
-import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
+import { PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -109,17 +110,31 @@ const Home: React.FC = () => {
   const isWebsiteTarget = (value: string) => /^(https?:\/\/|www\.)/i.test(value) || /^[\w.-]+\.[a-z]{2,}(:\d+)?(\/.*)?$/i.test(value);
 
   const handleScan = async () => {
-    if (!repoUrl.trim()) return;
-    if (!backendReachable && !isDemo) {
-      setScanStatus('error');
-      setProgress(0);
+    // On static Pages, allow one-click demo even with an empty field.
+    const target = repoUrl.trim() || (!backendReachable ? 'https://demo.example.com' : '');
+    if (!target) return;
+    if (!repoUrl.trim() && !backendReachable) setRepoUrl(target);
+
+    // Static Pages: enter labelled demo, then open the Scanner console which
+    // already runs the in-browser demo adapter end-to-end (client-meeting path).
+    if (!backendReachable) {
+      setScanStatus('scanning');
+      setProgress(10);
       setReport(null);
+      try {
+        if (!isDemo) await demoLogin('community');
+        navigate(`/scanner?target=${encodeURIComponent(target)}&autostart=1`);
+      } catch {
+        setScanStatus('error');
+        setProgress(0);
+      }
       return;
     }
+
     setScanStatus('scanning');
-    setProgress(0);
+    setProgress(5);
     setReport(null);
-    const target = repoUrl.trim();
+
     const githubSpec = (() => {
       const m = target.match(/github\.com[:/]+([^/]+)\/([^/#\s]+)/i);
       if (m) return `${m[1]}/${m[2].replace(/\.git$/, '')}`;
@@ -127,6 +142,7 @@ const Home: React.FC = () => {
       return '';
     })();
     try {
+      // Live GitHub Contents scan when the engine is reachable.
       if (githubSpec) {
         const resp = await gitHubScanService.scanRepos([githubSpec], 'full', false);
         const scanId = resp.data.scan_id;
@@ -161,7 +177,8 @@ const Home: React.FC = () => {
         }, 1500);
         return;
       }
-      const resp = await cbomService.triggerScan(target, isWebsiteTarget(target) ? 'website' : 'cbom');
+      const scanTarget = githubSpec ? `https://github.com/${githubSpec}` : target;
+      const resp = await cbomService.triggerScan(scanTarget, isWebsiteTarget(scanTarget) || Boolean(githubSpec) ? 'website' : 'cbom');
       const scanId = resp.data.scan_id;
       let ticks = 0;
       const interval = setInterval(async () => {
@@ -222,8 +239,8 @@ const Home: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const ink = 'background.default';
-  const panel = 'background.paper';
+  const ink = '#000000';
+  const panel = '#0a0a0f';
   const [navMenu, setNavMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
 
   const NAV = [
@@ -296,15 +313,15 @@ const Home: React.FC = () => {
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: isDark ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.78)',
-          backdropFilter: 'blur(12px)',
+          bgcolor: '#000000',
+          backdropFilter: 'none',
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}
       >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
-            <BrandLogo dark={isDark} />
+            <BrandLogo dark />
             <Stack direction="row" spacing={0.25} flexWrap="wrap" useFlexGap sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
                 <Button
@@ -401,22 +418,20 @@ const Home: React.FC = () => {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
-        <Box id="scan" sx={{ scrollMarginTop: 80 }}>
+        <Box id="scan" sx={{ scrollMarginTop: 96 }}>
           <MotionSection>
             <Box sx={{ border: '1px solid', borderColor: 'divider', bgcolor: panel, borderRadius: 2, p: { xs: 2, md: 2.5 } }}>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
                 <Typography sx={{ fontFamily: tokens.typography.mono, fontSize: 12, color: 'text.secondary' }}>
-                  {isDemo
+                  {isDemo || !backendReachable
                     ? '$ rivicq · interactive demo · sample data · nothing is claimed as a live result'
-                    : backendReachable
-                      ? '$ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate'
-                      : '$ rivicq scan · engine not hosted on this build · disabled · run it locally or deploy (docs/RENDER.md)'}
+                    : '$ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate'}
                 </Typography>
                 <Chip
                   size="small"
-                  label={isDemo && !backendReachable ? PUBLIC_ENGINE_CHIP_DEMO : (backendReachable ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DISCONNECTED)}
-                  color={(isDemo && !backendReachable) || backendReachable ? 'success' : 'default'}
-                  variant={isDemo && !backendReachable ? 'filled' : 'outlined'}
+                  label={backendReachable && !isDemo ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DEMO}
+                  color="success"
+                  variant={backendReachable && !isDemo ? 'outlined' : 'filled'}
                 />
               </Stack>
               {!backendReachable && !isDemo && <PublicEngineNotice variant="scan" compact />}
@@ -431,22 +446,24 @@ const Home: React.FC = () => {
                   }}
                 />
                 <LoadingButton
+                  type="button"
                   variant="contained"
                   endIcon={<ArrowForward />}
-                  onClick={handleScan}
+                  onClick={() => { void handleScan(); }}
                   loading={scanStatus === 'scanning'}
                   loadingText="Scanning…"
-                  disabled={!repoUrl.trim() || (!backendReachable && !isDemo)}
+                  disabled={backendReachable && !repoUrl.trim()}
                   sx={{ minWidth: 168 }}
+                  aria-label={backendReachable ? 'Run scan' : 'Run demo scan'}
                 >
-                  Run scan
+                  {backendReachable ? 'Run scan' : 'Run demo scan'}
                 </LoadingButton>
               </Stack>
-              {!backendReachable && !isDemo && (
+              {!backendReachable && (
                 <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary', lineHeight: 1.5 }}>
-                  Why is the button disabled? Scanning runs on the RivicQ CBOM engine, which is not hosted on this static
-                  build. Deploy the API (<code>docs/RENDER.md</code>) or run it locally for live scans — or use the
-                  interactive demo above to explore the workflow on sample data.
+                  {isDemo
+                    ? 'Interactive demo — labelled sample findings in this browser. Not customer telemetry.'
+                    : 'No engine on this static build. Run demo scan starts the interactive demo with labelled sample data. Live scans need the API (docs/RENDER.md).'}
                 </Typography>
               )}
             </Box>
@@ -466,6 +483,7 @@ const Home: React.FC = () => {
         )}
 
         <ScanWorkflowStrip />
+        <ArchifyWorkflowEmbed />
 
         <Box id="funnel" sx={{ mt: 6, scrollMarginTop: 80 }}>
           <ConsoleStory focus="funnel" />
@@ -558,7 +576,7 @@ const Home: React.FC = () => {
           </Grid>
         </Box>
 
-        <Box id="plans" sx={{ mt: 8, textAlign: 'center', scrollMarginTop: 80 }}>
+        <Box id="plans" sx={{ mt: 8, textAlign: 'center', scrollMarginTop: 96 }}>
           <Typography variant="caption" sx={{ color: 'text.disabled', letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600 }}>
             Control mappings (not certifications)
           </Typography>
@@ -572,7 +590,7 @@ const Home: React.FC = () => {
         <Box sx={{ mt: 8, py: 3, borderTop: 1, borderColor: 'divider' }}>
           <Stack spacing={1.25} alignItems="center">
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="center">
-              <BrandLogo compact dark={isDark} />
+              <BrandLogo compact dark />
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
             </Stack>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">

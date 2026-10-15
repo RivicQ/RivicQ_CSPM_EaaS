@@ -29,118 +29,13 @@ jobs:
             web/package-lock.json
             fabric/package-lock.json
 
-      - name: Install dependencies
-        working-directory: web
-        run: npm ci
-
-      - name: Build React SaaS app
-        working-directory: web
-        run: npm run build
+      - name: Build composite site
         env:
           REACT_APP_EDITION: community
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
           REACT_APP_SUPABASE_URL: https://suhoabdijefnsoxveewn.supabase.co
           REACT_APP_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8q50RgRBzXcuvjdaF7qBpg_E0GKHPt4
-
-      - name: Generate API docs (ReDoc)
-        run: |
-          # Build ReDoc HTML from the OpenAPI spec into the site's build
-          npx redoc-cli@latest bundle docs/openapi.yaml -o web/build/api/index.html || true
-        shell: bash
-
-      - name: Add SPA redirect
-        run: cp web/build/index.html web/build/404.html
-
-      - name: Install Fabric dependencies
-        working-directory: fabric
-        run: npm ci
-
-      - name: Build RivicQ Graph
-        working-directory: fabric
-        run: npm run build
-
-      - name: Publish Graph onto Pages
-        run: |
-          mkdir -p web/build/fabric web/build/docs
-          cp -r fabric/dist/. web/build/fabric/
-          cp web/build/fabric/index.html web/build/fabric/404.html
-          cp docs/FABRIC.md web/build/docs/FABRIC.md
-          cp docs/GRAPH.md web/build/docs/GRAPH.md
-          # Former NEXUS path stays as a bookmark redirect.
-          mkdir -p web/build/nexus
-          printf '%s\n' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/RivicQ_CSPM_EaaS/fabric/"><link rel="canonical" href="/RivicQ_CSPM_EaaS/fabric/"><title>Moved</title><p>This demo moved to <a href="/RivicQ_CSPM_EaaS/fabric/">RivicQ Graph</a>.</p>' > web/build/nexus/index.html
-          cp web/build/nexus/index.html web/build/nexus/404.html
-
-      - name: Publish SDK & plugin docs to the site
-        run: |
-          mkdir -p web/build/docs/sdks
-          cp docs/quantum-sdk.md web/build/docs/
-          cp docs/plugin-development.md web/build/docs/
-          cp docs/security-intelligence.md web/build/docs/
-          cp docs/README.md web/build/docs/README.md
-          cp docs/KNOWN_LIMITATIONS.md web/build/docs/KNOWN_LIMITATIONS.md
-          cp docs/INTEGRATIONS.md web/build/docs/INTEGRATIONS.md
-          cp docs/LAUNCH_CHECKLIST.md web/build/docs/LAUNCH_CHECKLIST.md
-          cp docs/PRODUCT_STATUS.md web/build/docs/PRODUCT_STATUS.md
-          cp docs/PLATFORM.md web/build/docs/PLATFORM.md
-          cp docs/DESIGN_SYSTEM.md web/build/docs/DESIGN_SYSTEM.md
-          cp docs/CORE_ENGINE.md web/build/docs/CORE_ENGINE.md
-          cp docs/ENGINEERING_AUDIT.md web/build/docs/ENGINEERING_AUDIT.md
-          cp docs/OPS_RUNBOOK.md web/build/docs/OPS_RUNBOOK.md
-          cp docs/ROADMAP.md web/build/docs/ROADMAP.md
-          cp docs/QISKIT_PIPELINE.md web/build/docs/QISKIT_PIPELINE.md
-          cp docs/ARCHITECTURE.md web/build/docs/ARCHITECTURE.md
-          cp docs/CLIENT_ARCHITECTURE.md web/build/docs/CLIENT_ARCHITECTURE.md
-          cp docs/BOM_FRAMEWORK.md web/build/docs/BOM_FRAMEWORK.md
-          cp docs/UX_DESIGN.md web/build/docs/UX_DESIGN.md
-          mkdir -p web/build/docs/ux
-          cp docs/ux/*.md web/build/docs/ux/
-          cp docs/CONTACT.md web/build/docs/CONTACT.md
-          cp docs/GRAPH.md web/build/docs/GRAPH.md
-          cp docs/contact.html web/build/docs/contact.html
-          cp docs/read.html web/build/docs/read.html
-          mkdir -p web/build/docs/assets
-          cp docs/assets/horizon-docs.css web/build/docs/assets/horizon-docs.css
-          cp docs/assets/rivicq-mark.svg web/build/docs/assets/rivicq-mark.svg
-          cp docs/assets/rivicq-mark.png web/build/docs/assets/rivicq-mark.png
-          cp docs/PQC_MIGRATION.md web/build/docs/PQC_MIGRATION.md
-          cp docs/editions.md web/build/docs/editions.md
-          cp DATASETS.md web/build/docs/DATASETS.md
-          cp LEGAL.md web/build/docs/LEGAL.md
-          cp PRIVACY.md web/build/docs/PRIVACY.md
-          cp TRADEMARKS.md web/build/docs/TRADEMARKS.md
-          cp NOTICE web/build/docs/NOTICE
-          cp CONTRIBUTING.md web/build/docs/CONTRIBUTING.md
-          cp SECURITY.md web/build/docs/SECURITY.md
-          cp docs/sdks/README.md web/build/docs/sdks/
-          cp docs/sdks/rust.md web/build/docs/sdks/
-          cp docs/sdks/python.md web/build/docs/sdks/
-          cp docs/sdks/typescript.md web/build/docs/sdks/
-          cp docs/sdks/java.md web/build/docs/sdks/
-          cp docs/sdks/dotnet.md web/build/docs/sdks/
-          cp docs/index.html web/build/docs/index.html
-          mkdir -p web/build/media
-          cp -r media/. web/build/media/
-          mkdir -p web/build/marketing
-          cp -r marketing/. web/build/marketing/
-
-      - name: Publish archify diagram site
-        run: |
-          # Architect-the-product explorer. Preserve the two-level layout so the
-          # site's ../diagrams/* embeds and ../../docs/* links keep resolving:
-          #   /archify/site/index.html  ->  ../diagrams = /archify/diagrams
-          #                                 ../../docs   = /docs
-          mkdir -p web/build/archify/site web/build/archify/diagrams web/build/archify/site/library
-          cp -r archify/site/. web/build/archify/site/
-          cp -r archify/diagrams/. web/build/archify/diagrams/
-          # Rendered docs read markdown from the Archify library. Raw .md URLs
-          # are removed from the published tree so Pages does not show source.
-          if compgen -G "web/build/docs/*.md" > /dev/null; then cp web/build/docs/*.md web/build/archify/site/library/; fi
-          if compgen -G "web/build/docs/ux/*.md" > /dev/null; then cp web/build/docs/ux/*.md web/build/archify/site/library/; fi
-          if compgen -G "web/build/docs/sdks/*.md" > /dev/null; then cp web/build/docs/sdks/*.md web/build/archify/site/library/; fi
-          if [ -f web/build/docs/NOTICE ]; then cp web/build/docs/NOTICE web/build/archify/site/library/NOTICE; fi
-          find web/build -name '*.md' -not -path '*/archify/site/library/*' -delete
-          find web/build -path '*/docs/NOTICE' -delete
+        run: bash scripts/build-pages.sh
 
       - name: Deploy to GitHub Pages (gh-pages branch)
         uses: peaceiris/actions-gh-pages@v4

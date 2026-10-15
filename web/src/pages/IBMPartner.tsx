@@ -80,11 +80,15 @@ const IBMPartner: React.FC = () => {
       maxWidth="lg"
       eyebrow="Partnerships · IBM Partner Plus"
       title="Selected. Readiness tracking only."
-      lede="RivicQ has been selected for IBM Partner Plus. This page tracks RivicQ readiness. It does not call IBM seller, marketplace, or Partner Plus APIs."
+      lede="RivicQ has been selected for IBM Partner Plus. This page tracks RivicQ readiness only. It does not call IBM seller, marketplace, or Partner Plus APIs, and it invents no co-sell records."
       primary={{ label: 'Request a conversation', to: '/request-demo' }}
       secondary={{ label: 'Email sales@', to: 'mailto:sales@rivicq.com' }}
       notice={PUBLIC_ENGINE_IBM_HONESTY}
       engineNotice="ibm"
+      sectionEyebrow="Partner readiness"
+      sectionTitle="Technology mappings and Build checklist — RivicQ state, not IBM API state."
+      diagramKicker="IBM · operator workflow"
+      diagramTitle="Keep IBM mappings honest — local taxonomy and optional connectors, never fabricated marketplace claims."
     >
       {!backendReachable && (
         <Typography sx={{ color: 'text.secondary', mb: 2, fontSize: '0.875rem' }}>
@@ -92,7 +96,7 @@ const IBMPartner: React.FC = () => {
         </Typography>
       )}
       {error && (
-        <Box sx={{ p: 1.75, mb: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'error.main', borderRadius: 2, color: 'error.light' }}>
+        <Box sx={{ p: 1.75, mb: 3, bgcolor: '#0a0a0f', border: '1px solid', borderColor: 'error.main', borderRadius: 2, color: 'error.light' }}>
           {error}
         </Box>
       )}

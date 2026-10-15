@@ -158,9 +158,30 @@ function okResponse(config: InternalAxiosRequestConfig, data: unknown, status = 
 }
 
 function urlOf(config: InternalAxiosRequestConfig): string {
-  let url = config.url || '';
-  if (!url.startsWith('/')) url = `/${url}`;
-  return url.replace(/^\/api\/v1/, '');
+  const raw = String(config.url || '');
+  const base = String(config.baseURL || '');
+
+  // Axios may pass an absolute URL (baseURL + path merged) once a prior session
+  // stored api_base_url. Always reduce to an API-relative path so demo routes match.
+  const asPath = (value: string): string => {
+    if (/^https?:\/\//i.test(value)) {
+      try {
+        return new URL(value).pathname || '/';
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  };
+
+  let path = asPath(raw);
+  if (!/^https?:\/\//i.test(raw) && base) {
+    const basePath = asPath(base).replace(/\/+$/, '');
+    const rel = path.startsWith('/') ? path : `/${path}`;
+    path = `${basePath}${rel}`;
+  }
+  if (!path.startsWith('/')) path = `/${path}`;
+  return path.replace(/^\/api\/v1/, '') || '/';
 }
 
 function isScanIdSegment(seg: string): boolean {
@@ -290,6 +311,8 @@ export function demoScanRespond(config: InternalAxiosRequestConfig): Promise<Axi
     s.progress = progress;
     s.status = status;
     const completed = status === 'completed';
+    const items = completed ? makeFindingItems(s.target, s.id, s.scanType) : [];
+    const countBy = (sev: string) => items.filter((f) => String(f.severity) === sev).length;
     return Promise.resolve(okResponse(config, {
       id: s.id,
       scan_id: s.id,
@@ -298,9 +321,16 @@ export function demoScanRespond(config: InternalAxiosRequestConfig): Promise<Axi
       target: s.target,
       scan_type: s.scanType,
       created_at: s.createdAt,
-      findings: { total: completed ? makeFindingItems(s.target, s.id, s.scanType).length : 0 },
-      finding_items: completed ? makeFindingItems(s.target, s.id, s.scanType) : [],
+      findings: {
+        total: items.length,
+        critical: countBy('critical'),
+        high: countBy('high'),
+        medium: countBy('medium'),
+        low: countBy('low'),
+      },
+      finding_items: items,
       resources: { web: true, network: true },
+      note: completed ? 'DEMO · labelled sample findings only' : undefined,
     }));
   }
 
@@ -309,6 +339,22 @@ export function demoScanRespond(config: InternalAxiosRequestConfig): Promise<Axi
     const s = scanStore.get(segs[1]);
     if (!s) return null;
     return Promise.resolve(okResponse(config, intelligencePayload(s)));
+  }
+
+  // GET /scans/{id}/report
+  if (method === 'get' && segs.length === 3 && segs[0] === 'scans' && isScanIdSegment(segs[1]) && segs[2] === 'report') {
+    const s = scanStore.get(segs[1]);
+    if (!s) return null;
+    const items = makeFindingItems(s.target, s.id, s.scanType);
+    return Promise.resolve(okResponse(config, {
+      scan_id: s.id,
+      target: s.target,
+      scan_type: s.scanType,
+      status: s.status,
+      findings: items,
+      finding_items: items,
+      note: 'Demo CBOM report — labelled sample data only.',
+    }));
   }
 
   // GET /scans/{id}/qiskit

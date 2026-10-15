@@ -18,8 +18,8 @@ const STEPS: Step[] = [
 
 /**
  * "How scanning works" strip with a live engine-status legend, so a visitor
- * on static Pages can see (a) the workflow and (b) exactly why scanning is
- * disabled here and which mode they are in.
+ * on static Pages can see (a) the workflow and (b) which mode they are in.
+ * Static Pages never claim scanning is permanently blocked — Run demo scan works.
  */
 const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const { backendReachable, isDemo } = useAuth();
@@ -28,7 +28,7 @@ const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false })
     ? { label: 'RivicQ engine · live', color: 'success', desc: 'Scans here are real and evidence-backed.' }
     : isDemo
       ? { label: 'Interactive demo · sample data', color: 'info', desc: 'This session answers in-browser with clearly-labelled sample data.' }
-      : { label: 'Engine not hosted · scanning disabled', color: 'default', desc: 'Deploy the API (docs/RENDER.md) or run it locally, or enter the interactive demo.' };
+      : { label: 'Static Pages · demo scan ready', color: 'info', desc: 'Press Run demo scan for labelled sample findings. Live evidence needs the API or a local run.' };
 
   return (
     <Box sx={{ mt: compact ? 3 : 6 }}>
@@ -44,11 +44,11 @@ const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false })
       <Grid container spacing={2}>
         {STEPS.map((s, i) => (
           <Grid item xs={12} sm={6} md={3} key={s.title}>
-            <Box sx={{ height: '100%', p: 2.25, borderRadius: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', position: 'relative', overflow: 'hidden' }}>
+            <Box sx={{ height: '100%', p: 2.25, borderRadius: 2, bgcolor: '#0a0a0f', border: '1px solid', borderColor: 'divider', position: 'relative', overflow: 'hidden' }}>
               <Stack direction="row" spacing={1.5} alignItems="flex-start">
                 <Box sx={{
                   width: 40, height: 40, borderRadius: 2, flexShrink: 0, display: 'grid', placeItems: 'center',
-                  background: (t) => (t.palette.mode === 'dark' ? 'rgba(124,58,237,0.28)' : 'rgba(124,58,237,0.10)'),
+                  background: 'rgba(124,58,237,0.28)',
                   color: 'primary.main',
                 }}>
                   {s.icon}

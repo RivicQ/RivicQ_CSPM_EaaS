@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "workflow",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/re1/re1/CSPM/.archify/workflow-cspm-operator-20261014-144800/candidate.json",
+    "sha256": "a4cd4ba744825bd3bb2d177f8fed8f5152e9867ed71f4e42ea348341ef8ed094",
+    "bytes": 6163
+  },
+  "artifact": {
+    "path": "/Users/re1/re1/CSPM/.archify/workflow-cspm-operator-20261014-144800/rivicq-cspm-operator-workflow.html",
+    "sha256": "a76fd0e484efa7520d116578baa68df3a702a2f1e9630199da638c9d478704e1",
+    "bytes": 763514
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/re1/re1/CSPM/.archify/workflow-cspm-operator-20261014-144800/rivicq-cspm-operator-workflow.finalize.json",
+    "summaryReceipt": "/Users/re1/re1/CSPM/.archify/workflow-cspm-operator-20261014-144800/rivicq-cspm-operator-workflow.finalize-summary.json",
+    "browserCheckReceipt": "/Users/re1/re1/CSPM/.archify/workflow-cspm-operator-20261014-144800/rivicq-cspm-operator-workflow.browser-check.json"
+  },
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.1.0",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.1.0",
+    "severity": "normal",
+    "checkedAt": "2026-10-14T12:59:50.096Z",
+    "source": "network",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.0.1 → 3.1.0. A newer release is available. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.1.0. The installed Skill has not changed; ask to snooze or ignore this reminder.",
+    "eventKey": "archify@sha256:ffedc53390c9da6e859f41e432c5d2d0615a23cf00a503181f07efbba88a7ce8"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 3306,
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "routesOverSuggestedBends": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [],
+      "detours": [
+        {
+          "relationship": {
+            "id": "e-console-post",
+            "from": "console",
+            "to": "postscan",
+            "label": "trigger",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "bends": 3,
+          "stretch": 1
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "console → postscan needs 3 bends: move node console or postscan so they share a row or column with matching centers, or sit diagonally with a clear corner."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

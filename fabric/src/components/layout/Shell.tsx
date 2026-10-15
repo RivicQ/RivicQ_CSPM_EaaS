@@ -92,8 +92,8 @@ const Shell: React.FC = () => {
         <NavLink to="/" className="mark">
           <Mark />
           <div>
-            <strong>GRAPH</strong>
-            <span>RivicQ Graph</span>
+            <strong>RivicQ Graph</strong>
+            <span>Labeled demo · synthetic data</span>
           </div>
         </NavLink>
         <NavGroups />

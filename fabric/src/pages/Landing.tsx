@@ -8,25 +8,38 @@ const Landing: React.FC = () => {
   return (
     <div className="landing">
       <PublicBar />
-      <p style={{ color: 'var(--intel)', letterSpacing: '0.08em', fontSize: 12, textTransform: 'uppercase' }}>The operating system for enterprise security</p>
-      <h1 className="hero-title">See every asset.<br />Understand every risk.<br />Secure what comes next.</h1>
+      <div className="hero-eyebrow">
+        <b>Graph</b>
+        <span>Cryptographic Security Posture Management · Berlin</span>
+      </div>
+      <h1 className="hero-title">
+        See the estate once.<br />
+        Leave with a map <em>you can trust.</em>
+      </h1>
       <p className="lede">
-        Unified security graph for cloud, identity, software, cryptography, AI, and compliance.
-        A misconfiguration is never just a misconfiguration — it is a workload, an identity, a dependency, a certificate, a dataset, a regulation, and a business impact.
-        This GitHub Pages build is a labeled Community demo with synthetic data. It is not a certification and does not collect payment or production secrets.
+        RivicQ Graph is a labeled demo of how CBOM, cloud, identity, and findings connect.
+        Nodes and edges are synthetic Northbridge fixtures — not a customer estate and not a certification.
+        Use it to understand the operator path: discover → classify → gate → report.
       </p>
       <div className="steps" aria-label="Product loop">
-        <span>Discover</span><span>Assess</span><span>Remediate</span><span>Migrate</span><span>Monitor</span>
+        <span>01 Discover</span>
+        <span>02 Assess</span>
+        <span>03 Remediate</span>
+        <span>04 Migrate</span>
+        <span>05 Report</span>
       </div>
       <div className="btn-row" style={{ marginBottom: 28 }}>
-        <button type="button" className="btn primary" onClick={() => nav('/discover')}>Start discovery</button>
-        <button type="button" className="btn" onClick={() => nav('/onboard')}>Create organization</button>
+        <button type="button" className="btn primary" onClick={() => nav('/app/graph')}>Open security graph</button>
+        <button type="button" className="btn" onClick={() => nav('/discover')}>Start discovery</button>
         <button type="button" className="btn" onClick={() => nav('/app/command')}>Open overview</button>
         <button type="button" className="btn" onClick={() => nav('/legal')}>Legal &amp; editions</button>
       </div>
-      <div className="surface" style={{ padding: 16 }}>
+      <div className="surface graph-plate">
         <h2 className="h2">Enterprise security graph</h2>
-        <p className="lede" style={{ marginBottom: 12 }}>Cloud, applications, cryptography, identity, and AI as one system. Nodes use distinct shapes. Red is threat. Magenta is quantum impact.</p>
+        <p className="lede">
+          Cloud, applications, cryptography, identity, and AI as one readable system.
+          Magenta marks cryptographic dependence. Red marks attack-path pressure. Every node is labeled DEMO data.
+        </p>
         <SecurityGraph />
       </div>
     </div>

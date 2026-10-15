@@ -7,27 +7,27 @@
    ════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* PALETTE — one design, two colour sets */
-  --fg-rgb:18,20,23; --bg-rgb:245,246,243;
-  --accent-rgb:124,58,237; --emerald-rgb:5,150,105;
-  --signal-rgb:13,148,136; --glow-rgb:139,92,246;
-  --shadow-rgb:24,28,34; --shadow-k:.16;
+  /* PALETTE — nebula identity (#000 / #0A0A0F / #7C3AED). Light is the same theme. */
+  --fg-rgb:255,255,255; --bg-rgb:0,0,0;
+  --accent-rgb:124,58,237; --emerald-rgb:34,197,94;
+  --signal-rgb:56,189,248; --glow-rgb:167,139,250;
+  --shadow-rgb:0,0,0; --shadow-k:1;
 
-  --bg:#f5f6f3; --bg-2:#eef0ec; --surface:#ffffff; --surface-2:#f0f2ee;
-  --sunken:#eceee9; --plate:#fbfbf9;
-  --text:#121417; --text-2:rgba(18,20,23,.68); --text-3:rgba(18,20,23,.62);
-  --line:rgba(18,20,23,.09); --line-hi:rgba(18,20,23,.16); --line-strong:rgba(18,20,23,.4);
-  --accent:#7c3aed; --accent-text:#6d28d9; --signal-text:#0f766e;
-  --accent-hover:#6d28d9; --accent-soft:rgba(124,58,237,.09); --on-accent:#fff;
-  --btn-bg:#121417; --btn-fg:#ffffff; --btn-hover:#000000;
-  --title-top:#0b0c0e; --title-end:rgba(18,20,23,.72);
-  --grad-a:#a78bfa; --grad-c:#4f46e5; --glint:#8b5cf6;
-  --emerald:#059669; --signal:#0d9488; --rose:#e11d48; --violet:#7c3aed;
-  --hue-cyan:#0891b2; --hue-emerald:#059669; --hue-violet:#7c3aed;
-  --hue-amber:#d97706; --hue-rose:#e11d48; --hue-orange:#ea580c;
-  --hue-slate:#64748b; --hue-blue:#2563eb;
-  --star:#f5a524;
-  color-scheme:light;
+  --bg:#000000; --bg-2:#0a0a0f; --surface:#0a0a0f; --surface-2:#12121a;
+  --sunken:#000000; --plate:#0a0a0f;
+  --text:#ffffff; --text-2:rgba(209,213,219,.92); --text-3:rgba(156,163,175,.88);
+  --line:rgba(255,255,255,.08); --line-hi:rgba(255,255,255,.14); --line-strong:rgba(255,255,255,.32);
+  --accent:#7c3aed; --accent-text:#a78bfa; --signal-text:#38bdf8;
+  --accent-hover:#6d28d9; --accent-soft:rgba(124,58,237,.16); --on-accent:#fff;
+  --btn-bg:#7c3aed; --btn-fg:#ffffff; --btn-hover:#6d28d9;
+  --title-top:#ffffff; --title-end:rgba(209,213,219,.72);
+  --grad-a:#a78bfa; --grad-c:#7c3aed; --glint:#c4b5fd;
+  --emerald:#22c55e; --signal:#38bdf8; --rose:#ef4444; --violet:#7c3aed;
+  --hue-cyan:#22d3ee; --hue-emerald:#22c55e; --hue-violet:#7c3aed;
+  --hue-amber:#fbbf24; --hue-rose:#fb7185; --hue-orange:#fb923c;
+  --hue-slate:#94a3b8; --hue-blue:#60a5fa;
+  --star:#fbbf24;
+  color-scheme:dark;
 }
 :root[data-theme="dark"] {
   --fg-rgb:238,241,243; --bg-rgb:7,8,10;
@@ -118,10 +118,7 @@ body.nav-scrolled .site-nav { background:rgba(var(--bg-rgb),.84); border-bottom-
 .site-nav .nav-link:hover { color:var(--text); background:rgba(var(--fg-rgb),.05); }
 .site-nav .nav-link[aria-current="page"] { color:var(--text); background:rgba(var(--fg-rgb),.09); box-shadow:inset 0 0 0 1px rgba(var(--fg-rgb),.1); }
 .site-nav .nav-link[aria-current="page"]::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px rgba(var(--accent-rgb),.8); }
-.site-nav .btn-theme { width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; flex:none; padding:0; border:1px solid var(--line-hi); border-radius:10px; background:transparent; color:var(--text-2); cursor:pointer; transition:color .18s var(--ease-out),border-color .18s var(--ease-out); }
-.site-nav .btn-theme:hover { color:var(--text); border-color:var(--line-strong); }
-.site-nav .btn-theme .theme-sun, :root[data-theme="dark"] .site-nav .btn-theme .theme-moon { display:none; }
-:root[data-theme="dark"] .site-nav .btn-theme .theme-sun { display:block; }
+.site-nav .btn-theme { display:none !important; }
 .site-nav .nav-cta { height:36px; min-height:36px; padding:0 1rem; display:inline-flex; align-items:center; justify-content:center; flex:none; border:1px solid var(--text); border-radius:10px; background:var(--text); color:var(--btn-fg); font-size:.8125rem; font-weight:600; letter-spacing:-.005em; line-height:1; text-decoration:none; white-space:nowrap; transition:background .2s var(--ease-out),border-color .2s var(--ease-out),color .2s var(--ease-out); }
 .site-nav .nav-cta:hover { background:var(--accent); border-color:var(--accent); color:var(--on-accent); box-shadow:0 8px 28px -6px rgba(var(--accent-rgb),.6); }
 

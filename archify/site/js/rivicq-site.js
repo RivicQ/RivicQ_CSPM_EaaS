@@ -32,7 +32,8 @@
   }
 
   function currentTheme() {
-    return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    /* Nebula identity only — light theme is not offered on the product site. */
+    return 'dark';
   }
 
   /* ── Diagram theme sync (best-effort same-origin) ──────────── */
