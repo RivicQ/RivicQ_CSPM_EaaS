@@ -58,6 +58,8 @@ cp docs/quantum-sdk.md docs/plugin-development.md docs/security-intelligence.md 
    docs/OPS_RUNBOOK.md docs/ROADMAP.md docs/QISKIT_PIPELINE.md docs/ARCHITECTURE.md \
    docs/CLIENT_ARCHITECTURE.md docs/BOM_FRAMEWORK.md docs/UX_DESIGN.md docs/CONTACT.md \
    docs/PQC_MIGRATION.md docs/editions.md \
+   docs/IMPLEMENTATION_STATUS.md docs/DEMO_RUNBOOK.md docs/PILOT_ACCEPTANCE_CRITERIA.md \
+   docs/PRODUCTION_READINESS.md docs/SECURITY_FINDINGS.md \
    web/build/docs/
 cp docs/ux/*.md web/build/docs/ux/ 2>/dev/null || true
 cp docs/contact.html docs/read.html docs/index.html web/build/docs/
