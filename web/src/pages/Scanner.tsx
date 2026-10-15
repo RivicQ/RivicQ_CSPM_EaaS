@@ -275,6 +275,8 @@ const Scanner: React.FC = () => {
       );
       setScanJobs((prev) => prev.filter((j) => j.id !== newJob.id));
     }
+    // pollScanStatus closes over setters for the active job; recreating it each render is unnecessary.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDemo, paid, scanTarget, scanType, targetClass]);
 
   useEffect(() => {
