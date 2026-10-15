@@ -76,17 +76,22 @@ const PublicEngineNotice: React.FC<{ variant?: Variant; force?: boolean; compact
         <Button size="small" variant="contained" onClick={() => navigate('/demo')} sx={websiteCtaSx}>
           Try the interactive demo
         </Button>
-        <Button size="small" variant="outlined" onClick={() => navigate('/login')} sx={websiteOutlineCtaSx()}>
-          Sign in to the engine
+        <Button size="small" variant="outlined" onClick={() => navigate('/request-demo')} sx={websiteOutlineCtaSx()}>
+          Request Enterprise demo
         </Button>
         <Button size="small" variant="outlined" href={diagramHref} target="_blank" rel="noopener noreferrer" sx={websiteOutlineCtaSx()}>
           Operator workflow
         </Button>
-        {variant === 'ibm' && (
-          <Button size="small" variant="outlined" onClick={() => navigate('/request-demo')} sx={websiteOutlineCtaSx()}>
-            Request enterprise demo
-          </Button>
-        )}
+        <Button
+          size="small"
+          variant="outlined"
+          href={`${process.env.PUBLIC_URL || ''}/docs/RENDER.md`}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={websiteOutlineCtaSx()}
+        >
+          Deploy the engine
+        </Button>
       </Stack>
     </Box>
   );

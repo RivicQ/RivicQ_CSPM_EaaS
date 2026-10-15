@@ -43,6 +43,11 @@ import TrademarkNotice from '../components/TrademarkNotice';
 import { proBlueContainedButtonSx } from '../theme/designSystem';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import { ARCHIFY_FONTS, NEBULA, archifyAuraLayersSx, nebulaCardSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
+import {
+  PUBLIC_ENGINE_AUTH_COPY,
+  PUBLIC_ENGINE_CHIP_DISCONNECTED,
+  PUBLIC_ENGINE_ENTERPRISE_AUTH_COPY,
+} from '../data/publicInfrastructure';
 
 interface AuthPageProps {
   defaultMode?: 'login' | 'register';
@@ -142,6 +147,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     setError('');
     setConfirmationSent(null);
 
+    // Static Pages: never surface a raw network failure for Enterprise/password login.
+    if (!backendReachable && !supabaseEnabled) {
+      setError(
+        edition === 'enterprise' || edition === 'professional'
+          ? PUBLIC_ENGINE_ENTERPRISE_AUTH_COPY
+          : 'Password sign-in needs the RivicQ engine. On this Pages build, use Interactive Demo (labelled sample data) or request an Enterprise workspace via sales@rivicq.com.'
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
       const result = mode === 'register'
         ? await register(displayName || form.email.split('@')[0], form.email, form.password, edition, {
@@ -169,10 +185,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
         navigate(from, { replace: true });
       }
     } catch (err: any) {
+      const networkish = /network|failed to fetch|err_network|timeout|econnrefused/i.test(
+        String(err?.message || err?.code || '')
+      );
       setError(
-        err?.response?.data?.error ||
-        err?.message ||
-        (mode === 'register' ? 'Registration failed' : 'Authentication failed')
+        !backendReachable && networkish
+          ? PUBLIC_ENGINE_AUTH_COPY
+          : err?.response?.data?.error ||
+            err?.message ||
+            (mode === 'register' ? 'Registration failed' : 'Authentication failed')
       );
     } finally {
       setLoading(false);
@@ -267,29 +288,32 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
             }}
           >
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
-              <Chip size="small" variant="outlined" label="Needs the RivicQ engine" />
+              <Chip size="small" variant="outlined" label={PUBLIC_ENGINE_CHIP_DISCONNECTED} />
               <Typography sx={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
-                Network / engine status
+                Expected on this build
               </Typography>
             </Stack>
             <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1 }}>
-              This GitHub Pages build is static and hosts no RivicQ engine, so real sign-in and scanning are turned off
-              here — that is a network/engine limitation, not a bug. Nothing is faked: real, evidence-backed results need
-              the deployed engine (<code>docs/RENDER.md</code>) or a local run.
+              {edition === 'enterprise' || edition === 'professional'
+                ? PUBLIC_ENGINE_ENTERPRISE_AUTH_COPY
+                : PUBLIC_ENGINE_AUTH_COPY}
             </Typography>
             <Typography sx={{ fontSize: '0.9375rem', lineHeight: 1.65, mb: 1.75 }}>
-              To try everything now, use the <strong>interactive demo</strong> below — it runs fully in your browser on
-              clearly-labelled sample data.
+              Start with the <strong>interactive demo</strong> — full console path in this browser on clearly-labelled
+              sample data. Enterprise SSO and connectors stay on a licensed deployment.
             </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} flexWrap="wrap" useFlexGap>
               <Button variant="contained" startIcon={<AutoAwesome />} disabled={loading} onClick={() => handleDemo(true)}>
                 Enter the interactive demo
+              </Button>
+              <Button variant="outlined" disabled={loading} onClick={() => navigate('/request-demo')}>
+                Request Enterprise demo
               </Button>
               <Button
                 variant="outlined"
                 onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/docs/RENDER.md`, '_blank', 'noopener,noreferrer')}
               >
-                How to deploy the engine
+                Deploy the engine
               </Button>
             </Stack>
           </Box>

@@ -241,7 +241,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
       return { requiresConfirmation: false };
     }
-    throw new Error('No authentication provider is available on this deployment.');
+    throw new Error(
+      'No engine is connected on this Pages build, so password sign-in cannot run here. Use Interactive Demo (labelled sample data) or request an Enterprise workspace via sales@rivicq.com.'
+    );
   }, [backendReachable, completeAuth, persist]);
 
   const register = React.useCallback(async (
@@ -263,7 +265,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isSupabaseConfigured) {
       return supabaseRegister(name, email, password, nextEdition);
     }
-    throw new Error('No authentication provider is available on this deployment.');
+    throw new Error(
+      'No engine is connected on this Pages build, so registration cannot run here. Use Interactive Demo (labelled sample data) or request an Enterprise workspace via sales@rivicq.com.'
+    );
   }, [backendReachable, completeAuth, supabaseRegister]);
 
   const verifyMfa = React.useCallback(async (email: string, code: string, session: string, nextEdition: Edition) => {
