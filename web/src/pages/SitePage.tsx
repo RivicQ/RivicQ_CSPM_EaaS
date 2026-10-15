@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Grid, Stack, Typography, useTheme } from '@mui/material';
+import { NorthEast } from '@mui/icons-material';
 import PublicShell from '../components/brand/PublicShell';
 import PublicEngineNotice from '../components/brand/PublicEngineNotice';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
@@ -57,7 +58,11 @@ const SitePage: React.FC<{
         <Typography sx={{ fontSize: { xs: '2rem', md: '2.8rem' }, fontWeight: 750, letterSpacing: '-0.03em', mt: 1, mb: 2, color: 'text.primary' }}>{title}</Typography>
         <Typography sx={{ color: 'text.secondary', fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.65, mb: 3 }}>{lede}</Typography>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: notice || blocks.length || children ? 4 : 0 }}>
-          {primary && <Button variant="contained" size="large" onClick={() => go(primary.to)} sx={websiteCtaSx}>{primary.label}</Button>}
+          {primary && (
+            <Button variant="contained" size="large" endIcon={<NorthEast />} onClick={() => go(primary.to)} sx={websiteCtaSx}>
+              {primary.label}
+            </Button>
+          )}
           {secondary && (
             <Button variant="outlined" size="large" onClick={() => go(secondary.to)} sx={websiteOutlineCtaSx(isDark)}>
               {secondary.label}

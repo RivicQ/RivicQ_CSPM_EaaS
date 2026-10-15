@@ -1,0 +1,80 @@
+/* Harbor (dark) and Ledger (light). Keep hex values aligned with tokens.ts. */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --rq-bg: #101614;
+  --rq-sidebar: #0c1210;
+  --rq-surface: #1a2420;
+  --rq-raised: #24302b;
+  --rq-text: #f4f7f5;
+  --rq-muted: #c3cfc9;
+  --rq-faint: #8fa099;
+  --rq-line: #31403a;
+  --rq-accent: #d7b56a;
+  --rq-accent-2: #f0d59a;
+  --rq-btn-bg: #e4c27a;
+  --rq-btn-bg-hover: #f0d59a;
+  --rq-btn-fg: #1a1408;
+  --rq-nav-active: rgba(228, 194, 122, 0.18);
+  --rq-nav-hover: rgba(244, 247, 245, 0.06);
+  --rq-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  --rq-focus: #f0d59a;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --rq-bg: #f3efe6;
+  --rq-sidebar: #e7e1d4;
+  --rq-surface: #fffcf7;
+  --rq-raised: #efe8dc;
+  --rq-text: #1c1915;
+  --rq-muted: #5c564c;
+  --rq-faint: #7a7368;
+  --rq-line: #d5cbba;
+  --rq-accent: #8c5a2b;
+  --rq-accent-2: #1e3f36;
+  --rq-btn-bg: #1e3f36;
+  --rq-btn-bg-hover: #16332c;
+  --rq-btn-fg: #f6f1e6;
+  --rq-nav-active: rgba(30, 63, 54, 0.12);
+  --rq-nav-hover: rgba(28, 25, 21, 0.05);
+  --rq-shadow: 0 18px 40px rgba(28, 25, 21, 0.08);
+  --rq-focus: #1e3f36;
+}
+
+button.MuiButton-contained:not(.Mui-disabled),
+button.MuiButton-containedPrimary:not(.Mui-disabled),
+a.MuiButton-contained:not(.Mui-disabled),
+a.MuiButton-containedPrimary:not(.Mui-disabled) {
+  /* Background must not transition: the label color follows --rq-btn-fg in the
+     same frame, and a 150ms fill animation leaves cream text on brass. */
+  transition: none !important;
+  background-color: var(--rq-btn-bg) !important;
+  background-image: none !important;
+  color: var(--rq-btn-fg) !important;
+  -webkit-text-fill-color: var(--rq-btn-fg) !important;
+}
+
+button.MuiButton-contained:hover,
+button.MuiButton-containedPrimary:hover,
+a.MuiButton-contained:hover,
+a.MuiButton-containedPrimary:hover {
+  background-color: var(--rq-btn-bg-hover) !important;
+  color: var(--rq-btn-fg) !important;
+  -webkit-text-fill-color: var(--rq-btn-fg) !important;
+}
+
+.MuiButton-contained.Mui-disabled,
+.MuiButton-containedPrimary.Mui-disabled {
+  background-color: var(--rq-raised) !important;
+  color: var(--rq-faint) !important;
+  -webkit-text-fill-color: var(--rq-faint) !important;
+}
+
+.MuiButton-contained .MuiButton-startIcon,
+.MuiButton-contained .MuiButton-endIcon,
+.MuiButton-containedPrimary .MuiButton-startIcon,
+.MuiButton-containedPrimary .MuiButton-endIcon {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}

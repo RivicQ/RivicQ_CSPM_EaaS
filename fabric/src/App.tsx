@@ -14,6 +14,7 @@ import Automation from './pages/Automation';
 import Checkout from './pages/Checkout';
 import Admin from './pages/Admin';
 import LegalPage from './pages/LegalPage';
+import DocPage from './pages/DocPage';
 import Posture from './pages/Posture';
 import Cloud from './pages/Cloud';
 import Assets from './pages/Assets';
@@ -38,6 +39,7 @@ const App: React.FC = () => (
     <Route path="/discover" element={<Discover />} />
     <Route path="/onboard" element={<Onboard />} />
     <Route path="/legal" element={<LegalPage />} />
+    <Route path="/docs/:docId" element={<DocPage />} />
     <Route path="/app" element={<Shell />}>
       <Route index element={<Navigate to="command" replace />} />
       <Route path="command" element={<Command />} />

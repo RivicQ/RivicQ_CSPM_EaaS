@@ -1,19 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Mark from '../brand/Mark';
 import SecurityGraph from '../components/graph/SecurityGraph';
+import PublicBar from '../components/layout/PublicBar';
 
 const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
     <div className="landing">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <Mark size={36} />
-        <div>
-          <strong style={{ letterSpacing: '0.12em' }}>GRAPH</strong>
-          <div style={{ color: 'var(--muted)', fontSize: 13 }}>RivicQ Graph</div>
-        </div>
-      </div>
+      <PublicBar />
       <p style={{ color: 'var(--intel)', letterSpacing: '0.08em', fontSize: 12, textTransform: 'uppercase' }}>The operating system for enterprise security</p>
       <h1 className="hero-title">See every asset.<br />Understand every risk.<br />Secure what comes next.</h1>
       <p className="lede">

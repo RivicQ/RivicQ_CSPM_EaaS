@@ -665,9 +665,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
                         <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
                           By continuing you agree to the{' '}
-                          <a href={`${process.env.PUBLIC_URL || ''}/docs/LEGAL.md`} style={{ color: 'inherit' }}>legal terms</a>
+                          <a href={`${process.env.PUBLIC_URL || ''}/docs/read.html?doc=LEGAL.md`} style={{ color: 'inherit' }}>legal terms</a>
                           {' '}and{' '}
-                          <a href={`${process.env.PUBLIC_URL || ''}/docs/PRIVACY.md`} style={{ color: 'inherit' }}>privacy notice</a>.
+                          <a href={`${process.env.PUBLIC_URL || ''}/docs/read.html?doc=PRIVACY.md`} style={{ color: 'inherit' }}>privacy notice</a>.
                           Authentication is handled by {providerName}.
                         </Typography>
                         <TrademarkNotice compact sx={{ textAlign: 'center', mx: 'auto' }} />

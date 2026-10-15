@@ -17,9 +17,11 @@
     var buttons = document.querySelectorAll('.theme-toggle');
     for (var i = 0; i < buttons.length; i++) {
       var dark = mode === 'dark';
-      buttons[i].textContent = dark ? '\u2600' : '\u263D';
-      buttons[i].setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-      buttons[i].setAttribute('title', dark ? 'Switch to light theme' : 'Switch to dark theme');
+      var current = dark ? 'Harbor' : 'Ledger';
+      var next = dark ? 'Ledger' : 'Harbor';
+      buttons[i].textContent = current;
+      buttons[i].setAttribute('aria-label', 'Theme ' + current + '. Switch to ' + next);
+      buttons[i].setAttribute('title', 'Switch to ' + next);
     }
   }
 

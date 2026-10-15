@@ -12,7 +12,7 @@ const NebulaBackdrop: React.FC<{ height?: string | number }> = ({ height = '100%
       overflow: 'hidden',
       pointerEvents: 'none',
       background:
-        'radial-gradient(ellipse 55% 48% at 50% 42%, rgba(124,58,237,0.42), transparent 68%), #000',
+        'radial-gradient(ellipse 55% 48% at 50% 42%, rgba(228,194,122,0.22), transparent 68%), #101614',
       '&::before': {
         content: '""',
         position: 'absolute',

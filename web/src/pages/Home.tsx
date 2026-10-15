@@ -15,6 +15,9 @@ import HomeScanReport, { HomeScanReportData } from '../components/home/HomeScanR
 import PublicEngineNotice from '../components/brand/PublicEngineNotice';
 import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
+import { websiteCtaSx } from '../theme/websiteChrome';
+import ThemeToggle from '../theme/ThemeToggle';
+import { useThemeMode } from '../theme/ThemeContext';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
@@ -52,6 +55,7 @@ const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', '
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const isDark = useTheme().palette.mode === 'dark';
+  const { mode, toggleMode } = useThemeMode();
   const { isAuthenticated, backendReachable, demoLogin, isDemo } = useAuth();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
@@ -313,7 +317,8 @@ const Home: React.FC = () => {
                 </Button>
               ))}
             </Stack>
-            <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={{ borderRadius: 999, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}>
+            <ThemeToggle mode={mode} onToggle={toggleMode} compact />
+            <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={websiteCtaSx}>
               Request demo
             </Button>
           </Stack>
@@ -353,7 +358,7 @@ const Home: React.FC = () => {
               size="large"
               endIcon={<NorthEast />}
               onClick={() => scrollToId('scan')}
-              sx={{ px: 3, py: 1.2, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
+              sx={{ ...websiteCtaSx, px: 3, py: 1.2 }}
             >
               Start security assessment
             </Button>
@@ -365,7 +370,14 @@ const Home: React.FC = () => {
                 await demoLogin('community');
                 navigate('/scanner');
               }}
-              sx={{ px: 3, py: 1.2, color: '#fff', borderColor: 'rgba(255,255,255,0.55)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.06)' } }}
+              sx={{
+                px: 3,
+                py: 1.2,
+                color: '#F4F7F5',
+                WebkitTextFillColor: '#F4F7F5',
+                borderColor: 'rgba(244,247,245,0.55)',
+                '&:hover': { borderColor: '#F4F7F5', bgcolor: 'rgba(244,247,245,0.06)' },
+              }}
             >
               Try the live demo
             </Button>

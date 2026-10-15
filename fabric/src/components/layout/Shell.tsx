@@ -4,6 +4,7 @@ import Mark from '../../brand/Mark';
 import { DEMO_NOTICE } from '../../data/catalog';
 import { useSession } from '../../state/session';
 import CommandPalette from '../ui/CommandPalette';
+import { ThemeToggle } from './PublicBar';
 
 const groups: { title: string; items: [string, string][] }[] = [
   {
@@ -73,21 +74,6 @@ const Shell: React.FC = () => {
   const { mode, setMode, role, tenant, setTenant, tenants } = useSession();
   const [palette, setPalette] = useState(false);
   const [mobile, setMobile] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const current = document.documentElement.getAttribute('data-theme');
-    return current === 'light' ? 'light' : 'dark';
-  });
-
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    try {
-      localStorage.setItem('rivicq.theme', next);
-    } catch {
-      /* storage blocked */
-    }
-    setTheme(next);
-  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -157,15 +143,7 @@ const Shell: React.FC = () => {
             </label>
             <button type="button" className="btn" onClick={() => setPalette(true)}>Command (⌘K)</button>
             <button type="button" className="btn" onClick={() => nav('/app/graph')}>Security graph</button>
-            <button
-              type="button"
-              className="btn"
-              onClick={toggleTheme}
-              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-              title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            >
-              {theme === 'dark' ? '☀' : '☾'}
-            </button>
+            <ThemeToggle />
             <button type="button" className="btn" onClick={() => nav('/legal')}>Legal</button>
           </div>
         </header>

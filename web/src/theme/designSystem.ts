@@ -17,19 +17,19 @@ export const designSystem = {
     metric: appTypography.metric.fontFamily,
   },
   gradient: {
-    brand: 'linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%)',
-    brandPlayful: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 45%, #6d28d9 100%)',
-    brandSoft: 'radial-gradient(ellipse 70% 55% at 50% 42%, rgba(124,58,237,0.42), transparent 68%)',
-    heroLight: '#f8fafc',
-    heroDark: '#000000',
-    sidebar: '#000000',
-    sidebarDark: '#000000',
-    meshLight: '#f8fafc',
-    meshDark: '#000000',
+    brand: 'linear-gradient(180deg, #E4C27A 0%, #C6A15B 100%)',
+    brandPlayful: 'linear-gradient(135deg, #F0D59A 0%, #E4C27A 45%, #1E3F36 100%)',
+    brandSoft: 'radial-gradient(ellipse 70% 55% at 50% 42%, rgba(228,194,122,0.32), transparent 68%)',
+    heroLight: 'var(--rq-bg, #F3EFE6)',
+    heroDark: 'var(--rq-bg, #101614)',
+    sidebar: 'var(--rq-sidebar, #0C1210)',
+    sidebarDark: 'var(--rq-sidebar, #0C1210)',
+    meshLight: 'var(--rq-bg, #F3EFE6)',
+    meshDark: 'var(--rq-bg, #101614)',
   },
   horizon: {
-    wash: 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.38), transparent 70%)',
-    band: '#7c3aed',
+    wash: 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(228,194,122,0.28), transparent 70%)',
+    band: 'var(--rq-accent, #D7B56A)',
   },
   shadow: {
     sm: '0 1px 2px rgba(2,6,23,0.06), 0 1px 3px rgba(2,6,23,0.05)',
@@ -41,25 +41,25 @@ export const designSystem = {
     spring: '0.15s ease',
     smooth: '0.15s ease',
   },
-  /** Deep-space console — black canvas, violet accent, semantic status only */
+  /** Console chrome. Values are CSS variables so the Harbor/Ledger toggle restyles the shell. */
   proBlue: {
-    navy: '#000000',
-    navyMid: '#0a0a0f',
-    navyLight: '#12121a',
-    royal: '#7c3aed',
-    accent: '#7c3aed',
-    accentLight: '#a78bfa',
-    accentMuted: '#d1d5db',
-    sidebar: '#000000',
-    commandCenter: '#0a0a0f',
-    commandGlow: '0 0 48px rgba(124,58,237,0.22)',
-    border: '#1f1f2e',
-    textPrimary: '#ffffff',
-    textSecondary: '#d1d5db',
-    textMuted: '#9ca3af',
-    navActive: 'rgba(124,58,237,0.22)',
-    navHover: 'rgba(255,255,255,0.05)',
-    shadow: '0 18px 48px rgba(0,0,0,0.45)',
+    navy: 'var(--rq-bg)',
+    navyMid: 'var(--rq-surface)',
+    navyLight: 'var(--rq-raised)',
+    royal: 'var(--rq-accent)',
+    accent: 'var(--rq-accent)',
+    accentLight: 'var(--rq-accent-2)',
+    accentMuted: 'var(--rq-muted)',
+    sidebar: 'var(--rq-sidebar)',
+    commandCenter: 'var(--rq-surface)',
+    commandGlow: 'none',
+    border: 'var(--rq-line)',
+    textPrimary: 'var(--rq-text)',
+    textSecondary: 'var(--rq-muted)',
+    textMuted: 'var(--rq-faint)',
+    navActive: 'var(--rq-nav-active)',
+    navHover: 'var(--rq-nav-hover)',
+    shadow: 'var(--rq-shadow)',
   },
 } as const;
 
@@ -68,13 +68,12 @@ export const meshBackground = (theme: Theme) => ({
   backgroundColor: theme.palette.background.default,
 });
 
-export const glassSurface = (theme: Theme, elevated = false) => ({
-  background: theme.palette.mode === 'dark'
-    ? elevated ? theme.palette.background.paper : '#0a0a0f'
-    : elevated ? '#ffffff' : '#f8fafc',
+export const glassSurface = (_theme: Theme, elevated = false) => ({
+  background: elevated ? 'var(--rq-surface)' : 'var(--rq-bg)',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  border: `1px solid ${theme.palette.divider}`,
+  border: '1px solid var(--rq-line)',
+  color: 'var(--rq-text)',
 });
 
 export const gradientTextSx = {
@@ -100,9 +99,9 @@ export const panelTitleSx = {
 };
 
 export const sidebarPaperSx = {
-  background: designSystem.gradient.sidebar,
-  borderRight: `1px solid ${designSystem.proBlue.border}`,
-  color: designSystem.proBlue.textPrimary,
+  background: 'var(--rq-sidebar)',
+  borderRight: '1px solid var(--rq-line)',
+  color: 'var(--rq-text)',
   overflow: 'hidden',
   height: '100vh',
 };
@@ -112,15 +111,15 @@ export const sidebarScrollSx = {
   overflowY: 'auto',
   overflowX: 'hidden',
   scrollbarWidth: 'thin',
-  scrollbarColor: '#1f1f2e transparent',
+  scrollbarColor: 'var(--rq-line) transparent',
   '&::-webkit-scrollbar': { width: 4 },
   '&::-webkit-scrollbar-track': { background: 'transparent' },
   '&::-webkit-scrollbar-thumb': {
-    background: '#1f1f2e',
+    background: 'var(--rq-line)',
     borderRadius: 99,
   },
   '&::-webkit-scrollbar-thumb:hover': {
-    background: '#2e1065',
+    background: 'var(--rq-accent)',
   },
 };
 
@@ -161,11 +160,11 @@ export const sidebarNavItemButtonSx = (active: boolean, disabled: boolean) => ({
 export const commandCenterCardSx = {
   position: 'relative' as const,
   overflow: 'hidden' as const,
-  background: '#0a0a0f',
+  background: 'var(--rq-surface)',
   backgroundImage: 'none',
-  border: `1px solid ${designSystem.proBlue.border}`,
+  border: '1px solid var(--rq-line)',
   boxShadow: 'none',
-  color: designSystem.proBlue.textPrimary,
+  color: 'var(--rq-text)',
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -188,7 +187,7 @@ export const commandCenterTitleSx = {
   color: designSystem.proBlue.textPrimary,
 };
 
-/** Primary CTA on navy hero — solid white pill (overrides global containedPrimary) */
+/** Primary CTA. Brass on Harbor, pine on Ledger. Label color is never the background. */
 export const heroPrimaryCtaSx = {
   px: 3,
   py: 1.15,
@@ -198,15 +197,21 @@ export const heroPrimaryCtaSx = {
   fontSize: '0.875rem',
   letterSpacing: '-0.01em',
   textTransform: 'none',
-  color: `#ffffff !important`,
+  color: 'var(--rq-btn-fg) !important',
+  WebkitTextFillColor: 'var(--rq-btn-fg)',
   border: 'none',
   boxShadow: 'none',
   backgroundImage: 'none !important',
-  backgroundColor: '#7c3aed !important',
-  '& .MuiButton-endIcon, & .MuiButton-startIcon': { color: 'inherit' },
+  backgroundColor: 'var(--rq-btn-bg) !important',
+  '& .MuiButton-endIcon, & .MuiButton-startIcon': {
+    color: 'inherit',
+    WebkitTextFillColor: 'inherit',
+  },
   '&:hover': {
-    backgroundColor: '#6d28d9 !important',
+    backgroundColor: 'var(--rq-btn-bg-hover) !important',
     backgroundImage: 'none !important',
+    color: 'var(--rq-btn-fg) !important',
+    WebkitTextFillColor: 'var(--rq-btn-fg)',
     boxShadow: 'none',
     transform: 'none',
   },
@@ -237,27 +242,31 @@ export const heroSecondaryCtaSx = {
   },
 };
 
-/** Primary CTA — matches command-center / auth hero navy gradient */
+/** Primary CTA — Harbor brass or Ledger pine, with a contrasting label. */
 export const proBlueContainedButtonSx = {
-  backgroundColor: tokens.colors.rivicq[500],
+  backgroundColor: 'var(--rq-btn-bg) !important',
   backgroundImage: 'none',
-  color: '#ffffff !important',
+  color: 'var(--rq-btn-fg) !important',
+  WebkitTextFillColor: 'var(--rq-btn-fg)',
   border: '1px solid transparent',
   boxShadow: 'none',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': {
     color: 'inherit',
+    WebkitTextFillColor: 'inherit',
   },
   '&:hover': {
-    backgroundColor: tokens.colors.rivicq[700],
+    backgroundColor: 'var(--rq-btn-bg-hover) !important',
     backgroundImage: 'none',
-    color: '#ffffff !important',
+    color: 'var(--rq-btn-fg) !important',
+    WebkitTextFillColor: 'var(--rq-btn-fg)',
     boxShadow: 'none',
     transform: 'none',
   },
   '&.Mui-disabled': {
-    backgroundColor: `${tokens.colors.rivicq[800]} !important`,
+    backgroundColor: 'var(--rq-raised) !important',
     backgroundImage: 'none !important',
-    color: '#9ca3af !important',
+    color: 'var(--rq-faint) !important',
+    WebkitTextFillColor: 'var(--rq-faint)',
     borderColor: 'transparent',
     boxShadow: 'none',
   },
@@ -266,12 +275,13 @@ export const proBlueContainedButtonSx = {
 /** Button/icon overrides for actions placed on pro-blue surfaces */
 export const proBlueActionStackSx = {
   '& .MuiButton-contained, & .MuiButton-containedPrimary': {
-    bgcolor: '#7c3aed',
-    color: '#ffffff',
+    bgcolor: 'var(--rq-btn-bg)',
+    color: 'var(--rq-btn-fg)',
+    WebkitTextFillColor: 'var(--rq-btn-fg)',
     fontWeight: 600,
     boxShadow: 'none',
     borderRadius: 999,
-    '&:hover': { bgcolor: '#6d28d9', boxShadow: 'none' },
+    '&:hover': { bgcolor: 'var(--rq-btn-bg-hover)', boxShadow: 'none' },
   },
   '& .MuiButton-outlined': {
     color: designSystem.proBlue.textPrimary,
@@ -299,17 +309,17 @@ export const proBlueBadgeSx = {
 };
 
 /** Top app bar — aligns with pro-blue sidebar & command center */
-export const appBarPaperSx = (mode: 'light' | 'dark') => ({
-  bgcolor: mode === 'dark' ? '#000000' : '#ffffff',
+export const appBarPaperSx = (_mode: 'light' | 'dark') => ({
+  bgcolor: 'var(--rq-bg)',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  color: mode === 'dark' ? designSystem.proBlue.textPrimary : '#0a0a0f',
-  borderBottom: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
+  color: 'var(--rq-text)',
+  borderBottom: '1px solid var(--rq-line)',
   boxShadow: 'none',
   backgroundImage: 'none',
 });
 
-export const appBarSearchSx = (mode: 'light' | 'dark') => ({
+export const appBarSearchSx = (_mode: 'light' | 'dark') => ({
   display: { xs: 'none', lg: 'flex' },
   alignItems: 'center',
   flexWrap: 'nowrap',
@@ -323,65 +333,53 @@ export const appBarSearchSx = (mode: 'light' | 'dark') => ({
   minWidth: 220,
   width: { lg: 240, xl: 280 },
   whiteSpace: 'nowrap',
-  bgcolor: mode === 'dark' ? '#0a0a0f' : '#f1f5f9',
-  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
+  bgcolor: 'var(--rq-surface)',
+  border: '1px solid var(--rq-line)',
   transition: designSystem.motion.smooth,
   '&:focus-within': {
-    bgcolor: mode === 'dark' ? '#0a0a0f' : '#ffffff',
-    borderColor: '#7c3aed',
+    bgcolor: 'var(--rq-surface)',
+    borderColor: 'var(--rq-accent)',
     boxShadow: 'none',
   },
 });
 
-export const appBarIconButtonSx = (mode: 'light' | 'dark') => ({
+export const appBarIconButtonSx = (_mode: 'light' | 'dark') => ({
   borderRadius: `${designSystem.radius.sm}px`,
-  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
-  bgcolor: mode === 'dark' ? '#0a0a0f' : '#ffffff',
-  color: mode === 'dark' ? designSystem.proBlue.textSecondary : '#0a0a0f',
+  border: '1px solid var(--rq-line)',
+  bgcolor: 'var(--rq-surface)',
+  color: 'var(--rq-text)',
   width: 36,
   height: 36,
   '&:hover': {
-    bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(124,58,237,0.08)',
-    borderColor: mode === 'dark' ? designSystem.proBlue.accentMuted : designSystem.proBlue.accent,
+    bgcolor: 'var(--rq-nav-hover)',
+    borderColor: 'var(--rq-accent)',
   },
 });
 
-export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolean) => ({
+export const appBarEditionChipSx = (_mode: 'light' | 'dark', isEnterprise: boolean) => ({
   fontWeight: 600,
   fontSize: '0.6875rem',
   letterSpacing: '0.02em',
   height: 26,
   display: { xs: 'none', sm: 'inline-flex' },
-  bgcolor: isEnterprise
-    ? mode === 'dark'
-      ? 'rgba(124,58,237,0.2)'
-      : 'rgba(109,40,217,0.1)'
-    : mode === 'dark'
-      ? '#0a0a0f'
-      : '#f1f5f9',
-  color: isEnterprise
-    ? mode === 'dark'
-      ? '#ffffff'
-      : '#5b21b6'
-    : mode === 'dark'
-      ? designSystem.proBlue.accentMuted
-      : '#4b5563',
-  border: `1px solid ${mode === 'dark' ? '#1f1f2e' : '#e5e7eb'}`,
+  bgcolor: isEnterprise ? 'var(--rq-nav-active)' : 'var(--rq-surface)',
+  color: 'var(--rq-text)',
+  border: '1px solid var(--rq-line)',
 });
 
-export const appBarPageTitleSx = (mode: 'light' | 'dark') => ({
+export const appBarPageTitleSx = (_mode: 'light' | 'dark') => ({
   fontFamily: designSystem.font.display,
   fontWeight: 600,
   fontSize: '0.9375rem',
   letterSpacing: '-0.02em',
   lineHeight: 1.2,
-  color: mode === 'dark' ? designSystem.proBlue.textPrimary : designSystem.proBlue.navyMid,
+  color: 'var(--rq-text)',
 });
 
-export const appBarPageEyebrowSx = (mode: 'light' | 'dark') => ({
+export const appBarPageEyebrowSx = (_mode: 'light' | 'dark') => ({
   ...appTypography.eyebrow,
   fontSize: '0.625rem',
-  color: mode === 'dark' ? designSystem.proBlue.accentMuted : designSystem.proBlue.accent,
+  color: 'var(--rq-accent)',
   lineHeight: 1,
   mb: 0.25,
 });

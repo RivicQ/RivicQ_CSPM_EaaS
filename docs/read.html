@@ -13,7 +13,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="assets/horizon-docs.css?v=20260911c" />
+    <link rel="stylesheet" href="assets/horizon-docs.css?v=20261015b" />
     <script>
       (function () {
         try {
@@ -114,6 +114,12 @@
           })
           .then(function (md) {
             body.innerHTML = window.marked.parse(md, { gfm: true, breaks: false });
+            body.querySelectorAll("table").forEach(function (table) {
+              var wrap = document.createElement("div");
+              wrap.className = "table-scroll";
+              table.parentNode.insertBefore(wrap, table);
+              wrap.appendChild(table);
+            });
             body.querySelectorAll("a[href$='.md']").forEach(function (a) {
               var href = a.getAttribute("href") || "";
               var name = href.replace(/^\.\.\//, "").split("/").pop();

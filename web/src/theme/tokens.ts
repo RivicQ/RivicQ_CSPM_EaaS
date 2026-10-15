@@ -1,21 +1,22 @@
 /**
- * RivicQ Security Cloud — deep-space nebula tokens (black canvas, violet accent).
- * Design rule: `crypto` severity is the ONLY place hue carries meaning.
- * Brand = violet ramp; everything else is neutral surface/ink.
+ * RivicQ enterprise palettes.
+ * Harbor (dark) is pine ink with a brass signal. Ledger (light) is warm paper
+ * with pine buttons. Crypto severity stays the only status hue.
+ * CSS variables in enterprise.css mirror these values.
  */
 export const tokens = {
   colors: {
     rivicq: {
-      50: '#f5f3ff',
-      100: '#ede9fe',
-      200: '#ddd6fe',
-      300: '#c4b5fd',
-      400: '#a78bfa',
-      500: '#7c3aed',
-      600: '#6d28d9',
-      700: '#5b21b6',
-      800: '#4c1d95',
-      900: '#2e1065',
+      50: '#F8F1DE',
+      100: '#F0E2C0',
+      200: '#E4C27A',
+      300: '#D7B56A',
+      400: '#C6A15B',
+      500: '#8C5A2B',
+      600: '#1E3F36',
+      700: '#16332C',
+      800: '#102822',
+      900: '#0C1210',
     },
     crypto: {
       critical: '#ef4444',
@@ -27,14 +28,14 @@ export const tokens = {
       classic: '#9ca3af',
       success: '#22c55e',
     },
-    navy: { 0: '#000000', 1: '#0a0a0f', 2: '#12121a', 3: '#1f1f2e' },
-    surface: { 0: '#f8fafc', 1: '#ffffff', 2: '#f1f5f9', 3: '#e5e7eb' },
-    surfaceLight: { 0: '#000000', 1: '#0a0a0f', 2: '#12121a', 3: '#1f1f2e' },
-    text: { primary: '#0a0a0f', secondary: '#4b5563', muted: '#9ca3af' },
-    textLight: { primary: '#ffffff', secondary: '#d1d5db', muted: '#9ca3af' },
-    border: '#e5e7eb',
-    borderLight: '#1f1f2e',
-    brandGradient: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(124,58,237,0.35), transparent 70%)',
+    navy: { 0: '#0C1210', 1: '#101614', 2: '#1A2420', 3: '#31403A' },
+    surface: { 0: '#F3EFE6', 1: '#FFFCF7', 2: '#EFE8DC', 3: '#D5CBBA' },
+    surfaceLight: { 0: '#101614', 1: '#1A2420', 2: '#24302B', 3: '#31403A' },
+    text: { primary: '#1C1915', secondary: '#5C564C', muted: '#7A7368' },
+    textLight: { primary: '#F4F7F5', secondary: '#C3CFC9', muted: '#8FA099' },
+    border: '#D5CBBA',
+    borderLight: '#31403A',
+    brandGradient: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(228,194,122,0.28), transparent 70%)',
   },
   spacing: (n: number) => `${n * 8}px`,
   typography: {

@@ -1,16 +1,19 @@
 /* RivicQ Security Cloud docs — deep-space nebula. Same chrome as the console. Not IBM Plex. */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --ink: #000000;
-  --surface: #0a0a0f;
-  --raised: #12121a;
-  --accent: #7c3aed;
-  --accent-deep: #6d28d9;
-  --ivory: #ffffff;
-  --muted: #d1d5db;
-  --faint: #9ca3af;
-  --line: #1f1f2e;
+:root,
+[data-theme="dark"] {
+  --ink: #101614;
+  --surface: #1a2420;
+  --raised: #24302b;
+  --accent: #d7b56a;
+  --accent-deep: #c6a15b;
+  --ivory: #f4f7f5;
+  --muted: #c3cfc9;
+  --faint: #8fa099;
+  --line: #31403a;
+  --btn-bg: #e4c27a;
+  --btn-fg: #1a1408;
   --ok: #22c55e;
   --warn: #f97316;
   --radius: 12px;
@@ -22,8 +25,8 @@ html { scroll-behavior: smooth; }
 body {
   font-family: var(--font);
   background:
-    radial-gradient(ellipse 55% 48% at 50% 18%, rgba(124,58,237,0.28), transparent 68%),
-    #000;
+    radial-gradient(ellipse 55% 48% at 50% 18%, rgba(215,181,106,0.18), transparent 68%),
+    #101614;
   color: var(--ivory);
   min-height: 100vh;
   position: relative;
@@ -66,7 +69,7 @@ body::before {
   font-weight: 650;
   text-decoration: none;
 }
-.skip:focus { top: 0.75rem; }
+.skip:focus { top: 0.75rem; color: var(--btn-fg); background: var(--btn-bg); }
 code {
   font-family: var(--mono);
   font-size: 0.88em;
@@ -91,8 +94,8 @@ code {
 .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 650; font-size: 1.1rem; color: var(--ivory); text-decoration: none; }
 .logo-mark { width: 28px; height: 28px; border-radius: 6px; display: block; flex-shrink: 0; }
 .logo-badge {
-  background: var(--accent);
-  color: #ffffff;
+  background: var(--btn-bg, var(--accent));
+  color: var(--btn-fg, #1a1408);
   font-size: 0.68rem;
   font-weight: 700;
   padding: 0.15rem 0.5rem;
@@ -151,8 +154,8 @@ code {
   text-decoration: none;
   border: 1px solid transparent;
 }
-.btn-primary { background: var(--accent); color: #ffffff; }
-.btn-primary:hover { background: var(--accent-deep); }
+.btn-primary { background: var(--btn-bg); color: var(--btn-fg); -webkit-text-fill-color: var(--btn-fg); }
+.btn-primary:hover { background: var(--accent-deep); color: var(--btn-fg); }
 .btn-outline { background: transparent; border-color: var(--line); color: var(--ivory); }
 .btn-outline:hover { border-color: var(--accent); }
 .btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ivory); }
@@ -336,8 +339,13 @@ section { padding: 0 0 3.5rem; }
   color: var(--faint);
   font-size: 0.825rem;
 }
-.md-wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 0 3rem; }
-.md-body { color: var(--ivory); line-height: 1.65; }
+.md-wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 0 3rem; min-width: 0; }
+.md-body { color: var(--ivory); line-height: 1.65; overflow-wrap: anywhere; max-width: 100%; }
+.md-body h1, .md-body h2, .md-body h3, .md-body p, .md-body li, .md-body td, .md-body th {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
 .md-body h1, .md-body h2, .md-body h3 { letter-spacing: -0.02em; margin: 1.6rem 0 0.6rem; }
 .md-body h1 { font-size: 2rem; }
 .md-body h2 { font-size: 1.35rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
@@ -346,7 +354,8 @@ section { padding: 0 0 3.5rem; }
 .md-body code { font-family: var(--mono); font-size: 0.86em; color: var(--accent); }
 .md-body pre { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem; overflow: auto; margin: 1rem 0; }
 .md-body pre code { color: var(--ivory); }
-.md-body table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.4rem; font-size: 0.9rem; }
+.table-scroll { overflow-x: auto; max-width: 100%; margin: 1rem 0 1.4rem; border: 1px solid var(--line); border-radius: var(--radius); }
+.md-body table { width: 100%; min-width: 640px; border-collapse: collapse; margin: 0; font-size: 0.9rem; }
 .md-body th, .md-body td { border: 1px solid var(--line); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
 .md-body th { background: var(--raised); color: var(--faint); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; }
 .md-body blockquote { border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--muted); margin: 1rem 0; }
@@ -384,18 +393,22 @@ section { padding: 0 0 3.5rem; }
    on white while keeping the RivicQ violet accent. Init + toggle live in
    assets/theme.js so the choice persists and follows the OS by default. */
 [data-theme="light"] {
-  --ink: #ffffff;
-  --surface: #ffffff;
-  --raised: #f1f5f9;
-  --ivory: #0a0a0f;
-  --muted: #4b5563;
-  --faint: #6b7280;
-  --line: #e5e7eb;
+  --ink: #f3efe6;
+  --surface: #fffcf7;
+  --raised: #efe8dc;
+  --ivory: #1c1915;
+  --muted: #5c564c;
+  --faint: #7a7368;
+  --line: #d5cbba;
+  --accent: #8c5a2b;
+  --accent-deep: #6e4520;
+  --btn-bg: #1e3f36;
+  --btn-fg: #f6f1e6;
 }
 [data-theme="light"] body {
   background:
-    radial-gradient(ellipse 55% 48% at 50% 12%, rgba(124,58,237,0.12), transparent 68%),
-    #f8fafc;
+    radial-gradient(ellipse 55% 48% at 50% 12%, rgba(30,63,54,0.08), transparent 68%),
+    #f3efe6;
 }
 /* Sparse starfield is only legible on the dark canvas. */
 [data-theme="light"] body::before { display: none; }
@@ -410,15 +423,17 @@ section { padding: 0 0 3.5rem; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
+  min-width: 5.5rem;
+  height: 32px;
+  padding: 0 0.85rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
-  color: var(--muted);
+  color: var(--ivory);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 650;
   line-height: 1;
+  font-family: var(--font);
 }
 .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }

@@ -6,6 +6,7 @@ import { CssBaseline, GlobalStyles } from '@mui/material';
 import { MotionConfig } from 'framer-motion';
 import designSystem from './theme/designSystem';
 import { getAppTheme } from './theme/theme';
+import './theme/enterprise.css';
 
 import Layout from './layouts/Layout';
 import { ThemeModeProvider } from './theme/ThemeContext';
@@ -96,6 +97,8 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 
 const App: React.FC = () => {
   const [mode, setMode] = React.useState<'light' | 'dark'>(() => {
+    const attr = document.documentElement.getAttribute('data-theme');
+    if (attr === 'dark' || attr === 'light') return attr;
     try {
       const stored = localStorage.getItem('rivicq.theme');
       if (stored === 'dark' || stored === 'light') return stored;
@@ -106,9 +109,16 @@ const App: React.FC = () => {
   });
   const theme = React.useMemo(() => getAppTheme(mode), [mode]);
 
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', mode);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', mode === 'dark' ? '#101614' : '#F3EFE6');
+  }, [mode]);
+
   const toggleMode = React.useCallback(() => {
     setMode((m) => {
       const next = m === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
       try {
         localStorage.setItem('rivicq.theme', next);
       } catch {
@@ -140,7 +150,7 @@ const App: React.FC = () => {
               styles={(theme) => ({
                 '*': { boxSizing: 'border-box' },
                 '::selection': {
-                  background: theme.palette.mode === 'dark' ? 'rgba(124,58,237,0.45)' : 'rgba(109,40,217,0.22)',
+                  background: theme.palette.mode === 'dark' ? 'rgba(228,194,122,0.45)' : 'rgba(30,63,54,0.22)',
                   color: theme.palette.text.primary,
                 },
                 ':focus-visible': {

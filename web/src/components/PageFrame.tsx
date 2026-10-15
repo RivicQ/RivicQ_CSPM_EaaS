@@ -51,7 +51,7 @@ const PageFrame: React.FC<PageFrameProps> = ({
             bgcolor: 'background.paper',
           }),
           borderRadius: `${designSystem.radius.xl}px`,
-          bgcolor: creative ? '#0a0a0f' : 'background.paper',
+          ...(creative ? {} : { bgcolor: 'background.paper' }),
           backgroundImage: 'none',
           boxShadow: 'none',
         }}
@@ -127,8 +127,9 @@ const PageFrame: React.FC<PageFrameProps> = ({
               px: 1.75,
               py: 1.5,
               borderRadius: 2,
-              bgcolor: '#000000',
-              border: '1px solid #1f1f2e',
+              bgcolor: '#101614',
+              color: '#f4f7f5',
+              border: '1px solid #31403a',
               backgroundImage: 'none',
               minHeight: 120,
             }}

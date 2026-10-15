@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
+import { Button, Tooltip } from '@mui/material';
 import { DarkMode, LightMode } from '@mui/icons-material';
 
 type Props = {
@@ -9,44 +9,30 @@ type Props = {
 };
 
 const ThemeToggle: React.FC<Props> = ({ mode, onToggle, compact = false }) => {
+  const current = mode === 'dark' ? 'Harbor' : 'Ledger';
+  const next = mode === 'dark' ? 'Ledger' : 'Harbor';
   return (
-    <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
-      <IconButton
+    <Tooltip title={`Switch to ${next}`}>
+      <Button
         onClick={onToggle}
-        size={compact ? 'small' : 'large'}
-        sx={
-          compact
-            ? {
-                borderRadius: `${8}px`,
-                border: (theme) =>
-                  `1px solid ${
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(124,58,237,0.28)'
-                      : 'rgba(124,58,237,0.16)'
-                  }`,
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.06)'
-                    : 'rgba(255,255,255,0.85)',
-                color: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(226,232,240,0.82)' : '#0a0a0f',
-                width: 36,
-                height: 36,
-                '&:hover': {
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(255,255,255,0.12)'
-                      : 'rgba(124,58,237,0.08)',
-                },
-              }
-            : {
-                border: (theme) => `1px solid ${theme.palette.divider}`,
-                bgcolor: 'background.paper',
-              }
-        }
+        size="small"
+        aria-label={`Theme ${current}. Switch to ${next}`}
+        startIcon={mode === 'light' ? <DarkMode sx={{ fontSize: 16 }} /> : <LightMode sx={{ fontSize: 16 }} />}
+        sx={{
+          borderRadius: 999,
+          border: '1px solid var(--rq-line)',
+          bgcolor: 'var(--rq-surface)',
+          color: 'var(--rq-text)',
+          WebkitTextFillColor: 'var(--rq-text)',
+          minHeight: compact ? 36 : 40,
+          px: compact ? 1.25 : 1.5,
+          fontWeight: 650,
+          letterSpacing: '0.01em',
+          '&:hover': { bgcolor: 'var(--rq-nav-hover)', borderColor: 'var(--rq-accent)' },
+        }}
       >
-        {mode === 'light' ? <DarkMode sx={{ fontSize: 18 }} /> : <LightMode sx={{ fontSize: 18 }} />}
-      </IconButton>
+        {current}
+      </Button>
     </Tooltip>
   );
 };

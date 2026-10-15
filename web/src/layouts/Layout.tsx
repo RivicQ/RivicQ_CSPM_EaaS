@@ -765,7 +765,7 @@ const Layout: React.FC = () => {
                 p: 0.25,
                 ml: 0.25,
                 '&:hover .MuiAvatar-root': {
-                  boxShadow: `0 0 0 2px ${blue.accent}55`,
+                  boxShadow: '0 0 0 2px var(--rq-focus)',
                 },
               }}
             >
