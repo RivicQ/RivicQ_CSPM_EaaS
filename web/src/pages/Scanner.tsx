@@ -165,20 +165,20 @@ const Scanner: React.FC = () => {
 
   useEffect(() => () => { if (pollTimerRef.current) window.clearInterval(pollTimerRef.current); }, []);
 
-  const clearPolling = () => {
+  const clearPolling = useCallback(() => {
     if (pollTimerRef.current) { window.clearInterval(pollTimerRef.current); pollTimerRef.current = null; }
-  };
+  }, []);
 
-  const updateJob = (jobId: string, updater: (job: ScanJob) => ScanJob) => {
+  const updateJob = useCallback((jobId: string, updater: (job: ScanJob) => ScanJob) => {
     setScanJobs((prev) => prev.map((job) => (job.id === jobId ? updater(job) : job)));
-  };
+  }, []);
 
   const refreshScanData = useCallback(() => {
     refetchScans();
     refetchFindings();
   }, [refetchScans, refetchFindings]);
 
-  const pollScanStatus = (jobId: string, scanId: string) => {
+  const pollScanStatus = useCallback((jobId: string, scanId: string) => {
     clearPolling();
     pollAttemptsRef.current = 0;
     pollTimerRef.current = window.setInterval(async () => {
@@ -238,7 +238,7 @@ const Scanner: React.FC = () => {
         }
       }
     }, POLL_INTERVAL_MS);
-  };
+  }, [clearPolling, refreshScanData, updateJob]);
 
   const startScan = useCallback(async (overrideTarget?: string) => {
     const target = (typeof overrideTarget === 'string' ? overrideTarget : scanTarget).trim();
@@ -274,7 +274,7 @@ const Scanner: React.FC = () => {
       );
       setScanJobs((prev) => prev.filter((j) => j.id !== newJob.id));
     }
-  }, [isDemo, paid, scanTarget, scanType, targetClass]);
+  }, [clearPolling, isDemo, paid, pollScanStatus, scanTarget, scanType, targetClass, updateJob]);
 
   useEffect(() => {
     if (autostartRef.current) return;
