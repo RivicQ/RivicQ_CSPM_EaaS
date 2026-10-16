@@ -7,6 +7,7 @@ const OpsBreadcrumbs: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const crumbs = breadcrumbFor(location.pathname);
+  if (crumbs.length <= 2) return null;
   return (
     <Breadcrumbs aria-label="Breadcrumb" sx={{ mb: 0.75, '& .MuiBreadcrumbs-separator': { mx: 0.5 } }}>
       {crumbs.map((c, i) => {

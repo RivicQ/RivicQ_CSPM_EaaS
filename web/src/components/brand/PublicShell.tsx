@@ -6,6 +6,8 @@ import BrandLogo from '../BrandLogo';
 import NebulaBackdrop from './NebulaBackdrop';
 import TrademarkNotice from '../TrademarkNotice';
 import { websiteCtaSx } from '../../theme/websiteChrome';
+import ThemeToggle from '../../theme/ThemeToggle';
+import { useThemeMode } from '../../theme/ThemeContext';
 
 type NavItem = {
   id: string;
@@ -38,6 +40,7 @@ const NAV: NavItem[] = [
 
 const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = ({ children, nebula = true }) => {
   const navigate = useNavigate();
+  const { mode } = useThemeMode();
   const [menu, setMenu] = React.useState<{ id: string; el: HTMLElement } | null>(null);
   const [mobileMenu, setMobileMenu] = React.useState<HTMLElement | null>(null);
 
@@ -69,7 +72,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: '#000000',
+          bgcolor: 'background.default',
           backdropFilter: 'none',
           borderBottom: '1px solid',
           borderColor: 'divider',
@@ -93,7 +96,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
                 '&:focus-visible': { outline: '2px solid #7c3aed', outlineOffset: 2 },
               }}
             >
-              <BrandLogo dark />
+              <BrandLogo dark={mode === 'dark'} />
             </Box>
             <Stack direction="row" spacing={0.25} sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
@@ -112,6 +115,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
               ))}
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
+              <ThemeToggle />
               <IconButton
                 size="small"
                 aria-label="Open navigation menu"

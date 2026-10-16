@@ -253,7 +253,7 @@ const CSPM: React.FC = () => {
         </Box>
       )}
 
-      <Dialog open={Boolean(selectedFinding)} onClose={() => setSelectedFinding(null)} fullWidth maxWidth="sm">
+      <Dialog open={Boolean(selectedFinding)} onClose={() => setSelectedFinding(null)} maxWidth="xs">
         <DialogTitle>Finding detail</DialogTitle>
         <DialogContent>
           {selectedFinding && selectedGuide && (

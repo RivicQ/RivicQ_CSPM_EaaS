@@ -9,6 +9,14 @@ import { getAppTheme } from './theme/theme';
 
 import Layout from './layouts/Layout';
 import { ThemeModeProvider } from './theme/ThemeContext';
+import {
+  applyThemeDom,
+  nextPreference,
+  readPreference,
+  resolveMode,
+  writePreference,
+  type ThemePreference,
+} from './theme/preference';
 import RequireAuth from './components/RequireAuth';
 import RequireEnterprise from './components/RequireEnterprise';
 import RequireRole from './components/RequireRole';
@@ -96,24 +104,32 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
 );
 
 const App: React.FC = () => {
-  const [mode, setMode] = React.useState<'light' | 'dark'>(() => {
-    try {
-      localStorage.setItem('rivicq.theme', 'dark');
-    } catch {
-      /* ignore */
-    }
-    return 'dark';
-  });
+  const [preference, setPreferenceState] = React.useState<ThemePreference>(() => readPreference());
+  const [mode, setMode] = React.useState<'light' | 'dark'>(() => resolveMode(readPreference()));
   const theme = React.useMemo(() => getAppTheme(mode), [mode]);
 
-  const toggleMode = React.useCallback(() => {
-    try {
-      localStorage.setItem('rivicq.theme', 'dark');
-    } catch {
-      /* ignore */
-    }
-    setMode('dark');
+  const applyPreference = React.useCallback((pref: ThemePreference) => {
+    const resolved = resolveMode(pref);
+    writePreference(pref);
+    applyThemeDom(pref, resolved);
+    setPreferenceState(pref);
+    setMode(resolved);
   }, []);
+
+  React.useEffect(() => {
+    applyPreference(preference);
+    if (preference !== 'auto' || typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
+    const onChange = () => applyPreference('auto');
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [preference, applyPreference]);
+
+  const cyclePreference = React.useCallback(() => {
+    applyPreference(nextPreference(preference));
+  }, [applyPreference, preference]);
+
+  const toggleMode = cyclePreference;
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -129,7 +145,13 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ThemeModeProvider mode={mode} toggleMode={toggleMode}>
+          <ThemeModeProvider
+            mode={mode}
+            preference={preference}
+            toggleMode={toggleMode}
+            cyclePreference={cyclePreference}
+            setPreference={applyPreference}
+          >
             <ThemeProvider theme={theme}>
               <MotionConfig reducedMotion="user">
               <CssBaseline />

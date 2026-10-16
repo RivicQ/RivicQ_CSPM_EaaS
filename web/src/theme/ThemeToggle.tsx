@@ -1,52 +1,46 @@
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
-import { DarkMode, LightMode } from '@mui/icons-material';
+import { Button, Tooltip } from '@mui/material';
+import { DarkMode, LightMode, SettingsBrightness } from '@mui/icons-material';
+import { THEME_LABEL, type ThemePreference } from './preference';
+import { useThemeMode } from './ThemeContext';
+
+const ICON: Record<ThemePreference, React.ReactNode> = {
+  auto: <SettingsBrightness sx={{ fontSize: 16 }} />,
+  nebula: <DarkMode sx={{ fontSize: 16 }} />,
+  day: <LightMode sx={{ fontSize: 16 }} />,
+};
 
 type Props = {
-  mode: 'light' | 'dark';
-  onToggle: () => void;
   compact?: boolean;
 };
 
-const ThemeToggle: React.FC<Props> = ({ mode, onToggle, compact = false }) => {
+const ThemeToggle: React.FC<Props> = ({ compact = true }) => {
+  const { preference, cyclePreference, mode } = useThemeMode();
+  const next = preference === 'auto' ? 'Nebula' : preference === 'nebula' ? 'Day' : 'Auto';
+
   return (
-    <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
-      <IconButton
-        onClick={onToggle}
-        size={compact ? 'small' : 'large'}
-        sx={
-          compact
-            ? {
-                borderRadius: `${8}px`,
-                border: (theme) =>
-                  `1px solid ${
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(124,58,237,0.28)'
-                      : 'rgba(124,58,237,0.16)'
-                  }`,
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.06)'
-                    : 'rgba(255,255,255,0.85)',
-                color: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(226,232,240,0.82)' : '#0a0a0f',
-                width: 36,
-                height: 36,
-                '&:hover': {
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(255,255,255,0.12)'
-                      : 'rgba(124,58,237,0.08)',
-                },
-              }
-            : {
-                border: (theme) => `1px solid ${theme.palette.divider}`,
-                bgcolor: 'background.paper',
-              }
-        }
+    <Tooltip title={`Theme: ${THEME_LABEL[preference]} (${mode}). Click for ${next}.`}>
+      <Button
+        size="small"
+        onClick={cyclePreference}
+        aria-label={`Color theme ${THEME_LABEL[preference]}. Switch to ${next}.`}
+        startIcon={ICON[preference]}
+        sx={{
+          minWidth: compact ? 92 : 108,
+          minHeight: 32,
+          px: 1,
+          textTransform: 'none',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          color: 'text.primary',
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          '&:hover': { bgcolor: 'action.hover' },
+        }}
       >
-        {mode === 'light' ? <DarkMode sx={{ fontSize: 18 }} /> : <LightMode sx={{ fontSize: 18 }} />}
-      </IconButton>
+        {THEME_LABEL[preference]}
+      </Button>
     </Tooltip>
   );
 };

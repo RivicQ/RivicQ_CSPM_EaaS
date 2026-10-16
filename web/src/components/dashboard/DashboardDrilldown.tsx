@@ -44,7 +44,7 @@ const DashboardDrilldown: React.FC<DashboardDrilldownProps> = ({ open, onClose, 
   const posture = state.kind === 'posture' ? model.posture : undefined;
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 420 } } }}>
+    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 'min(300px, 86vw)', sm: 320 } } }}>
       <Box sx={{ p: 2.5 }}>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
           <Typography sx={{ fontWeight: 800, fontSize: '1rem' }}>{state.title}</Typography>

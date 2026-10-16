@@ -430,7 +430,7 @@ const ComplianceDashboard: React.FC = () => {
         </TableContainer>
       </Card>
 
-      <Dialog open={Boolean(openFramework)} onClose={() => setOpenFramework(null)} fullWidth maxWidth="sm">
+      <Dialog open={Boolean(openFramework)} onClose={() => setOpenFramework(null)} maxWidth="xs">
         <DialogTitle>{FRAMEWORKS.find((f) => f.id === openFramework?.framework)?.name || openFramework?.framework}</DialogTitle>
         <DialogContent>
           {openFramework && (

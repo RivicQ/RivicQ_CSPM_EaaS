@@ -413,7 +413,7 @@ const Admin: React.FC = () => {
         )}
       </Stack>
 
-      <Dialog open={keyDialog} onClose={() => setKeyDialog(false)} fullWidth maxWidth="sm">
+      <Dialog open={keyDialog} onClose={() => setKeyDialog(false)} maxWidth="xs">
         <DialogTitle>Create API key</DialogTitle>
         <DialogContent>
           <TextField
@@ -431,7 +431,7 @@ const Admin: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={hookDialog} onClose={() => setHookDialog(false)} fullWidth maxWidth="sm">
+      <Dialog open={hookDialog} onClose={() => setHookDialog(false)} maxWidth="xs">
         <DialogTitle>Add webhook</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>

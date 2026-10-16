@@ -8,6 +8,8 @@ export type OpsRoute = {
   enterpriseOnly?: boolean;
   adminOnly?: boolean;
   demoOnly?: boolean;
+  /** Reachable from search, not shown in the primary sidebar. */
+  quiet?: boolean;
 };
 
 /** Minimum IA for an operator console. Marketing/demo items are not primary. */
@@ -27,9 +29,9 @@ export const OPS_ROUTES: OpsRoute[] = [
   { text: 'PATH Scanners', path: '/tools', section: 'Integrations', keywords: ['trivy', 'syft', 'gitleaks', 'osv', 'devsecops'] },
   { text: 'Ecosystem', path: '/ecosystem', section: 'Integrations', keywords: ['sdk', 'cli', 'plugin'] },
   { text: 'Pipeline', path: '/pipeline', section: 'Integrations', keywords: ['ci', 'github actions', 'gate'] },
-  { text: 'Contact', path: '/contact', section: 'Integrations', keywords: ['hello', 'support', 'sales'] },
-  { text: 'IBM Partner Plus', path: '/ibm', section: 'Integrations', keywords: ['ibm', 'partner', 'marketplace', 'cosell'] },
-  { text: 'CRM', path: '/crm', section: 'Integrations', keywords: ['leads', 'sales', 'funnel'], adminOnly: true },
+  { text: 'Contact', path: '/contact', section: 'Integrations', keywords: ['hello', 'support', 'sales'], quiet: true },
+  { text: 'IBM Partner Plus', path: '/ibm', section: 'Integrations', keywords: ['ibm', 'partner', 'marketplace', 'cosell'], quiet: true },
+  { text: 'CRM', path: '/crm', section: 'Integrations', keywords: ['leads', 'sales', 'funnel'], adminOnly: true, quiet: true },
 
   { text: 'HSM & Quantum', path: '/connectors/hsm', section: 'Enterprise', keywords: ['pkcs11', 'ibm', 'hbom'], enterpriseOnly: true },
   { text: 'AIBOM', path: '/security/ai', section: 'Enterprise', keywords: ['ai', 'model', 'aibom'], enterpriseOnly: true },

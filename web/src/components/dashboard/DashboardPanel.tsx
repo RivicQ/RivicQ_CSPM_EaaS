@@ -32,10 +32,10 @@ const DashboardPanel: React.FC<DashboardPanelProps> = ({
       sx={{
         height: height ?? 'auto',
         minWidth: 0,
-        bgcolor: '#0a0a0f',
-        color: '#ffffff',
+        bgcolor: 'background.paper',
+        color: 'text.primary',
         border: 1,
-        borderColor: 'rgba(255,255,255,0.12)',
+        borderColor: 'divider',
         borderRadius: `${dashboardDesign.radius.lg}px`,
         overflow: 'hidden',
         display: 'flex',

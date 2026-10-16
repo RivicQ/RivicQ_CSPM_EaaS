@@ -25,9 +25,9 @@ import { askAssistant, getSuggestedPrompts } from '../../services/aiAssistant';
 import type { AssistantMessage } from '../../types/assistant';
 import designSystem, { glassSurface } from '../../theme/designSystem';
 
-const FAB_SIZE = 56;
-const PANEL_WIDTH = 380;
-const PANEL_HEIGHT = 520;
+const FAB_SIZE = 44;
+const PANEL_WIDTH = 300;
+const PANEL_HEIGHT = 360;
 
 function renderMarkdownLite(text: string) {
   return text.split('\n').map((line, i) => {
@@ -169,9 +169,9 @@ const RivicQAssistant: React.FC = () => {
               right: isMobile ? 12 : 24,
               bottom: isMobile ? 80 : 96,
               zIndex: 1400,
-              width: isMobile ? 'calc(100vw - 24px)' : PANEL_WIDTH,
-              maxWidth: PANEL_WIDTH,
-              height: isMobile ? 'min(70vh, 520px)' : PANEL_HEIGHT,
+              width: PANEL_WIDTH,
+              maxWidth: 'calc(100vw - 24px)',
+              height: isMobile ? 'min(48vh, 360px)' : PANEL_HEIGHT,
             }}
           >
             <Box

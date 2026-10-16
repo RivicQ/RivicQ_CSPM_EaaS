@@ -350,7 +350,7 @@ const Inventory: React.FC = () => {
         </TableContainer>
       </Card>
 
-      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} fullWidth maxWidth="sm">
+      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="xs">
       <DialogTitle>Add New Asset</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>

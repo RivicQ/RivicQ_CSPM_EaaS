@@ -32,7 +32,7 @@ const StatCard: React.FC<StatCardProps> = ({
   const theme = useTheme();
   const isZero = value === 0 || value === '0';
   const color = isZero ? '#9ca3af' : (accent || theme.palette.primary.main);
-  const valueColor = isZero ? '#ffffff' : (accent || '#ffffff');
+  const valueColor = isZero ? theme.palette.text.primary : (accent || theme.palette.text.primary);
 
   return (
     <Box
@@ -50,13 +50,13 @@ const StatCard: React.FC<StatCardProps> = ({
         overflow: 'hidden',
         px: 1.5,
         py: 1.25,
-        bgcolor: '#0a0a0f',
+        bgcolor: 'background.paper',
         border: 1,
         borderColor: 'divider',
         borderRadius: `${dashboardDesign.radius.md}px`,
         transition: dashboardDesign.motion.transition,
         cursor: onClick ? 'pointer' : 'default',
-        color: '#ffffff',
+        color: 'text.primary',
         '&:hover': {
           borderColor: 'rgba(255,255,255,0.22)',
           boxShadow: 'none',

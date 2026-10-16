@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Alert, Box, Button, Card, CardContent, Stack, Typography } from '@mui/material';
-import { Lock } from '@mui/icons-material';
+import { Box, Button, Typography } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { roleAtLeast, WorkspaceRole } from '../auth/roles';
+import { NEBULA } from '../theme/nebulaSurfaces';
 
 const RequireRole: React.FC<{ role: WorkspaceRole; children: React.ReactElement }> = ({ role, children }) => {
   const { user, isAuthenticated } = useAuth();
@@ -15,26 +15,23 @@ const RequireRole: React.FC<{ role: WorkspaceRole; children: React.ReactElement 
 
   if (!roleAtLeast(user?.role, role)) {
     return (
-      <Box sx={{ minHeight: '70vh', display: 'grid', placeItems: 'center', px: 2 }}>
-        <Card sx={{ maxWidth: 640, width: '100%', border: '1px solid rgba(124,58,237,0.30)' }}>
-          <CardContent sx={{ p: 4 }}>
-            <Stack spacing={2}>
-              <Lock color="primary" />
-              <Typography variant="h5" fontWeight={800}>
-                Insufficient role
-              </Typography>
-              <Typography color="text.secondary">
-                This area requires the <strong>{role}</strong> role. Your workspace role is{' '}
-                <strong>{user?.role || 'viewer'}</strong>. Community demo sessions are operator-only and cannot open Admin.
-                Local full access uses the bootstrap admin created from AUTH_BOOTSTRAP_EMAIL (never publish that password).
-              </Typography>
-              <Alert severity="info">Ask a workspace admin to grant access. Roles are enforced on the server, not only in the UI.</Alert>
-              <Button variant="outlined" onClick={() => navigate('/dashboard')}>
-                Back to Overview
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
+      <Box
+        sx={{
+          maxWidth: 420,
+          p: 1.5,
+          border: '1px solid',
+          borderColor: NEBULA.line,
+          borderRadius: 1,
+          bgcolor: NEBULA.panel,
+        }}
+      >
+        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 700, mb: 0.5 }}>Insufficient role</Typography>
+        <Typography sx={{ fontSize: '0.75rem', color: NEBULA.muted, mb: 1, lineHeight: 1.4 }}>
+          This area needs the {role} role. Your workspace role is {user?.role || 'viewer'}.
+        </Typography>
+        <Button size="small" onClick={() => navigate('/dashboard')} sx={{ textTransform: 'none' }}>
+          Dashboard
+        </Button>
       </Box>
     );
   }

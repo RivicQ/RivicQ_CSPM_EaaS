@@ -7,6 +7,23 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
+    <script>
+      (function () {
+        try {
+          var stored = (localStorage.getItem('rivicq.theme') || 'nebula').toLowerCase();
+          var pref = stored;
+          if (pref === 'day' || pref === 'light' || pref === 'ledger') pref = 'day';
+          else if (pref === 'auto' || pref === 'system') pref = 'auto';
+          else pref = 'nebula';
+          var dark = pref === 'nebula' || (pref === 'auto' && !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches));
+          document.documentElement.setAttribute('data-theme', dark ? 'nebula' : 'day');
+          document.documentElement.setAttribute('data-theme-pref', pref);
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', dark ? '#000000' : '#f4f0fb');
+        } catch (e) { /* keep nebula */ }
+      })();
+    </script>
     <meta name="description" content="RivicQ — Cryptographic Security Posture Management. Discover, inventory, and assess cryptographic assets. Community CBOM/SBOM (Apache 2.0) and Enterprise QBOM/HBOM/AIBOM/IBOM." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

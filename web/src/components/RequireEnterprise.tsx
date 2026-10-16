@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Box, Button, Card, CardContent, Stack, Typography } from '@mui/material';
-import { ArrowForward, Lock, WorkspacePremium } from '@mui/icons-material';
+import { Box, Button, Stack, Typography } from '@mui/material';
+import { WorkspacePremium } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition, isEnterpriseEdition } from '../config/editions';
+import { NEBULA } from '../theme/nebulaSurfaces';
 
 const RequireEnterprise: React.FC<{ children: React.ReactElement; layers?: boolean }> = ({ children, layers }) => {
   const { edition } = useAuth();
@@ -12,31 +13,28 @@ const RequireEnterprise: React.FC<{ children: React.ReactElement; layers?: boole
 
   if (!allowed) {
     return (
-      <Box sx={{ minHeight: '70vh', display: 'grid', placeItems: 'center', px: 2 }}>
-        <Card sx={{ maxWidth: 720, width: '100%', bgcolor: '#0a0a0f', color: '#fff', border: '1px solid #1f1f2e' }}>
-          <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-            <Stack spacing={2} alignItems="flex-start">
-              <Lock sx={{ fontSize: 42, color: 'primary.main' }} />
-              <Typography variant="h4" fontWeight={800} sx={{ color: '#fff' }}>
-                Enterprise layer locked
-              </Typography>
-              <Typography variant="body1" sx={{ color: '#d1d5db' }}>
-                Community is Cryptographic Security Posture Management: CBOM, SBOM, scanner, and the policy gate. QBOM, HBOM, AIBOM, IBOM, HSM connectors, and GRC packs stay on the licensed Enterprise control plane.
-              </Typography>
-              <Alert severity="info" sx={{ width: '100%' }}>
-                Switch to Enterprise from the edition selector when your workspace is provisioned and approved.
-              </Alert>
-              <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
-                <Button variant="contained" startIcon={<WorkspacePremium />} onClick={() => navigate('/switcher')}>
-                  Choose edition
-                </Button>
-                <Button variant="outlined" endIcon={<ArrowForward />} onClick={() => navigate('/dashboard')}>
-                  Back to OSS dashboard
-                </Button>
-              </Stack>
-            </Stack>
-          </CardContent>
-        </Card>
+      <Box
+        sx={{
+          maxWidth: 420,
+          p: 1.5,
+          border: '1px solid',
+          borderColor: NEBULA.line,
+          borderRadius: 1,
+          bgcolor: NEBULA.panel,
+        }}
+      >
+        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 700, mb: 0.5 }}>Enterprise layer locked</Typography>
+        <Typography sx={{ fontSize: '0.75rem', color: NEBULA.muted, mb: 1, lineHeight: 1.4 }}>
+          Community is CBOM, SBOM, scanner, and the policy gate. QBOM, HBOM, AIBOM, IBOM, HSM, and GRC packs stay licensed.
+        </Typography>
+        <Stack direction="row" spacing={1}>
+          <Button size="small" variant="contained" startIcon={<WorkspacePremium />} onClick={() => navigate('/switcher')} sx={{ textTransform: 'none' }}>
+            Choose edition
+          </Button>
+          <Button size="small" onClick={() => navigate('/dashboard')} sx={{ textTransform: 'none' }}>
+            Dashboard
+          </Button>
+        </Stack>
       </Box>
     );
   }
