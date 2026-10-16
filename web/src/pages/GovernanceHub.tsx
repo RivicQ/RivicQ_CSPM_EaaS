@@ -6,7 +6,6 @@ import { bomService } from '../services/api';
 import { GOVERNANCE_CONTROLS } from '../data/bomFramework';
 import { isPaidEdition } from '../config/editions';
 import { useAuth } from '../context/AuthContext';
-import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 import ChecklistPanel from '../components/ops/ChecklistPanel';
 
 const GovernanceHub: React.FC = () => {
@@ -27,7 +26,7 @@ const GovernanceHub: React.FC = () => {
       eyebrow="Governance"
       title="Compliance mapping"
       subtitle="DORA, NIS2, EU AI Act, CRA, NIST Zero Trust, FIPS, BSI, plus OWASP API/publication/network lists and a RivicQ quantum checklist. Community is JSON mappings. Enterprise enables the evidence pack. Not a certification."
-      visual={<OpsHeroVisual variant="governance" mapped={mapped} locked={locked} />}
+      badge={`${mapped} mapped · ${locked} pack`}
     >
       <Alert severity="info" sx={{ mb: 2 }}>{data?.note || 'Operator mappings only.'}</Alert>
       <Stack spacing={1.25} sx={{ mb: 3 }}>

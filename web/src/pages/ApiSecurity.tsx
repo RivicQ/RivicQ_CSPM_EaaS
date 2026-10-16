@@ -5,7 +5,6 @@ import PageFrame from '../components/PageFrame';
 import { bomService } from '../services/api';
 import ChecklistPanel from '../components/ops/ChecklistPanel';
 import { SECURITY_CHECKLISTS } from '../data/securityChecklists';
-import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 
 const ApiSecurity: React.FC = () => {
   const { data } = useQuery({
@@ -19,7 +18,7 @@ const ApiSecurity: React.FC = () => {
       eyebrow="API security"
       title="TLS and HTTPS API surface"
       subtitle="Community derives API hygiene from website/host scans (HSTS, CSP, protocol, certificates). Full API gateway inventory is Enterprise."
-      visual={<OpsHeroVisual variant="findings" empty={!findings.length} />}
+      badge={findings.length ? `${findings.length} findings` : 'No scan yet'}
     >
       <Alert severity="info" sx={{ mb: 2 }}>{data?.note || 'Run a website scan to populate this view. Pages has no production API.'}</Alert>
       {findings.length === 0 ? (

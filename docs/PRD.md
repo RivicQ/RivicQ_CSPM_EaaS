@@ -92,7 +92,21 @@ Out of scope explicitly:
 - Certified compliance reports.
 - Multi-region or HA guarantees for the experiment (relies on Helm replicaCount as documented in `deploy/helm/`).
 
-## 9. Open questions
+## 9. Layout and client-architecture demo
+
+The operator console is the application. Architecture maps are references, aligned to `archify/site/index.html`.
+
+| Surface | What the operator sees |
+|---|---|
+| Archify site | Full-stage interactive maps (`archify/site`, `archify/diagrams`) |
+| Website, docs, graph | Small plate (~148px) or a one-line link. Not a 70vh frame |
+| Console (`/scanner` and other workspace routes) | Scan, findings, and a compact Discover → Mitigate → Report strip fed by `client_architecture` on scan intelligence. No viewport iframe and no cropped chart in the page header |
+
+The live demo is that strip plus a real scan (`POST /api/v1/scans`, then `GET /api/v1/scans/:id/intelligence`). Idle copy before a scan is the same three phases, marked waiting. It is not a second dashboard.
+
+Firmware and identity analysis in this repository (`internal/firmware`, `internal/identity`, https://github.com/RivicQ/RivicQ_CSPM_EaaS) is static metadata: bytes, strings, ELF/HEX structure, certificate fields. It does not execute images, extract keys, or perform binary reverse engineering. See [BRD.md](BRD.md) and [SRD.md](SRD.md).
+
+## 10. Open questions
 
 1. Which compliance "pack" becomes the first paid report artifact (DORA vs NIST vs BSI), given mappings-not-certifications framing?
 2. Should scheduled scans land before live SAML ACS in the Enterprise roadmap?

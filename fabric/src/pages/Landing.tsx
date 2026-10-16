@@ -25,15 +25,19 @@ const Landing: React.FC = () => {
       <p className="lede">
         RivicQ Graph is a labeled demo of how CBOM, cloud, identity, and findings connect.
         Nodes and edges are synthetic Northbridge fixtures — not a customer estate and not a certification.
-        Use it to understand the operator path: discover → classify → gate → report.
+        Use it to understand the client path: discover → mitigate → report.
       </p>
-      <div className="steps" aria-label="Product loop">
+      <div className="steps" aria-label="Client architecture">
         <span>01 Discover</span>
-        <span>02 Assess</span>
-        <span>03 Remediate</span>
-        <span>04 Migrate</span>
-        <span>05 Report</span>
+        <span>02 Mitigate</span>
+        <span>03 Report</span>
       </div>
+      <p className="lede" style={{ marginTop: 0, marginBottom: '1.25rem', fontSize: '0.875rem' }}>
+        Same client path as the console and the Archify operator map.
+        Firmware stays static metadata — not binary reverse engineering.
+        {' '}
+        <a href="../archify/site/index.html#diagrams">Open the Archify gallery</a>.
+      </p>
       <div className="btn-row" style={{ marginBottom: 28 }}>
         <button type="button" className="btn primary" onClick={() => nav('/app/graph')}>Open security graph</button>
         <button type="button" className="btn" onClick={() => nav('/discover')}>Start discovery</button>

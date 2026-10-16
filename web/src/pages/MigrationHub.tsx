@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, Chip, Stack, Typography } from '@mui/material';
 import PageFrame from '../components/PageFrame';
 import { bomService, cbomService } from '../services/api';
-import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 
 const MigrationHub: React.FC = () => {
   const { data: unified } = useQuery({
@@ -27,7 +26,6 @@ const MigrationHub: React.FC = () => {
       eyebrow="Migration"
       title="PQC shift roadmap"
       subtitle="Map Shor/Grover-class assets to ML-KEM, ML-DSA, and SLH-DSA. Hybrid classical + PQC is the recommended cut-over. This engine does not rotate production keys."
-      visual={<OpsHeroVisual variant="migration" />}
     >
       <Alert severity="info" sx={{ mb: 2 }}>
         Workbook layers: SBOM / CBOM / HBOM / AIBOM → QBOM. CRQC dates in third-party roadmaps are not executed here.

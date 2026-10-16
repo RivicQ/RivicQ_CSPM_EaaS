@@ -9,9 +9,7 @@ type PageFrameProps = {
   badge?: string;
   action?: React.ReactNode;
   secondaryAction?: React.ReactNode;
-  visual?: React.ReactNode;
   children?: React.ReactNode;
-  creative?: boolean;
 };
 
 const PageFrame: React.FC<PageFrameProps> = ({
@@ -21,7 +19,6 @@ const PageFrame: React.FC<PageFrameProps> = ({
   badge,
   action,
   secondaryAction,
-  visual,
   children,
 }) => (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -62,9 +59,9 @@ const PageFrame: React.FC<PageFrameProps> = ({
                   py: 0.15,
                   borderRadius: 999,
                   border: '1px solid',
-                  borderColor: 'rgba(124,58,237,0.45)',
-                  bgcolor: 'rgba(124,58,237,0.16)',
-                  color: NEBULA.accentSoft,
+                  borderColor: 'rgba(255,255,255,0.16)',
+                  bgcolor: 'transparent',
+                  color: NEBULA.muted,
                   fontSize: 11,
                   fontWeight: 600,
                 }}
@@ -107,23 +104,6 @@ const PageFrame: React.FC<PageFrameProps> = ({
           </Stack>
         )}
       </Stack>
-      {visual && (
-        <Box
-          sx={{
-            mt: 1.25,
-            maxHeight: 88,
-            overflow: 'hidden',
-            borderRadius: '8px',
-            bgcolor: NEBULA.ink,
-            border: '1px solid',
-            borderColor: NEBULA.line,
-            px: 1.25,
-            py: 1,
-          }}
-        >
-          {visual}
-        </Box>
-      )}
     </Box>
     {children}
   </Box>
