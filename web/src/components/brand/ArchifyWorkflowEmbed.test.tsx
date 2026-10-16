@@ -11,17 +11,18 @@ const wrap = (ui: React.ReactElement) => render(
 describe('ArchifyWorkflowEmbed', () => {
   it('keeps the console reference to a single line without an iframe', () => {
     wrap(<ArchifyWorkflowEmbed compact diagramId="operator" />);
-    const bar = document.querySelector('[data-embed="bar"]');
-    expect(bar).toBeTruthy();
-    expect(bar?.querySelector('iframe')).toBeNull();
-    expect(screen.getByRole('link', { name: /open map/i })).toHaveAttribute('href', expect.stringContaining('rivicq-cspm-operator-workflow.html'));
+    expect(screen.queryByTitle('RivicQ operator workflow preview')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open map/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('rivicq-cspm-operator-workflow.html'),
+    );
+    expect(screen.getByText('How does an operator scan run?')).toBeInTheDocument();
   });
 
   it('uses a short plate on website pages', () => {
     wrap(<ArchifyWorkflowEmbed diagramId="architecture" />);
-    const plate = document.querySelector('[data-embed="plate"]');
-    expect(plate).toBeTruthy();
-    expect(plate?.querySelector('iframe')).toBeTruthy();
-    expect(document.querySelector('[data-embed="bar"]')).toBeNull();
+    expect(screen.getByTitle('RivicQ Platform Architecture preview')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open diagram/i })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /open map/i })).not.toBeInTheDocument();
   });
 });

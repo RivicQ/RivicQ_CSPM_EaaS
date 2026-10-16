@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Fixed
+- **GitHub Pages build** (2026-10-16). Scanner polling is a stable callback, so `CI=true` no longer fails the Pages compile on a missing hook dependency.
 - **Client demo package** (2026-10-16). Pages publish copies PRD, BRD, SRD, and the client verification page. The docs operator map is a scaled 148px plate. Evaluation login is documented for a host the client starts; GitHub Pages stays a labeled Community walkthrough with no password.
 - **Small Archify references** (2026-10-16). Website, docs, and graph no longer open a 70vh diagram frame. The console keeps a one-line map link and a compact Discover → Mitigate → Report strip. Page headers no longer crop a lavender chart. The full stage stays on `archify/site`.
 - **Console operator layout** (2026-10-15). PageFrame is a compact nebula header, not a full-viewport lavender plate. Scan/Findings/CSPM/CBOM content sits under the title. Glass cards no longer stay invisible until scrolled. Demo posture score is labeled.
