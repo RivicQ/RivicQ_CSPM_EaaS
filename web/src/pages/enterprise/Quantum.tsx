@@ -14,14 +14,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Alert,
   AlertTitle,
 } from '@mui/material';
@@ -32,11 +24,6 @@ import {
   Sync,
 } from '@mui/icons-material';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   PieChart,
@@ -44,7 +31,6 @@ import {
   Cell,
 } from 'recharts';
 import { quantumService } from '../../services/api';
-import { tokens } from '../../theme/tokens';
 
 const ALGORITHMS = [
   { name: 'ML-KEM (FIPS 203)', type: 'KEM', status: 'NIST standard', security_level: 5 },
@@ -59,10 +45,6 @@ const QuantumReadiness: React.FC = () => {
   const [networks, setNetworks] = useState<any[]>([]);
   const [algorithms, setAlgorithms] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [migrateDialogOpen, setMigrateDialogOpen] = useState(false);
-  const [sourceAlgorithm, setSourceAlgorithm] = useState('RSA-2048');
-  const [targetAlgorithm, setTargetAlgorithm] = useState('CRYSTALS-Kyber');
-  const [selectedAsset] = useState('');
 
   useEffect(() => {
     loadQuantumData();
@@ -99,28 +81,6 @@ const QuantumReadiness: React.FC = () => {
     }
   };
 
-  const handleMigrate = async () => {
-    try {
-      await quantumService.migrateAlgorithm({
-        asset_id: selectedAsset,
-        source_algorithm: sourceAlgorithm,
-        target_algorithm: targetAlgorithm,
-      });
-      setMigrateDialogOpen(false);
-    } catch (error) {
-      console.error('Migration failed:', error);
-    }
-  };
-
-  const migrationData = [
-    { month: 'Jan', quantum_safe: 10, at_risk: 90 },
-    { month: 'Feb', quantum_safe: 15, at_risk: 85 },
-    { month: 'Mar', quantum_safe: 20, at_risk: 80 },
-    { month: 'Apr', quantum_safe: 28, at_risk: 72 },
-    { month: 'May', quantum_safe: 32, at_risk: 68 },
-    { month: 'Jun', quantum_safe: 35, at_risk: 65 },
-  ];
-
   const categoryData = readiness?.by_category
     ? Object.entries(readiness.by_category).map(([name, value]) => ({ name, value }))
     : [];
@@ -135,9 +95,6 @@ const QuantumReadiness: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button variant="outlined" startIcon={<Sync />} onClick={loadQuantumData}>
             Refresh
-          </Button>
-          <Button variant="contained" startIcon={<Security />} onClick={() => setMigrateDialogOpen(true)}>
-            Migrate Algorithm
           </Button>
         </Box>
         </Box>
@@ -175,7 +132,7 @@ const QuantumReadiness: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>Migration Progress</Typography>
+              <Typography color="textSecondary" gutterBottom>Plan coverage</Typography>
               <Typography variant="h3" color="info.main">{readiness?.migration_progress ?? 0}%</Typography>
             </CardContent>
           </Card>
@@ -190,24 +147,7 @@ const QuantumReadiness: React.FC = () => {
       )}
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ height: 350 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Migration Progress</Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={migrationData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="quantum_safe" stroke={tokens.colors.crypto.success} strokeWidth={2} name="Quantum Safe %" />
-                  <Line type="monotone" dataKey="at_risk" stroke={tokens.colors.crypto.critical} strokeWidth={2} name="At Risk %" />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={8}>
           <Card sx={{ height: 350 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>Readiness by Category</Typography>
@@ -314,53 +254,13 @@ const QuantumReadiness: React.FC = () => {
               <Typography>{rec}</Typography>
             </Box>
           )) || (
-            <>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Warning color="warning" fontSize="small" />
-                <Typography>Migrate RSA-2048 to CRYSTALS-Kyber</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Warning color="warning" fontSize="small" />
-                <Typography>Migrate ECDSA to CRYSTALS-Dilithium</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Warning color="warning" fontSize="small" />
-                <Typography>Implement hybrid classical-quantum key exchange</Typography>
-              </Box>
-            </>
+            <Typography color="text.secondary">
+              No engine recommendations. This workspace classifies algorithms; it does not rotate production keys.
+            </Typography>
           )}
         </CardContent>
       </Card>
 
-      <Dialog open={migrateDialogOpen} onClose={() => setMigrateDialogOpen(false)}>
-        <DialogTitle>Migrate to PQC Algorithm</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <FormControl fullWidth>
-              <InputLabel>Source Algorithm</InputLabel>
-              <Select value={sourceAlgorithm} label="Source Algorithm" onChange={(e) => setSourceAlgorithm(e.target.value)}>
-                <MenuItem value="RSA-2048">RSA-2048</MenuItem>
-                <MenuItem value="RSA-4096">RSA-4096</MenuItem>
-                <MenuItem value="ECDSA P-256">ECDSA P-256</MenuItem>
-                <MenuItem value="ECDSA P-384">ECDSA P-384</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Target Algorithm</InputLabel>
-              <Select value={targetAlgorithm} label="Target Algorithm" onChange={(e) => setTargetAlgorithm(e.target.value)}>
-                <MenuItem value="CRYSTALS-Kyber">CRYSTALS-Kyber</MenuItem>
-                <MenuItem value="CRYSTALS-Dilithium">CRYSTALS-Dilithium</MenuItem>
-                <MenuItem value="FALCON">FALCON</MenuItem>
-                <MenuItem value="SPHINCS+">SPHINCS+</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setMigrateDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleMigrate} variant="contained">Start Migration</Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

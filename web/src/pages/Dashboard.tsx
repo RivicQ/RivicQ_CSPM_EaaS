@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Box, Button, Chip, CircularProgress, Grid, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography, useTheme,
+  Box, Button, Chip, CircularProgress, Grid, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
 import {
   ArrowForward, AutoGraph, GitHub, GppGood, Lock, Memory, NotificationsActive, Security, TrendingUp,
@@ -67,8 +67,6 @@ const ChartTooltipContent: React.FC<any> = ({ active, payload, label }) => {
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { edition, isDemo } = useAuth();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const [timeRange, setTimeRange] = React.useState('7d');
   const [trendActiveIndex, setTrendActiveIndex] = React.useState<number | null>(null);
   const [selectedProvider, setSelectedProvider] = React.useState<string | null>(null);
@@ -516,7 +514,7 @@ const Dashboard: React.FC = () => {
 
       <Grid container spacing={dashboardDesign.layout.gridSpacing} sx={{ mb: dashboardDesign.layout.sectionGap }}>
         <Grid item xs={12} md={6}>
-          <DashboardPanel title="PQC Migration Readiness" subtitle="From scan intelligence in this workspace — not a silent live estate on Pages" delay={5}>
+          <DashboardPanel title="PQC classification" subtitle="From scan intelligence in this workspace — not a live key rotation" delay={5}>
             <PQCReadinessPanel {...pqcStats} />
           </DashboardPanel>
         </Grid>
@@ -608,12 +606,12 @@ const Dashboard: React.FC = () => {
 
       <Box
         sx={{
-          mt: { xs: 1.5, md: 2.5 },
-          p: { xs: 1.5, md: 2 },
-          borderRadius: `${dashboardDesign.radius.lg}px`,
+          mt: 1.25,
+          p: 1.25,
+          borderRadius: `${dashboardDesign.radius.md}px`,
           border: 1,
           borderColor: 'divider',
-          bgcolor: isDark ? 'rgba(124,58,237,0.1)' : 'rgba(124,58,237,0.06)',
+          bgcolor: '#0a0a0f',
           display: 'flex',
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',

@@ -1,11 +1,11 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Box, Button, Chip, Grid, Stack, Typography, useTheme } from '@mui/material';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Analytics as AnalyticsIcon, TrendingUp, Psychology, Description, Timeline,
+  Analytics as AnalyticsIcon, TrendingUp, Psychology, Description,
 } from '@mui/icons-material';
 import PageFrame from '../components/PageFrame';
 import StatCard from '../components/dashboard/StatCard';
@@ -13,13 +13,13 @@ import DashboardPanel from '../components/dashboard/DashboardPanel';
 import { EmptyState, DetailTabs, TabPanel } from '../components/ui';
 import { analyticsService, inventoryService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { categoryColor, chartGridStroke, chartTheme, chartTickFill, providerColor } from '../theme/chartTheme';
+import { categoryColor, chartGridStroke, chartTickFill, providerColor } from '../theme/chartTheme';
 import designSystem from '../theme/designSystem';
 import { tokens } from '../theme/tokens';
 import PostureTrendChart from '../components/dashboard/PostureTrendChart';
 import ChartTooltipBox from '../components/dashboard/ChartTooltip';
 import {
-  DEMO_ANALYTICS_INSIGHTS, DEMO_FORECAST, DEMO_POSTURE_TREND, DEMO_REPORTS,
+  DEMO_ANALYTICS_INSIGHTS, DEMO_POSTURE_TREND, DEMO_REPORTS,
   normalizeAssets, normalizeSummary,
 } from '../data/workspaceDemo';
 
@@ -101,14 +101,14 @@ const Analytics: React.FC = () => {
   const reports = reportsData?.reports?.length ? reportsData.reports : DEMO_REPORTS;
   const complianceScore = summary.compliance_score;
   const pqcPct = summary.total_assets
-    ? Math.round((summary.quantum_safe_count / summary.total_assets) * 100)
-    : 62;
+    ? `${Math.round((summary.quantum_safe_count / summary.total_assets) * 100)}%`
+    : '—';
 
   return (
-    <PageFrame eyebrow="Insights" title="Analytics" subtitle="Executive trends, ML intelligence, compliance reports, and PQC forecasts." badge={isDemo ? 'Demo data' : 'Live'}>
-      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
+    <PageFrame eyebrow="Insights" title="Analytics" subtitle="Workspace trends from inventory and scans. No invented forecasts." badge={isDemo ? 'Demo data' : 'Live'}>
+      <Grid container spacing={1.25} sx={{ mb: 1.25 }}>
         <Grid item xs={6} md={3}><StatCard label="Total Assets" value={summary.total_assets} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
-        <Grid item xs={6} md={3}><StatCard label="PQC Readiness" value={`${pqcPct}%`} accent={tokens.colors.crypto.low} delay={1} /></Grid>
+        <Grid item xs={6} md={3}><StatCard label="PQC classified" value={pqcPct} accent={tokens.colors.crypto.low} delay={1} /></Grid>
         <Grid item xs={6} md={3}><StatCard label="Vulnerable" value={summary.vulnerable_assets} accent={tokens.colors.crypto.high} delay={2} /></Grid>
         <Grid item xs={6} md={3}><StatCard label="Compliance" value={`${complianceScore}%`} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
       </Grid>
@@ -121,7 +121,6 @@ const Analytics: React.FC = () => {
           { label: 'Trends', icon: <TrendingUp fontSize="small" /> },
           { label: 'ML Insights', icon: <Psychology fontSize="small" /> },
           { label: 'Reports', icon: <Description fontSize="small" /> },
-          { label: 'Forecast', icon: <Timeline fontSize="small" /> },
         ]}
       />
 
@@ -236,31 +235,6 @@ const Analytics: React.FC = () => {
             ))}
           </Stack>
         )}
-      </TabPanel>
-
-      <TabPanel value={tab} index={4}>
-        <DashboardPanel title="PQC Migration Forecast" subtitle="Projected posture if current remediation velocity continues" delay={0}>
-          <Box sx={{ height: 260, mb: 3 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={DEMO_FORECAST}>
-                <CartesianGrid strokeDasharray="4 4" stroke={gridStroke} vertical={false} />
-                <XAxis dataKey="quarter" tick={{ fontSize: 10, fill: tickFill }} axisLine={false} tickLine={false} />
-                <YAxis domain={[70, 100]} tick={{ fontSize: 10, fill: tickFill }} axisLine={false} tickLine={false} />
-                <Tooltip />
-                <Line type="monotone" dataKey="projected_score" name="Posture score" stroke={chartTheme.pqc} strokeWidth={3} dot={{ r: 5, fill: chartTheme.pqc }} />
-                <Line type="monotone" dataKey="migration_pct" name="Migration %" stroke={tokens.colors.rivicq[500]} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 4, fill: tokens.colors.rivicq[500] }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </Box>
-          <Stack spacing={1.5}>
-            {DEMO_FORECAST.map((f) => (
-              <Box key={f.quarter} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
-                <Typography fontWeight={700}>{f.quarter}</Typography>
-                <Typography variant="body2" color="text.secondary">{f.note} — target score {f.projected_score}%, migration {f.migration_pct}%</Typography>
-              </Box>
-            ))}
-          </Stack>
-        </DashboardPanel>
       </TabPanel>
     </PageFrame>
   );

@@ -20,8 +20,8 @@ const HELP: Record<string, { title: string; body: string }> = {
     body: 'CBOM and SBOM from GET /bom/unified. QBOM, HBOM, AIBOM, and IBOM are Enterprise layers. Counts of 0 mean that layer has no records in this workspace, not a live cloud estate.',
   },
   '/migration': {
-    title: 'PQC migration',
-    body: 'Readiness comes from scan intelligence and PQC classes on CBOM findings. RSA-2048 is classified, not automatically marked vulnerable. IBM Quantum hardware is not invoked. QBOM as a product layer is Enterprise.',
+    title: 'PQC planning',
+    body: 'Readiness comes from scan intelligence and PQC classes on CBOM findings. This is a plan, not a live key rotation. RSA-2048 is classified, not automatically marked vulnerable. IBM Quantum hardware is not invoked. QBOM as a product layer is Enterprise.',
   },
   '/governance': {
     title: 'Governance',

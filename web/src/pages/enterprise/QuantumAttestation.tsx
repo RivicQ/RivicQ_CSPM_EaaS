@@ -136,28 +136,12 @@ const QuantumAttestation: React.FC = () => {
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Migration Roadmap</Typography>
+              <Typography variant="h6" gutterBottom>Classification roadmap</Typography>
               <Divider sx={{ mb: 2 }} />
               {milestones.length === 0 ? (
-                <Box>
-                  {[
-                    { phase: 'Phase 1: Inventory', desc: 'Identify all quantum-vulnerable assets', progress: 100 },
-                    { phase: 'Phase 2: Assessment', desc: 'Risk assessment and prioritization', progress: 60 },
-                    { phase: 'Phase 3: Migration', desc: 'Migrate to PQC algorithms', progress: 20 },
-                    { phase: 'Phase 4: Validation', desc: 'Verify PQC implementation', progress: 0 },
-                  ].map(item => (
-                    <Box key={item.phase} mb={2}>
-                      <Box display="flex" justifyContent="space-between" mb={0.5}>
-                        <Typography variant="body2" fontWeight="medium">{item.phase}</Typography>
-                        <Typography variant="caption">{item.progress}%</Typography>
-                      </Box>
-                      <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>
-                        {item.desc}
-                      </Typography>
-                      <LinearProgress variant="determinate" value={item.progress} sx={{ height: 4, borderRadius: 2 }} />
-                    </Box>
-                  ))}
-                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  No QBOM roadmap in this workspace. Classification is planning-only; this page does not migrate keys.
+                </Typography>
               ) : (
                 <List dense>
                   {milestones.map((m: any, i: number) => (
@@ -175,14 +159,10 @@ const QuantumAttestation: React.FC = () => {
 
       <Box mt={3}>
         <Button
-          variant="contained"
-          sx={{ background: 'linear-gradient(45deg, #7c3aed, #7c3aed)', mr: 2 }}
+          variant="outlined"
           onClick={() => quantumAttestationService.scanForPQCAlgorithms(['all'])}
         >
-          Start PQC Scan (All Assets)
-        </Button>
-        <Button variant="outlined">
-          Export Quantum BOM
+          Re-scan classification
         </Button>
       </Box>
     </Box>

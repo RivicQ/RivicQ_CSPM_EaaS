@@ -118,7 +118,7 @@ const Assets: React.FC = () => {
               <TableCell>{asset.cloud_provider || asset.cloudProvider || '—'}</TableCell>
               <TableCell><Typography variant="caption" color="text.secondary">{asset.owner || '—'}</Typography></TableCell>
               <TableCell><Chip label={asset.risk_level || asset.riskLevel || 'UNKNOWN'} color={getRiskColor(asset.risk_level || asset.riskLevel)} size="small" /></TableCell>
-              <TableCell><Chip label={asset.quantum_safe || asset.quantumSafe ? 'Ready' : 'Migrate'} color={asset.quantum_safe || asset.quantumSafe ? 'success' : 'warning'} size="small" variant="outlined" /></TableCell>
+              <TableCell><Chip label={asset.quantum_safe || asset.quantumSafe ? 'PQC-ready' : 'Classical'} color={asset.quantum_safe || asset.quantumSafe ? 'success' : 'warning'} size="small" variant="outlined" /></TableCell>
               <TableCell align="right">
                 <IconButton size="small" onClick={() => navigate(`/assets/${asset.id}`)}><Visibility fontSize="small" /></IconButton>
               </TableCell>
@@ -145,14 +145,14 @@ const Assets: React.FC = () => {
       badge={`${summary.total_assets} tracked`}
       secondaryAction={<Button variant="outlined" startIcon={<Refresh />} onClick={() => refetch()}>Refresh</Button>}
     >
-      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
+      <Grid container spacing={1.25} sx={{ mb: 1.25 }}>
         <Grid item xs={6} sm={3}><StatCard label="Total" value={summary.total_assets} icon={<Storage sx={{ fontSize: 20 }} />} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Quantum Safe" value={summary.quantum_safe_count} icon={<Security sx={{ fontSize: 20 }} />} accent={tokens.colors.crypto.low} delay={1} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="At Risk" value={summary.vulnerable_assets} icon={<Assessment sx={{ fontSize: 20 }} />} accent={tokens.colors.crypto.critical} delay={2} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Compliance" value={`${summary.compliance_score}%`} icon={<CheckCircle sx={{ fontSize: 20 }} />} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
       </Grid>
 
-      <GlassCard hover={false} padding={2} delay={1}>
+      <GlassCard hover={false} padding={1.25} delay={1}>
         <DetailTabs
           value={tab}
           onChange={setTab}
@@ -160,7 +160,7 @@ const Assets: React.FC = () => {
             { label: 'All Assets', icon: <Storage fontSize="small" /> },
             { label: 'Categories', icon: <Category fontSize="small" /> },
             { label: 'Cloud', icon: <Cloud fontSize="small" /> },
-            { label: 'PQC Migration', icon: <Security fontSize="small" /> },
+            { label: 'PQC classified', icon: <Security fontSize="small" /> },
             { label: 'Risk Queue', icon: <Warning fontSize="small" /> },
           ]}
         />
@@ -201,7 +201,7 @@ const Assets: React.FC = () => {
                   title: 'RivicQ cryptographic inventory',
                   subtitle: `${rows.length} assets`,
                   bodyHtml: `<table><thead><tr><th>Name</th><th>Algorithm</th><th>Risk</th><th>PQC</th></tr></thead><tbody>${
-                    rows.slice(0, 80).map((a) => `<tr><td>${a.name || ''}</td><td>${a.algorithm || a.crypto_algorithm || ''}</td><td>${a.risk_level || a.riskLevel || ''}</td><td>${a.quantum_safe || a.quantumSafe ? 'Ready' : 'Migrate'}</td></tr>`).join('')
+                    rows.slice(0, 80).map((a) => `<tr><td>${a.name || ''}</td><td>${a.algorithm || a.crypto_algorithm || ''}</td><td>${a.risk_level || a.riskLevel || ''}</td><td>${a.quantum_safe || a.quantumSafe ? 'PQC-ready' : 'Classical'}</td></tr>`).join('')
                   }</tbody></table>`,
                 });
               }}
@@ -262,7 +262,7 @@ const Assets: React.FC = () => {
 
         <TabPanel value={tab} index={3}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Legacy algorithms flagged for NIST PQC migration — prioritize CRITICAL and HIGH items first.
+            Classical algorithms classified against NIST PQC — this is a plan, not a live cut-over.
           </Typography>
           <Stack spacing={1.5}>
             {migrationQueue.map((asset, i) => (
@@ -276,7 +276,7 @@ const Assets: React.FC = () => {
                 <Button size="small" onClick={() => navigate(`/assets/${asset.id}`)}>View plan</Button>
               </Box>
             ))}
-            {!migrationQueue.length && <Typography color="text.secondary">All discovered assets are PQC-ready.</Typography>}
+            {!migrationQueue.length && <Typography color="text.secondary">No classical algorithms queued from this inventory. RSA-2048 is classified, not auto-migrated.</Typography>}
           </Stack>
         </TabPanel>
 

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
-import { tokens } from '../../theme/tokens';
 import dashboardDesign from '../../theme/dashboardDesign';
 import { metricValueSx } from '../../theme/designSystem';
 
@@ -32,7 +31,7 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const theme = useTheme();
   const isZero = value === 0 || value === '0';
-  const color = isZero ? '#a78bfa' : (accent || theme.palette.primary.main);
+  const color = isZero ? '#9ca3af' : (accent || theme.palette.primary.main);
   const valueColor = isZero ? '#ffffff' : (accent || '#ffffff');
 
   return (
@@ -58,21 +57,9 @@ const StatCard: React.FC<StatCardProps> = ({
         transition: dashboardDesign.motion.transition,
         cursor: onClick ? 'pointer' : 'default',
         color: '#ffffff',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          background: featured
-            ? `linear-gradient(90deg, ${color}, ${tokens.colors.rivicq[400]})`
-            : `linear-gradient(90deg, ${color}88, ${color}22)`,
-          opacity: featured ? 1 : 0.7,
-        },
         '&:hover': {
-          borderColor: `${color}55`,
-          boxShadow: `0 8px 24px rgba(0,0,0,0.28), 0 0 0 1px ${color}22`,
+          borderColor: 'rgba(255,255,255,0.22)',
+          boxShadow: 'none',
           transform: dashboardDesign.motion.hoverLift,
         },
       }}
@@ -95,7 +82,7 @@ const StatCard: React.FC<StatCardProps> = ({
             <Typography
               sx={{
                 ...metricValueSx,
-                fontSize: featured ? '1.5rem' : '1.375rem',
+                fontSize: featured ? '1.25rem' : '1.125rem',
                 lineHeight: 1,
                 color: valueColor,
               }}
@@ -141,7 +128,7 @@ const StatCard: React.FC<StatCardProps> = ({
               borderRadius: `${dashboardDesign.radius.sm}px`,
               display: 'grid',
               placeItems: 'center',
-              background: `linear-gradient(135deg, ${color}22, ${color}08)`,
+              background: 'rgba(255,255,255,0.04)',
               color,
               flexShrink: 0,
               border: 1,

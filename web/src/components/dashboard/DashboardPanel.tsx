@@ -42,15 +42,15 @@ const DashboardPanel: React.FC<DashboardPanelProps> = ({
         flexDirection: 'column',
         transition: dashboardDesign.motion.transition,
         '&:hover': {
-          borderColor: 'rgba(255,255,255,0.28)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+          borderColor: 'rgba(255,255,255,0.18)',
+          boxShadow: 'none',
         },
       }}
     >
       <Box
         sx={{
-          px: { xs: 1.75, md: 2.5 },
-          py: { xs: 1.5, md: 2 },
+          px: { xs: 1.25, md: 1.5 },
+          py: { xs: 1, md: 1.15 },
           display: 'flex',
           flexDirection: { xs: action ? 'column' : 'row', sm: 'row' },
           alignItems: { xs: 'flex-start', sm: 'flex-start' },
@@ -93,7 +93,7 @@ const DashboardPanel: React.FC<DashboardPanelProps> = ({
         sx={{
           flexGrow: 1,
           minWidth: 0,
-          p: noPadding ? 0 : { xs: 1.75, md: 2.5 },
+          p: noPadding ? 0 : { xs: 1.25, md: 1.5 },
           pt: noPadding ? 0 : 0,
           borderTop: 1,
           borderColor: 'divider',

@@ -896,7 +896,7 @@ const Layout: React.FC = () => {
           flexGrow: 1,
           width: { lg: `calc(100% - ${desktopWidth}px)` },
           mt: { xs: 7.5, lg: 7.5 },
-          pb: { xs: trailActive ? 28 : 8, sm: trailActive ? 22 : 0 },
+          pb: { xs: trailActive ? 18 : 6, sm: trailActive ? 14 : 0 },
           minHeight: '100vh',
           minWidth: 0,
           overflowX: 'hidden',
@@ -913,7 +913,7 @@ const Layout: React.FC = () => {
           transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
           style={{ minWidth: 0 }}
         >
-          <Box sx={{ px: { xs: 1.25, sm: 2, md: 2.5 }, py: { xs: 1.25, md: 1.75 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
+          <Box sx={{ px: { xs: 1.25, sm: 1.75, md: 2 }, py: { xs: 1, md: 1.25 }, maxWidth: 1280, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />
             <OpsBreadcrumbs />
             <Outlet />

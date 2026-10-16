@@ -41,7 +41,7 @@ export const tokens = {
     fontFamily: 'Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
     mono: '"JetBrains Mono", ui-monospace, monospace',
   },
-  borderRadius: { sm: 8, md: 12, lg: 16, xl: 20, full: 9999 },
+  borderRadius: { sm: 6, md: 8, lg: 10, xl: 12, full: 9999 },
   shadows: {
     glowGreen: '0 0 40px rgba(34,197,94,0.18)',
     glowRed: '0 0 40px rgba(239,68,68,0.18)',

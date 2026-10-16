@@ -80,7 +80,7 @@ export const SECURITY_CHECKLISTS: SecurityChecklist[] = [
       { id: 'Q-INV', title: 'Cryptographic inventory', rivicq: 'CBOM of algorithms, certs, libraries from scans and optional PATH tools.' },
       { id: 'Q-SHOR', title: 'Shor-class public-key exposure', rivicq: 'RSA/ECDSA/ECDH flagged for ML-KEM / ML-DSA replacement.' },
       { id: 'Q-GROV', title: 'Grover-class symmetric length', rivicq: 'AES-128 vs AES-256 notes; not an automatic vulnerability on AES-256.' },
-      { id: 'Q-HYB', title: 'Hybrid cut-over', rivicq: 'PQC migration hub recommends hybrid classical + PQC. Engine does not rotate keys.' },
+      { id: 'Q-HYB', title: 'Hybrid cut-over', rivicq: 'PQC planning recommends hybrid classical + PQC. Engine does not rotate keys.' },
       { id: 'Q-HNDL', title: 'Harvest-now-decrypt-later', rivicq: 'HNDL exposure field on scan intelligence when a scan exists.' },
       { id: 'Q-HSM', title: 'Hardware modules', rivicq: 'Declared HSM/TPM/QSIC inventory. QSIC is a research ASIC, not shipped silicon.' },
       { id: 'Q-FW', title: 'Firmware / semiconductor components', rivicq: 'Declared CycloneDX / hash inventory. No binary reverse-engineering or die inspection.' },

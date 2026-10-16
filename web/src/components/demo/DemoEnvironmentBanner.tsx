@@ -1,9 +1,8 @@
 import React from 'react';
-import { Alert, AlertTitle, Button, Stack } from '@mui/material';
-import { Science } from '@mui/icons-material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import designSystem from '../../theme/designSystem';
+import { NEBULA } from '../../theme/nebulaSurfaces';
 
 const DemoEnvironmentBanner: React.FC = () => {
   const { isDemo, logout } = useAuth();
@@ -12,47 +11,43 @@ const DemoEnvironmentBanner: React.FC = () => {
   if (!isDemo) return null;
 
   return (
-    <Alert
-      severity="info"
-      icon={<Science aria-hidden />}
+    <Box
       role="status"
       aria-label="Demo environment"
       sx={{
-        mb: 2.5,
-        borderRadius: `${designSystem.radius.lg}px`,
-        backdropFilter: 'none',
-        bgcolor: (t) => (t.palette.mode === 'dark' ? 'rgba(124,58,237,0.16)' : 'rgba(124,58,237,0.08)'),
-        border: 1,
-        borderColor: '#7c3aed',
-        '& .MuiAlert-icon': { color: '#a78bfa' },
+        mb: 1,
+        px: 1.25,
+        py: 0.6,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 1,
+        flexWrap: 'wrap',
+        border: '1px solid',
+        borderColor: NEBULA.line,
+        borderRadius: 1,
+        bgcolor: NEBULA.panel,
       }}
-      action={
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => navigate('/demo')}
-            aria-label="Open demo trail"
-          >
-            Demo trail
-          </Button>
-          <Button
-            size="small"
-            color="inherit"
-            onClick={() => {
-              logout();
-              navigate('/', { replace: true });
-            }}
-            aria-label="Exit demo"
-          >
-            Exit Demo
-          </Button>
-        </Stack>
-      }
     >
-      <AlertTitle sx={{ fontWeight: 800, letterSpacing: '0.04em' }}>DEMO ENVIRONMENT</AlertTitle>
-      You are exploring RivicQ with sample data. Demo actions do not touch customer estates.
-    </Alert>
+      <Typography sx={{ fontSize: '0.75rem', color: NEBULA.muted }}>
+        Demo · labeled sample data. Actions do not touch customer estates.
+      </Typography>
+      <Stack direction="row" spacing={0.75}>
+        <Button size="small" onClick={() => navigate('/demo')} sx={{ minHeight: 28, textTransform: 'none' }}>
+          Trail
+        </Button>
+        <Button
+          size="small"
+          onClick={() => {
+            logout();
+            navigate('/', { replace: true });
+          }}
+          sx={{ minHeight: 28, textTransform: 'none' }}
+        >
+          Exit
+        </Button>
+      </Stack>
+    </Box>
   );
 };
 

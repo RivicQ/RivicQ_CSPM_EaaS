@@ -8,7 +8,7 @@ const OpsBreadcrumbs: React.FC = () => {
   const navigate = useNavigate();
   const crumbs = breadcrumbFor(location.pathname);
   return (
-    <Breadcrumbs aria-label="Breadcrumb" sx={{ mb: 1.5, '& .MuiBreadcrumbs-separator': { mx: 0.5 } }}>
+    <Breadcrumbs aria-label="Breadcrumb" sx={{ mb: 0.75, '& .MuiBreadcrumbs-separator': { mx: 0.5 } }}>
       {crumbs.map((c, i) => {
         const last = i === crumbs.length - 1;
         if (last) {

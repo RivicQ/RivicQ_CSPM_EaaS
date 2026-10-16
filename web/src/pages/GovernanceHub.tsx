@@ -1,12 +1,11 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Chip, Stack, Typography } from '@mui/material';
+import { Chip, Stack, Typography } from '@mui/material';
 import PageFrame from '../components/PageFrame';
 import { bomService } from '../services/api';
 import { GOVERNANCE_CONTROLS } from '../data/bomFramework';
 import { isPaidEdition } from '../config/editions';
 import { useAuth } from '../context/AuthContext';
-import OpsHeroVisual from '../components/ops/OpsHeroVisual';
 import ChecklistPanel from '../components/ops/ChecklistPanel';
 
 const GovernanceHub: React.FC = () => {
@@ -20,19 +19,16 @@ const GovernanceHub: React.FC = () => {
   const rows = data?.controls?.length ? data.controls : GOVERNANCE_CONTROLS.map((c) => ({
     framework: c.framework, control: c.control, bom: c.bom, status: c.community || paid ? 'mapped' : 'locked', pack: paid,
   }));
-  const mapped = rows.filter((c: any) => c.status === 'mapped' || c.community || c.pack).length;
-  const locked = Math.max(0, rows.length - mapped);
   return (
     <PageFrame
       eyebrow="Governance"
       title="Compliance mapping"
-      subtitle="DORA, NIS2, EU AI Act, CRA, NIST Zero Trust, FIPS, BSI, plus OWASP API/publication/network lists and a RivicQ quantum checklist. Community is JSON mappings. Enterprise enables the evidence pack. Not a certification."
-      visual={<OpsHeroVisual variant="governance" mapped={mapped} locked={locked} />}
+      subtitle="Operator control mappings only. Community is JSON. Enterprise can add an evidence pack. Not a certification."
     >
-      <Alert severity="info" sx={{ mb: 2 }}>{data?.note || 'Operator mappings only.'}</Alert>
-      <Stack spacing={1.25} sx={{ mb: 3 }}>
+      <Typography color="text.secondary" sx={{ mb: 1, fontSize: '0.75rem' }}>{data?.note || 'Operator mappings only.'}</Typography>
+      <Stack spacing={0.75} sx={{ mb: 1.5 }}>
         {rows.map((c: any) => (
-          <Stack key={`${c.framework}-${c.control}`} direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ md: 'center' }} sx={{ p: 1.5, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+          <Stack key={`${c.framework}-${c.control}`} direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ md: 'center' }} sx={{ px: 1, py: 0.7, border: 1, borderColor: 'divider', borderRadius: 1 }}>
             <Chip size="small" color="primary" label={c.framework} />
             <Typography sx={{ flex: 1 }} fontWeight={600}>{c.control}</Typography>
             <Chip size="small" variant="outlined" label={String(c.bom || '').toUpperCase()} />
@@ -40,7 +36,7 @@ const GovernanceHub: React.FC = () => {
           </Stack>
         ))}
       </Stack>
-      <Typography variant="h6" fontWeight={800} sx={{ mb: 1.5 }}>Published checklists</Typography>
+      <Typography sx={{ fontSize: '0.8125rem', fontWeight: 700, mb: 1 }}>Published checklists</Typography>
       <ChecklistPanel />
     </PageFrame>
   );
