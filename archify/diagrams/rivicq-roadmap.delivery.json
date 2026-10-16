@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "818b1da1-91d8-463f-a324-07045ca2e844",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/re1/re1/CSPM/archify/spec/rivicq-roadmap.json",
+  "output": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-roadmap.html",
+  "specification": {
+    "sha256": "44c50de3e123c8898cd3a8d56d3407bebbc6b64d1233c53ce7e83d03e2c1c502",
+    "bytes": 4752
+  },
+  "artifact": {
+    "sha256": "24821dd9c750459368e5598cd5021c3062d1123fea7f4f4978081ffde7685ce4",
+    "bytes": 760032
+  }
+}

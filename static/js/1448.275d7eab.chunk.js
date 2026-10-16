@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkcryptobom_saas_frontend=self.webpackChunkcryptobom_saas_frontend||[]).push([[1448],{41448(e,s,t){t.r(s),t.d(s,{default:()=>o});t(65043);var a=t(52716),r=t(70579);const o=()=>(0,r.jsx)(a.A,{defaultMode:"register"})}}]);
+//# sourceMappingURL=1448.275d7eab.chunk.js.map

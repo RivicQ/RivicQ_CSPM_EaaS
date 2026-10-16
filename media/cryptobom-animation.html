@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<!-- CRYPTOBOM-ANIMATION v1.0 -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CryptoBOM SaaS — Platform Animation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0a14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Courier New', Courier, monospace;
+      color: #c0c0d0;
+    }
+    #wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    canvas {
+      display: block;
+      border: 1px solid #1a1a2e;
+    }
+    #controls {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+    }
+    #btnPause {
+      background: rgba(0,212,255,0.12);
+      border: 1px solid #00d4ff;
+      color: #00d4ff;
+      font-family: inherit;
+      font-size: 12px;
+      padding: 4px 12px;
+      cursor: pointer;
+      border-radius: 3px;
+      letter-spacing: 1px;
+    }
+    #btnPause:hover { background: rgba(0,212,255,0.25); }
+  </style>
+</head>
+<body>
+<div id="wrapper">
+  <canvas id="c"></canvas>
+  <div id="controls"><button id="btnPause">⏸ PAUSE</button></div>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Constants ─────────────────────────────────────────── */
+  const W = 900, H = 560;
+  const LOOP = 8000; // ms
+  const VERSION = 'v1.3';
+  const COL = {
+    bg:      '#0a0a14',
+    blue:    '#00d4ff',
+    purple:  '#8b5cf6',
+    silver:  '#c0c0d0',
+    green:   '#00ff88',
+    red:     '#ff4444',
+    gold:    '#ffd700',
+    dark:    '#0d0d22',
+    panel:   '#10102a',
+  };
+
+  /* ── Canvas setup ───────────────────────────────────────── */
+  const canvas = document.getElementById('c');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+
+  /* ── State ──────────────────────────────────────────────── */
+  let paused    = false;
+  let lastTime  = null;
+  let elapsed   = 0; // ms within current loop
+  let loopCount = 0;
+  let rafId     = null;
+
+  /* ── Node network (Phase 1) ─────────────────────────────── */
+  const NODES = [
+    { x: 200, y: 160, label: 'AES-256' },
+    { x: 420, y: 100, label: 'RSA-4096' },
+    { x: 640, y: 150, label: 'ECDSA' },
+    { x: 160, y: 310, label: 'SHA-3' },
+    { x: 370, y: 280, label: 'ChaCha20' },
+    { x: 580, y: 270, label: 'Ed25519' },
+    { x: 280, y: 420, label: 'X25519' },
+    { x: 490, y: 380, label: 'Kyber-768' },
+    { x: 700, y: 340, label: 'Dilithium' },
+  ];
+  const CX = 450, CY = 250; // centre
+
+  const EDGES = [
+    [0,1],[1,2],[0,3],[1,4],[2,5],[3,4],[4,5],[3,6],[4,7],[5,8],[6,7],[7,8]
+  ];
+
+  /* ── Checklist items (Phase 2) ───────────────────────────── */
+  const CHECKS = ['BSI TR-02102','eIDAS 2.0','DORA','NIST PQC','CRYSTALS-Kyber'];
+
+  /* ── Helpers ─────────────────────────────────────────────── */
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+  function hexAlpha(hex, a) {
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
+  /* ── Drawing primitives ───────────────────────────────────── */
+  function drawBackground() {
+    ctx.fillStyle = COL.bg;
+    ctx.fillRect(0, 0, W, H);
+    // subtle vignette
+    const vg = ctx.createRadialGradient(CX, CY, 100, CX, CY, 500);
+    vg.addColorStop(0, 'transparent');
+    vg.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawGrid(alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.18;
+    ctx.strokeStyle = COL.silver;
+    ctx.lineWidth = 0.5;
+    const step = 40;
+    for (let x = 0; x <= W; x += step) {
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    }
+    for (let y = 0; y <= H; y += step) {
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawEdges(highlightMask, alpha) {
+    EDGES.forEach(([a,b]) => {
+      const bothHit = highlightMask[a] && highlightMask[b];
+      ctx.save();
+      ctx.globalAlpha = alpha * (bothHit ? 0.7 : 0.15);
+      ctx.strokeStyle = bothHit ? COL.blue : COL.silver;
+      ctx.lineWidth   = bothHit ? 1.2 : 0.8;
+      if (bothHit) {
+        ctx.shadowColor = COL.blue;
+        ctx.shadowBlur  = 6;
+      }
+      ctx.beginPath();
+      ctx.moveTo(NODES[a].x, NODES[a].y);
+      ctx.lineTo(NODES[b].x, NODES[b].y);
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function drawNode(n, glow, alpha, showLabel) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (glow) {
+      ctx.shadowColor = COL.blue;
+      ctx.shadowBlur  = 18;
+    }
+    const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, 10);
+    grad.addColorStop(0, glow ? COL.blue : '#2a2a4a');
+    grad.addColorStop(1, glow ? hexAlpha(COL.blue,0.2) : '#151525');
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, 8, 0, Math.PI*2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = glow ? COL.blue : COL.silver;
+    ctx.lineWidth = glow ? 2 : 0.8;
+    ctx.stroke();
+    if (showLabel) {
+      ctx.font = 'bold 9px Courier New, monospace';
+      ctx.fillStyle = glow ? COL.blue : hexAlpha(COL.silver, 0.5);
+      ctx.fillText(n.label, n.x + 11, n.y + 4);
+    }
+    if (glow) {
+      // padlock icon
+      const px = n.x - 6, py = n.y - 22;
+      ctx.strokeStyle = COL.blue;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(px, py + 5, 12, 9);
+      ctx.beginPath();
+      ctx.arc(px + 6, py + 5, 4.5, Math.PI, 0);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawPulse(progress, alpha) {
+    const maxR = 340;
+    const r = maxR * progress;
+    ctx.save();
+    ctx.globalAlpha = alpha * (1 - progress) * 0.8;
+    ctx.strokeStyle = COL.blue;
+    ctx.lineWidth   = 2.5;
+    ctx.shadowColor = COL.blue;
+    ctx.shadowBlur  = 20;
+    ctx.beginPath();
+    ctx.arc(CX, CY, r, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function nodeHit(n, pulseR) {
+    const d = Math.hypot(n.x - CX, n.y - CY);
+    return d <= pulseR;
+  }
+
+  /* ── Phase 1 ─────────────────────────────────────────────── */
+  function drawPhase1(t) { // t 0..1
+    drawGrid(1);
+    const pulseProgress = t; // 0→1 over full phase
+    const pulseR = 340 * pulseProgress;
+    const highlightMask = NODES.map(n => nodeHit(n, pulseR));
+    drawEdges(highlightMask, 1);
+    NODES.forEach((n,i) => drawNode(n, highlightMask[i], 1, true));
+    // multiple pulse rings for radar effect
+    for (let k=0; k<3; k++) {
+      const prog = ((t * 3 + k) % 3) / 3;
+      drawPulse(prog, 0.7);
+    }
+    // Counter
+    const count = highlightMask.filter(Boolean).length;
+    ctx.save();
+    ctx.font = 'bold 13px Courier New, monospace';
+    ctx.fillStyle = COL.blue;
+    ctx.shadowColor = COL.blue;
+    ctx.shadowBlur = 10;
+    ctx.fillText(`Scanning… ${count} / ${NODES.length} assets found`, 30, H - 65);
+    ctx.restore();
+  }
+
+  /* ── Phase 2 ─────────────────────────────────────────────── */
+  function drawPhase2(t) { // t 0..1
+    drawGrid(1);
+    const highlightMask = NODES.map(() => true);
+    drawEdges(highlightMask, 0.4);
+    NODES.forEach(n => drawNode(n, true, 0.6, false));
+
+    // Panel
+    const px = 570, py = 70, pw = 300, ph = 300;
+    roundRect(ctx, px, py, pw, ph, 8);
+    ctx.fillStyle = COL.panel;
+    ctx.fill();
+    ctx.strokeStyle = COL.purple;
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = COL.purple;
+    ctx.shadowBlur = 12;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    ctx.font = 'bold 11px Courier New, monospace';
+    ctx.fillStyle = COL.purple;
+    ctx.fillText('PQC COMPLIANCE CHECK', px + 14, py + 22);
+
+    CHECKS.forEach((label, i) => {
+      const itemT = clamp((t * (CHECKS.length + 1)) - i, 0, 1);
+      const iy = py + 50 + i * 44;
+      // connecting line from node to panel
+      const node = NODES[i % NODES.length];
+      ctx.save();
+      ctx.globalAlpha = clamp(itemT * 2, 0, 1) * 0.45;
+      ctx.strokeStyle = COL.purple;
+      ctx.lineWidth = 0.8;
+      ctx.setLineDash([3,4]);
+      ctx.beginPath();
+      ctx.moveTo(node.x, node.y);
+      ctx.lineTo(px, iy + 8);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // row
+      ctx.save();
+      ctx.globalAlpha = clamp(itemT * 2, 0, 1);
+      const checked = itemT >= 0.5;
+      ctx.strokeStyle = checked ? COL.green : COL.red;
+      ctx.lineWidth = 1;
+      roundRect(ctx, px+14, iy, pw-28, 34, 4);
+      ctx.fillStyle = checked ? hexAlpha(COL.green, 0.08) : hexAlpha(COL.red, 0.08);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = '11px Courier New, monospace';
+      ctx.fillStyle = checked ? COL.green : COL.red;
+      ctx.fillText((checked ? '✓ ' : '✗ ') + label, px + 24, iy + 21);
+
+      if (checked) {
+        ctx.shadowColor = COL.green; ctx.shadowBlur = 8;
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillStyle = COL.green;
+        ctx.fillText('🛡', px + pw - 40, iy + 23);
+        ctx.shadowBlur = 0;
+      }
+      ctx.restore();
+    });
+
+    // progress bar
+    const barY = py + ph - 30;
+    ctx.fillStyle = '#1a1a2e';
+    roundRect(ctx, px+14, barY, pw-28, 16, 4);
+    ctx.fill();
+    const fillW = (pw-28) * t;
+    const grad = ctx.createLinearGradient(px+14, 0, px+14+fillW, 0);
+    grad.addColorStop(0, COL.purple);
+    grad.addColorStop(1, COL.green);
+    roundRect(ctx, px+14, barY, fillW, 16, 4);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.font = '10px Courier New, monospace';
+    ctx.fillStyle = COL.silver;
+    ctx.fillText(Math.round(t*100) + '% compliant', px+14+4, barY+11);
+  }
+
+  /* ── Phase 3 ─────────────────────────────────────────────── */
+  function drawQuantumLogo(cx, cy, r, alpha, pulse) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const pr = r * (1 + pulse * 0.12);
+    // outer glow
+    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, pr * 1.8);
+    grd.addColorStop(0, hexAlpha(COL.purple, 0.3));
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(cx, cy, pr * 1.8, 0, Math.PI*2);
+    ctx.fill();
+
+    // orbit rings
+    const orbits = [
+      { rx: pr*1.1, ry: pr*0.4, angle: 0 },
+      { rx: pr*1.1, ry: pr*0.4, angle: Math.PI/3 },
+      { rx: pr*1.1, ry: pr*0.4, angle: -Math.PI/3 },
+    ];
+    ctx.strokeStyle = COL.purple;
+    ctx.lineWidth = 2;
+    ctx.shadowColor = COL.purple;
+    ctx.shadowBlur = 12;
+    orbits.forEach(o => {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(o.angle);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, o.rx, o.ry, 0, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // nucleus
+    const ng = ctx.createRadialGradient(cx,cy,0,cx,cy,pr*0.35);
+    ng.addColorStop(0, '#ffffff');
+    ng.addColorStop(0.4, COL.blue);
+    ng.addColorStop(1, COL.purple);
+    ctx.beginPath();
+    ctx.arc(cx, cy, pr*0.35, 0, Math.PI*2);
+    ctx.fillStyle = ng;
+    ctx.shadowColor = COL.blue;
+    ctx.shadowBlur = 20;
+    ctx.fill();
+
+    // "Q" letter
+    ctx.font = `bold ${Math.round(pr*0.45)}px Courier New, monospace`;
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = COL.blue;
+    ctx.shadowBlur = 15;
+    ctx.fillText('Q', cx, cy + 1);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.restore();
+  }
+
+  function drawCertRibbon(cx, cy, slideIn, shimmer) {
+    const rw = 340, rh = 90;
+    const rx = cx - rw/2;
+    const ry = cy + 80 + (1-ease(slideIn)) * 120;
+    ctx.save();
+    ctx.globalAlpha = ease(slideIn);
+
+    // ribbon background
+    const rg = ctx.createLinearGradient(rx, ry, rx, ry+rh);
+    rg.addColorStop(0, '#1e1e3a');
+    rg.addColorStop(1, '#0e0e24');
+    roundRect(ctx, rx, ry, rw, rh, 6);
+    ctx.fillStyle = rg;
+    ctx.fill();
+
+    // gold border
+    const shimX = rx + shimmer * (rw + 60) - 30;
+    ctx.strokeStyle = COL.gold;
+    ctx.lineWidth = 2;
+    ctx.shadowColor = COL.gold;
+    ctx.shadowBlur = 10;
+    roundRect(ctx, rx, ry, rw, rh, 6);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // QR dot pattern
+    ctx.fillStyle = COL.silver;
+    for (let qi=0; qi<7; qi++) for (let qj=0; qj<7; qj++) {
+      if ((qi+qj)%2===0) {
+        ctx.fillRect(rx+rw-74+qi*8, ry+8+qj*8, 5, 5);
+      }
+    }
+    ctx.fillStyle = '#0a0a14';
+    ctx.fillRect(rx+rw-74, ry+8, 20, 20);
+    ctx.fillRect(rx+rw-74+36, ry+8, 20, 20);
+    ctx.fillRect(rx+rw-74, ry+44, 20, 20);
+    ctx.fillStyle = COL.silver;
+    ctx.fillRect(rx+rw-70, ry+12, 12, 12);
+    ctx.fillRect(rx+rw-70+36, ry+12, 12, 12);
+    ctx.fillRect(rx+rw-70, ry+48, 12, 12);
+
+    // certificate text
+    ctx.font = 'bold 16px Courier New, monospace';
+    ctx.fillStyle = COL.gold;
+    ctx.shadowColor = COL.gold;
+    ctx.shadowBlur = 8;
+    ctx.fillText('QUANTUM ATTESTATION  ✓', rx+16, ry+30);
+    ctx.shadowBlur = 0;
+    ctx.font = '10px Courier New, monospace';
+    ctx.fillStyle = COL.silver;
+    ctx.fillText('IBM Quantum Network · Issued 2026 · Valid 365 days', rx+16, ry+50);
+    ctx.fillText('Fingerprint: 4A:F2:9C:D1:3E:8B:72:AF:C5:01:9D:44:BB:E6:28', rx+16, ry+68);
+
+    // shimmer
+    const sg = ctx.createLinearGradient(shimX-20, ry, shimX+20, ry+rh);
+    sg.addColorStop(0, 'transparent');
+    sg.addColorStop(0.5, hexAlpha(COL.gold, 0.25));
+    sg.addColorStop(1, 'transparent');
+    roundRect(ctx, rx, ry, rw, rh, 6);
+    ctx.fillStyle = sg;
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawPhase3(t) {
+    drawGrid(0.6);
+    const pulse = Math.sin(t * Math.PI * 6) * 0.5 + 0.5;
+    const appear = clamp(t * 2.5, 0, 1);
+    drawQuantumLogo(CX, 190, 60, appear, pulse);
+    const ribbonT = clamp((t - 0.4) * 2.5, 0, 1);
+    if (ribbonT > 0) drawCertRibbon(CX, 190, ribbonT, t);
+    ctx.save();
+    ctx.font = 'bold 11px Courier New, monospace';
+    ctx.fillStyle = hexAlpha(COL.purple, 0.9);
+    ctx.fillText('IBM Quantum Network · Attestation Service', 30, H-65);
+    ctx.restore();
+  }
+
+  /* ── Phase 4 ─────────────────────────────────────────────── */
+  const PACKET_ORIGINS = [
+    {x:250,y:350},{x:400,y:430},{x:550,y:180},{x:180,y:250},{x:620,y:320},
+    {x:300,y:180},{x:700,y:200},{x:150,y:400},{x:500,y:120},
+  ];
+  const VAULT_X = 700, VAULT_Y = 340;
+
+  function drawVault(doorScale, locked) {
+    const vx = VAULT_X - 55, vy = VAULT_Y - 65;
+    const vw = 110, vh = 130;
+    ctx.save();
+
+    // vault body
+    const vg = ctx.createLinearGradient(vx, vy, vx+vw, vy+vh);
+    vg.addColorStop(0, '#2a2a3e');
+    vg.addColorStop(0.5, '#3a3a52');
+    vg.addColorStop(1, '#1a1a28');
+    roundRect(ctx, vx, vy, vw, vh, 8);
+    ctx.fillStyle = vg;
+    ctx.fill();
+    ctx.strokeStyle = COL.silver;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // LED strip
+    const ledG = ctx.createLinearGradient(vx, vy+vh-14, vx+vw, vy+vh-14);
+    ledG.addColorStop(0, 'transparent');
+    ledG.addColorStop(0.5, locked ? COL.green : COL.blue);
+    ledG.addColorStop(1, 'transparent');
+    ctx.fillStyle = ledG;
+    ctx.fillRect(vx+4, vy+vh-14, vw-8, 8);
+
+    // door (animated scale)
+    const dw = (vw-20) * doorScale;
+    const dg = ctx.createLinearGradient(vx+10, vy+10, vx+10+dw, vy+vh-30);
+    dg.addColorStop(0, '#4a4a66');
+    dg.addColorStop(1, '#2a2a3e');
+    ctx.fillStyle = dg;
+    ctx.fillRect(vx+10, vy+10, dw, vh-30);
+    ctx.strokeStyle = hexAlpha(COL.silver, 0.5);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(vx+10, vy+10, dw, vh-30);
+
+    // combination dial
+    if (doorScale > 0.5) {
+      const cx2 = vx+10 + dw*0.5, cy2 = vy + 10 + (vh-30)*0.5;
+      const dialR = Math.min(dw, vh-30) * 0.28;
+      const dgrad = ctx.createRadialGradient(cx2-dialR*0.3, cy2-dialR*0.3, 0, cx2, cy2, dialR);
+      dgrad.addColorStop(0, '#606080');
+      dgrad.addColorStop(1, '#1e1e30');
+      ctx.beginPath(); ctx.arc(cx2, cy2, dialR, 0, Math.PI*2);
+      ctx.fillStyle = dgrad; ctx.fill();
+      ctx.strokeStyle = COL.silver; ctx.lineWidth = 1.5; ctx.stroke();
+      // notch
+      for (let i=0; i<8; i++) {
+        const a = (i/8)*Math.PI*2;
+        ctx.beginPath();
+        ctx.moveTo(cx2 + Math.cos(a)*dialR*0.7, cy2 + Math.sin(a)*dialR*0.7);
+        ctx.lineTo(cx2 + Math.cos(a)*dialR*0.95, cy2 + Math.sin(a)*dialR*0.95);
+        ctx.stroke();
+      }
+    }
+
+    ctx.restore();
+
+    // padlock icon when locked
+    if (locked) {
+      ctx.save();
+      ctx.shadowColor = COL.green; ctx.shadowBlur = 20;
+      ctx.strokeStyle = COL.green; ctx.lineWidth = 3;
+      ctx.strokeRect(VAULT_X-14, VAULT_Y - 90, 28, 22);
+      ctx.beginPath();
+      ctx.arc(VAULT_X, VAULT_Y - 90, 10, Math.PI, 0);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+  }
+
+  function drawPhase4(t) {
+    drawGrid(0.5);
+    NODES.forEach(n => drawNode(n, false, 0.25, false));
+
+    const packetsArrived = Math.floor(t * (PACKET_ORIGINS.length + 1));
+    let allArrived = packetsArrived >= PACKET_ORIGINS.length;
+    const doorT = clamp((t - 0.6) / 0.25, 0, 1);
+    const doorScale = allArrived ? 1 - ease(doorT) : 1;
+    const locked = doorT >= 1;
+
+    // draw packets
+    PACKET_ORIGINS.forEach((o, i) => {
+      const pT = clamp(t * (PACKET_ORIGINS.length + 1) - i, 0, 1);
+      if (pT <= 0) return;
+      const arrived = pT >= 1;
+      const px = lerp(o.x, VAULT_X, ease(pT));
+      const py = lerp(o.y, VAULT_Y, ease(pT));
+      ctx.save();
+      ctx.globalAlpha = arrived ? 0 : 1;
+      ctx.shadowColor = COL.blue; ctx.shadowBlur = 12;
+      ctx.fillStyle = COL.blue;
+      const sz = 8;
+      ctx.fillRect(px - sz/2, py - sz/2, sz, sz);
+      ctx.strokeStyle = hexAlpha(COL.blue, 0.6);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(px - sz/2, py - sz/2, sz, sz);
+      ctx.restore();
+    });
+
+    drawVault(doorScale, locked);
+
+    if (locked) {
+      ctx.save();
+      ctx.font = 'bold 14px Courier New, monospace';
+      ctx.fillStyle = COL.green;
+      ctx.shadowColor = COL.green; ctx.shadowBlur = 14;
+      ctx.fillText('SECURED IN CLOUD HSM', VAULT_X - 80, VAULT_Y + 90);
+      ctx.shadowBlur = 0;
+      // status indicators
+      ['ENCRYPTED','ATTESTED','COMPLIANT','LOCKED'].forEach((s,i) => {
+        ctx.font = '9px Courier New, monospace';
+        ctx.fillStyle = COL.green;
+        ctx.fillText('● ' + s, VAULT_X - 80 + i*110, VAULT_Y + 108);
+      });
+      ctx.restore();
+    }
+  }
+
+  /* ── HUD ──────────────────────────────────────────────────── */
+  const PHASE_NAMES = [
+    'Phase 1 — Inventory Discovery',
+    'Phase 2 — PQC Compliance',
+    'Phase 3 — IBM Quantum Attestation',
+    'Phase 4 — Cloud HSM Vault Lock',
+  ];
+
+  function drawHUD(t, phase, loopCount) {
+    const hh = 38;
+    const hy = H - hh;
+    ctx.fillStyle = '#08081a';
+    ctx.fillRect(0, hy, W, hh);
+    ctx.strokeStyle = hexAlpha(COL.blue, 0.35);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, hy); ctx.lineTo(W, hy); ctx.stroke();
+
+    // phase name
+    ctx.font = 'bold 11px Courier New, monospace';
+    ctx.fillStyle = COL.blue;
+    ctx.fillText(PHASE_NAMES[phase], 14, hy + 15);
+
+    // progress bar
+    const bx = 14, by = hy + 22, bw = 400, bh = 8;
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(bx, by, bw, bh);
+    const pg = ctx.createLinearGradient(bx, 0, bx+bw*((phase + t)/4), 0);
+    pg.addColorStop(0, COL.blue);
+    pg.addColorStop(1, COL.purple);
+    ctx.fillStyle = pg;
+    ctx.fillRect(bx, by, bw * ((phase + t) / 4), bh);
+
+    // time / loop
+    const total = (phase + t) * 2000;
+    const secs = (total / 1000).toFixed(2);
+    ctx.font = '10px Courier New, monospace';
+    ctx.fillStyle = hexAlpha(COL.silver, 0.75);
+    ctx.fillText(`t=${secs}s`, bx + bw + 14, hy + 15);
+    ctx.fillText(`loop #${loopCount + 1}`, bx + bw + 14, hy + 30);
+
+    // phase dots
+    for (let i=0; i<4; i++) {
+      ctx.beginPath();
+      ctx.arc(W - 80 + i*18, hy + 19, 5, 0, Math.PI*2);
+      ctx.fillStyle = i <= phase ? COL.blue : '#2a2a3e';
+      ctx.shadowColor = i <= phase ? COL.blue : 'transparent';
+      ctx.shadowBlur = i <= phase ? 8 : 0;
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  /* ── Title ────────────────────────────────────────────────── */
+  function drawTitle() {
+    ctx.save();
+    ctx.font = 'bold 13px Courier New, monospace';
+    ctx.fillStyle = hexAlpha(COL.silver, 0.6);
+    ctx.fillText('CryptoBOM SaaS — Platform Workflow', 14, 22);
+    ctx.font = '10px Courier New, monospace';
+    ctx.fillStyle = hexAlpha(COL.silver, 0.35);
+    ctx.fillText(VERSION + '  |  IBM Quantum · NIST PQC · Cloud HSM', 14, 38);
+    ctx.restore();
+  }
+
+  /* ── Main render ─────────────────────────────────────────── */
+  function render(ts) {
+    if (!paused) {
+      if (lastTime !== null) {
+        const delta = ts - lastTime;
+        elapsed += delta;
+        if (elapsed >= LOOP) {
+          elapsed -= LOOP;
+          loopCount++;
+        }
+      }
+      lastTime = ts;
+    } else {
+      lastTime = ts;
+    }
+
+    const t01 = elapsed / LOOP; // 0..1 over full loop
+    const phase = Math.min(3, Math.floor(t01 * 4));
+    const phaseT = (t01 * 4) - phase; // 0..1 within phase
+
+    drawBackground();
+    drawTitle();
+
+    switch (phase) {
+      case 0: drawPhase1(phaseT); break;
+      case 1: drawPhase2(phaseT); break;
+      case 2: drawPhase3(phaseT); break;
+      case 3: drawPhase4(phaseT); break;
+    }
+
+    drawHUD(phaseT, phase, loopCount);
+
+    rafId = requestAnimationFrame(render);
+  }
+
+  /* ── Controls ─────────────────────────────────────────────── */
+  document.getElementById('btnPause').addEventListener('click', function () {
+    paused = !paused;
+    this.textContent = paused ? '▶ PLAY' : '⏸ PAUSE';
+  });
+
+  /* ── Start ────────────────────────────────────────────────── */
+  rafId = requestAnimationFrame(render);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RivicQ — Cryptographic Security Posture Management</title>
+  <meta name="description" content="RivicQ inventories cryptography (CBOM) and software components (SBOM), then classifies risk, quantum exposure, and control gaps. One engine, two editions — every diagram on this page is a validated, interactive Archify artifact.">
+  <meta name="theme-color" content="#000000">
+  <link rel="canonical" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/marketing/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RivicQ">
+  <meta property="og:title" content="RivicQ — Cryptographic Security Posture Management">
+  <meta property="og:description" content="Scan it once. Get a posture you can trust — one engine, two editions, eight system maps.">
+  <link rel="icon" type="image/svg+xml" href="assets/rivicq-mark.svg">
+  <link rel="icon" type="image/png" href="assets/rivicq-mark.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/rivicq-site.css">
+  <script>(function () { document.documentElement.setAttribute('data-theme', 'dark'); try { localStorage.setItem('rivicq-site-theme', 'dark'); } catch (_) {} })();</script>
+</head>
+<body>
+
+  <!-- ═════════════════ NAVIGATION ═════════════════ -->
+  <nav class="site-nav" id="site-nav">
+    <a class="nav-logo" href="#top" aria-label="RivicQ home">
+      <img src="assets/rivicq-mark.svg" alt="" width="30" height="30">
+      <span class="nav-logo-text">RivicQ</span>
+    </a>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a class="nav-link" href="#tour">Live map</a>
+        <a class="nav-link" href="#diagrams">Diagrams</a>
+        <a class="nav-link" href="#types">Questions</a>
+        <a class="nav-link" href="#features">Output</a>
+        <a class="nav-link" href="#quickstart">Quick start</a>
+        <a class="nav-link" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <a class="btn nav-cta" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/register" target="_blank" rel="noopener">Get started</a>
+    </div>
+  </nav>
+
+  <main id="main-content">
+
+  <!-- ═════════════════ HERO ═════════════════ -->
+  <style>.hero { padding-bottom:6.5rem; }</style>
+  <section class="hero" id="top" data-proof-aperture="first-fold">
+    <div class="hero-aura" aria-hidden="true"><div class="hero-spot"></div><div class="hero-horizon"></div></div>
+    <div class="hero-copy">
+      <a class="hero-eyebrow fade-up" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/CHANGELOG.md" target="_blank" rel="noopener">
+        <span class="eyebrow-tag">CSPM v1.2</span>
+        <span>Cryptographic Security Posture Management · Berlin</span>
+        <span class="eyebrow-arrow" aria-hidden="true">→</span>
+      </a>
+      <h1><span class="l">Scan it once.</span><span class="l">Get a posture <em>you can trust.</em></span></h1>
+      <p class="hero-sub fade-up d2">Code, containers, TLS endpoints, firmware, or cloud estates — RivicQ inventories the cryptography (CBOM) and software components (SBOM) behind them, then classifies risk, quantum exposure, and control gaps. One deterministic engine, two editions, mapped the way it really runs.</p>
+      <div class="hero-actions fade-up d3">
+        <div class="cmd-chip">
+          <span class="cmd-prompt" aria-hidden="true">$</span>
+          <code>rivicq scan .</code>
+          <button class="cmd-copy" type="button" data-copy-text="rivicq scan ." aria-label="Copy scan command">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"></rect><path d="M9.5 4.5V3A1.5 1.5 0 0 0 8 1.5H3A1.5 1.5 0 0 0 1.5 3v5A1.5 1.5 0 0 0 3 9.5h1.5" stroke="currentColor" stroke-width="1.3"></path></svg>
+            <span class="cmd-copy-label">Copy</span>
+          </button>
+        </div>
+        <a class="btn btn-primary" href="#quickstart">
+          <span>Get started</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </a>
+        <a class="btn btn-ghost demo-trigger" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/demo" target="_blank" rel="noopener">
+          <span class="play-ring" aria-hidden="true"><svg width="8" height="9" viewBox="0 0 9 10" fill="none"><path d="M1 1.2v7.6L8 5z" fill="currentColor"></path></svg></span>
+          <span>Try the live demo</span>
+        </a>
+      </div>
+      <div class="hero-meta fade-up d4">
+        <span class="hero-works">Works with <b>Community OSS</b> · <b>Enterprise</b> · <b>GitHub Action</b> · <b>Firmware &amp; Identity</b></span>
+        <a class="hero-stars" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 .2a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.88.87 2.34.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 .2Z"></path></svg>
+          <span><b>Apache 2.0</b> on GitHub</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════ LIVE STAGE ═════════════════ -->
+  <section class="stage" id="tour" aria-labelledby="tour-title">
+    <h2 class="sr-only" id="tour-title">Live system tour</h2>
+    <div class="stage-pin">
+      <div class="stage-window" id="hero-proof-stage">
+        <div class="window-bar">
+          <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <div class="proof-rail" id="proof-tabs" role="tablist" aria-label="Choose a live RivicQ system map">
+            <button class="spec-card" id="proof-tab-architecture" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="true" tabindex="0" data-proof="architecture">
+              <span class="spec-idx">01</span><span class="spec-name">Platform Architecture</span>
+            </button>
+            <button class="spec-card" id="proof-tab-scanning" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="scanning">
+              <span class="spec-idx">02</span><span class="spec-name">Scan Request</span>
+            </button>
+            <button class="spec-card" id="proof-tab-analysis" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="analysis">
+              <span class="spec-idx">03</span><span class="spec-name">Analysis Pipeline</span>
+            </button>
+            <button class="spec-card" id="proof-tab-compliance" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="compliance">
+              <span class="spec-idx">04</span><span class="spec-name">Compliance &amp; Evidence</span>
+            </button>
+          </div>
+          <div class="window-address" aria-hidden="true">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2" y="5.5" width="8" height="5.5" rx="1.2" stroke="currentColor" stroke-width="1.2"></rect><path d="M4 5.5V4a2 2 0 1 1 4 0v1.5" stroke="currentColor" stroke-width="1.2"></path></svg>
+            <span id="address-file">rivicq-architecture.html</span><b id="address-hash"></b>
+          </div>
+          <a class="proof-open" id="proof-open" href="../diagrams/rivicq-architecture.html?present=1#focus=api&amp;reach=downstream" target="_blank" rel="noopener" aria-label="Open the interactive diagram in a new tab">
+            <span>Open artifact</span><span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="hero-frame" id="hero-proof-panel" role="tabpanel" aria-labelledby="proof-tab-architecture">
+          <iframe id="hero-proof-frame" data-proof="architecture" data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1&amp;theme=dark#overview" title="RivicQ Platform Architecture — live proof" loading="eager"></iframe>
+        </div>
+        <div class="beat-card" aria-live="polite">
+          <div class="beat-rail" role="group" aria-label="Camera beats">
+            <button class="beat-tick" type="button" data-beat="0" aria-pressed="true"><span>Map</span></button>
+            <button class="beat-tick" type="button" data-beat="1" aria-pressed="false"><span>Focus</span></button>
+            <button class="beat-tick" type="button" data-beat="2" aria-pressed="false"><span>Upstream</span></button>
+            <button class="beat-tick" type="button" data-beat="3" aria-pressed="false"><span>Lens</span></button>
+          </div>
+          <p class="beat-meta"><span class="proof-live">Live</span><span id="proof-meta">Architecture · Blueprint · 13 nodes · 12 edges</span></p>
+          <h3 class="beat-title" id="beat-title">The whole system, in one readable frame.</h3>
+          <p class="beat-body" id="beat-body">This is the real generated artifact, not a screenshot. Lanes, boundaries, and every authored edge — scroll to move its camera.</p>
+          <strong class="sr-only" id="proof-title">Platform Architecture — one engine, two editions, deny by default</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════ RECEIPTS ═════════════════ -->
+  <section class="receipts" aria-label="RivicQ at a glance">
+    <div class="container receipts-row">
+      <div class="receipt fade-up"><b>8</b><span>System diagrams<br>on this page</span></div>
+      <div class="receipt fade-up d1"><b>6</b><span>BOM types<br>CBOM · SBOM · QBOM · HBOM · AIBOM · IBOM</span></div>
+      <div class="receipt fade-up d2"><b>2</b><span>Editions<br>Community (OSS) + Enterprise</span></div>
+      <div class="receipt fade-up d3"><b>10</b><span>Control mappings<br>DORA · BSI · NIST · ISO · eIDAS · PCI…</span></div>
+      <div class="receipt fade-up d4"><b>0</b><span>Runtime dependencies<br>each map is self-contained HTML</span></div>
+    </div>
+  </section>
+
+  <!-- ═════════════════ WHOLE SYSTEM ═════════════════ -->
+  <section id="diagrams">
+    <div class="container">
+      <header class="section-head fade-up" style="padding-top:4rem;">
+        <p class="section-label"><span>01</span><span>Whole system</span></p>
+        <h2 class="section-heading">Not just a dashboard. <em>The whole system, mapped.</em></h2>
+        <p class="section-body">Every map below is a real RivicQ artifact, generated and validated from the codebase — not a screenshot. Each one opens in its own self-contained HTML file; trace routes, focus nodes, switch themes, and export.</p>
+      </header>
+      <div class="systems-grid">
+
+        <a class="sys-card fade-up" href="../diagrams/rivicq-architecture.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1&theme=dark" title="RivicQ Platform Architecture preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Architecture</span><span class="sys-file">rivicq-architecture.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">What is RivicQ made of?</span>
+          <span class="sys-title">One engine, two editions</span>
+          <span class="sys-desc">Control plane, auth boundary, scanners, policy gate, BOM layer, and store — Community OSS and Enterprise sharing one engine.</span>
+        </a>
+
+        <a class="sys-card fade-up d1" href="../diagrams/rivicq-dataflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-dataflow.html?embed=1&theme=dark" title="RivicQ asset data flow preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Data flow</span><span class="sys-file">rivicq-dataflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">Where does every crypto asset go?</span>
+          <span class="sys-title">Discover → Analyze → Deliver</span>
+          <span class="sys-desc">Asset sources, built-in scanners, profiles, intelligence, then BOMs, evidence, and surfaces in one left-to-right journey.</span>
+        </a>
+
+        <a class="sys-card fade-up d2" href="../diagrams/rivicq-lifecycle.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-lifecycle.html?embed=1&theme=dark" title="RivicQ finding lifecycle preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Lifecycle</span><span class="sys-file">rivicq-lifecycle.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">Where does each finding stand now?</span>
+          <span class="sys-title">Waits, retries, honest endings</span>
+          <span class="sys-desc">Discovered → triaged → planned → migrating → remediated — with unassigned pauses, re-scan recovery, and documented terminals.</span>
+        </a>
+
+        <a class="sys-card fade-up" href="../diagrams/rivicq-cspm-operator-workflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-cspm-operator-workflow.html?embed=1&theme=dark" title="RivicQ operator workflow preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-cspm-operator-workflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">How does an operator scan run?</span>
+          <span class="sys-title">Discover → Gate → CBOM</span>
+          <span class="sys-desc">Console or CLI posts a scan, the engine fingerprints and classifies, the policy gate decides, QBOM stays Enterprise (403 on OSS), and the CBOM report publishes.</span>
+        </a>
+
+        <a class="sys-card fade-up d3" href="../diagrams/rivicq-analysis-workflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-analysis-workflow.html?embed=1&theme=dark" title="RivicQ analysis pipeline preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-analysis-workflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">What happens to each artifact?</span>
+          <span class="sys-title">Fingerprint → Gate → Evidence</span>
+          <span class="sys-desc">Every artifact is fingerprinted, classified deterministically, gated as BLOCK / WARN / PASS, and published with a signed evidence pack.</span>
+        </a>
+
+        <a class="sys-card fade-up" href="../diagrams/rivicq-compliance-workflow.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-compliance-workflow.html?embed=1&theme=dark" title="RivicQ compliance evidence preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-compliance-workflow.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">How does evidence get trusted?</span>
+          <span class="sys-title">Map standards, attest, or waive</span>
+          <span class="sys-desc">Collect, normalize once, map to DORA / BSI / eIDAS / NIST / ISO, then attest or issue a time-boxed waiver — evidence retained and signed.</span>
+        </a>
+
+        <a class="sys-card fade-up d1" href="../diagrams/rivicq-pqc-migration.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-pqc-migration.html?embed=1&theme=dark" title="RivicQ PQC migration preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-pqc-migration.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">How do you reach quantum readiness?</span>
+          <span class="sys-title">Inventory → Hybrid → Attest</span>
+          <span class="sys-desc">Classify every algorithm, plan ML-KEM / ML-DSA hybrids, roll out in phases, and verify before / after with a fresh scan.</span>
+        </a>
+
+        <a class="sys-card fade-up d2" href="../diagrams/rivicq-scanning-sequence.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-scanning-sequence.html?embed=1&theme=dark" title="RivicQ scan request sequence preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Sequence</span><span class="sys-file">rivicq-scanning-sequence.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">Who says what during a scan?</span>
+          <span class="sys-title">Auth first, evidence always</span>
+          <span class="sys-desc">Console → API → Authn/RBAC → Scanner → BOM store → evidence, with every return and audit event in order.</span>
+        </a>
+
+        <a class="sys-card fade-up d3" href="../diagrams/rivicq-roadmap.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-roadmap.html?embed=1&theme=dark" title="RivicQ delivery roadmap preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-roadmap.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">What ships, and when?</span>
+          <span class="sys-title">Now → Next → Later</span>
+          <span class="sys-desc">Community, Enterprise, partner programs, and quantum across three horizons — shipped markers on real items, not adjectives.</span>
+        </a>
+
+      </div>
+      <p class="honesty-note"><span>Real artifacts, one per facet of the system</span><span>Numbers in this page are illustrative or sample-labeled</span><span>Control mappings are engineering mappings, not certifications of RivicQ</span></p>
+    </div>
+  </section>
+
+  <!-- ═════════════════ DIAGRAM TYPES ═════════════════ -->
+  <section id="types">
+    <div class="container">
+      <header class="section-head fade-up" style="padding-top:4rem;">
+        <p class="section-label"><span>02</span><span>Diagram types</span></p>
+        <h2 class="section-heading">Five questions. <em>Five kinds of map.</em></h2>
+        <p class="section-body">Ask the question you actually have about your cryptographic estate. RivicQ draws the picture that answers it.</p>
+      </header>
+
+      <div class="types-index">
+        <ol class="types-list" id="types-list">
+          <li class="type-item is-active" data-type="arch">
+            <button type="button" aria-controls="type-preview" aria-pressed="true">
+              <span class="type-no">01</span><span class="type-name"><small>Architecture</small><span>What is it made of?</span></span>
+            </button>
+            <div class="type-detail"><div>
+              <p>The parts of the platform and how they connect — frontends, the control plane, its security boundary, scanners, the BOM layer, and storage.</p>
+              <ul class="type-uses"><li>Product topology</li><li>One engine, two editions</li><li>Auth + security boundaries</li><li>Cloud &amp; partner connectors</li></ul>
+            </div></div>
+          </li>
+          <li class="type-item" data-type="wf">
+            <button type="button" aria-controls="type-preview" aria-pressed="false">
+              <span class="type-no">02</span><span class="type-name"><small>Workflow</small><span>What happens next?</span></span>
+            </button>
+            <div class="type-detail"><div>
+              <p>Steps across stages — an artifact through analysis, findings through compliance, an estate through PQC migration, and the product through its roadmap.</p>
+              <ul class="type-uses"><li>Analysis pipeline</li><li>Compliance &amp; evidence</li><li>PQC migration</li><li>Delivery roadmap</li></ul>
+            </div></div>
+          </li>
+          <li class="type-item" data-type="seq">
+            <button type="button" aria-controls="type-preview" aria-pressed="false">
+              <span class="type-no">03</span><span class="type-name"><small>Sequence</small><span>Who says what, in what order?</span></span>
+            </button>
+            <div class="type-detail"><div>
+              <p>Back-and-forth in order — a scan request across console, API, authn, scanner, store, and evidence, with every return.</p>
+              <ul class="type-uses"><li>Scan request trace</li><li>API call chain with returns</li><li>OIDC / SSO handshake</li></ul>
+            </div></div>
+          </li>
+          <li class="type-item" data-type="flow">
+            <button type="button" aria-controls="type-preview" aria-pressed="false">
+              <span class="type-no">04</span><span class="type-name"><small>Data flow</small><span>Where does it all go?</span></span>
+            </button>
+            <div class="type-detail"><div>
+              <p>Where assets move and where they land — sources into discovery, into the intelligence engine, then out to BOMs, evidence, and surfaces.</p>
+              <ul class="type-uses"><li>Asset discovery → BOM</li><li>Findings → surfaces</li><li>Evidence packs to auditors</li></ul>
+            </div></div>
+          </li>
+          <li class="type-item" data-type="life">
+            <button type="button" aria-controls="type-preview" aria-pressed="false">
+              <span class="type-no">05</span><span class="type-name"><small>Lifecycle</small><span>Where does it stand now?</span></span>
+            </button>
+            <div class="type-detail"><div>
+              <p>States and what moves between them — a cryptographic finding from discovery to remediation, with waits, retries, and terminal endings.</p>
+              <ul class="type-uses"><li>Finding states</li><li>Waits on owners</li><li>Retries and terminal endings</li></ul>
+            </div></div>
+          </li>
+        </ol>
+
+        <div class="type-preview fade-up d1" id="type-preview">
+          <div class="type-plate">
+            <iframe class="is-active" data-type="arch" data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1&theme=dark" title="Architecture diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe data-type="wf" data-sync-theme src="../diagrams/rivicq-analysis-workflow.html?embed=1&theme=dark" title="Workflow diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe data-type="seq" data-sync-theme src="../diagrams/rivicq-scanning-sequence.html?embed=1&theme=dark" title="Sequence diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe data-type="flow" data-sync-theme src="../diagrams/rivicq-dataflow.html?embed=1&theme=dark" title="Data flow diagram" loading="lazy" tabindex="-1"></iframe>
+            <iframe data-type="life" data-sync-theme src="../diagrams/rivicq-lifecycle.html?embed=1&theme=dark" title="Lifecycle diagram" loading="lazy" tabindex="-1"></iframe>
+          </div>
+          <a class="type-more" href="#diagrams">
+            <span>Open any map, standalone</span>
+            <span class="type-more-sub">every artifact · self-contained HTML · exports</span>
+            <span class="type-more-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════ OUTPUT / FEATURES ═════════════════ -->
+  <section id="features">
+    <div class="container">
+      <header class="section-head fade-up" style="padding-top:4rem;">
+        <p class="section-label"><span>03</span><span>Output</span></p>
+        <h2 class="section-heading">One file. <em>Everything inside.</em></h2>
+      </header>
+
+      <div class="features-grid">
+        <figure class="feature compare fade-up">
+          <div class="compare-stage" id="compare-stage" style="--split:50%">
+            <iframe class="compare-dark" data-sync-theme data-force-theme="dark" src="../diagrams/rivicq-dataflow.html?embed=1&amp;theme=dark" title="RivicQ data flow in the dark theme" loading="lazy" tabindex="-1"></iframe>
+            <iframe class="compare-light" data-sync-theme data-force-theme="light" src="../diagrams/rivicq-dataflow.html?embed=1&amp;theme=light" title="RivicQ data flow in the light theme" loading="lazy" tabindex="-1"></iframe>
+            <span class="compare-handle" aria-hidden="true"><i></i></span>
+            <span class="compare-tag compare-tag-l" aria-hidden="true">Light</span>
+            <span class="compare-tag compare-tag-r" aria-hidden="true">Dark</span>
+            <input class="compare-range" id="compare-range" type="range" min="0" max="100" value="50" aria-label="Compare light and dark theme">
+          </div>
+          <figcaption class="feature-body" style="margin-top:1rem;">
+            <h3>Dual-theme output</h3>
+            <p>Every diagram ships with coordinated dark and light variable sets. The theme toggle and the SVG @media prefers-color-scheme rule switch together — one file follows the reader's theme.</p>
+            <span class="feature-tag">LIGHT · DARK · ONE FILE</span>
+          </figcaption>
+        </figure>
+
+        <div class="feature export fade-up d1">
+          <div class="export-shot" aria-hidden="true">
+            <ul class="export-menu-mock">
+              <li>PNG</li><li>JPEG</li><li>WEBP</li><li>SVG</li><li>WEBM</li><li>Clipboard</li>
+            </ul>
+          </div>
+          <h3>One menu, every format</h3>
+          <p>PNG, JPEG, WebP, dual-theme SVG, WebM motion, or straight to the clipboard — every export renders natively in the browser from the same menu.</p>
+          <ul class="formats" aria-label="Export formats">
+            <li>PNG</li><li>JPEG</li><li>WEBP</li><li>SVG</li><li>WEBM</li><li>Clipboard</li>
+          </ul>
+        </div>
+
+        <div class="feature cell fade-up">
+          <span class="cell-glyph" aria-hidden="true">4×</span>
+          <h3>Ultra-crisp 4× export</h3>
+          <p>PNG, JPEG, WebP — all rasterized natively at up to 4× source resolution by the browser. No upsampling blur. Sharp on retina displays, slides, and print.</p>
+        </div>
+        <div class="feature cell fade-up d1">
+          <span class="cell-glyph" aria-hidden="true">&lt;/&gt;</span>
+          <h3>Self-contained HTML</h3>
+          <p>One HTML file per map. Zero dependencies, no server, no runtime — open it in any browser and it works. Attach it to an email or a PR comment.</p>
+        </div>
+        <div class="feature cell fade-up d2">
+          <span class="cell-glyph" aria-hidden="true">“ ”</span>
+          <h3>Iterate by chat</h3>
+          <p>"Move compliance to phase two", "make the policy gate red", "add the Azure connector" — refine every map in plain words. No diagram editor to learn.</p>
+        </div>
+        <div class="feature cell fade-up d3">
+          <span class="cell-glyph" aria-hidden="true">→</span>
+          <h3>Inspect and play real routes</h3>
+          <p>Route Journey keeps the complete authored path visible while you inspect any stop or play one finite, reader-controlled pass over each exact incoming relationship.</p>
+          <span class="feature-tag">INSPECT · PLAY · PAUSE</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════ DESIGN SYSTEM ═════════════════ -->
+  <section id="palette">
+    <div class="container">
+      <header class="section-head section-head-row fade-up" style="padding-top:4rem;">
+        <div>
+          <p class="section-label"><span>04</span><span>Design system</span></p>
+          <h2 class="section-heading">Color that <em>means something.</em></h2>
+        </div>
+        <p class="section-body">Seven node colours, consistent in both themes. In your story the legend renames them — Backend can read as Scanner, Security as Policy Gate.</p>
+      </header>
+      <div class="legend fade-up d1">
+        <div class="legend-chip" style="--node:var(--hue-cyan)"><span class="legend-node"><b>Web Console</b><i>React :3000</i></span><span class="legend-label">Frontend</span><span class="legend-use">Client apps, browsers, UI</span></div>
+        <div class="legend-chip" style="--node:var(--hue-emerald)"><span class="legend-node"><b>API Server</b><i>Gin :8080/:9090</i></span><span class="legend-label">Backend</span><span class="legend-use">Services, APIs, workers</span></div>
+        <div class="legend-chip" style="--node:var(--hue-violet)"><span class="legend-node"><b>PostgreSQL</b><i>tenants · findings</i></span><span class="legend-label">Database</span><span class="legend-use">DBs, caches, stores</span></div>
+        <div class="legend-chip" style="--node:var(--hue-amber)"><span class="legend-node"><b>GitHub Pages</b><i>CDN</i></span><span class="legend-label">Cloud</span><span class="legend-use">Managed services, infra</span></div>
+        <div class="legend-chip" style="--node:var(--hue-rose)"><span class="legend-node"><b>Auth &amp; RBAC</b><i>JWT · OIDC · SSO</i></span><span class="legend-label">Security</span><span class="legend-use">Auth, secrets, guards</span></div>
+        <div class="legend-chip" style="--node:var(--hue-orange)"><span class="legend-node"><b>Audit Log</b><i>immutable events</i></span><span class="legend-label">Message Bus</span><span class="legend-use">Events, Kafka, RabbitMQ</span></div>
+        <div class="legend-chip" style="--node:var(--hue-slate)"><span class="legend-node"><b>Clients &amp; CI</b><i>browser · CLI · action</i></span><span class="legend-label">External</span><span class="legend-use">Users, 3rd parties, generic</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════ QUICK START ═════════════════ -->
+  <section id="quickstart">
+    <div class="container">
+      <header class="section-head fade-up" style="padding-top:4rem;">
+        <p class="section-label"><span>05</span><span>Quick start</span></p>
+        <h2 class="section-heading">Three steps. <em>One command.</em></h2>
+        <p class="section-body">One scanner for every edition, one action for CI, one validated map for the whole estate. Pick your lane for the exact command.</p>
+      </header>
+
+      <div class="qs-layout">
+        <div class="terminal fade-up">
+          <div class="terminal-bar">
+            <div class="agent-tabs" role="tablist" aria-label="Choose your lane">
+              <button type="button" role="tab" aria-selected="true" tabindex="0" data-agent="community">Community</button>
+              <button type="button" role="tab" aria-selected="false" tabindex="-1" data-agent="enterprise">Enterprise</button>
+              <button type="button" role="tab" aria-selected="false" tabindex="-1" data-agent="action">GitHub Action</button>
+              <button type="button" role="tab" aria-selected="false" tabindex="-1" data-agent="agent">Agent</button>
+            </div>
+          </div>
+          <div class="terminal-body" role="tabpanel">
+            <div data-agent-pane="community">
+              <p class="install-cmt"># Build the OSS CLI — Apache-2.0</p>
+              <div class="install-line">
+                <p class="install-cmd"><span aria-hidden="true">$ </span><code id="agent-command">git clone https://github.com/RivicQ/RivicQ_CSPM_EaaS.git &amp;&amp; make build-rivicq</code></p>
+                <button class="cmd-copy" type="button" data-copy-from="agent-command" aria-label="Copy install command">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"></rect><path d="M9.5 4.5V3A1.5 1.5 0 0 0 8 1.5H3A1.5 1.5 0 0 0 1.5 3v5A1.5 1.5 0 0 0 3 9.5h1.5" stroke="currentColor" stroke-width="1.3"></path></svg>
+                  <span class="cmd-copy-label">Copy</span>
+                </button>
+              </div>
+              <p class="install-cmt"># Scan any repo, TLS endpoint, or CI stage</p>
+              <p class="install-cmd"><span aria-hidden="true">$ </span><code>./bin/rivicq scan . --fail-on BLOCK</code></p>
+              <p class="install-cmt"># Export CBOM / SBOM, open the console</p>
+              <p class="install-cmd"><span aria-hidden="true">$ </span><code>make dev-backend &amp;&amp; make dev-frontend</code></p>
+            </div>
+            <div data-agent-pane="enterprise" hidden>
+              <p class="install-cmt"># Run the control plane locally</p>
+              <div class="install-line">
+                <p class="install-cmd"><span aria-hidden="true">$ </span><code id="agent-command-ent">cp .env.example .env &amp;&amp; make dev-enterprise</code></p>
+                <button class="cmd-copy" type="button" data-copy-from="agent-command-ent" aria-label="Copy install command">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"></rect><path d="M9.5 4.5V3A1.5 1.5 0 0 0 8 1.5H3A1.5 1.5 0 0 0 1.5 3v5A1.5 1.5 0 0 0 3 9.5h1.5" stroke="currentColor" stroke-width="1.3"></path></svg>
+                  <span class="cmd-copy-label">Copy</span>
+                </button>
+              </div>
+              <p class="install-cmt"># Open the Security Cloud console</p>
+              <p class="install-cmd"><span aria-hidden="true">$ </span><code>make dev-frontend   # → :3000/platform</code></p>
+              <p class="install-cmt"># Licensed control-plane layers</p>
+              <p class="install-cmd"><span aria-hidden="true">$ </span><code>QBOM · HBOM · AIBOM · IBOM · SSO · RBAC · audit</code></p>
+            </div>
+            <div data-agent-pane="action" hidden>
+              <p class="install-cmt"># .github/workflows/rivicq-scan.yml</p>
+              <p class="install-cmd"><span aria-hidden="true">79 </span><code>steps:</code></p>
+              <p class="install-cmd"><span aria-hidden="true">80 </span><code>&nbsp;&nbsp;- uses: RivicQ/RivicQ_CSPM_EaaS/.github/actions/rivicq-scan@main</code></p>
+              <p class="install-cmd"><span aria-hidden="true">81 </span><code>&nbsp;&nbsp;&nbsp;&nbsp;with:</code></p>
+              <p class="install-cmd"><span aria-hidden="true">82 </span><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fail-on: BLOCK</code></p>
+              <p class="install-cmt"># Gate every PR on crypto policy</p>
+              <p class="install-cmd"><span aria-hidden="true"># </span><code>Scan → inventory → policy gate in CI</code></p>
+            </div>
+            <div data-agent-pane="agent" hidden>
+              <p class="install-cmt"># Then just ask your agent to draw any map</p>
+              <p class="install-ask">Use Archify to map RivicQ: architecture, asset data flow, the finding lifecycle, compliance and evidence, the PQC migration, and the delivery roadmap.</p>
+              <p class="install-cmt"># Validate before it ships</p>
+              <p class="install-cmd"><span aria-hidden="true"># </span><code>typed JSON → checked render → self-contained HTML</code></p>
+            </div>
+          </div>
+        </div>
+
+        <ol class="steps fade-up d1">
+          <li class="step">
+            <span class="step-num">1</span>
+            <div><h3>Install in one command</h3>
+            <p>Clone and <code>make build-rivicq</code> for the Community CLI, or run the GitHub Action in CI. Enterprise control-plane layers are licensed separately — the engine is the same.</p></div>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <div><h3>Scan your code or cloud</h3>
+            <p>Point <code>rivicq scan</code> at a repository, TLS endpoint, container, or declared cluster. The same deterministic engine classifies every finding for every edition.</p></div>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <div><h3>Ask your agent to draw it</h3>
+            <p>Tell your agent to use Archify with the RivicQ codebase as evidence. Out comes a validated HTML file you can open, trace, theme, and export — then refine in chat.</p></div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="shortcut-box fade-up d2">
+        <p class="shortcut-title">Inside every artifact</p>
+        <div class="shortcut-rows">
+          <div class="shortcut-row"><span>Diagram guide</span><kbd>?</kbd></div>
+          <div class="shortcut-row"><span>Toggle theme</span><kbd>T</kbd></div>
+          <div class="shortcut-row"><span>Find node / route endpoint</span><kbd>/</kbd></div>
+          <div class="shortcut-row"><span>Trace, inspect, and play a route</span><kbd>R</kbd></div>
+          <div class="shortcut-row"><span>Semantic radar</span><kbd>M</kbd></div>
+          <div class="shortcut-row"><span>Compare semantic kinds</span><kbd>L</kbd></div>
+          <div class="shortcut-row"><span>Presentation stage</span><kbd>F</kbd></div>
+          <div class="shortcut-row"><span>Open export menu</span><kbd>E</kbd></div>
+          <div class="shortcut-row"><span>Focus node</span><kbd>Enter</kbd></div>
+          <div class="shortcut-row"><span>Reading depth / reset</span><kbd>+ − 0</kbd></div>
+          <div class="shortcut-row"><span>Navigate menu</span><kbd>↑ ↓</kbd></div>
+          <div class="shortcut-row"><span>Close menu</span><kbd>Esc</kbd></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════ PRODUCT FACTS ═════════════════ -->
+  <section class="product-facts" id="facts" aria-labelledby="product-facts-title">
+    <div class="container">
+      <div class="facts-heading"><span class="section-eyebrow">Product facts</span><h2 id="product-facts-title">A posture you can inspect and keep.</h2></div>
+      <div class="facts-grid">
+        <article><h3>What is RivicQ?</h3><p>RivicQ is <b>Cryptographic Security Posture Management</b>. Community (Apache-2.0) inventories cryptography (CBOM) and software components (SBOM); Enterprise licenses the QBOM, HBOM, AIBOM, and IBOM control-plane layers. Every diagram on this page is a validated Archify artifact generated from repository evidence — it documents the product described in the README and the code.</p></article>
+        <article><h3>What can I provide as input?</h3><p>A repository, a directory, a TLS endpoint, a declared pod or server, firmware or identity artifacts — and in Enterprise, customer cloud credentials via connectors. You can also point an agent at the RivicQ codebase to redraw any map. Missing facts are marked in the diagrams, never invented.</p></article>
+        <article><h3>Which edition is open source?</h3><p>Community is this public GitHub project, usable, modifiable and distributable under <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/LICENSE" target="_blank" rel="noopener">Apache-2.0</a>. Enterprise is a commercial license from RivicQ GmbH. Editions are licenses and feature entitlements — not a second scanner; both share the engine.</p></article>
+        <article><h3>What do I receive, and what are the limits?</h3><p>Each diagram is an HTML file with inline SVG plus its typed JSON source. Validation checks the diagram against an authoring contract; it does not prove runtime behaviour, and RivicQ claims no certification, audit opinion, or legal advice. Framework names in the UI are control mappings for operators, not seals of approval.</p></article>
+      </div>
+      <p class="facts-exports">Exports include PNG, JPEG, WebP, SVG, and WebM. Availability depends on the format and browser or local tooling; open any artifact and check its export menu before choosing a delivery format.</p>
+      <nav class="facts-links" aria-label="Product sources">
+        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">Read the engine README ↗</a>
+        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Published releases ↗</a>
+        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/LICENSE" target="_blank" rel="noopener">Apache-2.0 license ↗</a>
+        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/LEGAL.md" target="_blank" rel="noopener">Legal pack ↗</a>
+        <a href="../../docs/README.md">Open the docs →</a>
+      </nav>
+      <p class="facts-channel">Community source is this public repository. Options shown as "Enterprise" require a commercial license and, where noted, your identity provider or cloud credentials. The maps on this page are illustrative of the product; they are not a compliance certification of RivicQ.</p>
+    </div>
+  </section>
+
+  <!-- ═════════════════ CTA ═════════════════ -->
+  <section id="cta">
+    <div class="cta-glow" aria-hidden="true"></div>
+    <div class="container cta-inner">
+      <h2 class="cta-h fade-up">Scan it once.<br><em>Share the map.</em></h2>
+      <p class="cta-sub fade-up d1">One command opens your cryptographic inventory — and every map on this page is yours to keep, theme, trace, and export. Community starts free.</p>
+      <div class="cta-actions fade-up d2">
+        <a class="btn btn-primary btn-lg" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/register" target="_blank" rel="noopener">Get started free</a>
+        <a class="btn btn-ghost btn-lg" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener"><span>Star on GitHub</span> <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- ═════════════════ FOOTER ═════════════════ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="nav-logo"><img src="assets/rivicq-mark.svg" alt="" width="30" height="30">RivicQ</span>
+        <p class="footer-meta">Community · Apache-2.0 · RivicQ GmbH (Berlin)<br>One engine · two editions · no second scanner</p>
+      </div>
+      <div class="footer-links">
+        <a href="#diagrams">Diagrams</a>
+        <a href="#types">Questions</a>
+        <a href="#features">Output</a>
+        <a href="#palette">Design system</a>
+        <a href="../../docs/README.md">Documentation</a>
+        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+        <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS/blob/main/SECURITY.md" target="_blank" rel="noopener">Security</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/rivicq-site.js"></script>
+</body>
+</html>

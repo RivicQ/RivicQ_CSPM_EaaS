@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "d740c5f5-cfd3-4977-858a-ba2b6813693e",
+  "status": "current",
+  "command": "deliver",
+  "type": "lifecycle",
+  "input": "/Users/re1/re1/CSPM/archify/spec/rivicq-lifecycle.json",
+  "output": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-lifecycle.html",
+  "specification": {
+    "sha256": "be79b4f1137c19ae7446c87a0d7b5776b0a8d96bfefff368d38d97c8aea83639",
+    "bytes": 3800
+  },
+  "artifact": {
+    "sha256": "d4cd1f0183059a0e95197e506e8228f4d53af70570064ac5eb03480e2b47f28d",
+    "bytes": 771219
+  }
+}
