@@ -6,9 +6,9 @@ import appTypography from './typography';
 export const designSystem = {
   radius: {
     sm: tokens.borderRadius.sm,
-    md: 16,
-    lg: 20,
-    xl: 28,
+    md: tokens.borderRadius.md,
+    lg: tokens.borderRadius.lg,
+    xl: tokens.borderRadius.xl,
     pill: tokens.borderRadius.full,
   },
   font: {
@@ -35,7 +35,7 @@ export const designSystem = {
     sm: '0 1px 2px rgba(2,6,23,0.06), 0 1px 3px rgba(2,6,23,0.05)',
     md: '0 2px 4px rgba(2,6,23,0.06), 0 10px 28px -12px rgba(2,6,23,0.18)',
     lg: '0 0 0 1px rgba(2,6,23,0.04), 0 12px 40px -14px rgba(2,6,23,0.30)',
-    glow: (_color: string) => `0 0 44px rgba(124,58,237,0.28)`,
+    glow: (_color: string) => 'none',
   },
   motion: {
     spring: '0.15s ease',
@@ -52,7 +52,7 @@ export const designSystem = {
     accentMuted: '#d1d5db',
     sidebar: '#000000',
     commandCenter: '#0a0a0f',
-    commandGlow: '0 0 48px rgba(124,58,237,0.22)',
+    commandGlow: 'none',
     border: '#1f1f2e',
     textPrimary: '#ffffff',
     textSecondary: '#d1d5db',

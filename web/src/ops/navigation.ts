@@ -17,7 +17,7 @@ export const OPS_ROUTES: OpsRoute[] = [
   { text: 'Assets', path: '/assets', section: 'Operations', keywords: ['inventory', 'crypto', 'certificate', 'key'] },
   { text: 'Scans', path: '/scanner', section: 'Operations', keywords: ['cbom', 'github', 'website', 'history', 'failed'] },
   { text: 'CBOM', path: '/bom', section: 'Operations', keywords: ['sbom', 'cspm', 'inventory', 'explorer'] },
-  { text: 'PQC Migration', path: '/migration', section: 'Operations', keywords: ['quantum', 'readiness', 'roadmap', 'hybrid'] },
+  { text: 'PQC planning', path: '/migration', section: 'Operations', keywords: ['quantum', 'readiness', 'roadmap', 'hybrid', 'migration'] },
 
   { text: 'Crypto Posture', path: '/cspm', section: 'Posture', keywords: ['cspm', 'risk', 'score'] },
   { text: 'Governance', path: '/governance', section: 'Posture', keywords: ['compliance', 'controls', 'dora', 'nis2', 'mapping'] },
@@ -48,7 +48,7 @@ export const PALETTE_ACTIONS: Array<{ id: string; label: string; path: string; k
   { id: 'scan', label: 'Run scan', path: '/scanner', keywords: ['new', 'website', 'github'] },
   { id: 'critical', label: 'View critical findings', path: '/findings?severity=critical', keywords: ['p0', 'high'] },
   { id: 'cbom', label: 'Open CBOM', path: '/bom', keywords: ['inventory'] },
-  { id: 'pqc', label: 'View PQC roadmap', path: '/migration', keywords: ['quantum'] },
+  { id: 'pqc', label: 'View PQC plan', path: '/migration', keywords: ['quantum'] },
   { id: 'tools', label: 'PATH scanner integrations', path: '/tools', keywords: ['trivy', 'syft'] },
   { id: 'admin', label: 'Manage users', path: '/admin', keywords: ['sso', 'roles', 'keys'] },
   { id: 'report', label: 'Open reports', path: '/analytics', keywords: ['export'] },

@@ -105,12 +105,12 @@ const Findings: React.FC = () => {
       }
     >
       {isError && (
-        <Alert severity="warning" sx={{ mb: 2 }} action={<Button color="inherit" size="small" onClick={() => refetch()}>Retry</Button>}>
+        <Alert severity="warning" sx={{ mb: 1 }} action={<Button color="inherit" size="small" onClick={() => refetch()}>Retry</Button>}>
           Findings API unreachable. Start the backend on :9090 (make dev-backend). GitHub Pages has no API.
         </Alert>
       )}
 
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }} flexWrap="wrap" useFlexGap>
+      <Stack direction="row" spacing={1} sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
         {(['all', 'critical', 'high', 'medium', 'low'] as const).map((s) => (
           <Chip
             key={s}
@@ -243,13 +243,13 @@ const Findings: React.FC = () => {
                 </Box>
                 <Box>
                   <Typography variant="subtitle2" fontWeight={800}>Recommended remediation</Typography>
-                  <Typography variant="body2">{open.remediation || 'No engine recommendation on this finding. Use PQC Migration for classified algorithms.'}</Typography>
+                  <Typography variant="body2">{open.remediation || 'No engine recommendation on this finding. Open PQC planning for classified algorithms (plan only).'}</Typography>
                 </Box>
                 {open.bsiRef && (
                   <Typography variant="caption" color="text.secondary">Reference: {open.bsiRef}</Typography>
                 )}
                 <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined" onClick={() => navigate('/migration')}>PQC roadmap</Button>
+                  <Button size="small" variant="outlined" onClick={() => navigate('/migration')}>PQC plan</Button>
                   {open.asset && (
                     <Button size="small" onClick={() => navigate(`/assets?q=${encodeURIComponent(open.asset)}`)}>Related assets</Button>
                   )}

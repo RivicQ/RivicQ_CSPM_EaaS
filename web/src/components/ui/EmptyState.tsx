@@ -15,25 +15,24 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description, actio
   return (
     <Box
       sx={{
-        py: 3,
-        px: 2,
-        textAlign: 'center',
-        borderRadius: `${designSystem.radius.lg}px`,
+        py: 1.5,
+        px: 1.5,
+        textAlign: 'left',
+        borderRadius: `${designSystem.radius.md}px`,
         border: `1px dashed ${theme.palette.divider}`,
-        bgcolor: theme.palette.mode === 'dark' ? 'rgba(124,58,237,0.08)' : 'rgba(124,58,237,0.05)',
+        bgcolor: 'transparent',
       }}
     >
       {icon && (
         <Box
           sx={{
-            width: 56,
-            height: 56,
+            width: 32,
+            height: 32,
             borderRadius: `${designSystem.radius.md}px`,
-            mx: 'auto',
-            mb: 2,
+            mb: 1,
             display: 'grid',
             placeItems: 'center',
-            bgcolor: theme.palette.mode === 'dark' ? 'rgba(124,58,237,0.16)' : 'rgba(124,58,237,0.1)',
+            bgcolor: 'rgba(255,255,255,0.04)',
             color: 'primary.main',
           }}
         >
@@ -44,12 +43,12 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description, actio
         {title}
       </Typography>
       {description && (
-        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 360, mx: 'auto', mb: action ? 2.5 : 0 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 520, mb: action ? 1.25 : 0, fontSize: '0.75rem' }}>
           {description}
         </Typography>
       )}
       {action && (
-        <Button variant="contained" onClick={action.onClick} sx={{ mt: 1 }}>
+        <Button size="small" variant="outlined" onClick={action.onClick} sx={{ mt: 0.5, textTransform: 'none' }}>
           {action.label}
         </Button>
       )}
