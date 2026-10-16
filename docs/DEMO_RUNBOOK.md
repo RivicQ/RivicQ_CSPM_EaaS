@@ -48,6 +48,10 @@ Set `REACT_APP_API_URL` to that API. Interactive demo on static Pages uses **lab
 
 Not supported as a live scan: Infineon MCU attach, secret extraction, IBM Quantum jobs from Qiskit scores.
 
+## What to send a client
+
+The page to forward is [CLIENT_DEMO_VERIFICATION.md](CLIENT_DEMO_VERIFICATION.md). GitHub Pages is the labeled walkthrough. Enterprise login exists only on an evaluation API the client starts; Pages has no password and no license.
+
 ## Fallback
 
 If the API is down, demonstrate the CLI JSON + Archify maps at `archify/site/index.html#diagrams`. Do not present Pages demo findings as a live estate.

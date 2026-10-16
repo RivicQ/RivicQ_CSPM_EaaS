@@ -54,7 +54,7 @@ const GlassCard: React.FC<GlassCardProps> = ({
           '&:hover': {
             transform: 'none',
             boxShadow: 'none',
-            borderColor: 'rgba(196,181,253,0.2)',
+            borderColor: 'rgba(255,255,255,0.22)',
           },
         }),
       }}

@@ -155,9 +155,10 @@
 .archify-embed-frame {
   display: block;
   width: 100%;
-  height: min(560px, 70vh);
+  height: 148px;
   border: 0;
   background: #000;
+  pointer-events: none;
 }
 
 .systems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 1.5rem; }

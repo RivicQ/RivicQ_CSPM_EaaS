@@ -68,3 +68,5 @@ Quantum risk on Pages comes from **scans you run** (CLI or API). GitHub Pages is
 - Require IBM Quantum hardware for QBOM scores
 - Claim QSIC as shipped silicon
 - Claim a silent real-time quantum feed on GitHub Pages
+- Drop a viewport-height Archify iframe onto the console, docs, or graph. The full stage lives on `archify/site/index.html`. Elsewhere the map is a small plate or a one-line link
+- Crop a lavender chart into the console page header. `PageFrame` is title, subtitle, and actions only

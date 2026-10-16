@@ -32,6 +32,7 @@ UI colors follow the **Security Cloud** nebula ledger (`#000000` canvas, `#0A0A0
 - [OSS Architecture](oss-architecture.md)
 - [Enterprise SaaS architecture](ARCHITECTURE.md) — four-layer CBOM, control plane, hardware/QSIC scope
 - [Client architecture](CLIENT_ARCHITECTURE.md) — discover → mitigate → report from OSS to Enterprise
+- [PRD](PRD.md) · [BRD](BRD.md) · [SRD](SRD.md) — product, business, and software requirements. Console maps stay small; the full stage is the Archify site
 - [Security Cloud UX](UX_DESIGN.md) — core product visual system
 - [Operator UX audit](ux/README.md) — findings queue, IA, scorecard
 - [Contact](contact.html) — public desks on @rivicq.com ([CONTACT.md](CONTACT.md))
