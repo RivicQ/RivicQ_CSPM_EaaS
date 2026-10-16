@@ -13,7 +13,7 @@ const HelpDrawer: React.FC<Props> = ({ open, onClose }) => {
   const location = useLocation();
   const help = helpFor(location.pathname);
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 360 }, p: 2 } }}>
+    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: 'min(300px, 86vw)', sm: 300 }, p: 1.5 } }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
         <Typography variant="overline" color="primary" fontWeight={800}>Contextual help</Typography>
         <IconButton onClick={onClose} aria-label="Close help"><Close /></IconButton>

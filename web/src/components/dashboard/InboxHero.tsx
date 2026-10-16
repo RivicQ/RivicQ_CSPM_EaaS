@@ -49,7 +49,7 @@ const InboxHero: React.FC<InboxHeroProps> = ({
       sx={{
         border: '1px solid',
         borderColor: 'divider',
-        bgcolor: '#0a0a0f',
+        bgcolor: 'background.paper',
         borderRadius: `${dashboardDesign.radius.sm}px`,
         mb: dashboardDesign.layout.sectionGap,
         overflow: 'hidden',
@@ -58,18 +58,18 @@ const InboxHero: React.FC<InboxHeroProps> = ({
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 320px' },
+          gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 280px' },
         }}
       >
-        <Box sx={{ p: { xs: 2, md: 2.5 }, borderRight: { lg: '1px solid' }, borderColor: { lg: 'divider' } }}>
-          <Typography sx={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Box sx={{ p: { xs: 1.25, md: 1.5 }, borderRight: { lg: '1px solid' }, borderColor: { lg: 'divider' } }}>
+          <Typography sx={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
             {eyebrow}
           </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', fontSize: { xs: '1.35rem', md: '1.7rem' }, mt: 0.5, color: '#ffffff' }}>
+          <Typography variant="h4" sx={{ fontWeight: 600, letterSpacing: '-0.02em', fontSize: { xs: '1.05rem', md: '1.15rem' }, mt: 0.25, color: 'text.primary' }}>
             {title}
           </Typography>
-          <Typography sx={{ color: 'text.secondary', mt: 1, maxWidth: 640 }}>{subtitle}</Typography>
-          <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
+          <Typography sx={{ color: 'text.secondary', mt: 0.35, maxWidth: 640, fontSize: '0.75rem', lineHeight: 1.4 }}>{subtitle}</Typography>
+          <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap" useFlexGap>
             <Chip size="small" label={`${openCount} open`} color="primary" variant="outlined" />
             <Chip size="small" label={`${criticalCount} critical`} color={criticalCount > 0 ? 'error' : 'default'} />
             <Chip size="small" label={`Posture ${posture}`} />
@@ -77,8 +77,8 @@ const InboxHero: React.FC<InboxHeroProps> = ({
           {meta && <Box sx={{ mt: 1.5 }}>{meta}</Box>}
           {action && <Box sx={{ mt: 2 }}>{action}</Box>}
         </Box>
-        <Box sx={{ bgcolor: '#000000' }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ bgcolor: 'background.default' }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 1.5, py: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Typography sx={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700 }}>
               Today’s queue
             </Typography>

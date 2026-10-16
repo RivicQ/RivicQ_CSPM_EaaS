@@ -51,7 +51,7 @@ export const DEMO_POSTURE_TREND = [
 
 export const DEMO_REPORTS = [
   { id: 'rpt-1', name: 'Weekly Posture Report', type: 'executive', generated_at: new Date().toISOString(), pages: 12, format: 'PDF' },
-  { id: 'rpt-2', name: 'PQC Migration Readiness', type: 'technical', generated_at: new Date(Date.now() - 86400000).toISOString(), pages: 24, format: 'PDF' },
+  { id: 'rpt-2', name: 'PQC classification readiness', type: 'technical', generated_at: new Date(Date.now() - 86400000).toISOString(), pages: 24, format: 'PDF' },
   { id: 'rpt-3', name: 'SOC 2 Crypto Controls', type: 'compliance', generated_at: new Date(Date.now() - 172800000).toISOString(), pages: 18, format: 'CSV' },
 ];
 

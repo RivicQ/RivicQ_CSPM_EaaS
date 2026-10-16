@@ -17,7 +17,6 @@ import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 import ScanReportPanel, { ClientArchitectureView, PQCReadinessView } from '../components/scanner/ScanReportPanel';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
-import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 
 interface ScanJob {
   id: string;
@@ -314,14 +313,14 @@ const Scanner: React.FC = () => {
         </Box>
       )}
 
-      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
+      <Grid container spacing={1.25} sx={{ mb: 1.25 }}>
         <Grid item xs={6} sm={3}><StatCard label="Completed scans" value={completedScans} icon={<History />} accent={tokens.colors.rivicq[500]} delay={0} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Findings" value={totalFindings} icon={<BugReport />} accent={totalFindings > 0 ? tokens.colors.crypto.high : tokens.colors.rivicq[500]} delay={1} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Coverage" value={bench?.coverage_pct != null ? `${bench.coverage_pct}%` : '—'} hint={bench?.coverage_pct != null ? 'From benchmark API' : 'No benchmark payload'} icon={<Security />} accent={tokens.colors.crypto.low} delay={2} /></Grid>
         <Grid item xs={6} sm={3}><StatCard label="Scan time" value={bench?.scan_time_seconds != null ? `${bench.scan_time_seconds}s` : '—'} hint={bench?.scan_time_seconds != null ? 'From benchmark API' : 'Unavailable'} icon={<Speed />} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
       </Grid>
 
-      <GlassCard glow={tokens.colors.rivicq[500]} delay={0}>
+      <GlassCard delay={0} padding={1.25}>
         <DetailTabs
           value={tab}
           onChange={setTab}
@@ -554,7 +553,6 @@ const Scanner: React.FC = () => {
           <GitHubRepoScanPanel />
         </TabPanel>
       </GlassCard>
-      <ArchifyWorkflowEmbed compact diagramId="operator" />
     </PageFrame>
   );
 };

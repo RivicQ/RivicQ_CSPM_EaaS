@@ -67,7 +67,7 @@ const CONTEXT_PROMPTS: Record<AssistantContext, string[]> = {
 const ASSISTANT_RESPONSES: Record<AssistantContext, (edition: Edition, benchmark?: AssistantProps['benchmark']) => string> = {
   dashboard: (edition, benchmark) => {
     const base = isPaidEdition(edition)
-      ? 'Your paid edition unlocks executive compliance, cloud posture, and PQC migration analytics.'
+      ? 'Your paid edition unlocks executive compliance, cloud posture, and PQC planning analytics.'
       : 'Community keeps core CBOM, auth, scanning, and public dashboards available while locking paid module views.';
     return benchmark
       ? `${base} Benchmark snapshot: ${benchmark.throughput} req/sec, p95 ${benchmark.p95_latency_ms} ms, scan time ${benchmark.scan_time_seconds}s.`

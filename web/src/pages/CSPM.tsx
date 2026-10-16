@@ -35,8 +35,8 @@ const CSPM: React.FC = () => {
 
   if (isLoading && !view) {
     return (
-      <PageFrame eyebrow="Posture" title="Cryptographic Security Posture Management" subtitle="Loading CSPM data...">
-        <Grid container spacing={2.5}>
+      <PageFrame eyebrow="Posture" title="Cloud posture" subtitle="Loading CSPM data...">
+        <Grid container spacing={1.25}>
           {[1, 2, 3, 4].map((i) => (
             <Grid item xs={12} sm={6} md={3} key={i}>
               <Skeleton variant="rounded" height={120} sx={{ borderRadius: 3 }} />
@@ -49,7 +49,7 @@ const CSPM: React.FC = () => {
 
   if (!view) {
     return (
-      <PageFrame eyebrow="Posture" title="Cryptographic Security Posture Management" subtitle="Cloud cryptographic posture">
+      <PageFrame eyebrow="Posture" title="Cloud posture" subtitle="Cloud cryptographic posture">
         <EmptyState
           icon={<Cloud />}
           title={isError ? 'Unable to retrieve CSPM results' : 'No CSPM snapshot yet'}
@@ -78,12 +78,12 @@ const CSPM: React.FC = () => {
   return (
     <PageFrame
       eyebrow="Posture"
-      title="Cryptographic Security Posture Management"
+      title="Cloud posture"
       subtitle="Posture from scans in this workspace. Not a live attach to every customer cloud."
       badge={healthScore != null ? ((usingDemo || isDemo) ? `Demo score ${healthScore}` : `Score ${healthScore}`) : undefined}
       action={usingDemo || isDemo ? <ProvenanceChip kind="demo" label="DEMO ENVIRONMENT" /> : undefined}
     >
-      <Grid container spacing={2.5} sx={{ mb: 0.5 }}>
+      <Grid container spacing={1.25} sx={{ mb: 0.5 }}>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             label="Health Score"
@@ -123,11 +123,11 @@ const CSPM: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Grid container spacing={2.5}>
+      <Grid container spacing={1.25}>
         <Grid item xs={12} md={5}>
           <DashboardPanel title="Network Topology Map" delay={0}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-              <PostureRing score={healthScore} size={100} />
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+              <PostureRing score={healthScore} size={72} />
             </Box>
             <Stack spacing={2} alignItems="center">
               {topology.map((item: any) => (
@@ -193,7 +193,7 @@ const CSPM: React.FC = () => {
                         <TableCell sx={{ py: 0.75 }}>
                           <Button
                             size="small"
-                            variant={alg.migration?.includes('Migrate') ? 'contained' : 'outlined'}
+                            variant="outlined"
                             color={alg.migration?.includes('Migrate') ? 'warning' : 'inherit'}
                             sx={{ minWidth: 100 }}
                             onClick={() => {
@@ -253,7 +253,7 @@ const CSPM: React.FC = () => {
         </Box>
       )}
 
-      <Dialog open={Boolean(selectedFinding)} onClose={() => setSelectedFinding(null)} fullWidth maxWidth="sm">
+      <Dialog open={Boolean(selectedFinding)} onClose={() => setSelectedFinding(null)} maxWidth="xs">
         <DialogTitle>Finding detail</DialogTitle>
         <DialogContent>
           {selectedFinding && selectedGuide && (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Alert, Avatar, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Stack, Typography, useTheme,
+  Avatar, Box, Button, Card, CardContent, Chip, Grid, LinearProgress, Stack, Typography, useTheme,
 } from '@mui/material';
 import {
   Cloud, CloudDone, CloudOff, GppGood, Memory, NotificationsActive, Refresh, Storage, Warning,
@@ -127,9 +127,9 @@ const CloudPosture: React.FC = () => {
         <Button variant="outlined" startIcon={<Refresh />} onClick={() => window.location.reload()}>Sync now</Button>
       }
     >
-      <Alert severity="info" sx={{ mb: 3, borderRadius: 2, border: `1px solid ${tokens.colors.rivicq[500]}44`, '& .MuiAlert-icon': { color: tokens.colors.rivicq[400] } }}>
-        Live posture coverage across {accounts.length || 0} connected account(s) · Assessment every 24h and on change.
-      </Alert>
+      <Typography color="text.secondary" sx={{ mb: 2, fontSize: '0.8125rem' }}>
+        Coverage across {accounts.length || 0} connected account(s).
+      </Typography>
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {[

@@ -75,7 +75,7 @@ export const GOVERNANCE_CONTROLS = [
   { framework: 'EU AI Act', control: 'Art. 6 / Annex IV documentation', bom: 'aibom', community: false },
   { framework: 'EU CRA', control: 'Software component transparency', bom: 'sbom', community: true },
   { framework: 'NIST SP 800-207', control: 'Zero Trust identity inventory', bom: 'ibom', community: false },
-  { framework: 'FIPS 203/204/205', control: 'PQC migration mapping', bom: 'cbom', community: true },
+  { framework: 'FIPS 203/204/205', control: 'PQC classification mapping', bom: 'cbom', community: true },
   { framework: 'BSI TR-02102', control: 'Algorithm strength', bom: 'cbom', community: true },
   { framework: 'FIPS 140-3', control: 'Module inventory (declared HSM/QSIC)', bom: 'cbom', community: true },
 ];

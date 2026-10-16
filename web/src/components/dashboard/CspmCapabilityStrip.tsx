@@ -20,7 +20,7 @@ const CAPABILITIES: Capability[] = [
   { label: 'CBOM', hint: 'Cryptographic inventory', icon: <AccountTree />, path: '/bom', accent: tokens.colors.rivicq[500] },
   { label: 'SBOM', hint: 'Software + crypto libraries', icon: <GitHub />, path: '/bom', accent: tokens.colors.crypto.quantum },
   { label: 'Scanner', hint: 'Website, host, repo scans', icon: <Memory />, path: '/scanner', accent: tokens.colors.crypto.quantum },
-  { label: 'PQC', hint: 'Quantum readiness', icon: <Psychology />, path: '/migration', accent: tokens.colors.rivicq[500] },
+  { label: 'PQC', hint: 'Planning, not key rotation', icon: <Psychology />, path: '/migration', accent: tokens.colors.rivicq[500] },
   { label: 'Governance', hint: 'Control mapping', icon: <FactCheck />, path: '/governance', accent: tokens.colors.crypto.low },
   { label: 'Pipeline', hint: 'Eight-stage DevSecOps', icon: <Hub />, path: '/pipeline', accent: tokens.colors.crypto.info },
 ];
@@ -66,11 +66,11 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
               alignItems: { xs: 'flex-start', md: 'center' },
               gap: 1,
               textAlign: 'left',
-              minHeight: { xs: 76, md: 64 },
-              px: 1.5,
-              py: 1.25,
+              minHeight: { xs: 52, md: 48 },
+              px: 1.15,
+              py: 0.85,
               border: 1,
-              borderColor: 'rgba(196,181,253,0.14)',
+              borderColor: '#1f1f2e',
               borderRadius: `${designSystem.radius.md}px`,
               bgcolor: '#0a0a0f',
               cursor: 'pointer',
@@ -79,7 +79,7 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
               boxShadow: 'none',
               transition: designSystem.motion.smooth,
               '&:hover': {
-                borderColor: `${item.accent}66`,
+                borderColor: 'rgba(255,255,255,0.22)',
                 transform: 'none',
                 boxShadow: 'none',
               },
@@ -87,13 +87,13 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
           >
             <Box
               sx={{
-                width: 36,
-                height: 36,
+                width: 28,
+                height: 28,
                 borderRadius: `${designSystem.radius.sm}px`,
                 display: 'grid',
                 placeItems: 'center',
-                bgcolor: `${item.accent}18`,
-                color: item.accent,
+                bgcolor: 'rgba(255,255,255,0.04)',
+                color: '#d1d5db',
                 flexShrink: 0,
                 '& svg': { fontSize: 18 },
               }}

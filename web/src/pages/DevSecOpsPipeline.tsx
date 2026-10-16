@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Box, Chip, Stack, Typography } from '@mui/material';
+import { Box, Chip, Stack, Typography } from '@mui/material';
 import PageFrame from '../components/PageFrame';
 import { PIPELINE_STAGES } from '../data/bomFramework';
 import { isPaidEdition } from '../config/editions';
@@ -16,20 +16,20 @@ const DevSecOpsPipeline: React.FC = () => {
       subtitle="From IDE to regulator pack. Community runs stages 1–6 and JSON evidence. Continuous production monitoring is Enterprise."
       badge="rivicq scan ."
     >
-      <Alert severity="info" sx={{ mb: 3 }}>
+      <Typography color="text.secondary" sx={{ mb: 2, fontSize: '0.8125rem' }}>
         The GitHub Action policy gate is unchanged (`BLOCK` fails CI). RSA-2048 is classified, not auto-blocked.
-      </Alert>
-      <Stack spacing={1.5}>
+      </Typography>
+      <Stack spacing={0.75}>
         {PIPELINE_STAGES.map((s) => {
           const locked = !s.oss && !paid;
           return (
-            <Box key={s.id} sx={{ p: 2, borderRadius: 2, border: 1, borderColor: 'divider', opacity: locked ? 0.6 : 1 }}>
-              <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ md: 'center' }}>
-                <Typography fontFamily={tokens.typography.mono} fontWeight={800} color="primary">
+            <Box key={s.id} sx={{ px: 1, py: 0.75, borderRadius: 1, border: 1, borderColor: 'divider', opacity: locked ? 0.6 : 1 }}>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} alignItems={{ md: 'center' }}>
+                <Typography fontFamily={tokens.typography.mono} fontWeight={700} color="text.secondary" sx={{ fontSize: '0.75rem', width: 28 }}>
                   {String(s.id).padStart(2, '0')}
                 </Typography>
                 <Box sx={{ flex: 1 }}>
-                  <Typography fontWeight={800}>{s.name}</Typography>
+                  <Typography fontWeight={700} sx={{ fontSize: '0.8125rem' }}>{s.name}</Typography>
                   <Typography variant="body2" color="text.secondary">{s.action}</Typography>
                 </Box>
                 <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>

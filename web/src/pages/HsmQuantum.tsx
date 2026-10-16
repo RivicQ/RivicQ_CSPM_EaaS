@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Chip, Grid, Stack, Typography } from '@mui/material';
+import { Chip, Grid, Stack, Typography } from '@mui/material';
 import PageFrame from '../components/PageFrame';
 import { GlassCard } from '../components/ui';
 import { bomService } from '../services/api';
@@ -26,9 +26,9 @@ const HsmQuantum: React.FC = () => {
       title="HSM and quantum integration"
       subtitle="PQC classification on CBOM findings is Community. PKCS#11 / cloud HSM and QBOM stay disconnected until an Enterprise license and credentials exist."
     >
-      <Alert severity="info" sx={{ mb: 3 }}>
+      <Typography color="text.secondary" sx={{ mb: 2, fontSize: '0.8125rem' }}>
         {hsm?.note || 'HSM integration does not extract keys or reverse-engineer firmware.'} {hsm?.qsic}
-      </Alert>
+      </Typography>
       <Grid container spacing={2.5}>
         <Grid item xs={12} md={6}>
           <GlassCard>
@@ -57,7 +57,7 @@ const HsmQuantum: React.FC = () => {
             </Typography>
             <Stack spacing={1}>
               <Stack direction="row" spacing={1}><Chip size="small" label="runtime" /><Typography variant="body2">{q?.runtime?.connected ? 'API key present' : 'Not connected'}</Typography></Stack>
-              <Stack direction="row" spacing={1}><Chip size="small" label="migration" /><Typography variant="body2">{q?.migration?.connected ? 'Partner key present' : 'Local mapper only'}</Typography></Stack>
+              <Stack direction="row" spacing={1}><Chip size="small" label="plan mapper" /><Typography variant="body2">{q?.migration?.connected ? 'Partner key present' : 'Local mapper only'}</Typography></Stack>
             </Stack>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>{q?.note}</Typography>
           </GlassCard>

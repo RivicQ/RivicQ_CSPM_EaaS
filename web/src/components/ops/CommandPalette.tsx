@@ -98,10 +98,9 @@ const CommandPalette: React.FC<Props> = ({ open, onClose, findings, scans, asset
     <Dialog
       open={open}
       onClose={onClose}
-      fullWidth
-      maxWidth="sm"
+      maxWidth="xs"
       aria-label="Command palette"
-      sx={{ '& .MuiDialog-container': { alignItems: 'flex-start', pt: { xs: 8, md: 12 } } }}
+      sx={{ '& .MuiDialog-container': { alignItems: 'flex-start', pt: { xs: 6, md: 8 } } }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1.25 }}>
         <Search fontSize="small" />
@@ -129,7 +128,7 @@ const CommandPalette: React.FC<Props> = ({ open, onClose, findings, scans, asset
             ))}
           </Stack>
         )}
-        <List dense sx={{ maxHeight: 420, overflow: 'auto' }}>
+        <List dense sx={{ maxHeight: 220, overflow: 'auto' }}>
           {hits.map((h, i) => (
             <ListItemButton key={h.id} selected={i === active} onClick={() => go(h.path)}>
               <ListItemText

@@ -39,6 +39,7 @@ import { useDemoTrail } from '../context/DemoTrailContext';
 import { authService } from '../services/api';
 import { Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
+import ThemeToggle from '../theme/ThemeToggle';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { proBlueContainedButtonSx } from '../theme/designSystem';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
@@ -260,7 +261,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
           <BrandLogo dark />
-          <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600, borderColor: 'rgba(255,255,255,0.22)', color: NEBULA.muted }} />
+          <Stack direction="row" spacing={1} alignItems="center">
+            <ThemeToggle />
+            <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600, borderColor: 'rgba(255,255,255,0.22)', color: NEBULA.muted }} />
+          </Stack>
         </Box>
         <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: NEBULA.faint }}>
           {mode === 'register' ? 'Create workspace' : 'Cryptographic security'}

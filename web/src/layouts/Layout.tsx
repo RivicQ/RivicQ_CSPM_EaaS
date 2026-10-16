@@ -65,7 +65,7 @@ import {
   BugReport,
   MailOutline,
 } from '@mui/icons-material';
-import BomRibbon from '../components/bom/BomRibbon';
+import ThemeToggle from '../theme/ThemeToggle';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
@@ -134,13 +134,6 @@ const Layout: React.FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [modulesOpen, setModulesOpen] = React.useState(false);
   const [navQuery, setNavQuery] = React.useState('');
-  const [timeRange, setTimeRange] = React.useState(() => {
-    try {
-      return sessionStorage.getItem('rivicq.timeRange') || '24h';
-    } catch {
-      return '24h';
-    }
-  });
   const { mode } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
@@ -157,14 +150,6 @@ const Layout: React.FC = () => {
       /* ignore */
     }
   }, [sidebarCollapsed]);
-
-  React.useEffect(() => {
-    try {
-      sessionStorage.setItem('rivicq.timeRange', timeRange);
-    } catch {
-      /* ignore */
-    }
-  }, [timeRange]);
 
   React.useEffect(() => {
     persistPersona(persona);
@@ -260,7 +245,7 @@ const Layout: React.FC = () => {
     disabled,
   });
 
-  const bySection = (section: OpsSection) => OPS_ROUTES.filter((r) => r.section === section);
+  const bySection = (section: OpsSection) => OPS_ROUTES.filter((r) => r.section === section && (navQuery ? true : !r.quiet));
   const operationsItems: NavItem[] = [
     ...bySection('Operations').map((r) => toNav(r.path, r.text)),
     ...(isDemo ? [toNav('/demo', 'Demo Trail', 'Operations')] : []),
@@ -313,7 +298,7 @@ const Layout: React.FC = () => {
   }, [location.pathname]);
 
   const blue = designSystem.proBlue;
-  const isDarkMode = true;
+  const isDarkMode = mode === 'dark';
 
   const currentTitle = React.useMemo(() => {
     const all = [...allWorkspaceItems, ...enterpriseItems, ...modulesNav];
@@ -371,21 +356,6 @@ const Layout: React.FC = () => {
         {!(sidebarCollapsed && isDesktop) && (
           <Box sx={{ minWidth: 0 }}>
             <BrandLogo compact dark />
-            <Typography
-              variant="caption"
-              sx={{
-                display: 'block',
-                mt: 0.35,
-                pl: 0.25,
-                color: designSystem.proBlue.accentMuted,
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                fontSize: '0.58rem',
-                textTransform: 'uppercase',
-              }}
-            >
-              Security Cloud · SaaS
-            </Typography>
           </Box>
         )}
         {isDesktop && (
@@ -594,7 +564,7 @@ const Layout: React.FC = () => {
           ...appBarPaperSx(mode),
         }}
       >
-        <Toolbar sx={{ minHeight: 60, maxHeight: 60, gap: 1.25, px: { xs: 1.5, md: 2.5 }, flexWrap: 'nowrap', overflow: 'hidden' }}>
+        <Toolbar sx={{ minHeight: 52, maxHeight: 52, gap: 1, px: { xs: 1.25, md: 2 }, flexWrap: 'nowrap', overflow: 'hidden' }}>
           {!isDesktop && (
             <IconButton
               edge="start"
@@ -628,9 +598,6 @@ const Layout: React.FC = () => {
                 {currentTitle}
               </Typography>
             </Box>
-            <Box sx={{ display: { xs: 'none', xl: 'block' } }}>
-              <BomRibbon compact />
-            </Box>
           </Stack>
 
           <Box sx={{ flexGrow: 1 }} />
@@ -659,12 +626,12 @@ const Layout: React.FC = () => {
             </Typography>
           </Box>
 
-          <FormControl size="small" sx={{ minWidth: 118, display: { xs: 'none', md: 'inline-flex' } }}>
+          <FormControl size="small" sx={{ minWidth: 108, display: { xs: 'none', md: 'inline-flex' } }}>
             <Select
               value={persona}
               onChange={(e) => setPersona(e.target.value as OpsPersona)}
               aria-label="Operator view"
-              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
+              sx={{ height: 32, fontSize: '0.75rem', fontWeight: 600 }}
             >
               <MenuItem value="ciso">{PERSONA_LABEL.ciso}</MenuItem>
               <MenuItem value="analyst">{PERSONA_LABEL.analyst}</MenuItem>
@@ -672,31 +639,7 @@ const Layout: React.FC = () => {
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 132, display: { xs: 'none', md: 'inline-flex' } }}>
-            <Select
-              value={timeRange}
-              onChange={(e) => setTimeRange(String(e.target.value))}
-              aria-label="Time range"
-              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
-            >
-              <MenuItem value="24h">Last 24 hours</MenuItem>
-              <MenuItem value="7d">Last 7 days</MenuItem>
-              <MenuItem value="30d">Last 30 days</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 128, display: { xs: 'none', lg: 'inline-flex' } }}>
-            <Select
-              value={edition}
-              onChange={() => navigate('/switcher')}
-              aria-label="Workspace"
-              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
-            >
-              <MenuItem value="community">Community</MenuItem>
-              <MenuItem value="professional">Professional</MenuItem>
-              <MenuItem value="enterprise">Enterprise</MenuItem>
-            </Select>
-          </FormControl>
+          <ThemeToggle />
 
           <Box sx={{ flexGrow: { xs: 1, md: 0 }, display: { xs: 'block', md: 'none' } }} />
 
@@ -754,7 +697,8 @@ const Layout: React.FC = () => {
             <Chip
               size="small"
               label={edition.charAt(0).toUpperCase() + edition.slice(1)}
-              sx={{ ...appBarEditionChipSx(mode, edition === 'enterprise'), display: { xs: 'none', sm: 'inline-flex' } }}
+              onClick={() => navigate('/switcher')}
+              sx={{ ...appBarEditionChipSx(mode, edition === 'enterprise'), display: { xs: 'none', sm: 'inline-flex' }, cursor: 'pointer' }}
             />
 
             <IconButton
@@ -895,13 +839,13 @@ const Layout: React.FC = () => {
         sx={{
           flexGrow: 1,
           width: { lg: `calc(100% - ${desktopWidth}px)` },
-          mt: { xs: 7.5, lg: 7.5 },
-          pb: { xs: trailActive ? 28 : 8, sm: trailActive ? 22 : 0 },
+          mt: { xs: 6.5, lg: 6.5 },
+          pb: { xs: trailActive ? 18 : 6, sm: trailActive ? 14 : 0 },
           minHeight: '100vh',
           minWidth: 0,
           overflowX: 'hidden',
-          bgcolor: '#000000',
-          background: designSystem.gradient.meshDark,
+          bgcolor: 'background.default',
+          background: isDarkMode ? designSystem.gradient.meshDark : tokens.colors.surfaceLight[0],
           transition: reduceMotion ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           '& .MuiTableContainer-root': { overflowX: 'auto' },
         }}
@@ -913,7 +857,7 @@ const Layout: React.FC = () => {
           transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
           style={{ minWidth: 0 }}
         >
-          <Box sx={{ px: { xs: 1.25, sm: 2, md: 2.5 }, py: { xs: 1.25, md: 1.75 }, maxWidth: 1440, mx: 'auto', width: '100%', minWidth: 0 }}>
+          <Box sx={{ px: { xs: 1.25, sm: 1.75, md: 2 }, py: { xs: 1, md: 1.25 }, maxWidth: 1280, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />
             <OpsBreadcrumbs />
             <Outlet />

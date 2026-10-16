@@ -27,7 +27,7 @@ const DomainOpsStrip: React.FC = () => {
           sx={{
             textAlign: 'left',
             cursor: 'pointer',
-            p: 1.75,
+            p: 1,
             borderRadius: 2,
             border: '1px solid',
             borderColor: '#1f1f2e',
@@ -44,9 +44,9 @@ const DomainOpsStrip: React.FC = () => {
             {d.title.startsWith('API') && <Api fontSize="small" color="primary" />}
             {d.title.startsWith('GRC') && <Policy fontSize="small" color="primary" />}
             {d.title.startsWith('Quantum') && <Psychology fontSize="small" color="primary" />}
-            <Typography sx={{ fontWeight: 700, fontSize: '0.9rem' }}>{d.title}</Typography>
+            <Typography sx={{ fontWeight: 700, fontSize: '0.8125rem' }}>{d.title}</Typography>
           </Stack>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>{d.desc}</Typography>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem', lineHeight: 1.4 }}>{d.desc}</Typography>
         </Box>
       ))}
     </Box>

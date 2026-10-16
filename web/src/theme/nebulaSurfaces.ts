@@ -37,7 +37,7 @@ export const nebulaPageSx = {
 export const nebulaCardSx = {
   ...nebulaPanelSx,
   borderColor: NEBULA.lineHi,
-  boxShadow: '0 18px 48px rgba(0,0,0,0.45)',
+  boxShadow: 'none',
 } as const;
 
 export const archifyEyebrowSx = {

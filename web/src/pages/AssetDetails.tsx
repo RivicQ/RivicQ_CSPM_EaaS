@@ -151,7 +151,7 @@ const AssetDetails: React.FC = () => {
             <List dense disablePadding>
               {!quantumSafe && (
                 <ListItem disableGutters>
-                  <ListItemText primary="Migrate to post-quantum algorithm (CRYSTALS-Kyber or Dilithium)" />
+                  <ListItemText primary="Plan hybrid ML-KEM / ML-DSA. This console does not rotate keys." />
                 </ListItem>
               )}
               {algorithm.toUpperCase().includes('RSA') && typeof keySize === 'number' && keySize < 3072 && (

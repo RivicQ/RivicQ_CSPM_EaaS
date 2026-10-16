@@ -25,13 +25,12 @@ const LIGHT_PRIMARY = {
 
 const DARK_PRIMARY = LIGHT_PRIMARY;
 
-const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
-  const mode: 'light' | 'dark' = 'dark';
-  const isDark = true;
+const getAppTheme = (mode: 'light' | 'dark' = 'dark') => {
+  const isDark = mode === 'dark';
 
-  const surface = tokens.colors.surfaceLight;
-  const text = tokens.colors.textLight;
-  const border = tokens.colors.borderLight;
+  const surface = isDark ? tokens.colors.surface : tokens.colors.surfaceLight;
+  const text = isDark ? tokens.colors.text : tokens.colors.textLight;
+  const border = isDark ? tokens.colors.border : tokens.colors.borderLight;
 
   const primary = isDark ? DARK_PRIMARY : LIGHT_PRIMARY;
 
@@ -121,7 +120,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
             transition: designSystem.motion.smooth,
             '&:hover': {
               boxShadow: 'none',
-              borderColor: 'rgba(255,255,255,0.28)',
+              borderColor: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(10,10,15,0.18)',
             },
           },
         },
@@ -234,11 +233,51 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         },
       },
       MuiDialog: {
+        defaultProps: {
+          maxWidth: 'xs',
+          fullWidth: false,
+          scroll: 'paper',
+        },
         styleOverrides: {
           paper: {
             backgroundColor: surface[1],
             border: `1px solid ${border}`,
-            borderRadius: tokens.borderRadius.lg,
+            borderRadius: tokens.borderRadius.md,
+            width: 'min(380px, calc(100vw - 32px))',
+            maxWidth: '380px !important',
+            maxHeight: 'min(58vh, 440px)',
+            margin: 16,
+            overflow: 'hidden',
+          },
+          paperFullWidth: {
+            width: 'min(380px, calc(100vw - 32px))',
+          },
+          paperScrollPaper: {
+            maxHeight: 'min(58vh, 440px)',
+          },
+        },
+      },
+      MuiDialogTitle: {
+        styleOverrides: {
+          root: {
+            padding: '10px 14px',
+            fontSize: '0.9375rem',
+            fontWeight: 700,
+          },
+        },
+      },
+      MuiDialogContent: {
+        styleOverrides: {
+          root: {
+            padding: '8px 14px 12px',
+            overflow: 'auto',
+          },
+        },
+      },
+      MuiDialogActions: {
+        styleOverrides: {
+          root: {
+            padding: '8px 14px',
           },
         },
       },

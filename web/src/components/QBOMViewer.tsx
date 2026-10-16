@@ -367,7 +367,7 @@ const QBOMViewer: React.FC<QBOMViewerProps> = ({ qbom, onExport, onShareMigratio
       )}
 
       {/* Algorithm Detail Modal */}
-      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
+      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="xs">
         {selectedAlgorithm && (
           <>
             <DialogTitle>

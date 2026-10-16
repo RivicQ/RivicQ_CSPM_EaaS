@@ -6,9 +6,9 @@ import appTypography from './typography';
 export const designSystem = {
   radius: {
     sm: tokens.borderRadius.sm,
-    md: 16,
-    lg: 20,
-    xl: 28,
+    md: tokens.borderRadius.md,
+    lg: tokens.borderRadius.lg,
+    xl: tokens.borderRadius.xl,
     pill: tokens.borderRadius.full,
   },
   font: {
@@ -35,7 +35,7 @@ export const designSystem = {
     sm: '0 1px 2px rgba(2,6,23,0.06), 0 1px 3px rgba(2,6,23,0.05)',
     md: '0 2px 4px rgba(2,6,23,0.06), 0 10px 28px -12px rgba(2,6,23,0.18)',
     lg: '0 0 0 1px rgba(2,6,23,0.04), 0 12px 40px -14px rgba(2,6,23,0.30)',
-    glow: (_color: string) => `0 0 44px rgba(124,58,237,0.28)`,
+    glow: (_color: string) => 'none',
   },
   motion: {
     spring: '0.15s ease',
@@ -52,7 +52,7 @@ export const designSystem = {
     accentMuted: '#d1d5db',
     sidebar: '#000000',
     commandCenter: '#0a0a0f',
-    commandGlow: '0 0 48px rgba(124,58,237,0.22)',
+    commandGlow: 'none',
     border: '#1f1f2e',
     textPrimary: '#ffffff',
     textSecondary: '#d1d5db',
@@ -68,12 +68,12 @@ export const meshBackground = (theme: Theme) => ({
   backgroundColor: theme.palette.background.default,
 });
 
-export const glassSurface = (_theme: Theme, elevated = false) => ({
-  background: elevated ? '#0a0a0f' : '#000000',
+export const glassSurface = (theme: Theme, elevated = false) => ({
+  background: elevated ? theme.palette.background.paper : theme.palette.background.default,
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  border: '1px solid rgba(255,255,255,0.12)',
-  color: '#ffffff',
+  border: `1px solid ${theme.palette.divider}`,
+  color: theme.palette.text.primary,
 });
 
 export const gradientTextSx = {
@@ -298,77 +298,89 @@ export const proBlueBadgeSx = {
 };
 
 /** Top app bar — aligns with pro-blue sidebar & command center */
-export const appBarPaperSx = (_mode: 'light' | 'dark') => ({
-  bgcolor: '#000000',
-  backdropFilter: 'none',
-  WebkitBackdropFilter: 'none',
-  color: designSystem.proBlue.textPrimary,
-  borderBottom: '1px solid #1f1f2e',
-  boxShadow: 'none',
-  backgroundImage: 'none',
-});
-
-export const appBarSearchSx = (mode: 'light' | 'dark') => ({
-  display: { xs: 'none', lg: 'flex' },
-  alignItems: 'center',
-  flexWrap: 'nowrap',
-  borderRadius: `${designSystem.radius.md}px`,
-  px: 1.5,
-  py: 0,
-  height: 36,
-  maxHeight: 36,
-  overflow: 'hidden',
-  flexShrink: 0,
-  minWidth: 220,
-  width: { lg: 240, xl: 280 },
-  whiteSpace: 'nowrap',
-  bgcolor: '#0a0a0f',
-  border: '1px solid #1f1f2e',
-  transition: designSystem.motion.smooth,
-  '&:focus-within': {
-    bgcolor: '#0a0a0f',
-    borderColor: '#7c3aed',
+export const appBarPaperSx = (mode: 'light' | 'dark') => {
+  const dark = mode === 'dark';
+  return {
+    bgcolor: dark ? '#000000' : '#ffffff',
+    backdropFilter: 'none',
+    WebkitBackdropFilter: 'none',
+    color: dark ? designSystem.proBlue.textPrimary : '#0a0a0f',
+    borderBottom: `1px solid ${dark ? '#1f1f2e' : '#d9d2e8'}`,
     boxShadow: 'none',
-  },
-});
+    backgroundImage: 'none',
+  };
+};
 
-export const appBarIconButtonSx = (_mode: 'light' | 'dark') => ({
-  borderRadius: `${designSystem.radius.sm}px`,
-  border: '1px solid #1f1f2e',
-  bgcolor: '#0a0a0f',
-  color: designSystem.proBlue.textSecondary,
-  width: 36,
-  height: 36,
-  '&:hover': {
-    bgcolor: 'rgba(255,255,255,0.08)',
-    borderColor: designSystem.proBlue.accentMuted,
-  },
-});
+export const appBarSearchSx = (mode: 'light' | 'dark') => {
+  const dark = mode === 'dark';
+  return {
+    display: { xs: 'none', lg: 'flex' },
+    alignItems: 'center',
+    flexWrap: 'nowrap' as const,
+    borderRadius: `${designSystem.radius.md}px`,
+    px: 1.5,
+    py: 0,
+    height: 32,
+    maxHeight: 32,
+    overflow: 'hidden',
+    flexShrink: 0,
+    minWidth: 180,
+    width: { lg: 200, xl: 240 },
+    whiteSpace: 'nowrap' as const,
+    bgcolor: dark ? '#0a0a0f' : '#f4f0fb',
+    border: `1px solid ${dark ? '#1f1f2e' : '#d9d2e8'}`,
+    transition: designSystem.motion.smooth,
+    '&:focus-within': {
+      bgcolor: dark ? '#0a0a0f' : '#ffffff',
+      borderColor: '#7c3aed',
+      boxShadow: 'none',
+    },
+  };
+};
 
-export const appBarEditionChipSx = (_mode: 'light' | 'dark', isEnterprise: boolean) => ({
-  fontWeight: 600,
-  fontSize: '0.6875rem',
-  letterSpacing: '0.02em',
-  height: 26,
-  display: { xs: 'none', sm: 'inline-flex' },
-  bgcolor: isEnterprise ? 'rgba(124,58,237,0.2)' : '#0a0a0f',
-  color: isEnterprise ? '#ffffff' : designSystem.proBlue.accentMuted,
-  border: '1px solid #1f1f2e',
-});
+export const appBarIconButtonSx = (mode: 'light' | 'dark') => {
+  const dark = mode === 'dark';
+  return {
+    borderRadius: `${designSystem.radius.sm}px`,
+    border: `1px solid ${dark ? '#1f1f2e' : '#d9d2e8'}`,
+    bgcolor: dark ? '#0a0a0f' : '#ffffff',
+    color: dark ? designSystem.proBlue.textSecondary : '#3f3a4d',
+    width: 32,
+    height: 32,
+    '&:hover': {
+      bgcolor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(10,10,15,0.05)',
+      borderColor: '#7c3aed',
+    },
+  };
+};
 
-export const appBarPageTitleSx = (_mode: 'light' | 'dark') => ({
+export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolean) => {
+  const dark = mode === 'dark';
+  return {
+    fontWeight: 600,
+    fontSize: '0.6875rem',
+    letterSpacing: '0.02em',
+    height: 26,
+    display: { xs: 'none', sm: 'inline-flex' },
+    bgcolor: isEnterprise ? 'rgba(124,58,237,0.2)' : (dark ? '#0a0a0f' : '#f4f0fb'),
+    color: isEnterprise ? (dark ? '#ffffff' : '#4c1d95') : (dark ? designSystem.proBlue.accentMuted : '#3f3a4d'),
+    border: `1px solid ${dark ? '#1f1f2e' : '#d9d2e8'}`,
+  };
+};
+
+export const appBarPageTitleSx = (mode: 'light' | 'dark') => ({
   fontFamily: designSystem.font.display,
   fontWeight: 600,
-  fontSize: '0.9375rem',
+  fontSize: '0.875rem',
   letterSpacing: '-0.02em',
   lineHeight: 1.2,
-  color: designSystem.proBlue.textPrimary,
+  color: mode === 'dark' ? designSystem.proBlue.textPrimary : '#0a0a0f',
 });
 
-export const appBarPageEyebrowSx = (_mode: 'light' | 'dark') => ({
+export const appBarPageEyebrowSx = (mode: 'light' | 'dark') => ({
   ...appTypography.eyebrow,
   fontSize: '0.625rem',
-  color: designSystem.proBlue.accentMuted,
+  color: mode === 'dark' ? designSystem.proBlue.accentMuted : '#6b6578',
   lineHeight: 1,
   mb: 0.25,
 });

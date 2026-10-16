@@ -8,6 +8,8 @@ export type OpsRoute = {
   enterpriseOnly?: boolean;
   adminOnly?: boolean;
   demoOnly?: boolean;
+  /** Reachable from search, not shown in the primary sidebar. */
+  quiet?: boolean;
 };
 
 /** Minimum IA for an operator console. Marketing/demo items are not primary. */
@@ -17,7 +19,7 @@ export const OPS_ROUTES: OpsRoute[] = [
   { text: 'Assets', path: '/assets', section: 'Operations', keywords: ['inventory', 'crypto', 'certificate', 'key'] },
   { text: 'Scans', path: '/scanner', section: 'Operations', keywords: ['cbom', 'github', 'website', 'history', 'failed'] },
   { text: 'CBOM', path: '/bom', section: 'Operations', keywords: ['sbom', 'cspm', 'inventory', 'explorer'] },
-  { text: 'PQC Migration', path: '/migration', section: 'Operations', keywords: ['quantum', 'readiness', 'roadmap', 'hybrid'] },
+  { text: 'PQC planning', path: '/migration', section: 'Operations', keywords: ['quantum', 'readiness', 'roadmap', 'hybrid', 'migration'] },
 
   { text: 'Crypto Posture', path: '/cspm', section: 'Posture', keywords: ['cspm', 'risk', 'score'] },
   { text: 'Governance', path: '/governance', section: 'Posture', keywords: ['compliance', 'controls', 'dora', 'nis2', 'mapping'] },
@@ -27,9 +29,9 @@ export const OPS_ROUTES: OpsRoute[] = [
   { text: 'PATH Scanners', path: '/tools', section: 'Integrations', keywords: ['trivy', 'syft', 'gitleaks', 'osv', 'devsecops'] },
   { text: 'Ecosystem', path: '/ecosystem', section: 'Integrations', keywords: ['sdk', 'cli', 'plugin'] },
   { text: 'Pipeline', path: '/pipeline', section: 'Integrations', keywords: ['ci', 'github actions', 'gate'] },
-  { text: 'Contact', path: '/contact', section: 'Integrations', keywords: ['hello', 'support', 'sales'] },
-  { text: 'IBM Partner Plus', path: '/ibm', section: 'Integrations', keywords: ['ibm', 'partner', 'marketplace', 'cosell'] },
-  { text: 'CRM', path: '/crm', section: 'Integrations', keywords: ['leads', 'sales', 'funnel'], adminOnly: true },
+  { text: 'Contact', path: '/contact', section: 'Integrations', keywords: ['hello', 'support', 'sales'], quiet: true },
+  { text: 'IBM Partner Plus', path: '/ibm', section: 'Integrations', keywords: ['ibm', 'partner', 'marketplace', 'cosell'], quiet: true },
+  { text: 'CRM', path: '/crm', section: 'Integrations', keywords: ['leads', 'sales', 'funnel'], adminOnly: true, quiet: true },
 
   { text: 'HSM & Quantum', path: '/connectors/hsm', section: 'Enterprise', keywords: ['pkcs11', 'ibm', 'hbom'], enterpriseOnly: true },
   { text: 'AIBOM', path: '/security/ai', section: 'Enterprise', keywords: ['ai', 'model', 'aibom'], enterpriseOnly: true },
@@ -48,7 +50,7 @@ export const PALETTE_ACTIONS: Array<{ id: string; label: string; path: string; k
   { id: 'scan', label: 'Run scan', path: '/scanner', keywords: ['new', 'website', 'github'] },
   { id: 'critical', label: 'View critical findings', path: '/findings?severity=critical', keywords: ['p0', 'high'] },
   { id: 'cbom', label: 'Open CBOM', path: '/bom', keywords: ['inventory'] },
-  { id: 'pqc', label: 'View PQC roadmap', path: '/migration', keywords: ['quantum'] },
+  { id: 'pqc', label: 'View PQC plan', path: '/migration', keywords: ['quantum'] },
   { id: 'tools', label: 'PATH scanner integrations', path: '/tools', keywords: ['trivy', 'syft'] },
   { id: 'admin', label: 'Manage users', path: '/admin', keywords: ['sso', 'roles', 'keys'] },
   { id: 'report', label: 'Open reports', path: '/analytics', keywords: ['export'] },

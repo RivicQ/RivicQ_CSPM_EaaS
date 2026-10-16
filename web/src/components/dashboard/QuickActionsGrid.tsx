@@ -46,10 +46,10 @@ const QuickActionCard: React.FC<{
         border: 1,
         borderColor: 'rgba(148,163,184,0.12)',
         borderRadius: `${dashboardDesign.radius.md}px`,
-        bgcolor: '#0a0a0f',
+        bgcolor: 'background.paper',
         cursor: 'pointer',
         font: 'inherit',
-        color: '#fff',
+        color: 'text.primary',
         transition: dashboardDesign.motion.transition,
         '&:focus-visible': {
           outline: `2px solid ${action.accent}`,
