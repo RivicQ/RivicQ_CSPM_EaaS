@@ -12,6 +12,14 @@
 
 The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
 
+## Controlled pilot
+
+- [Pilot gate](PILOT_READINESS.md) — what is ready, limited, planned, or blocked
+- [Pilot onboarding](PILOT_ONBOARDING.md) — API, Pages, smoke tests, handoff
+- [Pilot acceptance criteria](PILOT_ACCEPTANCE_CRITERIA.md) — measurable tests
+- [Capability manifest](CAPABILITIES.yaml) — machine-readable status published with Pages
+- [Pilot landing page](../pilot/) — public entry point for the controlled pilot
+
 UI colors follow the **Security Cloud** nebula ledger (`#000000` canvas, `#0A0A0F` surface, violet `#7C3AED`). Control mappings are not certifications. Designed HTML hub: [docs/index.html](index.html).
 
 ## Getting started

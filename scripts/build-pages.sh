@@ -9,6 +9,7 @@
 #
 # Composite layout produced in web/build/:
 #   /            React SaaS app (SPA, 404.html fallback)
+#   /pilot/      Pilot gate, onboarding, acceptance, and capability manifest
 #   /api/        ReDoc HTML from docs/openapi.yaml
 #   /fabric/     RivicQ Graph (Vite build)
 #   /docs/       Horizon docs (hand-authored HTML + markdown)
@@ -27,25 +28,28 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 REACT_APP_EDITION="${REACT_APP_EDITION:-community}"
-export REACT_APP_EDITION
+GENERATE_SOURCEMAP="${GENERATE_SOURCEMAP:-false}"
+export REACT_APP_EDITION GENERATE_SOURCEMAP
 
 echo "==> Building React app (web/)"
-( cd web && npm ci && npm run build )
+( cd web && npm ci --no-audit --no-fund --prefer-offline && npm run build )
 
 echo "==> Generating API docs (ReDoc)"
-npx --yes redoc-cli@latest bundle docs/openapi.yaml -o web/build/api/index.html || \
-  echo "warn: ReDoc bundle failed; continuing without /api/"
+mkdir -p web/build/api
+npx --yes redoc-cli@0.13.21 bundle docs/openapi.yaml -o web/build/api/index.html
 
 echo "==> SPA fallback (404.html)"
 cp web/build/index.html web/build/404.html
 
 echo "==> Building RivicQ Graph (fabric/)"
-( cd fabric && npm ci && npm run build )
+( cd fabric && npm ci --no-audit --no-fund --prefer-offline && npm run build )
 
 echo "==> Publishing Graph + redirects"
-mkdir -p web/build/fabric web/build/docs web/build/nexus
+mkdir -p web/build/fabric web/build/docs web/build/nexus web/build/pilot
 cp -r fabric/dist/. web/build/fabric/
 cp web/build/fabric/index.html web/build/fabric/404.html
+cp docs/pilot.html web/build/pilot/index.html
+cp docs/pilot.html web/build/pilot/404.html
 printf '%s\n' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/RivicQ_CSPM_EaaS/fabric/"><link rel="canonical" href="/RivicQ_CSPM_EaaS/fabric/"><title>Moved</title><p>This demo moved to <a href="/RivicQ_CSPM_EaaS/fabric/">RivicQ Graph</a>.</p>' > web/build/nexus/index.html
 cp web/build/nexus/index.html web/build/nexus/404.html
 
@@ -59,8 +63,10 @@ cp docs/quantum-sdk.md docs/plugin-development.md docs/security-intelligence.md 
    docs/CLIENT_ARCHITECTURE.md docs/BOM_FRAMEWORK.md docs/UX_DESIGN.md docs/CONTACT.md \
    docs/PQC_MIGRATION.md docs/editions.md \
    docs/IMPLEMENTATION_STATUS.md docs/DEMO_RUNBOOK.md docs/PILOT_ACCEPTANCE_CRITERIA.md \
+   docs/PILOT_READINESS.md docs/PILOT_ONBOARDING.md docs/CAPABILITIES.yaml \
    docs/PRODUCTION_READINESS.md docs/SECURITY_FINDINGS.md \
    web/build/docs/
+cp docs/CAPABILITIES.yaml web/build/capabilities.yaml
 cp docs/ux/*.md web/build/docs/ux/ 2>/dev/null || true
 cp docs/contact.html docs/read.html docs/index.html web/build/docs/
 cp docs/assets/horizon-docs.css docs/assets/theme.js docs/assets/rivicq-mark.svg docs/assets/rivicq-mark.png web/build/docs/assets/
@@ -81,5 +87,9 @@ cp -r archify/diagrams/. web/build/archify/diagrams/
 echo "==> Installing Cloudflare Pages host config (_headers, _redirects)"
 cp cloudflare/_headers web/build/_headers
 cp cloudflare/_redirects web/build/_redirects
+touch web/build/.nojekyll
+
+echo "==> Verifying composite site"
+bash scripts/verify-pages-build.sh
 
 echo "==> Done. Output: web/build/"

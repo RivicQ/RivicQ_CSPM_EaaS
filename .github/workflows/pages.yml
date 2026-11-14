@@ -35,7 +35,11 @@ jobs:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
           REACT_APP_SUPABASE_URL: https://suhoabdijefnsoxveewn.supabase.co
           REACT_APP_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8q50RgRBzXcuvjdaF7qBpg_E0GKHPt4
+          GENERATE_SOURCEMAP: 'false'
         run: bash scripts/build-pages.sh
+
+      - name: Verify composite site
+        run: bash scripts/verify-pages-build.sh
 
       - name: Deploy to GitHub Pages (gh-pages branch)
         uses: peaceiris/actions-gh-pages@v4

@@ -12,7 +12,7 @@
 #   make clean        – remove build artifacts
 
 .PHONY: all dev dev-core dev-backend dev-enterprise dev-frontend build build-core build-oss build-enterprise \
-        build-rivicq rivicq-scan test lint migrate seed docker-up docker-down clean help
+        build-rivicq rivicq-scan build-pages verify-pages test lint migrate seed docker-up docker-down clean help
 
 GO        ?= go
 GOFLAGS   ?=
@@ -73,6 +73,15 @@ rivicq-scan: build-rivicq
 ## Run dataset analysis (CBOM accuracy vs expected.json)
 analyze-datasets: build-rivicq
 	python3 scripts/analyze-datasets.py
+
+# ── GitHub Pages / Cloudflare Pages ─────────────────────────────────────────
+## Build the full composite static site into web/build
+build-pages:
+	bash scripts/build-pages.sh
+
+## Verify the composite site is complete and safe to publish
+verify-pages:
+	bash scripts/verify-pages-build.sh
 
 .PHONY: analyze-datasets
 ## Run Go unit tests with race detector

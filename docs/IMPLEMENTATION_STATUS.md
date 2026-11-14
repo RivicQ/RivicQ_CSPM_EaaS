@@ -1,6 +1,6 @@
 # Implementation status
 
-Evidence-based snapshot of HEAD on `cursor/archify-site-system-86cc` after the 2026-10-15 engineering pass. Classification:
+Evidence-based snapshot of HEAD on `cursor/archify-site-system-86cc` after the 2026-10-15 engineering pass. The Pages pilot gate and composite build verification were added on 2026-11-14. Classification:
 
 - `VERIFIED` — implementation exists, workflow works, tests ran in this pass
 - `PARTIALLY_IMPLEMENTED` — code exists; coverage, connectors, or honesty bounds remain
@@ -21,6 +21,8 @@ Companion: [PRODUCT_STATUS.md](PRODUCT_STATUS.md), [KNOWN_LIMITATIONS.md](KNOWN_
 | Production refuse start without DB | VERIFIED | `internal/server/server.go` unless `RIVICQ_ALLOW_DEMO_MODE=1` | — |
 | Firmware / identity **static** analysis | PARTIALLY_IMPLEMENTED | CLI + API; no execution, no Infineon MCU, no private-key extract | Documented as static-only |
 | GitHub Pages public scan | BLOCKED | Static SPA; no production API | Deploy API or use CLI |
+| Pages pilot gate + capability manifest | VERIFIED | `docs/PILOT_READINESS.md`, `docs/PILOT_ONBOARDING.md`, `docs/CAPABILITIES.yaml`, `/pilot/` | Keep the manifest aligned with every phase |
+| Composite Pages build verification | VERIFIED | `scripts/build-pages.sh` calls `scripts/verify-pages-build.sh`; both Pages workflows run it | Treat a failed verification as a failed deploy |
 | Cloud connectors | BLOCKED | Need customer credentials | Empty state when missing |
 | SSO ACS handshake | NOT_IMPLEMENTED | Config store only | Operator IdP task |
 | Live Infineon MCU / HSM key inspection | NOT_IMPLEMENTED | Out of scope | Interface docs only |
