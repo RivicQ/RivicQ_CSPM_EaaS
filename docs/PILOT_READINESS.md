@@ -6,6 +6,7 @@ This gate covers the Community CLI, the policy gate, CBOM export, tenant-scoped 
 and the static GitHub Pages console/docs. It does **not** claim a hosted multi-tenant SaaS,
 real-time detection, AI analysis, or silicon attestation.
 
+Live gate: **https://rivicq.github.io/RivicQ_CSPM_EaaS/pilot/**
 Last reviewed: **2026-11-14** · Evidence: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) ·
 Machine-readable manifest: [CAPABILITIES.yaml](CAPABILITIES.yaml)
 
@@ -22,6 +23,7 @@ Machine-readable manifest: [CAPABILITIES.yaml](CAPABILITIES.yaml)
 | Hosted API for live scans | **LIMITED** | Must be deployed separately; Pages has no engine |
 | Qiskit posture scores | **LIMITED** | Local taxonomy only; not IBM Quantum jobs |
 | AI analysis and threat “ML” output | **LIMITED** | Template/heuristic output; do not present as trained AI |
+| Enterprise UUID tenant expand/contract | **PLANNED** | Existing TEXT tenant IDs only; do not mix UUID tenant data |
 | Supabase token exchange, memberships, invites, RLS | **PLANNED** | Not part of this pilot |
 | Stripe checkout, subscriptions, trial quotas | **PLANNED** | Trials are manual and non-billed |
 | Event bus, continuous scans, runtime sensors | **PLANNED** | No real-time claims |
