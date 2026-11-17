@@ -65,6 +65,8 @@ cp docs/quantum-sdk.md docs/plugin-development.md docs/security-intelligence.md 
    docs/IMPLEMENTATION_STATUS.md docs/DEMO_RUNBOOK.md docs/PILOT_ACCEPTANCE_CRITERIA.md \
    docs/PILOT_READINESS.md docs/PILOT_ONBOARDING.md docs/CAPABILITIES.yaml \
    docs/PRODUCTION_READINESS.md docs/SECURITY_FINDINGS.md \
+   docs/PRD.md docs/BRD.md docs/SRD.md docs/TRD.md docs/FIRMWARE_ANALYSIS.md \
+   docs/CLIENT_DEMO_VERIFICATION.md \
    web/build/docs/
 cp docs/CAPABILITIES.yaml web/build/capabilities.yaml
 cp docs/ux/*.md web/build/docs/ux/ 2>/dev/null || true

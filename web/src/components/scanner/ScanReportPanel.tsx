@@ -1,7 +1,7 @@
 import React from 'react';
-import { Alert, Box, Chip, Grid, Stack, Typography } from '@mui/material';
-import { Search, Healing, Description } from '@mui/icons-material';
+import { Box, Chip, Stack, Typography } from '@mui/material';
 import { tokens } from '../../theme/tokens';
+import { ARCHIFY_FONTS, NEBULA } from '../../theme/nebulaSurfaces';
 
 export type ArchitecturePhase = {
   id: string;
@@ -30,68 +30,117 @@ export type ClientArchitectureView = {
   honesty?: string;
 };
 
-const PHASE_ICON: Record<string, React.ReactNode> = {
-  discover: <Search fontSize="small" />,
-  mitigate: <Healing fontSize="small" />,
-  report: <Description fontSize="small" />,
-};
+const IDLE_PHASES: ArchitecturePhase[] = [
+  {
+    id: 'discover',
+    title: 'Discover',
+    status: 'waiting',
+    summary: 'Website, host, IP, server, pod, or a declared hardware catalog.',
+  },
+  {
+    id: 'mitigate',
+    title: 'Mitigate',
+    status: 'waiting',
+    summary: 'Map Shor and Grover families to ML-KEM, ML-DSA, and SLH-DSA.',
+  },
+  {
+    id: 'report',
+    title: 'Report',
+    status: 'waiting',
+    summary: 'CBOM evidence. Firmware stays static metadata, not binary reverse engineering.',
+  },
+];
 
 type Props = {
   architecture?: ClientArchitectureView | null;
   readiness?: PQCReadinessView | null;
+  /** Show the three client phases before a scan returns intelligence. */
+  showIdle?: boolean;
 };
 
-const ScanReportPanel: React.FC<Props> = ({ architecture, readiness }) => {
-  if (!architecture && !readiness) return null;
-  const phases = architecture?.phases ?? [];
+const ScanReportPanel: React.FC<Props> = ({ architecture, readiness, showIdle = false }) => {
+  const live = architecture?.phases ?? [];
+  const phases = live.length ? live : (showIdle ? IDLE_PHASES : []);
+  if (!phases.length && !readiness) return null;
+
   return (
-    <Box sx={{ mt: 2, p: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
-        <Typography variant="subtitle1" fontWeight={800}>Client report</Typography>
-        {architecture?.target_class && <Chip size="small" label={architecture.target_class} color="primary" />}
-        {architecture?.edition && <Chip size="small" variant="outlined" label={`${architecture.edition} edition`} />}
-        {readiness?.overall != null && <Chip size="small" label={`PQC readiness ${readiness.overall}/100`} />}
+    <Box
+      data-client-architecture="strip"
+      sx={{
+        mb: 2,
+        p: 1.25,
+        borderRadius: '12px',
+        border: '1px solid',
+        borderColor: 'rgba(255,255,255,0.12)',
+        bgcolor: NEBULA.ink,
+      }}
+    >
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
+        <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, fontSize: '0.875rem', letterSpacing: '-0.02em' }}>
+          Client architecture
+        </Typography>
+        {architecture?.target_class && <Chip size="small" label={architecture.target_class} variant="outlined" />}
+        {architecture?.edition && <Chip size="small" variant="outlined" label={architecture.edition} />}
+        {readiness?.overall != null && <Chip size="small" variant="outlined" label={`PQC ${readiness.overall}`} />}
       </Stack>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {architecture?.honesty || 'Discover inventories cryptography. Mitigate maps to NIST PQC. Report is CBOM evidence — not a certification.'}
-      </Typography>
-      <Grid container spacing={1.5} sx={{ mb: 2 }}>
-        {phases.map((p) => (
-          <Grid item xs={12} md={4} key={p.id}>
-            <Box sx={{ p: 1.5, height: '100%', borderRadius: 1.5, bgcolor: 'action.hover' }}>
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5, color: tokens.colors.rivicq[600] }}>
-                {PHASE_ICON[p.id] || <Description fontSize="small" />}
-                <Typography fontWeight={800}>{p.title}</Typography>
-                <Chip size="small" label={p.status} variant="outlined" />
-              </Stack>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{p.summary}</Typography>
-              <Stack spacing={0.5}>
-                {(p.actions || []).slice(0, 4).map((a) => (
-                  <Typography key={a} variant="caption" sx={{ display: 'block' }}>• {a}</Typography>
-                ))}
-              </Stack>
-            </Box>
-          </Grid>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' },
+          gap: 1,
+        }}
+      >
+        {phases.map((phase, index) => (
+          <Box
+            key={phase.id}
+            sx={{
+              px: 1.25,
+              py: 1,
+              borderRadius: '8px',
+              border: '1px solid',
+              borderColor: NEBULA.line,
+              bgcolor: NEBULA.panel,
+            }}
+          >
+            <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.35 }}>
+              <Typography sx={{ fontFamily: ARCHIFY_FONTS.mono, fontSize: '0.625rem', color: NEBULA.faint }}>
+                {String(index + 1).padStart(2, '0')}
+              </Typography>
+              <Typography sx={{ fontWeight: 600, fontSize: '0.8125rem' }}>{phase.title}</Typography>
+              <Typography sx={{ ml: 'auto', fontSize: '0.6875rem', color: tokens.colors.text.muted, textTransform: 'lowercase' }}>
+                {phase.status}
+              </Typography>
+            </Stack>
+            <Typography sx={{ color: NEBULA.muted, fontSize: '0.75rem', lineHeight: 1.45 }}>
+              {phase.summary}
+            </Typography>
+          </Box>
         ))}
-      </Grid>
+      </Box>
+      <Typography sx={{ mt: 1, color: NEBULA.faint, fontSize: '0.75rem', lineHeight: 1.45 }}>
+        {architecture?.honesty
+          || 'Discover inventories cryptography. Mitigate maps to NIST PQC. Report is CBOM evidence — not a certification. Firmware analysis reads metadata only.'}
+      </Typography>
       {readiness?.migration && readiness.migration.length > 0 && (
-        <Alert severity="info" sx={{ mb: 1.5 }}>
-          Mitigation: {readiness.migration.slice(0, 3).map((m) => `${m.algorithm} → ${m.replace_with}`).join(' · ')}
-        </Alert>
+        <Typography sx={{ mt: 0.5, color: NEBULA.muted, fontSize: '0.75rem' }}>
+          {readiness.migration.slice(0, 3).map((item) => `${item.algorithm} → ${item.replace_with}`).join(' · ')}
+        </Typography>
       )}
       {readiness?.compliance && (
-        <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-          {readiness.compliance.map((c) => (
+        <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mt: 0.75 }}>
+          {readiness.compliance.slice(0, 6).map((control) => (
             <Chip
-              key={`${c.framework}-${c.control}`}
+              key={`${control.framework}-${control.control}`}
               size="small"
               variant="outlined"
-              label={`${c.framework}: ${c.status}`}
+              label={`${control.framework}: ${control.status}`}
             />
           ))}
-          {readiness.pack_available
-            ? <Chip size="small" color="success" label="DORA pack enabled" />
-            : <Chip size="small" label="DORA JSON only (Community)" />}
+          <Chip
+            size="small"
+            variant="outlined"
+            label={readiness.pack_available ? 'DORA pack enabled' : 'DORA JSON only'}
+          />
         </Stack>
       )}
     </Box>

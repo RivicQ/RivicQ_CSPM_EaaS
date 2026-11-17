@@ -40,7 +40,7 @@ const MigrationHub: React.FC = () => {
     <PageFrame
       eyebrow="Planning"
       title="PQC classification"
-      subtitle="Scan taxonomy only. This page does not rotate keys or run IBM Quantum jobs."
+      subtitle="Scan taxonomy only. Maps Shor/Grover-class assets to ML-KEM / ML-DSA / SLH-DSA; does not rotate keys or run IBM Quantum jobs."
       badge={isDemo ? 'Demo' : (paid ? 'Enterprise' : 'Plan only')}
     >
       <Stack direction="row" spacing={1} sx={{ mb: 1.25 }} flexWrap="wrap" useFlexGap>

@@ -40,3 +40,7 @@ Official mark: geometric **R** on a rounded black square (`web/public/brand/rivi
 Public pages: `PublicShell` + `SitePage` + `websiteCtaSx`.  
 Console: `Layout` + `PageFrame` + `InboxHero`.  
 Do not add cream `#C4783A` or sky-blue chrome.
+
+## Diagram size
+
+`archify/site/index.html` is the only full-stage map (the pinned window). Website, docs, graph, and the console use a small plate (about 132–148px) or a one-line reference. The console does not host a viewport-height iframe. Violet is a small accent, not a page-sized wash behind the operator tools.

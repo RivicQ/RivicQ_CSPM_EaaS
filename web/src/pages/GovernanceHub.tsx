@@ -19,11 +19,14 @@ const GovernanceHub: React.FC = () => {
   const rows = data?.controls?.length ? data.controls : GOVERNANCE_CONTROLS.map((c) => ({
     framework: c.framework, control: c.control, bom: c.bom, status: c.community || paid ? 'mapped' : 'locked', pack: paid,
   }));
+  const mapped = rows.filter((c: any) => c.status === 'mapped' || c.community || c.pack).length;
+  const locked = Math.max(0, rows.length - mapped);
   return (
     <PageFrame
       eyebrow="Governance"
       title="Compliance mapping"
       subtitle="Operator control mappings only. Community is JSON. Enterprise can add an evidence pack. Not a certification."
+      badge={`${mapped} mapped · ${locked} pack`}
     >
       <Typography color="text.secondary" sx={{ mb: 1, fontSize: '0.75rem' }}>{data?.note || 'Operator mappings only.'}</Typography>
       <Stack spacing={0.75} sx={{ mb: 1.5 }}>

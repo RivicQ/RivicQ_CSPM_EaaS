@@ -17,6 +17,7 @@ import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 import ScanReportPanel, { ClientArchitectureView, PQCReadinessView } from '../components/scanner/ScanReportPanel';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 
 interface ScanJob {
   id: string;
@@ -320,7 +321,7 @@ const Scanner: React.FC = () => {
         <Grid item xs={6} sm={3}><StatCard label="Scan time" value={bench?.scan_time_seconds != null ? `${bench.scan_time_seconds}s` : '—'} hint={bench?.scan_time_seconds != null ? 'From benchmark API' : 'Unavailable'} icon={<Speed />} accent={tokens.colors.rivicq[700]} delay={3} /></Grid>
       </Grid>
 
-      <GlassCard delay={0} padding={1.25}>
+      <GlassCard hover={false} delay={0} padding={1.25}>
         <DetailTabs
           value={tab}
           onChange={setTab}
@@ -422,7 +423,8 @@ const Scanner: React.FC = () => {
               {auditOverall != null ? `Audit score: ${auditOverall}/100 (policy gate + Qiskit profile — not a certification).` : ''}
             </Alert>
           )}
-          <ScanReportPanel architecture={architecture} readiness={readiness} />
+          <ScanReportPanel architecture={architecture} readiness={readiness} showIdle />
+          <ArchifyWorkflowEmbed compact diagramId="operator" title="How does an operator scan run?" />
           {isScanning && (
             <Box sx={{ mb: 2 }}>
               <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.75 }}>
@@ -440,8 +442,26 @@ const Scanner: React.FC = () => {
             </Box>
           )}
           <Stack direction="row" spacing={1.5}>
-            <Button variant="contained" startIcon={<PlayArrow />} onClick={() => { void startScan(); }} disabled={isScanning} size="large" sx={{ background: designSystem.gradient.brand, px: 3 }}>
-              {isScanning ? 'Scanning…' : 'Start CBOM Scan'}
+            <Button
+              variant="contained"
+              disableElevation
+              startIcon={<PlayArrow />}
+              onClick={() => { void startScan(); }}
+              disabled={isScanning}
+              sx={{
+                borderRadius: '10px',
+                bgcolor: '#ffffff !important',
+                color: '#0a0b0d !important',
+                fontWeight: 600,
+                textTransform: 'none',
+                minHeight: 40,
+                px: 2,
+                boxShadow: 'none',
+                '& .MuiButton-startIcon': { color: 'inherit' },
+                '&:hover': { bgcolor: '#7c3aed !important', color: '#ffffff !important' },
+              }}
+            >
+              {isScanning ? 'Scanning…' : 'Start CBOM scan'}
             </Button>
             <Button variant="outlined" startIcon={<Refresh />} onClick={refreshScanData}>Refresh</Button>
           </Stack>

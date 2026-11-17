@@ -430,12 +430,22 @@ section { padding: 0 0 3.5rem; }
   letter-spacing: -0.02em;
   max-width: 40rem;
 }
+.archify-embed-stage {
+  position: relative;
+  height: 148px;
+  overflow: hidden;
+  background: #000;
+}
 .archify-embed-frame {
-  display: block;
-  width: 100%;
-  height: min(560px, 70vh);
+  position: absolute;
+  inset: 0;
+  width: 238%;
+  height: 238%;
   border: 0;
   background: #000;
+  pointer-events: none;
+  transform: scale(0.42);
+  transform-origin: 0 0;
 }
 
 .systems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 1.5rem; }

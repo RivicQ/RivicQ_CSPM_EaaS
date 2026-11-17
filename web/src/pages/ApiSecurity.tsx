@@ -18,6 +18,7 @@ const ApiSecurity: React.FC = () => {
       eyebrow="API security"
       title="TLS and HTTPS API surface"
       subtitle="Community derives API hygiene from website/host scans (HSTS, CSP, protocol, certificates). Full API gateway inventory is Enterprise."
+      badge={findings.length ? `${findings.length} findings` : 'No scan yet'}
     >
       <Typography color="text.secondary" sx={{ mb: 1, fontSize: '0.75rem' }}>{data?.note || 'Run a website scan to populate this view. Pages has no production API.'}</Typography>
       {findings.length === 0 ? (

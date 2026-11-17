@@ -9,9 +9,7 @@ type PageFrameProps = {
   badge?: string;
   action?: React.ReactNode;
   secondaryAction?: React.ReactNode;
-  visual?: React.ReactNode;
   children?: React.ReactNode;
-  creative?: boolean;
 };
 
 const PageFrame: React.FC<PageFrameProps> = ({
