@@ -27,8 +27,12 @@ const NAV: NavItem[] = [
     { label: 'Partners / IBM', to: '/ibm' },
   ] },
   { id: 'pricing', label: 'Pricing', to: '/pricing' },
+  { id: 'console', label: 'Console', to: '/dashboard' },
   { id: 'resources', label: 'Resources', items: [
     { label: 'Documentation', to: 'docs/index.html' },
+    { label: 'Open Source', to: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
+    { label: 'Cloud', to: 'marketing/index.html#cloud' },
+    { label: 'Animation', to: 'animation.html' },
     { label: 'System maps', to: '/maps' },
     { label: 'Archify gallery', to: 'archify/site/index.html#diagrams' },
     { label: 'RivicQ Graph demo', to: 'fabric/' },
@@ -121,6 +125,9 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
               >
                 <MenuIcon />
               </IconButton>
+              <Button variant="outlined" size="small" onClick={() => navigate('/dashboard')} sx={{ color: 'text.primary', borderColor: 'divider' }}>
+                Console
+              </Button>
               <Button variant="contained" size="small" onClick={() => navigate('/request-demo')} sx={websiteCtaSx}>
                 Request demo
               </Button>
@@ -179,6 +186,11 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
             <Button size="small" href="mailto:security@rivicq.com">security@</Button>
             <Button size="small" href="mailto:privacy@rivicq.com">privacy@</Button>
             <Button size="small" onClick={() => navigate('/contact')}>Contact</Button>
+            <Button size="small" onClick={() => navigate('/dashboard')}>Console</Button>
+            <Button size="small" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener noreferrer">Open Source</Button>
+            <Button size="small" onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/marketing/index.html#cloud`, '_blank', 'noopener,noreferrer')}>Cloud</Button>
+            <Button size="small" onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/docs/index.html`, '_blank', 'noopener,noreferrer')}>Reference</Button>
+            <Button size="small" onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/animation.html`, '_blank', 'noopener,noreferrer')}>Animation</Button>
           </Stack>
           <TrademarkNotice />
         </Stack>

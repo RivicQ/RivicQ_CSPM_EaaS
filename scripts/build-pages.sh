@@ -80,6 +80,8 @@ echo "==> Publishing media + marketing"
 mkdir -p web/build/media web/build/marketing
 cp -r media/. web/build/media/
 cp -r marketing/. web/build/marketing/
+cp media/cryptobom-animation.html web/build/animation.html
+cp media/cryptobom-animation.html web/build/marketing/animation.html
 
 echo "==> Publishing archify diagram site"
 mkdir -p web/build/archify/site web/build/archify/diagrams

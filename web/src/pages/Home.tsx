@@ -45,7 +45,9 @@ const DOCS: HomeDoc[] = [
   { icon: <MailOutline />, title: 'Contact', desc: 'Public desks on @rivicq.com.', to: '/contact' },
   { icon: <AccountTree />, title: 'RivicQ Graph', desc: 'Labeled security-graph demo. Synthetic data only.', href: 'fabric/' },
   { icon: <Api />, title: 'API reference', desc: 'OpenAPI for the RivicQ platform API.', href: 'api/index.html' },
-  { icon: <GitHub />, title: 'GitHub', desc: 'Source, issues, and the OSS scanner.', href: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
+  { icon: <AccountTree />, title: 'Cloud overview', desc: 'Security Cloud scope and Enterprise boundary.', href: 'marketing/index.html#cloud' },
+  { icon: <Psychology />, title: 'Platform animation', desc: 'Animated CryptoBOM discovery and posture flow.', href: 'animation.html' },
+  { icon: <GitHub />, title: 'Open Source', desc: 'Source, issues, and the OSS scanner.', href: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
 ];
 
 const STANDARDS = ['CIS Benchmarks', 'NIST 800-53', 'NIST PQC (FIPS 203/204)', 'SOC 2', 'ISO 27001', 'PCI DSS 4.0', 'DORA', 'NIS2', 'EU CRA', 'eIDAS 2.0'];
@@ -266,6 +268,11 @@ const Home: React.FC = () => {
       ],
     },
     {
+      id: 'console',
+      label: 'Console',
+      onClick: () => navigate('/dashboard'),
+    },
+    {
       id: 'trust',
       label: 'Trust & Security',
       items: [
@@ -278,6 +285,9 @@ const Home: React.FC = () => {
       label: 'Resources',
       items: [
         { label: 'Documentation', action: () => openExternal('docs/index.html') },
+        { label: 'Open Source', action: () => openExternal('https://github.com/RivicQ/RivicQ_CSPM_EaaS') },
+        { label: 'Cloud', action: () => openExternal('marketing/index.html#cloud') },
+        { label: 'Animation', action: () => openExternal('animation.html') },
         { label: 'System maps', action: () => navigate('/maps') },
         { label: 'Archify gallery', action: () => openExternal('archify/site/index.html#diagrams') },
         { label: 'RivicQ Graph demo', action: () => openExternal('fabric/') },
@@ -637,6 +647,11 @@ const Home: React.FC = () => {
               <Button size="small" href="mailto:security@rivicq.com">security@</Button>
               <Button size="small" href="mailto:privacy@rivicq.com">privacy@</Button>
               <Button size="small" onClick={() => navigate('/contact')}>Contact</Button>
+              <Button size="small" onClick={() => navigate('/dashboard')}>Console</Button>
+              <Button size="small" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener noreferrer">Open Source</Button>
+              <Button size="small" onClick={() => openExternal('marketing/index.html#cloud')}>Cloud</Button>
+              <Button size="small" onClick={() => openExternal('docs/index.html')}>Reference</Button>
+              <Button size="small" onClick={() => openExternal('animation.html')}>Animation</Button>
               <Button size="small" onClick={() => navigate('/pricing')}>Pricing</Button>
               <Button size="small" onClick={() => navigate('/ibm')}>IBM Partner Plus</Button>
               <Button size="small" onClick={() => navigate('/request-demo')}>Request demo</Button>
