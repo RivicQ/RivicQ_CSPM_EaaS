@@ -100,5 +100,12 @@ __pycache__/
 .env
 .env.*
 
+# RevenueOS deployment assets
+!revenueos/.dockerignore
+!revenueos/prisma/migrations/**/*.sql
+
+# Local Sellbird runtime data
+.sellbird/
+
 # Accidental nested clone of this repository (never commit)
 /RivicQ_CSPM_EaaS/

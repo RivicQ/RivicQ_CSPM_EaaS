@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+HOME_DIR="$ROOT/.sellbird"
+
+mkdir -p "$HOME_DIR/skills"
+cp "$ROOT/sales/sellbird/sellbird.local.yaml" "$HOME_DIR/sellbird.local.yaml"
+cp "$ROOT/sales/sellbird/skills/product_knowledge.md" "$HOME_DIR/skills/product_knowledge.md"
+cp "$ROOT/sales/sellbird/skills/competitive_intel.md" "$HOME_DIR/skills/competitive_intel.md"
+
+export SELLBIRD_HOME="$HOME_DIR"
+exec "$ROOT/.venv/bin/sellbird" "$@"

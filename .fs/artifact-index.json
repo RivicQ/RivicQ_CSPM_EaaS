@@ -1,0 +1,127 @@
+{
+  "artifacts": [
+    {
+      "path": "docs/founder-work/customer-profile.md",
+      "type": "customer-profile",
+      "created": "2026-11-17",
+      "createdBy": "customer-hypothesis",
+      "dependsOn": [
+        "README.md",
+        "docs/editions.md",
+        "docs/PILOT_READINESS.md",
+        "docs/CAPABILITIES.yaml",
+        "web/src/pages/RequestDemo.tsx"
+      ],
+      "feedsInto": [
+        "problem-validator",
+        "sellbird",
+        "positioning-writer"
+      ],
+      "recommendedNext": [
+        "problem-validator",
+        "five customer interviews"
+      ],
+      "confidence": "low",
+      "freshness": "fresh"
+    },
+    {
+      "path": "docs/founder-work/startup-loop.md",
+      "type": "startup-loop",
+      "created": "2026-11-17",
+      "createdBy": "founder-skills setup",
+      "dependsOn": [
+        "founder-context.md",
+        "truth-memo.md",
+        "docs/founder-work/customer-profile.md"
+      ],
+      "feedsInto": [
+        "co-founder",
+        "problem-validator"
+      ],
+      "recommendedNext": [
+        "problem-validator"
+      ],
+      "confidence": "medium",
+      "freshness": "fresh"
+    },
+    {
+      "path": "founder-context.md",
+      "type": "founder-context",
+      "created": "2026-11-17",
+      "createdBy": "founder-skills setup",
+      "dependsOn": [
+        "README.md",
+        "docs/PILOT_READINESS.md",
+        "docs/CAPABILITIES.yaml",
+        "docs/founder-work/customer-profile.md"
+      ],
+      "feedsInto": [
+        "co-founder",
+        "weekly-founder-review"
+      ],
+      "recommendedNext": [
+        "problem-validator"
+      ],
+      "confidence": "medium",
+      "freshness": "fresh"
+    },
+    {
+      "path": "truth-memo.md",
+      "type": "truth-memo",
+      "created": "2026-11-17",
+      "createdBy": "co-founder",
+      "dependsOn": [
+        "founder-context.md",
+        "docs/founder-work/customer-profile.md"
+      ],
+      "feedsInto": [
+        "co-founder",
+        "assumption-mapper"
+      ],
+      "recommendedNext": [
+        "problem-validator"
+      ],
+      "confidence": "medium",
+      "freshness": "fresh"
+    },
+    {
+      "path": "recommended-next-step.md",
+      "type": "recommended-next-step",
+      "created": "2026-11-17",
+      "createdBy": "co-founder",
+      "dependsOn": [
+        "truth-memo.md",
+        "docs/founder-work/customer-profile.md"
+      ],
+      "feedsInto": [
+        "problem-validator"
+      ],
+      "recommendedNext": [
+        "problem-validator"
+      ],
+      "confidence": "medium",
+      "freshness": "fresh"
+    },
+    {
+      "path": "sales/sellbird/sellbird.local.yaml",
+      "type": "sellbird-config",
+      "created": "2026-11-17",
+      "createdBy": "Sellbird setup",
+      "dependsOn": [
+        "docs/founder-work/customer-profile.md",
+        "sales/sellbird/skills/product_knowledge.md",
+        "sales/sellbird/skills/competitive_intel.md"
+      ],
+      "feedsInto": [
+        "sellbird",
+        "pipeline-reviewer"
+      ],
+      "recommendedNext": [
+        "authenticate a Claude or Codex brain provider",
+        "confirm real prospects before drafting"
+      ],
+      "confidence": "medium",
+      "freshness": "fresh"
+    }
+  ]
+}

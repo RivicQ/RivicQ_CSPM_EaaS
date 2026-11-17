@@ -1,0 +1,618 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  FOUNDER
+  FINANCE_ADMIN
+  SALES_ADMIN
+  SALES_USER
+  CUSTOMER
+}
+
+enum ProductKind {
+  SAAS
+  AUDIT
+  CONSULTING
+  SUPPORT
+}
+
+enum BillingInterval {
+  MONTHLY
+  ANNUAL
+  ONE_TIME
+  CUSTOM
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  PAUSED
+}
+
+enum QuotationStatus {
+  DRAFT
+  INTERNAL_REVIEW
+  APPROVED
+  SENT
+  VIEWED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED_TO_INVOICE
+}
+
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  VOID
+  UNCOLLECTIBLE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum PartnerType {
+  REFERRAL
+  RESELLER
+  TECHNOLOGY
+  IMPLEMENTATION
+}
+
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+enum RevenueCategory {
+  RECURRING
+  ONE_TIME
+  REFUND
+  COMMISSION
+  COST
+}
+
+enum RevenueKind {
+  CONTRACTED
+  INVOICED
+  COLLECTED
+  FORECAST
+}
+
+enum Scenario {
+  CONSERVATIVE
+  BASE
+  AGGRESSIVE
+}
+
+enum StripeEventStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+enum SupportStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum EngagementStatus {
+  PLANNED
+  IN_PROGRESS
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliverableStatus {
+  PLANNED
+  IN_PROGRESS
+  DELIVERED
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  SUSPENDED
+  CHURNED
+}
+
+model Organization {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  country   String?
+  vatId     String?
+  users     User[]
+  customers Customer[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  name               String
+  passwordHash       String
+  role               Role                @default(CUSTOMER)
+  organizationId     String?
+  organization       Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  customerId         String?
+  customer           Customer?           @relation("CustomerUsers", fields: [customerId], references: [id], onDelete: SetNull)
+  sessions           Session[]
+  auditLogs          AuditLog[]          @relation("AuditLogActor")
+  approvedQuotations Quotation[]         @relation("QuotationApprover")
+  createdQuotations  Quotation[]         @relation("QuotationCreator")
+  refunds            Refund[]            @relation("RefundAdministrator")
+  commissions        PartnerCommission[] @relation("CommissionApprover")
+  supportRequests    SupportRequest[]    @relation("SupportRequestOwner")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([organizationId])
+  @@index([customerId])
+}
+
+model Customer {
+  id               String              @id @default(cuid())
+  organizationId   String?
+  organization     Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  name             String
+  email            String
+  country          String
+  currency         String              @default("EUR")
+  status           CustomerStatus      @default(LEAD)
+  stripeCustomerId String?             @unique
+  users            User[]              @relation("CustomerUsers")
+  subscriptions    Subscription[]
+  quotations       Quotation[]
+  invoices         Invoice[]
+  payments         Payment[]
+  auditEngagements AuditEngagement[]
+  commissions      PartnerCommission[]
+  stripeCustomer   StripeCustomer?
+  revenueRecords   RevenueRecord[]
+  supportRequests  SupportRequest[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model Product {
+  id               String            @id @default(cuid())
+  code             String            @unique
+  name             String
+  description      String
+  kind             ProductKind
+  billingInterval  BillingInterval
+  defaultCurrency  String
+  active           Boolean           @default(true)
+  stripeProductId  String?           @unique
+  prices           Price[]
+  quotationItems   QuotationItem[]
+  auditEngagements AuditEngagement[]
+  revenueRecords   RevenueRecord[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([kind])
+}
+
+model Price {
+  id               String          @id @default(cuid())
+  productId        String
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  currency         String
+  unitAmount       Int
+  interval         BillingInterval
+  active           Boolean         @default(true)
+  stripePriceId    String?         @unique
+  priceBookVersion String
+  validFrom        DateTime        @default(now())
+  validTo          DateTime?
+  regionalPrices   RegionalPrice[]
+  subscriptions    Subscription[]
+  revenueRecords   RevenueRecord[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([productId, currency, interval, priceBookVersion])
+  @@index([productId])
+}
+
+model RegionalPrice {
+  id               String    @id @default(cuid())
+  priceId          String
+  price            Price     @relation(fields: [priceId], references: [id], onDelete: Cascade)
+  country          String
+  currency         String
+  unitAmount       Int
+  taxCode          String?
+  active           Boolean   @default(true)
+  priceBookVersion String
+  validFrom        DateTime  @default(now())
+  validTo          DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([priceId, country, priceBookVersion])
+  @@index([priceId])
+  @@index([country, currency])
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  customerId           String
+  customer             Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  priceId              String
+  price                Price              @relation(fields: [priceId], references: [id])
+  status               SubscriptionStatus @default(INCOMPLETE)
+  quantity             Int                @default(1)
+  stripeSubscriptionId String?            @unique
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  trialEnd             DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  invoices             Invoice[]
+  payments             Payment[]
+  revenueRecords       RevenueRecord[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model Quotation {
+  id               String              @id @default(cuid())
+  number           String              @unique
+  customerId       String
+  customer         Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  contactName      String
+  country          String
+  engagementType   String
+  description      String
+  scope            String
+  deliverables     String
+  exclusions       String
+  timeline         String
+  currency         String
+  subtotal         Int
+  discountBps      Int                 @default(0)
+  discountAmount   Int                 @default(0)
+  taxAmount        Int                 @default(0)
+  total            Int
+  status           QuotationStatus     @default(DRAFT)
+  validUntil       DateTime
+  acceptedAt       DateTime?
+  approvedAt       DateTime?
+  approvedById     String?
+  approvedBy       User?               @relation("QuotationApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  createdById      String
+  createdBy        User?               @relation("QuotationCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  priceBookVersion String
+  exchangeRate     Decimal?            @db.Decimal(18, 8)
+  fxSource         String?
+  items            QuotationItem[]
+  invoices         Invoice[]
+  payments         Payment[]
+  auditEngagements AuditEngagement[]
+  commissions      PartnerCommission[]
+  supportRequests  SupportRequest[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model QuotationItem {
+  id              String          @id @default(cuid())
+  quotationId     String
+  quotation       Quotation       @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  productId       String?
+  product         Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name            String
+  description     String?
+  quantity        Int             @default(1)
+  unitAmount      Int
+  amount          Int
+  billingInterval BillingInterval @default(ONE_TIME)
+  createdAt       DateTime        @default(now())
+
+  @@index([quotationId])
+}
+
+model Invoice {
+  id              String          @id @default(cuid())
+  number          String          @unique
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  quotationId     String?
+  quotation       Quotation?      @relation(fields: [quotationId], references: [id], onDelete: SetNull)
+  subscriptionId  String?
+  subscription    Subscription?   @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  currency        String
+  amount          Int
+  taxAmount       Int
+  amountPaid      Int             @default(0)
+  status          InvoiceStatus   @default(OPEN)
+  stripeInvoiceId String?         @unique
+  issuedAt        DateTime        @default(now())
+  dueAt           DateTime?
+  payments        Payment[]
+  revenueRecords  RevenueRecord[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([customerId])
+  @@index([quotationId])
+  @@index([status])
+}
+
+model Payment {
+  id                      String              @id @default(cuid())
+  customerId              String
+  customer                Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  invoiceId               String?
+  invoice                 Invoice?            @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  quotationId             String?
+  quotation               Quotation?          @relation(fields: [quotationId], references: [id], onDelete: SetNull)
+  subscriptionId          String?
+  subscription            Subscription?       @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  amount                  Int
+  currency                String
+  status                  PaymentStatus       @default(PENDING)
+  method                  String?
+  stripePaymentIntentId   String?             @unique
+  stripeCheckoutSessionId String?             @unique
+  orderReference          String              @unique
+  refunds                 Refund[]
+  revenueRecords          RevenueRecord[]
+  commissions             PartnerCommission[]
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+  @@index([invoiceId])
+}
+
+model Refund {
+  id              String   @id @default(cuid())
+  paymentId       String
+  payment         Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  amount          Int
+  reason          String
+  stripeRefundId  String?  @unique
+  administratorId String?
+  administrator   User?    @relation("RefundAdministrator", fields: [administratorId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+
+  @@index([paymentId])
+}
+
+model StripeCustomer {
+  id               String   @id @default(cuid())
+  customerId       String   @unique
+  customer         Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  stripeCustomerId String   @unique
+  createdAt        DateTime @default(now())
+}
+
+model StripeEvent {
+  id          String            @id
+  type        String
+  status      StripeEventStatus @default(RECEIVED)
+  attempts    Int               @default(0)
+  error       String?
+  payload     Json?
+  createdAt   DateTime          @default(now())
+  processedAt DateTime?
+
+  @@index([status])
+  @@index([type])
+}
+
+model AuditEngagement {
+  id           String             @id @default(cuid())
+  customerId   String
+  customer     Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  quotationId  String?
+  quotation    Quotation?         @relation(fields: [quotationId], references: [id], onDelete: SetNull)
+  productId    String?
+  product      Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name         String
+  status       EngagementStatus   @default(PLANNED)
+  scope        String
+  startDate    DateTime?
+  endDate      DateTime?
+  deliverables AuditDeliverable[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([customerId])
+}
+
+model AuditDeliverable {
+  id           String            @id @default(cuid())
+  engagementId String
+  engagement   AuditEngagement   @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  name         String
+  status       DeliverableStatus @default(PLANNED)
+  url          String?
+  createdAt    DateTime          @default(now())
+
+  @@index([engagementId])
+}
+
+model Partner {
+  id                String              @id @default(cuid())
+  name              String
+  type              PartnerType
+  commissionRateBps Int
+  terms             String?
+  active            Boolean             @default(true)
+  commissions       PartnerCommission[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model PartnerCommission {
+  id           String           @id @default(cuid())
+  partnerId    String
+  partner      Partner          @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  customerId   String
+  customer     Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  quotationId  String?
+  quotation    Quotation?       @relation(fields: [quotationId], references: [id], onDelete: SetNull)
+  paymentId    String?
+  payment      Payment?         @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  rateBps      Int
+  amount       Int
+  currency     String
+  status       CommissionStatus @default(PENDING)
+  approvedById String?
+  approvedBy   User?            @relation("CommissionApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  paidAt       DateTime?
+  createdAt    DateTime         @default(now())
+
+  @@index([partnerId])
+  @@index([paymentId])
+  @@index([status])
+}
+
+model RevenueRecord {
+  id             String          @id @default(cuid())
+  customerId     String?
+  customer       Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  productId      String?
+  product        Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  subscriptionId String?
+  subscription   Subscription?   @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  invoiceId      String?
+  invoice        Invoice?        @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  priceId        String?
+  price          Price?          @relation(fields: [priceId], references: [id], onDelete: SetNull)
+  paymentId      String?
+  payment        Payment?        @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  category       RevenueCategory
+  kind           RevenueKind
+  amount         Int
+  currency       String
+  interval       BillingInterval?
+  periodStart    DateTime
+  periodEnd      DateTime
+  scenario       Scenario        @default(BASE)
+  description    String?
+  createdAt      DateTime        @default(now())
+
+  @@index([currency, kind])
+  @@index([periodStart])
+  @@index([scenario])
+}
+
+model ExchangeRate {
+  id            String   @id @default(cuid())
+  baseCurrency  String
+  quoteCurrency String
+  rate          Decimal  @db.Decimal(18, 8)
+  source        String
+  effectiveAt   DateTime
+  createdAt     DateTime @default(now())
+
+  @@unique([baseCurrency, quoteCurrency, source, effectiveAt])
+}
+
+model Discount {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  percentBps  Int?
+  amountMinor Int?
+  currency    String?
+  active      Boolean   @default(true)
+  validFrom   DateTime?
+  validTo     DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model TaxConfiguration {
+  id        String   @id @default(cuid())
+  country   String   @unique
+  taxCode   String
+  rateBps   Int
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorRole  Role?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SupportRequest {
+  id          String        @id @default(cuid())
+  customerId  String
+  customer    Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  quotationId String?
+  quotation   Quotation?    @relation(fields: [quotationId], references: [id], onDelete: SetNull)
+  subject     String
+  message     String
+  status      SupportStatus @default(OPEN)
+  ownerId     String?
+  owner       User?         @relation("SupportRequestOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}

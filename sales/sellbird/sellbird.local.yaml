@@ -1,0 +1,98 @@
+persona:
+  name: "RivicQ Founder"
+  company: "RivicQ GmbH"
+  role: "Founder-led sales"
+  email: "sales@rivicq.com"
+  linkedin: ""
+  tone: "direct, technical, honest, consultative"
+
+product:
+  name: "RivicQ CSPM"
+  description: "Cryptographic Security Posture Management. The Community CLI inventories cryptography and software components as CBOM/SBOM, exports CycloneDX 1.6, and applies a policy gate. Enterprise adds SSO, server-side RBAC, tenant isolation, multi-cloud connectors, audit evidence, and compliance mappings."
+  pricing: "Community is Apache-2.0 and €0. Startup list price €490/month, Professional list price €1,490/month, Enterprise custom. Checkout is not live."
+  key_benefits:
+    - "CBOM and SBOM inventory with CycloneDX 1.6 export from an authorized source tree"
+    - "Deterministic policy gate and fail-on exit codes for CI"
+    - "One engine across Community and Enterprise, with honest license boundaries"
+    - "Controlled pilot gate, capability manifest, and evidence JSON"
+  objection_responses:
+    "too expensive": "Start with the free Apache-2.0 Community CLI and a controlled CBOM pilot on an authorized source tree. We can discuss Enterprise only after the evidence is useful."
+    "already have a solution": "That makes sense. What does your current inventory say about cryptographic algorithms, keys, and certificates across repositories and services?"
+    "not interested": "Understood. Is cryptographic inventory already owned by another team, or is it simply not on the current audit path?"
+    "no live SaaS": "Correct. GitHub Pages is a labeled demo. Live scans use the CLI or a separately deployed API; the pilot states that boundary explicitly."
+    "compliance": "Our control packs are engineering mappings, not certifications. The pilot can show evidence and mappings without claiming audit approval."
+  offer:
+    primary: "Controlled CBOM pilot: static cryptographic inventory, CycloneDX evidence, policy gate, and a written boundary of what the pilot does not claim"
+    entry: "Free CBOM pilot in under 5 minutes; no credit card required; enterprise features available on request"
+    goal: "book_call"
+    booking_method: "ask_preference"
+    booking_url: ""
+    meeting_duration: "20 minutes"
+    meeting_owner: "RivicQ sales"
+
+icp:
+  industries:
+    - "Financial Services"
+    - "Fintech and Payments"
+    - "Identity and PKI"
+    - "Regulated SaaS"
+    - "Industrial IoT and Manufacturing"
+    - "Healthcare"
+  company_size: "50-1000 employees"
+  titles:
+    - "CISO"
+    - "Chief Information Security Officer"
+    - "Head of Information Security"
+    - "VP Security"
+    - "Director of Security"
+    - "Head of Application Security"
+    - "Security Engineering Manager"
+    - "Security Architect"
+    - "Head of DevSecOps"
+  geography:
+    - "Germany"
+    - "European Union"
+    - "United Kingdom"
+  hiring_signals:
+    - "Security Engineer"
+    - "Application Security Engineer"
+    - "DevSecOps Engineer"
+    - "Security Architect"
+    - "GRC Analyst"
+    - "Compliance Manager"
+    - "PKI Engineer"
+    - "Cryptography Engineer"
+  geo_coordinates:
+    "Germany": "51.1657,10.4515,500"
+    "European Union": "50.8503,4.3517,1500"
+    "United Kingdom": "54.0,-2.0,500"
+  keyword_variants:
+    "Financial Services": ["CBOM", "cryptographic inventory", "DORA crypto evidence"]
+    "Fintech and Payments": ["CBOM", "PCI cryptography inventory", "key management inventory"]
+    "Identity and PKI": ["certificate inventory", "PKI inventory", "cryptographic asset inventory"]
+    "Regulated SaaS": ["SBOM CBOM", "software cryptography inventory", "post quantum readiness"]
+    "Industrial IoT and Manufacturing": ["device cryptography inventory", "CBOM firmware", "SBOM CBOM"]
+    "Healthcare": ["medical device SBOM", "cryptographic inventory", "security evidence"]
+
+channels:
+  email:
+    enabled: true
+    provider: "gmail"
+    max_daily_sends: 20
+    require_approval: true
+    send_to_risky: false
+    max_bounce_rate: 0.05
+
+brain:
+  provider: "claude"
+  model: ""
+  reasoning_effort: ""
+
+compliance:
+  postal_address: ""
+  opt_out_line: "Not interested? Just let me know and I won't email you again."
+  do_not_contact: []
+
+writer:
+  site_facts: true
+  require_tip: true

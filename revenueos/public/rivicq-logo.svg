@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="RivicQ">
+  <defs>
+    <linearGradient id="rq" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8b5cf6" />
+      <stop offset="0.55" stop-color="#22d3ee" />
+      <stop offset="1" stop-color="#a7f3d0" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="#0b0918" />
+  <path d="M64 14 106 32v34c0 27-17 42-42 50-25-8-42-23-42-50V32L64 14Z" fill="none" stroke="url(#rq)" stroke-width="5" />
+  <path d="M48 86V42h20c11 0 17 5 17 14 0 7-4 11-10 13l13 17H74L62 70h-4v16h-10Zm10-27h9c5 0 8-2 8-6s-3-6-8-6h-9v12Z" fill="url(#rq)" />
+  <circle cx="95" cy="92" r="11" fill="none" stroke="#a7f3d0" stroke-width="5" />
+  <path d="m102 99 9 9" stroke="#a7f3d0" stroke-width="5" stroke-linecap="round" />
+</svg>

@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: rivicq
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: rivicq_revenueos
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rivicq -d rivicq_revenueos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      target: deps
+    environment:
+      DATABASE_URL: postgresql://rivicq:${POSTGRES_PASSWORD:-change-me}@postgres:5432/rivicq_revenueos
+      DATABASE_URL_DIRECT: postgresql://rivicq:${POSTGRES_PASSWORD:-change-me}@postgres:5432/rivicq_revenueos
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["npx", "prisma", "migrate", "deploy"]
+
+  app:
+    build:
+      context: .
+      target: runner
+    ports:
+      - "3100:3100"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://rivicq:${POSTGRES_PASSWORD:-change-me}@postgres:5432/rivicq_revenueos
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3100}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      STRIPE_MODE: ${STRIPE_MODE:-test}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      FOUNDER_LIVE_APPROVAL_TOKEN: ${FOUNDER_LIVE_APPROVAL_TOKEN:-}
+      DEPLOYMENT_APPROVAL_TOKEN: ${DEPLOYMENT_APPROVAL_TOKEN:-}
+      STRIPE_LIVE_APPROVAL_TOKEN: ${STRIPE_LIVE_APPROVAL_TOKEN:-}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@rivicq.test}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?SEED_ADMIN_PASSWORD is required}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-RivicQ Founder}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
