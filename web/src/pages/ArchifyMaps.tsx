@@ -28,8 +28,8 @@ const ArchifyMaps: React.FC = () => (
           System maps from archify/site/index.html
         </Typography>
         <Typography sx={{ color: NEBULA.muted, maxWidth: '62ch', mb: 3, lineHeight: 1.65 }}>
-          The gallery below is the same nine diagrams as the Archify explorer. Embeds use{' '}
-          <code>?embed=1&theme=dark</code>. Cards open <code>?present=1</code>. The designed hub remains{' '}
+          The gallery below is the same ten diagrams as the Archify explorer. Embeds use{' '}
+          <code>?embed=1&motion=1&theme=dark</code>. Cards open <code>?present=1</code>. The designed hub remains{' '}
           <code>archify/site/index.html#diagrams</code>.
         </Typography>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>

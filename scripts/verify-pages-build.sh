@@ -56,7 +56,7 @@ require_grep() {
   local pattern="$1"
   local path="$2"
   local label="$3"
-  if grep -q -- "$pattern" "$BUILD_DIR/$path" 2>/dev/null; then
+  if grep -R -q -- "$pattern" "$BUILD_DIR/$path" 2>/dev/null; then
     ok "$label"
   else
     bad "$label (pattern '$pattern' not found in $path)"
@@ -102,7 +102,10 @@ required_files=(
   "docs/KNOWN_LIMITATIONS.md"
   "marketing/index.html"
   "archify/site/index.html"
+  "archify/site/css/archify-universal.css"
+  "archify/site/js/archify-universal.js"
   "archify/diagrams/rivicq-architecture.html"
+  "archify/diagrams/rivicq-finding-devsecops-workflow.html"
   "nexus/index.html"
   "_headers"
   "_redirects"
@@ -147,6 +150,20 @@ require_grep "status: planned" "docs/CAPABILITIES.yaml" "manifest has planned en
 require_grep "status: blocked" "docs/CAPABILITIES.yaml" "manifest has blocked entries"
 require_grep "RivicQ_CSPM_EaaS/fabric/" "nexus/index.html" "nexus redirect targets the Graph"
 require_grep "PILOT" "docs/README.md" "docs index links the pilot set"
+require_grep "rivicq-finding-devsecops-workflow.html" "archify/site/index.html" "Archify gallery includes finding-to-DevSecOps map"
+require_grep "rivicq-finding-devsecops-workflow.html" "marketing/index.html" "marketing includes finding-to-DevSecOps map"
+require_grep "rivicq-finding-devsecops-workflow.html" "docs/index.html" "docs include finding-to-DevSecOps map"
+require_grep "archify-universal.css" "archify/site/index.html" "Archify site loads universal motion styles"
+require_grep "archify-universal.css" "marketing/index.html" "marketing loads universal motion styles"
+require_grep "archify-universal.css" "docs/index.html" "docs load universal motion styles"
+require_grep "archify-universal.css" "pilot/index.html" "pilot loads universal motion styles"
+require_grep "archify-universal.js" "pilot/index.html" "pilot loads universal motion script"
+require_grep "motion=1" "archify/site/index.html" "Archify embeds allow motion"
+require_grep "motion=1" "marketing/index.html" "marketing embeds allow motion"
+require_grep "motion=1" "docs/index.html" "docs embeds allow motion"
+require_grep "motion=1" "archify/site/js/rivicq-site.js" "Archify gallery embeds allow motion"
+require_grep "data-allow-motion" "archify/diagrams/rivicq-finding-devsecops-workflow.html" "new diagram honors explicit motion"
+require_grep "findingDevsecops" "static/js" "bundle includes finding-to-DevSecOps diagram id"
 
 if find "$BUILD_DIR" -type f \( -name '.env' -o -name '.env.*' \) -print -quit | grep -q .; then
   bad "environment file found in Pages output"

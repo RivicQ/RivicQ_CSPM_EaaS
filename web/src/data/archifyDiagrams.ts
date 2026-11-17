@@ -3,7 +3,7 @@
  * Live: https://rivicq.github.io/RivicQ_CSPM_EaaS/archify/site/index.html#diagrams
  *
  * Use:
- *   embed  → `{file}?embed=1&theme=dark` inside an iframe plate
+ *   embed  → `{file}?embed=1&theme=dark&motion=1` inside an iframe plate
  *   present → `{file}?present=1` for a full-page open
  */
 export const ARCHIFY_BASE = `${process.env.PUBLIC_URL || ''}/archify`;
@@ -15,6 +15,7 @@ export type ArchifyDiagramId =
   | 'dataflow'
   | 'lifecycle'
   | 'operator'
+  | 'findingDevsecops'
   | 'analysis'
   | 'compliance'
   | 'pqc'
@@ -73,6 +74,16 @@ export const ARCHIFY_DIAGRAMS: readonly ArchifyDiagram[] = [
     previewTitle: 'RivicQ operator workflow preview',
   },
   {
+    id: 'findingDevsecops',
+    file: 'rivicq-finding-devsecops-workflow.html',
+    kind: 'Workflow',
+    question: 'How does a finding become a shipped fix?',
+    title: 'Find → Analyze → Engineer → Deploy',
+    description:
+      'An animated trace follows a finding from the queue through clear analysis, product engineering ownership, the DevSecOps policy gate, and evidence-backed deployment.',
+    previewTitle: 'RivicQ finding-to-DevSecOps workflow preview',
+  },
+  {
     id: 'analysis',
     file: 'rivicq-analysis-workflow.html',
     kind: 'Workflow',
@@ -127,7 +138,7 @@ export const ARCHIFY_DIAGRAMS: readonly ArchifyDiagram[] = [
 const catalogById = (): Record<ArchifyDiagramId, ArchifyDiagram> => {
   const empty: Partial<Record<ArchifyDiagramId, ArchifyDiagram>> = {};
   for (const d of ARCHIFY_DIAGRAMS) empty[d.id] = d;
-  const missing = (['architecture', 'dataflow', 'lifecycle', 'operator', 'analysis', 'compliance', 'pqc', 'scanning', 'roadmap'] as const)
+  const missing = (['architecture', 'dataflow', 'lifecycle', 'operator', 'findingDevsecops', 'analysis', 'compliance', 'pqc', 'scanning', 'roadmap'] as const)
     .filter((id) => !empty[id]);
   if (missing.length > 0) {
     throw new Error(`Archify catalog missing: ${missing.join(', ')}`);
@@ -140,6 +151,6 @@ const ARCHIFY_BY_ID = catalogById();
 export const archifyDiagram = (id: ArchifyDiagramId): ArchifyDiagram => ARCHIFY_BY_ID[id];
 
 export const archifyDiagramHref = (file: string, mode: 'embed' | 'present'): string => {
-  const q = mode === 'embed' ? 'embed=1&theme=dark' : 'present=1';
+  const q = mode === 'embed' ? 'embed=1&theme=dark&motion=1' : 'present=1';
   return `${ARCHIFY_BASE}/diagrams/${file}?${q}`;
 };

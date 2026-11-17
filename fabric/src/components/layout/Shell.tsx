@@ -4,6 +4,7 @@ import Mark from '../../brand/Mark';
 import { DEMO_NOTICE } from '../../data/catalog';
 import { useSession } from '../../state/session';
 import CommandPalette from '../ui/CommandPalette';
+import ArchifySurface from './ArchifySurface';
 
 const groups: { title: string; items: [string, string][] }[] = [
   {
@@ -90,7 +91,8 @@ const Shell: React.FC = () => {
   }, []);
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={{ position: 'relative', isolation: 'isolate' }}>
+      <ArchifySurface placement="backdrop" />
       <aside className="nav" aria-label="Primary">
         <NavLink to="/" className="mark">
           <Mark />
@@ -150,6 +152,7 @@ const Shell: React.FC = () => {
           </div>
         </header>
         <div className="page">
+          <ArchifySurface placement="rail" />
           <div className="banner" role="status">{DEMO_NOTICE} Secret values are never rendered.</div>
           <Outlet />
         </div>

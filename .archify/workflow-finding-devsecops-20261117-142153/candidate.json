@@ -1,0 +1,240 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "RivicQ CSPM — Finding to DevSecOps",
+    "subtitle": "Clear analysis, product engineering ownership, and an evidence-backed DevSecOps gate",
+    "locale": "en",
+    "output": ".archify/workflow-finding-devsecops-20261117-142153/finding-devsecops-workflow.html",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:RivicQ/RivicQ_CSPM_EaaS.git",
+      "link_mode": "local-only",
+      "revision": "a3315bf9c3017f758ff9f73c3e889a8cfc3824b8"
+    }
+  },
+  "lanes": [
+    { "id": "detect", "label": "Detection" },
+    { "id": "analysis", "label": "Clear Analysis" },
+    { "id": "engineering", "label": "Product Engineering" },
+    { "id": "devsecops", "label": "DevSecOps Flow" },
+    { "id": "evidence", "label": "Evidence & Exception" }
+  ],
+  "phases": [
+    { "id": "understand", "label": "Understand", "fromCol": 0, "toCol": 2, "variant": "emphasis" },
+    { "id": "resolve", "label": "Resolve", "fromCol": 3, "toCol": 4, "variant": "emphasis" },
+    { "id": "ship", "label": "Ship", "fromCol": 5, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "analysis_group", "label": "Explain the finding", "lane": "analysis", "fromCol": 1, "toCol": 2, "variant": "emphasis" },
+    { "id": "engineering_group", "label": "Own the fix", "lane": "engineering", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "gate_group", "label": "Decide at the gate", "lane": "devsecops", "fromCol": 4, "toCol": 5, "variant": "security" },
+    { "id": "exception_group", "label": "Do not ship silently", "lane": "evidence", "fromCol": 4, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": ["finding", "normalize", "classify", "triage", "fix", "ci", "gate", "deploy", "evidence"],
+  "nodes": [
+    {
+      "id": "finding",
+      "lane": "detect",
+      "col": 0,
+      "type": "frontend",
+      "label": "Finding",
+      "sublabel": "queue · severity",
+      "icon": "start",
+      "width": 144,
+      "sources": [
+        { "path": "web/src/pages/Findings.tsx", "line": 92, "end_line": 104 },
+        { "path": "web/src/pages/Findings.tsx", "line": 149, "end_line": 155 }
+      ]
+    },
+    {
+      "id": "normalize",
+      "lane": "analysis",
+      "col": 1,
+      "type": "backend",
+      "label": "Normalize",
+      "sublabel": "fingerprint · dedup",
+      "width": 144,
+      "sources": [
+        { "path": "internal/intelligence/fingerprint.go", "line": 79, "end_line": 114 }
+      ]
+    },
+    {
+      "id": "classify",
+      "lane": "analysis",
+      "col": 2,
+      "type": "backend",
+      "label": "Clear Analysis",
+      "sublabel": "risk · PQC · impact",
+      "tag": "explainable",
+      "width": 160,
+      "sources": [
+        { "path": "internal/intelligence/pqc_class.go", "line": 91, "end_line": 114 },
+        { "path": "internal/api/shared/intelligence.go", "line": 103, "end_line": 130 }
+      ]
+    },
+    {
+      "id": "triage",
+      "lane": "engineering",
+      "col": 2,
+      "type": "frontend",
+      "label": "Triage",
+      "sublabel": "owner · priority",
+      "width": 144,
+      "sources": [
+        { "path": "web/src/pages/Findings.tsx", "line": 216, "end_line": 256 }
+      ]
+    },
+    {
+      "id": "fix",
+      "lane": "engineering",
+      "col": 3,
+      "type": "backend",
+      "label": "Remediation",
+      "sublabel": "patch · recommendation",
+      "width": 160,
+      "sources": [
+        { "path": "web/src/pages/DevSecOpsTools.tsx", "line": 121, "end_line": 130 },
+        { "path": "web/src/pages/Findings.tsx", "line": 244, "end_line": 256 }
+      ]
+    },
+    {
+      "id": "ci",
+      "lane": "devsecops",
+      "col": 3,
+      "type": "messagebus",
+      "label": "CI Scan",
+      "sublabel": "rivicq scan .",
+      "width": 144,
+      "sources": [
+        { "path": "web/src/data/bomFramework.ts", "line": 61, "end_line": 70 },
+        { "path": "web/src/pages/DevSecOpsTools.tsx", "line": 121, "end_line": 130 }
+      ]
+    },
+    {
+      "id": "gate",
+      "lane": "devsecops",
+      "col": 4,
+      "type": "security",
+      "label": "Policy Gate",
+      "sublabel": "BLOCK · WARN · ALLOW",
+      "tag": "fail-on",
+      "width": 160,
+      "sources": [
+        { "path": "internal/intelligence/policy.go", "line": 35, "end_line": 60 },
+        { "path": "web/src/pages/DevSecOpsPipeline.tsx", "line": 19, "end_line": 21 }
+      ]
+    },
+    {
+      "id": "deploy",
+      "lane": "devsecops",
+      "col": 5,
+      "type": "cloud",
+      "label": "Deploy",
+      "sublabel": "pass only",
+      "icon": "success",
+      "width": 144,
+      "sources": [
+        { "path": "web/src/data/bomFramework.ts", "line": 68, "end_line": 69 }
+      ]
+    },
+    {
+      "id": "blocked",
+      "lane": "evidence",
+      "col": 4,
+      "type": "security",
+      "label": "Blocked",
+      "sublabel": "hold deployment",
+      "icon": "failure",
+      "width": 144,
+      "sources": [
+        { "path": "internal/intelligence/policy.go", "line": 10, "end_line": 15 },
+        { "path": "internal/intelligence/policy.go", "line": 35, "end_line": 45 }
+      ]
+    },
+    {
+      "id": "replay",
+      "lane": "evidence",
+      "col": 3,
+      "type": "messagebus",
+      "label": "Replay",
+      "sublabel": "revise + re-scan",
+      "icon": "active",
+      "width": 144,
+      "sources": [
+        { "path": "web/src/pages/Findings.tsx", "line": 149, "end_line": 155 },
+        { "path": "internal/intelligence/policy.go", "line": 35, "end_line": 45 }
+      ]
+    },
+    {
+      "id": "evidence",
+      "lane": "evidence",
+      "col": 5,
+      "type": "database",
+      "label": "Evidence Pack",
+      "sublabel": "JSON · export",
+      "width": 168,
+      "sources": [
+        { "path": "web/src/pages/Findings.tsx", "line": 230, "end_line": 246 },
+        { "path": "internal/api/shared/intelligence.go", "line": 103, "end_line": 130 }
+      ]
+    }
+  ],
+  "edges": [
+    { "id": "e-finding-normalize", "from": "finding", "to": "normalize", "label": "GET /findings", "variant": "emphasis" },
+    { "id": "e-normalize-classify", "from": "normalize", "to": "classify", "label": "stable finding" },
+    { "id": "e-classify-triage", "from": "classify", "to": "triage", "label": "severity · PQC", "variant": "emphasis" },
+    { "id": "e-triage-fix", "from": "triage", "to": "fix", "label": "assign + patch" },
+    { "id": "e-fix-ci", "from": "fix", "to": "ci", "label": "pull request", "variant": "dashed", "role": "async" },
+    { "id": "e-ci-gate", "from": "ci", "to": "gate", "label": "scan result", "variant": "emphasis" },
+    { "id": "e-gate-deploy", "from": "gate", "to": "deploy", "label": "PASS", "variant": "emphasis" },
+    { "id": "e-deploy-evidence", "from": "deploy", "to": "evidence", "label": "re-scan + report" },
+    { "id": "e-gate-blocked", "from": "gate", "to": "blocked", "label": "BLOCK / WARN", "variant": "security", "role": "error" },
+    { "id": "e-blocked-replay", "from": "blocked", "to": "replay", "label": "revise", "variant": "dashed", "role": "branch" },
+    { "id": "e-replay-triage", "from": "replay", "to": "triage", "label": "reopen", "variant": "dashed", "role": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Clear analysis",
+      "items": [
+        "Fingerprinting and dedup make repeated scans stable",
+        "Severity, PQC class, and impact explain why a finding matters"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Product engineering",
+      "items": [
+        "Triage assigns an owner and a patch path",
+        "Community keeps workflow local; it does not persist assign or suppress"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "DevSecOps flow",
+      "items": [
+        "CI runs rivicq scan ., then the policy gate decides BLOCK, WARN, or ALLOW",
+        "Deployment proceeds on PASS; Enterprise adds continuous monitoring"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Evidence by default",
+      "items": [
+        "Evidence and remediation stay attached to the finding",
+        "A re-scan closes the loop without claiming a live attach on Pages"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Honest boundary",
+      "items": [
+        "GitHub Pages hosts no live API",
+        "Live scans need the backend API or a local CLI run"
+      ]
+    }
+  ]
+}

@@ -12,9 +12,9 @@ const CbomPublic: React.FC = () => (
     engineNotice="scan"
     sectionEyebrow="CBOM pipeline"
     sectionTitle="From scan input to CycloneDX evidence operators can keep."
-    diagramId="operator"
-    diagramKicker="CBOM · operator workflow"
-    diagramTitle="Inventory cryptography → classify algorithms → fail CI on BLOCK → export CycloneDX CBOM."
+    diagramId="findingDevsecops"
+    diagramKicker="CBOM · finding to DevSecOps"
+    diagramTitle="Inventory cryptography → analyze the finding → engineer the fix → gate CI → export evidence."
     blocks={[
       { title: 'CycloneDX export', body: 'GET /api/v1/scans/:id/cyclonedx when an API is running. The CLI writes local JSON evidence without a mailbox product.' },
       { title: 'Inventory fields', body: 'Algorithms, key sizes, libraries, and locations from the scan — not a guessed fleet inventory.' },

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Divider, IconButton, Menu, MenuItem, MenuList, Stack, Typography } from '@mui/material';
 import { KeyboardArrowDown, Menu as MenuIcon } from '@mui/icons-material';
 import BrandLogo from '../BrandLogo';
-import NebulaBackdrop from './NebulaBackdrop';
+import ArchifySurface from './ArchifySurface';
 import TrademarkNotice from '../TrademarkNotice';
 import { websiteCtaSx } from '../../theme/websiteChrome';
 
@@ -57,12 +57,8 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary', position: 'relative' }}>
-      {nebula && (
-        <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-          <NebulaBackdrop />
-        </Box>
-      )}
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary', position: 'relative', isolation: 'isolate' }}>
+      {nebula && <ArchifySurface placement="backdrop" variant="public" />}
       <Box sx={{ height: 3, bgcolor: 'primary.main', position: 'sticky', top: 0, zIndex: 21 }} />
       <Box
         sx={{
@@ -76,6 +72,9 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
         }}
       >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
+          <Box sx={{ mb: 0.85 }}>
+            <ArchifySurface placement="rail" variant="public" />
+          </Box>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
             <Box
               component="button"

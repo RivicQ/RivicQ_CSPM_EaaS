@@ -66,6 +66,7 @@ import {
   MailOutline,
 } from '@mui/icons-material';
 import BomRibbon from '../components/bom/BomRibbon';
+import ArchifySurface from '../components/brand/ArchifySurface';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
@@ -582,7 +583,8 @@ const Layout: React.FC = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', isolation: 'isolate' }}>
+      <ArchifySurface placement="backdrop" variant="console" />
       <AppBar
         position="fixed"
         elevation={0}
@@ -915,6 +917,9 @@ const Layout: React.FC = () => {
         >
           <Box sx={{ px: { xs: 1.25, sm: 1.75, md: 2 }, py: { xs: 1, md: 1.25 }, maxWidth: 1280, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />
+            <Box sx={{ mb: 1 }}>
+              <ArchifySurface placement="rail" variant="console" />
+            </Box>
             <OpsBreadcrumbs />
             <Outlet />
           </Box>

@@ -136,6 +136,12 @@
       meta: 'Workflow · Signal Flow · 7 nodes · 7 edges',
       title: 'Compliance & Evidence — map, attest, or waive',
       beats: ['#overview', '#focus=standards&reach=downstream', '#focus=collect&reach=upstream', '#lens=security~database']
+    },
+    finding: {
+      file: 'rivicq-finding-devsecops-workflow.html',
+      meta: 'Workflow · Signal Flow · 9 nodes · 10 edges',
+      title: 'Finding to DevSecOps — clear analysis, engineering, evidence',
+      beats: ['#overview', '#focus=classify&reach=downstream', '#focus=gate&reach=upstream', '#lens=security~backend']
     }
   };
 
@@ -164,7 +170,7 @@
   var currentBeat = 0;
 
   function diagramBase(file) {
-    return '../diagrams/' + file + '?embed=1&theme=' + currentTheme();
+    return '../diagrams/' + file + '?embed=1&motion=1&theme=' + currentTheme();
   }
 
   function setFrameHash(hash) {

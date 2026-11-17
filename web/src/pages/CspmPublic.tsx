@@ -12,9 +12,9 @@ const CspmPublic: React.FC = () => (
     engineNotice="scan"
     sectionEyebrow="CSPM console"
     sectionTitle="What operators read after a real scan finishes."
-    diagramId="operator"
-    diagramKicker="CSPM · operator workflow"
-    diagramTitle="Discover assets → classify crypto risk → gate CI → report posture evidence."
+    diagramId="findingDevsecops"
+    diagramKicker="CSPM · finding to DevSecOps"
+    diagramTitle="Detect → analyze clearly → engineer the fix → gate DevSecOps → publish evidence."
     blocks={[
       { title: 'Security score', body: 'Comes from a completed scan or a connected workspace. Pages does not invent a live estate score.' },
       { title: 'Asset inventory', body: 'Repositories, hosts, certificates, and declared cloud accounts when a connector exists and is licensed.' },

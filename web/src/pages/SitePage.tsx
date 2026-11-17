@@ -64,7 +64,7 @@ const SitePage: React.FC<{
   secondary,
   notice,
   engineNotice,
-  diagramId = 'operator',
+  diagramId = 'findingDevsecops',
   diagramKicker,
   diagramTitle,
   maxWidth = 'lg',

@@ -23,7 +23,7 @@ const PLATE_HEIGHT = 132;
 
 const ArchifyWorkflowEmbed: React.FC<ArchifyWorkflowEmbedProps> = ({
   compact = false,
-  diagramId = 'operator',
+  diagramId = 'findingDevsecops',
   kicker,
   title,
 }) => {

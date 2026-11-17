@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "f47cec78-8378-4fe8-b409-f223b936f3e2",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/re1/re1/CSPM/.archify/workflow-finding-devsecops-20261117-142153/candidate.json",
+  "output": "/Users/re1/re1/CSPM/.archify/workflow-finding-devsecops-20261117-142153/finding-devsecops-workflow.html",
+  "specification": {
+    "sha256": "f8fa9bd89846cbdf3433b5982caf5bb7fa2d212ba212ef44ed6d84deab926301",
+    "bytes": 8421
+  },
+  "artifact": {
+    "sha256": "29c4e1821659346130e5850578068728668b511b83a2a09641b76cb8d970afe9",
+    "bytes": 771167
+  }
+}
