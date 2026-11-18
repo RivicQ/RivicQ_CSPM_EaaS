@@ -46,6 +46,7 @@ var PublicRoutes = []PublicRoute{
 	{Method: http.MethodGet, Path: "/auth/google/callback"},
 	{Method: http.MethodPost, Path: "/auth/google/callback"},
 	{Method: http.MethodGet, Path: "/auth/github/login"},
+	{Method: http.MethodPost, Path: "/auth/github/exchange"},
 	{Method: http.MethodGet, Path: "/auth/github/callback"},
 	{Method: http.MethodPost, Path: "/auth/github/callback"},
 

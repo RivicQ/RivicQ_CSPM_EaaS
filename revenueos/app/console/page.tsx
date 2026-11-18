@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { isStaffRole } from "@/lib/env";
+import { defaultPostLoginPath } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
 export default async function ConsolePage() {
   const user = await getSession();
   if (!user) redirect("/login");
-  redirect(isStaffRole(user.role) ? "/admin" : "/portal");
+  redirect(defaultPostLoginPath(user.role));
 }

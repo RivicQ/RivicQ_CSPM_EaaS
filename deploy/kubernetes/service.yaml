@@ -1,31 +1,33 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cryptobom-server
+  name: cryptobom-enterprise
   namespace: cryptobom-system
   labels:
-    app: cryptobom-server
+    app: cryptobom-enterprise
+    edition: enterprise
 spec:
   selector:
-    app: cryptobom-server
+    app: cryptobom-enterprise
   ports:
     - name: http
       port: 80
-      targetPort: 8080
+      targetPort: 9090
   type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cryptobom-server-lb
+  name: cryptobom-enterprise-lb
   namespace: cryptobom-system
   labels:
-    app: cryptobom-server
+    app: cryptobom-enterprise
+    edition: enterprise
 spec:
   selector:
-    app: cryptobom-server
+    app: cryptobom-enterprise
   ports:
     - name: http
       port: 80
-      targetPort: 8080
+      targetPort: 9090
   type: LoadBalancer

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAPIBaseURL, setAPIBaseURL, Edition } from '../config/editions';
+import { getAPIBaseURL, Edition } from '../config/editions';
 import { isClientDemoToken, DEMO_STORAGE_KEY } from '../demo/constants';
 import { demoAwareAdapter } from '../demo/scanDemo';
 
@@ -15,21 +15,32 @@ const api = axios.create({
 // interactive. Everything else still goes to the network fallthrough.
 api.defaults.adapter = demoAwareAdapter;
 
-// Auto-update base URL when edition detection changes it
 export function syncAPIBaseURL(): void {
-  const url = getAPIBaseURL();
-  if (api.defaults.baseURL !== url) {
-    api.defaults.baseURL = url;
+  api.defaults.baseURL = getAPIBaseURL();
+}
+
+function shouldAttachAuthToken(url?: string): boolean {
+  const base = getAPIBaseURL();
+  if (!url) return true;
+  if (url.startsWith('/')) return true;
+  try {
+    const target = new URL(url, window.location.origin);
+    if (base.startsWith('/')) {
+      return target.origin === window.location.origin;
+    }
+    const allowed = new URL(base, window.location.origin);
+    return target.origin === allowed.origin;
+  } catch {
+    return false;
   }
 }
 
-// Allow external code to update the API base URL at runtime
-export { setAPIBaseURL, getAPIBaseURL };
-
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
-  if (token && !isClientDemoToken(token)) {
+  if (token && !isClientDemoToken(token) && shouldAttachAuthToken(config.url)) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else if (config.headers) {
+    delete (config.headers as any).Authorization;
   }
   return config;
 });
@@ -147,12 +158,13 @@ export const authService = {
   changePassword: (current_password: string, new_password: string) =>
     api.post('/auth/change-password', { current_password, new_password }),
 
-  mfaSetup: () => api.post('/auth/mfa/setup'),
+  mfaSetup: (data?: { password?: string; code?: string }) => api.post('/auth/mfa/setup', data || {}),
 
-  mfaConfirm: (data: { secret: string; code: string }) =>
+  mfaConfirm: (data: { secret?: string; code: string }) =>
     api.post('/auth/mfa/confirm', data),
 
-  mfaDisable: (code: string) => api.post('/auth/mfa/disable', { code }),
+  mfaDisable: (data: { password: string; code: string } | string) =>
+    api.post('/auth/mfa/disable', typeof data === 'string' ? { code: data } : data),
 
   workspaceUsers: () => api.get('/auth/workspace/users'),
 
@@ -164,8 +176,11 @@ export const authService = {
   googleLogin: (edition?: Edition) =>
     api.get('/auth/google/login', { params: { edition: edition === 'community' ? 'oss' : edition } }),
 
-  googleExchange: (data: { code: string; state: string }) =>
+  googleExchange: (data: { exchange_code: string; state: string }) =>
     api.post('/auth/google/exchange', data),
+
+  githubExchange: (data: { exchange_code: string; state: string }) =>
+    api.post('/auth/github/exchange', data),
 
   googleStatus: () => api.get('/auth/google/status'),
 

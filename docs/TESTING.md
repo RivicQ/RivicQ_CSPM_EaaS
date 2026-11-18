@@ -9,7 +9,7 @@ How we verify the engine, API, frontend, and datasets, and the rules reviewers e
 | Unit (pure engine) | `*_test.go` colocated with `internal/...` | `go test ./...` |
 | Go unit + race | `internal/auth`, `internal/api/shared`, `internal/intelligence`, `internal/api/enterprise`, `tests/` | `go test -count=1 -short` (+ `-race`) |
 | Integration (Postgres) | `tests/integration/integration_test.go`, `tests/enterprise/...` | `go test -tags integration` with `RIVICQ_TEST_DATABASE_URL` (Postgres 15 service in CI) |
-| Full server smoke | live fixture checks against running OSS/Enterprise | `scripts/run-edition.sh`, `RIVICQ_SMOKE_URLS` in `ci-cd.yml` |
+| Full server smoke | live fixture checks against running OSS/Enterprise | `./run-edition.sh`, `RIVICQ_SMOKE_URLS` in CI workflows when configured |
 | Dataset harness | `tests/dataset_harness_test.go` + `datasets/**/expected.json` | `make analyze-datasets` |
 | Benchmarks | `tests/bench/` (`BenchmarkAPICalls`, `BenchmarkDatasetGeneration`) | `go test -bench=.`; regression gate <= 20% vs `tests/benchmark-baseline.json` |
 | Scanner accuracy regression | harness on `fixtures/` + datasets | `docs/RIVICQ_SCANNER_ACCURACY.md` |
@@ -35,15 +35,25 @@ How we verify the engine, API, frontend, and datasets, and the rules reviewers e
 ## 3. Running the suite
 
 ```bash
-make test                                  # go vet + unit tests (short)
-make test-all                              # full unit + datasets + analysis
-go test -race ./...                        # race detector
-go test -tags integration ./...            # needs RIVICQ_TEST_DATABASE_URL
+make test                                  # Go unit tests with race detector
+go test -count=1 -short ./...              # short Go unit tests (CI-friendly)
+go test -race ./...                        # race detector across packages
+go test -tags enterprise ./...             # enterprise-tagged Go tests
+go test -tags integration ./...            # needs RIVICQ_TEST_DATABASE_URL (Postgres)
+cd web && npm run lint                     # frontend lint
+cd web && npx tsc --noEmit                 # frontend typecheck
 cd web && CI=true npm test -- --watchAll=false
-npm run lint && npm run type-check         # web lint + tsc
+cd web && npm run build                    # frontend production build
+cd revenueos && npm run typecheck          # RevenueOS typecheck
+cd revenueos && npm run lint               # RevenueOS lint
+cd revenueos && npm test                   # RevenueOS tests
+cd revenueos && npm run build              # RevenueOS build
 golangci-lint run ./...                    # per .golangci.yml (v2)
-make analyze-datasets                      # dataset harness + update cache
+make analyze-datasets                      # build CLI + validate datasets/expected.json
+make verify-beta                           # local beta readiness gate (see scripts/verify-beta-readiness.sh)
 ```
+
+> `make test-all` is not defined. Use the commands above or `make verify-beta` for a realistic local gate. Enterprise-tagged tests are part of the enterprise CI workflow and beta readiness checks. Integration tests require a reachable Postgres database and `RIVICQ_TEST_DATABASE_URL`.
 
 `scripts/analyze-datasets.py` drives dataset expectations; CI also runs `scripts/production-readiness.sh --strict` (`production-validation` job in `ci-cd.yml`).
 

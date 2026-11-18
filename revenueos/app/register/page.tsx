@@ -4,7 +4,7 @@ import { Card, PageHeader } from "@/components/ui";
 export default function RegisterPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
-      <PageHeader eyebrow="Customer onboarding" title="Create account" description="Start with a customer account; payments require an approved quotation." />
+      <PageHeader eyebrow="Customer onboarding" title="Create account" description="Registration creates a tenant-safe workspace. Email ownership must be verified before sign-in." />
       <Card>
         <AuthForm mode="register" />
       </Card>

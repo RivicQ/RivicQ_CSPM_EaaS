@@ -40,11 +40,11 @@ The Community console is the **RivicQ Security Cloud** — deep-space nebula chr
 | Dashboard, inventory, scanner | Limited: website, host, IP, server, declared pod, QSIC catalog | Same engine + live kube attach, DORA pack |
 | Labeled demo trail | Community-limited (sample data only) | UI preference is not a license |
 | Multi-cloud inventory (AWS, Azure, GCP, and other connectors) | — | Yes — **customer credentials required** |
-| SSO (OIDC; SAML configuration store) | — | Yes — ACS handshake is an operator task with your IdP |
-| RBAC (Viewer, Analyst, Operator, Admin) | Basic roles | Enforced server-side (`RequireRole`) |
-| Immutable audit log viewer | — | Yes — tenant taken from JWT, not spoofable headers |
-| Compliance report packs (DORA, BSI, eIDAS, ISO, NIST mappings) | — | Yes — **engineering mappings, not a certification** |
-| Air-gapped Helm / Compose | OSS chart | Enterprise chart |
+| SSO (OIDC; SAML configuration store) | — | Config store and auth plumbing exist in parts of the enterprise control plane; a complete IdP ACS/login handshake is an operator integration task |
+| RBAC (Viewer, Analyst, Operator, Admin) | Basic roles | Enforced server-side on covered routes (`RequireRole`) |
+| Immutable audit log viewer | — | Available in enterprise control plane when configured; tenant derived from JWT claims, not spoofable headers |
+| Compliance report packs (DORA, BSI, eIDAS, ISO, NIST mappings) | — | Mappings and evidence views where implemented — **engineering mappings, not a certification** |
+| Air-gapped Helm / Compose | OSS chart artifacts | Enterprise chart artifacts may be incomplete during beta hardening; verify templates/manifests before claiming deployability |
 | Support | GitHub issues | Contracted support via [rivicq.com](https://rivicq.com) |
 
 **Community** is this public GitHub project. You may use, modify, and distribute it under Apache-2.0 (see [LICENSE](LICENSE) and [NOTICE](NOTICE)).

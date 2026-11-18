@@ -47,14 +47,15 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Optional Python Aer (`sdk/python/rivicq_qiskit`) is educational.
 - Compliance dashboards remain **control mappings**, not certifications.
 
-## Enterprise
+## Enterprise (private beta)
 
-- Cloud inventory needs real credentials; disconnected connectors show empty states.
-- SAML configuration can be stored; a complete IdP ACS handshake is an operations task with your identity provider.
-- Compliance PDFs and dashboards are **control mappings**, not certifications.
-- RBAC roles: Admin, Operator, Analyst, Viewer. Mutating SSO and cloud-connector APIs require **Admin**. `RequireRole` is enforced on those routes.
-- API keys and webhooks require a JWT (or API-key) **tenant claim**. The `X-Tenant-ID` header is not a source of truth.
-- Community scan, inventory, findings, GitHub scans, QBOM, and intelligence lists are partitioned by JWT `tenant_id`. Unauthenticated requests share the **public tenant** (Home CBOM pilot). Cross-tenant scan IDs return 404.
+- Cloud inventory and external connectors need real credentials; without them the UI/API should present unconfigured or empty states, not fabricated estates.
+- SSO configuration support may exist, but a complete SAML/OIDC IdP ACS/login handshake is an operator integration task and should be validated per environment.
+- Compliance outputs are **control mappings/evidence aids**, not certifications.
+- RBAC roles (Admin, Operator, Analyst, Viewer) are intended for covered routes; verify admin-only enforcement for mutating SSO/cloud-connector/API-key/webhook/workspace operations in the deployed build.
+- API keys and webhooks require authenticated tenant context. The `X-Tenant-ID` header is not a source of truth.
+- Scan, inventory, findings, and intelligence resources are intended to be tenant-scoped for protected paths. Unauthenticated or demo flows may use a public/demo tenant; cross-tenant access to protected scan resources should return not found/denied behavior as enforced.
+- Enterprise Helm chart templates may be absent or incomplete in the current tree; treat deployment claims as artifact-dependent and verify before pilot use.
 
 ## Third-party names
 

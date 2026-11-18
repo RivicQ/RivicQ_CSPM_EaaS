@@ -8,23 +8,20 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rivic-q/cryptobom-saas/internal/auth"
-	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/server"
 )
 
 // TestEnterpriseServerExposesHardenedProbes checks the Enterprise bootstrap
-// inherits liveness/readiness separation. It previously served its own router
-// with a /readyz that always answered 200, so a load balancer routed traffic to
-// an instance with no database.
+// inherits liveness/readiness separation and fail-closed readiness in demo mode.
 func TestEnterpriseServerExposesHardenedProbes(t *testing.T) {
+	setValidEnterpriseLicenseEnv(t)
 	t.Setenv("RIVICQ_ALLOW_DEMO_MODE", "true")
 	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", "Enterprise-Probe-Passphrase-42!")
 	t.Setenv("CRYPTOBOM_EDITION", "enterprise")
 	gin.SetMode(gin.TestMode)
 
 	srv := server.New(server.WithPort("9090"))
-	srv.RegisterRoutes()
+	srv.RegisterHealthRoutes()
 
 	for _, probe := range []string{"/healthz", "/readyz", "/edition"} {
 		found := false
@@ -49,35 +46,5 @@ func TestEnterpriseServerExposesHardenedProbes(t *testing.T) {
 	srv.Engine.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/readyz", nil))
 	if rec.Code != http.StatusServiceUnavailable {
 		t.Errorf("/readyz in demo mode = %d, want 503 so a load balancer does not route here", rec.Code)
-	}
-}
-
-// TestEnterpriseIBMQRoutesAreAuthenticated ensures the IBMQ routes added through
-// the hook still sit behind the deny-by-default gate.
-func TestEnterpriseIBMQRoutesAreAuthenticated(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	r := gin.New()
-	api := r.Group(auth.APIPrefix)
-	svc, err := authn.NewService(authn.Config{
-		Secret:   "enterprise-test-secret-at-least-32-bytes",
-		Issuer:   "rivicq",
-		Audience: "rivicq-api",
-	}, authn.NewMemStore())
-	if err != nil {
-		t.Fatalf("new auth service: %v", err)
-	}
-	api.Use(svc.EnforceAuth())
-	ibmq := api.Group("/ibmq")
-	ibmq.GET("/status", func(c *gin.Context) { c.Status(http.StatusOK) })
-	ibmq.POST("/attest", func(c *gin.Context) { c.Status(http.StatusOK) })
-
-	for _, p := range []string{"/ibmq/status", "/ibmq/attest"} {
-		req := httptest.NewRequest(http.MethodGet, auth.APIPrefix+p, nil)
-		rec := httptest.NewRecorder()
-		r.ServeHTTP(rec, req)
-		if rec.Code == http.StatusOK {
-			t.Errorf("anonymous request to %s was served", p)
-		}
 	}
 }

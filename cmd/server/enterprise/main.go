@@ -28,6 +28,12 @@ func main() {
 	// this configuration read, so relying on it here would silently ignore .env.
 	config.LoadDotEnv()
 
+	// Fail closed: enterprise startup requires a valid signed, unexpired beta
+	// license bound to the configured tenant/customer where provided.
+	if _, err := enterprise.RequireValidLicense(); err != nil {
+		logger.WithError(err).Fatal("Enterprise license validation failed (fail-closed): valid signed, unexpired CRYPTOBOM_LICENSE_KEY and CRYPTOBOM_LICENSE_SIGNING_KEY required")
+	}
+
 	cfg, err := config.LoadEnterprise()
 	if err != nil {
 		logger.WithError(err).Fatal("Failed to load Enterprise configuration")
@@ -50,6 +56,7 @@ func main() {
 	// hardened HTTP server, readiness probe, and auth gate still apply.
 	ibmqRoutes := func(api *gin.RouterGroup, s *server.Server) {
 		group := api.Group("/ibmq")
+		group.Use(enterprise.LicenseMiddleware())
 		group.GET("/status", enterprise.GetIBMQStatus(cfg))
 		group.GET("/systems", enterprise.ListIBMQuantumSystems(cfg))
 		group.POST("/attest", enterprise.CreateIBMQuantumAttestation(cfg, s.Logger))

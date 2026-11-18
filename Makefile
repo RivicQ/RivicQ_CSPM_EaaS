@@ -12,7 +12,7 @@
 #   make clean        – remove build artifacts
 
 .PHONY: all dev dev-core dev-backend dev-enterprise dev-frontend build build-core build-oss build-enterprise \
-        build-rivicq rivicq-scan build-pages verify-pages test lint migrate seed docker-up docker-down clean help
+        build-rivicq rivicq-scan build-pages verify-pages verify-beta test lint migrate seed docker-up docker-down clean help
 
 GO        ?= go
 GOFLAGS   ?=
@@ -82,6 +82,10 @@ build-pages:
 ## Verify the composite site is complete and safe to publish
 verify-pages:
 	bash scripts/verify-pages-build.sh
+
+## Run the realistic beta readiness gate
+verify-beta:
+	bash scripts/verify-beta-readiness.sh
 
 .PHONY: analyze-datasets
 ## Run Go unit tests with race detector

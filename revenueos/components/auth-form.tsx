@@ -7,11 +7,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setError("");
+    setSuccess("");
     const form = new FormData(event.currentTarget);
     const payload =
       mode === "login"
@@ -30,12 +32,17 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as { error?: string; redirectTo?: string; message?: string };
       if (!response.ok) {
         setError(data.error ?? "Request failed");
         return;
       }
-      router.push("/portal");
+      if (mode === "register") {
+        setSuccess(data.message ?? "Registration received. Verify email ownership before signing in.");
+        (event.target as HTMLFormElement).reset();
+        return;
+      }
+      router.push(data.redirectTo ?? "/portal");
       router.refresh();
     } catch {
       setError("Unable to reach the server");
@@ -56,8 +63,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           <Field name="country" label="Country code" type="text" placeholder="DE" required />
         </>
       ) : null}
-      <Field name="password" label="Password" type="password" minLength={8} required />
+      <Field name="password" label="Password" type="password" minLength={12} required />
+      {mode === "register" ? (
+        <p className="text-xs text-slate-400">Use 12-72 characters. Email verification is required before sign-in.</p>
+      ) : null}
       {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+      {success ? <p className="text-sm text-emerald-300">{success}</p> : null}
       <button
         type="submit"
         disabled={pending}

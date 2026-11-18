@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { normalizeEdition, Edition } from '../config/editions';
+import { Edition } from '../config/editions';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
 const supabasePublishableKey = process.env.REACT_APP_SUPABASE_PUBLISHABLE_KEY || '';
@@ -23,12 +23,13 @@ export interface SupabaseAuthUser {
   edition: Edition;
 }
 
-function toAuthUser(email: string, edition: Edition): SupabaseAuthUser {
+function toAuthUser(email: string): SupabaseAuthUser {
   const fallback = email.split('@')[0] || 'Supabase User';
   const name =
     (email.split('@')[0].split(/[._-]/).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')) ||
     fallback;
-  return { id: `sb-${email}`, name, email, edition };
+  // Supabase metadata must never grant product entitlement; server /auth/me is authoritative.
+  return { id: `sb-${email}`, name, email, edition: 'community' };
 }
 
 export const supabaseAuthService = {
@@ -38,20 +39,20 @@ export const supabaseAuthService = {
     if (error) throw error;
     const user = data.user;
     if (!user?.email) throw new Error('Supabase session did not return a user');
-    return toAuthUser(user.email, normalizeEdition((user.user_metadata as any)?.edition));
+    return toAuthUser(user.email);
   },
 
-  async signUp(name: string, email: string, password: string, edition: Edition): Promise<{ user: SupabaseAuthUser; session: any }> {
+  async signUp(name: string, email: string, password: string, _edition: Edition): Promise<{ user: SupabaseAuthUser; session: any }> {
     if (!supabase) throw new Error('Supabase is not configured');
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name, edition } },
+      options: { data: { name } },
     });
     if (error) throw error;
     const user = data.user;
     if (!user?.email) throw new Error('Supabase sign up did not return a user');
-    return { user: toAuthUser(user.email, edition), session: data.session };
+    return { user: toAuthUser(user.email), session: data.session };
   },
 
   async signOut(): Promise<void> {

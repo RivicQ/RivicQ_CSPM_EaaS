@@ -212,7 +212,7 @@ export async function createSubscriptionCheckout(input: {
         rivicqPriceId: price.id,
       },
     },
-    success_url: `${getAppUrl()}/portal?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${getAppUrl()}/portal?checkout=success`,
     cancel_url: `${getAppUrl()}/portal?checkout=cancelled`,
   });
 
@@ -292,7 +292,7 @@ export async function createQuotationCheckout(quotationId: string, actorId: stri
       priceBookVersion: quotation.priceBookVersion,
       orderReference,
     },
-    success_url: `${getAppUrl()}/portal?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${getAppUrl()}/portal?checkout=success`,
     cancel_url: `${getAppUrl()}/portal?checkout=cancelled`,
   });
 

@@ -85,3 +85,45 @@ func RateLimit(limit int) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+
+// LoginRateLimit enforces per-IP and per-account login attempt limits.
+func LoginRateLimit(ipLimit, accountLimit int, window time.Duration) gin.HandlerFunc {
+	if ipLimit < 0 && accountLimit < 0 {
+		return func(c *gin.Context) { c.Next() }
+	}
+	ipRL := NewRateLimiter(ipLimit, window)
+	acctRL := NewRateLimiter(accountLimit, window)
+	return func(c *gin.Context) {
+		ip := c.ClientIP()
+		if ipLimit >= 0 && !ipRL.Allow(ip) {
+			c.Header("Retry-After", "60")
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "rate limit exceeded, try again later"})
+			return
+		}
+		email := ""
+		if v, ok := c.Get("login_email"); ok {
+			if s, ok := v.(string); ok {
+				email = s
+			}
+		}
+		if email == "" {
+			email = c.PostForm("email")
+		}
+		if email == "" {
+			email = c.Query("email")
+		}
+		if email != "" {
+			key := "acct:" + email
+			if accountLimit >= 0 && !acctRL.Allow(key) {
+				c.Header("Retry-After", "60")
+				c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "rate limit exceeded, try again later"})
+				return
+			}
+		}
+		c.Next()
+	}
+}
+
+// AllowKey reports whether a key is within limit; useful for handler-level checks.
+func (rl *RateLimiter) AllowKey(key string) bool { return rl.Allow(key) }

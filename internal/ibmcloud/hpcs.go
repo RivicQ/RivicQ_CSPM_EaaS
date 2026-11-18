@@ -7,7 +7,6 @@ package ibmcloud
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
@@ -51,6 +50,7 @@ type HPCSKey struct {
 }
 
 // AttestationReport holds the HSM attestation certificate chain.
+// NISTCompliant/Verified must only be true when backed by real verification evidence.
 type AttestationReport struct {
 	KeyID         string    `json:"key_id"`
 	Timestamp     time.Time `json:"timestamp"`
@@ -58,8 +58,11 @@ type AttestationReport struct {
 	FIPSLevel     int       `json:"fips_level"`
 	CertChain     []string  `json:"cert_chain"`
 	Signature     string    `json:"signature"`
-	VerifiedAt    time.Time `json:"verified_at"`
+	VerifiedAt    time.Time `json:"verified_at,omitempty"`
 	NISTCompliant bool      `json:"nist_compliant"`
+	Verified      bool      `json:"verified"`
+	Status        string    `json:"status,omitempty"`
+	Source        string    `json:"source,omitempty"`
 }
 
 // COSBucket represents an IBM Cloud Object Storage bucket.
@@ -183,10 +186,10 @@ func (c *HPCSClient) doAPI(method, path string, out interface{}) error {
 
 // GetStatus returns the current HPCS instance status.
 func (c *HPCSClient) GetStatus() (*HPCSStatus, error) {
-	if status, err := c.fetchRealStatus(); err == nil {
-		return status, nil
+	if c == nil || !c.Configured {
+		return nil, fmt.Errorf("hpcs not configured")
 	}
-	return c.demoStatus(), nil
+	return c.fetchRealStatus()
 }
 
 func (c *HPCSClient) fetchRealStatus() (*HPCSStatus, error) {
@@ -214,24 +217,13 @@ func (c *HPCSClient) fetchRealStatus() (*HPCSStatus, error) {
 	}, nil
 }
 
-func (c *HPCSClient) demoStatus() *HPCSStatus {
-	return &HPCSStatus{
-		InstanceID:  c.InstanceID,
-		Region:      c.Region,
-		State:       "active",
-		KeyCount:    42,
-		HSMUnits:    2,
-		FIPSLevel:   4,
-		LastChecked: time.Now().UTC(),
-	}
-}
 
 // ListKeys returns all keys managed by the HPCS instance.
 func (c *HPCSClient) ListKeys() ([]HPCSKey, error) {
-	if keys, err := c.fetchRealKeys(); err == nil {
-		return keys, nil
+	if c == nil || !c.Configured {
+		return nil, fmt.Errorf("hpcs not configured")
 	}
-	return c.demoKeys(), nil
+	return c.fetchRealKeys()
 }
 
 func (c *HPCSClient) fetchRealKeys() ([]HPCSKey, error) {
@@ -291,47 +283,17 @@ func keyStateString(state int) string {
 	}
 }
 
-func (c *HPCSClient) demoKeys() []HPCSKey {
-	now := time.Now().UTC()
-	rotated := now.Add(-30 * 24 * time.Hour)
-	return []HPCSKey{
-		{
-			ID:          "key-001-hpcs-master",
-			Name:        "cryptobom-master-key",
-			Type:        "symmetric",
-			State:       "active",
-			Algorithm:   "AES-256",
-			KeySize:     256,
-			CreatedAt:   now.Add(-90 * 24 * time.Hour),
-			RotatedAt:   &rotated,
-			HSMBacked:   true,
-			Extractable: false,
-			QuantumSafe: true,
-		},
-		{
-			ID:          "key-002-hpcs-signing",
-			Name:        "cryptobom-signing-key",
-			Type:        "asymmetric",
-			State:       "active",
-			Algorithm:   "RSA-4096",
-			KeySize:     4096,
-			CreatedAt:   now.Add(-60 * 24 * time.Hour),
-			HSMBacked:   true,
-			Extractable: false,
-			QuantumSafe: false,
-		},
-	}
-}
 
 // AttestKey generates an HSM attestation report for a given key ID.
+// Attestation is only reported as verified when real verifiable evidence is available.
 func (c *HPCSClient) AttestKey(keyID string) (*AttestationReport, error) {
 	if keyID == "" {
 		return nil, fmt.Errorf("key ID must not be empty")
 	}
-	if report, err := c.fetchRealAttestation(keyID); err == nil {
-		return report, nil
+	if c == nil || !c.Configured {
+		return nil, fmt.Errorf("hpcs not configured")
 	}
-	return c.demoAttestation(keyID), nil
+	return c.fetchRealAttestation(keyID)
 }
 
 func (c *HPCSClient) fetchRealAttestation(keyID string) (*AttestationReport, error) {
@@ -341,46 +303,29 @@ func (c *HPCSClient) fetchRealAttestation(keyID string) (*AttestationReport, err
 	if err := c.doAPI("GET", "/api/v2/keys/"+keyID+"/attestation", &attest); err != nil {
 		return nil, err
 	}
+	// Presence of a document alone is not cryptographic verification of compliance.
+	// Do not claim verified/NIST compliant without real verification.
 	return &AttestationReport{
 		KeyID:         keyID,
 		Timestamp:     time.Now().UTC(),
 		HSMSerial:     "IBM-HPCS-" + c.InstanceID,
-		FIPSLevel:     4,
+		FIPSLevel:     0,
 		Signature:     hex.EncodeToString(attest.AttestationDocument),
-		VerifiedAt:    time.Now().UTC(),
-		NISTCompliant: true,
+		NISTCompliant: false,
+		Verified:      false,
+		Status:        "unverified",
+		Source:        "ibm_hpcs",
 	}, nil
 }
 
-func (c *HPCSClient) demoAttestation(keyID string) *AttestationReport {
-	sigBytes := make([]byte, 32)
-	if _, err := rand.Read(sigBytes); err != nil {
-		return &AttestationReport{KeyID: keyID, FIPSLevel: 4, NISTCompliant: true}
-	}
-
-	return &AttestationReport{
-		KeyID:     keyID,
-		Timestamp: time.Now().UTC(),
-		HSMSerial: "IBM-HPCS-4768-SN-" + keyID[:min(8, len(keyID))],
-		FIPSLevel: 4,
-		CertChain: []string{
-			"-----BEGIN CERTIFICATE-----\nMIIB...HPCS Root CA (stub)\n-----END CERTIFICATE-----",
-			"-----BEGIN CERTIFICATE-----\nMIIB...HPCS Intermediate CA (stub)\n-----END CERTIFICATE-----",
-		},
-		Signature:     hex.EncodeToString(sigBytes),
-		VerifiedAt:    time.Now().UTC(),
-		NISTCompliant: true,
-	}
-}
 
 // ListCOSBuckets returns encrypted IBM Cloud Object Storage buckets.
-// Uses the S3-compatible COS endpoint when credentials are configured
-// (IBM_COS_ACCESS_KEY / IBM_COS_SECRET_KEY), otherwise demo data.
+// Uses the S3-compatible COS endpoint when credentials are configured.
 func (c *HPCSClient) ListCOSBuckets() ([]COSBucket, error) {
-	if buckets, err := c.fetchRealCOSBuckets(); err == nil {
-		return buckets, nil
+	if c == nil {
+		return nil, fmt.Errorf("hpcs not configured")
 	}
-	return c.demoCOSBuckets(), nil
+	return c.fetchRealCOSBuckets()
 }
 
 func (c *HPCSClient) fetchRealCOSBuckets() ([]COSBucket, error) {
@@ -423,29 +368,6 @@ func (c *HPCSClient) fetchRealCOSBuckets() ([]COSBucket, error) {
 	return buckets, nil
 }
 
-func (c *HPCSClient) demoCOSBuckets() []COSBucket {
-	now := time.Now().UTC()
-	return []COSBucket{
-		{
-			Name:           "cryptobom-artifacts-prod",
-			Region:         c.Region,
-			EncryptionType: "customer-managed",
-			KMSKeyID:       "key-001-hpcs-master",
-			ObjectCount:    1247,
-			SizeBytes:      5368709120, // 5 GB
-			CreatedAt:      now.Add(-180 * 24 * time.Hour),
-		},
-		{
-			Name:           "cryptobom-backups-prod",
-			Region:         c.Region,
-			EncryptionType: "customer-managed",
-			KMSKeyID:       "key-001-hpcs-master",
-			ObjectCount:    89,
-			SizeBytes:      107374182400, // 100 GB
-			CreatedAt:      now.Add(-90 * 24 * time.Hour),
-		},
-	}
-}
 
 func min(a, b int) int {
 	if a < b {

@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cryptobom-enterprise.fullname" . }}
+  labels:
+    {{- include "cryptobom-enterprise.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "cryptobom-enterprise.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if and .Values.secrets.create (not .Values.secrets.existingSecret) }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "cryptobom-enterprise.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cryptobom-enterprise.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "cryptobom-enterprise.fullname" . }}-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: DATABASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: JWT_SECRET
+            - name: CRYPTOBOM_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: CRYPTOBOM_LICENSE_KEY
+            - name: CRYPTOBOM_LICENSE_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: CRYPTOBOM_LICENSE_SIGNING_KEY
+            {{- $entdb := default .Values.enterprise.enterpriseDatabaseUrl .Values.secrets.enterpriseDatabaseUrl }}
+            {{- if or $entdb .Values.secrets.existingSecret }}
+            - name: ENTERPRISE_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: ENTERPRISE_DATABASE_URL
+                  optional: true
+            {{- end }}
+            {{- if or .Values.secrets.ibmqApiKey .Values.secrets.existingSecret }}
+            - name: IBMQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: IBMQ_API_KEY
+                  optional: true
+            {{- end }}
+            {{- if or .Values.secrets.ibmqNetwork .Values.secrets.existingSecret }}
+            - name: IBMQ_NETWORK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: IBMQ_NETWORK
+                  optional: true
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/authn"
@@ -27,10 +29,7 @@ type GitHubEmail struct {
 	Verified bool   `json:"verified"`
 }
 
-var (
-	githubOAuthConfig *oauth2.Config
-	githubStateMap    = make(map[string]string) // state -> edition
-)
+var githubOAuthConfig *oauth2.Config
 
 func initGitHubOAuthConfig() *oauth2.Config {
 	if githubOAuthConfig != nil {
@@ -49,7 +48,7 @@ func initGitHubOAuthConfig() *oauth2.Config {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		RedirectURL:  redirectURL,
-		Scopes:       []string{"read:user", "user:email", "repo"},
+		Scopes:       []string{"read:user", "user:email"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",
@@ -68,11 +67,11 @@ func GitHubLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
 			})
 			return
 		}
-
-		state := generateOAuthState()
-		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
-		githubStateMap[state] = edition
-
+		state, err := defaultOAuthStore.createState(time.Now().UTC())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize OAuth state"})
+			return
+		}
 		redirectURL := config.AuthCodeURL(state, oauth2.AccessTypeOffline)
 		c.JSON(http.StatusOK, gin.H{
 			"auth_url": redirectURL,
@@ -88,104 +87,154 @@ func GitHubCallbackHandler(logger *logrus.Logger, service *authn.Service, allowe
 			c.JSON(http.StatusBadGateway, gin.H{"error": "GitHub OAuth not configured"})
 			return
 		}
+		if c.Request.Method == http.MethodPost {
+			githubExchangeResponse(c)
+			return
+		}
 
-		state := c.Query("state")
-		code := c.Query("code")
+		if oauthErr := c.Query("error"); oauthErr != "" {
+			params := url.Values{}
+			params.Set("error", oauthErr)
+			if desc := c.Query("error_description"); desc != "" {
+				params.Set("error_description", desc)
+			}
+			c.Redirect(http.StatusTemporaryRedirect, buildOAuthFrontendRedirect(params))
+			return
+		}
 
+		state := strings.TrimSpace(c.Query("state"))
+		code := strings.TrimSpace(c.Query("code"))
 		if state == "" || code == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing state or code"})
 			return
 		}
-
-		requestedEdition, exists := githubStateMap[state]
-		if !exists {
+		if err := defaultOAuthStore.consumeState(state, time.Now().UTC()); err != nil {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid state parameter"})
 			return
 		}
-		delete(githubStateMap, state)
 
-		token, err := config.Exchange(context.Background(), code)
+		result, err := completeGitHubOAuth(c.Request.Context(), logger, service, allowedDomains, config, code)
 		if err != nil {
-			logger.WithError(err).Error("GitHub OAuth token exchange failed")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Token exchange failed"})
+			status := http.StatusInternalServerError
+			msg := "OAuth completion failed"
+			switch err.Error() {
+			case "no verified email found on GitHub account", "email domain not allowed":
+				status = http.StatusForbidden
+				msg = err.Error()
+			}
+			c.JSON(status, gin.H{"error": msg})
 			return
 		}
-
-		client := config.Client(context.Background(), token)
-		resp, err := client.Get("https://api.github.com/user")
+		exchangeCode, err := defaultOAuthStore.createExchange(state, result, time.Now().UTC())
 		if err != nil {
-			logger.WithError(err).Error("GitHub user request failed")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to complete OAuth"})
 			return
 		}
-		defer func() { _ = resp.Body.Close() }()
+		params := url.Values{}
+		params.Set("exchange_code", exchangeCode)
+		params.Set("state", state)
+		params.Set("provider", "github")
+		c.Redirect(http.StatusTemporaryRedirect, buildOAuthFrontendRedirect(params))
+	}
+}
 
-		var ghUser GitHubUser
-		if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
-			logger.WithError(err).Error("Failed to decode GitHub user info")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user info"})
-			return
-		}
+func completeGitHubOAuth(
+	ctx context.Context,
+	logger *logrus.Logger,
+	service *authn.Service,
+	allowedDomains []string,
+	config *oauth2.Config,
+	code string,
+) (*oauthCompletion, error) {
+	token, err := config.Exchange(ctx, code)
+	if err != nil {
+		logger.WithError(err).Error("GitHub OAuth token exchange failed")
+		return nil, err
+	}
+	client := config.Client(ctx, token)
+	resp, err := client.Get("https://api.github.com/user")
+	if err != nil {
+		logger.WithError(err).Error("GitHub user request failed")
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
 
-		if ghUser.Email == "" {
-			emailResp, err := client.Get("https://api.github.com/user/emails")
-			if err == nil {
-				defer func() { _ = emailResp.Body.Close() }()
-				var emails []GitHubEmail
-				if err := json.NewDecoder(emailResp.Body).Decode(&emails); err == nil {
-					for _, e := range emails {
-						if e.Primary && e.Verified {
-							ghUser.Email = e.Email
-							break
-						}
+	var ghUser GitHubUser
+	if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
+		logger.WithError(err).Error("Failed to decode GitHub user info")
+		return nil, err
+	}
+	if ghUser.Email == "" {
+		emailResp, err := client.Get("https://api.github.com/user/emails")
+		if err == nil {
+			defer func() { _ = emailResp.Body.Close() }()
+			var emails []GitHubEmail
+			if err := json.NewDecoder(emailResp.Body).Decode(&emails); err == nil {
+				for _, e := range emails {
+					if e.Primary && e.Verified {
+						ghUser.Email = e.Email
+						break
 					}
 				}
 			}
 		}
-
-		if ghUser.Email == "" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "No verified email found on GitHub account"})
-			return
-		}
-
-		if len(allowedDomains) > 0 && !workEmailAllowed(ghUser.Email, allowedDomains) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Email domain not allowed"})
-			return
-		}
-
-		ghUserName := ghUser.Name
-		if ghUserName == "" {
-			ghUserName = ghUser.Login
-		}
-
-		existingUser, err := service.EnsureExternalUser(c.Request.Context(), ghUser.Email, ghUserName, "")
-		if err != nil {
-			logger.WithError(err).Error("Failed to resolve user from GitHub OAuth")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
-			return
-		}
-
-		edition := normalizeAuthEdition(requestedEdition)
-
-		pair, err := service.IssueTokens(c.Request.Context(), existingUser, edition, c.Request.UserAgent(), c.ClientIP())
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-			return
-		}
-
-		params := url.Values{}
-		params.Set("access_token", pair.AccessToken)
-		params.Set("refresh_token", pair.RefreshToken)
-		params.Set("edition", editionForRole(string(existingUser.Role), requestedEdition))
-		params.Set("user_id", existingUser.ID)
-		params.Set("user_name", existingUser.Name)
-		params.Set("user_email", existingUser.Email)
-		params.Set("user_role", string(existingUser.Role))
-		if token.AccessToken != "" {
-			params.Set("github_token", token.AccessToken)
-		}
-		c.Redirect(http.StatusTemporaryRedirect, buildOAuthFrontendRedirect(params))
 	}
+	if ghUser.Email == "" {
+		return nil, &oauthUserError{"no verified email found on GitHub account"}
+	}
+	if len(allowedDomains) > 0 && !workEmailAllowed(ghUser.Email, allowedDomains) {
+		return nil, &oauthUserError{"email domain not allowed"}
+	}
+	name := ghUser.Name
+	if name == "" {
+		name = ghUser.Login
+	}
+	user, err := service.EnsureExternalUser(ctx, ghUser.Email, name, "")
+	if err != nil {
+		logger.WithError(err).Error("Failed to resolve user from GitHub OAuth")
+		return nil, err
+	}
+	pair, err := service.IssueTokens(ctx, user, "", "", "")
+	if err != nil {
+		return nil, err
+	}
+	return &oauthCompletion{
+		AccessToken:  pair.AccessToken,
+		RefreshToken: pair.RefreshToken,
+		Edition:      serverAuthEdition(),
+		User: authUserResponse{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+			Role:  string(user.Role),
+		},
+	}, nil
+}
+
+type oauthUserError struct{ msg string }
+
+func (e *oauthUserError) Error() string { return e.msg }
+
+func githubExchangeResponse(c *gin.Context) {
+	var req struct {
+		ExchangeCode string `json:"exchange_code"`
+		State        string `json:"state"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+	entry, err := defaultOAuthStore.consumeExchange(req.ExchangeCode, req.State, time.Now().UTC())
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid or expired exchange code"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"access_token":  entry.accessToken,
+		"refresh_token": entry.refreshToken,
+		"user":          entry.user,
+		"edition":       entry.edition,
+	})
 }
 
 func GitHubOAuthStatusHandler(logger *logrus.Logger) gin.HandlerFunc {

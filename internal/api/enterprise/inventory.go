@@ -64,7 +64,7 @@ func (h *InventoryHandler) SetupRoutes(router *gin.RouterGroup) {
 
 type Asset struct {
 	ID            uuid.UUID              `json:"id"`
-	TenantID      uuid.UUID              `json:"tenant_id"`
+	TenantID      string                 `json:"tenant_id"`
 	AssetID       string                 `json:"asset_id"`
 	Name          string                 `json:"name"`
 	Description   string                 `json:"description"`
@@ -164,7 +164,7 @@ type InfrastructureAsset struct {
 
 func (h *InventoryHandler) ListAssets(c *gin.Context) {
 	if !enterpriseDBReady(h.db) {
-		c.JSON(http.StatusOK, demoAssetsList())
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory_assets", "inventory", "assets"))
 		return
 	}
 	tenantID := tenantIDFor(c)
@@ -225,7 +225,7 @@ func (h *InventoryHandler) ListAssets(c *gin.Context) {
 	}
 
 	if len(assets) == 0 {
-		c.JSON(http.StatusOK, demoAssetsList())
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory_assets", "inventory", "assets"))
 		return
 	}
 
@@ -237,7 +237,7 @@ func (h *InventoryHandler) ListAssets(c *gin.Context) {
 
 func (h *InventoryHandler) GetAsset(c *gin.Context) {
 	if !enterpriseDBReady(h.db) {
-		c.JSON(http.StatusOK, gin.H{"id": c.Param("id"), "name": "Demo Asset", "category": "certificate", "risk": "medium"})
+		c.JSON(http.StatusServiceUnavailable, unavailableState("inventory_asset", "inventory"))
 		return
 	}
 	id := c.Param("id")
@@ -246,15 +246,16 @@ func (h *InventoryHandler) GetAsset(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid asset ID"})
 		return
 	}
+	tenantID := tenantIDFor(c)
 
 	var asset Asset
 	var metadata, tags []byte
 	query := `
 		SELECT id, tenant_id, asset_id, name, description, category, sub_category,
 		       cloud_provider, region, account_id, metadata, tags, discovered_at, last_scanned_at
-		FROM inventory_assets WHERE id = $1
+		FROM inventory_assets WHERE id = $1 AND tenant_id = $2
 	`
-	err = h.db.QueryRow(query, assetID).Scan(
+	err = h.db.QueryRow(query, assetID, tenantID).Scan(
 		&asset.ID, &asset.TenantID, &asset.AssetID, &asset.Name, &asset.Description,
 		&asset.Category, &asset.SubCategory, &asset.CloudProvider, &asset.Region,
 		&asset.AccountID, &metadata, &tags, &asset.DiscoveredAt, &asset.LastScannedAt,
@@ -271,6 +272,14 @@ func (h *InventoryHandler) GetAsset(c *gin.Context) {
 }
 
 func (h *InventoryHandler) CreateAsset(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("inventory_asset", "inventory"))
+		return
+	}
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 	var asset Asset
 	if err := c.ShouldBindJSON(&asset); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -290,7 +299,7 @@ func (h *InventoryHandler) CreateAsset(c *gin.Context) {
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 	`
 	_, err := h.db.Exec(query,
-		asset.ID, asset.TenantID, asset.AssetID, asset.Name, asset.Description,
+		asset.ID, tenantID, asset.AssetID, asset.Name, asset.Description,
 		asset.Category, asset.SubCategory, asset.CloudProvider, asset.Region,
 		asset.AccountID, metadata, tags, asset.DiscoveredAt,
 	)
@@ -304,6 +313,14 @@ func (h *InventoryHandler) CreateAsset(c *gin.Context) {
 }
 
 func (h *InventoryHandler) UpdateAsset(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("inventory_asset", "inventory"))
+		return
+	}
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 	id := c.Param("id")
 	assetID, err := uuid.Parse(id)
 	if err != nil {
@@ -320,18 +337,21 @@ func (h *InventoryHandler) UpdateAsset(c *gin.Context) {
 	metadata, _ := json.Marshal(asset.Metadata)
 	tags, _ := json.Marshal(asset.Tags)
 
-	query := `
-		UPDATE inventory_assets 
+	res, err := h.db.Exec(`
+		UPDATE inventory_assets
 		SET name = $1, description = $2, sub_category = $3, cloud_provider = $4,
 		    region = $5, account_id = $6, metadata = $7, tags = $8, last_scanned_at = $9, updated_at = NOW()
-		WHERE id = $10
-	`
-	_, err = h.db.Exec(query,
+		WHERE id = $10 AND tenant_id = $11
+	`,
 		asset.Name, asset.Description, asset.SubCategory, asset.CloudProvider,
-		asset.Region, asset.AccountID, metadata, tags, time.Now(), assetID,
+		asset.Region, asset.AccountID, metadata, tags, time.Now(), assetID, tenantID,
 	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update asset"})
+		return
+	}
+	if rows, _ := res.RowsAffected(); rows == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Asset not found"})
 		return
 	}
 
@@ -339,6 +359,14 @@ func (h *InventoryHandler) UpdateAsset(c *gin.Context) {
 }
 
 func (h *InventoryHandler) DeleteAsset(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("inventory_asset", "inventory"))
+		return
+	}
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 	id := c.Param("id")
 	assetID, err := uuid.Parse(id)
 	if err != nil {
@@ -346,16 +374,23 @@ func (h *InventoryHandler) DeleteAsset(c *gin.Context) {
 		return
 	}
 
-	_, err = h.db.Exec("DELETE FROM inventory_assets WHERE id = $1", assetID)
+	res, err := h.db.Exec("DELETE FROM inventory_assets WHERE id = $1 AND tenant_id = $2", assetID, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete asset"})
+		return
+	}
+	if rows, _ := res.RowsAffected(); rows == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Asset not found"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Asset deleted successfully"})
 }
-
 func (h *InventoryHandler) ListAssetsByCategory(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory", "inventory", "assets"))
+		return
+	}
 	category := c.Param("category")
 	tenantID := tenantIDFor(c)
 
@@ -399,6 +434,10 @@ func (h *InventoryHandler) ListAssetsByCategory(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListAssetsByCloudProvider(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory", "inventory", "assets"))
+		return
+	}
 	provider := c.Param("provider")
 	tenantID := tenantIDFor(c)
 
@@ -442,6 +481,10 @@ func (h *InventoryHandler) ListAssetsByCloudProvider(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListCryptoAssets(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory", "inventory", "assets"))
+		return
+	}
 	tenantID := tenantIDFor(c)
 
 	query := `
@@ -480,6 +523,14 @@ func (h *InventoryHandler) ListCryptoAssets(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ScanCryptoAssets(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("crypto_scan", "crypto_scan"))
+		return
+	}
+	_, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 	var req struct {
 		AssetIDs []string `json:"asset_ids"`
 	}
@@ -487,17 +538,20 @@ func (h *InventoryHandler) ScanCryptoAssets(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	h.logger.Info("Starting crypto asset scan for ", len(req.AssetIDs), " assets")
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":    "scan_started",
-		"asset_ids": req.AssetIDs,
-		"message":   "Crypto asset scan initiated",
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":     "unavailable",
+		"source":     "unconfigured",
+		"configured": false,
+		"capability": "crypto_asset_scan",
+		"message":    "Crypto asset scanning is unavailable: no verified scan integration configured",
 	})
 }
 
 func (h *InventoryHandler) ListAIAssets(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory", "inventory", "assets"))
+		return
+	}
 	tenantID := tenantIDFor(c)
 
 	query := `
@@ -537,6 +591,14 @@ func (h *InventoryHandler) ListAIAssets(c *gin.Context) {
 }
 
 func (h *InventoryHandler) RegisterAIModel(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("ai_asset", "ai_inventory"))
+		return
+	}
+	_, ok := mutatingTenantIDFor(c)
+	if !ok {
+		return
+	}
 	var aiAsset AIAsset
 	if err := c.ShouldBindJSON(&aiAsset); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -569,6 +631,10 @@ func (h *InventoryHandler) RegisterAIModel(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListHardwareAssets(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory", "inventory", "assets"))
+		return
+	}
 	tenantID := tenantIDFor(c)
 
 	query := `
@@ -609,6 +675,10 @@ func (h *InventoryHandler) ListHardwareAssets(c *gin.Context) {
 }
 
 func (h *InventoryHandler) DiscoverHardware(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("hardware_discovery", "hardware_discovery"))
+		return
+	}
 	h.logger.Info("Declared hardware inventory (not firmware reverse-engineering)")
 
 	c.JSON(http.StatusOK, gin.H{
@@ -621,6 +691,10 @@ func (h *InventoryHandler) DiscoverHardware(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListSoftwareAssets(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory", "inventory", "assets"))
+		return
+	}
 	tenantID := tenantIDFor(c)
 
 	query := `
@@ -661,6 +735,10 @@ func (h *InventoryHandler) ListSoftwareAssets(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("sbom_import", "sbom_import"))
+		return
+	}
 	scanPath := c.Query("path")
 	if scanPath == "" {
 		scanPath = c.PostForm("path")
@@ -691,15 +769,8 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 			sbomResult = &discovery.SBOMResult{Components: nil, Format: "cyclonedx", Total: 0}
 		}
 	} else {
-		sbomResult = &discovery.SBOMResult{
-			Components: []discovery.SBOMComponent{
-				{Name: "openssl", Version: "3.0.8", Type: "library", License: "Apache-2.0"},
-				{Name: "golang", Version: "1.22", Type: "language"},
-				{Name: "react", Version: "18.2.0", Type: "library", License: "MIT"},
-			},
-			Format: "cyclonedx",
-			Total:  3,
-		}
+		c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","capability":"sbom_import","message":"SBOM import requires a real scan path or content; no fabricated components are returned"})
+		return
 	}
 
 	if h.db != nil {
@@ -756,6 +827,10 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ListInfrastructureAssets(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableList("inventory", "inventory", "assets"))
+		return
+	}
 	tenantID := tenantIDFor(c)
 
 	query := `
@@ -801,12 +876,11 @@ func (h *InventoryHandler) ListInfrastructureAssets(c *gin.Context) {
 }
 
 func (h *InventoryHandler) SyncInfrastructure(c *gin.Context) {
-	h.logger.Info("Starting infrastructure sync")
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":  "sync_started",
-		"message": "Infrastructure sync initiated",
-	})
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("infrastructure_sync", "infrastructure_sync"))
+		return
+	}
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","capability":"infrastructure_sync","message":"Infrastructure sync is unavailable: no verified integration configured"})
 }
 
 type InventorySummary struct {
@@ -821,7 +895,7 @@ type InventorySummary struct {
 
 func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
 	if !enterpriseDBReady(h.db) {
-		c.JSON(http.StatusOK, demoInventorySummary())
+		c.JSON(http.StatusServiceUnavailable, unavailableSummary("inventory"))
 		return
 	}
 
@@ -869,7 +943,7 @@ func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
 	}
 
 	if summary.TotalAssets == 0 {
-		c.JSON(http.StatusOK, demoInventorySummary())
+		c.JSON(http.StatusServiceUnavailable, unavailableSummary("inventory"))
 		return
 	}
 
@@ -877,6 +951,10 @@ func (h *InventoryHandler) GetInventorySummary(c *gin.Context) {
 }
 
 func (h *InventoryHandler) ExportInventory(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("inventory_export", "inventory_export"))
+		return
+	}
 	format := c.DefaultQuery("format", "json")
 	tenantID := tenantIDFor(c)
 

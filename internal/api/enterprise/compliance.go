@@ -118,11 +118,7 @@ func (h *ComplianceHandler) SetupRoutes(router *gin.RouterGroup) {
 
 func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 	if !enterpriseDBReady(h.db) {
-		c.JSON(http.StatusOK, gin.H{"frameworks": []gin.H{
-			{"framework": "iso27001", "status": "active", "score": 75},
-			{"framework": "dora", "status": "active", "score": 82},
-			{"framework": "gdpr", "status": "active", "score": 90},
-		}})
+		abortIfNoDB(c, h.db)
 		return
 	}
 	tenantID := tenantIDFor(c)
@@ -143,14 +139,15 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 
 	var frameworks []map[string]interface{}
 	for rows.Next() {
-		var id, tenantID uuid.UUID
+		var id, tid string
 		var framework, scope, status string
 		var controls []byte
-		var score, lastAudit, nextAudit *time.Time
+		var score *int
+		var lastAudit, nextAudit *time.Time
 		var delve, kertos bool
 		var createdAt time.Time
 
-		err := rows.Scan(&id, &tenantID, &framework, &scope, &controls, &status, &score,
+		err := rows.Scan(&id, &tid, &framework, &scope, &controls, &status, &score,
 			&lastAudit, &nextAudit, &delve, &kertos, &createdAt)
 		if err != nil {
 			continue
@@ -158,6 +155,7 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 
 		frameworks = append(frameworks, map[string]interface{}{
 			"id":                 id,
+			"tenant_id":          tid,
 			"framework":          framework,
 			"scope":              scope,
 			"status":             status,
@@ -173,6 +171,10 @@ func (h *ComplianceHandler) ListFrameworks(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) CreateFramework(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID, ok := mutatingTenantIDFor(c)
 	if !ok {
 		return
@@ -187,7 +189,7 @@ func (h *ComplianceHandler) CreateFramework(c *gin.Context) {
 		return
 	}
 
-	frameworkID := uuid.New()
+	frameworkID := uuid.New().String()
 
 	query := `
 		INSERT INTO compliance_frameworks (id, tenant_id, framework, scope, status, controls)
@@ -211,15 +213,19 @@ func (h *ComplianceHandler) CreateFramework(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetFramework(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	frameworkID, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid framework ID"})
 		return
 	}
+	tenantID := tenantIDFor(c)
 
-	var fwID, tenantID uuid.UUID
-	var framework, scope, status string
+	var fwID, tid, framework, scope, status string
 	var controls []byte
 	var score *int
 	var lastAudit, nextAudit *time.Time
@@ -228,10 +234,10 @@ func (h *ComplianceHandler) GetFramework(c *gin.Context) {
 	query := `
 		SELECT id, tenant_id, framework, scope, controls, status, score, 
 		       last_audit_at, next_audit_at, delve_integration, kertos_integration
-		FROM compliance_frameworks WHERE id = $1
+		FROM compliance_frameworks WHERE id = $1 AND tenant_id = $2
 	`
-	err = h.db.QueryRow(query, frameworkID).Scan(
-		&fwID, &tenantID, &framework, &scope, &controls, &status, &score,
+	err = h.db.QueryRow(query, frameworkID, tenantID).Scan(
+		&fwID, &tid, &framework, &scope, &controls, &status, &score,
 		&lastAudit, &nextAudit, &delveConn, &kertosConn,
 	)
 	if err != nil {
@@ -241,7 +247,7 @@ func (h *ComplianceHandler) GetFramework(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":                 fwID,
-		"tenant_id":          tenantID,
+		"tenant_id":          tid,
 		"framework":          framework,
 		"scope":              scope,
 		"status":             status,
@@ -250,14 +256,23 @@ func (h *ComplianceHandler) GetFramework(c *gin.Context) {
 		"next_audit_at":      nextAudit,
 		"delve_integration":  delveConn,
 		"kertos_integration": kertosConn,
+		"controls":           controls,
 	})
 }
 
 func (h *ComplianceHandler) UpdateFramework(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	frameworkID, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid framework ID"})
+		return
+	}
+	tenantID, ok := mutatingTenantIDFor(c)
+	if !ok {
 		return
 	}
 
@@ -277,9 +292,9 @@ func (h *ComplianceHandler) UpdateFramework(c *gin.Context) {
 		    status = COALESCE(NULLIF($2, ''), status),
 		    score = CASE WHEN $3 > 0 THEN $3 ELSE score END,
 		    updated_at = NOW()
-		WHERE id = $4
+		WHERE id = $4 AND tenant_id = $5
 	`
-	_, err = h.db.Exec(query, req.Scope, req.Status, req.Score, frameworkID)
+	_, err = h.db.Exec(query, req.Scope, req.Status, req.Score, frameworkID, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update framework"})
 		return
@@ -289,18 +304,29 @@ func (h *ComplianceHandler) UpdateFramework(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) ListControls(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	frameworkID, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid framework ID"})
 		return
 	}
+	tenantID := tenantIDFor(c)
+	var exists string
+	if err := h.db.QueryRow(`SELECT id FROM compliance_frameworks WHERE id = $1 AND tenant_id = $2`, frameworkID, tenantID).Scan(&exists); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Framework not found"})
+		return
+	}
 
 	query := `
-		SELECT id, framework_id, control_id, title, description, category, 
-		       sub_category, severity, status, evidence, remediation, automated, last_checked_at
-		FROM compliance_controls 
+		SELECT id, framework_id, control_id, title, description, category,
+		       severity, status, evidence, remediation, automated, last_checked_at
+		FROM compliance_controls
 		WHERE framework_id = $1
+		ORDER BY severity DESC, control_id
 	`
 	rows, err := h.db.Query(query, frameworkID)
 	if err != nil {
@@ -309,7 +335,7 @@ func (h *ComplianceHandler) ListControls(c *gin.Context) {
 	}
 	defer func() { _ = rows.Close() }()
 
-	var controls []ComplianceControl
+	controls := []ComplianceControl{}
 	for rows.Next() {
 		var control ComplianceControl
 		var evidence []byte
@@ -321,8 +347,8 @@ func (h *ComplianceHandler) ListControls(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		if err := json.Unmarshal(evidence, &control.Evidence); err != nil {
-			continue
+		if len(evidence) > 0 {
+			_ = json.Unmarshal(evidence, &control.Evidence)
 		}
 		controls = append(controls, control)
 	}
@@ -331,88 +357,100 @@ func (h *ComplianceHandler) ListControls(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetComplianceDashboard(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	frameworkID, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid framework ID"})
 		return
 	}
+	tenantID := tenantIDFor(c)
 
 	var framework string
 	var status string
-	var score, totalControls, passed, failed, pending int
+	var score *int
 	var lastAudit, nextAudit *time.Time
 	var delveConnected, kertosConnected bool
 
 	query := `
 		SELECT cf.framework, cf.status, cf.score, cf.last_audit_at, cf.next_audit_at,
-		       cf.delve_integration, cf.kertos_integration,
-		       (SELECT COUNT(*) FROM compliance_controls WHERE framework_id = cf.id) as total,
-		       (SELECT COUNT(*) FROM compliance_controls WHERE framework_id = cf.id AND status = 'passed') as passed,
-		       (SELECT COUNT(*) FROM compliance_controls WHERE framework_id = cf.id AND status = 'failed') as failed,
-		       (SELECT COUNT(*) FROM compliance_controls WHERE framework_id = cf.id AND status = 'pending') as pending
-		FROM compliance_frameworks cf WHERE cf.id = $1
+		       cf.delve_integration, cf.kertos_integration
+		FROM compliance_frameworks cf WHERE cf.id = $1 AND cf.tenant_id = $2
 	`
-	err = h.db.QueryRow(query, frameworkID).Scan(
+	err = h.db.QueryRow(query, frameworkID, tenantID).Scan(
 		&framework, &status, &score, &lastAudit, &nextAudit,
-		&delveConnected, &kertosConnected, &totalControls, &passed, &failed, &pending,
+		&delveConnected, &kertosConnected,
 	)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Framework not found"})
 		return
 	}
+	var totalControls, passed, failed, pending int
+	_ = h.db.QueryRow(`SELECT COUNT(*) FROM compliance_controls WHERE framework_id = $1`, frameworkID).Scan(&totalControls)
+	_ = h.db.QueryRow(`SELECT COUNT(*) FROM compliance_controls WHERE framework_id = $1 AND status = 'passed'`, frameworkID).Scan(&passed)
+	_ = h.db.QueryRow(`SELECT COUNT(*) FROM compliance_controls WHERE framework_id = $1 AND status = 'failed'`, frameworkID).Scan(&failed)
+	_ = h.db.QueryRow(`SELECT COUNT(*) FROM compliance_controls WHERE framework_id = $1 AND status = 'pending'`, frameworkID).Scan(&pending)
 
 	dashboard := ComplianceDashboard{
 		Framework:       framework,
 		Status:          status,
-		Score:           score,
+		Score:           0,
 		TotalControls:   totalControls,
 		PassedControls:  passed,
 		FailedControls:  failed,
 		PendingControls: pending,
-		LastAudit:       time.Now(),
-		NextAudit:       time.Now().Add(90 * 24 * time.Hour),
 		DelveConnected:  delveConnected,
 		KertosConnected: kertosConnected,
 	}
+	if score != nil { dashboard.Score = *score }
+	if lastAudit != nil { dashboard.LastAudit = *lastAudit }
+	if nextAudit != nil { dashboard.NextAudit = *nextAudit }
 
 	c.JSON(http.StatusOK, dashboard)
 }
 
 func (h *ComplianceHandler) GetAllComplianceDashboards(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID := tenantIDFor(c)
 
-	frameworks := []string{"iso27001", "dora", "gdpr", "eu_ai_act", "soc2", "nist", "pqc"}
-
-	var dashboards []ComplianceDashboard
-	for _, fw := range frameworks {
-		dashboard := ComplianceDashboard{
-			Framework:       fw,
-			Status:          "active",
-			Score:           75,
-			TotalControls:   100,
-			PassedControls:  75,
-			FailedControls:  10,
-			PendingControls: 15,
-		}
-		dashboards = append(dashboards, dashboard)
+	rows, err := h.db.Query(`SELECT framework, status, score FROM compliance_frameworks WHERE tenant_id = $1`, tenantID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list compliance frameworks"})
+		return
 	}
-
-	h.logger.Info("Fetching compliance dashboards for tenant: ", tenantID)
+	defer func() { _ = rows.Close() }()
+	dashboards := []ComplianceDashboard{}
+	for rows.Next() {
+		var fw, status string
+		var score *int
+		if err := rows.Scan(&fw, &status, &score); err != nil { continue }
+		d := ComplianceDashboard{Framework: fw, Status: status}
+		if score != nil { d.Score = *score }
+		dashboards = append(dashboards, d)
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"tenant_id":  tenantID,
 		"dashboards": dashboards,
+		"status":     "ok",
+		"source":     "database",
 		"summary": gin.H{
-			"overall_score":     78,
-			"frameworks_count":  len(frameworks),
-			"critical_findings": 3,
-			"high_findings":     7,
+			"frameworks_count": len(dashboards),
 		},
 	})
 }
 
 func (h *ComplianceHandler) ScanCompliance(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	frameworkID, err := uuid.Parse(id)
 	if err != nil {
@@ -420,17 +458,18 @@ func (h *ComplianceHandler) ScanCompliance(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info("Starting compliance scan for framework: ", frameworkID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":         "scan_started",
-		"framework_id":   frameworkID,
-		"message":        "Compliance scan initiated",
-		"estimated_time": "5-10 minutes",
+	_ = frameworkID
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":"unavailable","source":"unconfigured","configured":false,
+		"capability":"compliance_scan","message":"Compliance scan unavailable: no verified scan integration configured",
 	})
 }
 
 func (h *ComplianceHandler) RemediationPlan(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	frameworkID, err := uuid.Parse(id)
 	if err != nil {
@@ -438,54 +477,49 @@ func (h *ComplianceHandler) RemediationPlan(c *gin.Context) {
 		return
 	}
 
-	remediation := gin.H{
-		"framework_id": frameworkID,
-		"findings": []gin.H{
-			{
-				"control_id":     "A.5.1",
-				"title":          "Information Security Policies",
-				"priority":       "high",
-				"steps":          []string{"Review current policy", "Update policy document", "Distribute to staff"},
-				"estimated_time": "2 days",
-			},
-			{
-				"control_id":     "A.6.1",
-				"title":          "Internal Organization",
-				"priority":       "medium",
-				"steps":          []string{"Define organizational structure", "Assign responsibilities"},
-				"estimated_time": "1 week",
-			},
-		},
-		"automatable": []string{"A.9.1", "A.12.3"},
-	}
-
-	c.JSON(http.StatusOK, remediation)
+	_ = frameworkID
+	c.JSON(http.StatusOK, gin.H{
+		"status":"unavailable","source":"unconfigured","configured":false,
+		"findings":[]any{},"automatable":[]any{},
+		"message":"Remediation plan unavailable: no verified findings configured",
+	})
 }
 
 func (h *ComplianceHandler) ListReports(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID := tenantIDFor(c)
 
-	query := `
-		SELECT id, tenant_id, report_type, framework, title, generated_at
+	rows, err := h.db.Query(`
+		SELECT id, report_type, framework, title, generated_at
 		FROM compliance_reports 
 		WHERE tenant_id = $1
 		ORDER BY generated_at DESC
 		LIMIT 20
-	`
-
-	h.logger.Info("Listing compliance reports for tenant: ", tenantID)
-
-	rows, err := h.db.Query(query, tenantID)
+	`, tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list reports"})
 		return
 	}
 	defer func() { _ = rows.Close() }()
-
-	c.JSON(http.StatusOK, gin.H{"reports": []map[string]interface{}{}})
+	reports := []map[string]interface{}{}
+	for rows.Next() {
+		var id, rtype, framework, title string
+		var generatedAt time.Time
+		if err := rows.Scan(&id, &rtype, &framework, &title, &generatedAt); err != nil { continue }
+		reports = append(reports, map[string]interface{}{"id": id, "report_type": rtype, "framework": framework, "title": title, "generated_at": generatedAt})
+	}
+	c.JSON(http.StatusOK, gin.H{"reports": reports})
 }
 
 func (h *ComplianceHandler) GenerateReport(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
 	var req struct {
 		Framework string `json:"framework" binding:"required"`
 		Title     string `json:"title"`
@@ -507,6 +541,10 @@ func (h *ComplianceHandler) GenerateReport(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	var delveCfg DelveConfig
 	if err := c.ShouldBindJSON(&delveCfg); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -543,6 +581,10 @@ func (h *ComplianceHandler) ConnectDelve(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetDelveStatus(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID := tenantIDFor(c)
 	connected := false
 	err := h.db.QueryRow(
@@ -558,14 +600,11 @@ func (h *ComplianceHandler) GetDelveStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":    status,
 		"provider":  "delve",
-		"version":   "2.1.0",
-		"last_sync": time.Now().Add(-1 * time.Hour),
+		"configured": status == "connected",
 	})
 }
 
 func (h *ComplianceHandler) SyncDelveData(c *gin.Context) {
-	h.logger.Info("Syncing data from Delve")
-
 	var delveCfg DelveConfig
 	if err := c.ShouldBindJSON(&delveCfg); err != nil {
 		delveCfg = DelveConfig{
@@ -573,35 +612,31 @@ func (h *ComplianceHandler) SyncDelveData(c *gin.Context) {
 			APIKey:      os.Getenv("DELVE_API_KEY"),
 		}
 	}
-
-	// Graceful demo fallback when Delve is not configured.
 	if delveCfg.APIEndpoint == "" || delveCfg.APIKey == "" {
-		h.logger.Warn("Delve not configured; returning demo sync")
-		c.JSON(http.StatusOK, gin.H{
-			"status":   "sync_completed",
-			"provider": "delve",
-			"message":  "Data synchronization completed (demo)",
-			"controls": 128,
-			"demo":     true,
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":"unavailable","source":"unconfigured","configured":false,
+			"capability":"delve_sync","provider":"delve",
+			"message":"Delve integration is not configured",
 		})
 		return
 	}
 
 	controls, err := h.fetchDelveData(delveCfg.APIEndpoint, delveCfg.APIKey)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to sync data from Delve", "detail": err.Error()})
+		c.JSON(http.StatusBadGateway, gin.H{"status":"unavailable","source":"error","configured":true,"provider":"delve","error":"Failed to sync data from Delve"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":   "sync_completed",
-		"provider": "delve",
-		"message":  "Data synchronization completed",
-		"controls": len(controls),
+		"status":"ok","source":"delve","provider":"delve","controls": len(controls),
 	})
 }
 
 func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	var kertosCfg KertosConfig
 	if err := c.ShouldBindJSON(&kertosCfg); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -637,6 +672,10 @@ func (h *ComplianceHandler) ConnectKertos(c *gin.Context) {
 }
 
 func (h *ComplianceHandler) GetKertosStatus(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID := tenantIDFor(c)
 	connected := false
 	err := h.db.QueryRow(
@@ -652,14 +691,11 @@ func (h *ComplianceHandler) GetKertosStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":    status,
 		"provider":  "kertos",
-		"version":   "1.8.0",
-		"last_sync": time.Now().Add(-30 * time.Minute),
+		"configured": status == "connected",
 	})
 }
 
 func (h *ComplianceHandler) SyncKertosData(c *gin.Context) {
-	h.logger.Info("Syncing data from Kertos")
-
 	var kertosCfg KertosConfig
 	if err := c.ShouldBindJSON(&kertosCfg); err != nil {
 		kertosCfg = KertosConfig{
@@ -668,35 +704,31 @@ func (h *ComplianceHandler) SyncKertosData(c *gin.Context) {
 			OrgID:       os.Getenv("KERTOS_ORG_ID"),
 		}
 	}
-
-	// Graceful demo fallback when Kertos is not configured.
 	if kertosCfg.APIEndpoint == "" || kertosCfg.APIKey == "" {
-		h.logger.Warn("Kertos not configured; returning demo sync")
-		c.JSON(http.StatusOK, gin.H{
-			"status":   "sync_completed",
-			"provider": "kertos",
-			"message":  "Data synchronization completed (demo)",
-			"controls": 96,
-			"demo":     true,
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":"unavailable","source":"unconfigured","configured":false,
+			"capability":"kertos_sync","provider":"kertos",
+			"message":"Kertos integration is not configured",
 		})
 		return
 	}
 
 	controls, err := h.fetchKertosData(kertosCfg.APIEndpoint, kertosCfg.APIKey)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to sync data from Kertos", "detail": err.Error()})
+		c.JSON(http.StatusBadGateway, gin.H{"status":"unavailable","source":"error","configured":true,"provider":"kertos","error":"Failed to sync data from Kertos"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":   "sync_completed",
-		"provider": "kertos",
-		"message":  "Data synchronization completed",
-		"controls": len(controls),
+		"status":"ok","source":"kertos","provider":"kertos","controls": len(controls),
 	})
 }
 
 func (h *ComplianceHandler) ListRisks(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID := tenantIDFor(c)
 	level := c.Query("level")
 
@@ -722,10 +754,14 @@ func (h *ComplianceHandler) ListRisks(c *gin.Context) {
 	}
 	defer func() { _ = rows.Close() }()
 
-	c.JSON(http.StatusOK, gin.H{"risks": []map[string]interface{}{}})
+	c.JSON(http.StatusOK, gin.H{"risks": []any{}, "status":"ok","source":"database"})
 }
 
 func (h *ComplianceHandler) CreateRisk(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID, ok := mutatingTenantIDFor(c)
 	if !ok {
 		return
@@ -737,33 +773,31 @@ func (h *ComplianceHandler) CreateRisk(c *gin.Context) {
 		return
 	}
 
-	riskID := uuid.New()
-
-	h.logger.Info("Creating risk assessment for tenant: ", tenantID)
-
-	c.JSON(http.StatusCreated, gin.H{
-		"id":      riskID,
-		"status":  "created",
-		"message": "Risk assessment created",
-	})
+	_ = tenantID; _ = risk
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"risk_assessment_create","message":"Risk creation unavailable: no verified persistence integration configured"})
 }
 
 func (h *ComplianceHandler) UpdateRisk(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
 	id := c.Param("id")
 
-	h.logger.Info("Updating risk: ", id)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Risk updated successfully"})
+	_ = id
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"risk_assessment_update","message":"Risk update unavailable"})
 }
 
 func (h *ComplianceHandler) MitigateRisk(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
 	id := c.Param("id")
-
-	c.JSON(http.StatusOK, gin.H{
-		"id":      id,
-		"status":  "mitigation_started",
-		"message": "Risk mitigation plan generated",
-	})
+	_ = id
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"risk_mitigation","message":"Risk mitigation unavailable: no verified mitigation integration configured"})
 }
 
 func (h *ComplianceHandler) getDefaultControls(framework string) []map[string]interface{} {

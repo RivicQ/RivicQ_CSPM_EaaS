@@ -48,7 +48,7 @@ func (h *TerraformHandler) SetupRoutes(router *gin.RouterGroup) {
 
 type TerraformResource struct {
 	ID               uuid.UUID                  `json:"id"`
-	TenantID         uuid.UUID                  `json:"tenant_id"`
+	TenantID         string                     `json:"tenant_id"`
 	TerraformStateID string                     `json:"terraform_state_id"`
 	Workspace        string                     `json:"workspace"`
 	ModuleSource     string                     `json:"module_source"`
@@ -96,7 +96,7 @@ type Workspace struct {
 
 func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
 	if !enterpriseDBReady(h.db) {
-		c.JSON(http.StatusOK, demoTerraformResources())
+		c.JSON(http.StatusServiceUnavailable, unavailableList("terraform_resources", "terraform", "resources"))
 		return
 	}
 	tenantID := tenantIDFor(c)
@@ -151,11 +151,14 @@ func (h *TerraformHandler) ListTerraformResources(c *gin.Context) {
 }
 
 func (h *TerraformHandler) ScanTerraformResources(c *gin.Context) {
-	tenantID, ok := mutatingTenantIDFor(c)
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform_scan", "terraform_scan"))
+		return
+	}
+	_, ok := mutatingTenantIDFor(c)
 	if !ok {
 		return
 	}
-
 	var req struct {
 		Workspace  string `json:"workspace"`
 		ModulePath string `json:"module_path"`
@@ -164,71 +167,20 @@ func (h *TerraformHandler) ScanTerraformResources(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	h.logger.Info("Starting Terraform security scan for tenant: ", tenantID)
-
-	securityFindings := []TerraformSecurityFinding{
-		{
-			RuleID:      "AVD-AWS-0001",
-			Severity:    "HIGH",
-			Title:       "S3 Bucket Public Access",
-			Description: "S3 bucket has public access enabled",
-			Resource:    "aws_s3_bucket.public_data",
-			Remediation: "Enable block_public_acls and block_public_policy",
-			Provider:    "aws",
-		},
-		{
-			RuleID:      "AVD-AWS-0002",
-			Severity:    "CRITICAL",
-			Title:       "IAM Policy Wildcards",
-			Description: "IAM policy uses wildcard actions",
-			Resource:    "aws_iam_policy.admin",
-			Remediation: "Use specific actions instead of wildcards",
-			Provider:    "aws",
-		},
-		{
-			RuleID:      "AVD-GCP-0001",
-			Severity:    "HIGH",
-			Title:       "GCS Bucket Public Access",
-			Description: "Google Cloud Storage bucket is publicly accessible",
-			Resource:    "google_storage_bucket.public",
-			Remediation: "Set uniform_bucket_level_access to true",
-			Provider:    "google",
-		},
-	}
-
-	complianceViolations := []ComplianceIssue{
-		{
-			ControlID: "ISO27001-A.9.1",
-			Framework: "iso27001",
-			Severity:  "HIGH",
-			Resource:  "aws_security_group.allow_all",
-			Message:   "Unrestricted inbound access",
-		},
-		{
-			ControlID: "NIST-AC-3",
-			Framework: "nist",
-			Severity:  "MEDIUM",
-			Resource:  "aws_iam_role.admin",
-			Message:   "Overly permissive role",
-		},
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":                "scan_completed",
-		"security_findings":     securityFindings,
-		"compliance_violations": complianceViolations,
-		"summary": gin.H{
-			"total_findings": len(securityFindings),
-			"critical":       1,
-			"high":           2,
-			"medium":         1,
-			"low":            0,
-		},
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":     "unavailable",
+		"source":     "unconfigured",
+		"configured": false,
+		"capability": "terraform_security_scan",
+		"message":    "Terraform security/compliance scanning is unavailable: no verified scanner integration configured",
 	})
 }
 
 func (h *TerraformHandler) GetTerraformResource(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
+		return
+	}
 	id := c.Param("id")
 	resourceID, err := uuid.Parse(id)
 	if err != nil {
@@ -259,308 +211,90 @@ func (h *TerraformHandler) GetTerraformResource(c *gin.Context) {
 }
 
 func (h *TerraformHandler) UpdateTerraformResource(c *gin.Context) {
-	id := c.Param("id")
-	resourceID, err := uuid.Parse(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid resource ID"})
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"id":      resourceID,
-		"message": "Resource updated successfully",
-	})
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_resource_update","message":"Terraform resource update unavailable: no verified persistence/integration configured"})
 }
 
 func (h *TerraformHandler) ListWorkspaces(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-
-	h.logger.Info("Listing workspaces for tenant: ", tenantID)
-
-	workspaces := []Workspace{
-		{
-			ID:               uuid.New(),
-			Name:             "production",
-			TerraformVersion: "1.5.0",
-			WorkingDirectory: "environments/prod",
-			VCSRepo:          "github.com/org/infrastructure",
-			VCSBranch:        "main",
-			Status:           "active",
-			LastRunAt:        &[]time.Time{time.Now().Add(-1 * time.Hour)}[0],
-		},
-		{
-			ID:               uuid.New(),
-			Name:             "staging",
-			TerraformVersion: "1.5.0",
-			WorkingDirectory: "environments/staging",
-			VCSRepo:          "github.com/org/infrastructure",
-			VCSBranch:        "main",
-			Status:           "active",
-			LastRunAt:        &[]time.Time{time.Now().Add(-2 * time.Hour)}[0],
-		},
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
+		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"workspaces": workspaces})
+	c.JSON(http.StatusOK, gin.H{"workspaces": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Terraform workspaces unavailable: no verified workspace integration configured"})
 }
 
 func (h *TerraformHandler) CreateWorkspace(c *gin.Context) {
-	tenantID, ok := mutatingTenantIDFor(c)
-	if !ok {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
 		return
 	}
-
-	var workspace Workspace
-	if err := c.ShouldBindJSON(&workspace); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	workspace.ID = uuid.New()
-	workspace.Status = "active"
-
-	h.logger.Info("Creating workspace: ", workspace.Name, " for tenant: ", tenantID)
-
-	c.JSON(http.StatusCreated, workspace)
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_workspace_create","message":"Workspace creation unavailable: no verified persistence/integration configured"})
 }
 
 func (h *TerraformHandler) GetWorkspaceState(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
+		return
+	}
 	id := c.Param("id")
 	workspaceID, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid workspace ID"})
 		return
 	}
-
-	state := gin.H{
-		"workspace_id":      workspaceID,
-		"resources":         25,
-		"outputs":           10,
-		"dependencies":      15,
-		"serial":            42,
-		"terraform_version": "1.5.0",
-	}
-
-	c.JSON(http.StatusOK, state)
+	c.JSON(http.StatusServiceUnavailable, gin.H{"workspace_id": workspaceID, "status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_state","message":"Terraform state unavailable: no verified state integration configured"})
 }
 
 func (h *TerraformHandler) ListSecurityFindings(c *gin.Context) {
 	if !enterpriseDBReady(h.db) {
-		c.JSON(http.StatusOK, demoTerraformFindings())
+		c.JSON(http.StatusServiceUnavailable, unavailableList("terraform_findings", "terraform", "findings"))
 		return
 	}
-	tenantID := tenantIDFor(c)
-	severity := c.Query("severity")
-	provider := c.Query("provider")
-
-	h.logger.Info("Listing security findings for tenant: ", tenantID)
-
-	findings := []TerraformSecurityFinding{
-		{
-			RuleID:      "AVD-AWS-0001",
-			Severity:    "HIGH",
-			Title:       "S3 Bucket Public Access",
-			Description: "S3 bucket has public access enabled",
-			Resource:    "aws_s3_bucket.public_data",
-			Remediation: "Enable block_public_acls and block_public_policy",
-			Provider:    "aws",
-		},
-		{
-			RuleID:      "AVD-AWS-0002",
-			Severity:    "CRITICAL",
-			Title:       "IAM Policy Wildcards",
-			Description: "IAM policy uses wildcard actions",
-			Resource:    "aws_iam_policy.admin",
-			Remediation: "Use specific actions instead of wildcards",
-			Provider:    "aws",
-		},
-		{
-			RuleID:      "AVD-GCP-0001",
-			Severity:    "HIGH",
-			Title:       "GCS Bucket Public Access",
-			Description: "Google Cloud Storage bucket is publicly accessible",
-			Resource:    "google_storage_bucket.public",
-			Remediation: "Set uniform_bucket_level_access to true",
-			Provider:    "gcp",
-		},
-	}
-
-	if severity != "" {
-		var filtered []TerraformSecurityFinding
-		for _, f := range findings {
-			if f.Severity == severity {
-				filtered = append(filtered, f)
-			}
-		}
-		findings = filtered
-	}
-
-	if provider != "" {
-		var filtered []TerraformSecurityFinding
-		for _, f := range findings {
-			if f.Provider == provider {
-				filtered = append(filtered, f)
-			}
-		}
-		findings = filtered
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"findings": findings,
-		"total":    len(findings),
-	})
+	c.JSON(http.StatusOK, gin.H{"findings": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Terraform security findings unavailable: no verified findings integration configured"})
 }
 
 func (h *TerraformHandler) ListComplianceViolations(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-	framework := c.Query("framework")
-
-	h.logger.Info("Listing compliance violations for tenant: ", tenantID)
-
-	violations := []ComplianceIssue{
-		{
-			ControlID: "ISO27001-A.9.1",
-			Framework: "iso27001",
-			Severity:  "HIGH",
-			Resource:  "aws_security_group.allow_all",
-			Message:   "Unrestricted inbound access",
-		},
-		{
-			ControlID: "NIST-AC-3",
-			Framework: "nist",
-			Severity:  "MEDIUM",
-			Resource:  "aws_iam_role.admin",
-			Message:   "Overly permissive role",
-		},
-		{
-			ControlID: "GDPR-Art.32",
-			Framework: "gdpr",
-			Severity:  "HIGH",
-			Resource:  "google_storage_bucket.customer_data",
-			Message:   "Missing encryption at rest",
-		},
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
+		return
 	}
-
-	if framework != "" {
-		var filtered []ComplianceIssue
-		for _, v := range violations {
-			if v.Framework == framework {
-				filtered = append(filtered, v)
-			}
-		}
-		violations = filtered
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"violations": violations,
-		"total":      len(violations),
-	})
+	c.JSON(http.StatusOK, gin.H{"violations": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Terraform compliance violations unavailable: no verified findings integration configured"})
 }
 
 func (h *TerraformHandler) ListModules(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-
-	h.logger.Info("Listing Terraform modules for tenant: ", tenantID)
-
-	modules := []map[string]interface{}{
-		{
-			"name":      "aws-vpc",
-			"source":    "terraform-aws-modules/vpc/aws",
-			"version":   "3.19.0",
-			"provider":  "aws",
-			"resources": 45,
-			"inputs":    20,
-			"outputs":   15,
-		},
-		{
-			"name":      "gcp-gke",
-			"source":    "terraform-google-modules/kubernetes-engine/google",
-			"version":   "27.0.0",
-			"provider":  "google",
-			"resources": 30,
-			"inputs":    25,
-			"outputs":   10,
-		},
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
+		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"modules": modules})
+	c.JSON(http.StatusOK, gin.H{"modules": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Terraform modules unavailable: no verified module integration configured"})
 }
 
 func (h *TerraformHandler) ScanModules(c *gin.Context) {
-	tenantID, ok := mutatingTenantIDFor(c)
-	if !ok {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
 		return
 	}
-
-	h.logger.Info("Scanning Terraform modules for tenant: ", tenantID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":  "scan_started",
-		"message": "Module security scan initiated",
-	})
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_module_scan","message":"Module scan unavailable: no verified scan integration configured"})
 }
 
 func (h *TerraformHandler) DetectDrift(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-	workspace := c.Query("workspace")
-
-	h.logger.Info("Detecting drift for tenant: ", tenantID, " workspace: ", workspace)
-
-	drifts := []map[string]interface{}{
-		{
-			"resource":   "aws_instance.web_server",
-			"attribute":  "instance_type",
-			"expected":   "t3.medium",
-			"actual":     "t3.large",
-			"drift_type": "update",
-		},
-		{
-			"resource":   "aws_security_group.web",
-			"attribute":  "ingress[0].cidr_blocks",
-			"expected":   []string{"10.0.0.0/16"},
-			"actual":     []string{"0.0.0.0/0"},
-			"drift_type": "update",
-		},
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
+		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"workspace": workspace,
-		"drifts":    drifts,
-		"total":     len(drifts),
-	})
+	c.JSON(http.StatusServiceUnavailable, gin.H{"drifts": []any{}, "total": 0, "status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_drift","message":"Drift detection unavailable: no verified drift integration configured"})
 }
 
 func (h *TerraformHandler) GetPlanHistory(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-	workspace := c.Query("workspace")
-
-	h.logger.Info("Getting plan history for tenant: ", tenantID, " workspace: ", workspace)
-
-	history := []map[string]interface{}{
-		{
-			"id":                  uuid.New(),
-			"workspace":           workspace,
-			"action":              "apply",
-			"status":              "success",
-			"duration":            "5m 30s",
-			"resources_added":     5,
-			"resources_changed":   10,
-			"resources_destroyed": 2,
-			"created_at":          time.Now().Add(-1 * time.Hour),
-		},
-		{
-			"id":         uuid.New(),
-			"workspace":  workspace,
-			"action":     "plan",
-			"status":     "finished",
-			"duration":   "1m 15s",
-			"changes":    true,
-			"created_at": time.Now().Add(-2 * time.Hour),
-		},
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
+		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"workspace": workspace,
-		"history":   history,
-		"total":     len(history),
-	})
+	c.JSON(http.StatusOK, gin.H{"history": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Plan history unavailable: no verified history integration configured"})
 }

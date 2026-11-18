@@ -45,15 +45,23 @@ func DefaultCORSConfig() CORSConfig {
 func CORS(cfg CORSConfig) gin.HandlerFunc {
 	originMap := make(map[string]bool, len(cfg.AllowedOrigins))
 	for _, o := range cfg.AllowedOrigins {
-		originMap[strings.ToLower(o)] = true
+		originMap[strings.ToLower(strings.TrimSpace(o))] = true
 	}
-	allowAll := originMap["*"]
+	hasWildcard := originMap["*"]
 
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-
-		allowed := allowAll || originMap[strings.ToLower(origin)] || (cfg.AllowLocalDev && isLocalDevOrigin(origin))
-		if allowed {
+		originAllowed := false
+		if origin != "" {
+			if hasWildcard && !cfg.AllowCredentials {
+				originAllowed = true
+			} else if !hasWildcard && originMap[strings.ToLower(origin)] {
+				originAllowed = true
+			} else if !hasWildcard && cfg.AllowLocalDev && isLocalDevOrigin(origin) {
+				originAllowed = true
+			}
+		}
+		if originAllowed {
 			c.Header("Access-Control-Allow-Origin", origin)
 			c.Header("Vary", "Origin")
 			if cfg.AllowCredentials {

@@ -7,7 +7,7 @@ Scope and behavior of the Enterprise edition. The full Community-vs-Enterprise f
 - Enterprise binary: `cmd/server/enterprise/main.go`, gin release mode, listens `:9090`.
 - Activation: `CRYPTOBOM_LICENSE_KEY` with `ENT-` prefix and >= 20 characters (`internal/edition/edition.go`). The OSS binary refuses enterprise flags ("OSS build does not include enterprise features").
 - Runtime feature flags are returned by `GET /edition`. The feature subsections are shown in grant coverage on the dashboard only when activated.
-- Without credentials, enterprise connectors render honest empty states — they never fabricate a live cloud estate (disclosure in `docs/KNOWN_LIMITATIONS.md`).
+- Without credentials, enterprise connectors should render honest empty/unconfigured states — they must not fabricate a live cloud estate (disclosure in `docs/KNOWN_LIMITATIONS.md`). Private beta deployments should verify connector availability before making pilot claims.
 
 ## 2. Control plane routes
 
@@ -15,7 +15,7 @@ All routes under `/api/v1`, mounted by `internal/api/enterprise/SetupRoutes` on 
 
 | Area | Primary handlers | Notes |
 |---|---|---|
-| SSO login + callback (SAML/OIDC/LDAP) | `internal/api/shared/sso.go`, `internal/api/oss/` | `login/sso`, `auth/sso/callback`; relay-injection protected (relay not in logs); session binding to canonical identity |
+| SSO config/login plumbing (SAML/OIDC/LDAP) | `internal/api/shared/sso.go`, `internal/api/oss/` | Configuration and callback handling exist in code paths, but a complete IdP ACS/login handshake is an operator integration task and should not be claimed as turnkey for private beta |
 | API keys | `internal/api/enterprise/apikeys.go` (`POST /admin/keys`) | Admin-only; secret shown once as `key_...`; stored SHA-256-hashed |
 | Outbound webhooks | `internal/api/enterprise/webhooks.go` (`/api/v1/webhooks`) | HMAC-SHA256 signed, retries, verified per delivery |
 | Audit viewer | `internal/api/enterprise/audit.go` | Admin/Operator; search + export; data in `audit_events` |
@@ -32,8 +32,8 @@ All routes under `/api/v1`, mounted by `internal/api/enterprise/SetupRoutes` on 
 ## 3. Tenancy and RBAC
 
 - Tenant ownership: JWT `tenant_id` claim only (`internal/tenant/context.go`); `X-Tenant-ID` is never trusted. Cross-tenant lookup returns 404.
-- Roles (viewer < analyst < operator < admin) enforced server-side via `internal/auth/rbac.go` `RequireRole`. Mutating SSO, cloud-connector, API-key, webhook, and workspace-role endpoints require admin.
-- Administrator management: `api/v1/oss/admin/manage/{enable,disable,reset}` and `senior_admins` guards (`internal/api/shared/senior_admins.go`); admins cannot be disabled by operators/non-masters.
+- Roles (viewer < analyst < operator < admin) are intended to be enforced server-side via `internal/auth/rbac.go` `RequireRole` on covered routes. For private beta, treat mutating SSO/cloud-connector/API-key/webhook/workspace-role operations as admin-only and verify route coverage in the deployed build.
+- Administrator management endpoints and senior-admin guard behavior are code-level controls (`api/v1/oss/admin/manage/*`, `internal/api/shared/senior_admins.go`) and should be validated in the target environment before pilot use.
 - Domain-restricted signup: `AUTH_ALLOWED_DOMAINS`, `INTERNAL_AUTH_ALLOWED_DOMAINS` config.
 - Data remains tenant-partitioned in shared Postgres; all event/query filters are tenant-scoped in SQL.
 
@@ -54,13 +54,13 @@ Remediation trail: `docs/SECURITY_SECRET_REMEDIATION.md`; policy `docs/MASTER_RU
 
 - Audit middleware records every request (JWT tenant) to `audit_events` with actor, action, resource, result, request id, ip; event viewer in `/audit`.
 - OpenTelemetry trace export opt-in via `OTEL_EXPORTER_OTLP_ENDPOINT` (`internal/observability/otel.go`); `/healthz` stays dependency-independent.
-- Enterprise charts (`deploy/helm/cryptobom-enterprise`, `deploy/helm/cryptobom-saas`) include cron-ready resource limits, PrometheusRule templates, and production replicaCount 2.
+- Helm chart artifacts exist under `deploy/helm/` (including enterprise/SaaS charts), but production-readiness features (resources, alert rules, replica settings, templates) are artifact-dependent. Verify chart contents (especially `deploy/helm/cryptobom-enterprise/templates` when present) before relying on them in a private beta.
 - Framework mappings (DORA Art. 9(2), eIDAS 2.0 / ETSI TS 119 312, BSI TR-02102, ISO 27001/27102, NIST 800-53/CSF, SOC 2) are mappings that help operators evidence controls; they are never a certification claim.
 
 ## 6. Operating the Enterprise edition
 
 Local: `make dev-enterprise` (optional `CRYPTOBOM_PORT=9090`, `go run ./cmd/server/enterprise`, requires Postgres, `CRYPTOBOM_LICENSE_KEY`, strong `JWT_SECRET`), then `cat .env` for `AUTH_BOOTSTRAP_*` to log in.
 
-Production: Helm chart upgrade with `--set image.tag`, `kubectl rollout status`, health at `/healthz`/`/readyz`, API smoke against the assets endpoint; deploy gated jobs and rollback runbook in `docs/DEVSECOPS.md` and `docs/ROLLBACK_RUNBOOK.md`.
+Production deployment claims should match available artifacts. Helm upgrades, rollout checks, and rollback flows apply only where complete charts/manifests and cluster credentials exist; verify `deploy/helm/cryptobom-enterprise/templates` and other chart contents before relying on enterprise Helm deployment in a private beta. See `docs/DEVSECOPS.md` and `docs/ROLLBACK_RUNBOOK.md` for operator runbooks.
 
 Supported postgres: `deploy/migrations/*.sql` (+ embedded Go ledger). Backup/restore and single-tenant migration: `docs/DATABASE_GUIDE.md`, `docs/DEPLOYMENT.md`.

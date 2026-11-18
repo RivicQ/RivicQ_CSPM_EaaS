@@ -3,10 +3,11 @@ import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
 import { getSession } from "@/lib/auth";
 import { isStaffRole } from "@/lib/env";
+import { allowedAdminSections, firstAllowedAdminPath, type AdminSection } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
-const sections = [
+const sections: [AdminSection, string][] = [
   ["overview", "Overview"],
   ["products", "Products"],
   ["subscriptions", "Subscriptions"],
@@ -27,18 +28,22 @@ const sections = [
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSession();
   if (!user || !isStaffRole(user.role)) redirect("/login");
+  const allowed = new Set(allowedAdminSections(user.role));
+  if (!allowed.size) redirect("/portal");
+
+  const nav = sections.filter(([slug]) => allowed.has(slug));
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[250px_1fr]">
       <aside className="border-b border-violet-500/10 bg-[#080714] p-5 lg:min-h-screen lg:border-b-0 lg:border-r">
         <div className="mb-6 flex items-center justify-between gap-2">
-          <Link href="/" className="text-sm font-semibold text-white">
+          <Link href={firstAllowedAdminPath(user.role)} className="text-sm font-semibold text-white">
             RivicQ RevenueOS
           </Link>
           <LogoutButton />
         </div>
         <nav className="flex flex-wrap gap-1 lg:flex-col">
-          {sections.map(([slug, label]) => (
+          {nav.map(([slug, label]) => (
             <Link
               key={slug}
               href={slug === "overview" ? "/admin" : `/admin/${slug}`}

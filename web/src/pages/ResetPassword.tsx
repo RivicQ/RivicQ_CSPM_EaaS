@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { Alert, Button, Card, CardContent, Stack, TextField, Typography } from '@mui/material';
 import { ArrowBack, Lock } from '@mui/icons-material';
 import { authService } from '../services/api';
@@ -13,10 +13,9 @@ const cardSx = {
 };
 
 const ResetPassword: React.FC = () => {
-  const [params] = useSearchParams();
   const navigate = useNavigate();
   const { backendReachable } = useAuth();
-  const [token, setToken] = React.useState(params.get('token') || '');
+  const [token, setToken] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [confirm, setConfirm] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -55,7 +54,7 @@ const ResetPassword: React.FC = () => {
         <CardContent sx={{ p: 4 }}>
           <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 600, letterSpacing: '-0.03em' }}>Set a new password</Typography>
           <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
-            Use the reset token from your operator or from labeled demo mode. Tokens expire in 30 minutes and are single-use.
+            Enter the reset token provided by your operator. Tokens expire in 30 minutes, are single-use, and must be submitted in this form (not in the URL).
           </Typography>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           {done ? (

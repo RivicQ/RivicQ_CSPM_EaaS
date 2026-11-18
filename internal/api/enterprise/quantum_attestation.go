@@ -1,7 +1,6 @@
 package enterprise
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -53,7 +52,7 @@ func (h *QuantumAttestationHandler) SetupRoutes(router *gin.RouterGroup) {
 
 type QuantumAttestation struct {
 	ID              uuid.UUID              `json:"id"`
-	TenantID        uuid.UUID              `json:"tenant_id"`
+	TenantID        string                 `json:"tenant_id"`
 	AssetID         *uuid.UUID             `json:"asset_id"`
 	AttestationType string                 `json:"attestation_type"`
 	QuantumNetwork  string                 `json:"quantum_network"`
@@ -88,6 +87,10 @@ type QuantumReadiness struct {
 }
 
 func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, unavailableList("quantum_attestations", "quantum_attestation", "attestations"))
+		return
+	}
 	tenantID := tenantIDFor(c)
 	status := c.Query("status")
 
@@ -98,7 +101,6 @@ func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
 		WHERE tenant_id = $1
 	`
 	args := []interface{}{tenantID}
-
 	if status != "" {
 		query += " AND status = $2"
 		args = append(args, status)
@@ -111,7 +113,7 @@ func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
 	}
 	defer func() { _ = rows.Close() }()
 
-	var attestations []QuantumAttestation
+	attestations := make([]QuantumAttestation, 0)
 	for rows.Next() {
 		var attestation QuantumAttestation
 		var attestationData []byte
@@ -128,10 +130,14 @@ func (h *QuantumAttestationHandler) ListAttestations(c *gin.Context) {
 		attestations = append(attestations, attestation)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"attestations": attestations})
+	c.JSON(http.StatusOK, gin.H{"attestations": attestations, "source": "database", "status": "ok", "total": len(attestations)})
 }
 
 func (h *QuantumAttestationHandler) CreateAttestation(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "enterprise database unavailable", "status": "unavailable", "source": "unconfigured"})
+		return
+	}
 	tenantID, ok := mutatingTenantIDFor(c)
 	if !ok {
 		return
@@ -144,8 +150,11 @@ func (h *QuantumAttestationHandler) CreateAttestation(c *gin.Context) {
 	}
 
 	attestation.ID = uuid.New()
-	attestation.TenantID, _ = uuid.Parse(tenantID)
+	attestation.TenantID = tenantID
+	// Created attestations are pending/unverified; never mark attested without
+	// real provider-side verification evidence.
 	attestation.Status = "pending"
+	attestation.AttestedAt = nil
 
 	attestationDataJSON, _ := json.Marshal(attestation.AttestationData)
 
@@ -166,12 +175,15 @@ func (h *QuantumAttestationHandler) CreateAttestation(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info("Created quantum attestation: ", attestation.ID)
-
+	h.logger.Info("Created quantum attestation (pending, unverified): ", attestation.ID)
 	c.JSON(http.StatusCreated, attestation)
 }
 
 func (h *QuantumAttestationHandler) GetAttestation(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "enterprise database unavailable", "status": "unavailable", "source": "unconfigured"})
+		return
+	}
 	id := c.Param("id")
 	attestationID, err := uuid.Parse(id)
 	if err != nil {
@@ -198,11 +210,14 @@ func (h *QuantumAttestationHandler) GetAttestation(c *gin.Context) {
 	}
 
 	_ = json.Unmarshal(attestationData, &attestation.AttestationData)
-
 	c.JSON(http.StatusOK, attestation)
 }
 
 func (h *QuantumAttestationHandler) VerifyAttestation(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "enterprise database unavailable", "status": "unavailable", "source": "unconfigured"})
+		return
+	}
 	id := c.Param("id")
 	attestationID, err := uuid.Parse(id)
 	if err != nil {
@@ -210,20 +225,24 @@ func (h *QuantumAttestationHandler) VerifyAttestation(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info("Verifying quantum attestation: ", attestationID)
-
-	query := `UPDATE quantum_attestations SET status = 'attested', attested_at = NOW() WHERE id = $1`
-	_, _ = h.db.Exec(query, attestationID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"id":          attestationID,
-		"status":      "attested",
-		"verified_at": time.Now(),
-		"message":     "Attestation verified successfully",
+	// No real quantum/provider verification is configured in this build path;
+	// never mark as attested/verified without cryptographic/provider evidence.
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"id":         attestationID,
+		"status":     "unavailable",
+		"source":     "unconfigured",
+		"verified":   false,
+		"attested":   false,
+		"capability": "quantum_attestation_verification",
+		"message":    "Quantum attestation verification is unavailable: no verified provider integration configured",
 	})
 }
 
 func (h *QuantumAttestationHandler) RefreshAttestation(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "enterprise database unavailable", "status": "unavailable", "source": "unconfigured"})
+		return
+	}
 	id := c.Param("id")
 	attestationID, err := uuid.Parse(id)
 	if err != nil {
@@ -231,80 +250,30 @@ func (h *QuantumAttestationHandler) RefreshAttestation(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info("Refreshing quantum attestation: ", attestationID)
-
-	query := `UPDATE quantum_attestations SET status = 'pending', attested_at = NULL WHERE id = $1`
-	_, _ = h.db.Exec(query, attestationID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"id":      attestationID,
-		"status":  "refreshed",
-		"message": "Attestation refresh initiated",
+	// Refresh requires a real provider/job backend; report unavailable honestly.
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"id":         attestationID,
+		"status":     "unavailable",
+		"source":     "unconfigured",
+		"capability": "quantum_attestation_refresh",
+		"message":    "Attestation refresh is unavailable: no configured quantum provider backend",
 	})
 }
 
 func (h *QuantumAttestationHandler) ListQuantumNetworks(c *gin.Context) {
-	networks := []QuantumNetwork{
-		{
-			ID:        "ibmq_brisbane",
-			Name:      "IBM Quantum Brisbane",
-			Provider:  "IBM Quantum",
-			Status:    "online",
-			Qubits:    127,
-			ErrorRate: 0.001,
-			Fidelity:  0.99,
-			Region:    "au-syd",
-		},
-		{
-			ID:        "ibmq_sherbrooke",
-			Name:      "IBM Quantum Sherbrooke",
-			Provider:  "IBM Quantum",
-			Status:    "online",
-			Qubits:    127,
-			ErrorRate: 0.001,
-			Fidelity:  0.99,
-			Region:    "ca-montreal",
-		},
-		{
-			ID:        "ibm_washington",
-			Name:      "IBM Quantum Washington",
-			Provider:  "IBM Quantum",
-			Status:    "online",
-			Qubits:    127,
-			ErrorRate: 0.001,
-			Fidelity:  0.99,
-			Region:    "us-east",
-		},
-	}
-
-	c.JSON(http.StatusOK, gin.H{"networks": networks})
+	// Never return fabricated network topology/metrics; only real provider data is allowed.
+	c.JSON(http.StatusOK, gin.H{
+		"networks":   []QuantumNetwork{},
+		"total":      0,
+		"status":     "unavailable",
+		"source":     "unconfigured",
+		"configured": false,
+		"capability": "quantum_network_inventory",
+		"message":    "No verified quantum network provider is configured",
+	})
 }
 
-// demoQuantumProviders is the static fallback shown when the provider registry
-// has no instantiated providers (e.g. registry initialisation skipped).
-var demoQuantumProviders = []map[string]interface{}{
-	{
-		"name":      "IBM Quantum",
-		"type":      "quantum_computing",
-		"api_type":  "rest",
-		"endpoints": []string{"https://api.quantum-computing.ibm.com"},
-		"features":  []string{"Qiskit", "Quantum Circuits", "Hybrid Jobs"},
-	},
-	{
-		"name":      "Q-CTRL",
-		"type":      "quantum_control",
-		"api_type":  "rest",
-		"endpoints": []string{"https://api.q-ctrl.com"},
-		"features":  []string{"Error Suppression", "Error Mitigation", "Pulse Level"},
-	},
-	{
-		"name":      "Rigetti",
-		"type":      "quantum_computing",
-		"api_type":  "rest",
-		"endpoints": []string{"https://api.rigetti.com"},
-		"features":  []string{"Quil", "Quantum VM", "Hybrid Computing"},
-	},
-}
+// No static/demo provider inventory is returned when providers are not configured.
 
 // ListQuantumProviders reflects the providers registered in the Quantum SDK
 // provider registry, each with its live status and capabilities.
@@ -329,12 +298,11 @@ func (h *QuantumAttestationHandler) ListQuantumProviders(c *gin.Context) {
 	}
 
 	if len(providers) == 0 {
-		for _, demo := range demoQuantumProviders {
-			providers = append(providers, gin.H(demo))
-		}
+		c.JSON(http.StatusOK, gin.H{"providers": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "message": "No quantum providers configured"})
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"providers": providers, "total": len(providers)})
+	c.JSON(http.StatusOK, gin.H{"providers": providers, "total": len(providers), "status": "ok", "source": "provider_registry"})
 }
 
 // GetQuantumProviderStatus returns the live status of a single registered
@@ -353,86 +321,51 @@ func (h *QuantumAttestationHandler) GetQuantumProviderStatus(c *gin.Context) {
 }
 
 func (h *QuantumAttestationHandler) GetQuantumReadiness(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-
-	h.logger.Info("Calculating quantum readiness for tenant: ", tenantID)
-
-	readiness := QuantumReadiness{
-		OverallScore:      65,
-		QuantumSafeAssets: 35,
-		AtRiskAssets:      65,
-		MigrationProgress: 35,
-		Recommendations: []string{
-			"Migrate RSA-2048 to CRYSTALS-Kyber",
-			"Migrate ECDSA to CRYSTALS-Dilithium",
-			"Implement hybrid classical-quantum key exchange",
-			"Review cryptographic inventory for deprecated algorithms",
-		},
-		ByCategory: map[string]int{
-			"symmetric_encryption":  80,
-			"asymmetric_encryption": 45,
-			"digital_signatures":    40,
-			"key_exchange":          35,
-			"hash_functions":        90,
-		},
-		ByAlgorithm: map[string]int{
-			"RSA":                30,
-			"ECDSA":              40,
-			"ECDH":               35,
-			"AES-256":            85,
-			"SHA-256":            90,
-			"CRYSTALS-Kyber":     10,
-			"CRYSTALS-Dilithium": 5,
-		},
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":     "unavailable",
+			"source":     "unconfigured",
+			"configured": false,
+			"capability": "quantum_readiness",
+			"message":    "Quantum readiness is unavailable without enterprise database and verified inventory data",
+		})
+		return
 	}
-
-	c.JSON(http.StatusOK, readiness)
+	tenantID := tenantIDFor(c)
+	h.logger.Info("Calculating quantum readiness for tenant: ", tenantID)
+	c.JSON(http.StatusOK, gin.H{
+		"status":              "ok",
+		"source":              "database",
+		"configured":          true,
+		"overall_score":       0,
+		"quantum_safe_assets": 0,
+		"at_risk_assets":      0,
+		"migration_progress":  0,
+		"recommendations":     []string{},
+		"by_category":         map[string]int{},
+		"by_algorithm":        map[string]int{},
+		"note":                "Readiness scoring requires verified asset inventory; no fabricated metrics are returned",
+	})
 }
 
 func (h *QuantumAttestationHandler) GetMigrationPlan(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-
-	h.logger.Info("Generating migration plan for tenant: ", tenantID)
-
-	migrationPlan := gin.H{
-		"current_state": gin.H{
-			"total_crypto_assets": 100,
-			"quantum_safe":        35,
-			"at_risk":             65,
-		},
-		"target_state": gin.H{
-			"total_crypto_assets": 100,
-			"quantum_safe":        100,
-			"at_risk":             0,
-		},
-		"phases": []gin.H{
-			{
-				"phase":      1,
-				"name":       "Assessment & Planning",
-				"duration":   "2 weeks",
-				"activities": []string{"Inventory crypto assets", "Risk assessment", "Prioritization"},
-				"completion": "100%",
-			},
-			{
-				"phase":      2,
-				"name":       "Hybrid Migration",
-				"duration":   "4 weeks",
-				"activities": []string{"Implement hybrid RSA+Kyber", "Deploy ECDSA+Dilithium", "Update TLS config"},
-				"completion": "60%",
-			},
-			{
-				"phase":      3,
-				"name":       "Full PQC Migration",
-				"duration":   "6 weeks",
-				"activities": []string{"Remove legacy algorithms", "Migrate key management", "Update applications"},
-				"completion": "0%",
-			},
-		},
-		"estimated_completion":    "12 weeks",
-		"total_assets_to_migrate": 65,
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":     "unavailable",
+			"source":     "unconfigured",
+			"configured": false,
+			"capability": "quantum_migration_plan",
+			"message":    "Migration planning is unavailable without enterprise database and verified inventory data",
+		})
+		return
 	}
-
-	c.JSON(http.StatusOK, migrationPlan)
+	c.JSON(http.StatusOK, gin.H{
+		"status":     "unavailable",
+		"source":     "database",
+		"configured": true,
+		"phases":     []gin.H{},
+		"message":    "Migration plan requires verified asset inventory; no fabricated plan is returned",
+	})
 }
 
 func (h *QuantumAttestationHandler) ListPQCAlgorithms(c *gin.Context) {
@@ -494,11 +427,14 @@ func (h *QuantumAttestationHandler) ListPQCAlgorithms(c *gin.Context) {
 }
 
 func (h *QuantumAttestationHandler) MigrateAlgorithm(c *gin.Context) {
-	tenantID, ok := mutatingTenantIDFor(c)
+	if !enterpriseDBReady(h.db) {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "enterprise database unavailable", "status": "unavailable", "source": "unconfigured"})
+		return
+	}
+	_, ok := mutatingTenantIDFor(c)
 	if !ok {
 		return
 	}
-
 	var req struct {
 		AssetID         string `json:"asset_id"`
 		SourceAlgorithm string `json:"source_algorithm"`
@@ -508,58 +444,12 @@ func (h *QuantumAttestationHandler) MigrateAlgorithm(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	h.logger.Info("Migrating algorithm for tenant: ", tenantID, " from: ", req.SourceAlgorithm, " to: ", req.TargetAlgorithm)
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":             "migration_started",
-		"source_algorithm":   req.SourceAlgorithm,
-		"target_algorithm":   req.TargetAlgorithm,
-		"estimated_duration": "5 minutes",
-		"message":            "Algorithm migration initiated",
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":           "unavailable",
+		"source":           "unconfigured",
+		"capability":       "pqc_migration_execution",
+		"source_algorithm": req.SourceAlgorithm,
+		"target_algorithm": req.TargetAlgorithm,
+		"message":          "Algorithm migration execution is unavailable: no verified migration integration configured",
 	})
-}
-
-type IBMQuantumClient struct {
-	APIKey  string
-	BaseURL string
-	Network string
-	Timeout int
-}
-
-func NewIBMQuantumClientForAttestation(apiKey, baseURL, network string) *IBMQuantumClient {
-	return &IBMQuantumClient{
-		APIKey:  apiKey,
-		BaseURL: baseURL,
-		Network: network,
-		Timeout: 30,
-	}
-}
-
-func (c *IBMQuantumClient) GetNetworkInfo(ctx context.Context) (map[string]interface{}, error) {
-	return map[string]interface{}{
-		"name":     c.Network,
-		"nodes":    5,
-		"qubits":   127,
-		"fidelity": 0.994,
-		"status":   "online",
-	}, nil
-}
-
-func (c *IBMQuantumClient) SubmitJob(ctx context.Context, job map[string]interface{}) (string, error) {
-	return uuid.New().String(), nil
-}
-
-func (c *IBMQuantumClient) GetJobResult(ctx context.Context, jobID string) (map[string]interface{}, error) {
-	return map[string]interface{}{
-		"job_id":      jobID,
-		"status":      "completed",
-		"result":      " attestation verified",
-		"qubits_used": 127,
-		"error_rate":  0.001,
-	}, nil
-}
-
-func (c *IBMQuantumClient) VerifyAttestation(ctx context.Context, data map[string]interface{}) (bool, error) {
-	return true, nil
 }

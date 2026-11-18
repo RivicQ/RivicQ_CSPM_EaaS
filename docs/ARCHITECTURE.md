@@ -144,7 +144,7 @@ flowchart LR
 
 - **GitHub Pages** (`docs/GITHUB_ACTIONS_AND_PAGES.md`): `.github/workflows/pages.yml` builds `web/` with `REACT_APP_EDITION=community`, ReDoc from `docs/openapi.yaml`, `fabric/`, `marketing/`, `docs/`, and `archify/`, then publishes to the `gh-pages` branch via `peaceiris/actions-gh-pages`.
 - **Local demo**: `docker-compose.yml` (db + migrate + app + web + scanner) or `make dev-backend` / `make dev-enterprise` / `make dev-frontend`. In-memory demo mode when no DB is configured; `/readyz` returns 503 in demo mode and `/healthz` stays independent.
-- **Helm**: OSS chart `deploy/helm/cryptobom-oss`, SaaS/Enterprise charts `deploy/helm/cryptobom-saas` and `deploy/helm/cryptobom-enterprise`; `deploy/kubernetes` yaml for enterprise deployments.
+- **Helm/Kubernetes artifacts**: charts and manifests exist under `deploy/helm/` and `deploy/kubernetes/`, but completeness varies by chart/environment. Verify templates and values (including enterprise chart contents) before making deployment claims for a private beta.
 - **Cloudflare Pages**: `_headers`, `_redirects`, and `wrangler.toml` are being added at the repo root (not yet committed at the time of writing) as a static Publish-Only host; the same built `web/` output is hosted there with Pages-managed TLS.
 
 ## 8. Observability

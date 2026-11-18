@@ -4,10 +4,10 @@ This document describes how RivicQ CSPM changes flow through source, CI, securit
 
 ## 1. SDLC and branch model
 
-- Trunk-based: `main` (and legacy `master`) is the integration branch; `develop` exists for staging promotion and manual milestone work.
-- Feature branches use a `cursor/*` or topic prefix; all PRs target `main`/`master` and run the full CI matrix.
+- Primary integration branches are `main` (and legacy `master` where workflows still trigger). `develop` may be used for staging/promotion workflows when present.
+- Feature/topic branches (including `cursor/*`) should target the active default branch; CI triggers vary by workflow and currently include combinations of `main`, `master`, and `develop` as configured in `.github/workflows/`.
 - `pull_request_template.md` and `.github/ISSUE_TEMPLATE/` (bug, feature, question, security) standardize contributions.
-- `release-drafter.yml` drafts release notes on pushes/PRs to `main`/`master`; `release.yml` publishes images + provenance on `v*.*.*` tags.
+- `release-drafter.yml` and `release.yml` operate on the triggers declared in their workflow files; confirm branch/tag behavior before relying on release automation in a private beta.
 - Contributor rules: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `GOVERNANCE.md`, `docs/README.md`.
 
 ## 2. CI gate matrix (.github/workflows/)
@@ -16,8 +16,8 @@ This document describes how RivicQ CSPM changes flow through source, CI, securit
 |---|---|---|
 | `ci.yml` | push `main`/`develop`, PR `main` | Backend build + tests |
 | `ci-oss.yml` | push/PR `master`,`main` | golangci-lint v2, unit tests (non-enterprise) with race + coverage, OSS binary build, manual demo smoke, GHCR OSS image |
-| `ci-enterprise.yml` | push/PR `master`,`main` | Enterprise unit tests, Enterprise binary build + smoke (mock IBMQ) |
-| `ci-cd.yml` | push `main`,`master`,`develop`, PR, manual | Full pipeline: CodeQL (codeql-analysis), security-scan, **oss-gate** (fails if OSS build imports enterprise packages), build-and-test (go test -race + coverage on Postgres 15 service), integration-tests (live OSS+Enterprise servers via `run-edition.sh`, `RIVICQ_SMOKE_URLS`), production-validation (`scripts/production-readiness.sh --strict`), performance-tests (benchmark regression <= 20%), container-build (Dockerfile.oss/.enterprise, Syft SBOM, Trivy SARIF), deploy-staging (develop), deploy-production (main), benchmark-tests, docs-build |
+| `ci-enterprise.yml` | push/PR `master`,`main` | Enterprise-tagged unit tests, Enterprise binary build + smoke (mock IBMQ), and conditional Enterprise Helm lint (blocking once chart templates exist) |
+| `ci-cd.yml` | push `main`,`master`,`develop`, PR, manual | Full pipeline as configured: security/code analysis jobs, OSS gate, build/test, integration/validation/perf/container/docs/deploy jobs. Some deploy and validation steps depend on secrets, cluster credentials, external services, and complete chart artifacts; treat them as environment-gated rather than universally available in private beta. |
 | `codeql.yml` | weekly schedule (Fri 02:35) + manual | CodeQL Advanced on actions/go/javascript-typescript/python, `build-mode: none`; uploads disabled while Default CodeQL setup is active |
 | `snyk-security.yml` | push/PR `main` | Snyk Open Source / Code / IaC / Container when `SNYK_TOKEN` set; skips cleanly without it, uploads SARIF to code scanning |
 | `dast-scan.yml` | daily 03:00 UTC + manual | OWASP ZAP baseline scan against `https://staging.cryptobom.io`, report artifact |
@@ -53,10 +53,9 @@ Linters: `.golangci.yml` enables `errcheck`, `govet`, `ineffassign`, `staticchec
 ## 4. Release and rollback
 
 - Release: tag `v*.*.*` -> `release.yml` builds and publishes images + SLSA provenance; `release-drafter.yml` prepared the notes; `CHANGELOG.md` keeps the ledger (latest tagged `v1.6.4`).
-- Deploy: Helm charts `deploy/helm/cryptobom-oss`, `cryptobom-saas`, `cryptobom-enterprise`, namespaced by environment (staging `cryptobom-staging` / `cryptobom-enterprise-staging`, production equivalents), `--wait --timeout`, resource requests/limits, replicaCount 2 for production Enterprise.
-- Verification: `kubectl rollout status`, health checks at `healthz`, API smoke against assets endpoint, dashboard 200.
-- Rollback: `rollback.yml` (helm rollback to previous or explicit revision) and in-pipeline `Rollback on Failure` jobs that record current revision before `helm upgrade`; post-rollback smoke tests. Runbook: `docs/ROLLBACK_RUNBOOK.md`, `docs/OPS_RUNBOOK.md`.
-- Environment promotion: local (`docker-compose.yml` / `make dev-*`) -> staging (gated on `develop`, environment `staging`) -> production (gated on `main` push + `KUBE_CONFIG_PROD` present). The public site, however, deploys exclusively via GitHub Pages (`pages.yml`); Helm production is skipped when no kubeconfig exists.
+- Deploy artifacts: Helm charts exist under `deploy/helm/` (OSS/SaaS/Enterprise), but deployability is artifact- and environment-dependent. In particular, verify enterprise chart templates exist before claiming enterprise Helm lint/install/rollback readiness.
+- Verification/rollback: `kubectl rollout status`, health endpoints, smoke tests, and `helm rollback` workflows are available as runbooks/jobs when cluster access, images, and complete charts are present. See `docs/ROLLBACK_RUNBOOK.md`, `docs/OPS_RUNBOOK.md`.
+- Promotion/public site: workflow behavior depends on configured branches, environments, and secrets. The public static site is deployed via GitHub Pages workflow configuration (`pages.yml`), while Helm-based production deploys are gated on cluster credentials/secrets. Avoid assuming a full staging→production Helm path is active without validating workflow configuration and artifacts.
 
 ## 5. Required secrets / variables
 

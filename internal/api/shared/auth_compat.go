@@ -2,8 +2,6 @@ package shared
 
 import (
 	"strings"
-
-	"github.com/rivic-q/cryptobom-saas/internal/authn"
 )
 
 // authUserResponse is the user shape the web client expects from /auth routes
@@ -15,20 +13,12 @@ type authUserResponse struct {
 	Role  string `json:"role,omitempty"`
 }
 
-// editionForRole normalises a frontend edition request, falling back to the
-// highest edition a role is entitled to.
+// editionForRole returns the server-derived entitlement. Role/request inputs are
+// intentionally ignored to prevent client or role-based escalation.
 func editionForRole(role, requested string) string {
-	if strings.TrimSpace(requested) != "" {
-		return normalizeAuthEdition(requested)
-	}
-	switch authn.Role(role) {
-	case authn.RoleAdmin:
-		return "enterprise"
-	case authn.RoleOperator, authn.RoleAnalyst:
-		return "professional"
-	default:
-		return "oss"
-	}
+	_ = role
+	_ = requested
+	return serverAuthEdition()
 }
 
 // workEmailAllowed reports whether the email's domain is on the operator's

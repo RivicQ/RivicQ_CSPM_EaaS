@@ -43,7 +43,7 @@ func newCloudSDKs(ctx context.Context) *cloudSDKs {
 	return sdks
 }
 
-// ── AWS inventory via real SDK with demo fallback ───────────────────────
+// ── AWS inventory via real SDK (no fabricated fallback) ───────────────────
 
 type awsInventoryResult struct {
 	EC2Instances []awscloud.EC2Instance `json:"ec2_instances,omitempty"`
@@ -91,7 +91,7 @@ func (c *cloudSDKs) fetchAWSInventory(ctx context.Context) (*awsInventoryResult,
 	return result, nil
 }
 
-// ── GCP inventory via real SDK with demo fallback ───────────────────────
+// ── GCP inventory via real SDK (no fabricated fallback) ───────────────────
 
 type gcpInventoryResult struct {
 	GCEInstances []gcpcloud.GCEInstance `json:"gce_instances,omitempty"`
@@ -131,7 +131,7 @@ func (c *cloudSDKs) fetchGCPInventory(ctx context.Context) (*gcpInventoryResult,
 	return result, nil
 }
 
-// ── Azure inventory via real SDK with demo fallback ─────────────────────
+// ── Azure inventory via real SDK (no fabricated fallback) ─────────────────
 
 type azureInventoryResult struct {
 	VMs             []azurecloud.AzureVM             `json:"virtual_machines,omitempty"`

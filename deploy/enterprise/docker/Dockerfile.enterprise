@@ -1,12 +1,31 @@
-FROM alpine:latest
-
-RUN apk --no-cache add ca-certificates tzdata curl
+# Enterprise image for deploy/enterprise/k8s and helm references.
+# Build from repo root: docker build -f deploy/enterprise/docker/Dockerfile.enterprise .
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
 
-COPY bin/cryptobom-enterprise /app/cryptobom-enterprise
-COPY configs/enterprise.yaml /app/config.yaml
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags "-X main.version=2.0.0 -X main.edition=enterprise" \
+    -tags enterprise \
+    -o /app/cryptobom-server \
+    ./cmd/server/enterprise
 
+FROM alpine:3.20
+
+RUN apk --no-cache add ca-certificates tzdata wget
+
+WORKDIR /app
+RUN addgroup -S cryptobom && adduser -S -G cryptobom -u 1000 cryptobom
+COPY --from=builder /app/cryptobom-server /app/cryptobom-server
+
+USER 1000:2000
 EXPOSE 9090
+ENV CRYPTOBOM_EDITION=enterprise CRYPTOBOM_PORT=9090 PORT=9090
 
-CMD ["./cryptobom-enterprise"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget -qO- http://localhost:9090/healthz >/dev/null || exit 1
+
+CMD ["/app/cryptobom-server"]

@@ -23,40 +23,41 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// SetupRoutes configures Enterprise API routes with IBMQ integration
+// SetupRoutes configures Enterprise API routes with IBMQ integration.
+// Enterprise mode is fail-closed: database/migration/configuration failures must
+// not result in serving demo/fabricated data as real.
 func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) {
 	authService := shared.SetupStandardAuth(router, db, logger)
 	enterpriseAuth := authService.AuthenticateMiddleware()
 
-	// Initialize Enterprise database with fallback.
-	//
-	// The enterprise store is only attempted when the standard database is
-	// actually usable. Without this guard a demo-mode instance would still dial
-	// PostgreSQL for the enterprise handlers, and a test would silently read and
-	// write whatever happens to be listening on the developer's machine.
-	var enterpriseDB *database.EnterpriseDB
+	// Core database is required for enterprise tenancy/auth/state alignment.
 	if !standardDBReady(db) {
-		logger.Warn("Standard database unavailable — enterprise endpoints will use demo mode")
-	} else {
-		dbConfig := config.DatabaseConfig{
-			Host:     getEnvOrDefault("CRYPTOBOM_DB_HOST", "localhost"),
-			Port:     getEnvOrDefaultInt("CRYPTOBOM_DB_PORT", 5432),
-			User:     getEnvOrDefault("CRYPTOBOM_DB_USER", "cryptobom"),
-			Password: os.Getenv("CRYPTOBOM_DB_PASSWORD"),
-			Name:     getEnvOrDefault("CRYPTOBOM_ENTERPRISE_DB_NAME", "cryptobom_enterprise"),
-			SSLMode:  getEnvOrDefault("CRYPTOBOM_DB_SSLMODE", "disable"),
-		}
-		conn, connErr := database.NewEnterpriseConnection(dbConfig)
-		if connErr != nil {
-			logger.WithError(connErr).Warn("Enterprise database unavailable — enterprise endpoints will use demo mode")
-		} else if migrateErr := database.RunEnterpriseMigrations(conn); migrateErr != nil {
-			logger.WithError(migrateErr).Warn("Enterprise migrations failed — enterprise endpoints will use demo mode")
-		} else {
-			enterpriseDB = conn
-		}
+		logger.Fatal("Core database unavailable — enterprise endpoints cannot start (fail-closed, no demo data)")
 	}
 
-	// Initialize handlers (nil-safe: each handler checks for nil db internally)
+	// Enterprise tables live in the core DB by default to preserve tenant model
+	// consistency. A separate enterprise DB is opt-in via ENTERPRISE_DATABASE_URL
+	// and must never silently reuse the wrong database.
+	var enterpriseDB *database.EnterpriseDB
+	if dsn := database.EnterpriseDatabaseURL(); dsn != "" {
+		conn, err := database.NewEnterpriseConnection(config.DatabaseConfig{})
+		if err != nil {
+			logger.WithError(err).Fatal("Separate enterprise database (ENTERPRISE_DATABASE_URL) unavailable — fail closed")
+		}
+		if err := database.RunEnterpriseMigrations(conn); err != nil {
+			logger.WithError(err).Fatal("Separate enterprise database migrations failed — fail closed")
+		}
+		enterpriseDB = conn
+		logger.Info("Enterprise using separate ENTERPRISE_DATABASE_URL database")
+	} else {
+		enterpriseDB = database.NewEnterpriseDBFromSQL(db.DB, logger)
+		if err := database.RunEnterpriseMigrations(enterpriseDB); err != nil {
+			logger.WithError(err).Fatal("Enterprise migrations on core database failed — fail closed")
+		}
+		logger.Info("Enterprise tables aligned to core database/tenant model")
+	}
+
+	// Initialize handlers (nil-safe guards remain as defense in depth)
 	inventoryHandler := NewInventoryHandler(enterpriseDB, logger, cfg)
 	complianceHandler := NewComplianceHandler(enterpriseDB, logger)
 	multicloudHandler := NewMultiCloudHandler(enterpriseDB, logger)
@@ -89,7 +90,7 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	webhookManager := NewWebhookManager(enterpriseDB, logger)
 	auditViewer := NewAuditViewer(enterpriseDB, logger)
 
-	// Setup Enterprise-specific routes (nil-safe: handlers return demo data when db is nil)
+	// Setup Enterprise-specific routes.
 	inventoryHandler.SetupRoutes(router)
 	complianceHandler.SetupRoutes(router)
 	multicloudHandler.SetupRoutes(router)
@@ -102,10 +103,6 @@ func SetupRoutes(router *gin.RouterGroup, db *database.DB, logger *logrus.Logger
 	apiKeyManager.SetupRoutes(router, enterpriseAuth)
 	webhookManager.SetupRoutes(router, enterpriseAuth)
 	auditViewer.SetupRoutes(router, enterpriseAuth)
-
-	if enterpriseDB == nil {
-		logger.Info("Enterprise endpoints registered in demo mode")
-	}
 
 	// Enhanced CBOM Management with IBMQ Attestation
 	cbom := router.Group("/cbom")
@@ -461,40 +458,12 @@ func ListQuantumNetworks(cfg *config.EnterpriseConfig, logger *logrus.Logger) gi
 
 func TriggerEmergencyQuantumResponse(cfg *config.EnterpriseConfig, logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !cfg.IBMQ.Enabled {
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"error": "IBM Quantum integration not enabled",
-			})
-			return
-		}
-
-		var request struct {
-			ThreatLevel    string   `json:"threat_level"`
-			AffectedAssets []string `json:"affected_assets"`
-		}
-
-		if err := c.ShouldBindJSON(&request); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		// For now, create a mock emergency response
-		response := gin.H{
-			"status":          "emergency_triggered",
-			"threat_level":    request.ThreatLevel,
-			"affected_assets": len(request.AffectedAssets),
-			"timestamp":       time.Now(),
-			"response_id":     fmt.Sprintf("emergency_%d", time.Now().Unix()),
-		}
-
-		logger.WithFields(logrus.Fields{
-			"threat_level":    request.ThreatLevel,
-			"affected_assets": len(request.AffectedAssets),
-		}).Warn("Triggered emergency quantum response")
-
-		c.JSON(http.StatusOK, gin.H{
-			"emergency_response": response,
-			"initiated_at":       response["timestamp"],
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":     "unavailable",
+			"source":     "unconfigured",
+			"configured": cfg != nil && cfg.IBMQ.Enabled && cfg.IBMQ.APIKey != "",
+			"capability": "emergency_quantum_response",
+			"message":    "Emergency quantum response is unavailable: no verified response integration configured",
 		})
 	}
 }
@@ -503,19 +472,14 @@ func TriggerEmergencyQuantumResponse(cfg *config.EnterpriseConfig, logger *logru
 func attestCBOMReport(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		logger.WithField("id", id).Info("Creating IBM Quantum attestation for CBOM")
-
-		if !cfg.IBMQ.Enabled {
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"error": "IBM Quantum integration required for attestation",
-			})
-			return
-		}
-
-		c.JSON(http.StatusAccepted, gin.H{
-			"id":                 id,
-			"attestation_status": "ibmq_initiated",
-			"message":            "Quantum attestation started via IBM Quantum",
+		// No real attestation pipeline is wired here; never claim initiated/attested.
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"id":         id,
+			"status":     "unavailable",
+			"source":     "unconfigured",
+			"configured": cfg != nil && cfg.IBMQ.Enabled && cfg.IBMQ.APIKey != "",
+			"capability": "cbom_quantum_attestation",
+			"message":    "CBOM quantum attestation is unavailable: no verified attestation integration configured",
 		})
 	}
 }
@@ -523,20 +487,14 @@ func attestCBOMReport(db *database.DB, logger *logrus.Logger, cfg *config.Enterp
 func verifyAssetQuantum(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		logger.WithField("id", id).Info("Performing quantum verification via IBMQ")
-
-		// Mock verification for now
-		verification := gin.H{
-			"asset_id":        id,
-			"quantum_safe":    false,
-			"score":           0.3,
-			"recommendations": []string{"Upgrade to post-quantum algorithms"},
-			"verified_at":     time.Now(),
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"asset_id":             id,
-			"quantum_verification": verification,
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"asset_id":   id,
+			"status":     "unavailable",
+			"source":     "unconfigured",
+			"verified":   false,
+			"configured": cfg != nil && cfg.IBMQ.Enabled && cfg.IBMQ.APIKey != "",
+			"capability": "quantum_asset_verification",
+			"message":    "Quantum asset verification is unavailable: no verified provider integration configured",
 		})
 	}
 }
@@ -581,11 +539,12 @@ func performMLSecurityScan(db *database.DB, logger *logrus.Logger, cfg *config.E
 				"high":                analysis.High,
 				"medium":              analysis.Medium,
 				"low":                 analysis.Low,
-				"ibmq_verified":       true,
+				"ibmq_verified":       false,
 			},
 			"threats":      analysis.Threats,
 			"scan_id":      fmt.Sprintf("ml-scan-%d", time.Now().Unix()),
 			"generated_at": analysis.GeneratedAt,
+			"source":       analysis.Source,
 		})
 	}
 }
@@ -800,18 +759,14 @@ func getMLInsights(db *database.DB, logger *logrus.Logger, cfg *config.Enterpris
 			return
 		}
 		if len(insights) == 0 {
-			labels := []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
-			trend := make([]gin.H, len(labels))
-			for i, label := range labels {
-				trend[i] = gin.H{"label": label, "score": 68 + i*2, "value": 68 + i*2}
-			}
 			c.JSON(http.StatusOK, gin.H{
-				"posture_trend": trend,
-				"trend":         trend,
-				"insights": []gin.H{
-					{"type": "posture_summary", "title": "Post-quantum readiness improving", "severity": "medium", "confidence": 0.88},
-				},
-				"total": 1,
+				"posture_trend": []any{},
+				"trend":         []any{},
+				"insights":      []any{},
+				"total":         0,
+				"status":        "ok",
+				"source":        "analysis",
+				"message":       "No insights available from configured/observed data",
 			})
 			return
 		}
@@ -841,11 +796,14 @@ func getQuantumThreatForecasts(db *database.DB, logger *logrus.Logger, cfg *conf
 func performQuantumScan(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		logger.WithField("cluster_id", id).Info("Performing quantum vulnerability scan")
-		c.JSON(http.StatusOK, gin.H{
-			"cluster_id":   id,
-			"quantum_scan": "completed",
-			"ibmq_results": true,
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"cluster_id":  id,
+			"status":      "unavailable",
+			"source":      "unconfigured",
+			"configured":  false,
+			"ibmq_results": false,
+			"capability":  "quantum_scan",
+			"message":     "Quantum vulnerability scan is unavailable: no verified integration configured",
 		})
 	}
 }
@@ -880,16 +838,20 @@ func getQuantumMetrics(db *database.DB, logger *logrus.Logger, cfg *config.Enter
 
 func getHPCSStatus(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Getting IBM HPCS status")
 		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{
 			APIKey:       cfg.Cloud.IBM.APIKey,
 			Region:       cfg.Cloud.IBM.Region,
 			HPCSEnabled:  cfg.Cloud.IBM.HPCSEnabled,
 			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
 		})
+		if !client.Configured {
+			c.JSON(http.StatusOK, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"ibm_hpcs","message":"IBM HPCS is not configured"})
+			return
+		}
 		status, err := client.GetStatus()
-		if err != nil && !client.Configured {
-			logger.WithError(err).Warn("HPCS not configured, returning demo status")
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"error","configured":true,"capability":"ibm_hpcs","message":"IBM HPCS status unavailable"})
+			return
 		}
 		c.JSON(http.StatusOK, status)
 	}
@@ -897,58 +859,71 @@ func getHPCSStatus(db *database.DB, logger *logrus.Logger, cfg *config.Enterpris
 
 func getHPCSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Listing IBM HPCS keys")
 		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{
 			APIKey:       cfg.Cloud.IBM.APIKey,
 			Region:       cfg.Cloud.IBM.Region,
 			HPCSEnabled:  cfg.Cloud.IBM.HPCSEnabled,
 			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
 		})
-		keys, err := client.ListKeys()
-		if err != nil && !client.Configured {
-			logger.WithError(err).Warn("HPCS not configured, returning demo keys")
+		if !client.Configured {
+			c.JSON(http.StatusOK, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"ibm_hpcs_keys","message":"IBM HPCS is not configured"})
+			return
 		}
-		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys)})
+		keys, err := client.ListKeys()
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"error","configured":true,"capability":"ibm_hpcs_keys","message":"IBM HPCS keys unavailable"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys), "status":"ok","source":"ibm_hpcs"})
 	}
 }
 
 func getCOSBuckets(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Listing IBM COS buckets")
-		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{
-			APIKey:       cfg.Cloud.IBM.APIKey,
-			Region:       cfg.Cloud.IBM.Region,
-			HPCSEnabled:  cfg.Cloud.IBM.HPCSEnabled,
-			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
-		})
-		buckets, err := client.ListCOSBuckets()
-		if err != nil && !client.Configured {
-			logger.WithError(err).Warn("IBM COS not configured, returning demo buckets")
+		// IBM COS listing requires explicit COS credentials; never return demo buckets.
+		if os.Getenv("IBM_COS_ACCESS_KEY") == "" || os.Getenv("IBM_COS_SECRET_KEY") == "" || os.Getenv("IBM_COS_ENDPOINT") == "" {
+			c.JSON(http.StatusOK, gin.H{"buckets":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"ibm_cos","message":"IBM COS is not configured"})
+			return
 		}
-		c.JSON(http.StatusOK, gin.H{"buckets": buckets, "total": len(buckets)})
+		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{APIKey: cfg.Cloud.IBM.APIKey, Region: cfg.Cloud.IBM.Region, HPCSEnabled: cfg.Cloud.IBM.HPCSEnabled, HPCSInstance: cfg.Cloud.IBM.HPCSInstance})
+		buckets, err := client.ListCOSBuckets()
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"buckets":[]any{},"total":0,"status":"unavailable","source":"error","configured":true,"capability":"ibm_cos","message":"IBM COS buckets unavailable"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"buckets": buckets, "total": len(buckets), "status":"ok","source":"ibm_cos"})
 	}
 }
 
 func attestHPCSKey(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		keyID := c.Param("keyId")
-		logger.WithField("key_id", keyID).Info("Attesting IBM HPCS key")
 		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{
 			APIKey:       cfg.Cloud.IBM.APIKey,
 			Region:       cfg.Cloud.IBM.Region,
 			HPCSEnabled:  cfg.Cloud.IBM.HPCSEnabled,
 			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
 		})
+		if !client.Configured {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"key_id": keyID, "provider":"ibm-hpcs", "status":"unavailable", "source":"unconfigured",
+				"configured": false, "verified": false, "attested": false,
+				"capability":"hpcs_attestation", "message":"HPCS attestation is unavailable: HPCS is not configured or verified",
+			})
+			return
+		}
 		report, err := client.AttestKey(keyID)
-		if err != nil && !client.Configured {
-			logger.WithError(err).Warn("HPCS not configured, returning demo attestation")
+		if err != nil || report == nil || !report.Verified {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"key_id": keyID, "provider":"ibm-hpcs", "status":"unavailable", "source":"ibm_hpcs",
+				"configured": true, "verified": false, "attested": false,
+				"capability":"hpcs_attestation", "message":"HPCS attestation unavailable or unverifiable", "report": report,
+			})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"key_id":   keyID,
-			"status":   "attested",
-			"provider": "ibm-hpcs",
-			"verified": report != nil && report.NISTCompliant,
-			"report":   report,
+			"key_id": keyID, "provider":"ibm-hpcs", "status": report.Status, "source":"ibm_hpcs",
+			"configured": true, "verified": report.Verified, "attested": report.Verified, "report": report,
 		})
 	}
 }
@@ -957,11 +932,15 @@ func attestHPCSKey(db *database.DB, logger *logrus.Logger, cfg *config.Enterpris
 
 func getCloudHSMStatus(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Getting AWS CloudHSM status")
 		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
+		if !client.Configured() {
+			c.JSON(http.StatusOK, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"aws_cloudhsm","message":"AWS CloudHSM is not configured"})
+			return
+		}
 		status, err := client.GetClusterStatus()
 		if err != nil {
-			logger.WithError(err).Warn("CloudHSM lookup failed, returning demo status")
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"error","configured":true,"capability":"aws_cloudhsm","message":"AWS CloudHSM status unavailable"})
+			return
 		}
 		c.JSON(http.StatusOK, status)
 	}
@@ -969,26 +948,34 @@ func getCloudHSMStatus(db *database.DB, logger *logrus.Logger, cfg *config.Enter
 
 func getKMSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Listing AWS KMS keys")
 		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
+		if !client.Configured() {
+			c.JSON(http.StatusOK, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"aws_kms","message":"AWS KMS is not configured"})
+			return
+		}
 		keys, err := client.ListKMSKeys()
 		if err != nil {
-			logger.WithError(err).Warn("KMS lookup failed, returning demo keys")
+			c.JSON(http.StatusServiceUnavailable, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"error","configured":true,"capability":"aws_kms","message":"AWS KMS keys unavailable"})
+			return
 		}
-		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys)})
+		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys), "status":"ok","source":"aws_kms"})
 	}
 }
 
 func getCloudTrailAudit(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Getting AWS CloudTrail crypto events")
 		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
+		if !client.Configured() {
+			c.JSON(http.StatusOK, gin.H{"events":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"aws_cloudtrail","message":"AWS CloudTrail is not configured"})
+			return
+		}
 		since := time.Now().Add(-24 * time.Hour)
 		events, err := client.GetCryptoAuditEvents(since)
 		if err != nil {
-			logger.WithError(err).Warn("CloudTrail lookup failed, returning demo events")
+			c.JSON(http.StatusServiceUnavailable, gin.H{"events":[]any{},"total":0,"status":"unavailable","source":"error","configured":true,"capability":"aws_cloudtrail","message":"AWS CloudTrail events unavailable"})
+			return
 		}
-		c.JSON(http.StatusOK, gin.H{"events": events, "total": len(events)})
+		c.JSON(http.StatusOK, gin.H{"events": events, "total": len(events), "status":"ok","source":"aws_cloudtrail"})
 	}
 }
 
@@ -1024,11 +1011,12 @@ func getQuantumRiskAssessment(db *database.DB, logger *logrus.Logger, cfg *confi
 
 func scanForPQCAlgorithms(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Scanning for PQC algorithms")
-		c.JSON(http.StatusAccepted, gin.H{
-			"scan_id":        fmt.Sprintf("pqc-scan-%d", time.Now().Unix()),
-			"status":         "in_progress",
-			"assets_scanned": 0,
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":     "unavailable",
+			"source":     "unconfigured",
+			"configured": false,
+			"capability": "pqc_scan",
+			"message":    "PQC scanning is unavailable: no verified scan integration configured",
 		})
 	}
 }
@@ -1036,45 +1024,33 @@ func scanForPQCAlgorithms(db *database.DB, logger *logrus.Logger, cfg *config.En
 func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		assetID := c.Param("assetId")
-		logger.WithField("asset_id", assetID).Info("Getting attestation report")
-
-		attestations := []gin.H{}
-		if db != nil {
-			rows, err := db.Query(`
-				SELECT qa.id, ca.algorithm, qa.status, ca.quantum_safe, qa.attested_at
-				FROM quantum_attestations qa
-				JOIN cbom_reports cr ON qa.cbom_report_id = cr.id
-				JOIN crypto_assets ca ON ca.cbom_report_id = cr.id
-				WHERE ca.id = $1
-			`, assetID)
-			if err == nil {
-				defer func() { _ = rows.Close() }()
-				for rows.Next() {
-					var id, algorithm, status string
-					var quantumSafe bool
-					var attestedAt interface{}
-					if err := rows.Scan(&id, &algorithm, &status, &quantumSafe, &attestedAt); err != nil {
-						continue
-					}
-					attestations = append(attestations, gin.H{
-						"algorithm":    algorithm,
-						"status":       status,
-						"quantum_safe": quantumSafe,
-					})
-				}
-			}
+		if !standardDBReady(db) {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"asset_id": assetID, "attestations": []any{}, "status":"unavailable", "source":"unconfigured",
+				"message":"Attestation report unavailable: database not configured",
+			})
+			return
 		}
-
-		quantumSafe := 0
-		for _, a := range attestations {
-			if a["quantum_safe"] == true {
-				quantumSafe++
+		attestations := []gin.H{}
+		rows, err := db.Query(`
+			SELECT qa.id, qa.status, qa.attestation_data, qa.attested_at
+			FROM quantum_attestations qa
+			WHERE qa.asset_id::text = $1 OR qa.id::text = $1
+		`, assetID)
+		if err == nil {
+			defer func() { _ = rows.Close() }()
+			for rows.Next() {
+				var id, status string
+				var data, attestedAt interface{}
+				if err := rows.Scan(&id, &status, &data, &attestedAt); err != nil {
+					continue
+				}
+				attestations = append(attestations, gin.H{"id": id, "status": status, "attested_at": attestedAt})
 			}
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"asset_id":     assetID,
-			"attestations": attestations,
-			"summary":      gin.H{"total": len(attestations), "quantum_safe": quantumSafe, "vulnerable": len(attestations) - quantumSafe},
+			"asset_id": assetID, "attestations": attestations, "status":"ok", "source":"database",
+			"summary": gin.H{"total": len(attestations)},
 		})
 	}
 }
@@ -1153,12 +1129,9 @@ func exportQuantumSafeBOM(db *database.DB, logger *logrus.Logger, cfg *config.En
 	return func(c *gin.Context) {
 		assetId := c.Param("assetId")
 		logger.WithField("asset_id", assetId).Info("Exporting quantum-safe BOM")
-		c.JSON(http.StatusOK, gin.H{
-			"asset_id":    assetId,
-			"bom_version": "2.0",
-			"format":      "cyclonedx",
-			"components":  shared.BOMComponents(),
-			"summary":     gin.H{"total": 3, "quantum_safe": 2, "pqc_ready": 1},
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"asset_id": assetId, "status":"unavailable", "source":"unconfigured", "configured": false,
+			"capability":"quantum_safe_bom_export", "message":"Quantum-safe BOM export is unavailable: no verified export source configured",
 		})
 	}
 }
@@ -1167,40 +1140,19 @@ func exportQuantumSafeBOM(db *database.DB, logger *logrus.Logger, cfg *config.En
 
 func getGCPKMSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Listing GCP KMS keys")
-		c.JSON(http.StatusOK, gin.H{
-			"keys": []gin.H{
-				{"id": "gcp-kms-1", "algorithm": "GOOGLE_SYMMETRIC_ENCRYPTION", "state": "enabled", "location": "global"},
-				{"id": "gcp-kms-2", "algorithm": "RSA_DECRYPT_OAEP_4096_SHA256", "state": "enabled", "location": "us-central1"},
-			},
-			"total": 2,
-		})
+		c.JSON(http.StatusOK, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"gcp_kms","message":"GCP KMS is not configured"})
 	}
 }
 
 func getGKEWorkloads(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Listing GKE workloads")
-		c.JSON(http.StatusOK, gin.H{
-			"workloads": []gin.H{
-				{"name": "api-server", "namespace": "default", "crypto_assets": 4, "quantum_safe": 2},
-				{"name": "auth-service", "namespace": "security", "crypto_assets": 6, "quantum_safe": 3},
-			},
-			"total": 2,
-		})
+		c.JSON(http.StatusOK, gin.H{"workloads":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"gke_workloads","message":"GKE integration is not configured"})
 	}
 }
 
 func getGCPHSMKeyRings(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Listing GCP HSM key rings")
-		c.JSON(http.StatusOK, gin.H{
-			"key_rings": []gin.H{
-				{"name": "cryptobom-production", "location": "us-central1", "keys": 4, "hsm": true},
-				{"name": "cryptobom-staging", "location": "us-east1", "keys": 2, "hsm": false},
-			},
-			"total": 2,
-		})
+		c.JSON(http.StatusOK, gin.H{"key_rings":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"gcp_hsm_keyrings","message":"GCP HSM key rings are not configured"})
 	}
 }
 
@@ -1208,14 +1160,13 @@ func getGCPHSMKeyRings(db *database.DB, logger *logrus.Logger, cfg *config.Enter
 
 func getBenchmarksSummary(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logger.Info("Getting benchmark summary")
 		c.JSON(http.StatusOK, gin.H{
-			"benchmarks": []gin.H{
-				{"name": "NIST SP 800-56A", "status": "compliant", "score": 92.5, "findings": 2},
-				{"name": "BSI TR-02102", "status": "compliant", "score": 88.0, "findings": 3},
-				{"name": "PCI DSS 4.0", "status": "non_compliant", "score": 65.0, "findings": 7},
-			},
-			"overall_score": 81.8,
+			"benchmarks": []any{},
+			"overall_score": 0,
+			"status": "unavailable",
+			"source": "unconfigured",
+			"configured": false,
+			"message": "Benchmarks unavailable: no verified benchmark/compliance data configured",
 		})
 	}
 }

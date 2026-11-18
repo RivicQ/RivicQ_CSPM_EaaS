@@ -219,7 +219,7 @@ func (s *Service) Login(ctx context.Context, email, password, edition, userAgent
 			MFASession:  raw,
 		}, nil
 	}
-	pair, err := s.issueSession(ctx, u, editionForRole(edition, u.Role), userAgent, ip)
+	pair, err := s.issueSession(ctx, u, entitledEdition(), userAgent, ip)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (s *Service) VerifyMFA(ctx context.Context, mfaSession, code, userAgent, ip
 	if err := s.store.MarkTokenUsed(ctx, tok.Hash); err != nil {
 		return nil, ErrInvalidMFASession
 	}
-	return s.issueSession(ctx, u, editionForRole("", u.Role), userAgent, ip)
+	return s.issueSession(ctx, u, entitledEdition(), userAgent, ip)
 }
 
 // Refresh rotates a refresh session. Reuse of a consumed token revokes every
@@ -291,7 +291,7 @@ func (s *Service) Refresh(ctx context.Context, refreshToken, userAgent, ip strin
 		return nil, err
 	}
 
-	access, err := s.issuer.sign(u, editionForRole("", u.Role), now)
+	access, err := s.issuer.sign(u, entitledEdition(), now)
 	if err != nil {
 		return nil, err
 	}
@@ -379,15 +379,25 @@ func (s *Service) ChangePassword(ctx context.Context, userID, current, next stri
 		return err
 	}
 	u.PasswordHash = hash
-	return s.store.UpdateUser(ctx, u)
+	if err := s.store.UpdateUser(ctx, u); err != nil {
+		return err
+	}
+	return s.store.RevokeSessionsForUser(ctx, u.ID)
 }
 
-// SetupMFA generates a TOTP secret and provisioning URI. MFA is not enabled
-// until ConfirmMFA verifies the first code.
-func (s *Service) SetupMFA(ctx context.Context, userID string) (secret, uri string, err error) {
+// SetupMFA generates a TOTP secret and provisioning URI after verifying the
+// current password and, if MFA is already enabled, the current TOTP. MFA is not
+// enabled until ConfirmMFA verifies the first code.
+func (s *Service) SetupMFA(ctx context.Context, userID, password, currentCode string) (secret, uri string, err error) {
 	u, err := s.store.GetUserByID(ctx, userID)
 	if err != nil {
 		return "", "", ErrUserNotFound
+	}
+	if !CheckPassword(password, u.PasswordHash) {
+		return "", "", ErrInvalidCredentials
+	}
+	if u.MFAEnabled && !s.totpValid(u, currentCode) {
+		return "", "", ErrInvalidMFACode
 	}
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "RivicQ CryptoBOM",
@@ -399,13 +409,17 @@ func (s *Service) SetupMFA(ctx context.Context, userID string) (secret, uri stri
 		return "", "", err
 	}
 	u.MFASecret = key.Secret()
+	u.MFAEnabled = false
 	if err := s.store.UpdateUser(ctx, u); err != nil {
+		return "", "", err
+	}
+	if err := s.store.RevokeSessionsForUser(ctx, u.ID); err != nil {
 		return "", "", err
 	}
 	return key.Secret(), key.URL(), nil
 }
 
-// ConfirmMFA verifies the first TOTP code and enables MFA.
+// ConfirmMFA verifies the first TOTP code, enables MFA, and revokes other sessions.
 func (s *Service) ConfirmMFA(ctx context.Context, userID, code string) error {
 	u, err := s.store.GetUserByID(ctx, userID)
 	if err != nil {
@@ -415,11 +429,15 @@ func (s *Service) ConfirmMFA(ctx context.Context, userID, code string) error {
 		return ErrInvalidMFACode
 	}
 	u.MFAEnabled = true
-	return s.store.UpdateUser(ctx, u)
+	if err := s.store.UpdateUser(ctx, u); err != nil {
+		return err
+	}
+	return s.store.RevokeSessionsForUser(ctx, u.ID)
 }
 
-// DisableMFA clears MFA after verifying the account password.
-func (s *Service) DisableMFA(ctx context.Context, userID, password string) error {
+// DisableMFA clears MFA after verifying the current password and current TOTP
+// code when MFA is enabled, then revokes other sessions.
+func (s *Service) DisableMFA(ctx context.Context, userID, password, code string) error {
 	u, err := s.store.GetUserByID(ctx, userID)
 	if err != nil {
 		return ErrUserNotFound
@@ -427,9 +445,15 @@ func (s *Service) DisableMFA(ctx context.Context, userID, password string) error
 	if !CheckPassword(password, u.PasswordHash) {
 		return ErrInvalidCredentials
 	}
+	if u.MFAEnabled && !s.totpValid(u, code) {
+		return ErrInvalidMFACode
+	}
 	u.MFAEnabled = false
 	u.MFASecret = ""
-	return s.store.UpdateUser(ctx, u)
+	if err := s.store.UpdateUser(ctx, u); err != nil {
+		return err
+	}
+	return s.store.RevokeSessionsForUser(ctx, u.ID)
 }
 
 // DemoLogin issues a short session for the operator demo identity. It only
@@ -442,7 +466,7 @@ func (s *Service) DemoLogin(ctx context.Context, userAgent, ip string) (*TokenPa
 	if err != nil {
 		return nil, ErrDemoDisabled
 	}
-	return s.issueSession(ctx, u, EditionOSS, userAgent, ip)
+	return s.issueSession(ctx, u, entitledEdition(), userAgent, ip)
 }
 
 // ListSessions returns a user's sessions, newest first.
@@ -518,7 +542,8 @@ func (s *Service) IssueTokens(ctx context.Context, u *User, edition, userAgent, 
 	if u == nil {
 		return nil, ErrUserNotFound
 	}
-	return s.issueSession(ctx, u, editionForRole(edition, u.Role), userAgent, ip)
+	_ = edition
+	return s.issueSession(ctx, u, entitledEdition(), userAgent, ip)
 }
 
 // Authenticate validates an access token and returns its claims.
@@ -564,6 +589,8 @@ func (s *Service) ListUsersByTenant(ctx context.Context, tenantID string) ([]*Us
 // --- internals ---
 
 func (s *Service) issueSession(ctx context.Context, u *User, edition Edition, userAgent, ip string) (*TokenPair, error) {
+	_ = edition
+	edition = entitledEdition()
 	now := s.now().UTC()
 	raw, hash, err := newOpaqueToken()
 	if err != nil {

@@ -26,8 +26,7 @@ Commit `1fa0910` + Phase 2/6 test additions.
 5. **SQL scoping** — `internal/database/queries.go` carries `WHERE … tenant_id = $…`
    on every accessor (including aggregate metrics), and `mapRowError` returns
    `ErrForbidden` vs `ErrNotFound` to avoid cross-tenant existence probing.
-6. **Schema** — every data table declares `tenant_id UUID NOT NULL REFERENCES
-   tenants(id)` with tenant-scoped indexes.
+6. **Schema** — tenant-owned data is scoped by `tenant_id` columns and tenant predicates in application/database access paths. Identifier types and FK shapes vary by table and migration generation (see `docs/DATA_MODEL.md` and `internal/database/migrations.go`); do not assume every table uses UUID tenant IDs. Tenant-scoped indexes exist where required for access patterns.
 
 ## Tests (all passing)
 

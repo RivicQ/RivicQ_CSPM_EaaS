@@ -1,6 +1,6 @@
 import { handleRoute, ok } from "@/lib/api";
+import { requireAdminApiAccess } from "@/lib/admin-data";
 import { writeAuditLog } from "@/lib/audit";
-import { requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { productSchema } from "@/lib/validation";
 
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   return handleRoute(async () => {
-    const actor = await requireStaff();
+    const actor = await requireAdminApiAccess("products");
     const products = await prisma.product.findMany({
       include: { prices: true },
       orderBy: { code: "asc" },
@@ -20,7 +20,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   return handleRoute(async () => {
-    const actor = await requireStaff(["SUPER_ADMIN", "FOUNDER", "SALES_ADMIN"]);
+    const actor = await requireAdminApiAccess("products");
     const body = productSchema.parse(await request.json());
     const product = await prisma.product.create({
       data: {
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   return handleRoute(async () => {
-    const actor = await requireStaff(["SUPER_ADMIN", "FOUNDER", "SALES_ADMIN"]);
+    const actor = await requireAdminApiAccess("products");
     const body = (await request.json()) as { id: string; active?: boolean; name?: string; description?: string };
     if (!body.id) throw new Error("Product id is required");
     const product = await prisma.product.update({

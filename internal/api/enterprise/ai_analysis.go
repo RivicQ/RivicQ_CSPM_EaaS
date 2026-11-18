@@ -160,7 +160,7 @@ func analyzeAsset(ctx context.Context, db *database.DB, tenantID string, req aiA
 			GeneratedAt: time.Now().UTC(),
 			Source:      "rivicq-ai",
 			Scope:       "asset",
-			Summary:     "Asset intelligence is unavailable in demo mode. Connect the enterprise database.",
+			Summary:     "Asset intelligence is unavailable. Connect a configured enterprise database and verified inventory.",
 			Severity:    "info",
 		}, nil
 	}

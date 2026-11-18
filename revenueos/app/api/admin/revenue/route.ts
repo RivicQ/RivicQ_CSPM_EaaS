@@ -1,5 +1,5 @@
 import { handleRoute, ok } from "@/lib/api";
-import { requireStaff } from "@/lib/auth";
+import { requireAdminApiAccess } from "@/lib/admin-data";
 import { prisma } from "@/lib/db";
 import { asRevenueInterval, firstTenCustomerPlan, projectFinancials, summarizeRevenue } from "@/lib/revenue";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   return handleRoute(async () => {
-    await requireStaff(["SUPER_ADMIN", "FOUNDER", "FINANCE_ADMIN"]);
+    await requireAdminApiAccess("revenue");
     const records = await prisma.revenueRecord.findMany({
       orderBy: { periodStart: "desc" },
       take: 5000,

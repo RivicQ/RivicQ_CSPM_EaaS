@@ -1,9 +1,14 @@
 export type StripeMode = "test" | "live";
 
 const STAFF_ROLES = ["SUPER_ADMIN", "FOUNDER", "FINANCE_ADMIN", "SALES_ADMIN", "SALES_USER"] as const;
+const INSECURE_JWT_SECRET = "revenueos-local-development-secret-not-for-production";
 
 export function isProduction() {
   return process.env.NODE_ENV === "production";
+}
+
+export function isDeployedEnvironment() {
+  return isProduction() || process.env.DEPLOYED === "true";
 }
 
 export function getStripeMode(): StripeMode {
@@ -17,10 +22,20 @@ export function getAppUrl() {
 export function getSessionSecret() {
   const secret = process.env.JWT_SECRET;
   if (secret && secret.length >= 32) return secret;
-  if (isProduction()) {
-    throw new Error("JWT_SECRET must be at least 32 characters in production");
+  if (isDeployedEnvironment()) {
+    throw new Error("JWT_SECRET must be at least 32 characters in deployed environments");
   }
-  return "revenueos-local-development-secret-not-for-production";
+  return INSECURE_JWT_SECRET;
+}
+
+export function assertSecureRuntimeConfig() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("JWT_SECRET must be at least 32 characters in deployed environments");
+  }
+  if (secret === INSECURE_JWT_SECRET) {
+    throw new Error("JWT_SECRET must not use the development fallback in deployed environments");
+  }
 }
 
 export function getStripeSecretKey() {

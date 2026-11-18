@@ -1,5 +1,5 @@
 import { handleRoute, HttpError, ok } from "@/lib/api";
-import { requireStaff } from "@/lib/auth";
+import { requireAdminApiAccess } from "@/lib/admin-data";
 import { assertLiveModeAllowed, getAppUrl, getStripeMode } from "@/lib/env";
 import { isStripeConfigured } from "@/lib/stripe";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   return handleRoute(async () => {
-    await requireStaff(["SUPER_ADMIN", "FOUNDER", "FINANCE_ADMIN"]);
+    await requireAdminApiAccess("config");
     const mode = getStripeMode();
     let liveModeReady = false;
     try {
@@ -28,7 +28,7 @@ export async function GET() {
 
 export async function POST() {
   return handleRoute(async () => {
-    await requireStaff(["SUPER_ADMIN", "FOUNDER"]);
+    await requireAdminApiAccess("config");
     if (getStripeMode() !== "live") {
       throw new HttpError(409, "Application is in TEST MODE; live mode needs an environment change and deployment");
     }

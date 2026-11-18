@@ -11,8 +11,8 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 )
 
-// enterpriseDefaultTenant is used as a fallback when the request does not
-// carry a JWT/API-key tenant claim. The X-Tenant-ID header is ignored.
+// enterpriseDefaultTenant is retained for compatibility; tenant resolution is
+// aligned to the core/public tenant model via internal/tenant.
 const enterpriseDefaultTenant = "00000000-0000-0000-0000-000000000001"
 
 // quantumVulnerableAlgorithms maps well-known public-key / hash algorithms to
@@ -197,10 +197,10 @@ func analyzeThreats(ctx context.Context, db *database.DB, tenantID string) (*Thr
 
 	analysis := &ThreatAnalysis{
 		GeneratedAt: time.Now().UTC(),
-		Source:      "live",
+		Source:      "database",
 	}
 	if db == nil {
-		analysis.Source = "demo"
+		analysis.Source = "unconfigured"
 		return analysis, nil
 	}
 

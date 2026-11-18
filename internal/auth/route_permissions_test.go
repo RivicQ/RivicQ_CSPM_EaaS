@@ -190,3 +190,65 @@ func TestPermissionIsDerivedFromRoleNotToken(t *testing.T) {
 		}
 	}
 }
+
+
+func TestParameterizedRoutesUseFullPath(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	authz := func() gin.HandlerFunc {
+		return func(c *gin.Context) {
+			role := c.GetHeader("X-Test-Role")
+			if role == "" {
+				role = "viewer"
+			}
+			c.Set("role", NormalizeRole(role))
+			c.Set("permissions", PermissionsForRole(role))
+			c.Next()
+		}
+	}
+	r.DELETE(APIPrefix+"/inventory/assets/:id", authz(), RequireRoutePermission(), func(c *gin.Context) { c.Status(http.StatusOK) })
+	r.POST(APIPrefix+"/terraform/resources/scan", authz(), RequireRoutePermission(), func(c *gin.Context) { c.Status(http.StatusOK) })
+	r.DELETE(APIPrefix+"/auth/sessions/:id", authz(), RequireRoutePermission(), func(c *gin.Context) { c.Status(http.StatusOK) })
+	r.PATCH(APIPrefix+"/auth/workspace/users/:id/role", authz(), RequireRoutePermission(), func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	cases := []struct{
+		method, path, role string
+		want int
+	}{
+		{http.MethodDelete, APIPrefix+"/inventory/assets/abc-123", "viewer", http.StatusForbidden},
+		{http.MethodPost, APIPrefix+"/terraform/resources/scan", "viewer", http.StatusForbidden},
+		{http.MethodDelete, APIPrefix+"/auth/sessions/sess-1", "viewer", http.StatusOK},
+		{http.MethodPatch, APIPrefix+"/auth/workspace/users/u-2/role", "viewer", http.StatusForbidden},
+		{http.MethodPatch, APIPrefix+"/auth/workspace/users/u-2/role", "admin", http.StatusOK},
+	}
+	for _, tc := range cases {
+		req := httptest.NewRequest(tc.method, tc.path, nil)
+		req.Header.Set("X-Test-Role", tc.role)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != tc.want {
+			t.Errorf("%s %s as %s: got %d want %d", tc.method, tc.path, tc.role, w.Code, tc.want)
+		}
+	}
+}
+
+func TestMutatingEnterprisePrefixesMapped(t *testing.T) {
+	cases := []struct{ method, path string; perm Permission }{
+		{http.MethodPost, APIPrefix + "/inventory/assets", PermAssetsWrite},
+		{http.MethodDelete, APIPrefix + "/inventory/assets/1", PermAssetsWrite},
+		{http.MethodPost, APIPrefix + "/terraform/resources/scan", PermCloudManage},
+		{http.MethodPost, APIPrefix + "/quantum/attestations", PermPQCAttest},
+		{http.MethodPost, APIPrefix + "/cncf/tools", PermIntegrations},
+		{http.MethodPost, APIPrefix + "/ai/analyze", PermScansStart},
+		{http.MethodPost, APIPrefix + "/enterprise/ibm/hpcs/keys/k1/attest", PermCloudManage},
+		{http.MethodPost, APIPrefix + "/cspm/multicloud/cloud/accounts", PermComplianceWrite},
+		{http.MethodPost, APIPrefix + "/webhooks", PermWebhooksWrite},
+		{http.MethodPost, APIPrefix + "/analytics/insights", PermReportsWrite},
+	}
+	for _, tc := range cases {
+		perm, ok := RequiredPermission(tc.method, tc.path)
+		if !ok || perm != tc.perm {
+			t.Errorf("%s %s => (%v,%v), want (%v,true)", tc.method, tc.path, perm, ok, tc.perm)
+		}
+	}
+}

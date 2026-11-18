@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -12,8 +14,15 @@ import (
 // Handlers exposes the lifecycle over HTTP. It keeps the JSON contract used by
 // the web client (/auth/*), so the frontend does not need route changes.
 type Handlers struct {
-	svc    *Service
-	logger *logrus.Logger
+	svc         *Service
+	logger      *logrus.Logger
+	loginMu     sync.Mutex
+	loginByAcct map[string]*loginAttempt
+}
+
+type loginAttempt struct {
+	count    int
+	lastSeen time.Time
 }
 
 // NewHandlers builds the HTTP surface for a service.
@@ -21,7 +30,30 @@ func NewHandlers(svc *Service, logger *logrus.Logger) *Handlers {
 	if logger == nil {
 		logger = logrus.New()
 	}
-	return &Handlers{svc: svc, logger: logger}
+	return &Handlers{svc: svc, logger: logger, loginByAcct: make(map[string]*loginAttempt)}
+}
+
+func (h *Handlers) allowLoginAccount(email string) bool {
+	key := strings.ToLower(strings.TrimSpace(email))
+	if key == "" {
+		return true
+	}
+	now := time.Now()
+	window := time.Minute
+	limit := 10
+	h.loginMu.Lock()
+	defer h.loginMu.Unlock()
+	v, ok := h.loginByAcct[key]
+	if !ok || now.Sub(v.lastSeen) > window {
+		h.loginByAcct[key] = &loginAttempt{count: 1, lastSeen: now}
+		return true
+	}
+	v.lastSeen = now
+	if v.count >= limit {
+		return false
+	}
+	v.count++
+	return true
 }
 
 // Service returns the underlying lifecycle service.
@@ -87,6 +119,10 @@ func (h *Handlers) Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
+	if !h.allowLoginAccount(req.Email) {
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many login attempts. Try again later."})
+		return
+	}
 	res, err := h.svc.Login(c.Request.Context(), req.Email, req.Password, req.Edition, c.Request.UserAgent(), c.ClientIP())
 	if err != nil {
 		h.logger.WithError(err).WithField("email", req.Email).Warn("authentication failed")
@@ -106,7 +142,7 @@ func (h *Handlers) Login(c *gin.Context) {
 		"refresh_token": res.RefreshToken,
 		"expires_in":    res.ExpiresIn,
 		"user":          toUserResponse(res.User),
-		"edition":       string(editionForRole(req.Edition, res.User.Role)),
+		"edition":       string(entitledEdition()),
 	})
 }
 
@@ -161,7 +197,7 @@ func (h *Handlers) Register(c *gin.Context) {
 		"refresh_token": res.RefreshToken,
 		"expires_in":    res.ExpiresIn,
 		"user":          toUserResponse(res.User),
-		"edition":       string(editionForRole(req.Edition, user.Role)),
+		"edition":       string(entitledEdition()),
 	})
 }
 
@@ -237,7 +273,7 @@ func (h *Handlers) Me(c *gin.Context) {
 		"name":         u.Name,
 		"organisation": u.Organisation,
 		"role":         string(u.Role),
-		"edition":      c.GetString(ctxEdition),
+		"edition":      string(entitledEdition()),
 		"mfa_enabled":  u.MFAEnabled,
 		"permissions":  c.GetStringSlice(ctxPermissions),
 	})
@@ -280,18 +316,13 @@ func (h *Handlers) ForgotPassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Email is required"})
 		return
 	}
-	token, found, err := h.svc.ForgotPassword(c.Request.Context(), req.Email)
+	_, _, err := h.svc.ForgotPassword(c.Request.Context(), req.Email)
 	if err != nil {
 		h.logger.WithError(err).Warn("password reset issue failed")
 	}
-	resp := gin.H{
-		"message": "If an account exists for that email, a reset link was issued. This product does not send mailbox mail; use the reset page with a token from your operator, or demo mode.",
-	}
-	if h.svc.DemoEnabled() && found && token != "" {
-		resp["demo_mode"] = true
-		resp["reset_token"] = token
-	}
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "If an account exists for that email, a reset link has been issued.",
+	})
 }
 
 // ResetPassword handles POST /auth/reset-password.
@@ -357,10 +388,23 @@ func (h *Handlers) MFAVerify(c *gin.Context) {
 
 // MFASetup handles POST /auth/mfa/setup.
 func (h *Handlers) MFASetup(c *gin.Context) {
-	secret, uri, err := h.svc.SetupMFA(c.Request.Context(), CurrentUserID(c))
+	var req struct {
+		Password string `json:"password"`
+		Code     string `json:"code"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+	secret, uri, err := h.svc.SetupMFA(c.Request.Context(), CurrentUserID(c), req.Password, req.Code)
 	if err != nil {
-		h.logger.WithError(err).Error("MFA setup failed")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate MFA secret"})
+		switch {
+		case errors.Is(err, ErrInvalidCredentials), errors.Is(err, ErrInvalidMFACode):
+			c.JSON(statusForError(err), gin.H{"error": messageForError(err)})
+		default:
+			h.logger.WithError(err).Error("MFA setup failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate MFA secret"})
+		}
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -393,12 +437,11 @@ func (h *Handlers) MFADisable(c *gin.Context) {
 		Password string `json:"password"`
 		Code     string `json:"code"`
 	}
-	_ = c.ShouldBindJSON(&req)
-	password := req.Password
-	if password == "" {
-		password = req.Code
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
 	}
-	if err := h.svc.DisableMFA(c.Request.Context(), CurrentUserID(c), password); err != nil {
+	if err := h.svc.DisableMFA(c.Request.Context(), CurrentUserID(c), req.Password, req.Code); err != nil {
 		c.JSON(statusForError(err), gin.H{"error": messageForError(err)})
 		return
 	}
@@ -456,7 +499,7 @@ func (h *Handlers) Demo(c *gin.Context) {
 		"refresh_token": pair.RefreshToken,
 		"expires_in":    pair.ExpiresIn,
 		"user":          toUserResponse(pair.User),
-		"edition":       string(EditionOSS),
+		"edition":       string(entitledEdition()),
 		"demo_mode":     true,
 	})
 }

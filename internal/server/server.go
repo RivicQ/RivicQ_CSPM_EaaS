@@ -187,11 +187,11 @@ func (s *Server) Start() {
 // It is separate from Start so an operator or a test can build the full route
 // table without opening a listener.
 func (s *Server) RegisterRoutes() {
-	s.registerHealthRoutes()
+	s.RegisterHealthRoutes()
 	s.registerAPIRoutes()
 }
 
-// registerHealthRoutes exposes liveness and readiness separately.
+// RegisterHealthRoutes exposes liveness and readiness separately.
 //
 // /healthz reports that the process is running and never fails on a dependency,
 // so a database blip does not trigger a restart loop.
@@ -199,7 +199,7 @@ func (s *Server) RegisterRoutes() {
 // /readyz reports whether the instance should receive traffic. It returns 503
 // when the database is unreachable, and 503 in demo mode: fabricated in-memory
 // data must never be routed to by a load balancer.
-func (s *Server) registerHealthRoutes() {
+func (s *Server) RegisterHealthRoutes() {
 	s.Engine.GET("/healthz", func(c *gin.Context) {
 		dbStatus := "disconnected"
 		if s.DB != nil && s.DB.DB != nil {
@@ -256,10 +256,15 @@ func (s *Server) registerAPIRoutes() {
 	apiGroup := s.Engine.Group("/api/v1")
 
 	if s.Edition == edition.Enterprise {
+		// Fail closed: enterprise runtime requires a valid signed, unexpired license.
+		if _, err := enterprise.RequireValidLicense(); err != nil {
+			s.Logger.WithError(err).Fatal("Enterprise license validation failed (fail-closed)")
+		}
 		cfg, err := config.LoadEnterprise()
 		if err != nil {
 			s.Logger.Fatal("Failed to load Enterprise configuration:", err)
 		}
+		apiGroup.Use(enterprise.LicenseMiddleware())
 		enterprise.SetupRoutes(apiGroup, s.DB, s.Logger, cfg)
 	} else {
 		cfg, err := config.LoadOSS()

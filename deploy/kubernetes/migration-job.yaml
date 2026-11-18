@@ -1,0 +1,81 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cryptobom-enterprise-migrate
+  namespace: cryptobom-system
+  labels:
+    app: cryptobom-enterprise
+    edition: enterprise
+    component: migration
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: cryptobom-enterprise
+        edition: enterprise
+        component: migration
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: cryptobom-sa
+      securityContext:
+        fsGroup: 2000
+      containers:
+        - name: migrate
+          image: rivicq/cryptobom-enterprise:2.0.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              /app/cryptobom-server &
+              pid=$!
+              # Enterprise server runs fail-closed core/enterprise migrations on startup.
+              # Keep this job alive briefly to complete migrations, then stop cleanly.
+              sleep 20
+              if kill -0 "$pid" 2>/dev/null; then
+                kill -TERM "$pid" 2>/dev/null || true
+                wait "$pid" || true
+                exit 0
+              fi
+              wait "$pid"
+          envFrom:
+            - configMapRef:
+                name: cryptobom-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-secrets
+                  key: DATABASE_URL
+            - name: ENTERPRISE_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-secrets
+                  key: ENTERPRISE_DATABASE_URL
+                  optional: true
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-secrets
+                  key: JWT_SECRET
+            - name: CRYPTOBOM_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-secrets
+                  key: CRYPTOBOM_LICENSE_KEY
+            - name: CRYPTOBOM_LICENSE_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-secrets
+                  key: CRYPTOBOM_LICENSE_SIGNING_KEY
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000

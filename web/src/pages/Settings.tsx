@@ -26,6 +26,7 @@ const Settings: React.FC = () => {
   const [mfaSecret, setMfaSecret] = React.useState('');
   const [mfaUri, setMfaUri] = React.useState('');
   const [mfaCode, setMfaCode] = React.useState('');
+  const [mfaPassword, setMfaPassword] = React.useState('');
   const [mfaMsg, setMfaMsg] = React.useState('');
   const [mfaErr, setMfaErr] = React.useState('');
 
@@ -71,11 +72,16 @@ const Settings: React.FC = () => {
       setMfaErr('MFA enrollment requires a live API session. Demo mode does not store TOTP secrets.');
       return;
     }
+    if (!mfaPassword) {
+      setMfaErr('Enter your current password to begin MFA enrollment.');
+      return;
+    }
     setBusy(true);
     try {
-      const resp = await authService.mfaSetup();
+      const resp = await authService.mfaSetup({ password: mfaPassword, code: mfaCode.trim() || undefined });
       setMfaSecret(resp.data?.secret || '');
       setMfaUri(resp.data?.provisioning_uri || '');
+      setMfaCode('');
       setMfaMsg('Add the secret to your authenticator, then confirm with a 6-digit code.');
     } catch (err: any) {
       setMfaErr(err?.response?.data?.error || err?.message || 'Unable to start MFA setup');
@@ -93,6 +99,7 @@ const Settings: React.FC = () => {
       setMfaSecret('');
       setMfaUri('');
       setMfaCode('');
+      setMfaPassword('');
       setMfaMsg('MFA is enabled for this account.');
       await refreshMe();
     } catch (err: any) {
@@ -104,15 +111,20 @@ const Settings: React.FC = () => {
 
   const disableMfa = async () => {
     setMfaErr('');
+    if (!mfaPassword) {
+      setMfaErr('Enter your current password to disable MFA.');
+      return;
+    }
     if (!mfaCode.trim()) {
       setMfaErr('Enter a current authenticator code to disable MFA.');
       return;
     }
     setBusy(true);
     try {
-      await authService.mfaDisable(mfaCode.trim());
+      await authService.mfaDisable({ password: mfaPassword, code: mfaCode.trim() });
       setMfaEnabled(false);
       setMfaCode('');
+      setMfaPassword('');
       setMfaMsg('MFA is disabled.');
       await refreshMe();
     } catch (err: any) {
@@ -209,9 +221,19 @@ const Settings: React.FC = () => {
               {mfaMsg && <Alert severity="success">{mfaMsg}</Alert>}
               <Chip label={mfaEnabled ? 'MFA enabled' : 'MFA off'} color={mfaEnabled ? 'success' : 'default'} size="small" sx={{ alignSelf: 'flex-start' }} />
               {!mfaEnabled && !mfaSecret && (
-                <Button variant="contained" disabled={busy} onClick={startMfa} sx={{ alignSelf: 'flex-start' }}>
-                  Enroll authenticator
-                </Button>
+                <Stack spacing={1}>
+                  <TextField
+                    size="small"
+                    type="password"
+                    label="Current password"
+                    value={mfaPassword}
+                    onChange={(e) => setMfaPassword(e.target.value)}
+                    autoComplete="current-password"
+                  />
+                  <Button variant="contained" disabled={busy || !mfaPassword} onClick={startMfa} sx={{ alignSelf: 'flex-start' }}>
+                    Enroll authenticator
+                  </Button>
+                </Stack>
               )}
               {mfaSecret && (
                 <Stack spacing={1}>
@@ -231,8 +253,16 @@ const Settings: React.FC = () => {
               )}
               {mfaEnabled && (
                 <Stack spacing={1}>
-                  <TextField size="small" label="Authenticator code to disable" value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} inputProps={{ maxLength: 6 }} />
-                  <Button color="warning" variant="outlined" disabled={busy} onClick={disableMfa} sx={{ alignSelf: 'flex-start' }}>
+                  <TextField
+                    size="small"
+                    type="password"
+                    label="Current password"
+                    value={mfaPassword}
+                    onChange={(e) => setMfaPassword(e.target.value)}
+                    autoComplete="current-password"
+                  />
+                  <TextField size="small" label="Current authenticator code" value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} inputProps={{ maxLength: 6 }} />
+                  <Button color="warning" variant="outlined" disabled={busy || !mfaPassword || mfaCode.trim().length < 6} onClick={disableMfa} sx={{ alignSelf: 'flex-start' }}>
                     Disable MFA
                   </Button>
                 </Stack>

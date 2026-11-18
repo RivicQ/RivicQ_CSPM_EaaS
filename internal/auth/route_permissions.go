@@ -47,7 +47,7 @@ var resourcePermissionTable = map[string]resourcePermissions{
 	"governance":   {read: PermComplianceRead, write: PermComplianceWrite},
 	"controls":     {read: PermComplianceRead, write: PermComplianceWrite},
 	"users":        {read: PermUsersRead, write: PermUsersManage},
-	"audit":        {read: PermAuditRead, write: ""},
+	"audit":        {read: PermAuditRead, write: PermAuditRead},
 	"apikeys":      {read: PermAPIKeysRead, write: PermAPIKeysWrite},
 	"api-keys":     {read: PermAPIKeysRead, write: PermAPIKeysWrite},
 	"webhooks":     {read: PermWebhooksRead, write: PermWebhooksWrite},
@@ -76,12 +76,25 @@ var resourcePermissionTable = map[string]resourcePermissions{
 	"cilium":       {read: PermComplianceRead, write: PermComplianceWrite},
 	"security":     {read: PermFindingsRead, write: PermFindingsWrite},
 	"kubernetes":   {read: PermCloudRead, write: PermCloudManage},
-	"monitoring":   {read: "", write: PermIntegrations},
+	"monitoring":   {read: PermCloudRead, write: PermIntegrations},
 	// Firmware and identity static analysis reuse the scan/read permissions:
 	// reading profiles is CBOM metadata, and triggering an analysis is the same
 	// capability as starting a scan (starts work, changes no stored state).
 	"firmware": {read: PermCBOMRead, write: PermScansStart},
 	"identity": {read: PermCBOMRead, write: PermScansStart},
+
+	// Enterprise mutating prefixes.
+	"inventory":  {read: PermAssetsRead, write: PermAssetsWrite},
+	"terraform":  {read: PermCloudRead, write: PermCloudManage},
+	"quantum":    {read: PermPQCRead, write: PermPQCAttest},
+	"cncf":       {read: PermCloudRead, write: PermIntegrations},
+	"ai":         {read: PermCBOMRead, write: PermScansStart},
+	"ibm":        {read: PermCloudRead, write: PermCloudManage},
+	"cspm":       {read: PermComplianceRead, write: PermComplianceWrite},
+	"enterprise": {read: PermCloudRead, write: PermCloudManage},
+	"dashboard":  {read: PermReportsRead, write: PermReportsWrite},
+	"eaas":       {read: PermCloudRead, write: PermCloudManage},
+	"tenancy":    {read: PermUsersRead, write: PermUsersManage},
 }
 
 // exactPathPermissions covers routes whose permission is not a function of
@@ -201,22 +214,27 @@ func IsMutatingMethod(method string) bool {
 // permission failure is a 403 rather than a 401.
 func RequireRoutePermission() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		method := c.Request.Method
+		path := c.Request.URL.Path
+		if fp := c.FullPath(); fp != "" {
+			path = fp
+		}
 		// Public routes are decided by the authentication allow-list. Applying
 		// the permission model here would 403 a login or a provider webhook,
 		// which has no session and therefore no permissions.
-		if IsPublicRoute(c.Request.Method, c.Request.URL.Path) {
+		if IsPublicRoute(method, c.Request.URL.Path) || IsPublicRoute(method, path) {
 			c.Next()
 			return
 		}
 
-		perm, governed := RequiredPermission(c.Request.Method, c.Request.URL.Path)
+		perm, governed := RequiredPermission(method, path)
 		if !governed {
-			if IsMutatingMethod(c.Request.Method) {
+			if IsMutatingMethod(method) {
 				// Fail closed on an unmapped mutation.
 				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 					"error":      "permission_not_defined",
 					"message":    "This operation is not covered by the permission model.",
-					"method":     c.Request.Method,
+					"method":     method,
 					"path":       c.Request.URL.Path,
 					"request_id": c.GetString("request_id"),
 				})

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rivic-q/cryptobom-saas/internal/auth"
 )
 
 // Gin context keys. These match the keys the authorization layer
@@ -19,7 +20,8 @@ const (
 )
 
 // Authenticate extracts and verifies the access token, populating the request
-// context. It aborts with 401 when the token is missing or invalid.
+// context from current user state. It aborts with 401 when missing, invalid, or
+// the account is disabled.
 func (s *Service) AuthenticateMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		raw := bearerToken(c.GetHeader("Authorization"))
@@ -35,12 +37,18 @@ func (s *Service) AuthenticateMiddleware() gin.HandlerFunc {
 			s.abortUnauthorized(c, "invalid or expired token")
 			return
 		}
-		c.Set(ctxUserID, claims.UserID)
-		c.Set(ctxTenantID, claims.TenantID)
-		c.Set(ctxEmail, normalizeEmail(claims.Email))
-		c.Set(ctxRole, string(normalizeRole(claims.Role)))
-		c.Set(ctxEdition, claims.Edition)
-		c.Set(ctxPermissions, claims.Permissions)
+		u, err := s.store.GetUserByID(c.Request.Context(), claims.UserID)
+		if err != nil || u == nil || u.Disabled {
+			s.abortUnauthorized(c, "invalid or expired token")
+			return
+		}
+		role := normalizeRole(string(u.Role))
+		c.Set(ctxUserID, u.ID)
+		c.Set(ctxTenantID, u.TenantID)
+		c.Set(ctxEmail, normalizeEmail(u.Email))
+		c.Set(ctxRole, string(role))
+		c.Set(ctxEdition, string(entitledEdition()))
+		c.Set(ctxPermissions, auth.PermissionsForRole(string(role)))
 		c.Next()
 	}
 }

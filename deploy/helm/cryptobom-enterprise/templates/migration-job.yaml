@@ -1,0 +1,85 @@
+{{- if .Values.enterprise.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cryptobom-enterprise.fullname" . }}-migrate
+  labels:
+    {{- include "cryptobom-enterprise.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migration
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.enterprise.migration.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "cryptobom-enterprise.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migration
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "cryptobom-enterprise.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          # Enterprise server performs fail-closed core/enterprise migrations on startup.
+          # Running the image as a migration gate verifies DB/schema readiness before rollout.
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              /app/cryptobom-server &
+              pid=$!
+              # Allow startup migrations to run; fail the job if the process exits non-zero.
+              sleep 20
+              if kill -0 "$pid" 2>/dev/null; then
+                kill -TERM "$pid" 2>/dev/null || true
+                wait "$pid" || true
+                exit 0
+              fi
+              wait "$pid"
+          envFrom:
+            - configMapRef:
+                name: {{ include "cryptobom-enterprise.fullname" . }}-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: DATABASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: JWT_SECRET
+            - name: CRYPTOBOM_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: CRYPTOBOM_LICENSE_KEY
+            - name: CRYPTOBOM_LICENSE_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: CRYPTOBOM_LICENSE_SIGNING_KEY
+            {{- $entdb := default .Values.enterprise.enterpriseDatabaseUrl .Values.secrets.enterpriseDatabaseUrl }}
+            {{- if or $entdb .Values.secrets.existingSecret }}
+            - name: ENTERPRISE_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cryptobom-enterprise.secretName" . }}
+                  key: ENTERPRISE_DATABASE_URL
+                  optional: true
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+{{- end }}

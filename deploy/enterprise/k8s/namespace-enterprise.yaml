@@ -4,5 +4,5 @@ metadata:
   name: cryptobom-enterprise
   labels:
     name: cryptobom-enterprise
+    app: cryptobom-enterprise
     edition: enterprise
-    ibmq-enabled: "true"

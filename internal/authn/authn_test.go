@@ -231,7 +231,7 @@ func TestMFAFlow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	secret, uri, err := svc.SetupMFA(ctx, user.ID)
+	secret, uri, err := svc.SetupMFA(ctx, user.ID, "Tr0ub4dor&3xZ!", "")
 	if err != nil {
 		t.Fatalf("SetupMFA: %v", err)
 	}
@@ -359,11 +359,18 @@ func TestChangePassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	sess, err := svc.Login(ctx, "hana@example.com", "Tr0ub4dor&3xZ!", "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := svc.ChangePassword(ctx, user.ID, "wrong", "Another&Strong1!"); err == nil {
 		t.Fatal("wrong current password must be rejected")
 	}
 	if err := svc.ChangePassword(ctx, user.ID, "Tr0ub4dor&3xZ!", "Another&Strong1!"); err != nil {
 		t.Fatalf("ChangePassword: %v", err)
+	}
+	if _, err := svc.Refresh(ctx, sess.RefreshToken, "", ""); !errors.Is(err, ErrInvalidToken) {
+		t.Fatalf("sessions should be revoked after password change, got %v", err)
 	}
 	if _, err := svc.Login(ctx, "hana@example.com", "Another&Strong1!", "", "", ""); err != nil {
 		t.Fatalf("login with changed password: %v", err)
@@ -389,5 +396,24 @@ func TestSessionRevocation(t *testing.T) {
 	}
 	if _, err := svc.Refresh(ctx, res.RefreshToken, "", ""); !errors.Is(err, ErrInvalidToken) {
 		t.Fatalf("revoked session must not refresh, got %v", err)
+	}
+}
+
+
+func TestDisableMFARequiresTOTP(t *testing.T) {
+	svc, _, _ := newTestService(t, nil)
+	ctx := context.Background()
+	user, _, err := svc.Register(ctx, "Mfa", "mfa@example.com", "Tr0ub4dor&3xZ!", "")
+	if err != nil { t.Fatal(err) }
+	secret, _, err := svc.SetupMFA(ctx, user.ID, "Tr0ub4dor&3xZ!", "")
+	if err != nil { t.Fatal(err) }
+	code, _ := totp.GenerateCode(secret, time.Now())
+	if err := svc.ConfirmMFA(ctx, user.ID, code); err != nil { t.Fatal(err) }
+	if err := svc.DisableMFA(ctx, user.ID, "Tr0ub4dor&3xZ!", "000000"); !errors.Is(err, ErrInvalidMFACode) {
+		t.Fatalf("expected ErrInvalidMFACode, got %v", err)
+	}
+	code, _ = totp.GenerateCode(secret, time.Now())
+	if err := svc.DisableMFA(ctx, user.ID, "Tr0ub4dor&3xZ!", code); err != nil {
+		t.Fatalf("DisableMFA: %v", err)
 	}
 }

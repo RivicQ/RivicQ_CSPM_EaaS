@@ -1,9 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AdminActionForm, PostButton } from "@/components/admin-actions";
 import { Card, DataTable, PageHeader } from "@/components/ui";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { assertLiveModeAllowed, getAppUrl, getStripeMode } from "@/lib/env";
+import { assertLiveModeAllowed, getAppUrl, getStripeMode, isStaffRole } from "@/lib/env";
 import { formatMoney } from "@/lib/money";
+import { canAccessAdminSection, firstAllowedAdminPath, isAdminSection, type AdminSection } from "@/lib/rbac";
 import { asRevenueInterval, summarizeRevenue } from "@/lib/revenue";
 import { isStripeConfigured } from "@/lib/stripe";
 
@@ -32,18 +34,20 @@ export default async function AdminSectionPage({
   params: Promise<{ section: string }>;
 }) {
   const { section } = await params;
-  const title = sectionTitles[section];
-  if (!title) notFound();
+  if (!isAdminSection(section) || !sectionTitles[section]) notFound();
+  const user = await getSession();
+  if (!user || !isStaffRole(user.role)) redirect("/login");
+  if (!canAccessAdminSection(user.role, section)) redirect(firstAllowedAdminPath(user.role));
 
   return (
     <main>
-      <PageHeader eyebrow="Revenue operations" title={title} />
-      {await renderSection(section)}
+      <PageHeader eyebrow="Revenue operations" title={sectionTitles[section]} />
+      {await renderSection(section as AdminSection)}
     </main>
   );
 }
 
-async function renderSection(section: string) {
+async function renderSection(section: AdminSection) {
   switch (section) {
     case "products": {
       const products = await prisma.product.findMany({

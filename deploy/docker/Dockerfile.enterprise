@@ -1,3 +1,5 @@
+# Canonical enterprise Dockerfile (enterprise build tag/target, fail-closed runtime contract).
+# Build from repo root: docker build -f deploy/docker/Dockerfile.enterprise .
 FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
@@ -6,22 +8,24 @@ RUN go mod download
 
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build \
-    -ldflags "-X main.version=latest -X main.edition=enterprise" \
+    -ldflags "-X main.version=2.0.0 -X main.edition=enterprise" \
     -tags enterprise \
-    -o /app/cryptobom-enterprise \
-    ./cmd/server/enterprise/main.go
+    -o /app/cryptobom-server \
+    ./cmd/server/enterprise
 
-FROM alpine:3.18
+FROM alpine:3.20
 
-RUN apk --no-cache add ca-certificates tzdata curl
+RUN apk --no-cache add ca-certificates tzdata wget
 
 WORKDIR /app
+RUN addgroup -S cryptobom && adduser -S -G cryptobom -u 1000 cryptobom
+COPY --from=builder /app/cryptobom-server /app/cryptobom-server
 
-COPY --from=builder /app/cryptobom-enterprise /app/cryptobom-server
-
+USER 1000:2000
 EXPOSE 9090
+ENV CRYPTOBOM_EDITION=enterprise CRYPTOBOM_PORT=9090 PORT=9090
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-    CMD wget -qO- http://localhost:9090/healthz || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget -qO- http://localhost:9090/healthz >/dev/null || exit 1
 
 CMD ["/app/cryptobom-server"]

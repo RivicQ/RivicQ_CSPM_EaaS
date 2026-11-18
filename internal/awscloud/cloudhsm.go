@@ -5,8 +5,6 @@ package awscloud
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -116,13 +114,12 @@ func (c *CloudHSMClient) Configured() bool {
 }
 
 // GetClusterStatus returns the status of the CloudHSM cluster.
+// Returns an error when CloudHSM is not configured or real status is unavailable.
 func (c *CloudHSMClient) GetClusterStatus() (*ClusterStatus, error) {
-	if c.ClusterID != "" {
-		if status, err := c.fetchRealClusterStatus(); err == nil {
-			return status, nil
-		}
+	if c == nil || !c.Configured() || c.ClusterID == "" {
+		return nil, fmt.Errorf("cloudhsm not configured")
 	}
-	return c.demoClusterStatus(), nil
+	return c.fetchRealClusterStatus()
 }
 
 func (c *CloudHSMClient) fetchRealClusterStatus() (*ClusterStatus, error) {
@@ -154,24 +151,13 @@ func (c *CloudHSMClient) fetchRealClusterStatus() (*ClusterStatus, error) {
 	}, nil
 }
 
-func (c *CloudHSMClient) demoClusterStatus() *ClusterStatus {
-	return &ClusterStatus{
-		ClusterID:   c.ClusterID,
-		Region:      c.Region,
-		State:       "ACTIVE",
-		HSMCount:    2,
-		FIPSLevel:   3,
-		VpcID:       "vpc-0a1b2c3d4e5f",
-		LastChecked: time.Now().UTC(),
-	}
-}
-
 // ListKMSKeys returns KMS keys including CloudHSM-backed keys.
+// Returns an error when KMS is not configured or keys are unavailable.
 func (c *CloudHSMClient) ListKMSKeys() ([]KMSKey, error) {
-	if keys, err := c.fetchRealKMSKeys(); err == nil {
-		return keys, nil
+	if c == nil || !c.Configured() {
+		return nil, fmt.Errorf("kms not configured")
 	}
-	return c.demoKMSKeys(), nil
+	return c.fetchRealKMSKeys()
 }
 
 func (c *CloudHSMClient) fetchRealKMSKeys() ([]KMSKey, error) {
@@ -243,44 +229,13 @@ func (c *CloudHSMClient) describeKMSKey(keyID string) KMSKey {
 	}
 }
 
-func (c *CloudHSMClient) demoKMSKeys() []KMSKey {
-	now := time.Now().UTC()
-	rotation := now.Add(90 * 24 * time.Hour)
-	return []KMSKey{
-		{
-			KeyID:       "arn:aws:kms:" + c.Region + ":123456789012:key/mrk-abc123",
-			Alias:       "alias/cryptobom-master",
-			Description: "CryptoBOM master encryption key (CloudHSM-backed)",
-			KeyUsage:    "ENCRYPT_DECRYPT",
-			KeySpec:     "SYMMETRIC_DEFAULT",
-			State:       "Enabled",
-			Origin:      "AWS_CLOUDHSM",
-			CreatedAt:   now.Add(-120 * 24 * time.Hour),
-			RotatesAt:   &rotation,
-			HSMBacked:   true,
-			MultiRegion: true,
-		},
-		{
-			KeyID:       "arn:aws:kms:" + c.Region + ":123456789012:key/key-def456",
-			Alias:       "alias/cryptobom-signing",
-			Description: "CryptoBOM RSA signing key",
-			KeyUsage:    "SIGN_VERIFY",
-			KeySpec:     "RSA_4096",
-			State:       "Enabled",
-			Origin:      "AWS_KMS",
-			CreatedAt:   now.Add(-60 * 24 * time.Hour),
-			HSMBacked:   false,
-			MultiRegion: false,
-		},
-	}
-}
-
 // GetCryptoAuditEvents retrieves CloudTrail crypto events since the given time.
+// Returns an error when CloudTrail is not configured or events are unavailable.
 func (c *CloudHSMClient) GetCryptoAuditEvents(since time.Time) ([]AuditEvent, error) {
-	if events, err := c.fetchRealAuditEvents(since); err == nil {
-		return events, nil
+	if c == nil || !c.Configured() {
+		return nil, fmt.Errorf("cloudtrail not configured")
 	}
-	return c.demoAuditEvents(since), nil
+	return c.fetchRealAuditEvents(since)
 }
 
 func (c *CloudHSMClient) fetchRealAuditEvents(since time.Time) ([]AuditEvent, error) {
@@ -323,44 +278,4 @@ func (c *CloudHSMClient) fetchRealAuditEvents(since time.Time) ([]AuditEvent, er
 		})
 	}
 	return events, nil
-}
-
-func (c *CloudHSMClient) demoAuditEvents(since time.Time) []AuditEvent {
-	idBytes := make([]byte, 8)
-	rand.Read(idBytes) //nolint:errcheck // non-critical stub randomness
-
-	now := time.Now().UTC()
-	events := []AuditEvent{
-		{
-			EventID:     hex.EncodeToString(idBytes),
-			EventName:   "Decrypt",
-			EventSource: "kms.amazonaws.com",
-			UserARN:     "arn:aws:iam::123456789012:role/cryptobom-api",
-			KeyID:       "arn:aws:kms:" + c.Region + ":123456789012:key/mrk-abc123",
-			Region:      c.Region,
-			SourceIP:    "10.0.1.42",
-			Timestamp:   now.Add(-5 * time.Minute),
-			Success:     true,
-		},
-		{
-			EventID:     "audit-" + hex.EncodeToString(idBytes[:4]),
-			EventName:   "GenerateDataKey",
-			EventSource: "kms.amazonaws.com",
-			UserARN:     "arn:aws:iam::123456789012:role/cryptobom-api",
-			KeyID:       "arn:aws:kms:" + c.Region + ":123456789012:key/mrk-abc123",
-			Region:      c.Region,
-			SourceIP:    "10.0.1.42",
-			Timestamp:   now.Add(-1 * time.Hour),
-			Success:     true,
-		},
-	}
-
-	// Filter by since timestamp
-	var filtered []AuditEvent
-	for _, e := range events {
-		if e.Timestamp.After(since) {
-			filtered = append(filtered, e)
-		}
-	}
-	return filtered
 }

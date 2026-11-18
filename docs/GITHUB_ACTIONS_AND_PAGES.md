@@ -6,10 +6,10 @@ This repository ships 23 workflow files under `.github/workflows/` and publishes
 
 | Workflow | Purpose | Primary trigger |
 |---|---|---|
-| `ci.yml` | Backend build + tests on main/develop | push/PR to main, develop |
-| `ci-oss.yml` | Lint (golangci), OSS unit tests + race, OSS build, demo smoke, OSS image | push/PR master/main |
-| `ci-enterprise.yml` | Enterprise unit tests, build, smoke (mock IBMQ) | push/PR master/main |
-| `ci-cd.yml` | Full pipeline: CodeQL, security-scan, oss-gate, build+test, integration (Postgres), production-readiness, perf gate, container+SBOM+Trivy, deployments | push/PR main/master/develop, manual (`workflow_dispatch`) |
+| `ci.yml` | Backend/frontend/RevenueOS checks and dataset validation | push/PR to main, develop |
+| `ci-oss.yml` | OSS lint/test/build, optional demo smoke, container image build | push/PR master/main, manual |
+| `ci-enterprise.yml` | Enterprise-tagged tests, enterprise build/smoke, conditional enterprise Helm lint | push/PR master/main, manual |
+| `ci-cd.yml` | Broader CI/CD pipeline with analysis, build/test, validation, container, and environment-gated deploy jobs | push/PR main/master/develop, manual (`workflow_dispatch`) |
 | `codeql.yml` | CodeQL weekly + manual on actions/go/javascript-typescript/python, `build-mode: none`, uploads disabled (Default CodeQL takes over) | schedule weekly, workflow_dispatch, PR |
 | `snyk-security.yml` | Snyk Open Source/Code/IaC/Container SARIF upload when `SNYK_TOKEN` set | push/PR main |
 | `dast-scan.yml` | OWASP ZAP baseline DAST against staging | schedule daily, manual |
@@ -35,14 +35,13 @@ Repo-local composite action: `.github/actions/rivicq-scan/action.yml` wraps `cmd
 
 ## 3. Pages pipeline (`pages.yml`)
 
-Steps in order:
+Steps in order (as configured):
 
-1. On push to `main`/`master` or `workflow_dispatch`.
-2. Define build matrix/inputs (edition `community`, base path, API URL from secret `REACT_APP_API_URL`, Supabase publishable config). `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_PUBLISHABLE_KEY` are inlined as **non-secret publishable client config** — they are public keys/project URLs by design, never the service-role key.
-3. `actions/setup-node` + `npm ci` + `CI=true npm run build` (`web/`), producing a static `web/build` (React SPA, Community edition).
-4. Build ReDoc site from `docs/openapi.yaml` into `web/build/docs/` (SPA redirect `404.html` fallback).
-5. Copy deployable artifacts into `web/build`: `fabric/dist` -> `web/build/fabric`, `archify/site` (+ `archify/diagrams`) -> `web/build/archify`, `marketing/` assets, `docs/` content.
-6. `peaceiris/actions-gh-pages` force-orphan publishes `web/build` to the `gh-pages` branch (keeps commit history clean; Pages serves the site).
+1. Trigger on push to `main`/`master` (or as configured in `pages.yml`) and `workflow_dispatch`.
+2. Set build-time environment values (edition, optional API URL, publishable Supabase client config if provided). Publishable Supabase values are client-side configuration, not service-role secrets.
+3. Run `scripts/build-pages.sh` to produce the composite static site in `web/build/` (React app, API docs, Graph, docs/marketing/archify/media assets, host config).
+4. Run `scripts/verify-pages-build.sh` to fail closed on incomplete or unsafe output.
+5. Publish `web/build/` to the `gh-pages` branch via the configured deploy action.
 
 What Pages does **not** do: it hosts no backend, no database, no scan execution. Every visible scan on the public site is the labeled synthetic demo (`fabric/`, `web/src/demo/`), or a client-side preview of data the operator passes to their own Community backend. The static site itself cannot be a source of secrets by construction — the Requests tab can inspect the empty network surface.
 

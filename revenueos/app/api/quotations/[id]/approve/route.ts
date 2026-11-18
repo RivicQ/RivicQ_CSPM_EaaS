@@ -1,40 +1,35 @@
 import { handleRoute, HttpError, ok } from "@/lib/api";
+import { requireAdminApiAccess } from "@/lib/admin-data";
 import { writeAuditLog } from "@/lib/audit";
-import { requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { isQuotationStatus, quotationUpdateData } from "@/lib/quotation-workflow";
 
 export const dynamic = "force-dynamic";
 
-const allowedStatuses = [
-  "DRAFT",
-  "INTERNAL_REVIEW",
-  "APPROVED",
-  "SENT",
-  "VIEWED",
-  "ACCEPTED",
-  "REJECTED",
-  "EXPIRED",
-  "CONVERTED_TO_INVOICE",
-];
-
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   return handleRoute(async () => {
-    const actor = await requireStaff(["SUPER_ADMIN", "FOUNDER", "SALES_ADMIN", "FINANCE_ADMIN"]);
+    const actor = await requireAdminApiAccess("quotations-status");
     const { id } = await params;
-    const body = (await request.json()) as { status: string };
-    if (!allowedStatuses.includes(body.status)) throw new HttpError(400, "Invalid quotation status");
+    const body = (await request.json()) as { status?: string };
+    if (typeof body.status !== "string" || !isQuotationStatus(body.status)) {
+      throw new HttpError(400, "Invalid quotation status");
+    }
 
     const existing = await prisma.quotation.findUnique({ where: { id } });
     if (!existing) throw new HttpError(404, "Quotation not found");
 
+    const data = quotationUpdateData({
+      from: existing.status,
+      to: body.status,
+      actorId: actor.id,
+      existingApprovedAt: existing.approvedAt,
+      existingApprovedById: existing.approvedById,
+      existingAcceptedAt: existing.acceptedAt,
+    });
+
     const quotation = await prisma.quotation.update({
       where: { id },
-      data: {
-        status: body.status as never,
-        approvedAt: body.status === "APPROVED" ? new Date() : existing.approvedAt,
-        approvedById: body.status === "APPROVED" ? actor.id : existing.approvedById,
-        acceptedAt: body.status === "ACCEPTED" ? new Date() : existing.acceptedAt,
-      },
+      data,
     });
 
     await writeAuditLog({
@@ -44,6 +39,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       entityType: "Quotation",
       entityId: id,
       metadata: { from: existing.status, to: quotation.status },
+      ip: null,
     });
     return ok({ quotation });
   });

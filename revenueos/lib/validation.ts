@@ -1,8 +1,10 @@
 import { z } from "zod";
 
+const passwordSchema = z.string().min(12).max(72);
+
 export const loginSchema = z.object({
   email: z.email(),
-  password: z.string().min(8),
+  password: passwordSchema,
 });
 
 export const registerSchema = loginSchema.extend({

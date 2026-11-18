@@ -2,14 +2,13 @@ package shared
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/authn"
@@ -29,10 +28,7 @@ type GoogleUser struct {
 	HD            string `json:"hd"`
 }
 
-var (
-	googleOAuthConfig *oauth2.Config
-	oauthStateMap     = make(map[string]string) // state -> edition
-)
+var googleOAuthConfig *oauth2.Config
 
 func resolveGoogleOAuthRedirectURL() string {
 	if redirectURL := strings.TrimSpace(os.Getenv("GOOGLE_OAUTH_REDIRECT_URL")); redirectURL != "" {
@@ -72,14 +68,6 @@ func initGoogleOAuthConfig() *oauth2.Config {
 	return googleOAuthConfig
 }
 
-func generateOAuthState() string {
-	b := make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
-		return "oauth-state-fallback"
-	}
-	return hex.EncodeToString(b)
-}
-
 func GoogleLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		config := initGoogleOAuthConfig()
@@ -90,11 +78,11 @@ func GoogleLoginHandler(logger *logrus.Logger) gin.HandlerFunc {
 			})
 			return
 		}
-
-		state := generateOAuthState()
-		edition := normalizeAuthEdition(c.DefaultQuery("edition", "oss"))
-		oauthStateMap[state] = edition
-
+		state, err := defaultOAuthStore.createState(time.Now().UTC())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize OAuth state"})
+			return
+		}
 		redirectURL := config.AuthCodeURL(
 			state,
 			oauth2.AccessTypeOffline,
@@ -115,6 +103,10 @@ func GoogleCallbackHandler(logger *logrus.Logger, service *authn.Service, allowe
 			c.JSON(http.StatusBadGateway, gin.H{"error": "Google OAuth not configured"})
 			return
 		}
+		if c.Request.Method == http.MethodPost {
+			googleExchangeResponse(c, c.Request.Context(), logger, service, allowedDomains)
+			return
+		}
 
 		if oauthErr := c.Query("error"); oauthErr != "" {
 			params := url.Values{}
@@ -126,67 +118,60 @@ func GoogleCallbackHandler(logger *logrus.Logger, service *authn.Service, allowe
 			return
 		}
 
-		state := c.Query("state")
-		code := c.Query("code")
-
+		state := strings.TrimSpace(c.Query("state"))
+		code := strings.TrimSpace(c.Query("code"))
 		if state == "" || code == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing state or code"})
 			return
 		}
-
-		result, err := completeGoogleOAuth(logger, service, allowedDomains, config, code, state)
-		if err != nil {
-			status := http.StatusInternalServerError
-			switch err.Error() {
-			case "invalid state parameter":
-				status = http.StatusForbidden
-			case "Google email not verified", "Email domain not allowed":
-				status = http.StatusForbidden
-			}
-			c.JSON(status, gin.H{"error": err.Error()})
+		if err := defaultOAuthStore.consumeState(state, time.Now().UTC()); err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid state parameter"})
 			return
 		}
 
+		result, err := completeGoogleOAuth(c.Request.Context(), logger, service, allowedDomains, config, code)
+		if err != nil {
+			status := http.StatusInternalServerError
+			msg := "OAuth completion failed"
+			switch err.Error() {
+			case "google email not verified", "email domain not allowed":
+				status = http.StatusForbidden
+				msg = err.Error()
+			case "token exchange failed", "failed to get user info", "failed to parse user info", "failed to create user", "failed to generate token":
+				msg = err.Error()
+			}
+			c.JSON(status, gin.H{"error": msg})
+			return
+		}
+
+		exchangeCode, err := defaultOAuthStore.createExchange(state, result, time.Now().UTC())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to complete OAuth"})
+			return
+		}
 		params := url.Values{}
-		params.Set("access_token", result.AccessToken)
-		params.Set("refresh_token", result.RefreshToken)
-		params.Set("edition", result.Edition)
-		params.Set("user_id", result.User.ID)
-		params.Set("user_name", result.User.Name)
-		params.Set("user_email", result.User.Email)
-		params.Set("user_role", string(result.User.Role))
+		params.Set("exchange_code", exchangeCode)
+		params.Set("state", state)
+		params.Set("provider", "google")
 		c.Redirect(http.StatusTemporaryRedirect, buildOAuthFrontendRedirect(params))
 	}
 }
 
-type googleOAuthCompletion struct {
-	AccessToken  string
-	RefreshToken string
-	Edition      string
-	User         *authn.User
-}
-
 func completeGoogleOAuth(
+	ctx context.Context,
 	logger *logrus.Logger,
 	service *authn.Service,
 	allowedDomains []string,
 	config *oauth2.Config,
 	code string,
-	state string,
-) (*googleOAuthCompletion, error) {
-	requestedEdition, exists := oauthStateMap[state]
-	if !exists {
-		return nil, fmt.Errorf("invalid state parameter")
-	}
-	delete(oauthStateMap, state)
-
-	token, err := config.Exchange(context.Background(), code)
+) (*oauthCompletion, error) {
+	token, err := config.Exchange(ctx, code)
 	if err != nil {
 		logger.WithError(err).Error("Google OAuth token exchange failed")
 		return nil, fmt.Errorf("token exchange failed")
 	}
 
-	client := config.Client(context.Background(), token)
+	client := config.Client(ctx, token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 	if err != nil {
 		logger.WithError(err).Error("Google userinfo request failed")
@@ -199,34 +184,70 @@ func completeGoogleOAuth(
 		logger.WithError(err).Error("Failed to decode Google user info")
 		return nil, fmt.Errorf("failed to parse user info")
 	}
-
 	if !googleUser.EmailVerified {
 		return nil, fmt.Errorf("google email not verified")
 	}
-
 	if len(allowedDomains) > 0 && !workEmailAllowed(googleUser.Email, allowedDomains) {
 		return nil, fmt.Errorf("email domain not allowed")
 	}
 
-	user, err := service.EnsureExternalUser(context.Background(), googleUser.Email, googleUser.Name, "")
+	user, err := service.EnsureExternalUser(ctx, googleUser.Email, googleUser.Name, "")
 	if err != nil {
 		logger.WithError(err).Error("Failed to resolve user from Google OAuth")
 		return nil, fmt.Errorf("failed to create user")
 	}
-
-	edition := normalizeAuthEdition(requestedEdition)
-
-	pair, err := service.IssueTokens(context.Background(), user, edition, "", "")
+	pair, err := service.IssueTokens(ctx, user, "", "", "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token")
 	}
 
-	return &googleOAuthCompletion{
+	return &oauthCompletion{
 		AccessToken:  pair.AccessToken,
 		RefreshToken: pair.RefreshToken,
-		Edition:      editionForRole(string(user.Role), requestedEdition),
-		User:         user,
+		Edition:      serverAuthEdition(),
+		User: authUserResponse{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+			Role:  string(user.Role),
+		},
 	}, nil
+}
+
+func googleExchangeResponse(c *gin.Context, ctx context.Context, logger *logrus.Logger, service *authn.Service, allowedDomains []string) {
+	_ = ctx
+	_ = logger
+	_ = service
+	_ = allowedDomains
+	var req struct {
+		ExchangeCode string `json:"exchange_code"`
+		State        string `json:"state"`
+		Code         string `json:"code"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+	exchangeCode := strings.TrimSpace(req.ExchangeCode)
+	state := strings.TrimSpace(req.State)
+	if exchangeCode == "" {
+		exchangeCode = strings.TrimSpace(req.Code)
+	}
+	if exchangeCode == "" || state == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing exchange code or state"})
+		return
+	}
+	entry, err := defaultOAuthStore.consumeExchange(exchangeCode, state, time.Now().UTC())
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid or expired exchange code"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"access_token":  entry.accessToken,
+		"refresh_token": entry.refreshToken,
+		"user":          entry.user,
+		"edition":       entry.edition,
+	})
 }
 
 func GoogleExchangeHandler(logger *logrus.Logger, service *authn.Service, allowedDomains []string) gin.HandlerFunc {
@@ -236,40 +257,7 @@ func GoogleExchangeHandler(logger *logrus.Logger, service *authn.Service, allowe
 			c.JSON(http.StatusBadGateway, gin.H{"error": "Google OAuth not configured"})
 			return
 		}
-
-		var req struct {
-			Code  string `json:"code"`
-			State string `json:"state"`
-		}
-		if err := c.ShouldBindJSON(&req); err != nil || req.Code == "" || req.State == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing code or state"})
-			return
-		}
-
-		result, err := completeGoogleOAuth(logger, service, allowedDomains, config, req.Code, req.State)
-		if err != nil {
-			status := http.StatusInternalServerError
-			switch err.Error() {
-			case "invalid state parameter":
-				status = http.StatusForbidden
-			case "Google email not verified", "Email domain not allowed":
-				status = http.StatusForbidden
-			}
-			c.JSON(status, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"access_token":  result.AccessToken,
-			"refresh_token": result.RefreshToken,
-			"user": authUserResponse{
-				ID:    result.User.ID,
-				Name:  result.User.Name,
-				Email: result.User.Email,
-				Role:  string(result.User.Role),
-			},
-			"edition": result.Edition,
-		})
+		googleExchangeResponse(c, c.Request.Context(), logger, service, allowedDomains)
 	}
 }
 

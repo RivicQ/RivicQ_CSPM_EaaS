@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -22,7 +21,7 @@ import (
 
 const scanTenantSecret = "scan-tenant-isolation-secret-0123456789"
 
-func scanTenantRouter(t *testing.T) *gin.Engine {
+func scanTenantRouter(t *testing.T) (*gin.Engine, *authn.Service) {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 	t.Setenv("JWT_SECRET", scanTenantSecret)
@@ -35,36 +34,22 @@ func scanTenantRouter(t *testing.T) *gin.Engine {
 	group := router.Group("/api/v1")
 	logger := logrus.New()
 	logger.SetLevel(logrus.FatalLevel)
-	oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
-	return router
-}
-
-// newTenantMinter builds a standalone authn service sharing the router's
-// signing secret so tests can mint real access tokens for arbitrary tenants.
-func newTenantMinter(t *testing.T) *authn.Service {
-	t.Helper()
-	svc, err := authn.NewService(authn.Config{
-		Secret:     scanTenantSecret,
-		Issuer:     "rivicq",
-		Audience:   "rivicq-api",
-		AccessTTL:  15 * time.Minute,
-		RefreshTTL: 7 * 24 * time.Hour,
-	}, authn.NewMemStore())
-	require.NoError(t, err)
-	return svc
+	authService := oss.SetupRoutes(group, &database.DB{}, logger, &config.OSSConfig{})
+	return router, authService
 }
 
 // tenantBearer mints a real access token through the production authn issuer.
 // Hand-rolling JWT claims is no longer sufficient because validation is strict
 // about issuer, audience and expiry.
-func tenantBearer(t *testing.T, tenantID string) string {
+func tenantBearer(t *testing.T, authService *authn.Service, tenantID string) string {
 	t.Helper()
-	svc := newTenantMinter(t)
-	u, err := svc.EnsureExternalUser(context.Background(), tenantID+"@example.com", "Isolation "+tenantID, "")
+	ctx := context.Background()
+	u, err := authService.EnsureExternalUser(ctx, tenantID+"@example.com", "Isolation "+tenantID, "")
 	require.NoError(t, err)
 	u.TenantID = tenantID
 	u.Role = "operator"
-	pair, err := svc.IssueTokens(context.Background(), u, "oss", "go-tests", "127.0.0.1")
+	require.NoError(t, authService.UpdateUser(ctx, u))
+	pair, err := authService.IssueTokens(ctx, u, "oss", "go-tests", "127.0.0.1")
 	require.NoError(t, err)
 	return pair.AccessToken
 }
@@ -89,9 +74,9 @@ func postScan(t *testing.T, router *gin.Engine, token, target string) string {
 }
 
 func TestScanReportIsTenantScoped(t *testing.T) {
-	router := scanTenantRouter(t)
-	tokenA := tenantBearer(t, "report-tenant-a")
-	tokenB := tenantBearer(t, "report-tenant-b")
+	router, authService := scanTenantRouter(t)
+	tokenA := tenantBearer(t, authService, "report-tenant-a")
+	tokenB := tenantBearer(t, authService, "report-tenant-b")
 	idA := postScan(t, router, tokenA, "127.0.0.1")
 
 	// Cross-tenant caller must never be able to fetch another tenant's report.
@@ -125,9 +110,9 @@ func getScan(router *gin.Engine, token, id string, extra map[string]string) *htt
 }
 
 func TestScanIsolationAcrossTenants(t *testing.T) {
-	router := scanTenantRouter(t)
-	tokenA := tenantBearer(t, "tenant-a")
-	tokenB := tenantBearer(t, "tenant-b")
+	router, authService := scanTenantRouter(t)
+	tokenA := tenantBearer(t, authService, "tenant-a")
+	tokenB := tenantBearer(t, authService, "tenant-b")
 
 	idA := postScan(t, router, tokenA, "127.0.0.1")
 	idB := postScan(t, router, tokenB, "127.0.0.1")
@@ -152,7 +137,7 @@ func TestScanIsolationAcrossTenants(t *testing.T) {
 // unauthenticated "public pilot" scan surface is gone. An anonymous caller
 // must not be able to create or read a scan.
 func TestAnonymousScanIsRejected(t *testing.T) {
-	router := scanTenantRouter(t)
+	router, _ := scanTenantRouter(t)
 
 	body, err := json.Marshal(map[string]string{"target": "127.0.0.1"})
 	require.NoError(t, err)
@@ -168,29 +153,27 @@ func TestAnonymousScanIsRejected(t *testing.T) {
 // TestInvalidBearerDoesNotFallBackToPublicTenant ensures a malformed credential
 // is rejected outright instead of being treated as an anonymous request.
 func TestInvalidBearerDoesNotFallBackToPublicTenant(t *testing.T) {
-	router := scanTenantRouter(t)
-	token := tenantBearer(t, "tenant-a")
+	router, authService := scanTenantRouter(t)
+	token := tenantBearer(t, authService, "tenant-a")
 	id := postScan(t, router, token, "127.0.0.1")
 
 	w := getScan(router, "not-a-token", id, nil)
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
-	// A token signed with the right secret but the wrong claims must also fail.
-	svc := newTenantMinter(t)
-	u, err := svc.EnsureExternalUser(context.Background(), "tenant-a@example.com", "Isolation tenant-a", "")
+	// A refresh token signed with the right secret must also fail as a bearer.
+	ctx := context.Background()
+	u, err := authService.EnsureExternalUser(ctx, "tenant-a@example.com", "Isolation tenant-a", "")
 	require.NoError(t, err)
-	u.TenantID = "tenant-a"
-	u.Role = "operator"
-	refreshPair, err := svc.IssueTokens(context.Background(), u, "oss", "go-tests", "127.0.0.1")
+	refreshPair, err := authService.IssueTokens(ctx, u, "oss", "go-tests", "127.0.0.1")
 	require.NoError(t, err)
 	w = getScan(router, refreshPair.RefreshToken, id, nil)
 	assert.Equal(t, http.StatusUnauthorized, w.Code, "a refresh token must not work as an access token")
 }
 
 func TestIntelligenceReportIsTenantScoped(t *testing.T) {
-	router := scanTenantRouter(t)
-	tokenA := tenantBearer(t, "intel-a")
-	tokenB := tenantBearer(t, "intel-b")
+	router, authService := scanTenantRouter(t)
+	tokenA := tenantBearer(t, authService, "intel-a")
+	tokenB := tenantBearer(t, authService, "intel-b")
 	idA := postScan(t, router, tokenA, "127.0.0.1")
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/scans/"+idA+"/intelligence", nil)
@@ -209,9 +192,9 @@ func TestIntelligenceReportIsTenantScoped(t *testing.T) {
 	}
 }
 func TestScanListDoesNotLeakOtherTenants(t *testing.T) {
-	router := scanTenantRouter(t)
-	tokenA := tenantBearer(t, "list-tenant-a")
-	tokenB := tenantBearer(t, "list-tenant-b")
+	router, authService := scanTenantRouter(t)
+	tokenA := tenantBearer(t, authService, "list-tenant-a")
+	tokenB := tenantBearer(t, authService, "list-tenant-b")
 	idA := postScan(t, router, tokenA, "127.0.0.1")
 	idB := postScan(t, router, tokenB, "127.0.0.1")
 

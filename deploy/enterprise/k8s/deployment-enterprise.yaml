@@ -1,8 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cryptobom-enterprise-config
+  namespace: cryptobom-enterprise
+  labels:
+    app: cryptobom-enterprise
+    edition: enterprise
+data:
+  CRYPTOBOM_EDITION: "enterprise"
+  PORT: "9090"
+  CRYPTOBOM_PORT: "9090"
+  CRYPTOBOM_LOG_LEVEL: "info"
+  QUANTUM_ENABLED: "false"
+  IBMQ_ENABLED: "false"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cryptobom-enterprise
   namespace: cryptobom-enterprise
+  labels:
+    app: cryptobom-enterprise
+    edition: enterprise
+    version: "2.0.0"
 spec:
   replicas: 2
   selector:
@@ -13,45 +33,207 @@ spec:
       labels:
         app: cryptobom-enterprise
         edition: enterprise
+        version: "2.0.0"
     spec:
+      securityContext:
+        fsGroup: 2000
       containers:
-      - name: cryptobom-enterprise
-        image: rivic-q/cryptobom-enterprise:latest
-        ports:
-        - containerPort: 9090
-        env:
-        - name: CRYPTOBOM_EDITION
-          value: "enterprise"
-        - name: IBMQ_ENABLED
-          value: "true"
-        - name: IBMQ_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: ibmq-secrets
-              key: api-key
-        - name: CRYPTOBOM_LOG_LEVEL
-          value: "info"
-        - name: ML_ENABLED
-          value: "true"
-        - name: ANALYTICS_ENABLED
-          value: "true"
-        resources:
-          limits:
-            cpu: "1000m"
-            memory: "2Gi"
-          requests:
-            cpu: "500m"
-            memory: "1Gi"
+        - name: cryptobom-enterprise
+          image: rivicq/cryptobom-enterprise:2.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9090
+              name: http
+          envFrom:
+            - configMapRef:
+                name: cryptobom-enterprise-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: DATABASE_URL
+            - name: ENTERPRISE_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: ENTERPRISE_DATABASE_URL
+                  optional: true
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: JWT_SECRET
+            - name: CRYPTOBOM_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: CRYPTOBOM_LICENSE_KEY
+            - name: CRYPTOBOM_LICENSE_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: CRYPTOBOM_LICENSE_SIGNING_KEY
+            - name: CRYPTOBOM_LICENSE_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: CRYPTOBOM_LICENSE_TENANT_ID
+                  optional: true
+            - name: CRYPTOBOM_CUSTOMER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: CRYPTOBOM_CUSTOMER_ID
+                  optional: true
+            - name: IBMQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: IBMQ_API_KEY
+                  optional: true
+            - name: IBMQ_NETWORK
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: IBMQ_NETWORK
+                  optional: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cryptobom-enterprise-service
+  name: cryptobom-enterprise
   namespace: cryptobom-enterprise
+  labels:
+    app: cryptobom-enterprise
+    edition: enterprise
 spec:
   selector:
     app: cryptobom-enterprise
   ports:
-  - port: 9090
-    targetPort: 9090
+    - name: http
+      port: 80
+      targetPort: 9090
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cryptobom-enterprise-lb
+  namespace: cryptobom-enterprise
+  labels:
+    app: cryptobom-enterprise
+    edition: enterprise
+spec:
+  selector:
+    app: cryptobom-enterprise
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9090
   type: LoadBalancer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cryptobom-enterprise-migrate
+  namespace: cryptobom-enterprise
+  labels:
+    app: cryptobom-enterprise
+    edition: enterprise
+    component: migration
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: cryptobom-enterprise
+        edition: enterprise
+        component: migration
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        fsGroup: 2000
+      containers:
+        - name: migrate
+          image: rivicq/cryptobom-enterprise:2.0.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              /app/cryptobom-server &
+              pid=$!
+              # Fail-closed enterprise bootstrap runs core/enterprise migrations on startup.
+              sleep 20
+              if kill -0 "$pid" 2>/dev/null; then
+                kill -TERM "$pid" 2>/dev/null || true
+                wait "$pid" || true
+                exit 0
+              fi
+              wait "$pid"
+          envFrom:
+            - configMapRef:
+                name: cryptobom-enterprise-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: DATABASE_URL
+            - name: ENTERPRISE_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: ENTERPRISE_DATABASE_URL
+                  optional: true
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: JWT_SECRET
+            - name: CRYPTOBOM_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: CRYPTOBOM_LICENSE_KEY
+            - name: CRYPTOBOM_LICENSE_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cryptobom-enterprise-secrets
+                  key: CRYPTOBOM_LICENSE_SIGNING_KEY
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000

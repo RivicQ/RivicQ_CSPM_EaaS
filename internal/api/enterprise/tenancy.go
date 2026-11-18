@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/tenant"
 )
 
 // standardDBReady reports whether the standard database wrapper carries a live
@@ -27,50 +28,35 @@ func abortIfNoDB(c *gin.Context, db *database.EnterpriseDB) bool {
 	if enterpriseDBReady(db) {
 		return true
 	}
-	c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Enterprise database not available"})
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"error":  "enterprise database unavailable",
+		"status": "unavailable",
+		"source": "unconfigured",
+	})
 	return false
 }
 
 // tenantIDFor resolves the tenant for unauthenticated or read-mostly handlers.
-// JWT tenant claims win. The X-Tenant-ID header is ignored (it is spoofable).
-// Callers that mutate tenant data must use jwtTenantOrAbort instead of this fallback.
+// JWT/API-key tenant claims win. Spoofable headers are ignored.
 func tenantIDFor(c *gin.Context) string {
-	if tenant := c.GetString("tenant_id"); tenant != "" {
-		return tenant
-	}
-	return enterpriseDefaultTenant
+	return tenant.Resolve(c)
 }
 
 // jwtTenantOrAbort returns the JWT/API-key tenant or writes 403 and false.
 func jwtTenantOrAbort(c *gin.Context) (string, bool) {
-	tenant := c.GetString("tenant_id")
-	if tenant == "" {
+	t := c.GetString("tenant_id")
+	if t == "" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "tenant context required"})
 		return "", false
 	}
-	return tenant, true
+	return t, true
 }
 
 // mutatingTenantIDFor resolves the tenant for a handler that writes tenant data,
 // and fails closed when the request carries an identity but no tenant.
-//
-// tenantIDFor falls back to a shared default tenant, which is right for an
-// anonymous demo read and wrong for a write: a token that authenticates a user
-// without naming a tenant would otherwise deposit data into the default tenant,
-// where it becomes visible to every other unauthenticated caller of the same
-// endpoint. That is cross-tenant contamination reached without any attacker
-// effort, so it is refused rather than defaulted.
-//
-// The distinction is intentional:
-//
-//   - tenant claim present: use it.
-//   - authenticated but no tenant: 403. The token is malformed or was minted
-//     before tenancy existed; guessing is not safe.
-//   - no identity at all (demo/fabricated mode): the default tenant, because
-//     there is no real party to protect from.
 func mutatingTenantIDFor(c *gin.Context) (string, bool) {
-	if tenant := c.GetString("tenant_id"); tenant != "" {
-		return tenant, true
+	if t := c.GetString("tenant_id"); t != "" {
+		return t, true
 	}
 	if c.GetString("user_id") != "" {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -79,5 +65,5 @@ func mutatingTenantIDFor(c *gin.Context) (string, bool) {
 		})
 		return "", false
 	}
-	return enterpriseDefaultTenant, true
+	return tenant.PublicTenantID, true
 }

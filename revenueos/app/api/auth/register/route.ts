@@ -1,9 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { handleRoute, HttpError, ok } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
-import { hashPassword, issueSession, SESSION_COOKIE } from "@/lib/auth";
+import { hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { isProduction } from "@/lib/env";
+import { getClientIp } from "@/lib/request";
+import { buildTenantSafeOrganizationName, registrationResponse } from "@/lib/registration";
 import { registerSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -18,17 +19,14 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await hashPassword(body.password);
+    const organizationName = buildTenantSafeOrganizationName(body.organization, email);
+    const ip = getClientIp(request);
+
     const result = await prisma
       .$transaction(async (tx) => {
-        let organizationId: string | null = null;
-        if (body.organization) {
-          const organization = await tx.organization.upsert({
-            where: { name: body.organization },
-            create: { name: body.organization, country: body.country },
-            update: {},
-          });
-          organizationId = organization.id;
-        }
+        const organization = await tx.organization.create({
+          data: { name: organizationName, country: body.country },
+        });
         const customer = await tx.customer.create({
           data: {
             name: body.organization ?? body.name,
@@ -36,7 +34,7 @@ export async function POST(request: Request) {
             country: body.country,
             currency: body.country.toUpperCase() === "IN" ? "INR" : "EUR",
             status: "LEAD",
-            organizationId,
+            organizationId: organization.id,
           },
         });
         const user = await tx.user.create({
@@ -45,11 +43,11 @@ export async function POST(request: Request) {
             name: body.name,
             passwordHash,
             role: "CUSTOMER",
-            organizationId,
+            organizationId: organization.id,
             customerId: customer.id,
           },
         });
-        return { user, customer };
+        return { user };
       })
       .catch((error: unknown) => {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
@@ -58,23 +56,16 @@ export async function POST(request: Request) {
         throw error;
       });
 
-    const token = await issueSession(result.user.id, result.user.role);
-    const response = ok({ user: { id: result.user.id, email: result.user.email, role: result.user.role } });
-    response.cookies.set(SESSION_COOKIE, token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: isProduction(),
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60,
-    });
     await writeAuditLog({
       actorId: result.user.id,
       actorRole: "CUSTOMER",
       action: "REGISTER",
       entityType: "User",
       entityId: result.user.id,
-      ip: request.headers.get("x-forwarded-for"),
+      metadata: { emailVerificationRequired: true },
+      ip,
     });
-    return response;
+
+    return ok(registrationResponse(), 201);
   });
 }

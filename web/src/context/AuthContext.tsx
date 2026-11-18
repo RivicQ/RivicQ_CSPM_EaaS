@@ -1,8 +1,8 @@
 import React from 'react';
-import { authService, syncAPIBaseURL } from '../services/api';
-import { setEditionPreference, getEditionFromBackend, normalizeEdition, setAPIBaseURL, Edition } from '../config/editions';
+import { authService } from '../services/api';
+import { getEditionFromBackend, normalizeEdition, Edition } from '../config/editions';
 import { supabaseAuthService, isSupabaseConfigured } from '../services/supabase';
-import { CLIENT_DEMO_TOKEN, DEMO_STORAGE_KEY, TRAIL_ACTIVE_KEY, TRAIL_STEP_KEY, isClientDemoToken } from '../demo/constants';
+import { CLIENT_DEMO_TOKEN, DEMO_STORAGE_KEY, isClientDemoToken } from '../demo/constants';
 
 export interface AuthUser {
   id: string;
@@ -59,13 +59,12 @@ function readStoredAuth() {
   try {
     const token = localStorage.getItem('auth_token');
     const userRaw = localStorage.getItem('auth_user');
-    const edition = normalizeEdition(localStorage.getItem('app_edition')) || 'community';
     const user = userRaw ? JSON.parse(userRaw) : null;
     const demo = Boolean(user?.demo) || localStorage.getItem(DEMO_STORAGE_KEY) === '1' || isClientDemoToken(token);
     if (user) user.demo = demo;
-    return { token, user, edition };
+    return { token, user };
   } catch {
-    return { token: null, user: null, edition: 'community' as Edition };
+    return { token: null, user: null };
   }
 }
 
@@ -73,237 +72,276 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = React.useState(true);
   const [token, setToken] = React.useState<string | null>(null);
   const [user, setUser] = React.useState<AuthUser | null>(null);
-  const [edition, setEditionState] = React.useState<Edition>('community');
   const [backendReachable, setBackendReachable] = React.useState(false);
+
+  const clearStoredAuth = React.useCallback(() => {
+    try {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('app_edition');
+      localStorage.removeItem('api_base_url');
+      localStorage.removeItem(DEMO_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const persist = React.useCallback((nextToken: string | null, nextUser: AuthUser | null) => {
+    try {
+      if (nextToken) localStorage.setItem('auth_token', nextToken);
+      else localStorage.removeItem('auth_token');
+      if (nextUser) localStorage.setItem('auth_user', JSON.stringify(nextUser));
+      else localStorage.removeItem('auth_user');
+      localStorage.removeItem('app_edition');
+      localStorage.removeItem('api_base_url');
+    } catch {
+      // ignore storage failures
+    }
+    setToken(nextToken);
+    setUser(nextUser);
+  }, []);
+
+  const applyMe = React.useCallback((nextToken: string, data: any, demoHint = false) => {
+    const nextUser: AuthUser = {
+      id: String(data?.id || data?.user_id || ''),
+      name: String(data?.name || data?.email || ''),
+      email: String(data?.email || ''),
+      role: String(data?.role || 'viewer'),
+      tenantId: data?.tenant_id ? String(data.tenant_id) : undefined,
+      mfaEnabled: Boolean(data?.mfa_enabled),
+      edition: normalizeEdition(data?.edition),
+      demo: demoHint || Boolean(data?.demo),
+    };
+    persist(nextToken, nextUser);
+    return nextUser;
+  }, [persist]);
 
   React.useEffect(() => {
     let cancelled = false;
-
     const init = async () => {
       const stored = readStoredAuth();
 
-      let sbSession: Awaited<ReturnType<typeof supabaseAuthService.getSession>> | null = null;
-      try {
-        sbSession = await supabaseAuthService.getSession();
-      } catch {
-        sbSession = null;
-      }
-      let sbUser: AuthUser | null = null;
-      let sbToken: string | null = null;
-      if (sbSession?.user?.email) {
-        sbUser = {
-          id: sbSession.user.id,
-          name: (sbSession.user.user_metadata as any)?.name || sbSession.user.email.split('@')[0],
-          email: sbSession.user.email,
-          edition: normalizeEdition((sbSession.user.user_metadata as any)?.edition),
-        };
-        sbToken = sbSession.access_token ?? null;
-      }
-
-      let remote: { edition: string; features: Record<string, any>; baseURL: string } | null = null;
+      let remote: { edition: string; features?: Record<string, any>; baseURL?: string } | null = null;
       try {
         remote = await getEditionFromBackend();
       } catch {
         remote = null;
       }
       if (cancelled) return;
-
-      // Backend /edition reports the *server build* (the OSS server says
-      // "oss"), not the user's entitlement. Prefer the persisted edition so a
-      // previously selected Enterprise/Professional workspace survives reloads
-      // instead of snapping back to Community and hiding features.
-      const detectedEdition = normalizeEdition(sbUser?.edition || stored.edition || remote?.edition);
-      if (remote?.edition) {
-        syncAPIBaseURL();
-        if (!sbUser?.edition && !stored.edition) {
-          setEditionPreference(detectedEdition);
-        }
-      }
-
       setBackendReachable(Boolean(remote?.edition));
-      // Static Pages: drop a stale absolute API host so demo scans do not
-      // fall through to a dead network target from a prior local session.
-      if (!remote?.edition) {
-        try {
-          const storedApi = localStorage.getItem('api_base_url');
-          if (storedApi && /^https?:\/\//i.test(storedApi)) {
-            localStorage.removeItem('api_base_url');
-            setAPIBaseURL('/api/v1');
-          }
-        } catch {
-          /* ignore */
-        }
-      }
-      const nextToken = sbToken ?? stored.token;
-      let nextUser: AuthUser | null = sbUser ?? stored.user;
-      let nextEdition = detectedEdition;
 
-      if (nextToken && !isClientDemoToken(nextToken) && remote?.edition) {
+      let sbToken: string | null = null;
+      let sbSessionUser: any = null;
+      try {
+        const sbSession = await supabaseAuthService.getSession();
+        if (sbSession?.access_token && sbSession?.user?.email) {
+          sbToken = sbSession.access_token;
+          sbSessionUser = sbSession.user;
+        }
+      } catch {
+        sbToken = null;
+      }
+
+      const nextToken = stored.token || sbToken;
+      if (!nextToken) {
+        clearStoredAuth();
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      if (isClientDemoToken(nextToken)) {
+        // Demo sessions are local-only labeled samples; keep only non-sensitive stored identity.
+        const demoUser: AuthUser = {
+          id: String(stored.user?.id || 'demo'),
+          name: String(stored.user?.name || 'Demo'),
+          email: String(stored.user?.email || ''),
+          role: String(stored.user?.role || 'viewer'),
+          edition: normalizeEdition(remote?.edition || 'community'),
+          demo: true,
+        };
+        try { localStorage.setItem(DEMO_STORAGE_KEY, '1'); } catch {}
+        persist(nextToken, demoUser);
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      if (remote?.edition) {
         try {
           const me = await authService.me();
-          const data = me.data || {};
-          const syncedEdition = normalizeEdition(data.edition || nextEdition);
-          nextUser = {
-            id: String(data.id || data.user_id || nextUser?.id || ''),
-            name: String(data.name || nextUser?.name || ''),
-            email: String(data.email || nextUser?.email || ''),
-            role: String(data.role || nextUser?.role || 'viewer'),
-            tenantId: String(data.tenant_id || nextUser?.tenantId || ''),
-            mfaEnabled: Boolean(data.mfa_enabled),
-            edition: syncedEdition,
-            demo: false,
-          };
-          nextEdition = syncedEdition;
-          try {
-            localStorage.setItem('auth_user', JSON.stringify(nextUser));
-            setEditionPreference(syncedEdition);
-          } catch {
-            /* ignore */
-          }
+          if (!cancelled) applyMe(nextToken, me.data || {}, false);
         } catch {
-          // Keep stored session if /auth/me is unreachable.
+          if (!cancelled) {
+            clearStoredAuth();
+            setToken(null);
+            setUser(null);
+          }
+        }
+      } else if (sbToken && sbSessionUser?.email) {
+        // Supabase-backed session without configured API backend: keep session but do not grant entitlements beyond server-known defaults.
+        const sbUser: AuthUser = {
+          id: String(sbSessionUser.id),
+          name: String((sbSessionUser.user_metadata as any)?.name || sbSessionUser.email.split('@')[0]),
+          email: String(sbSessionUser.email),
+          edition: 'community',
+        };
+        persist(sbToken, sbUser);
+      } else {
+        // No authoritative backend to validate token/entitlement.
+        if (!cancelled) {
+          clearStoredAuth();
+          setToken(null);
+          setUser(null);
         }
       }
-      if (cancelled) return;
-
-      setToken(nextToken);
-      setUser(nextUser);
-      setEditionState(nextEdition);
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     };
 
     init().catch(() => {
-      if (!cancelled) setLoading(false);
+      if (!cancelled) {
+        clearStoredAuth();
+        setLoading(false);
+      }
     });
     return () => { cancelled = true; };
-  }, []);
-
-  const persist = React.useCallback((nextToken: string | null, nextUser: AuthUser | null, nextEdition: Edition) => {
-    try {
-      if (nextToken) {
-        localStorage.setItem('auth_token', nextToken);
-      } else {
-        localStorage.removeItem('auth_token');
-      }
-      if (nextUser) {
-        localStorage.setItem('auth_user', JSON.stringify(nextUser));
-      } else {
-        localStorage.removeItem('auth_user');
-      }
-      setEditionPreference(nextEdition);
-    } catch {
-      // ignore storage failures
-    }
-    setToken(nextToken);
-    setUser(nextUser);
-    setEditionState(nextEdition);
-  }, []);
+  }, [applyMe, clearStoredAuth, persist]);
 
   const completeAuth = React.useCallback((payload: any) => {
-    const token = payload?.access_token || payload?.token;
-    if (!token || !payload?.user) {
-      throw new Error('Authentication service returned an invalid response');
-    }
-    const nextToken = String(token);
-    const nextEdition = normalizeEdition(payload?.edition || payload.user.edition || 'community');
-    const nextUser = {
-      ...payload.user,
-      id: payload.user.id || payload.user.user_id,
-      tenantId: payload.user.tenant_id || payload.user.tenantId,
-      mfaEnabled: Boolean(payload.user.mfa_enabled ?? payload.user.mfaEnabled),
-      edition: nextEdition,
-      demo: Boolean(payload?.demo_mode || payload?.user?.demo),
-    };
-    try {
-      if (nextUser.demo) localStorage.setItem(DEMO_STORAGE_KEY, '1');
-      else localStorage.removeItem(DEMO_STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
-    persist(nextToken, nextUser, nextEdition);
-  }, [persist]);
+    const nextToken = String(payload?.access_token || payload?.token || '');
+    if (!nextToken) throw new Error('Authentication service returned an invalid response');
+    // Trust server-derived /auth/me for entitlement and identity.
+    return authService.me().then((me) => {
+      applyMe(nextToken, me.data || {}, Boolean(payload?.demo_mode || payload?.user?.demo));
+    });
+  }, [applyMe]);
 
-  const supabaseLogin = React.useCallback(async (email: string, password: string, nextEdition: Edition) => {
-    const supabaseUser = await supabaseAuthService.signIn(email, password);
+  const persistAuth = React.useCallback((payload: any) => {
+    const nextToken = String(payload?.access_token || payload?.token || '');
+    if (!nextToken) return;
+    try { localStorage.setItem('auth_token', nextToken); } catch {}
+    // Hydrate from server; do not trust client-supplied edition/role in payload.
+    void authService.me().then((me) => {
+      applyMe(nextToken, me.data || {}, false);
+    }).catch(() => {
+      // keep token only if /auth/me fails later? safer to clear.
+      clearStoredAuth();
+      setToken(null);
+      setUser(null);
+    });
+  }, [applyMe, clearStoredAuth]);
+
+  const supabaseLogin = React.useCallback(async (email: string, password: string, _nextEdition: Edition) => {
+    await supabaseAuthService.signIn(email, password);
     const sbToken = await supabaseAuthService.getSessionToken();
-    persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
-  }, [persist]);
+    if (!sbToken) throw new Error('Supabase session unavailable');
+    if (backendReachable) {
+      try {
+        const me = await authService.me();
+        persist(sbToken, {
+          id: String(me.data?.id || me.data?.user_id || ''),
+          name: String(me.data?.name || email.split('@')[0]),
+          email: String(me.data?.email || email),
+          role: String(me.data?.role || 'viewer'),
+          tenantId: me.data?.tenant_id ? String(me.data.tenant_id) : undefined,
+          mfaEnabled: Boolean(me.data?.mfa_enabled),
+          edition: normalizeEdition(me.data?.edition),
+        });
+        return;
+      } catch {
+        // fall through to clear
+      }
+    }
+    clearStoredAuth();
+    throw new Error('Unable to establish a server-validated session.');
+  }, [backendReachable, clearStoredAuth, persist]);
 
   const supabaseRegister = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition): Promise<RegisterResult> => {
-    const { user: supabaseUser, session } = await supabaseAuthService.signUp(name, email, password, nextEdition);
-    if (session?.access_token) {
-      persist(session.access_token, supabaseUser, nextEdition);
-      return { requiresConfirmation: false };
+    const { session } = await supabaseAuthService.signUp(name, email, password, nextEdition);
+    if (session?.access_token && backendReachable) {
+      try {
+        const me = await authService.me();
+        applyMe(session.access_token, me.data || {}, false);
+        return { requiresConfirmation: false };
+      } catch {
+        // ignore and fall through
+      }
     }
-    return { requiresConfirmation: true, email: supabaseUser.email };
-  }, [persist]);
+    return { requiresConfirmation: true, email };
+  }, [applyMe, backendReachable]);
 
-  const login = React.useCallback(async (email: string, password: string, nextEdition: Edition): Promise<LoginResult> => {
+  const login = React.useCallback(async (email: string, password: string, _nextEdition: Edition): Promise<LoginResult> => {
     if (backendReachable) {
-      const response = await authService.login({ email, password, edition: nextEdition });
+      const response = await authService.login({ email, password });
       const data = response.data;
       if (data?.mfa_required) {
         return { mfaRequired: true, mfaSession: data.mfa_session, email };
       }
-      completeAuth(data);
+      try { localStorage.setItem('auth_token', String(data.access_token)); } catch {}
+      await completeAuth(data);
       return { requiresConfirmation: false };
     }
     if (isSupabaseConfigured) {
-      const supabaseUser = await supabaseAuthService.signIn(email, password);
-      const sbToken = await supabaseAuthService.getSessionToken();
-      persist(sbToken, supabaseUser, normalizeEdition(supabaseUser.edition || nextEdition));
+      await supabaseLogin(email, password, 'community');
       return { requiresConfirmation: false };
     }
-    throw new Error(
-      'No engine is connected on this Pages build, so password sign-in cannot run here. Use Interactive Demo (labelled sample data) or request an Enterprise workspace via sales@rivicq.com.'
-    );
-  }, [backendReachable, completeAuth, persist]);
+    throw new Error('No authenticated backend is available.');
+  }, [backendReachable, completeAuth, supabaseLogin]);
 
   const register = React.useCallback(async (
     name: string,
     email: string,
     password: string,
-    nextEdition: Edition,
+    _nextEdition: Edition,
     extras?: { first_name?: string; last_name?: string; organisation?: string; job_title?: string; country?: string; industry?: string; organisation_size?: string; accept_terms?: boolean },
   ): Promise<RegisterResult> => {
     if (backendReachable) {
-      const response = await authService.register({ name, email, password, edition: nextEdition, ...extras });
+      const response = await authService.register({ name, email, password, ...extras });
       const data = response.data;
-      if (data?.mfa_required) {
-        return { requiresConfirmation: true, email, mfaRequired: true, mfaSession: data.mfa_session };
+      if (data?.access_token) {
+        try { localStorage.setItem('auth_token', String(data.access_token)); } catch {}
+        await completeAuth(data);
+        return { requiresConfirmation: false };
       }
-      completeAuth(data);
-      return { requiresConfirmation: false };
+      return { requiresConfirmation: true, email };
     }
     if (isSupabaseConfigured) {
-      return supabaseRegister(name, email, password, nextEdition);
+      return supabaseRegister(name, email, password, 'community');
     }
-    throw new Error(
-      'No engine is connected on this Pages build, so registration cannot run here. Use Interactive Demo (labelled sample data) or request an Enterprise workspace via sales@rivicq.com.'
-    );
+    throw new Error('No authenticated backend is available.');
   }, [backendReachable, completeAuth, supabaseRegister]);
 
-  const verifyMfa = React.useCallback(async (email: string, code: string, session: string, nextEdition: Edition) => {
-    const response = await authService.verifyMfa({ email, mfa_code: code, mfa_session: session, edition: nextEdition });
-    completeAuth(response.data);
+  const demoLogin = React.useCallback(async (_nextEdition: Edition) => {
+    if (backendReachable) {
+      const response = await authService.demo();
+      const data = response.data;
+      try { localStorage.setItem('auth_token', String(data.access_token)); } catch {}
+      await completeAuth(data);
+      try { localStorage.setItem(DEMO_STORAGE_KEY, '1'); } catch {}
+      return;
+    }
+    const demoToken = CLIENT_DEMO_TOKEN;
+    const demoUser: AuthUser = { id: 'demo', name: 'Demo User', email: 'demo@rivicq.local', role: 'operator', edition: 'community', demo: true };
+    try { localStorage.setItem(DEMO_STORAGE_KEY, '1'); } catch {}
+    persist(demoToken, demoUser);
+  }, [backendReachable, completeAuth, persist]);
+
+  const verifyMfa = React.useCallback(async (email: string, code: string, session: string, _edition: Edition) => {
+    const response = await authService.verifyMfa({ email, mfa_code: code, mfa_session: session });
+    const data = response.data;
+    try { localStorage.setItem('auth_token', String(data.access_token)); } catch {}
+    await completeAuth(data);
   }, [completeAuth]);
 
   const refreshMe = React.useCallback(async () => {
-    if (!token || isClientDemoToken(token) || !backendReachable) return;
-    const me = await authService.me();
-    const data = me.data || {};
-    const nextEdition = normalizeEdition(data.edition || edition);
-    persist(token, {
-      id: String(data.id || data.user_id || user?.id || ''),
-      name: String(data.name || user?.name || ''),
-      email: String(data.email || user?.email || ''),
-      role: String(data.role || user?.role || 'viewer'),
-      tenantId: String(data.tenant_id || user?.tenantId || ''),
-      mfaEnabled: Boolean(data.mfa_enabled),
-      edition: nextEdition,
-      demo: Boolean(user?.demo),
-    }, nextEdition);
-  }, [backendReachable, edition, persist, token, user]);
+    if (!token || isClientDemoToken(token)) return;
+    try {
+      const me = await authService.me();
+      applyMe(token, me.data || {}, Boolean(user?.demo));
+    } catch {
+      clearStoredAuth();
+      setToken(null);
+      setUser(null);
+    }
+  }, [applyMe, clearStoredAuth, token, user?.demo]);
 
   const updateProfile = React.useCallback(async (name: string) => {
     await authService.patchMe({ name });
@@ -312,69 +350,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const changePassword = React.useCallback(async (currentPassword: string, nextPassword: string) => {
     await authService.changePassword(currentPassword, nextPassword);
-  }, []);
-
-  const demoLogin = React.useCallback(async (_nextEdition: Edition) => {
-    if (backendReachable) {
-      const response = await authService.demo('community');
-      completeAuth({ ...response.data, demo_mode: true, edition: 'oss' });
-      return;
-    }
-    // Isolated Pages/static demo — not a JWT, not mixed with customer data.
-    const demoUser: AuthUser = {
-      id: 'demo-user',
-      name: 'Demo operator',
-      email: 'demo-ciso@demo.rivicq.local',
-      role: 'operator',
-      tenantId: 'tenant-demo',
-      mfaEnabled: false,
-      edition: 'community',
-      demo: true,
-    };
-    try {
-      localStorage.setItem(DEMO_STORAGE_KEY, '1');
-      localStorage.removeItem('api_base_url');
-    } catch {
-      /* ignore */
-    }
-    setAPIBaseURL('/api/v1');
-    syncAPIBaseURL();
-    persist(CLIENT_DEMO_TOKEN, demoUser, 'community');
-  }, [backendReachable, completeAuth, persist]);
+    await refreshMe();
+  }, [refreshMe]);
 
   const logout = React.useCallback(() => {
-    if (backendReachable && token && !isClientDemoToken(token)) {
-      authService.logout().catch(() => undefined);
-    }
-    if (isSupabaseConfigured) {
-      supabaseAuthService.signOut().catch(() => undefined);
-    }
-    try {
-      localStorage.removeItem(DEMO_STORAGE_KEY);
-      sessionStorage.removeItem(TRAIL_ACTIVE_KEY);
-      sessionStorage.removeItem(TRAIL_STEP_KEY);
-    } catch {
-      /* ignore */
-    }
-    persist(null, null, edition);
-  }, [backendReachable, edition, persist, token]);
+    try { void authService.logout(); } catch {}
+    try { void supabaseAuthService.signOut(); } catch {}
+    clearStoredAuth();
+    setToken(null);
+    setUser(null);
+  }, [clearStoredAuth]);
 
-  const setEdition = React.useCallback((nextEdition: Edition) => {
-    if (user?.demo) {
-      persist(token, user, 'community');
-      return;
-    }
-    persist(token, user, nextEdition);
-  }, [persist, token, user]);
+  const setEdition = React.useCallback((_next: Edition) => {
+    // Edition/entitlement is server-derived; ignore client requests.
+  }, []);
 
-  const isDemo = Boolean(user?.demo) || isClientDemoToken(token);
-
-  const value = React.useMemo(() => ({
+  const value = React.useMemo<AuthContextValue>(() => ({
     user,
     token,
-    edition,
-    isAuthenticated: Boolean(token),
-    isDemo,
+    edition: user?.edition || 'community',
+    isAuthenticated: Boolean(token && user),
+    isDemo: Boolean(user?.demo) || localStorage.getItem(DEMO_STORAGE_KEY) === '1' || isClientDemoToken(token),
     loading,
     supabaseEnabled: isSupabaseConfigured,
     backendReachable,
@@ -389,16 +385,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     changePassword,
     logout,
     setEdition,
-    persistAuth: completeAuth,
-  }), [edition, isDemo, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, verifyMfa, refreshMe, updateProfile, changePassword, logout, setEdition, token, user, completeAuth]);
+    persistAuth,
+  }), [user, token, loading, backendReachable, login, register, supabaseLogin, supabaseRegister, demoLogin, verifyMfa, refreshMe, updateProfile, changePassword, logout, setEdition, persistAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
-  const context = React.useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
+export const useAuth = (): AuthContextValue => {
+  const ctx = React.useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
 };

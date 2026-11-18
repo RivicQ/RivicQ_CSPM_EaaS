@@ -115,6 +115,7 @@ func SetupOAuthRoutes(authGroup *gin.RouterGroup, logger *logrus.Logger, authSer
 	authGroup.GET("/google/status", GoogleOAuthStatusHandler(logger))
 
 	authGroup.GET("/github/login", GitHubLoginHandler(logger))
+	authGroup.POST("/github/exchange", GitHubCallbackHandler(logger, authService, allowedDomains))
 	authGroup.GET("/github/callback", GitHubCallbackHandler(logger, authService, allowedDomains))
 	authGroup.POST("/github/callback", GitHubCallbackHandler(logger, authService, allowedDomains))
 	authGroup.GET("/github/status", GitHubOAuthStatusHandler(logger))

@@ -13,12 +13,12 @@ RivicQ ships **one cryptographic intelligence engine** and two **legal editions*
 | **DevSecOps pipeline** | Stages 1–6 + JSON evidence | Stage 7 continuous monitoring |
 | **HSM / quantum** | Declared catalog + local Qiskit | PKCS#11 / cloud HSM / optional runtime when credentials exist |
 | **Multi-cloud inventory** | No | Yes (customer cloud credentials) |
-| **SSO** | No | OIDC; SAML configuration store (IdP ACS is operational work) |
-| **RBAC** | Basic roles in the UI | Server-side `RequireRole` (Viewer &lt; Analyst &lt; Operator &lt; Admin) |
-| **Audit viewer** | No | Yes — tenant from JWT claims only |
-| **Workspaces** | JWT tenant on scans; anonymous → public tenant | JWT tenant isolation |
-| **Compliance PDFs / packs** | No | Control **mappings** (DORA / BSI / eIDAS / ISO / NIST, etc.) — **not a certification** |
-| **Support** | GitHub issues | Contracted |
+| **SSO** | No | SSO configuration support exists in parts of the enterprise control plane; complete OIDC/SAML IdP ACS handshake remains operator integration work for private beta |
+| **RBAC** | Basic roles in the UI | Server-side `RequireRole` on covered routes (Viewer &lt; Analyst &lt; Operator &lt; Admin) |
+| **Audit viewer** | No | Enterprise audit views where configured; tenant derived from JWT claims only |
+| **Workspaces** | JWT tenant on scans; anonymous traffic may map to a public/demo tenant in limited flows | JWT tenant isolation for protected resources |
+| **Compliance PDFs / packs** | No | Control **mappings** where implemented (DORA / BSI / eIDAS / ISO / NIST, etc.) — **not a certification** |
+| **Support** | GitHub issues | Contracted (if applicable) |
 
 See [LEGAL.md](../LEGAL.md), [PRIVACY.md](../PRIVACY.md), [TRADEMARKS.md](../TRADEMARKS.md), and the comparison table in [README.md](../README.md).
 

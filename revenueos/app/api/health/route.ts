@@ -1,14 +1,15 @@
 import { ok } from "@/lib/api";
-import { getStripeMode } from "@/lib/env";
-import { isStripeConfigured } from "@/lib/stripe";
+import { assertSecureRuntimeConfig, isDeployedEnvironment } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (isDeployedEnvironment()) {
+    assertSecureRuntimeConfig();
+  }
+  const deployed = isDeployedEnvironment();
   return ok({
     status: "ok",
-    stripeMode: getStripeMode(),
-    stripeConfigured: isStripeConfigured(),
-    timestamp: new Date().toISOString(),
+    ...(deployed ? {} : { env: "development" }),
   });
 }

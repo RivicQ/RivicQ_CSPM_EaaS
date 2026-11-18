@@ -104,12 +104,7 @@ docker build -f deploy/docker/Dockerfile.oss -t cryptobom-oss:local .
 docker run --rm -p 8080:8080 cryptobom-oss:local
 ```
 
-Pre-built images are published to the GitHub Container Registry on every
-push to `master`:
-
-```
-ghcr.io/RivicQ/RivicQ_CSPM_EaaS/cryptobom-oss:latest
-```
+Container publishing depends on the configured workflow and event (for example, CI image jobs may push on non-PR branch pushes when credentials/permissions allow; manual deploy workflows also exist). Verify the active workflow in `.github/workflows/` before assuming a registry tag is updated for a given branch or commit.
 
 ---
 
@@ -144,8 +139,8 @@ push and pull request.
 
 | File | Trigger | Purpose | Secrets required |
 |------|---------|---------|-----------------|
-| `.github/workflows/ci-oss.yml` | Push / PR to `master` or `main`, or manual | Lint, unit tests, build OSS binary, build container image | None (uses `GITHUB_TOKEN`) |
-| `.github/workflows/ci-cd.yml` | Push / PR to `master`, `main`, `develop`, or manual | Full CI pipeline (security scan, tests, container build) | None for CI; deploy steps need `KUBE_CONFIG_*` / `IBMQ_API_KEY` |
+| `.github/workflows/ci-oss.yml` | Push / PR to `master` or `main`, or manual | Lint, unit tests, build OSS binary, build container image (push behavior is workflow/event-dependent) | None for basic CI (uses `GITHUB_TOKEN`) |
+| `.github/workflows/ci-cd.yml` | Push / PR to `master`, `main`, `develop`, or manual | Broader CI/CD pipeline; deploy/validation stages are environment- and secret-gated | Varies by job; deploy steps may need cluster credentials/secrets |
 | `.github/workflows/deploy-oss.yml` | **Manual only** | Publish OSS container image to a configurable OCI registry | Optional – see [Required secrets](#required-secrets--variables) |
 | `.github/workflows/deploy-gcp.yml` | **Manual only** | Build and deploy OSS image to GCP / GKE | `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT`, `GCP_PROJECT_ID` |
 | `.github/workflows/deploy-enterprise.yml` | **Manual only** | Build and deploy Enterprise image to GCP, AWS, and IBM Cloud | `GCP_*`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `IBM_CLOUD_API_KEY` |

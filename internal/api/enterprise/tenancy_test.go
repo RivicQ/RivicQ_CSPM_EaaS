@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rivic-q/cryptobom-saas/internal/tenant"
 )
 
 func TestTenantIDForIgnoresSpoofedHeader(t *testing.T) {
@@ -15,7 +16,7 @@ func TestTenantIDForIgnoresSpoofedHeader(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
 	c.Request.Header.Set("X-Tenant-ID", "malicious-tenant")
 
-	if got := tenantIDFor(c); got != enterpriseDefaultTenant {
+	if got := tenantIDFor(c); got != tenant.PublicTenantID {
 		t.Fatalf("spoofed header must not win, got %q", got)
 	}
 

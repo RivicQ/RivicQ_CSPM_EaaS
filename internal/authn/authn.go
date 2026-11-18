@@ -14,6 +14,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
 )
 
 // Role is a workspace role. Roles are ordered: admin > operator > analyst > viewer.
@@ -141,22 +143,11 @@ func normalizeRole(role string) Role {
 	}
 }
 
-// editionForRole derives the edition a role is entitled to.
-func editionForRole(requested string, role Role) Edition {
-	switch Edition(strings.ToLower(strings.TrimSpace(requested))) {
-	case EditionEnterprise, "ent":
+// entitledEdition returns the server-derived entitlement for the running build.
+// Client-supplied edition and role-based escalation are intentionally ignored.
+func entitledEdition() Edition {
+	if edition.Detect().Edition == edition.Enterprise {
 		return EditionEnterprise
-	case EditionProfessional, "pro":
-		return EditionProfessional
-	case EditionOSS, "community":
-		return EditionOSS
 	}
-	switch role {
-	case RoleAdmin:
-		return EditionEnterprise
-	case RoleOperator, RoleAnalyst:
-		return EditionProfessional
-	default:
-		return EditionOSS
-	}
+	return EditionOSS
 }

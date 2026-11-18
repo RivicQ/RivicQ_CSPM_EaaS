@@ -17,41 +17,64 @@ type EnterpriseDB struct {
 	logger *logrus.Logger
 }
 
-func NewEnterpriseConnection(cfg config.DatabaseConfig) (*EnterpriseDB, error) {
-	dsn := strings.TrimSpace(os.Getenv("DATABASE_URL"))
+// EnterpriseDatabaseURL returns the explicitly configured enterprise DB URL.
+// A separate enterprise database is opt-in; when unset the caller should run
+// enterprise tables in the core database to keep the tenant model consistent.
+func EnterpriseDatabaseURL() string {
+	return strings.TrimSpace(os.Getenv("ENTERPRISE_DATABASE_URL"))
+}
+
+// NewEnterpriseConnection connects to an explicitly configured separate
+// enterprise database. It never silently reuses DATABASE_URL/core settings;
+// use ENTERPRISE_DATABASE_URL when a separate DB is truly required.
+func NewEnterpriseConnection(_ config.DatabaseConfig) (*EnterpriseDB, error) {
+	dsn := EnterpriseDatabaseURL()
 	if dsn == "" {
-		dsn = fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode,
-		)
+		return nil, fmt.Errorf("ENTERPRISE_DATABASE_URL is not set (separate enterprise database not configured)")
 	}
 
+	logger := logrus.New()
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %w", err)
+		return nil, fmt.Errorf("failed to open enterprise database: %w", err)
 	}
 
 	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		_ = db.Close()
+		return nil, fmt.Errorf("failed to ping enterprise database: %w", err)
 	}
 
 	db.SetMaxOpenConns(50)
 	db.SetMaxIdleConns(50)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
-	logger := logrus.New()
-	logger.Info("Enterprise database connection established")
+	logger.Info("Enterprise database connection established (separate ENTERPRISE_DATABASE_URL)")
 
-	return &EnterpriseDB{
-		DB:     db,
-		logger: logger,
-	}, nil
+	return &EnterpriseDB{DB: db, logger: logger}, nil
+}
+
+// NewEnterpriseDBFromSQL wraps an existing SQL handle (typically the core DB)
+// so enterprise tables share the same database/tenant model.
+func NewEnterpriseDBFromSQL(db *sql.DB, logger *logrus.Logger) *EnterpriseDB {
+	if logger == nil {
+		logger = logrus.New()
+	}
+	return &EnterpriseDB{DB: db, logger: logger}
 }
 
 func RunEnterpriseMigrations(db *EnterpriseDB) error {
-	logger := logrus.New()
+	if db == nil || db.DB == nil {
+		return fmt.Errorf("enterprise database handle is nil")
+	}
+	logger := db.logger
+	if logger == nil {
+		logger = logrus.New()
+	}
 	logger.Info("Running enterprise database migrations...")
 
+	// Tenant IDs are TEXT to align with the core tenant model and seeded/public
+	// tenants. Enterprise tables may live in the core DB (beta default) so we
+	// must not redefine core-owned tables with incompatible UUID types.
 	queries := []string{
 		`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`,
 		`CREATE EXTENSION IF NOT EXISTS "pg_trgm";`,
@@ -86,29 +109,26 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 			);
 		EXCEPTION WHEN duplicate_object THEN NULL; END $$;`,
 
+		// Compatible with core tenants (TEXT id). IF NOT EXISTS avoids
+		// clobbering the core table when enterprise runs in the shared DB.
 		`CREATE TABLE IF NOT EXISTS tenants (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			name VARCHAR(255) NOT NULL,
-			domain VARCHAR(255) UNIQUE NOT NULL,
-			plan VARCHAR(50) DEFAULT 'enterprise',
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			domain TEXT,
+			plan TEXT DEFAULT 'enterprise',
 			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);`,
 
-		`CREATE TABLE IF NOT EXISTS users (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
-			email VARCHAR(255) UNIQUE NOT NULL,
-			name VARCHAR(255) NOT NULL,
-			role VARCHAR(50) NOT NULL DEFAULT 'user',
-			mfa_enabled BOOLEAN DEFAULT FALSE,
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		);`,
+		// Ensure the public/default tenant used for unauthenticated enterprise
+		// reads exists for FK consistency. Core may seed a different tenant.
+		`INSERT INTO tenants (id, name, plan)
+		 VALUES ('00000000-0000-0000-0000-000000000001', 'Public', 'oss')
+		 ON CONFLICT (id) DO NOTHING;`,
 
 		`CREATE TABLE IF NOT EXISTS cbom_reports (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			name VARCHAR(255) NOT NULL,
 			version VARCHAR(50) NOT NULL,
 			cyclonedx_bom JSONB NOT NULL,
@@ -120,7 +140,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS inventory_assets (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			asset_id VARCHAR(255) NOT NULL,
 			name VARCHAR(255) NOT NULL,
 			description TEXT,
@@ -172,7 +192,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 			risk_category VARCHAR(50),
 			eu_ai_act_classification VARCHAR(50),
 			transparency_score INTEGER,
-		_bias_assessment JSONB,
+			bias_assessment JSONB,
 			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);`,
@@ -221,7 +241,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 			inventory_asset_id UUID NOT NULL REFERENCES inventory_assets(id),
 			infrastructure_type VARCHAR(100) NOT NULL,
 			resource_type VARCHAR(100),
-			 service_name VARCHAR(255),
+			service_name VARCHAR(255),
 			configuration JSONB,
 			network_config JSONB,
 			encryption_at_rest BOOLEAN DEFAULT FALSE,
@@ -239,7 +259,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS cloud_accounts (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			provider cloud_provider NOT NULL,
 			account_id VARCHAR(100) NOT NULL,
 			account_name VARCHAR(255),
@@ -256,7 +276,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS compliance_frameworks (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			framework compliance_framework NOT NULL,
 			scope VARCHAR(255),
 			controls JSONB,
@@ -291,7 +311,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS risk_assessments (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			asset_id UUID REFERENCES inventory_assets(id),
 			framework_id UUID REFERENCES compliance_frameworks(id),
 			risk_type VARCHAR(100) NOT NULL,
@@ -315,7 +335,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS quantum_attestations (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			asset_id UUID REFERENCES inventory_assets(id),
 			attestation_type VARCHAR(100) NOT NULL,
 			quantum_network VARCHAR(255),
@@ -332,7 +352,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS terraform_assets (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			terraform_state_id VARCHAR(255),
 			workspace VARCHAR(255),
 			module_source VARCHAR(500),
@@ -353,7 +373,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS cncf_tools (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			tool_name VARCHAR(100) NOT NULL,
 			tool_type VARCHAR(100),
 			version VARCHAR(50),
@@ -368,26 +388,9 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);`,
 
-		`CREATE TABLE IF NOT EXISTS security_events (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
-			event_type VARCHAR(100) NOT NULL,
-			severity VARCHAR(20) NOT NULL,
-			source VARCHAR(255) NOT NULL,
-			category VARCHAR(100),
-			description TEXT,
-			affected_assets UUID[],
-			metadata JSONB,
-			resolved BOOLEAN DEFAULT FALSE,
-			resolved_by VARCHAR(255),
-			resolved_at TIMESTAMP WITH TIME ZONE,
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-			updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-		);`,
-
 		`CREATE TABLE IF NOT EXISTS kubernetes_clusters (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			cloud_account_id UUID REFERENCES cloud_accounts(id),
 			name VARCHAR(255) NOT NULL,
 			endpoint VARCHAR(500) NOT NULL,
@@ -405,7 +408,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS compliance_reports (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			report_type VARCHAR(100) NOT NULL,
 			framework compliance_framework,
 			title VARCHAR(255) NOT NULL,
@@ -420,7 +423,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS api_keys (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			name VARCHAR(255) NOT NULL,
 			key_prefix VARCHAR(8) NOT NULL,
 			key_hash VARCHAR(64) NOT NULL,
@@ -435,7 +438,7 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 
 		`CREATE TABLE IF NOT EXISTS webhooks (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			tenant_id UUID NOT NULL REFERENCES tenants(id),
+			tenant_id TEXT NOT NULL REFERENCES tenants(id),
 			name VARCHAR(255) NOT NULL,
 			url VARCHAR(1024) NOT NULL,
 			secret VARCHAR(255) NOT NULL,
@@ -454,9 +457,6 @@ func RunEnterpriseMigrations(db *EnterpriseDB) error {
 			response_body TEXT,
 			delivered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);`,
-
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_enabled BOOLEAN DEFAULT FALSE;`,
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_secret VARCHAR(255) DEFAULT '';`,
 	}
 
 	for _, query := range queries {
@@ -494,8 +494,6 @@ func createEnterpriseIndexes(db *EnterpriseDB) error {
 		`CREATE INDEX IF NOT EXISTS idx_quantum_attestations_tenant ON quantum_attestations(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_terraform_assets_tenant ON terraform_assets(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_cncf_tools_tenant ON cncf_tools(tenant_id);`,
-		`CREATE INDEX IF NOT EXISTS idx_security_events_tenant ON security_events(tenant_id);`,
-		`CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events(severity);`,
 		`CREATE INDEX IF NOT EXISTS idx_kubernetes_clusters_tenant ON kubernetes_clusters(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_compliance_reports_tenant ON compliance_reports(tenant_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_api_keys_tenant ON api_keys(tenant_id);`,

@@ -291,6 +291,7 @@ func walkRepo(root string, includeFixtures bool) ([]shared.RepoFile, error) {
 	skipDir := map[string]bool{
 		".git": true, "node_modules": true, "vendor": true,
 		"dist": true, "coverage": true, "bin": true,
+		".venv": true, "venv": true, "site-packages": true, "__pycache__": true,
 	}
 	if !includeFixtures {
 		skipDir["testdata"] = true

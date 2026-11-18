@@ -1,17 +1,21 @@
 package shared
 
-import "strings"
+import (
+	"github.com/rivic-q/cryptobom-saas/internal/edition"
+)
 
-// normalizeAuthEdition maps frontend edition names to JWT edition values.
-func normalizeAuthEdition(raw string) string {
-	switch strings.ToLower(strings.TrimSpace(raw)) {
-	case "community", "oss":
-		return "oss"
-	case "professional", "pro":
-		return "professional"
-	case "enterprise", "ent":
+// serverAuthEdition returns the server-derived entitlement for this running build.
+// Client-supplied edition values are intentionally ignored.
+func serverAuthEdition() string {
+	if edition.Detect().Edition == edition.Enterprise {
 		return "enterprise"
-	default:
-		return "oss"
 	}
+	return "oss"
+}
+
+// normalizeAuthEdition is retained for compatibility but always resolves to the
+// server-derived entitlement.
+func normalizeAuthEdition(raw string) string {
+	_ = raw
+	return serverAuthEdition()
 }

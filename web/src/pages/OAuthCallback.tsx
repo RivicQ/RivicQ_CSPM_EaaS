@@ -43,93 +43,39 @@ const OAuthCallback: React.FC = () => {
       return;
     }
 
-    const code = searchParams.get('code');
+    const exchangeCode = searchParams.get('exchange_code') || searchParams.get('code');
     const state = searchParams.get('state');
-
-    const finishWithTokens = async (
-      accessToken: string,
-      refreshToken: string | null,
-      edition: ReturnType<typeof normalizeEdition>,
-      user?: { id: string; name: string; email: string; role: string },
-    ) => {
-      try {
-        if (user?.id && user.name) {
-          persistAuth({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            user: {
-              id: user.id,
-              name: decode(user.name),
-              email: decode(user.email),
-              role: user.role,
-            },
-            edition,
-          });
-        } else {
-          persistAuth({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            user: { id: 'loading', name: 'Loading...', email: '', role: 'viewer' },
-            edition,
-          });
-          const meResp = await authService.me();
-          const me = meResp.data;
-          persistAuth({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            user: { id: me.user_id, name: me.name || me.email, email: me.email, role: me.role },
-            edition: me.edition || edition,
-          });
-        }
-        navigate('/dashboard', { replace: true });
-      } catch {
-        setError('Failed to complete authentication. Please try logging in manually.');
-      }
-    };
+    const provider = (searchParams.get('provider') || '').toLowerCase();
 
     const finish = async () => {
-      if (code && state) {
+      if (exchangeCode && state) {
         try {
-          const resp = await authService.googleExchange({ code, state });
+          let resp;
+          if (provider === 'github') {
+            resp = await authService.githubExchange({ exchange_code: exchangeCode, state });
+          } else {
+            resp = await authService.googleExchange({ exchange_code: exchangeCode, state });
+          }
           const data = resp.data;
-          await finishWithTokens(
-            data.access_token,
-            data.refresh_token,
-            normalizeEdition(data.edition),
-            data.user
-              ? {
-                  id: data.user.id,
-                  name: data.user.name,
-                  email: data.user.email,
-                  role: data.user.role || 'viewer',
-                }
-              : undefined,
-          );
+          persistAuth({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token || null,
+            user: data.user ? {
+              id: data.user.id,
+              name: decode(data.user.name),
+              email: decode(data.user.email),
+              role: data.user.role || 'viewer',
+            } : { id: 'loading', name: 'Loading...', email: '', role: 'viewer' },
+            edition: normalizeEdition(data.edition),
+          });
+          navigate('/dashboard', { replace: true });
         } catch (err: any) {
-          setError(err?.response?.data?.error || err?.message || 'Google sign-in failed');
+          setError(err?.response?.data?.error || err?.message || 'Sign-in failed');
         }
         return;
       }
 
-      const accessToken = searchParams.get('access_token');
-      const refreshToken = searchParams.get('refresh_token');
-      const edition = normalizeEdition(searchParams.get('edition'));
-      const userId = searchParams.get('user_id');
-      const userName = searchParams.get('user_name');
-      const userEmail = searchParams.get('user_email');
-      const userRole = searchParams.get('user_role') || 'viewer';
-
-      if (!accessToken) {
-        setError('No access token received from authentication provider. Please try again.');
-        return;
-      }
-
-      await finishWithTokens(accessToken, refreshToken, edition, {
-        id: userId || '',
-        name: userName || '',
-        email: userEmail || '',
-        role: userRole,
-      });
+      setError('Missing exchange code. Please try signing in again.');
     };
 
     finish();

@@ -21,17 +21,17 @@ const RequireEnterprise: React.FC<{ children: React.ReactElement; layers?: boole
                 Enterprise layer locked
               </Typography>
               <Typography variant="body1" sx={{ color: '#d1d5db' }}>
-                Community is Cryptographic Security Posture Management: CBOM, SBOM, scanner, and the policy gate. QBOM, HBOM, AIBOM, IBOM, HSM connectors, and GRC packs stay on the licensed Enterprise control plane.
+                This workspace is not entitled to this capability. Server-derived entitlements are required.
               </Typography>
               <Alert severity="info" sx={{ width: '100%' }}>
-                Switch to Enterprise from the edition selector when your workspace is provisioned and approved.
+                Sign in to an entitled workspace provisioned by your administrator.
               </Alert>
               <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
                 <Button variant="contained" startIcon={<WorkspacePremium />} onClick={() => navigate('/switcher')}>
                   Choose edition
                 </Button>
                 <Button variant="outlined" endIcon={<ArrowForward />} onClick={() => navigate('/dashboard')}>
-                  Back to OSS dashboard
+                  Back to dashboard
                 </Button>
               </Stack>
             </Stack>

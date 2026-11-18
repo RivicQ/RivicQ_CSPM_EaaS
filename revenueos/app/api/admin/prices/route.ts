@@ -1,15 +1,14 @@
 import { handleRoute, ok } from "@/lib/api";
+import { requireAdminApiAccess } from "@/lib/admin-data";
 import { writeAuditLog } from "@/lib/audit";
-import { requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { priceSchema, regionalPriceSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
-const allowedRoles = ["SUPER_ADMIN", "FOUNDER", "FINANCE_ADMIN"];
 
 export async function GET() {
   return handleRoute(async () => {
-    const actor = await requireStaff(allowedRoles);
+    const actor = await requireAdminApiAccess("prices");
     const prices = await prisma.price.findMany({
       include: { product: true, regionalPrices: true },
       orderBy: [{ product: { code: "asc" } }, { currency: "asc" }],
@@ -21,7 +20,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   return handleRoute(async () => {
-    const actor = await requireStaff(allowedRoles);
+    const actor = await requireAdminApiAccess("prices");
     const payload = await request.json();
     if (payload.kind === "regional") {
       const body = regionalPriceSchema.parse(payload);
@@ -73,7 +72,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   return handleRoute(async () => {
-    const actor = await requireStaff(allowedRoles);
+    const actor = await requireAdminApiAccess("prices");
     const body = (await request.json()) as {
       id: string;
       unitAmount?: number;

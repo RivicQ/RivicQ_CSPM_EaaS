@@ -49,7 +49,7 @@ func (h *CNCFHandler) SetupRoutes(router *gin.RouterGroup) {
 
 type CNCFPlugin struct {
 	ID              uuid.UUID              `json:"id"`
-	TenantID        uuid.UUID              `json:"tenant_id"`
+	TenantID        string                 `json:"tenant_id"`
 	ToolName        string                 `json:"tool_name"`
 	ToolType        string                 `json:"tool_type"`
 	Version         string                 `json:"version"`
@@ -60,6 +60,10 @@ type CNCFPlugin struct {
 }
 
 func (h *CNCFHandler) ListTools(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID := tenantIDFor(c)
 	toolType := c.Query("type")
 
@@ -104,6 +108,10 @@ func (h *CNCFHandler) ListTools(c *gin.Context) {
 }
 
 func (h *CNCFHandler) RegisterTool(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID, ok := mutatingTenantIDFor(c)
 	if !ok {
 		return
@@ -116,7 +124,7 @@ func (h *CNCFHandler) RegisterTool(c *gin.Context) {
 	}
 
 	tool.ID = uuid.New()
-	tool.TenantID, _ = uuid.Parse(tenantID)
+	tool.TenantID = tenantID
 	tool.Status = "active"
 
 	configJSON, _ := json.Marshal(tool.Configuration)
@@ -140,6 +148,10 @@ func (h *CNCFHandler) RegisterTool(c *gin.Context) {
 }
 
 func (h *CNCFHandler) UpdateTool(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	toolID, err := uuid.Parse(id)
 	if err != nil {
@@ -175,6 +187,10 @@ func (h *CNCFHandler) UpdateTool(c *gin.Context) {
 }
 
 func (h *CNCFHandler) DeleteTool(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	toolID, err := uuid.Parse(id)
 	if err != nil {
@@ -198,190 +214,82 @@ func (h *CNCFHandler) GetToolMetrics(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tool ID"})
 		return
 	}
-
-	metrics := gin.H{
-		"tool_id":      toolID,
-		"cpu_usage":    "45%",
-		"memory_usage": "512MB",
-		"uptime":       "24h 30m",
-		"requests":     12500,
-		"errors":       12,
-		"latency_p50":  "25ms",
-		"latency_p95":  "85ms",
-		"latency_p99":  "150ms",
-	}
-
-	c.JSON(http.StatusOK, metrics)
+	c.JSON(http.StatusOK, gin.H{
+		"tool_id": toolID,
+		"status": "unavailable",
+		"source": "unconfigured",
+		"configured": false,
+		"message": "Tool metrics unavailable: no live metrics integration configured",
+	})
 }
 
 func (h *CNCFHandler) CheckToolHealth(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	toolID, err := uuid.Parse(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tool ID"})
 		return
 	}
-
-	h.logger.Info("Checking health for tool: ", toolID)
-
-	query := `UPDATE cncf_tools SET last_health_check = NOW() WHERE id = $1`
-	_, _ = h.db.Exec(query, toolID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"tool_id":    toolID,
-		"status":     "healthy",
-		"checked_at": time.Now(),
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"tool_id": toolID,
+		"status": "unavailable",
+		"source": "unconfigured",
+		"configured": false,
+		"message": "Tool health check unavailable: no live health probe integration configured",
 	})
 }
 
 func (h *CNCFHandler) PrometheusIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"tool":     "Prometheus",
-		"type":     "monitoring",
-		"version":  "2.45.0",
-		"endpoint": "http://prometheus:9090",
-		"status":   "connected",
-		"metrics": gin.H{
-			"targets":         25,
-			"alert_rules":     50,
-			"recording_rules": 30,
-		},
-	})
+	c.JSON(http.StatusOK, gin.H{"tool":"Prometheus","type":"monitoring","status":"unavailable","source":"unconfigured","configured":false,"message":"Prometheus integration not configured"})
 }
 
 func (h *CNCFHandler) GrafanaIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"tool":     "Grafana",
-		"type":     "visualization",
-		"version":  "10.0.0",
-		"endpoint": "http://grafana:3000",
-		"status":   "connected",
-		"dashboards": gin.H{
-			"total":       15,
-			"datasources": 5,
-		},
-	})
+	c.JSON(http.StatusOK, gin.H{"tool":"Grafana","type":"visualization","status":"unavailable","source":"unconfigured","configured":false,"message":"Grafana integration not configured"})
 }
 
 func (h *CNCFHandler) ArgoCDIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"tool":     "ArgoCD",
-		"type":     "gitops",
-		"version":  "2.8.0",
-		"endpoint": "http://argocd:8080",
-		"status":   "connected",
-		"applications": gin.H{
-			"total":       20,
-			"synced":      18,
-			"out_of_sync": 2,
-		},
-	})
+	c.JSON(http.StatusOK, gin.H{"tool":"ArgoCD","type":"gitops","status":"unavailable","source":"unconfigured","configured":false,"message":"ArgoCD integration not configured"})
 }
 
 func (h *CNCFHandler) FluxIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"tool":     "Flux",
-		"type":     "gitops",
-		"version":  "2.1.0",
-		"endpoint": "http://flux:3000",
-		"status":   "connected",
-		"reconcilers": gin.H{
-			"helm":      10,
-			"kustomize": 8,
-		},
-	})
+	c.JSON(http.StatusOK, gin.H{"tool":"Flux","type":"gitops","status":"unavailable","source":"unconfigured","configured":false,"message":"Flux integration not configured"})
 }
 
 func (h *CNCFHandler) IstioIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"tool":    "Istio",
-		"type":    "service_mesh",
-		"version": "1.18.0",
-		"status":  "connected",
-		"mesh": gin.H{
-			"services":         50,
-			"workloads":        100,
-			"gateways":         10,
-			"virtual_services": 25,
-		},
-	})
+	c.JSON(http.StatusOK, gin.H{"tool":"Istio","type":"service_mesh","status":"unavailable","source":"unconfigured","configured":false,"message":"Istio integration not configured"})
 }
 
 func (h *CNCFHandler) LinkerdIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"tool":    "Linkerd",
-		"type":    "service_mesh",
-		"version": "2.13.0",
-		"status":  "connected",
-		"mesh": gin.H{
-			"services":    45,
-			"deployments": 80,
-		},
-	})
+	c.JSON(http.StatusOK, gin.H{"tool":"Linkerd","type":"service_mesh","status":"unavailable","source":"unconfigured","configured":false,"message":"Linkerd integration not configured"})
 }
 
 func (h *CNCFHandler) CiliumIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"tool":    "Cilium",
-		"type":    "networking",
-		"version": "1.13.0",
-		"status":  "connected",
-		"network": gin.H{
-			"nodes":            10,
-			"endpoints":        200,
-			"cilium_endpoints": 180,
-			"network_policies": 50,
-		},
-	})
+	c.JSON(http.StatusOK, gin.H{"tool":"Cilium","type":"networking","status":"unavailable","source":"unconfigured","configured":false,"message":"Cilium integration not configured"})
 }
 
 func (h *CNCFHandler) K3sIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"tool":    "K3s",
-		"type":    "kubernetes",
-		"version": "v1.27.4+k3s1",
-		"status":  "connected",
-		"cluster": gin.H{
-			"nodes":       5,
-			"namespaces":  20,
-			"deployments": 60,
-			"pods":        150,
-		},
-	})
+	c.JSON(http.StatusOK, gin.H{"tool":"K3s","type":"kubernetes","status":"unavailable","source":"unconfigured","configured":false,"message":"K3s integration not configured"})
 }
 
 func (h *CNCFHandler) GetCNCFDashboard(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-
-	dashboard := gin.H{
-		"tools_summary": gin.H{
-			"total":     10,
-			"healthy":   9,
-			"unhealthy": 1,
-			"pending":   0,
-		},
-		"by_category": gin.H{
-			"monitoring":   []string{"Prometheus", "Grafana"},
-			"gitops":       []string{"ArgoCD", "Flux"},
-			"service_mesh": []string{"Istio", "Linkerd"},
-			"networking":   []string{"Cilium"},
-			"kubernetes":   []string{"K3s"},
-		},
-		"security": gin.H{
-			"network_policies": 50,
-			"cnps":             25,
-			"cilium_agents":    10,
-		},
-		"observability": gin.H{
-			"metrics": "enabled",
-			"tracing": "enabled",
-			"logging": "enabled",
-		},
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
 	}
-
-	h.logger.Info("Fetching CNCF dashboard for tenant: ", tenantID)
-
-	c.JSON(http.StatusOK, dashboard)
+	tenantID := tenantIDFor(c)
+	var total int
+	_ = h.db.QueryRow(`SELECT COUNT(*) FROM cncf_tools WHERE tenant_id = $1`, tenantID).Scan(&total)
+	c.JSON(http.StatusOK, gin.H{
+		"status":"ok","source":"database",
+		"tools_summary": gin.H{"total": total, "healthy": 0, "unhealthy": 0, "pending": 0},
+		"by_category": gin.H{},
+		"security": gin.H{},
+		"observability": gin.H{"metrics":"unconfigured","tracing":"unconfigured","logging":"unconfigured"},
+	})
 }
 
 type PrometheusClient struct {

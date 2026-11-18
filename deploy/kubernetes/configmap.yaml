@@ -3,12 +3,15 @@ kind: ConfigMap
 metadata:
   name: cryptobom-config
   namespace: cryptobom-system
+  labels:
+    app: cryptobom-enterprise
+    edition: enterprise
 data:
-  PORT: "8080"
-  LOG_LEVEL: "info"
-  DB_HOST: "cryptobom-postgres"
-  DB_PORT: "5432"
-  DB_NAME: "cryptobom"
-  DB_SSL_MODE: "require"
-  QUANTUM_ENABLED: "true"
-  NIST_STANDARD: "FIPS-203"
+  CRYPTOBOM_EDITION: "enterprise"
+  PORT: "9090"
+  CRYPTOBOM_PORT: "9090"
+  CRYPTOBOM_LOG_LEVEL: "info"
+  # DATABASE_URL must be provided via Secret (fail-closed; no demo/fabricated data).
+  # ENTERPRISE_DATABASE_URL is optional and only for an explicit separate enterprise DB.
+  QUANTUM_ENABLED: "false"
+  IBMQ_ENABLED: "false"

@@ -8,9 +8,12 @@ export function LogoutButton() {
     <button
       type="button"
       onClick={async () => {
-        await fetch("/api/auth/logout", { method: "POST" });
-        router.push("/login");
-        router.refresh();
+        try {
+          await fetch("/api/auth/logout", { method: "POST" });
+        } finally {
+          router.push("/login");
+          router.refresh();
+        }
       }}
       className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5"
     >

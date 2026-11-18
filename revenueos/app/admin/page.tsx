@@ -1,7 +1,10 @@
+import { redirect } from "next/navigation";
 import { Card, DataTable, PageHeader, StatCard } from "@/components/ui";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import { getStripeMode } from "@/lib/env";
 import { formatMoney } from "@/lib/money";
+import { canAccessAdminSection, firstAllowedAdminPath } from "@/lib/rbac";
 import { asRevenueInterval, firstTenCustomerPlan, projectFinancials, summarizeRevenue } from "@/lib/revenue";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +14,10 @@ export default async function AdminOverviewPage({
 }: {
   searchParams: Promise<{ scenario?: string; currency?: string; customers?: string }>;
 }) {
+  const user = await getSession();
+  if (!user) redirect("/login");
+  if (!canAccessAdminSection(user.role, "overview")) redirect(firstAllowedAdminPath(user.role));
+
   const params = await searchParams;
   const [customers, activeSubscriptions, pendingQuotations, succeededPayments, auditEngagements, revenueRecords] =
     await Promise.all([

@@ -1,40 +1,34 @@
 import { handleRoute, HttpError, ok } from "@/lib/api";
+import { requireAdminApiAccess } from "@/lib/admin-data";
 import { writeAuditLog } from "@/lib/audit";
-import { requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { isQuotationStatus, quotationUpdateData } from "@/lib/quotation-workflow";
 
 export const dynamic = "force-dynamic";
 
-const allowedStatuses = [
-  "DRAFT",
-  "INTERNAL_REVIEW",
-  "APPROVED",
-  "SENT",
-  "VIEWED",
-  "ACCEPTED",
-  "REJECTED",
-  "EXPIRED",
-  "CONVERTED_TO_INVOICE",
-];
-
 export async function POST(request: Request) {
   return handleRoute(async () => {
-    const actor = await requireStaff(["SUPER_ADMIN", "FOUNDER", "SALES_ADMIN", "FINANCE_ADMIN"]);
-    const body = (await request.json()) as { id: string; status: string };
-    if (!body.id || !allowedStatuses.includes(body.status)) {
+    const actor = await requireAdminApiAccess("quotations-status");
+    const body = (await request.json()) as { id?: string; status?: string };
+    if (!body.id || typeof body.status !== "string" || !isQuotationStatus(body.status)) {
       throw new HttpError(400, "Valid quotation id and status are required");
     }
+
     const existing = await prisma.quotation.findUnique({ where: { id: body.id } });
     if (!existing) throw new HttpError(404, "Quotation not found");
 
+    const data = quotationUpdateData({
+      from: existing.status,
+      to: body.status,
+      actorId: actor.id,
+      existingApprovedAt: existing.approvedAt,
+      existingApprovedById: existing.approvedById,
+      existingAcceptedAt: existing.acceptedAt,
+    });
+
     const quotation = await prisma.quotation.update({
       where: { id: body.id },
-      data: {
-        status: body.status as never,
-        approvedAt: body.status === "APPROVED" ? new Date() : existing.approvedAt,
-        approvedById: body.status === "APPROVED" ? actor.id : existing.approvedById,
-        acceptedAt: body.status === "ACCEPTED" ? new Date() : existing.acceptedAt,
-      },
+      data,
     });
     await writeAuditLog({
       actorId: actor.id,
@@ -43,6 +37,7 @@ export async function POST(request: Request) {
       entityType: "Quotation",
       entityId: quotation.id,
       metadata: { from: existing.status, to: quotation.status },
+      ip: null,
     });
     return ok({ quotation });
   });

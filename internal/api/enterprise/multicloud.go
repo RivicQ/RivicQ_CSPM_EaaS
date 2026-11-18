@@ -60,7 +60,7 @@ func (h *MultiCloudHandler) SetupRoutes(router *gin.RouterGroup) {
 
 type CloudAccount struct {
 	ID             uuid.UUID     `json:"id"`
-	TenantID       uuid.UUID     `json:"tenant_id"`
+	TenantID       string        `json:"tenant_id"`
 	Provider       CloudProvider `json:"provider"`
 	AccountID      string        `json:"account_id"`
 	AccountName    string        `json:"account_name"`
@@ -94,6 +94,10 @@ type SecurityFinding struct {
 }
 
 func (h *MultiCloudHandler) ListCloudAccounts(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID := tenantIDFor(c)
 	provider := c.Query("provider")
 
@@ -138,6 +142,10 @@ func (h *MultiCloudHandler) ListCloudAccounts(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AddCloudAccount(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	tenantID, ok := mutatingTenantIDFor(c)
 	if !ok {
 		return
@@ -150,7 +158,7 @@ func (h *MultiCloudHandler) AddCloudAccount(c *gin.Context) {
 	}
 
 	account.ID = uuid.New()
-	account.TenantID, _ = uuid.Parse(tenantID)
+	account.TenantID = tenantID
 
 	regionsJSON, _ := json.Marshal(account.Regions)
 	servicesJSON, _ := json.Marshal(account.Services)
@@ -161,7 +169,7 @@ func (h *MultiCloudHandler) AddCloudAccount(c *gin.Context) {
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
 	_, err := h.db.Exec(query,
-		account.ID, account.TenantID, account.Provider, account.AccountID,
+		account.ID, tenantID, account.Provider, account.AccountID,
 		account.AccountName, account.OrganizationID, regionsJSON, servicesJSON, "active",
 	)
 	if err != nil {
@@ -176,6 +184,10 @@ func (h *MultiCloudHandler) AddCloudAccount(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) UpdateCloudAccount(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	accountID, err := uuid.Parse(id)
 	if err != nil {
@@ -216,6 +228,10 @@ func (h *MultiCloudHandler) UpdateCloudAccount(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) DeleteCloudAccount(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	accountID, err := uuid.Parse(id)
 	if err != nil {
@@ -233,6 +249,10 @@ func (h *MultiCloudHandler) DeleteCloudAccount(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) SyncCloudAccount(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	id := c.Param("id")
 	accountID, err := uuid.Parse(id)
 	if err != nil {
@@ -250,6 +270,10 @@ func (h *MultiCloudHandler) SyncCloudAccount(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) ListCloudResources(c *gin.Context) {
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
+	}
 	accountID := c.Param("id")
 
 	h.logger.Info("Listing resources for cloud account: ", accountID)
@@ -261,241 +285,108 @@ func (h *MultiCloudHandler) ListCloudResources(c *gin.Context) {
 }
 
 func (h *MultiCloudHandler) AWSInventory(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-	h.logger.Info("Fetching AWS inventory for tenant: ", tenantID)
-
 	sdks := newCloudSDKs(c.Request.Context())
 	result, err := sdks.fetchAWSInventory(c.Request.Context())
-	if err != nil || result.Total == 0 {
-		resources := []map[string]interface{}{
-			{
-				"resource_id":     "i-0123456789abcdef0",
-				"resource_type":   "ec2_instance",
-				"resource_name":   "web-server-1",
-				"service":         "ec2",
-				"region":          "us-east-1",
-				"instance_type":   "t3.medium",
-				"security_groups": []string{"sg-0123456789abcdef"},
-			},
-			{
-				"resource_id":   "arn:aws:s3:::my-bucket",
-				"resource_type": "s3_bucket",
-				"resource_name": "my-bucket",
-				"service":       "s3",
-				"region":        "us-east-1",
-				"encryption":    true,
-			},
-		}
+	if err != nil || result == nil || result.Total == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"provider":  "aws",
-			"resources": resources,
-			"total":     len(resources),
-			"source":    "demo",
+			"provider": "aws", "status":"unavailable", "source":"unconfigured", "configured": false,
+			"resources": []any{}, "ec2":[]any{}, "s3":[]any{}, "rds":[]any{}, "eks":[]any{}, "total": 0,
+			"message":"AWS inventory unavailable: no live cloud integration configured",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"provider": "aws",
-		"source":   "live",
-		"ec2":      result.EC2Instances,
-		"s3":       result.S3Buckets,
-		"rds":      result.RDSInstances,
-		"eks":      result.EKSClusters,
-		"total":    result.Total,
+		"provider": "aws", "status":"ok", "source":"live",
+		"ec2": result.EC2Instances, "s3": result.S3Buckets, "rds": result.RDSInstances, "eks": result.EKSClusters,
+		"total": result.Total,
 	})
 }
 
 func (h *MultiCloudHandler) AWSScan(c *gin.Context) {
-	tenantID, ok := mutatingTenantIDFor(c)
-	if !ok {
+	if _, ok := mutatingTenantIDFor(c); !ok {
 		return
 	}
-
-	h.logger.Info("Starting AWS security scan for tenant: ", tenantID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":   "scan_started",
-		"provider": "aws",
-		"message":  "AWS security scan initiated",
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"status":"unavailable","source":"unconfigured","configured":false,"provider":"aws",
+		"capability":"cloud_scan","message":"AWS scan unavailable: no live scan integration configured",
 	})
 }
 
 func (h *MultiCloudHandler) GCPInventory(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-	h.logger.Info("Fetching GCP inventory for tenant: ", tenantID)
-
 	sdks := newCloudSDKs(c.Request.Context())
 	result, err := sdks.fetchGCPInventory(c.Request.Context())
-	if err != nil || result.Total == 0 {
-		resources := []map[string]interface{}{
-			{
-				"resource_id":   "projects/my-project/zones/us-central1-a/instances/web-server",
-				"resource_type": "compute_instance",
-				"resource_name": "web-server",
-				"service":       "compute",
-				"region":        "us-central1",
-				"machine_type":  "e2-medium",
-			},
-		}
+	if err != nil || result == nil || result.Total == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"provider":  "gcp",
-			"resources": resources,
-			"total":     len(resources),
-			"source":    "demo",
+			"provider":"gcp","status":"unavailable","source":"unconfigured","configured":false,
+			"resources":[]any{},"compute":[]any{},"storage":[]any{},"gke":[]any{},"total":0,
+			"message":"GCP inventory unavailable: no live cloud integration configured",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"provider": "gcp",
-		"source":   "live",
-		"compute":  result.GCEInstances,
-		"storage":  result.GCSBuckets,
-		"gke":      result.GKEClusters,
-		"total":    result.Total,
+		"provider":"gcp","status":"ok","source":"live",
+		"compute": result.GCEInstances, "storage": result.GCSBuckets, "gke": result.GKEClusters, "total": result.Total,
 	})
 }
 
 func (h *MultiCloudHandler) GCPScan(c *gin.Context) {
-	tenantID, ok := mutatingTenantIDFor(c)
-	if !ok {
-		return
-	}
-
-	h.logger.Info("Starting GCP security scan for tenant: ", tenantID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":   "scan_started",
-		"provider": "gcp",
-		"message":  "GCP security scan initiated",
-	})
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"provider":"gcp","capability":"cloud_scan","message":"GCP scan unavailable: no live scan integration configured"})
 }
 
 func (h *MultiCloudHandler) IBMCloudInventory(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-
-	h.logger.Info("Fetching IBM Cloud inventory for tenant: ", tenantID)
-
-	resources := []map[string]interface{}{
-		{
-			"resource_id":   "crn:v1:bluemix:public:is:us-south:a/1234567890::instance:abc123",
-			"resource_type": "vsi",
-			"resource_name": "quantum-worker-1",
-			"service":       "is",
-			"region":        "us-south",
-			"profile":       "bx2-2x8",
-		},
-	}
-
 	c.JSON(http.StatusOK, gin.H{
-		"provider":  "ibm_cloud",
-		"resources": resources,
-		"total":     len(resources),
+		"provider":"ibm_cloud","status":"unavailable","source":"unconfigured","configured":false,
+		"resources":[]any{},"total":0,
+		"message":"IBM Cloud inventory unavailable: no live cloud integration configured",
 	})
 }
 
 func (h *MultiCloudHandler) IBMCloudScan(c *gin.Context) {
-	tenantID, ok := mutatingTenantIDFor(c)
-	if !ok {
-		return
-	}
-
-	h.logger.Info("Starting IBM Cloud security scan for tenant: ", tenantID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":   "scan_started",
-		"provider": "ibm_cloud",
-		"message":  "IBM Cloud security scan initiated",
-	})
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"provider":"ibm_cloud","capability":"cloud_scan","message":"IBM Cloud scan unavailable: no live scan integration configured"})
 }
 
 func (h *MultiCloudHandler) AzureInventory(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-	h.logger.Info("Fetching Azure inventory for tenant: ", tenantID)
-
 	sdks := newCloudSDKs(c.Request.Context())
 	result, err := sdks.fetchAzureInventory(c.Request.Context())
-	if err != nil || result.Total == 0 {
-		resources := []map[string]interface{}{
-			{
-				"resource_id":   "/subscriptions/.../resourceGroups/prod/providers/Microsoft.Compute/virtualMachines/app-server-1",
-				"resource_type": "virtual_machine",
-				"resource_name": "app-server-1",
-				"service":       "compute",
-				"region":        "eastus",
-				"vm_size":       "Standard_D2s_v3",
-			},
-		}
+	if err != nil || result == nil || result.Total == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"provider":  "azure",
-			"resources": resources,
-			"total":     len(resources),
-			"source":    "demo",
+			"provider":"azure","status":"unavailable","source":"unconfigured","configured":false,
+			"resources":[]any{},"virtual_machines":[]any{},"storage_accounts":[]any{},"aks":[]any{},"total":0,
+			"message":"Azure inventory unavailable: no live cloud integration configured",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"provider":         "azure",
-		"source":           "live",
-		"virtual_machines": result.VMs,
-		"storage_accounts": result.StorageAccounts,
-		"aks":              result.AKSClusters,
-		"total":            result.Total,
+		"provider":"azure","status":"ok","source":"live",
+		"virtual_machines": result.VMs, "storage_accounts": result.StorageAccounts, "aks": result.AKSClusters, "total": result.Total,
 	})
 }
 
 func (h *MultiCloudHandler) AzureScan(c *gin.Context) {
-	tenantID, ok := mutatingTenantIDFor(c)
-	if !ok {
-		return
-	}
-
-	h.logger.Info("Starting Azure security scan for tenant: ", tenantID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":   "scan_started",
-		"provider": "azure",
-		"message":  "Azure security scan initiated",
-	})
+	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"provider":"azure","capability":"cloud_scan","message":"Azure scan unavailable: no live scan integration configured"})
 }
 
 func (h *MultiCloudHandler) GetResourcesSummary(c *gin.Context) {
-	tenantID := tenantIDFor(c)
-
-	summary := gin.H{
-		"total_resources": 150,
-		"by_provider": gin.H{
-			"aws":       80,
-			"gcp":       45,
-			"ibm_cloud": 20,
-			"azure":     5,
-		},
-		"by_service": gin.H{
-			"ec2":              30,
-			"s3":               25,
-			"rds":              15,
-			"compute":          30,
-			"storage":          20,
-			"kubernetes":       20,
-			"quantum":          10,
-			"virtual_machines": 5,
-		},
-		"security_findings": gin.H{
-			"critical": 2,
-			"high":     8,
-			"medium":   15,
-			"low":      25,
-		},
-		"compliance": gin.H{
-			"iso27001": "85%",
-			"nist":     "78%",
-			"pqc":      "65%",
-		},
+	if !enterpriseDBReady(h.db) {
+		abortIfNoDB(c, h.db)
+		return
 	}
-
-	h.logger.Info("Getting resources summary for tenant: ", tenantID)
-
-	c.JSON(http.StatusOK, summary)
+	tenantID := tenantIDFor(c)
+	var total int
+	_ = h.db.QueryRow(`SELECT COUNT(*) FROM cloud_accounts WHERE tenant_id = $1`, tenantID).Scan(&total)
+	c.JSON(http.StatusOK, gin.H{
+		"status":"ok","source":"database",
+		"total_accounts": total,
+		"by_provider": gin.H{},
+		"by_service": gin.H{},
+		"security_findings": gin.H{"critical":0,"high":0,"medium":0,"low":0},
+		"compliance": gin.H{},
+		"message":"Resource summary derived from configured cloud accounts only; no fabricated findings",
+	})
 }

@@ -115,3 +115,23 @@ func TestCORSBlocksPreflightFromUnknownOrigin(t *testing.T) {
 		t.Fatalf("unexpected allow origin = %q", got)
 	}
 }
+
+
+func TestCORSRejectsWildcardWhenCredentialsEnabled(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.Use(CORS(CORSConfig{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{http.MethodGet, http.MethodOptions},
+		AllowedHeaders:   []string{"Origin"},
+		AllowCredentials: true,
+	}))
+	r.GET("/api/v1/edition", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"edition": "oss"}) })
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/edition", nil)
+	req.Header.Set("Origin", "https://evil-attacker.example")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "" {
+		t.Fatalf("wildcard+credentials must not echo origin, got %q", got)
+	}
+}
