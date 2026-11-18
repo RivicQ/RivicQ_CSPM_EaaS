@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RivicQ Console &amp; Product Reference</title>
-  <meta name="description" content="Complete RivicQ reference: console architecture, sign-in to evidence workflow, scanning sequence, edition boundaries, and validated interactive diagrams.">
+  <title>RivicQ CSPM Product &amp; Console Reference</title>
+  <meta name="description" content="Complete RivicQ reference: CSPM product overview, authenticated console, sign-in to evidence workflow, scanning sequence, edition boundaries, and validated interactive diagrams.">
   <meta name="theme-color" content="#05050d">
   <link rel="icon" type="image/svg+xml" href="assets/rivicq-mark.svg">
   <link rel="stylesheet" href="css/archify-universal.css">
@@ -62,7 +62,7 @@
   <div class="rvq-universal-backdrop" aria-hidden="true"></div>
   <nav class="ref-nav" aria-label="RivicQ reference">
     <a class="ref-brand" href="../../"><img src="assets/rivicq-mark.svg" alt="">RivicQ</a>
-    <a href="#console">Console</a>
+    <a href="#console">Overview</a>
     <a href="#workflow">Workflow</a>
     <a href="#scanning">Scanning</a>
     <a href="#boundaries">Editions</a>
@@ -75,11 +75,11 @@
   <main class="ref-shell">
     <section class="ref-hero" id="top">
       <p class="ref-eyebrow">Complete system reference</p>
-      <h1>The console, the engine, and the evidence — <em>one readable path.</em></h1>
-      <p class="ref-lede">RivicQ is a cryptographic security posture management engine: it accepts a target, runs tenant-scoped scanners, fingerprints findings, applies policy, and emits CycloneDX-compatible CBOM evidence. Community is the Apache-2.0 engine; Enterprise layers remain license-gated.</p>
+      <h1>The product, the console, the engine, and the evidence — <em>one readable path.</em></h1>
+      <p class="ref-lede">RivicQ is a cryptographic security posture management product: public pages explain the engine, the authenticated console scopes work to a tenant, scanners fingerprint findings, policy decides, and CycloneDX-compatible CBOM evidence comes back. Community is the Apache-2.0 engine; Enterprise layers stay license- and configuration-gated.</p>
       <div class="ref-actions">
         <a class="primary" href="../../animation.html">Watch the product animation</a>
-        <a href="../diagrams/rivicq-console-product.html?present=1">Open console architecture</a>
+        <a href="../diagrams/rivicq-console-product.html?present=1">Open CSPM product overview</a>
         <a href="../diagrams/rivicq-enablement.html?present=1">Open enablement workflow</a>
         <a href="../../docs/">Read the docs</a>
       </div>
@@ -88,15 +88,15 @@
 
     <section class="ref-section" id="console">
       <div class="ref-section-head">
-        <div><h2>Console and product architecture</h2><p>Operator or CI enters through the product console, RevenueOS commerce desk, or GitHub Action. AuthN, tenant scope, and RBAC sit before API v1. The shared engine discovers, scans, evaluates, persists, and returns evidence through <code>result_url</code>.</p></div>
+        <div><h2>CSPM product overview and console</h2><p>Public product pages lead into the authenticated console, RevenueOS commerce desk, and GitHub Action. Session, tenant scope, server-derived entitlement, and RBAC sit before API v1. The shared engine discovers, scans, evaluates, persists, and returns evidence through <code>result_url</code>.</p></div>
         <a class="ref-open" href="../diagrams/rivicq-console-product.html?present=1">Open full diagram ↗</a>
       </div>
-      <div class="ref-frame"><iframe src="../diagrams/rivicq-console-product.html?embed=1&amp;theme=dark&amp;motion=1" title="RivicQ console and product architecture" loading="lazy"></iframe></div>
+      <div class="ref-frame"><iframe src="../diagrams/rivicq-console-product.html?embed=1&amp;theme=dark&amp;motion=1" title="RivicQ CSPM product and console overview" loading="lazy"></iframe></div>
       <div class="ref-grid">
-        <article class="ref-card"><h3>Product console</h3><p>Dashboard + scanner in the Community UI. Session or demo token establishes context; scan and report reads go through <code>/api</code>.</p></article>
-        <article class="ref-card"><h3>API boundary</h3><p><code>POST /scans</code> returns <code>202</code> with a scan ID and result URL; status and report routes remain tenant-scoped.</p></article>
-        <article class="ref-card"><h3>Shared engine</h3><p>Discovery manager, TLS/SSH/HTTP/SBOM scanners, intelligence gate, Postgres job store, and CBOM evidence.</p></article>
-        <article class="ref-card"><h3>Edition boundary</h3><p>Enterprise adds QBOM, SSO, audit, and HSM behind license checks. Control mappings are mappings, not certifications.</p></article>
+        <article class="ref-card"><h3>Product surface</h3><p>Home, Product, and CSPM pages explain the system before sign-in; the same maps appear in the Archify gallery and React site.</p></article>
+        <article class="ref-card"><h3>Operator console</h3><p>Dashboard, assets, findings, scanner, BOM, governance, and role-gated admin views use a real API session. MFA setup and disable require `/auth/me` identity and a live API.</p></article>
+        <article class="ref-card"><h3>Tenant-scoped engine</h3><p><code>POST /scans</code> returns <code>202</code> with a result URL. Status and report reads stay inside the caller tenant; unmapped mutations fail closed.</p></article>
+        <article class="ref-card"><h3>Edition boundary</h3><p>Enterprise fails closed without a valid license and configured database. Unconfigured cloud, HSM, SSO, and advanced BOM layers stay unavailable.</p></article>
       </div>
     </section>
 
@@ -133,7 +133,7 @@
       </div>
     </section>
 
-    <footer class="ref-footer">RivicQ GmbH · Reference generated from the repository at revision <code>b0372189be95514ca039106dc72743bda19dd3cf</code>. Interactive diagrams are validated, self-contained Archify HTML artifacts.</footer>
+    <footer class="ref-footer">RivicQ GmbH · Reference generated from the repository at revision <code>9d9343b2f46b034f578564ba5bcff76eca26e04c</code>. Interactive diagrams are validated, self-contained Archify HTML artifacts.</footer>
   </main>
 </body>
 </html>

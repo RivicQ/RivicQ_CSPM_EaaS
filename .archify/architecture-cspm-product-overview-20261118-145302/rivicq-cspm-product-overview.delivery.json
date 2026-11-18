@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "66ec5d41-5b86-4832-b38c-31e430bf01d3",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/re1/re1/CSPM/.archify/architecture-cspm-product-overview-20261118-145302/candidate.json",
+  "output": "/Users/re1/re1/CSPM/.archify/architecture-cspm-product-overview-20261118-145302/rivicq-cspm-product-overview.html",
+  "specification": {
+    "sha256": "d256f864d2a2a64983b579fe2bea5f3c38fb938d3c5bcf1cda646bf82b0805eb",
+    "bytes": 11023
+  },
+  "artifact": {
+    "sha256": "f0b71e3f1384a1b4066fe748ea9fb45e7a734a716974e006a17c7a44dca6c93e",
+    "bytes": 777325
+  }
+}

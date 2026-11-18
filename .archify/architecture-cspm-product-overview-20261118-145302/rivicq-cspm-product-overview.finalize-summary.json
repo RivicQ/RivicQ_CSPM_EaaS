@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/re1/re1/CSPM/.archify/architecture-cspm-product-overview-20261118-145302/candidate.json",
+    "sha256": "d256f864d2a2a64983b579fe2bea5f3c38fb938d3c5bcf1cda646bf82b0805eb",
+    "bytes": 11023
+  },
+  "artifact": {
+    "path": "/Users/re1/re1/CSPM/.archify/architecture-cspm-product-overview-20261118-145302/rivicq-cspm-product-overview.html",
+    "sha256": "f0b71e3f1384a1b4066fe748ea9fb45e7a734a716974e006a17c7a44dca6c93e",
+    "bytes": 777325
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/re1/re1/CSPM/.archify/architecture-cspm-product-overview-20261118-145302/rivicq-cspm-product-overview.finalize.json",
+    "summaryReceipt": "/Users/re1/re1/CSPM/.archify/architecture-cspm-product-overview-20261118-145302/rivicq-cspm-product-overview.finalize-summary.json",
+    "browserCheckReceipt": "/Users/re1/re1/CSPM/.archify/architecture-cspm-product-overview-20261118-145302/rivicq-cspm-product-overview.browser-check.json"
+  },
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.2.0",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.2.0",
+    "severity": "normal",
+    "checkedAt": "2026-11-17T13:22:21.595Z",
+    "source": "cache",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.0.1 → 3.2.0. A previous check at 2026-11-17T13:22:21.595Z found a newer release. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.2.0. The installed Skill has not changed; ask to snooze or ignore this reminder.",
+    "eventKey": "archify@sha256:70e210265c59f24dcbdf2a502ff671104b5454e7ee7d3554aecd86bad32384f5"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 10451
+}

@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "RivicQ CSPM Product and Console Overview",
+    "subtitle": "Public pages → authenticated console → tenant-scoped scan → evidence",
+    "locale": "en",
+    "output": ".archify/architecture-cspm-product-overview-20261118-145302/rivicq-cspm-product-overview.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:RivicQ/RivicQ_CSPM_EaaS.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "9d9343b2f46b034f578564ba5bcff76eca26e04c"
+    },
+    "views": [
+      {
+        "id": "entry_points",
+        "label": "Entry points",
+        "focus": ["operator", "console", "revenue", "github"],
+        "note": "Start from the public product pages, the console, the commerce desk, or CI."
+      },
+      {
+        "id": "scan_engine",
+        "label": "Scan engine",
+        "focus": ["api", "scan_manager", "scanners", "intelligence", "store"],
+        "note": "The shared Community engine accepts, runs, evaluates, and persists a scan."
+      },
+      {
+        "id": "edition_boundary",
+        "label": "Edition boundary",
+        "focus": ["enterprise", "evidence", "auth"],
+        "note": "Enterprise layers and advanced evidence stay license- and configuration-gated."
+      }
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [30, 40],
+    "cols": 12,
+    "gapX": 34,
+    "gapY": 28,
+    "cellW": 88,
+    "cellH": 58
+  },
+  "components": [
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "Visitor / Operator",
+      "sublabel": "public site or workspace",
+      "pos": [30, 300],
+      "size": [124, 66],
+      "sources": [
+        { "path": "web/src/pages/Home.tsx", "line": 27, "end_line": 34, "label": "public platform overview" },
+        { "path": "web/src/pages/Product.tsx", "line": 4, "end_line": 25, "label": "public product page" },
+        { "path": "web/src/pages/CspmPublic.tsx", "line": 4, "end_line": 26, "label": "public CSPM page" }
+      ]
+    },
+    {
+      "id": "console",
+      "type": "frontend",
+      "label": "Product Console",
+      "sublabel": "dashboard · scans · findings · MFA",
+      "tag": "Community UI",
+      "pos": [230, 300],
+      "size": [150, 70],
+      "sources": [
+        { "path": "web/src/App.tsx", "line": 163, "end_line": 229, "label": "public and protected console routes" },
+        { "path": "web/src/context/AuthContext.tsx", "line": 208, "end_line": 229, "label": "server-derived identity" },
+        { "path": "web/src/pages/Settings.tsx", "line": 68, "end_line": 135, "label": "MFA setup and disable" }
+      ]
+    },
+    {
+      "id": "revenue",
+      "type": "frontend",
+      "label": "RevenueOS Console",
+      "sublabel": "commerce control room",
+      "tag": "separate desk",
+      "pos": [230, 110],
+      "size": [140, 66],
+      "sources": [
+        { "path": "revenueos/app/console/page.tsx", "line": 7, "end_line": 10, "label": "session-based console gate" },
+        { "path": "revenueos/app/page.tsx", "line": 8, "end_line": 46, "label": "commerce landing and links" }
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Identity / Entitlement",
+      "sublabel": "session · tenant · server-derived edition",
+      "pos": [440, 300],
+      "size": [156, 72],
+      "sources": [
+        { "path": "internal/authn/enforce.go", "line": 11, "end_line": 64, "label": "deny-by-default auth" },
+        { "path": "internal/auth/route_permissions.go", "line": 10, "end_line": 26, "label": "fail-closed mutation permissions" },
+        { "path": "web/src/context/AuthContext.tsx", "line": 208, "end_line": 229, "label": "server-derived entitlement" }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API v1 Routes",
+      "sublabel": "/scans · /cspm · /edition",
+      "pos": [660, 300],
+      "size": [142, 70],
+      "sources": [
+        { "path": "internal/server/server.go", "line": 185, "end_line": 277, "label": "health, edition, and API routes" },
+        { "path": "internal/api/oss/handlers.go", "line": 17, "end_line": 52, "label": "Community API surface" },
+        { "path": "internal/api/shared/handlers.go", "line": 766, "end_line": 818, "label": "POST /scans contract" }
+      ]
+    },
+    {
+      "id": "scan_manager",
+      "type": "backend",
+      "label": "Discovery Manager",
+      "sublabel": "tenant-scoped job",
+      "pos": [900, 300],
+      "size": [150, 68],
+      "sources": [
+        { "path": "internal/discovery/scan_manager.go", "line": 108, "end_line": 185, "label": "tenant job lifecycle" },
+        { "path": "internal/api/shared/handlers.go", "line": 821, "end_line": 896, "label": "tenant status and report" }
+      ]
+    },
+    {
+      "id": "scanners",
+      "type": "backend",
+      "label": "Target Scanners",
+      "sublabel": "TLS · SSH · HTTP · SBOM",
+      "pos": [1120, 130],
+      "size": [150, 70],
+      "sources": [
+        { "path": "internal/discovery/scanner.go", "line": 38, "end_line": 101, "label": "concurrent dispatch" },
+        { "path": "internal/discovery/target_policy.go", "line": 13, "end_line": 73, "label": "private target policy" }
+      ]
+    },
+    {
+      "id": "intelligence",
+      "type": "backend",
+      "label": "Intelligence Gate",
+      "sublabel": "findings + policy",
+      "tag": "BLOCK · WARN · ALLOW",
+      "pos": [1120, 300],
+      "size": [150, 70],
+      "sources": [
+        { "path": "internal/intelligence/pipeline.go", "line": 20, "end_line": 64, "label": "report build" },
+        { "path": "internal/intelligence/policy.go", "line": 8, "end_line": 47, "label": "policy actions" },
+        { "path": "internal/api/shared/intelligence.go", "line": 39, "end_line": 54, "label": "intelligence routes" }
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Postgres + Job Store",
+      "sublabel": "reports + tenant state",
+      "pos": [900, 500],
+      "size": [150, 68],
+      "sources": [
+        { "path": "internal/api/shared/handlers.go", "line": 796, "end_line": 817, "label": "scan persistence setup" },
+        { "path": "internal/discovery/scan_manager.go", "line": 176, "end_line": 184, "label": "result indexing" },
+        { "path": "internal/database/queries.go", "line": 581, "end_line": 589, "label": "audit event write" }
+      ]
+    },
+    {
+      "id": "evidence",
+      "type": "database",
+      "label": "CBOM Evidence",
+      "sublabel": "CycloneDX 1.6 compatible",
+      "pos": [1120, 500],
+      "size": [150, 68],
+      "sources": [
+        { "path": "internal/intelligence/cyclonedx.go", "line": 10, "end_line": 44, "label": "CBOM document" },
+        { "path": "internal/api/shared/intelligence.go", "line": 39, "end_line": 54, "label": "evidence routes" }
+      ]
+    },
+    {
+      "id": "enterprise",
+      "type": "cloud",
+      "label": "Enterprise Layer",
+      "sublabel": "license · RBAC · audit · HSM",
+      "tag": "configured only",
+      "pos": [660, 110],
+      "size": [148, 72],
+      "sources": [
+        { "path": "internal/server/server.go", "line": 255, "end_line": 275, "label": "fail-closed license gate" },
+        { "path": "internal/api/enterprise/handlers.go", "line": 26, "end_line": 58, "label": "database and migration gate" },
+        { "path": "internal/edition/edition.go", "line": 162, "end_line": 225, "label": "configured capabilities" }
+      ]
+    },
+    {
+      "id": "github",
+      "type": "external",
+      "label": "CLI / GitHub Action",
+      "sublabel": "--fail-on BLOCK",
+      "pos": [660, 500],
+      "size": [146, 68],
+      "sources": [
+        { "path": "cmd/rivicq/main.go", "line": 20, "end_line": 78, "label": "CLI commands and exit codes" },
+        { "path": ".github/actions/rivicq-scan/action.yml", "line": 1, "end_line": 30, "label": "CI scan action" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Deny-by-default identity boundary",
+      "wraps": ["auth"],
+      "pad": 18
+    },
+    {
+      "kind": "region",
+      "label": "Shared Community scan engine",
+      "wraps": ["api", "scan_manager", "scanners", "intelligence", "store", "evidence"],
+      "pad": 22
+    }
+  ],
+  "connections": [
+    { "id": "operator-console", "from": "operator", "to": "console", "label": "explore", "variant": "emphasis" },
+    { "id": "console-auth", "from": "console", "to": "auth", "label": "JWT", "variant": "security", "labelDy": 26 },
+    { "id": "revenue-auth", "from": "revenue", "to": "auth", "label": "session", "variant": "security" },
+    { "id": "auth-api", "from": "auth", "to": "api", "label": "allow", "variant": "security" },
+    { "id": "api-manager", "from": "api", "to": "scan_manager", "label": "POST /scans", "variant": "emphasis" },
+    { "id": "manager-scanners", "from": "scan_manager", "to": "scanners", "label": "targets" },
+    { "id": "scanners-intel", "from": "scanners", "to": "intelligence", "label": "assets" },
+    { "id": "intel-evidence", "from": "intelligence", "to": "evidence", "label": "CBOM", "variant": "emphasis" },
+    { "id": "manager-store", "from": "scan_manager", "to": "store", "label": "persist", "variant": "dashed" },
+    { "id": "intel-store", "from": "intelligence", "to": "store", "label": "report", "variant": "dashed" },
+    { "id": "github-api", "from": "github", "to": "api", "label": "scan", "variant": "dashed" },
+    { "id": "enterprise-api", "from": "enterprise", "to": "api", "label": "licensed", "variant": "security" },
+    { "id": "evidence-console", "from": "evidence", "to": "console", "label": "result_url", "variant": "default", "fromSide": "bottom", "toSide": "bottom", "via": [[1195, 650], [305, 650]], "labelAt": [750, 650], "labelDy": -18 }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "What the product shows",
+      "items": [
+        "Public Home, Product, and CSPM pages explain the system before asking for a session.",
+        "The console exposes dashboard, scans, findings, assets, settings, and role-gated admin views.",
+        "MFA setup and disable require a live API session; demo mode never stores TOTP secrets."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "What the engine actually does",
+      "items": [
+        "POST /scans validates the target, normalizes tenant scope, and returns 202 with a result URL.",
+        "The manager runs target scanners under a 120-second timeout and persists completed reports.",
+        "Intelligence evaluates findings before a CycloneDX-compatible CBOM is delivered."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Where trust is enforced",
+      "items": [
+        "Client edition switches are ignored; /auth/me is authoritative for identity and entitlement.",
+        "Unmapped mutations fail closed; Reads stay tenant-scoped.",
+        "Enterprise requires a valid license and configured database; unconfigured capabilities stay unavailable."
+      ]
+    }
+  ]
+}

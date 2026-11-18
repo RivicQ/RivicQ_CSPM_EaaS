@@ -11,6 +11,7 @@ export const ARCHIFY_SITE = `${ARCHIFY_BASE}/site/index.html`;
 export const ARCHIFY_DIAGRAMS_HUB = `${ARCHIFY_SITE}#diagrams`;
 
 export type ArchifyDiagramId =
+  | 'console'
   | 'architecture'
   | 'dataflow'
   | 'lifecycle'
@@ -33,6 +34,16 @@ export type ArchifyDiagram = {
 };
 
 export const ARCHIFY_DIAGRAMS: readonly ArchifyDiagram[] = [
+  {
+    id: 'console',
+    file: 'rivicq-console-product.html',
+    kind: 'Architecture',
+    question: 'What is the complete CSPM product?',
+    title: 'Public overview → console → evidence',
+    description:
+      'Public product pages, authenticated console, tenant-scoped scans, policy gate, CycloneDX evidence, and the Enterprise license boundary.',
+    previewTitle: 'RivicQ CSPM product and console overview preview',
+  },
   {
     id: 'architecture',
     file: 'rivicq-architecture.html',
@@ -138,7 +149,7 @@ export const ARCHIFY_DIAGRAMS: readonly ArchifyDiagram[] = [
 const catalogById = (): Record<ArchifyDiagramId, ArchifyDiagram> => {
   const empty: Partial<Record<ArchifyDiagramId, ArchifyDiagram>> = {};
   for (const d of ARCHIFY_DIAGRAMS) empty[d.id] = d;
-  const missing = (['architecture', 'dataflow', 'lifecycle', 'operator', 'findingDevsecops', 'analysis', 'compliance', 'pqc', 'scanning', 'roadmap'] as const)
+  const missing = (['console', 'architecture', 'dataflow', 'lifecycle', 'operator', 'findingDevsecops', 'analysis', 'compliance', 'pqc', 'scanning', 'roadmap'] as const)
     .filter((id) => !empty[id]);
   if (missing.length > 0) {
     throw new Error(`Archify catalog missing: ${missing.join(', ')}`);

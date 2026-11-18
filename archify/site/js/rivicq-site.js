@@ -115,8 +115,8 @@
   var PROOFS = {
     console: {
       file: 'rivicq-console-product.html',
-      meta: 'Architecture · Product · 13 components · 12 connections',
-      title: 'Console and Product — one engine, two editions, deny by default',
+      meta: 'Architecture · Product · 12 components · 13 connections',
+      title: 'CSPM Product and Console — public overview to tenant-scoped evidence',
       beats: ['#overview', '#focus=console&reach=upstream', '#focus=evidence&reach=upstream', '#lens=security~database']
     },
     enablement: {

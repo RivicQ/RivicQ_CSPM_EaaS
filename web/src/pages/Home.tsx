@@ -28,6 +28,8 @@ const PLATFORM = [
   { icon: <Psychology />, title: 'AI engineering', desc: 'AIBOM is an Enterprise inventory for models, datasets, and AI identities. Community CBOM still flags cryptography on serving stacks. EU AI Act names are mappings, not a certification.' },
   { icon: <AccountTree />, title: 'DevSecOps', desc: 'Scan → inventory → policy gate in CI. The GitHub Action is Community; continuous monitoring is Enterprise.' },
   { icon: <GppGood />, title: 'Cloud security', desc: 'CSPM from declared and scanned assets. Live cloud attach needs customer credentials and an Enterprise license.' },
+  { icon: <FactCheck />, title: 'Operator console', desc: 'Dashboard, assets, findings, scanner, BOM, and role-gated admin views behind one authenticated tenant scope.' },
+  { icon: <Lock />, title: 'Identity & MFA', desc: 'Server-derived edition from /auth/me, tenant RBAC, and TOTP setup or disable that only works against a live API.' },
   { icon: <Api />, title: 'API security', desc: 'TLS/HTTPS hygiene from website and host scans. Gateway inventory is Enterprise when a connector exists.' },
   { icon: <FactCheck />, title: 'GRC & compliance risk', desc: 'DORA, NIS2, NIST, ISO, PCI, SOC 2 operator mappings. Mappings are not audits or certifications.' },
   { icon: <EnhancedEncryption />, title: 'Quantum risk', desc: 'Harvest-now exposure and ML-KEM / ML-DSA planning from scan intelligence. Pages is static — live scores need the API or CLI.' },
@@ -271,7 +273,12 @@ const Home: React.FC = () => {
     {
       id: 'console',
       label: 'Console',
-      onClick: () => navigate('/dashboard'),
+      items: [
+        { label: 'Product overview', action: () => navigate('/product') },
+        { label: 'CSPM overview', action: () => navigate('/product/cspm') },
+        { label: 'System reference', action: () => openExternal('archify/site/reference.html') },
+        { label: 'Open console', action: () => navigate('/dashboard') },
+      ],
     },
     {
       id: 'trust',
