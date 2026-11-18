@@ -42,6 +42,7 @@ import BrandLogo from '../components/BrandLogo';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { proBlueContainedButtonSx } from '../theme/designSystem';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
+import ArchifySurface from '../components/brand/ArchifySurface';
 import { ARCHIFY_FONTS, NEBULA, archifyAuraLayersSx, nebulaCardSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
 import {
   PUBLIC_ENGINE_AUTH_COPY,
@@ -258,6 +259,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       <Box aria-hidden sx={archifyAuraLayersSx.radial} />
       <Box aria-hidden sx={archifyAuraLayersSx.grid} />
       <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box sx={{ mb: 2 }}>
+          <ArchifySurface placement="rail" variant="public" />
+        </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
           <BrandLogo dark />
           <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600, borderColor: 'rgba(255,255,255,0.22)', color: NEBULA.muted }} />

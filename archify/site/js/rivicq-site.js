@@ -113,6 +113,18 @@
      PINNED LIVE STAGE
      ════════════════════════════════════════════════════════════ */
   var PROOFS = {
+    console: {
+      file: 'rivicq-console-product.html',
+      meta: 'Architecture · Product · 13 components · 12 connections',
+      title: 'Console and Product — one engine, two editions, deny by default',
+      beats: ['#overview', '#focus=console&reach=upstream', '#focus=evidence&reach=upstream', '#lens=security~database']
+    },
+    enablement: {
+      file: 'rivicq-enablement.html',
+      meta: 'Workflow · Enablement · 9 nodes · 8 edges',
+      title: 'RivicQ Enablement — console sign-in to policy-gated evidence',
+      beats: ['#overview', '#focus=policy&reach=downstream', '#focus=intel&reach=upstream', '#lens=security~backend']
+    },
     architecture: {
       file: 'rivicq-architecture.html',
       meta: 'Architecture · Blueprint · 13 nodes · 12 edges',

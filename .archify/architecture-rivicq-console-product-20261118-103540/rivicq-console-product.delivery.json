@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "5d5b309e-8632-4db7-92bb-23ee8dcab31b",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/re1/re1/CSPM/.archify/architecture-rivicq-console-product-20261118-103540/candidate.json",
+  "output": "/Users/re1/re1/CSPM/.archify/architecture-rivicq-console-product-20261118-103540/rivicq-console-product.html",
+  "specification": {
+    "sha256": "9a18bdf8e0a8ccb82f5111fcbd467468808338bc8737ac49a02fb59909da343e",
+    "bytes": 10062
+  },
+  "artifact": {
+    "sha256": "78cb0c2b6d00266eb19b1c2e7e611f48bd0a8b7a71d2eee9bb5c35d6c3dc95e0",
+    "bytes": 776300
+  }
+}

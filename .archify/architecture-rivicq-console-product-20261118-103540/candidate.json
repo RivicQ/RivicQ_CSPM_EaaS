@@ -1,0 +1,257 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "RivicQ Console and Product Architecture",
+    "subtitle": "One engine, two editions, deny by default",
+    "locale": "en",
+    "output": ".archify/architecture-rivicq-console-product-20261118-103540/rivicq-console-product.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:RivicQ/RivicQ_CSPM_EaaS.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "b0372189be95514ca039106dc72743bda19dd3cf"
+    },
+    "views": [
+      {
+        "id": "entry_points",
+        "label": "Entry points",
+        "focus": ["operator", "console", "revenue", "github"],
+        "note": "Start from the product console, the commerce console, or CI."
+      },
+      {
+        "id": "scan_engine",
+        "label": "Scan engine",
+        "focus": ["api", "scan_manager", "scanners", "intelligence", "store"],
+        "note": "The shared Community engine accepts, runs, and persists a scan."
+      },
+      {
+        "id": "edition_boundary",
+        "label": "Edition boundary",
+        "focus": ["enterprise", "evidence", "auth"],
+        "note": "Enterprise layers and enterprise-only evidence remain license gated."
+      }
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [30, 40],
+    "cols": 12,
+    "gapX": 34,
+    "gapY": 28,
+    "cellW": 88,
+    "cellH": 58
+  },
+  "components": [
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "Operator / CI",
+      "sublabel": "browser or pipeline",
+      "pos": [30, 300],
+      "size": [120, 64],
+      "sources": [
+        { "path": "web/src/App.tsx", "line": 163, "end_line": 209, "label": "public and protected routes" },
+        { "path": ".github/actions/rivicq-scan/action.yml", "line": 1, "end_line": 30, "label": "CI scan action" }
+      ]
+    },
+    {
+      "id": "console",
+      "type": "frontend",
+      "label": "Product Console",
+      "sublabel": "dashboard + scanner",
+      "tag": "Community UI",
+      "pos": [230, 300],
+      "size": [140, 66],
+      "sources": [
+        { "path": "web/src/App.tsx", "line": 187, "end_line": 209, "label": "protected console routes" },
+        { "path": "web/src/services/api.ts", "line": 414, "end_line": 480, "label": "scan and report client" }
+      ]
+    },
+    {
+      "id": "revenue",
+      "type": "frontend",
+      "label": "RevenueOS Console",
+      "sublabel": "commerce control room",
+      "tag": "separate desk",
+      "pos": [230, 110],
+      "size": [140, 66],
+      "sources": [
+        { "path": "revenueos/app/console/page.tsx", "line": 1, "end_line": 11, "label": "session-based console gate" },
+        { "path": "revenueos/app/page.tsx", "line": 8, "end_line": 46, "label": "commerce landing and links" }
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "AuthN / Tenant / RBAC",
+      "sublabel": "bearer token + tenant",
+      "pos": [440, 300],
+      "size": [150, 68],
+      "sources": [
+        { "path": "internal/authn/enforce.go", "line": 10, "end_line": 49, "label": "bearer verification" },
+        { "path": "internal/tenant/context.go", "line": 10, "end_line": 47, "label": "tenant from JWT" },
+        { "path": "internal/auth/permissions.go", "line": 11, "end_line": 109, "label": "route permissions" }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API v1 Routes",
+      "sublabel": "/scans + /cbom",
+      "pos": [660, 300],
+      "size": [140, 66],
+      "sources": [
+        { "path": "internal/api/oss/handlers.go", "line": 17, "end_line": 52, "label": "OSS route registration" },
+        { "path": "internal/api/shared/handlers.go", "line": 766, "end_line": 818, "label": "POST /scans" }
+      ]
+    },
+    {
+      "id": "scan_manager",
+      "type": "backend",
+      "label": "Discovery Manager",
+      "sublabel": "tenant-scoped job",
+      "pos": [900, 300],
+      "size": [150, 68],
+      "sources": [
+        { "path": "internal/discovery/scan_manager.go", "line": 108, "end_line": 185, "label": "job lifecycle" },
+        { "path": "internal/api/shared/handlers.go", "line": 820, "end_line": 896, "label": "status and report" }
+      ]
+    },
+    {
+      "id": "scanners",
+      "type": "backend",
+      "label": "Target Scanners",
+      "sublabel": "TLS · SSH · HTTP · SBOM",
+      "pos": [900, 130],
+      "size": [150, 70],
+      "sources": [
+        { "path": "internal/discovery/scanner.go", "line": 38, "end_line": 101, "label": "concurrent dispatch" },
+        { "path": "internal/discovery/target_policy.go", "line": 13, "end_line": 73, "label": "private target policy" }
+      ]
+    },
+    {
+      "id": "intelligence",
+      "type": "backend",
+      "label": "Intelligence Gate",
+      "sublabel": "findings + policy",
+      "tag": "BLOCK · WARN · ALLOW",
+      "pos": [1130, 300],
+      "size": [150, 70],
+      "sources": [
+        { "path": "internal/intelligence/pipeline.go", "line": 11, "end_line": 62, "label": "report build" },
+        { "path": "internal/intelligence/policy.go", "line": 8, "end_line": 93, "label": "policy actions" }
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Postgres + Job Store",
+      "sublabel": "reports + audit events",
+      "pos": [900, 500],
+      "size": [150, 68],
+      "sources": [
+        { "path": "internal/api/shared/handlers.go", "line": 42, "end_line": 98, "label": "report persistence" },
+        { "path": "internal/database/queries.go", "line": 581, "end_line": 589, "label": "audit event write" }
+      ]
+    },
+    {
+      "id": "evidence",
+      "type": "database",
+      "label": "CBOM Evidence",
+      "sublabel": "CycloneDX 1.6 compatible",
+      "pos": [1360, 300],
+      "size": [150, 68],
+      "sources": [
+        { "path": "internal/intelligence/cyclonedx.go", "line": 10, "end_line": 44, "label": "CBOM document" },
+        { "path": "internal/api/shared/intelligence.go", "line": 41, "end_line": 54, "label": "evidence routes" }
+      ]
+    },
+    {
+      "id": "enterprise",
+      "type": "cloud",
+      "label": "Enterprise Layer",
+      "sublabel": "QBOM · SSO · audit · HSM",
+      "tag": "license required",
+      "pos": [660, 110],
+      "size": [148, 72],
+      "sources": [
+        { "path": "internal/edition/edition.go", "line": 19, "end_line": 71, "label": "edition feature matrix" },
+        { "path": "internal/api/shared/qbom.go", "line": 16, "end_line": 58, "label": "QBOM enterprise gate" },
+        { "path": "internal/api/enterprise/handlers.go", "line": 164, "end_line": 174, "label": "enterprise SSO routes" }
+      ]
+    },
+    {
+      "id": "github",
+      "type": "external",
+      "label": "CLI / GitHub Action",
+      "sublabel": "--fail-on BLOCK",
+      "pos": [660, 500],
+      "size": [146, 68],
+      "sources": [
+        { "path": "cmd/rivicq/main.go", "line": 20, "end_line": 78, "label": "CLI commands and exit codes" },
+        { "path": ".github/workflows/rivicq-security.yml", "line": 25, "end_line": 39, "label": "CI gate" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Deny-by-default identity boundary",
+      "wraps": ["auth"],
+      "pad": 18
+    },
+    {
+      "kind": "region",
+      "label": "Shared Community scan engine",
+      "wraps": ["api", "scan_manager", "scanners", "intelligence", "store", "evidence"],
+      "pad": 22
+    }
+  ],
+  "connections": [
+    { "id": "operator-console", "from": "operator", "to": "console", "label": "sign in", "variant": "emphasis" },
+    { "id": "console-auth", "from": "console", "to": "auth", "label": "JWT", "variant": "security" },
+    { "id": "revenue-auth", "from": "revenue", "to": "auth", "label": "session", "variant": "security" },
+    { "id": "auth-api", "from": "auth", "to": "api", "label": "allow", "variant": "security" },
+    { "id": "api-manager", "from": "api", "to": "scan_manager", "label": "POST /scans", "variant": "emphasis" },
+    { "id": "manager-scanners", "from": "scan_manager", "to": "scanners", "label": "targets" },
+    { "id": "scanners-intel", "from": "scanners", "to": "intelligence", "label": "assets" },
+    { "id": "intel-evidence", "from": "intelligence", "to": "evidence", "label": "CBOM", "variant": "emphasis" },
+    { "id": "manager-store", "from": "scan_manager", "to": "store", "label": "persist", "variant": "dashed" },
+    { "id": "intel-store", "from": "intelligence", "to": "store", "label": "report", "variant": "dashed" },
+    { "id": "github-api", "from": "github", "to": "api", "label": "scan", "variant": "dashed" },
+    { "id": "enterprise-api", "from": "enterprise", "to": "api", "label": "licensed", "variant": "security" },
+    { "id": "evidence-console", "from": "evidence", "to": "console", "label": "result_url", "variant": "default", "fromSide": "bottom", "toSide": "bottom", "via": [[1435, 650], [300, 650]], "labelAt": [860, 650], "labelDy": -18 }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Where work starts",
+      "items": [
+        "The product console exposes public routes and protected scanner, findings, and BOM views.",
+        "RevenueOS is a separate commerce desk with its own session gate.",
+        "CLI and GitHub Action use the same scan contract without a browser."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "What the engine actually does",
+      "items": [
+        "POST /scans validates the target, normalizes tenant, and returns 202 with a result URL.",
+        "The manager runs target scanners under a 120-second timeout and persists completed reports.",
+        "Intelligence evaluates findings before a CycloneDX-compatible CBOM is delivered."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Edition boundary",
+      "items": [
+        "Community covers the shared scanner, CBOM, policy, and CLI gate.",
+        "QBOM, HSM, SSO, audit, and advanced BOM layers require Enterprise.",
+        "Control mappings are evidence mappings, not certifications."
+      ]
+    }
+  ]
+}

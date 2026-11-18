@@ -17,6 +17,7 @@ import { LoadingButton } from '../components/ui';
 import { tokens } from '../theme/tokens';
 import { MotionSection } from '../motion/primitives';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
+import ArchifySurface from '../components/brand/ArchifySurface';
 import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
 import ArchifySystemMaps from '../components/brand/ArchifySystemMaps';
 import { PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
@@ -285,6 +286,7 @@ const Home: React.FC = () => {
       label: 'Resources',
       items: [
         { label: 'Documentation', action: () => openExternal('docs/index.html') },
+        { label: 'System reference', action: () => openExternal('archify/site/reference.html') },
         { label: 'Open Source', action: () => openExternal('https://github.com/RivicQ/RivicQ_CSPM_EaaS') },
         { label: 'Cloud', action: () => openExternal('marketing/index.html#cloud') },
         { label: 'Animation', action: () => openExternal('animation.html') },
@@ -323,6 +325,9 @@ const Home: React.FC = () => {
         }}
       >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
+          <Box sx={{ mb: 0.85 }}>
+            <ArchifySurface placement="rail" variant="public" />
+          </Box>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
             <BrandLogo dark />
             <Stack direction="row" spacing={0.25} flexWrap="wrap" useFlexGap sx={{ display: { xs: 'none', md: 'flex' } }}>
@@ -650,7 +655,7 @@ const Home: React.FC = () => {
               <Button size="small" onClick={() => navigate('/dashboard')}>Console</Button>
               <Button size="small" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener noreferrer">Open Source</Button>
               <Button size="small" onClick={() => openExternal('marketing/index.html#cloud')}>Cloud</Button>
-              <Button size="small" onClick={() => openExternal('docs/index.html')}>Reference</Button>
+              <Button size="small" onClick={() => openExternal('archify/site/reference.html')}>Reference</Button>
               <Button size="small" onClick={() => openExternal('animation.html')}>Animation</Button>
               <Button size="small" onClick={() => navigate('/pricing')}>Pricing</Button>
               <Button size="small" onClick={() => navigate('/ibm')}>IBM Partner Plus</Button>

@@ -37,7 +37,8 @@
         <a class="nav-link" href="#quickstart">Quick start</a>
         <a class="nav-link" href="../../marketing/index.html#cloud">Cloud</a>
         <a class="nav-link" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">Open Source</a>
-        <a class="nav-link" href="../../docs/">Reference</a>
+        <a class="nav-link" href="reference.html">Reference</a>
+        <a class="nav-link" href="../../docs/">Docs</a>
         <a class="nav-link" href="../../animation.html">Animation</a>
       </div>
       <a class="btn nav-cta" href="../../dashboard">Console</a>
@@ -94,20 +95,26 @@
         <div class="window-bar">
           <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
           <div class="proof-rail" id="proof-tabs" role="tablist" aria-label="Choose a live RivicQ system map">
+            <button class="spec-card" id="proof-tab-console" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="console">
+              <span class="spec-idx">01</span><span class="spec-name">Console &amp; Product</span>
+            </button>
+            <button class="spec-card" id="proof-tab-enablement" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="enablement">
+              <span class="spec-idx">02</span><span class="spec-name">Enablement Workflow</span>
+            </button>
             <button class="spec-card" id="proof-tab-architecture" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="true" tabindex="0" data-proof="architecture">
-              <span class="spec-idx">01</span><span class="spec-name">Platform Architecture</span>
+              <span class="spec-idx">03</span><span class="spec-name">Platform Architecture</span>
             </button>
             <button class="spec-card" id="proof-tab-scanning" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="scanning">
-              <span class="spec-idx">02</span><span class="spec-name">Scan Request</span>
+              <span class="spec-idx">04</span><span class="spec-name">Scan Request</span>
             </button>
             <button class="spec-card" id="proof-tab-analysis" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="analysis">
-              <span class="spec-idx">03</span><span class="spec-name">Analysis Pipeline</span>
+              <span class="spec-idx">05</span><span class="spec-name">Analysis Pipeline</span>
             </button>
             <button class="spec-card" id="proof-tab-compliance" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="compliance">
-              <span class="spec-idx">04</span><span class="spec-name">Compliance &amp; Evidence</span>
+              <span class="spec-idx">06</span><span class="spec-name">Compliance &amp; Evidence</span>
             </button>
             <button class="spec-card" id="proof-tab-finding" type="button" role="tab" aria-controls="hero-proof-panel" aria-selected="false" tabindex="-1" data-proof="finding">
-              <span class="spec-idx">05</span><span class="spec-name">Finding → DevSecOps</span>
+              <span class="spec-idx">07</span><span class="spec-name">Finding → DevSecOps</span>
             </button>
           </div>
           <div class="window-address" aria-hidden="true">
@@ -140,7 +147,7 @@
   <!-- ═════════════════ RECEIPTS ═════════════════ -->
   <section class="receipts" aria-label="RivicQ at a glance">
     <div class="container receipts-row">
-      <div class="receipt fade-up"><b>8</b><span>System diagrams<br>on this page</span></div>
+        <div class="receipt fade-up"><b>10</b><span>System diagrams<br>on this page</span></div>
       <div class="receipt fade-up d1"><b>6</b><span>BOM types<br>CBOM · SBOM · QBOM · HBOM · AIBOM · IBOM</span></div>
       <div class="receipt fade-up d2"><b>2</b><span>Editions<br>Community (OSS) + Enterprise</span></div>
       <div class="receipt fade-up d3"><b>10</b><span>Control mappings<br>DORA · BSI · NIST · ISO · eIDAS · PCI…</span></div>
@@ -157,6 +164,22 @@
         <p class="section-body">Every map below is a real RivicQ artifact, generated and validated from the codebase — not a screenshot. Each one opens in its own self-contained HTML file; trace routes, focus nodes, switch themes, and export.</p>
       </header>
       <div class="systems-grid">
+
+        <a class="sys-card fade-up" href="../diagrams/rivicq-console-product.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-console-product.html?embed=1&theme=dark&motion=1" title="RivicQ console and product architecture preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Architecture</span><span class="sys-file">rivicq-console-product.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">What does the console actually run?</span>
+          <span class="sys-title">Product console → evidence</span>
+          <span class="sys-desc">Operator, RevenueOS, API boundary, tenant auth, discovery, scanners, policy gate, CBOM evidence, and the Enterprise license line.</span>
+        </a>
+
+        <a class="sys-card fade-up" href="../diagrams/rivicq-enablement.html?present=1" target="_blank" rel="noopener">
+          <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-enablement.html?embed=1&theme=dark&motion=1" title="RivicQ enablement workflow preview" loading="lazy" tabindex="-1"></iframe></span>
+          <span class="sys-meta"><span class="sys-kind">Workflow</span><span class="sys-file">rivicq-enablement.html</span><span class="sys-open" aria-hidden="true">↗</span></span>
+          <span class="sys-q">How does a scan become evidence?</span>
+          <span class="sys-title">Sign-in → policy-gated CBOM</span>
+          <span class="sys-desc">Target selection, tenant policy, job execution, concurrent discovery, intelligence, gate decision, and CycloneDX-compatible report.</span>
+        </a>
 
         <a class="sys-card fade-up" href="../diagrams/rivicq-architecture.html?present=1" target="_blank" rel="noopener">
           <span class="sys-plate"><iframe data-sync-theme src="../diagrams/rivicq-architecture.html?embed=1&theme=dark&motion=1" title="RivicQ Platform Architecture preview" loading="lazy" tabindex="-1"></iframe></span>

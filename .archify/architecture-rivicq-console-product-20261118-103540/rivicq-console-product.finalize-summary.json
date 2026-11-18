@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/re1/re1/CSPM/.archify/architecture-rivicq-console-product-20261118-103540/candidate.json",
+    "sha256": "9a18bdf8e0a8ccb82f5111fcbd467468808338bc8737ac49a02fb59909da343e",
+    "bytes": 10062
+  },
+  "artifact": {
+    "path": "/Users/re1/re1/CSPM/.archify/architecture-rivicq-console-product-20261118-103540/rivicq-console-product.html",
+    "sha256": "78cb0c2b6d00266eb19b1c2e7e611f48bd0a8b7a71d2eee9bb5c35d6c3dc95e0",
+    "bytes": 776300
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/re1/re1/CSPM/.archify/architecture-rivicq-console-product-20261118-103540/rivicq-console-product.finalize.json",
+    "summaryReceipt": "/Users/re1/re1/CSPM/.archify/architecture-rivicq-console-product-20261118-103540/rivicq-console-product.finalize-summary.json",
+    "browserCheckReceipt": "/Users/re1/re1/CSPM/.archify/architecture-rivicq-console-product-20261118-103540/rivicq-console-product.browser-check.json"
+  },
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.2.0",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.2.0",
+    "severity": "normal",
+    "checkedAt": "2026-11-17T13:22:21.595Z",
+    "source": "cache",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.0.1 → 3.2.0. A previous check at 2026-11-17T13:22:21.595Z found a newer release. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.2.0. The installed Skill has not changed; ask to snooze or ignore this reminder.",
+    "eventKey": "archify@sha256:70e210265c59f24dcbdf2a502ff671104b5454e7ee7d3554aecd86bad32384f5"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 2609,
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "routesOverSuggestedStretch": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [],
+      "detours": [
+        {
+          "relationship": {
+            "id": "evidence-console",
+            "from": "evidence",
+            "to": "console",
+            "label": "result_url",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "bends": 2,
+          "stretch": 1.496
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "evidence → console needs 2 bends: move node evidence or console so they share a row or column with matching centers, or sit diagonally with a clear corner."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

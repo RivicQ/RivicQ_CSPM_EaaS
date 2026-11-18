@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, GlobalStyles } from '@mui/material';
 
 type ArchifySurfaceProps = {
-  placement?: 'backdrop' | 'rail';
+  placement?: 'both' | 'backdrop' | 'rail';
   variant?: 'public' | 'console';
 };
 
@@ -29,9 +29,11 @@ const archifySurfaceCss = `
   .rvq-surface-backdrop {
     position: fixed;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     overflow: hidden;
     pointer-events: none;
+    opacity: 0.42;
+    mix-blend-mode: screen;
   }
   .rvq-surface-backdrop::before {
     content: "";
@@ -42,7 +44,7 @@ const archifySurfaceCss = `
       linear-gradient(90deg, rgba(167, 139, 250, 0.09) 1px, transparent 1px);
     background-size: 44px 44px;
     transform: rotate(-8deg) scale(1.3);
-    opacity: 0.5;
+    opacity: 0.72;
     animation: rvqSurfaceGridPan 28s linear infinite;
     mask-image: radial-gradient(circle at 50% 38%, #000 0%, transparent 72%);
   }

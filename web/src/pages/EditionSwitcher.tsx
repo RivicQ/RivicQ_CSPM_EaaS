@@ -5,6 +5,7 @@ import { ArrowForward, Lock, Security, WorkspacePremium, CloudQueue, Psychology,
 import { setEditionPreference, Edition } from '../config/editions';
 import BrandLogo from '../components/BrandLogo';
 import NebulaBackdrop from '../components/brand/NebulaBackdrop';
+import ArchifySurface from '../components/brand/ArchifySurface';
 import {
   ARCHIFY_FONTS,
   NEBULA,
@@ -58,6 +59,9 @@ const EditionSwitcher: React.FC = () => {
       <Box aria-hidden sx={archifyAuraLayersSx.radial} />
       <Box aria-hidden sx={archifyAuraLayersSx.grid} />
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box sx={{ mb: 2 }}>
+          <ArchifySurface placement="rail" variant="public" />
+        </Box>
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
           <BrandLogo dark />
         </Box>

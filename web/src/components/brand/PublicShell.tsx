@@ -30,6 +30,7 @@ const NAV: NavItem[] = [
   { id: 'console', label: 'Console', to: '/dashboard' },
   { id: 'resources', label: 'Resources', items: [
     { label: 'Documentation', to: 'docs/index.html' },
+    { label: 'System reference', to: 'archify/site/reference.html' },
     { label: 'Open Source', to: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
     { label: 'Cloud', to: 'marketing/index.html#cloud' },
     { label: 'Animation', to: 'animation.html' },
@@ -189,7 +190,7 @@ const PublicShell: React.FC<{ children: React.ReactNode; nebula?: boolean }> = (
             <Button size="small" onClick={() => navigate('/dashboard')}>Console</Button>
             <Button size="small" href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener noreferrer">Open Source</Button>
             <Button size="small" onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/marketing/index.html#cloud`, '_blank', 'noopener,noreferrer')}>Cloud</Button>
-            <Button size="small" onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/docs/index.html`, '_blank', 'noopener,noreferrer')}>Reference</Button>
+            <Button size="small" onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/archify/site/reference.html`, '_blank', 'noopener,noreferrer')}>Reference</Button>
             <Button size="small" onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/animation.html`, '_blank', 'noopener,noreferrer')}>Animation</Button>
           </Stack>
           <TrademarkNotice />

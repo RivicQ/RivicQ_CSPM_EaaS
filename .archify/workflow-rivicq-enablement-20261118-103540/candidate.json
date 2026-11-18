@@ -1,0 +1,496 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "RivicQ Enablement Workflow",
+    "subtitle": "From console sign-in to policy-gated evidence",
+    "locale": "en",
+    "output": ".archify/workflow-rivicq-enablement-20261118-103540/rivicq-enablement.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:RivicQ/RivicQ_CSPM_EaaS.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "b0372189be95514ca039106dc72743bda19dd3cf"
+    },
+    "views": [
+      {
+        "id": "happy_path",
+        "label": "Happy path",
+        "focus": [
+          "signin",
+          "target",
+          "post",
+          "policy",
+          "job",
+          "discovery",
+          "intel",
+          "gate",
+          "bom"
+        ],
+        "note": "A permitted target becomes a completed, tenant-scoped CBOM report."
+      },
+      {
+        "id": "policy_stops",
+        "label": "Policy stops",
+        "focus": [
+          "policy",
+          "gate"
+        ],
+        "note": "Target validation and finding policy can stop a run before evidence is issued."
+      },
+      {
+        "id": "evidence_limits",
+        "label": "Evidence limits",
+        "focus": [
+          "bom"
+        ],
+        "note": "Advanced BOM layers remain license gated; control mappings are not certifications."
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "entry",
+      "label": "Operator / Console"
+    },
+    {
+      "id": "control",
+      "label": "API Boundary"
+    },
+    {
+      "id": "engine",
+      "label": "Shared Engine"
+    },
+    {
+      "id": "evidence",
+      "label": "Evidence & Delivery"
+    },
+    {
+      "id": "exception",
+      "label": "Policy Exception",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "intake",
+      "label": "Intake",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "execute",
+      "label": "Execute",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "deliver",
+      "label": "Deliver",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "request_group",
+      "label": "Auth + target policy",
+      "lane": "control",
+      "fromCol": 2,
+      "toCol": 2,
+      "variant": "emphasis"
+    },
+    {
+      "id": "run_group",
+      "label": "Tenant-scoped job",
+      "lane": "engine",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "deliver_group",
+      "label": "Evidence + gates",
+      "lane": "evidence",
+      "fromCol": 3,
+      "toCol": 5,
+      "variant": "dashed"
+    },
+    {
+      "id": "exception_group",
+      "label": "Policy stop",
+      "lane": "exception",
+      "fromCol": 3,
+      "toCol": 5,
+      "variant": "security"
+    }
+  ],
+  "mainPath": [
+    "signin",
+    "target",
+    "post",
+    "policy",
+    "job",
+    "discovery",
+    "intel",
+    "gate",
+    "bom"
+  ],
+  "semanticChecks": {
+    "allowedRoots": [
+      "signin"
+    ],
+    "allowedTerminals": [
+      "bom"
+    ],
+    "requiredEdges": [
+      {
+        "from": "signin",
+        "to": "target"
+      },
+      {
+        "from": "post",
+        "to": "policy"
+      },
+      {
+        "from": "policy",
+        "to": "job"
+      },
+      {
+        "from": "intel",
+        "to": "gate"
+      },
+      {
+        "from": "gate",
+        "to": "bom"
+      }
+    ],
+    "requiredPaths": [
+      {
+        "from": "signin",
+        "to": "bom"
+      },
+      {
+        "from": "post",
+        "to": "job"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "signin",
+      "lane": "entry",
+      "col": 0,
+      "type": "external",
+      "label": "Sign in / demo",
+      "sublabel": "session or token",
+      "icon": "start",
+      "width": 132,
+      "sources": [
+        {
+          "path": "web/src/context/AuthContext.tsx",
+          "line": 88,
+          "end_line": 179,
+          "label": "session bootstrap"
+        },
+        {
+          "path": "web/src/App.tsx",
+          "line": 163,
+          "end_line": 204,
+          "label": "public and protected routes"
+        }
+      ]
+    },
+    {
+      "id": "target",
+      "lane": "entry",
+      "col": 1,
+      "type": "frontend",
+      "label": "Choose target",
+      "sublabel": "repo \u00b7 host \u00b7 SBOM",
+      "width": 138,
+      "sources": [
+        {
+          "path": "web/src/pages/Scanner.tsx",
+          "line": 22,
+          "end_line": 95,
+          "label": "scan target classes"
+        },
+        {
+          "path": "web/src/services/api.ts",
+          "line": 414,
+          "end_line": 480,
+          "label": "scan client calls"
+        }
+      ]
+    },
+    {
+      "id": "post",
+      "lane": "control",
+      "col": 2,
+      "type": "backend",
+      "label": "POST /scans",
+      "sublabel": "202 + result_url",
+      "width": 138,
+      "yOffset": -34,
+      "sources": [
+        {
+          "path": "internal/api/shared/handlers.go",
+          "line": 766,
+          "end_line": 818,
+          "label": "scan request"
+        }
+      ]
+    },
+    {
+      "id": "policy",
+      "lane": "control",
+      "col": 2,
+      "type": "security",
+      "label": "Target policy",
+      "sublabel": "private targets blocked",
+      "width": 142,
+      "yOffset": 34,
+      "sources": [
+        {
+          "path": "internal/discovery/target_policy.go",
+          "line": 13,
+          "end_line": 73,
+          "label": "target validation"
+        },
+        {
+          "path": "internal/authn/enforce.go",
+          "line": 10,
+          "end_line": 49,
+          "label": "bearer context"
+        }
+      ]
+    },
+    {
+      "id": "job",
+      "lane": "engine",
+      "col": 2,
+      "type": "backend",
+      "label": "Scan job",
+      "sublabel": "pending -> running",
+      "width": 132,
+      "sources": [
+        {
+          "path": "internal/discovery/scan_manager.go",
+          "line": 108,
+          "end_line": 185,
+          "label": "job lifecycle"
+        }
+      ]
+    },
+    {
+      "id": "discovery",
+      "lane": "engine",
+      "col": 3,
+      "type": "backend",
+      "label": "Scanners",
+      "sublabel": "TLS \u00b7 SSH \u00b7 HTTP \u00b7 SBOM",
+      "width": 146,
+      "sources": [
+        {
+          "path": "internal/discovery/scanner.go",
+          "line": 38,
+          "end_line": 101,
+          "label": "concurrent dispatch"
+        }
+      ]
+    },
+    {
+      "id": "intel",
+      "lane": "engine",
+      "col": 4,
+      "type": "backend",
+      "label": "Intelligence",
+      "sublabel": "fingerprint + policy",
+      "width": 142,
+      "sources": [
+        {
+          "path": "internal/intelligence/pipeline.go",
+          "line": 11,
+          "end_line": 62,
+          "label": "report build"
+        },
+        {
+          "path": "internal/intelligence/fingerprint.go",
+          "line": 11,
+          "end_line": 57,
+          "label": "deterministic fingerprints"
+        }
+      ]
+    },
+    {
+      "id": "gate",
+      "lane": "exception",
+      "col": 4,
+      "type": "security",
+      "label": "Gate decision",
+      "sublabel": "BLOCK \u00b7 WARN \u00b7 ALLOW",
+      "width": 142,
+      "sources": [
+        {
+          "path": "internal/intelligence/policy.go",
+          "line": 8,
+          "end_line": 93,
+          "label": "policy actions"
+        }
+      ]
+    },
+    {
+      "id": "bom",
+      "lane": "evidence",
+      "col": 4,
+      "type": "database",
+      "label": "CBOM report",
+      "sublabel": "CycloneDX 1.6",
+      "width": 138,
+      "sources": [
+        {
+          "path": "internal/intelligence/cyclonedx.go",
+          "line": 10,
+          "end_line": 44,
+          "label": "CBOM document"
+        },
+        {
+          "path": "internal/api/shared/intelligence.go",
+          "line": 41,
+          "end_line": 54,
+          "label": "evidence routes"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "signin-target",
+      "from": "signin",
+      "to": "target",
+      "label": "session",
+      "role": "main",
+      "variant": "emphasis"
+    },
+    {
+      "id": "target-post",
+      "from": "target",
+      "to": "post",
+      "label": "target + scan_type",
+      "role": "main"
+    },
+    {
+      "id": "post-policy",
+      "from": "post",
+      "to": "policy",
+      "label": "tenant scope",
+      "role": "main",
+      "variant": "security"
+    },
+    {
+      "id": "policy-job",
+      "from": "policy",
+      "to": "job",
+      "label": "allowed",
+      "role": "main",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          420.6,
+          430
+        ],
+        [
+          500,
+          430
+        ],
+        [
+          500,
+          460
+        ],
+        [
+          420.6,
+          460
+        ]
+      ]
+    },
+    {
+      "id": "job-discovery",
+      "from": "job",
+      "to": "discovery",
+      "label": "120s timeout",
+      "role": "main"
+    },
+    {
+      "id": "discovery-intel",
+      "from": "discovery",
+      "to": "intel",
+      "label": "findings",
+      "role": "main",
+      "route": "up-channel"
+    },
+    {
+      "id": "intel-gate",
+      "from": "intel",
+      "to": "gate",
+      "label": "evaluate",
+      "role": "main"
+    },
+    {
+      "id": "gate-bom",
+      "from": "gate",
+      "to": "bom",
+      "label": "ALLOW / INFORM",
+      "role": "main",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "right",
+      "via": [
+        [
+          900,
+          866
+        ],
+        [
+          900,
+          688
+        ]
+      ],
+      "labelDy": 50
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Start from the console",
+      "items": [
+        "A session or demo token establishes the operator context.",
+        "The scanner UI maps repo, host, website, SBOM, firmware, and inventory targets.",
+        "POST /scans returns 202 with a scan ID and result URL."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Run the shared engine",
+      "items": [
+        "Target policy and tenant scope are checked before a job starts.",
+        "The manager runs concurrent scanners under a 120-second timeout.",
+        "Intelligence fingerprints findings and evaluates BLOCK, WARN, ALLOW, and INFORM rules."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Evidence with boundaries",
+      "items": [
+        "Permitted results become CycloneDX-compatible CBOM evidence in the console.",
+        "CLI and GitHub Action enforce fail-on BLOCK outside the browser.",
+        "QBOM, HSM, SSO, audit, and advanced BOM layers require Enterprise; mappings are not certifications."
+      ]
+    }
+  ]
+}

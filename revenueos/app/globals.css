@@ -47,11 +47,152 @@ a {
   animation-delay: 240ms;
 }
 
+@keyframes rvq-archify-grid-pan {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 44px 44px, 44px 44px; }
+}
+
+@keyframes rvq-archify-aura-drift {
+  0%, 100% { transform: translate3d(-3%, -2%, 0) scale(1.04); opacity: 0.72; }
+  50% { transform: translate3d(2%, 1%, 0) scale(1.1); opacity: 1; }
+}
+
+@keyframes rvq-archify-trace {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(230%); }
+}
+
+@keyframes rvq-archify-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.34); opacity: 0.68; }
+  50% { box-shadow: 0 0 0 5px rgba(167, 139, 250, 0); opacity: 1; }
+}
+
+.rvq-archify-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.42;
+  mix-blend-mode: screen;
+}
+
+.rvq-archify-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background-image:
+    linear-gradient(rgba(167, 139, 250, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167, 139, 250, 0.1) 1px, transparent 1px);
+  background-size: 44px 44px;
+  transform: rotate(-8deg) scale(1.3);
+  animation: rvq-archify-grid-pan 28s linear infinite;
+  mask-image: radial-gradient(circle at 50% 38%, #000 0%, transparent 72%);
+}
+
+.rvq-archify-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(124, 58, 237, 0.24), transparent 32%),
+    radial-gradient(circle at 82% 16%, rgba(56, 189, 248, 0.14), transparent 28%),
+    radial-gradient(circle at 60% 82%, rgba(167, 139, 250, 0.18), transparent 34%);
+  filter: blur(18px);
+  animation: rvq-archify-aura-drift 20s ease-in-out infinite;
+}
+
+.rvq-archify-content {
+  position: relative;
+  z-index: 1;
+}
+
+.rvq-archify-rail {
+  position: fixed;
+  bottom: 12px;
+  left: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.13), rgba(10, 10, 15, 0.74) 42%, rgba(56, 189, 248, 0.09));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+  opacity: 0.78;
+}
+
+.rvq-archify-rail-stage {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 6px;
+  color: rgba(226, 232, 240, 0.82);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rvq-archify-rail-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #a78bfa;
+  animation: rvq-archify-pulse 2.8s ease-in-out infinite;
+}
+
+.rvq-archify-rail-stage:nth-child(2) .rvq-archify-rail-dot { animation-delay: 0.28s; }
+.rvq-archify-rail-stage:nth-child(3) .rvq-archify-rail-dot { animation-delay: 0.56s; }
+.rvq-archify-rail-stage:nth-child(4) .rvq-archify-rail-dot { animation-delay: 0.84s; }
+.rvq-archify-rail-stage:nth-child(5) .rvq-archify-rail-dot { animation-delay: 1.12s; }
+
+.rvq-archify-rail-link {
+  position: relative;
+  width: clamp(14px, 4vw, 48px);
+  height: 1px;
+  margin: 0 6px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.rvq-archify-rail-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, #a78bfa, transparent);
+  animation: rvq-archify-trace 2.6s linear infinite;
+}
+
+.rvq-archify-rail-stage:nth-child(2) .rvq-archify-rail-link::after { animation-delay: 0.2s; }
+.rvq-archify-rail-stage:nth-child(3) .rvq-archify-rail-link::after { animation-delay: 0.4s; }
+.rvq-archify-rail-stage:nth-child(4) .rvq-archify-rail-link::after { animation-delay: 0.6s; }
+
 @media (prefers-reduced-motion: reduce) {
   .rise,
   .rise-delay-1,
   .rise-delay-2,
-  .rise-delay-3 {
+  .rise-delay-3,
+  .rvq-archify-backdrop::before,
+  .rvq-archify-backdrop::after,
+  .rvq-archify-rail-dot,
+  .rvq-archify-rail-link::after {
     animation: none;
+  }
+}
+
+@media print {
+  .rvq-archify-backdrop,
+  .rvq-archify-rail {
+    display: none;
   }
 }

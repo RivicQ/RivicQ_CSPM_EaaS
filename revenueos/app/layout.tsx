@@ -9,7 +9,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <div className="rvq-archify-backdrop" aria-hidden="true" />
+        <div className="rvq-archify-rail" aria-hidden="true">
+          {["Finding", "Analysis", "Engineering", "DevSecOps", "Evidence"].map((stage, index) => (
+            <span className="rvq-archify-rail-stage" key={stage}>
+              <span className="rvq-archify-rail-dot" />
+              <span>{stage}</span>
+              {index < 4 && <span className="rvq-archify-rail-link" />}
+            </span>
+          ))}
+        </div>
+        <main className="rvq-archify-content">{children}</main>
+      </body>
     </html>
   );
 }

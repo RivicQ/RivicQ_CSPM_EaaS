@@ -902,8 +902,10 @@ const Layout: React.FC = () => {
           minHeight: '100vh',
           minWidth: 0,
           overflowX: 'hidden',
-          bgcolor: '#000000',
-          background: designSystem.gradient.meshDark,
+          position: 'relative',
+          zIndex: 1,
+          bgcolor: 'transparent',
+          background: 'transparent',
           transition: reduceMotion ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           '& .MuiTableContainer-root': { overflowX: 'auto' },
         }}
