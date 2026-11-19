@@ -3,6 +3,7 @@ import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../../theme/websiteChrome';
+import { NEBULA } from '../../theme/nebulaSurfaces';
 import {
   PUBLIC_ENGINE_CHIP_DEMO,
   PUBLIC_ENGINE_CHIP_DISCONNECTED,
@@ -16,9 +17,9 @@ type Variant = 'scan' | 'ibm';
 const panelSx = {
   p: 2,
   mb: 3,
-  bgcolor: '#0a0a0f',
+  bgcolor: NEBULA.panel,
   border: '1px solid',
-  borderColor: 'divider',
+  borderColor: NEBULA.line,
   borderRadius: 2,
 } as const;
 

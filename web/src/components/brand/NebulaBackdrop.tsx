@@ -1,9 +1,12 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import ArchifySurface from './ArchifySurface';
+import { useThemeMode } from '../../theme/ThemeContext';
 
 /** Deep-space nebula with the Archify flow surface beneath it. */
-const NebulaBackdrop: React.FC<{ height?: string | number }> = ({ height = '100%' }) => (
+const NebulaBackdrop: React.FC<{ height?: string | number }> = ({ height = '100%' }) => {
+  const { mode } = useThemeMode();
+  return (
   <>
     <ArchifySurface placement="backdrop" variant="public" />
     <Box
@@ -15,7 +18,9 @@ const NebulaBackdrop: React.FC<{ height?: string | number }> = ({ height = '100%
         overflow: 'hidden',
         pointerEvents: 'none',
         background:
-          'radial-gradient(ellipse 55% 48% at 50% 42%, rgba(124,58,237,0.42), transparent 68%), #000',
+          mode === 'light'
+            ? 'radial-gradient(ellipse 55% 48% at 50% 42%, rgba(124,58,237,0.16), transparent 68%), var(--rvq-canvas)'
+            : 'radial-gradient(ellipse 55% 48% at 50% 42%, rgba(124,58,237,0.42), transparent 68%), #000',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -34,11 +39,12 @@ const NebulaBackdrop: React.FC<{ height?: string | number }> = ({ height = '100%
             'radial-gradient(1px 1px at 48% 8%, rgba(255,255,255,0.6), transparent)',
             'radial-gradient(1.3px 1.3px at 86% 70%, rgba(255,255,255,0.55), transparent)',
           ].join(','),
-          opacity: 0.9,
+          opacity: mode === 'light' ? 0.18 : 0.9,
         },
       }}
     />
   </>
-);
+  );
+};
 
 export default NebulaBackdrop;

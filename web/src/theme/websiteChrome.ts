@@ -1,19 +1,20 @@
-/** rivicq.com nebula CTAs — never inherit cream/terracotta from an older theme. */
+import { NEBULA } from './nebulaSurfaces';
+import { PRISM } from './prism';
+
 export const websiteCtaSx = {
   borderRadius: 999,
-  bgcolor: '#7c3aed !important',
-  color: '#ffffff !important',
+  bgcolor: `${NEBULA.accent} !important`,
+  color: `${PRISM.dark.text} !important`,
   boxShadow: 'none',
-  '&:hover': { bgcolor: '#6d28d9 !important', boxShadow: 'none' },
+  '&:hover': { bgcolor: `${PRISM.brand.violet600} !important`, boxShadow: 'none' },
 } as const;
 
-/** Outline CTA — adapts to the surrounding surface so it stays legible in light and dark. */
 export const websiteOutlineCtaSx = (_isDark?: boolean) => ({
   borderRadius: 999,
-  color: '#ffffff !important',
-  borderColor: 'rgba(255,255,255,0.45) !important',
+  color: `${NEBULA.text} !important`,
+  borderColor: `${NEBULA.lineHi} !important`,
   '&:hover': {
-    borderColor: '#ffffff !important',
-    bgcolor: 'rgba(124,58,237,0.16) !important',
+    borderColor: `${NEBULA.accentSoft} !important`,
+    bgcolor: `${NEBULA.raised} !important`,
   },
 });

@@ -2,6 +2,8 @@ import React from 'react';
 import { Box, Chip, Grid, Stack, Typography } from '@mui/material';
 import { AccountTree, Assessment, ManageSearch, TravelExplore } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { NEBULA } from '../../theme/nebulaSurfaces';
+import { PRISM } from '../../theme/prism';
 
 interface Step {
   icon: React.ReactNode;
@@ -44,11 +46,11 @@ const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false })
       <Grid container spacing={2}>
         {STEPS.map((s, i) => (
           <Grid item xs={12} sm={6} md={3} key={s.title}>
-            <Box sx={{ height: '100%', p: 2.25, borderRadius: 2, bgcolor: '#0a0a0f', border: '1px solid', borderColor: 'divider', position: 'relative', overflow: 'hidden' }}>
+            <Box sx={{ height: '100%', p: 2.25, borderRadius: PRISM.radii.md, bgcolor: NEBULA.panel, border: PRISM.border.hairline, borderColor: NEBULA.line, position: 'relative', overflow: 'hidden' }}>
               <Stack direction="row" spacing={1.5} alignItems="flex-start">
                 <Box sx={{
                   width: 40, height: 40, borderRadius: 2, flexShrink: 0, display: 'grid', placeItems: 'center',
-                  background: 'rgba(124,58,237,0.28)',
+                  bgcolor: NEBULA.raised,
                   color: 'primary.main',
                 }}>
                   {s.icon}

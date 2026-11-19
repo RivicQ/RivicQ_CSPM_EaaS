@@ -4,7 +4,8 @@ import {
 } from '@mui/material';
 import { CheckCircle, ErrorOutline, GitHub, Lock, ArrowForward, Shield, Language } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { tokens } from '../../theme/tokens';
+import { PRISM } from '../../theme/prism';
+import { NEBULA } from '../../theme/nebulaSurfaces';
 import { websiteCtaSx } from '../../theme/websiteChrome';
 import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_SCAN_COPY } from '../../data/publicInfrastructure';
 
@@ -34,15 +35,14 @@ type HomeScanReportProps = {
 const STAGES = ['Connecting', 'Discovering files', 'Analyzing crypto', 'Building CBOM', 'Quantifying risk'];
 
 const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, report, onOpenApp, onRegister }) => {
-  const cardBg = '#0a0a0f';
   const activeStage = Math.min(STAGES.length - 1, Math.floor((progress / 100) * STAGES.length));
 
   return (
     <Box component={motion.div} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} sx={{ mb: 6 }}>
-      <Card sx={{ bgcolor: cardBg, border: 1, borderColor: '#1f1f2e', color: '#fff' }}>
+      <Card sx={{ bgcolor: NEBULA.panel, border: 1, borderColor: NEBULA.line, color: NEBULA.text }}>
         <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-            {/github/i.test(report?.target || '') ? <GitHub sx={{ color: tokens.colors.rivicq[500] }} /> : <Language sx={{ color: tokens.colors.rivicq[500] }} />}
+            {/github/i.test(report?.target || '') ? <GitHub sx={{ color: NEBULA.accentSoft }} /> : <Language sx={{ color: NEBULA.accentSoft }} />}
             <Typography variant="h6" fontWeight={800}>CBOM scan</Typography>
             {status === 'scanning' && <Chip size="small" label="Running" color="primary" />}
             {status === 'complete' && <Chip size="small" label="Completed" color="success" />}
@@ -80,19 +80,19 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
                 <Grid item xs={6} sm={3}>
                   <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
                     <Typography variant="caption" color="text.secondary">Security score</Typography>
-                    <Typography variant="h5" fontWeight={900} sx={{ color: tokens.colors.rivicq[600] }}>{report.score ?? report.auditScore ?? '—'}</Typography>
+                    <Typography variant="h5" fontWeight={900} sx={{ color: NEBULA.accentSoft }}>{report.score ?? report.auditScore ?? '—'}</Typography>
                   </Box>
                 </Grid>
                 {[
-                  { k: 'critical', label: 'Critical', c: tokens.colors.crypto.critical },
-                  { k: 'high', label: 'High', c: tokens.colors.crypto.high },
-                  { k: 'medium', label: 'Medium', c: tokens.colors.crypto.medium },
+                  { k: 'critical', label: 'Critical', c: PRISM.severity.critical },
+                  { k: 'high', label: 'High', c: PRISM.severity.high },
+                  { k: 'medium', label: 'Medium', c: PRISM.severity.medium },
                 ].map((s) => (
                   <Grid item xs={6} sm={3} key={s.k}>
                     <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
                       <Typography variant="caption" color="text.secondary">{s.label}</Typography>
                       <Typography variant="h5" fontWeight={900} sx={{ color: s.c }}>
-                        {(report.severity as Record<string, number | undefined>)?.[s.k] ?? 0}
+                        {(report.severity as Record<string, number | undefined>)?.[s.k] ?? '—'}
                       </Typography>
                     </Box>
                   </Grid>

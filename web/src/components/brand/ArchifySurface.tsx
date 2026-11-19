@@ -65,10 +65,10 @@ const archifySurfaceCss = `
     width: 100%;
     min-width: 0;
     padding: 6px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--rvq-border);
     border-radius: 10px;
-    background: linear-gradient(90deg, rgba(124, 58, 237, 0.12), rgba(10, 10, 15, 0.72) 42%, rgba(56, 189, 248, 0.08));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    background: linear-gradient(90deg, rgba(124, 58, 237, 0.12), var(--rvq-surface) 42%, rgba(56, 189, 248, 0.08));
+    box-shadow: inset 0 1px 0 var(--rvq-border);
     overflow: hidden;
   }
   .rvq-surface-rail[data-variant="console"] {
@@ -95,7 +95,7 @@ const archifySurfaceCss = `
   .rvq-surface-rail-item:nth-of-type(5) .rvq-surface-rail-dot { animation-delay: 1.12s; }
   .rvq-surface-rail-label {
     margin-left: 6px;
-    color: rgba(226, 232, 240, 0.82);
+    color: var(--rvq-text-secondary);
     font-family: "JetBrains Mono", ui-monospace, monospace;
     font-size: clamp(7px, 1.1vw, 9px);
     font-weight: 600;
@@ -111,7 +111,7 @@ const archifySurfaceCss = `
     min-width: 10px;
     margin: 0 8px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.16);
+    background: var(--rvq-border-strong);
   }
   .rvq-surface-rail-link::after {
     content: "";
