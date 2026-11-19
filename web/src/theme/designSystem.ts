@@ -1,6 +1,7 @@
 import { Theme } from '@mui/material/styles';
 import { tokens } from './tokens';
 import appTypography from './typography';
+import { PRISM, prismPalette } from './prism';
 
 /** Creative professional design system — shared across the entire product */
 export const designSystem = {
@@ -12,7 +13,7 @@ export const designSystem = {
     pill: tokens.borderRadius.full,
   },
   font: {
-    display: appTypography.fontFamily,
+    display: appTypography.fontFamilyTitle,
     mono: appTypography.fontFamilyMono,
     metric: appTypography.metric.fontFamily,
   },
@@ -43,37 +44,40 @@ export const designSystem = {
   },
   /** Deep-space console — black canvas, violet accent, semantic status only */
   proBlue: {
-    navy: '#000000',
-    navyMid: '#0a0a0f',
-    navyLight: '#12121a',
-    royal: '#7c3aed',
-    accent: '#7c3aed',
-    accentLight: '#a78bfa',
-    accentMuted: '#d1d5db',
-    sidebar: '#000000',
-    commandCenter: '#0a0a0f',
+    navy: 'var(--rvq-canvas)',
+    navyMid: 'var(--rvq-surface)',
+    navyLight: 'var(--rvq-surface-raised)',
+    royal: PRISM.brand.violet500,
+    accent: PRISM.brand.violet500,
+    accentLight: PRISM.brand.violet400,
+    accentMuted: 'var(--rvq-text-secondary)',
+    sidebar: 'var(--rvq-canvas)',
+    commandCenter: 'var(--rvq-surface)',
     commandGlow: 'none',
-    border: '#1f1f2e',
-    textPrimary: '#ffffff',
-    textSecondary: '#d1d5db',
-    textMuted: '#9ca3af',
+    border: 'var(--rvq-border)',
+    textPrimary: 'var(--rvq-text)',
+    textSecondary: 'var(--rvq-text-secondary)',
+    textMuted: 'var(--rvq-text-muted)',
     navActive: 'rgba(124,58,237,0.22)',
-    navHover: 'rgba(255,255,255,0.05)',
-    shadow: '0 18px 48px rgba(0,0,0,0.45)',
+    navHover: 'rgba(124,58,237,0.08)',
+    shadow: PRISM.elevation.panel,
   },
 } as const;
 
 export const meshBackground = (theme: Theme) => ({
-  background: theme.palette.mode === 'dark' ? designSystem.gradient.meshDark : designSystem.gradient.meshLight,
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: prismPalette(theme.palette.mode).canvas,
+  backgroundImage:
+    theme.palette.mode === 'dark'
+      ? 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.22), transparent 70%)'
+      : 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.08), transparent 70%)',
 });
 
 export const glassSurface = (_theme: Theme, elevated = false) => ({
-  background: elevated ? '#0a0a0f' : '#000000',
-  backdropFilter: 'none',
-  WebkitBackdropFilter: 'none',
-  border: '1px solid rgba(255,255,255,0.12)',
-  color: '#ffffff',
+  background: elevated ? 'var(--rvq-surface-raised)' : 'var(--rvq-surface)',
+  backdropFilter: `blur(${PRISM.blur.glass})`,
+  WebkitBackdropFilter: `blur(${PRISM.blur.glass})`,
+  border: `1px solid var(--rvq-border)`,
+  color: 'var(--rvq-text)',
 });
 
 export const gradientTextSx = {
@@ -99,9 +103,9 @@ export const panelTitleSx = {
 };
 
 export const sidebarPaperSx = {
-  background: designSystem.gradient.sidebar,
-  borderRight: `1px solid ${designSystem.proBlue.border}`,
-  color: designSystem.proBlue.textPrimary,
+  background: 'var(--rvq-canvas)',
+  borderRight: `1px solid var(--rvq-border)`,
+  color: 'var(--rvq-text)',
   overflow: 'hidden',
   height: '100vh',
 };
@@ -111,15 +115,15 @@ export const sidebarScrollSx = {
   overflowY: 'auto',
   overflowX: 'hidden',
   scrollbarWidth: 'thin',
-  scrollbarColor: '#1f1f2e transparent',
+  scrollbarColor: 'var(--rvq-border) transparent',
   '&::-webkit-scrollbar': { width: 4 },
   '&::-webkit-scrollbar-track': { background: 'transparent' },
   '&::-webkit-scrollbar-thumb': {
-    background: '#1f1f2e',
+    background: 'var(--rvq-border-strong)',
     borderRadius: 99,
   },
   '&::-webkit-scrollbar-thumb:hover': {
-    background: '#2e1065',
+    background: PRISM.brand.violet600,
   },
 };
 
@@ -160,11 +164,11 @@ export const sidebarNavItemButtonSx = (active: boolean, disabled: boolean) => ({
 export const commandCenterCardSx = {
   position: 'relative' as const,
   overflow: 'hidden' as const,
-  background: '#0a0a0f',
+  background: 'var(--rvq-surface)',
   backgroundImage: 'none',
-  border: `1px solid ${designSystem.proBlue.border}`,
+  border: `1px solid var(--rvq-border)`,
   boxShadow: 'none',
-  color: designSystem.proBlue.textPrimary,
+  color: 'var(--rvq-text)',
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -221,18 +225,18 @@ export const heroSecondaryCtaSx = {
   fontSize: '0.875rem',
   letterSpacing: '-0.01em',
   textTransform: 'none',
-  color: `${designSystem.proBlue.textPrimary} !important`,
+  color: `var(--rvq-text) !important`,
   backgroundImage: 'none !important',
-  backgroundColor: 'rgba(255,255,255,0.08) !important',
-  border: '1px solid rgba(255,255,255,0.22)',
+  backgroundColor: 'var(--rvq-surface-raised) !important',
+  border: '1px solid var(--rvq-border-strong)',
   boxShadow: 'none',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
   '& .MuiButton-endIcon, & .MuiButton-startIcon': { color: 'inherit' },
   '&:hover': {
-    backgroundColor: 'rgba(255,255,255,0.14) !important',
+    backgroundColor: 'var(--rvq-surface-overlay) !important',
     backgroundImage: 'none !important',
-    borderColor: 'rgba(255,255,255,0.5)',
+    borderColor: 'var(--rvq-accent)',
   },
 };
 
@@ -299,16 +303,16 @@ export const proBlueBadgeSx = {
 
 /** Top app bar — aligns with pro-blue sidebar & command center */
 export const appBarPaperSx = (_mode: 'light' | 'dark') => ({
-  bgcolor: '#000000',
-  backdropFilter: 'none',
-  WebkitBackdropFilter: 'none',
-  color: designSystem.proBlue.textPrimary,
-  borderBottom: '1px solid #1f1f2e',
+  bgcolor: 'var(--rvq-canvas)',
+  backdropFilter: `blur(${PRISM.blur.glass})`,
+  WebkitBackdropFilter: `blur(${PRISM.blur.glass})`,
+  color: 'var(--rvq-text)',
+  borderBottom: '1px solid var(--rvq-border)',
   boxShadow: 'none',
   backgroundImage: 'none',
 });
 
-export const appBarSearchSx = (mode: 'light' | 'dark') => ({
+export const appBarSearchSx = (_mode: 'light' | 'dark') => ({
   display: { xs: 'none', lg: 'flex' },
   alignItems: 'center',
   flexWrap: 'nowrap',
@@ -322,38 +326,41 @@ export const appBarSearchSx = (mode: 'light' | 'dark') => ({
   minWidth: 220,
   width: { lg: 240, xl: 280 },
   whiteSpace: 'nowrap',
-  bgcolor: '#0a0a0f',
-  border: '1px solid #1f1f2e',
+  bgcolor: 'var(--rvq-surface)',
+  border: '1px solid var(--rvq-border)',
   transition: designSystem.motion.smooth,
   '&:focus-within': {
-    bgcolor: '#0a0a0f',
-    borderColor: '#7c3aed',
+    bgcolor: 'var(--rvq-surface-raised)',
+    borderColor: 'var(--rvq-accent)',
     boxShadow: 'none',
   },
 });
 
-export const appBarIconButtonSx = (_mode: 'light' | 'dark') => ({
+export const appBarIconButtonSx = (mode: 'light' | 'dark') => ({
   borderRadius: `${designSystem.radius.sm}px`,
-  border: '1px solid #1f1f2e',
-  bgcolor: '#0a0a0f',
-  color: designSystem.proBlue.textSecondary,
+  border: '1px solid var(--rvq-border)',
+  bgcolor: 'var(--rvq-surface)',
+  color: 'var(--rvq-text-secondary)',
   width: 36,
   height: 36,
   '&:hover': {
-    bgcolor: 'rgba(255,255,255,0.08)',
-    borderColor: designSystem.proBlue.accentMuted,
+    bgcolor:
+      mode === 'dark'
+        ? 'rgba(255,255,255,0.08)'
+        : `rgba(124,58,237,0.08)`,
+    borderColor: 'var(--rvq-border-strong)',
   },
 });
 
-export const appBarEditionChipSx = (_mode: 'light' | 'dark', isEnterprise: boolean) => ({
+export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolean) => ({
   fontWeight: 600,
   fontSize: '0.6875rem',
   letterSpacing: '0.02em',
   height: 26,
   display: { xs: 'none', sm: 'inline-flex' },
-  bgcolor: isEnterprise ? 'rgba(124,58,237,0.2)' : '#0a0a0f',
-  color: isEnterprise ? '#ffffff' : designSystem.proBlue.accentMuted,
-  border: '1px solid #1f1f2e',
+  bgcolor: isEnterprise ? 'rgba(124,58,237,0.2)' : 'var(--rvq-surface)',
+  color: isEnterprise ? '#ffffff' : prismPalette(mode).textSecondary,
+  border: '1px solid var(--rvq-border)',
 });
 
 export const appBarPageTitleSx = (_mode: 'light' | 'dark') => ({
@@ -362,13 +369,13 @@ export const appBarPageTitleSx = (_mode: 'light' | 'dark') => ({
   fontSize: '0.9375rem',
   letterSpacing: '-0.02em',
   lineHeight: 1.2,
-  color: designSystem.proBlue.textPrimary,
+  color: 'var(--rvq-text)',
 });
 
 export const appBarPageEyebrowSx = (_mode: 'light' | 'dark') => ({
   ...appTypography.eyebrow,
   fontSize: '0.625rem',
-  color: designSystem.proBlue.accentMuted,
+  color: 'var(--rvq-text-secondary)',
   lineHeight: 1,
   mb: 0.25,
 });

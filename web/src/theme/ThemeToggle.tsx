@@ -13,6 +13,7 @@ const ThemeToggle: React.FC<Props> = ({ mode, onToggle, compact = false }) => {
     <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
       <IconButton
         onClick={onToggle}
+        aria-label={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}
         size={compact ? 'small' : 'large'}
         sx={
           compact

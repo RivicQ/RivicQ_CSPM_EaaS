@@ -1,15 +1,15 @@
 /** Shared nebula / Archify surface tokens for public and console React pages. */
 export const NEBULA = {
-  ink: '#000000',
-  panel: '#0a0a0f',
-  raised: '#12121a',
-  line: '#1f1f2e',
-  lineHi: 'rgba(255,255,255,0.14)',
-  accent: '#7c3aed',
-  accentSoft: '#a78bfa',
-  text: '#ffffff',
-  muted: '#d1d5db',
-  faint: '#9ca3af',
+  ink: 'var(--rvq-canvas)',
+  panel: 'var(--rvq-surface)',
+  raised: 'var(--rvq-surface-raised)',
+  line: 'var(--rvq-border)',
+  lineHi: 'var(--rvq-border-strong)',
+  accent: 'var(--rvq-accent)',
+  accentSoft: 'var(--rvq-accent-soft)',
+  text: 'var(--rvq-text)',
+  muted: 'var(--rvq-text-secondary)',
+  faint: 'var(--rvq-text-muted)',
 } as const;
 
 export const ARCHIFY_FONTS = {
@@ -22,7 +22,7 @@ export const ARCHIFY_FONTS = {
 export const nebulaPanelSx = {
   bgcolor: NEBULA.panel,
   border: '1px solid',
-  borderColor: 'rgba(255,255,255,0.12)',
+  borderColor: 'var(--rvq-border)',
   borderRadius: 2,
   color: NEBULA.text,
 } as const;

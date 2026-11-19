@@ -2,6 +2,7 @@ import { createTheme } from '@mui/material/styles';
 import { tokens } from './tokens';
 import designSystem, { proBlueContainedButtonSx } from './designSystem';
 import appTypography from './typography';
+import { prismPalette, type PrismMode } from './prism';
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -18,22 +19,13 @@ declare module '@mui/material/Chip' {
   }
 }
 
-const LIGHT_PRIMARY = {
-  50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa',
-  500: '#7c3aed', 600: '#6d28d9', 700: '#5b21b6', 800: '#4c1d95', 900: '#2e1065',
-};
-
-const DARK_PRIMARY = LIGHT_PRIMARY;
-
-const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
-  const mode: 'light' | 'dark' = 'dark';
-  const isDark = true;
-
-  const surface = tokens.colors.surfaceLight;
-  const text = tokens.colors.textLight;
-  const border = tokens.colors.borderLight;
-
-  const primary = isDark ? DARK_PRIMARY : LIGHT_PRIMARY;
+const getAppTheme = (mode: PrismMode = 'dark') => {
+  const isDark = mode === 'dark';
+  const prism = prismPalette(mode);
+  const surface = isDark ? tokens.colors.surface : tokens.colors.surfaceLight;
+  const text = isDark ? tokens.colors.text : tokens.colors.textLight;
+  const border = isDark ? tokens.colors.border : tokens.colors.borderLight;
+  const primary = tokens.colors.rivicq;
 
   return createTheme({
     palette: {
@@ -42,7 +34,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
         main: primary[500],
         light: primary[400],
         dark: primary[700],
-        contrastText: isDark ? '#ffffff' : '#ffffff',
+        contrastText: '#ffffff',
       },
       secondary: {
         main: tokens.colors.crypto.success,
@@ -121,7 +113,7 @@ const getAppTheme = (_mode: 'light' | 'dark' = 'dark') => {
             transition: designSystem.motion.smooth,
             '&:hover': {
               boxShadow: 'none',
-              borderColor: 'rgba(255,255,255,0.28)',
+              borderColor: prism.borderStrong,
             },
           },
         },

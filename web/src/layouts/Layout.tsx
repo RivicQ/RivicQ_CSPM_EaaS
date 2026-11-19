@@ -101,6 +101,7 @@ import designSystem, {
   appBarPageTitleSx,
   appBarPageEyebrowSx,
 } from '../theme/designSystem';
+import ThemeToggle from '../theme/ThemeToggle';
 
 interface NavItem {
   text: string;
@@ -142,7 +143,7 @@ const Layout: React.FC = () => {
       return '24h';
     }
   });
-  const { mode } = useThemeMode();
+  const { mode, toggleMode } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
@@ -703,6 +704,7 @@ const Layout: React.FC = () => {
           <Box sx={{ flexGrow: { xs: 1, md: 0 }, display: { xs: 'block', md: 'none' } }} />
 
           <Stack direction="row" spacing={0.75} alignItems="center">
+            <ThemeToggle mode={mode} onToggle={toggleMode} compact />
             <Tooltip title="Search">
               <IconButton
                 onClick={() => setPaletteOpen(true)}

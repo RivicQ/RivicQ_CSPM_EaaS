@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 import designSystem, { glassSurface } from '../../theme/designSystem';
+import { PRISM, prismPalette } from '../../theme/prism';
 
 type GlassCardProps = {
   children: React.ReactNode;
@@ -23,6 +24,7 @@ const GlassCard: React.FC<GlassCardProps> = ({
   onClick,
 }) => {
   const theme = useTheme();
+  const prism = prismPalette(theme.palette.mode);
 
   return (
     <Box
@@ -38,7 +40,7 @@ const GlassCard: React.FC<GlassCardProps> = ({
         p: padding,
         border: noBorder ? 'none' : undefined,
         cursor: onClick ? 'pointer' : 'default',
-        transition: designSystem.motion.smooth,
+        transition: PRISM.motion.base,
         position: 'relative',
         overflow: 'hidden',
         '&::before': glow ? {
@@ -54,7 +56,7 @@ const GlassCard: React.FC<GlassCardProps> = ({
           '&:hover': {
             transform: 'none',
             boxShadow: 'none',
-            borderColor: 'rgba(255,255,255,0.18)',
+            borderColor: prism.borderStrong,
           },
         }),
       }}

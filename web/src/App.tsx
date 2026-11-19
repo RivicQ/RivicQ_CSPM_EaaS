@@ -4,8 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
 import { MotionConfig } from 'framer-motion';
-import designSystem from './theme/designSystem';
 import { getAppTheme } from './theme/theme';
+import { prismCssVariables, prismPalette, type PrismMode } from './theme/prism';
 
 import Layout from './layouts/Layout';
 import { ThemeModeProvider } from './theme/ThemeContext';
@@ -95,35 +95,52 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
   </PageErrorBoundary>
 );
 
+const readInitialMode = (): PrismMode => {
+  try {
+    const stored = localStorage.getItem('rivicq.theme');
+    if (stored === 'light' || stored === 'dark') return stored;
+  } catch {
+    /* storage may be disabled */
+  }
+  return window.matchMedia?.('(prefers-color-scheme: light)').matches
+    ? 'light'
+    : 'dark';
+};
+
 const App: React.FC = () => {
-  const [mode, setMode] = React.useState<'light' | 'dark'>(() => {
-    try {
-      localStorage.setItem('rivicq.theme', 'dark');
-    } catch {
-      /* ignore */
-    }
-    return 'dark';
-  });
+  const [mode, setMode] = React.useState<PrismMode>(readInitialMode);
   const theme = React.useMemo(() => getAppTheme(mode), [mode]);
 
   const toggleMode = React.useCallback(() => {
-    try {
-      localStorage.setItem('rivicq.theme', 'dark');
-    } catch {
-      /* ignore */
-    }
-    setMode('dark');
+    setMode((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('rivicq.theme', next);
+      } catch {
+        /* storage may be disabled */
+      }
+      return next;
+    });
   }, []);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000,
-        gcTime: 5 * 60 * 1000,
-        retry: 2,
-      },
-    },
-  });
+  const queryClient = React.useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000,
+            gcTime: 5 * 60 * 1000,
+            retry: 2,
+          },
+        },
+      }),
+    []
+  );
+
+  React.useEffect(() => {
+    document.documentElement.dataset.theme = mode;
+    document.documentElement.style.colorScheme = mode;
+  }, [mode]);
 
   return (
     <ErrorBoundary>
@@ -135,6 +152,7 @@ const App: React.FC = () => {
               <CssBaseline />
             <GlobalStyles
               styles={(theme) => ({
+                ':root': prismCssVariables(theme.palette.mode),
                 '*': { boxSizing: 'border-box' },
                 '::selection': {
                   background: theme.palette.mode === 'dark' ? 'rgba(124,58,237,0.45)' : 'rgba(109,40,217,0.22)',
@@ -145,9 +163,12 @@ const App: React.FC = () => {
                   outlineOffset: 2,
                 },
                 body: {
-                  ...(theme.palette.mode === 'dark'
-                    ? { background: designSystem.gradient.meshDark, backgroundColor: theme.palette.background.default }
-                    : { background: designSystem.gradient.meshLight, backgroundColor: theme.palette.background.default }),
+                  backgroundColor: prismPalette(theme.palette.mode).canvas,
+                  backgroundImage:
+                    theme.palette.mode === 'dark'
+                      ? 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.18), transparent 70%)'
+                      : 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.06), transparent 70%)',
+                  color: theme.palette.text.primary,
                 },
                 '::-webkit-scrollbar': { width: 8, height: 8 },
                 '::-webkit-scrollbar-track': { background: 'transparent' },
