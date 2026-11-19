@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RivicQ Encryption-as-a-Service — Developer Portal</title>
+<style>
+:root{--bg:#0a0a12;--surface:#141421;--surface2:#1d1d2e;--border:#2e2e46;--text:#f4f2ff;--muted:#a7a4c2;--purple:#8b5cf6;--purple2:#b58cff;--accent:#22d3ee;--ok:#34d399;--warn:#fbbf24;--err:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#0d0b1a 0%,var(--bg) 45%);color:var(--text);font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,18,.94);backdrop-filter:blur(8px);z-index:5}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:-.03em;font-size:19px;color:var(--text)}
+.logo span{color:var(--purple2)}
+nav a{margin-left:18px;color:var(--muted);font-size:14px}
+main{padding:36px 0 80px}
+section{display:none;animation:fade .2s ease}section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.1;letter-spacing:-.04em;margin:18px 0}
+h2{font-size:26px;letter-spacing:-.02em;margin:34px 0 14px}
+h3{font-size:17px;margin:0 0 8px}
+p{color:var(--muted)}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--purple2);font-weight:700}
+.hero{padding:46px 0 30px}.lede{font-size:18px;max-width:720px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px}
+.card h3{color:var(--text)}
+.tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid var(--border);color:var(--muted);margin-right:6px}
+.tag.ok{color:var(--ok);border-color:#1d5a49}.tag.exp{color:var(--warn);border-color:#6b5420}.tag.pend{color:var(--accent);border-color:#205a65}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--purple);color:#fff;border:0;border-radius:9px;padding:11px 18px;font-weight:700;font-size:14px;cursor:pointer}
+.btn:hover{background:var(--purple2);text-decoration:none}.btn.secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.btn.small{padding:6px 11px;font-size:12px}.btn:disabled{opacity:.5;cursor:not-allowed}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+input,select,textarea{width:100%;background:#0e0e19;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:11px 12px;font:inherit}
+textarea{min-height:96px;resize:vertical}
+pre{background:#0e0e19;border:1px solid var(--border);border-radius:10px;padding:14px;overflow:auto;font-size:12px;max-height:320px;color:#d8d3ff}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--border);vertical-align:top}th{color:var(--muted);font-weight:600}
+.banner{border-radius:10px;padding:12px 14px;margin:14px 0;font-size:14px;display:none}.banner.show{display:block}
+.banner.err{background:#3a1a22;border:1px solid #7f3444;color:#ffd9df}.banner.ok{background:#12332b;border:1px solid #226b55;color:#c7f9e8}.banner.info{background:#112a36;border:1px solid #23596b;color:#c9f1fb}
+.steps{counter-reset:s;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-top:22px}
+.step{counter-increment:s;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:13px;color:var(--muted)}
+.step:before{content:counter(s);display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--purple);color:#fff;font-weight:700;margin-right:8px}
+.secret{word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:#0e0e19;border:1px dashed var(--purple);padding:10px;border-radius:8px;color:var(--purple2)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.muted{color:var(--muted)}
+footer{border-top:1px solid var(--border);padding:24px 0;color:var(--muted);font-size:12px}
+@media(max-width:600px){nav a{margin-left:10px;font-size:12px}.grid{grid-template-columns:1fr}.card{padding:16px}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <div class="logo">RIVIC<span>Q</span> <span style="color:var(--muted);font-weight:500;font-size:13px">/ EaaS</span></div>
+  <nav>
+    <a href="#" data-go="discover">Discover</a><a href="#" data-go="plans-view">Pricing</a>
+    <a href="#" data-go="auth">Register</a><a href="#" data-go="portal">Portal</a>
+    <a href="#" data-go="beta">Beta</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+<section id="discover" class="active">
+  <div class="hero"><div class="eyebrow">Encryption as a Service · Developer-first API</div>
+    <h1>Cryptography you can call,<br /><span style="color:var(--purple2)">inspect and meter.</span></h1>
+    <p class="lede">RivicQ EaaS provides authenticated encryption, message authentication, secure randomness and post-quantum operations through one versioned API. Register free, create a sandbox, make a real cryptographic call and inspect the usage event — without a sales conversation.</p>
+    <div class="row"><button class="btn" data-go="auth">Start free</button><button class="btn secondary" data-go="portal">Open developer portal</button></div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>Classical operations</h3><p>AES-256-GCM encryption and decryption, HMAC-SHA-256 message authentication, SHA-256 digests and CSPRNG bytes. Implemented with the Go standard library and covered by end-to-end tests.</p><span class="tag ok">Beta implemented</span></div>
+    <div class="card"><h3>Post-quantum laboratory</h3><p>ML-KEM-768 (FIPS 203) key establishment and ML-DSA-65 (FIPS 204) signatures via <code>cloudflare/circl</code>. Private keys stay server-side. Not a certified cryptographic module.</p><span class="tag exp">Experimental</span><span class="tag">SLH-DSA planned</span></div>
+    <div class="card"><h3>Transparent freemium</h3><p>10,000 operations/month, 60 requests/minute and one sandbox project for free. Plan limits shown here are the limits enforced by the API.</p><span class="tag ok">Enforced</span></div>
+    <div class="card"><h3>Honest boundaries</h3><p>HSM custody, payment collection, email delivery and webhooks are integration-pending. The standalone service uses a file store for sandbox use; hosted deployments require PostgreSQL. No simulated success responses are presented as production features.</p><span class="tag pend">Integration pending</span></div>
+  </div>
+  <h2>From discovery to first call</h2>
+  <div class="steps">
+    <div class="step">Discover the API and its maturity labels</div><div class="step">Register a free account</div>
+    <div class="step">Verify your email (dev code returned locally)</div><div class="step">Create a sandbox project</div>
+    <div class="step">Issue a sandbox API credential</div><div class="step">Execute a real cryptographic operation</div>
+    <div class="step">Inspect usage and limits</div><div class="step">Upgrade or expand into Enterprise</div>
+  </div>
+  <h2>Supported operations</h2>
+  <div id="operations-table" class="card"><p class="muted">Loading operation catalogue…</p></div>
+  <h2>Architecture and custody</h2>
+  <p>Caller identity is derived from the credential stored server-side, never from a client-supplied tenant header. API credentials are stored as SHA-256 hashes and shown once. Keys used for cryptographic operations are generated server-side and never returned. Payloads, plaintext and secrets are excluded from usage events and logs. The standalone service uses an atomic file store for sandbox use; hosted deployments must use the PostgreSQL migration in <code>deploy/migrations/004_eaas_schema.sql</code>.</p>
+</section>
+
+<section id="auth">
+  <h2>Create your free developer account</h2>
+  <div class="grid"><div class="card">
+    <form id="register-form">
+      <label for="reg-name">Name</label><input id="reg-name" required minlength="2" maxlength="120" autocomplete="name" />
+      <label for="reg-email">Email</label><input id="reg-email" type="email" required autocomplete="email" />
+      <label for="reg-password">Password (12+ characters)</label><input id="reg-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" />
+      <div style="margin-top:18px"><button class="btn" type="submit">Register free account</button></div>
+    </form>
+  </div><div class="card">
+    <h3>Already registered?</h3><p>Log in to obtain a new dashboard session. Your API keys are not changed by logging in.</p>
+    <form id="login-form">
+      <label for="login-email">Email</label><input id="login-email" type="email" required autocomplete="email" />
+      <label for="login-password">Password</label><input id="login-password" type="password" required autocomplete="current-password" />
+      <div style="margin-top:18px"><button class="btn secondary" type="submit">Log in</button></div>
+    </form>
+  </div></div>
+</section>
+
+<section id="verify">
+  <h2>Verify your account</h2>
+  <div class="card" style="max-width:520px">
+    <p id="verify-hint">Enter the 6-digit verification code. In development the code is returned once at registration; hosted email delivery is integration-pending.</p>
+    <form id="verify-form"><label for="verify-code">Verification code</label><input id="verify-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required />
+      <div style="margin-top:18px"><button class="btn" type="submit">Verify account</button></div></form>
+  </div>
+</section>
+
+<section id="portal">
+  <h2>Developer portal</h2>
+  <div id="portal-login" class="card"><p>Register and verify to access projects, credentials, usage and plans.</p><button class="btn" data-go="auth">Go to registration</button></div>
+  <div id="portal-body" style="display:none">
+    <div class="card" id="account-card"></div>
+    <h3>1 · Sandbox project</h3>
+    <div class="card"><div class="row"><input id="project-name" placeholder="my-sandbox" style="flex:1;min-width:180px" /><button class="btn" id="create-project">Create sandbox project</button></div>
+      <div id="projects"></div></div>
+    <h3>2 · API credentials and keys</h3>
+    <div class="card"><p class="muted">Select a project above, then issue a credential. The secret is displayed once and stored only as a hash.</p>
+      <div class="row"><button class="btn" id="create-key">Issue sandbox API key</button><button class="btn secondary" id="create-aes-key">Create AES-256-GCM key</button><button class="btn secondary" id="create-hmac-key">Create HMAC-SHA-256 key</button></div>
+      <div id="key-output"></div><div id="keys"></div></div>
+    <h3>3 · Make a real API call</h3>
+    <div class="card"><div class="row"><select id="op-select" style="max-width:260px"></select><input id="op-message" value="Hello RivicQ" style="flex:1;min-width:160px" /><button class="btn" id="run-op">Execute</button></div>
+      <p class="muted" id="op-note"></p><pre id="op-result">Response will appear here.</pre></div>
+    <h3>4 · Inspect usage</h3>
+    <div class="card" id="usage"></div>
+    <h3>5 · Plans and entitlements</h3>
+    <div id="plan-cards" class="grid"></div>
+    <div id="subscription-output"></div>
+  </div>
+</section>
+
+<section id="plans-view">
+  <h2>Transparent plan comparison</h2>
+  <p>Limits below are read from the same plan definitions the API enforces. Payment collection is not implemented; plan changes update entitlements immediately and are labelled accordingly.</p>
+  <div id="public-plans" class="grid"></div>
+</section>
+
+<section id="beta">
+  <h2>Early-beta registration</h2>
+  <p>Registration is stored for administrative review. It is not an invitation, approval or marketing subscription. Only the fields needed for beta triage are collected.</p>
+  <div class="card" style="max-width:760px"><form id="beta-form">
+    <label>Name</label><input id="beta-name" required minlength="2" />
+    <label>Work email</label><input id="beta-email" type="email" required />
+    <label>Organisation</label><input id="beta-org" required minlength="2" />
+    <label>Role</label><input id="beta-role" placeholder="e.g. Security Engineer" />
+    <label>Use case (10+ characters)</label><textarea id="beta-usecase" required minlength="10"></textarea>
+    <label>Edition interest</label><select id="beta-edition"><option value="community">Open-Source Community</option><option value="enterprise">Enterprise Security Cloud</option><option value="eaas_api">EaaS API developer</option><option value="open_source_cloud">Open-Source Cloud self-hosting</option></select>
+    <label>Deployment</label><select id="beta-deploy"><option value="saas">RivicQ-hosted SaaS</option><option value="self_hosted">Self-hosted</option><option value="private_cloud">Private cloud</option><option value="on_premises">On-premises</option></select>
+    <label>Integration interests</label><select id="beta-integration"><option value="cloud_cspm">Cloud CSPM</option><option value="ai">AI security</option><option value="quantum">Quantum / PQC</option><option value="hardware_hsm">Hardware / HSM</option><option value="wireless">Wireless security</option></select>
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-top:16px"><input type="checkbox" id="beta-consent" style="width:auto;margin-top:4px" required /><span>I consent to RivicQ storing these details for beta review under the privacy notice, separate from marketing communications.</span></label>
+    <div style="margin-top:18px"><button class="btn" type="submit">Submit registration</button></div>
+  </form></div>
+</section>
+
+<div id="banner" class="banner"></div>
+</main>
+<footer><div class="wrap">RivicQ EaaS · Early-beta build · Classical operations use Go standard-library crypto; PQC operations are experimental and labelled as such. No card data or payloads are stored. Private keys are never returned by the API; in the sandbox they are stored base64-encoded in the state file and require filesystem protection.</div></footer>
+
+<script>
+const API='/api/eaas/v1', BETA='/api/beta/v1';
+const state={token:sessionStorage.getItem('eaas_token')||'',user:null,project:null,apiKey:'',aesKey:'',hmacKey:'',kemKeyId:'',sigKeyId:'',keys:[],plans:[]};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function banner(msg,type='info'){const b=$('banner');b.className='banner show '+type;b.textContent=msg;setTimeout(()=>b.className='banner',7000)}
+function go(id){document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));$(''+id).classList.add('active');window.scrollTo(0,0)}
+document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();go(el.dataset.go)}));
+async function api(path,{method='GET',body,token}={}){
+  const headers={'Content-Type':'application/json'};
+  if(token)headers.Authorization='Bearer '+token;
+  const res=await fetch(path,{method,headers,body:body?JSON.stringify(body):undefined});
+  let out={};try{out=await res.json()}catch{}
+  if(!res.ok){const err=new Error(out.error?.message||'Request failed ('+res.status+')');err.code=out.error?.code;throw err}
+  return out;
+}
+const sessionCall=(path,opts={})=>api(API+path,{...opts,token:state.token});
+const opsCall=(op,body)=>api(API+'/operations/'+op,{method:'POST',body,token:state.apiKey});
+
+(async function init(){
+  try{const o=await api(API+'/operations');$('operations-table').innerHTML='<table><thead><tr><th>Operation</th><th>Algorithm</th><th>Category</th><th>Maturity</th></tr></thead><tbody>'+o.operations.map(x=>'<tr><td><code>'+esc(x.id)+'</code></td><td>'+esc(x.algorithm)+'</td><td>'+esc(x.category)+'</td><td><span class="tag '+(x.maturity==='Experimental'?'exp':'ok')+'">'+esc(x.maturity)+'</span></td></tr>').join('')+'</tbody></table>'}catch(e){$('operations-table').textContent=e.message}
+  await loadPlans();
+  if(state.token){try{state.user=await sessionCall('/auth/me');enterPortal()}catch{state.token='';sessionStorage.removeItem('eaas_token')}}
+})();
+
+$('register-form').addEventListener('submit',async e=>{e.preventDefault();
+  try{const out=await api(API+'/auth/register',{method:'POST',body:{name:$('reg-name').value,email:$('reg-email').value,password:$('reg-password').value}});
+    state.token=out.session_token;sessionStorage.setItem('eaas_token',out.session_token);state.user={email:out.email,verified:false};
+    $('verify-hint').innerHTML='Account <strong>'+esc(out.email)+'</strong> created. Your one-time development verification code is: <span class="secret">'+esc(out.dev_verification_code||'delivered by email')+'</span><br/><small>'+esc(out.dev_notice||'')+'</small>';
+    banner('Registration stored. Verify your account to continue.','ok');go('verify');
+  }catch(err){banner(err.message,'err')}});
+
+$('login-form').addEventListener('submit',async e=>{e.preventDefault();try{
+  const out=await api(API+'/auth/login',{method:'POST',body:{email:$('login-email').value,password:$('login-password').value}});
+  state.token=out.session_token;sessionStorage.setItem('eaas_token',out.session_token);state.user=await sessionCall('/auth/me');enterPortal();go('portal');
+  if(!state.user.verified){banner('Account is not verified yet.','info');go('verify')}
+}catch(err){banner(err.message,'err')}});
+
+$('verify-form').addEventListener('submit',async e=>{e.preventDefault();try{
+  await sessionCall('/auth/verify',{method:'POST',body:{code:$('verify-code').value}});
+  state.user=await sessionCall('/auth/me');banner('Account verified. You can now create projects and credentials.','ok');enterPortal();go('portal');
+}catch(err){banner(err.message,'err')}});
+
+function enterPortal(){$('portal-login').style.display=state.token?'none':'block';$('portal-body').style.display=state.token?'block':'none';
+  if(state.token){$('account-card').innerHTML='<h3>'+esc(state.user?.name||state.user?.email)+'</h3><p>'+esc(state.user?.email)+' · '+esc(state.user?.plan||'free')+' · verified: '+esc(String(state.user?.verified))+'</p>';loadProjects();loadKeys();loadUsage();loadPlanCards()}}
+
+$('create-project').addEventListener('click',async()=>{try{
+  await sessionCall('/projects',{method:'POST',body:{name:$('project-name').value||'my-sandbox',environment:'sandbox'}});
+  banner('Sandbox project created.','ok');loadProjects();
+}catch(err){banner(err.message,'err')}});
+
+async function loadProjects(){try{const out=await sessionCall('/projects');$('projects').innerHTML=out.projects.length?'<table><thead><tr><th>Project</th><th>Environment</th><th>Created</th><th></th></tr></thead><tbody>'+out.projects.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+esc(p.environment)+'</td><td>'+esc(p.created_at)+'</td><td><button class="btn small secondary" data-project="'+esc(p.id)+'">Select</button></td></tr>').join('')+'</tbody></table>':'<p class="muted">No projects yet.</p>';
+  $('projects').querySelectorAll('[data-project]').forEach(b=>b.addEventListener('click',()=>{state.project=b.dataset.project;state.apiKey='';state.aesKey='';state.hmacKey='';state.keys=[];banner('Project selected. Issue an API credential next.','ok');loadKeys();$('key-output').innerHTML=''}));
+}catch(err){banner(err.message,'err')}}
+
+async function issueKey(){if(!state.project){banner('Select a project first.','err');return}try{
+  const out=await sessionCall('/projects/'+state.project+'/keys',{method:'POST',body:{}});state.apiKey=out.key;
+  $('key-output').innerHTML='<p>Save this credential now. It will not be shown again.</p><div class="secret">'+esc(out.key)+'</div><p class="muted">Prefix: '+esc(out.prefix)+' · environment: '+esc(out.environment)+'</p>';
+  banner('API credential issued.','ok');loadKeys();
+}catch(err){banner(err.message,'err')}}
+$('create-key').addEventListener('click',issueKey);
+
+async function issueCryptoKey(alg){if(!state.project){banner('Select a project first.','err');return}try{
+  const out=await sessionCall('/projects/'+state.project+'/crypto-keys',{method:'POST',body:{algorithm:alg}});
+  if(alg==='aes-256-gcm')state.aesKey=out.key_id;else state.hmacKey=out.key_id;
+  $('key-output').innerHTML='<p>Server-held '+esc(alg)+' key created. Private material never leaves the service.</p><p class="secret">'+esc(out.key_id)+'</p>'+(out.public_key?'<p>Public key:<br/><span class="secret">'+esc(out.public_key)+'</span></p>':'');
+  banner('Cryptographic key provisioned.','ok');
+}catch(err){banner(err.message,'err')}}
+$('create-aes-key').addEventListener('click',()=>issueCryptoKey('aes-256-gcm'));
+$('create-hmac-key').addEventListener('click',()=>issueCryptoKey('hmac-sha-256'));
+
+async function loadKeys(){if(!state.project)return;try{const out=await sessionCall('/projects/'+state.project+'/keys');$('keys').innerHTML=out.api_keys.length?'<table><thead><tr><th>Prefix</th><th>Environment</th><th>Last used</th><th>Status</th><th></th></tr></thead><tbody>'+out.api_keys.map(k=>'<tr><td><code>'+esc(k.prefix)+'</code></td><td>'+esc(k.environment)+'</td><td>'+esc(k.last_used_at||'never')+'</td><td>'+(k.revoked?'revoked':'active')+'</td><td>'+(k.revoked?'':'<button class="btn small secondary" data-revoke="'+esc(k.id)+'">Revoke</button> <button class="btn small secondary" data-rotate="'+esc(k.id)+'">Rotate</button>')+'</td></tr>').join('')+'</tbody></table>':'<p class="muted">No credentials issued for this project.</p>';
+  $('keys').querySelectorAll('[data-revoke]').forEach(b=>b.addEventListener('click',async()=>{try{await sessionCall('/keys/'+b.dataset.revoke,{method:'DELETE'});banner('Credential revoked.','ok');loadKeys()}catch(e){banner(e.message,'err')}}));
+  $('keys').querySelectorAll('[data-rotate]').forEach(b=>b.addEventListener('click',async()=>{try{const o=await sessionCall('/keys/'+b.dataset.rotate+'/rotate',{method:'POST',body:{}});state.apiKey=o.key;$('key-output').innerHTML='<p>Rotated credential (shown once):</p><div class="secret">'+esc(o.key)+'</div>';banner('Credential rotated.','ok');loadKeys()}catch(e){banner(e.message,'err')}}));
+}catch(err){banner(err.message,'err')}}
+
+(async function fillOperations(){try{const o=await api(API+'/operations');$('op-select').innerHTML=o.operations.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.id)+' — '+esc(x.algorithm)+' ('+esc(x.maturity)+')</option>').join('');$('op-select').addEventListener('change',updateOpNote);updateOpNote()}catch{}})();
+function updateOpNote(){const id=$('op-select').value;const notes={encrypt:'Requires an AES-256-GCM key from step 2. Message is base64-encoded before sending.',decrypt:'Paste ciphertext and nonce from an encrypt response; include the same aad.',mac_sign:'Requires an HMAC-SHA-256 key. This is a MAC, not a digital signature.',mac_verify:'Requires a signature from mac_sign and the same message.',digest:'No key required. Returns a SHA-256 digest.',random:'Set the number of bytes (1-1024) in the message field.',mlkem768_keygen:'Creates a server-held ML-KEM key; only the public key is returned.',mlkem768_encapsulate:'Supply a base64 public key from mlkem768_keygen in the message field.',mlkem768_decapsulate:'Requires a key_id from keygen and ciphertext from encapsulate.',mldsa65_keygen:'Creates a server-held ML-DSA key; only the public key is returned.',mldsa65_sign:'Requires a key_id from mldsa65_keygen.',mldsa65_verify:'Supply public_key, message and signature as base64.'};$('op-note').textContent=notes[id]||''}
+
+$('run-op').addEventListener('click',async()=>{if(!state.apiKey){banner('Issue a sandbox API key first.','err');return}
+  const op=$('op-select').value,msg=$('op-message').value,b=msg=>b64(msg);
+  let body={};
+  try{switch(op){
+    case 'encrypt':case 'mac_sign':case 'digest':if(!state.aesKey&&op==='encrypt'||!state.hmacKey&&op==='mac_sign')throw new Error('Provision the required key in step 2');body={message:b(msg),key_id:op==='encrypt'?state.aesKey:state.hmacKey};if(op==='encrypt')body.aad=b('portal-v1');break;
+    case 'decrypt':const parsed=JSON.parse(msg);body={key_id:state.aesKey,ciphertext:parsed.ciphertext,nonce:parsed.nonce,aad:b('portal-v1')};break;
+    case 'mac_verify':const mac=JSON.parse(msg);body={key_id:state.hmacKey,message:b(mac.message),signature:mac.mac};break;
+    case 'random':body={bytes:parseInt(msg,10)||32};break;
+    case 'mlkem768_keygen':case 'mldsa65_keygen':body={};break;
+    case 'mlkem768_encapsulate':body={public_key:msg};break;
+    case 'mlkem768_decapsulate':const kem=JSON.parse(msg);body={key_id:kem.key_id,ciphertext:kem.ciphertext};break;
+    case 'mldsa65_sign':body={key_id:state.sigKeyId||msg,message:b('signed by RivicQ EaaS')};break;
+    case 'mldsa65_verify':const sig=JSON.parse(msg);body={public_key:sig.public_key,message:b(sig.message),signature:sig.signature};break;
+  }}catch(err){banner('Input error: '+err.message,'err');return}
+  try{const out=await opsCall(op,body);$('op-result').textContent=JSON.stringify(out,null,2);if(out.key_id){if(op==='mlkem768_keygen')state.kemKeyId=out.key_id;if(op==='mldsa65_keygen')state.sigKeyId=out.key_id}banner('Operation completed: '+out.operation+' ('+out.maturity+')','ok');loadUsage();
+  }catch(err){$('op-result').textContent=JSON.stringify({error:err.code,message:err.message},null,2);banner(err.message,'err');loadUsage()}
+});
+function b64(s){return btoa(unescape(encodeURIComponent(s)))}
+
+async function loadUsage(){if(!state.token)return;try{const s=await sessionCall('/usage/summary');const pct=s.monthly_quota>0?Math.min(100,Math.round(s.operations_used/s.monthly_quota*100)):0;
+  $('usage').innerHTML='<p><strong>Plan:</strong> '+esc(s.plan)+' · <strong>Used this month:</strong> '+esc(s.operations_used)+' / '+(s.monthly_quota<0?'unlimited':esc(s.monthly_quota))+' ('+pct+'%) · <strong>Remaining:</strong> '+(s.remaining_quota<0?'unlimited':esc(s.remaining_quota))+'</p><p>Rate limit: '+esc(s.requests_per_minute<0?'custom':s.requests_per_minute)+' req/min · Failed: '+esc(s.operations_failed)+' · Resets: '+esc(s.period_end)+'</p>'+(s.upgrade_interest?'<p class="muted">You are using a significant share of your free quota. Review the plan comparison below.</p>':'');
+  const ev=await sessionCall('/usage/events');$('usage').innerHTML+='<h3>Recent activity (payloads excluded)</h3>'+(ev.events.length?'<table><thead><tr><th>Time</th><th>Operation</th><th>Status</th><th>Latency</th></tr></thead><tbody>'+ev.events.slice(0,8).map(e=>'<tr><td>'+esc(e.timestamp)+'</td><td>'+esc(e.operation)+'</td><td>'+esc(e.status)+(e.error_code?' ('+esc(e.error_code)+')':'')+'</td><td>'+esc(e.latency_ms)+' ms</td></tr>').join('')+'</tbody></table>':'<p class="muted">No usage yet.</p>');
+}catch(err){banner(err.message,'err')}}
+
+async function loadPlans(){try{const out=await api(API+'/plans');state.plans=out.plans;renderPlans($('public-plans'),false);renderPlans($('plan-cards'),true)}catch{}}
+function renderPlans(target,withButton){if(!target)return;target.innerHTML=state.plans.map(p=>'<div class="card"><h3>'+esc(p.name)+'</h3><p class="muted">'+esc(p.target)+'</p><p><strong>'+(p.monthly_operations<0?'Custom':p.monthly_operations.toLocaleString())+'</strong> operations/month<br/>'+esc(p.requests_per_minute<0?'Custom':p.requests_per_minute)+' req/min · '+esc(p.projects<0?'Custom':p.projects)+' projects<br/>Production: '+(p.production_eligible?'yes':'no')+' · Audit: '+(p.audit_log?'yes':'no')+'<br/>HSM: '+(p.hsm?'yes':'integration pending')+' · SSO: '+(p.sso?'yes':'integration pending')+'</p><p><strong>'+(p.price_monthly_eur===0?'Free':p.id==='enterprise'?'Custom':'€'+p.price_monthly_eur+'/month')+'</strong></p>'+(withButton?'<button class="btn small" data-plan="'+esc(p.id)+'">Select plan</button>':'')+'</div>').join('');
+  if(withButton)target.querySelectorAll('[data-plan]').forEach(b=>b.addEventListener('click',async()=>{try{const out=await sessionCall('/subscription',{method:'POST',body:{plan:b.dataset.plan}});$('subscription-output').innerHTML='<div class="banner ok show">Entitlements changed to '+esc(out.plan)+'. '+esc(out.notice)+'</div>';loadUsage();loadPlans()}catch(err){banner(err.message,'err')}}))}
+async function loadPlanCards(){renderPlans($('plan-cards'),true)}
+
+$('beta-form').addEventListener('submit',async e=>{e.preventDefault();try{
+  const out=await api(BETA+'/registrations',{method:'POST',body:{name:$('beta-name').value,work_email:$('beta-email').value,organisation:$('beta-org').value,role:$('beta-role').value,use_case:$('beta-usecase').value,edition_interest:[$('beta-edition').value],deployments:[$('beta-deploy').value],integrations:[$('beta-integration').value],consent:$('beta-consent').checked}});
+  banner(out.message+' Reference: '+out.id,'ok');e.target.reset();
+}catch(err){banner(err.message,'err')}});
+</script>
+</body>
+</html>

@@ -10,7 +10,19 @@
 | [TRADEMARKS.md](../TRADEMARKS.md) — RivicQ marks and third-party names | [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) |
 | [NOTICE](../NOTICE) · [LICENSE](../LICENSE) | |
 
-The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs.
+The Pages site is a **static DEMO workspace** (labeled sample data). Production authentication is unchanged: `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend. Client demo markers are not JWTs. This applies to CSPM only; the EaaS developer portal is served by its standalone binary, not GitHub Pages, and EaaS is excluded from CSPM scores and pilot/production claims.
+
+## EaaS (standalone; separate from CSPM)
+
+Branch `feature/eaas-product-foundation`. Evidence: `cmd/eaas`, `internal/eaas`, `web/eaas/index.html`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`. Local sandbox only; not a hosted or production-ready service.
+
+- [EaaS product status](EAAS_PRODUCT_STATUS.md) — VERIFIED / LIMITED / Experimental / blocked boundaries
+- [EaaS API](EAAS_API.md) — `/healthz`, `/api/eaas/v1/*`, `/api/beta/v1/*`
+- [EaaS deployment](EAAS_DEPLOYMENT.md) — default `:9091`, `/` and `/portal`, sandbox state file
+- [EaaS security & privacy](EAAS_SECURITY_PRIVACY.md) — hashed keys, metadata-only usage, base64 private bytes in state
+- [EaaS limitations](EAAS_LIMITATIONS.md) — no hosted deployment, payments, email, webhooks, Postgres repository, CAVP/FIPS, AI/quantum-hardware/HSM/wireless
+- [EaaS testing & CI](EAAS_TESTING_CI.md) — seven local package tests; full repository suite passed locally
+- [EaaS freemium & metering](EAAS_FREEMIUM_AND_METERING.md) — Free = 10,000 operations/month and 60 RPM, enforced; plan switch without payment
 
 ## Controlled pilot
 

@@ -100,7 +100,8 @@
         <p class="note">
           Live scanning runs against the RivicQ CBOM engine. On GitHub Pages the engine is not reachable —
           sign in to run a real scan. We never show fabricated findings here. Qiskit scores are a local taxonomy,
-          not IBM Quantum hardware.
+          not IBM Quantum hardware. EaaS is a separate sandbox binary with its own API and portal; it is not
+          hosted on this site and is not production-ready.
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#workflow">Read the workflow</a>
@@ -318,7 +319,8 @@
           Copied onto GitHub Pages with each deploy from the release branch. Markdown files are the
           source of truth. This page is the designed index. Pilot status is published in the
           <a href="../pilot/">pilot gate</a> and <a href="CAPABILITIES.yaml">capability manifest</a>.
-          Pages demos never publish secret values.
+          EaaS documentation is listed separately because that surface is not hosted on Pages and is
+          not production-ready. Pages demos never publish secret values.
         </p>
         <div class="doc-groups">
           <article class="doc-card">
@@ -362,6 +364,21 @@
               <li><a href="read.html?doc=QISKIT_PIPELINE.md">Qiskit pipeline</a></li>
               <li><a href="../fabric/">RivicQ Graph demo</a></li>
               <li><a href="read.html?doc=FABRIC.md">Graph notes (FABRIC.md)</a> · <a href="read.html?doc=GRAPH.md">Rename note</a></li>
+            </ul>
+          </article>
+          <article class="doc-card">
+            <h3>Encryption as a Service (separate surface)</h3>
+            <ul>
+              <li><strong>Separate binary:</strong> default <code>:9091</code>; portal at <code>/</code> and <code>/portal</code> is served by the EaaS binary, not GitHub Pages. Sandbox file store only — not production-ready.</li>
+              <li><a href="read.html?doc=API_GUIDE.md">API guide (CSPM <code>/api/v1</code>)</a></li>
+              <li><a href="read.html?doc=EAAS_API.md">EaaS API (<code>/api/eaas/v1</code>, <code>/api/beta/v1</code>)</a></li>
+              <li><a href="read.html?doc=EAAS_PRODUCT_STATUS.md">EaaS product status</a></li>
+              <li><a href="read.html?doc=EAAS_DEPLOYMENT.md">EaaS deployment and persistence</a></li>
+              <li><a href="read.html?doc=EAAS_SECURITY_PRIVACY.md">EaaS security and privacy</a></li>
+              <li><a href="read.html?doc=EAAS_LIMITATIONS.md">EaaS limitations</a></li>
+              <li><a href="read.html?doc=EAAS_TESTING_CI.md">EaaS testing and CI</a></li>
+              <li><a href="read.html?doc=EAAS_FREEMIUM_AND_METERING.md">EaaS freemium and metering</a></li>
+              <li><a href="read.html?doc=PRD_TRACEABILITY_MATRIX.md">PRD traceability matrix</a></li>
             </ul>
           </article>
           <article class="doc-card">

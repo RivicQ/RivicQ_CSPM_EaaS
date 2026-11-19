@@ -2,6 +2,8 @@
 
 Baseline 58/100 (`RIVICQ_BASELINE.md`, commit `82a6785`).
 
+**Scope:** this scorecard measures the **CSPM scanner/control plane only**. The standalone EaaS build on branch `feature/eaas-product-foundation` (`cmd/eaas`, `internal/eaas`, `web/eaas`) is a separate local sandbox surface and is **excluded** from every number here. Adding EaaS did not change the 58/100 baseline or the ~78/100 re-assessment; do not fold EaaS operations, keys, usage, or portal activity into these scores.
+
 Every score below is justified by a file, a test, or a command output. Where a
 score moved because of a fix that only one test covers, that is stated. Scores are
 my assessment against the original rubric, not a measurement.
@@ -18,8 +20,11 @@ categories that moved furthest are the two that were worst; the categories that
 remain lowest are the ones requiring either an external party or an operational
 procedure that cannot be validated by a test.
 
-**Production Ready: not claimed.** Three medium-severity pre-existing defects
-remain open and are listed in §9.
+**Production Ready for CSPM: not claimed.** Three medium-severity pre-existing
+defects remain open and are listed in §9. **EaaS is not scored here and is not
+production-ready**: its evidence scope is local only, seven EaaS package tests
+and the full repository `go test ./...` suite passed locally, and EaaS remains
+excluded from the CSPM verdict (`docs/EAAS_TESTING_CI.md`).
 
 ---
 
@@ -83,6 +88,11 @@ honest ceiling for that category regardless of the measured 1.000/1.000.
 
 ## Verification
 
+The commands below record the **CSPM pass**. After EaaS was added, local
+`gofmt -l internal/eaas cmd/eaas`, `go vet ./...`, `go build ./...`, and
+`go test ./... -count=1` passed; EaaS has seven package tests
+(`internal/eaas/eaas_test.go`). Enterprise-tag commands below were not re-run.
+
 ```
 go build ./... && go build -tags enterprise ./...          pass
 go vet ./...   && go vet -tags enterprise ./...            pass
@@ -120,5 +130,7 @@ testing. None exist.
 | `RIVICQ_SECURITY_REPORT.md` | Findings by severity, with residual risks and a recommended order of work |
 | `RIVICQ_SCANNER_ACCURACY.md` | Measured precision/recall, the 5 defects the corpus found, and the limits of the method |
 | `RIVICQ_TEST_REPORT.md` | Suites, commands, integration results, coverage, and weaknesses in the tests themselves |
-| `RIVICQ_PRODUCTION_READINESS.md` | Per-capability fixed/verified/open status; pilot entry criteria |
-| `RIVICQ_SCORECARD.md` | This document |
+| `RIVICQ_PRODUCTION_READINESS.md` | Per-capability fixed/verified/open status; CSPM pilot entry criteria; EaaS explicitly excluded |
+| `RIVICQ_SCORECARD.md` | This document (CSPM only) |
+| `docs/EAAS_PRODUCT_STATUS.md` | EaaS status labels and evidence; not part of this score |
+| `docs/EAAS_LIMITATIONS.md` | EaaS capability gaps; see also `docs/EAAS_TESTING_CI.md` |

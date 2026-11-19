@@ -91,6 +91,7 @@ web/.env.*
 
 # Database dumps (never commit)
 *.sql
+!deploy/migrations/*.sql
 cryptobom_backup.sql
 
 # Python virtual environments

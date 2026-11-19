@@ -30,7 +30,7 @@ const RequestDemo: React.FC = () => {
     setError('');
     if (!backendReachable) {
       window.location.href = `mailto:sales@rivicq.com?subject=${encodeURIComponent('RivicQ ' + form.intent)}&body=${encodeURIComponent(
-        `Name: ${form.name}\nCompany: ${form.company}\nIntent: ${form.intent}\n`,
+        `Name: ${form.name}\nWork email: ${form.email}\nCompany: ${form.company}\nIntent: ${form.intent}\n`,
       )}`;
       return;
     }

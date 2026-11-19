@@ -1,8 +1,11 @@
 # Database Guide
 
-How RivicQ CSPM / CryptoBOM EaaS stores data, how to configure and migrate it,
-and how to keep it locked down. See `docs/MASTER_RULES.md` rules 6 and 7 for the
-mandatory rules this guide implements.
+How RivicQ CSPM stores data, how to configure and migrate it, and how to keep it
+locked down. See `docs/MASTER_RULES.md` rules 6 and 7 for the mandatory rules
+this guide implements. The standalone EaaS build is a separate surface with its
+own sandbox file store; its PostgreSQL file is a target schema, not a running
+repository. That boundary is described in
+[EaaS persistence boundary](#eaas-persistence-boundary-separate-surface).
 
 ## Contents
 
@@ -10,6 +13,7 @@ mandatory rules this guide implements.
 - [Connection configuration](#connection-configuration)
 - [Demo (in-memory) mode](#demo-in-memory-mode)
 - [Schema and migrations](#schema-and-migrations)
+- [EaaS persistence boundary (separate surface)](#eaas-persistence-boundary-separate-surface)
 - [Migration workflow](#migration-workflow)
 - [Tenant-scoped queries](#tenant-scoped-queries)
 - [Least-privilege database roles](#least-privilege-database-roles)
@@ -39,9 +43,14 @@ Two migration sources exist by design:
    startup (`RunMigrations`) and via `ApplyMigrations`. They are the source of
    truth for the running binary.
 2. **SQL files** (`deploy/migrations/*.sql`) are applied by the Docker Compose
-   `migrate` service and `make migrate`. `deploy/migrations/` currently holds
+   `migrate` service and `make migrate`. The tracked core SQL migrations are
    `001_initial_schema.sql`, `002_enterprise_features.sql`, and
-   `003_add_auth_columns.sql`.
+   `003_add_auth_columns.sql`. `deploy/migrations/004_eaas_schema.sql` is also
+   present, but it is an EaaS **target schema only**: it was previously ignored
+   by the repository-wide `*.sql` rule until the `!deploy/migrations/*.sql`
+   exception in `.gitignore` made it trackable. No Go Postgres repository exists
+   for EaaS, so see the boundary below before treating that file as applied
+   runtime state.
 
 ## Connection configuration
 
@@ -123,6 +132,22 @@ Engine behavior (`internal/database/migrate.go`):
 (`cmd/server/oss/main.go`, `internal/server/server.go`). The Enterprise binary
 also runs `RunEnterpriseMigrations` (`internal/database/enterprise_database.go`).
 
+## EaaS persistence boundary (separate surface)
+
+The EaaS binary (`cmd/eaas`, `internal/eaas`) does **not** use the Postgres
+connection, pooling, migration engine, or `Queries` layer described above. Its
+runtime state is an atomic JSON file (`EAAS_DATA_FILE`, default
+`./data/eaas-store.json`) guarded by a process-local mutex; it is a sandbox store
+with no multi-process coordination. `deploy/migrations/004_eaas_schema.sql`
+defines a target PostgreSQL 15+ model (`account_id` foreign keys, metadata-only
+usage events) but there is no Go repository, connection configuration, or EaaS
+migration runner behind it. The `make migrate` target applies every SQL file in
+`deploy/migrations/` in sorted order, so 004 may be loaded into a database by
+that command; that does not make the EaaS service Postgres-backed. Do not claim a
+production EaaS store, hosted deployment, or EaaS tenant isolation from the
+CSPM rules above. See [EAAS_DEPLOYMENT.md](EAAS_DEPLOYMENT.md) and
+[EAAS_SECURITY_PRIVACY.md](EAAS_SECURITY_PRIVACY.md).
+
 ## Migration workflow
 
 1. **Never edit an applied migration.** Append a new one with the next ID. The
@@ -135,7 +160,8 @@ also runs `RunEnterpriseMigrations` (`internal/database/enterprise_database.go`)
    `RIVICQ_TEST_DATABASE_URL` at an empty database; the integration suite drops
    and recreates the tables it touches. Never point it at production.
 6. **Apply in the order the tooling applies.** Startup uses the Go migrations;
-   Compose/`make` use `deploy/migrations/*.sql`. Keep the two in step.
+   Compose/`make` use `deploy/migrations/*.sql`. Keep the two in step for the
+   CSPM core schema. The EaaS target schema is not wired to the running service.
 
 Local application:
 
@@ -201,7 +227,8 @@ repository; operate it in your environment.
   policy that meets your compliance obligations.
 - **Test restores** on a schedule. An untested backup is not a backup.
 - Never commit a database dump: `.gitignore` blocks `*.sql` and
-  `cryptobom_backup.sql`.
+  `cryptobom_backup.sql`, with a `!deploy/migrations/*.sql` exception for the
+  tracked migration files and the EaaS target schema.
 
 ## Row-level security (Supabase)
 

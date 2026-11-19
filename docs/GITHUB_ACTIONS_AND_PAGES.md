@@ -1,12 +1,13 @@
 # GitHub Actions and GitHub Pages
 
-This repository ships 23 workflow files under `.github/workflows/` and publishes a public product site from the `gh-pages` branch. `docs/DEVSECOPS.md` describes the security gates; this document details the action catalog and the Pages build pipeline.
+This repository ships 25 workflow files under `.github/workflows/` (counted from that directory, including `eaas-ci.yml`) and publishes a public CSPM product site from the `gh-pages` branch. `docs/DEVSECOPS.md` describes the security gates; this document details the action catalog and the Pages build pipeline. The EaaS portal is not a Pages site: it is served by the EaaS binary at `/` and `/portal`.
 
 ## 1. Workflow catalog
 
 | Workflow | Purpose | Primary trigger |
 |---|---|---|
 | `ci.yml` | Backend build + tests on main/develop | push/PR to main, develop |
+| `eaas-ci.yml` | Path-filtered EaaS checks: gofmt, go vet, go build, go test only | push/PR touching `internal/eaas/**`, `cmd/eaas/**`, `web/eaas/**`, `004_eaas_schema.sql`, `docs/EAAS_*.md`, `go.mod`, `go.sum`, or the workflow; manual |
 | `ci-oss.yml` | Lint (golangci), OSS unit tests + race, OSS build, demo smoke, OSS image | push/PR master/main |
 | `ci-enterprise.yml` | Enterprise unit tests, build, smoke (mock IBMQ) | push/PR master/main |
 | `ci-cd.yml` | Full pipeline: CodeQL, security-scan, oss-gate, build+test, integration (Postgres), production-readiness, perf gate, container+SBOM+Trivy, deployments | push/PR main/master/develop, manual (`workflow_dispatch`) |
@@ -27,7 +28,7 @@ This repository ships 23 workflow files under `.github/workflows/` and publishes
 | `animation-ci.yml` | Validate `media/cryptobom-animation.html` | PRs touching that file |
 | `greetings.yml` | First-interaction comments (pull_request_target/issues, auto) | new issues/PRs |
 
-Global rules: every workflow uses pinned, delegated `GITHUB_TOKEN` permissions where it can (`contents: read`, `packages: write` only on publish paths), checks out `actions/checkout@v4`, and keeps secrets strictly to the matrix above.
+Global rules: every workflow uses pinned, delegated `GITHUB_TOKEN` permissions where it can (`contents: read`, `packages: write` only on publish paths), checks out `actions/checkout@v4`, and keeps secrets strictly to the matrix above. `eaas-ci.yml` is intentionally narrow: it has no race, coverage, govulncheck, migration validation, portal build, container build, or deploy step.
 
 ## 2. How actions land in the repo
 
@@ -41,14 +42,14 @@ Steps in order:
 2. Define build matrix/inputs (edition `community`, base path, API URL from secret `REACT_APP_API_URL`, Supabase publishable config). `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_PUBLISHABLE_KEY` are inlined as **non-secret publishable client config** — they are public keys/project URLs by design, never the service-role key.
 3. `actions/setup-node` + `npm ci` + `CI=true npm run build` (`web/`), producing a static `web/build` (React SPA, Community edition).
 4. Build ReDoc site from `docs/openapi.yaml` into `web/build/docs/` (SPA redirect `404.html` fallback).
-5. Copy deployable artifacts into `web/build`: `fabric/dist` -> `web/build/fabric`, `archify/site` (+ `archify/diagrams`) -> `web/build/archify`, `marketing/` assets, `docs/` content.
+5. Copy deployable artifacts into `web/build`: `fabric/dist` -> `web/build/fabric`, `archify/site` (+ `archify/diagrams`) -> `web/build/archify`, `marketing/` assets, `docs/` content (including `API_GUIDE.md`, `EAAS_*.md`, and `PRD_TRACEABILITY_MATRIX.md`).
 6. `peaceiris/actions-gh-pages` force-orphan publishes `web/build` to the `gh-pages` branch (keeps commit history clean; Pages serves the site).
 
-What Pages does **not** do: it hosts no backend, no database, no scan execution. Every visible scan on the public site is the labeled synthetic demo (`fabric/`, `web/src/demo/`), or a client-side preview of data the operator passes to their own Community backend. The static site itself cannot be a source of secrets by construction — the Requests tab can inspect the empty network surface.
+What Pages does **not** do: it hosts no backend, no database, no scan execution, and no EaaS portal. The EaaS surface has its own binary and static directory: its portal is served at `/` and `/portal` by the EaaS binary (default `:9091`, `EAAS_STATIC_DIR`), and its API lives under `/api/eaas/v1/*` and `/api/beta/v1/*`. Pages only publishes the EaaS documentation files. Every visible CSPM scan on the public site is the labeled synthetic demo (`fabric/`, `web/src/demo/`), or a client-side preview of data the operator passes to their own Community backend. The static site itself cannot be a source of secrets by construction — the Requests tab can inspect the empty network surface.
 
 ## 4. Behind the Pages actions at build time
 
-Show-me examples served by the product site today: ReDoc API reference, animated brand `media/cryptobom-animation.html`, RivicQ Graph at `/fabric`, product diagrams at `/archify`. All are rebuilt from this repository on merge, which keeps documentation and specs in sync with code.
+Show-me examples served by the product site today: ReDoc CSPM API reference (`docs/openapi.yaml`), animated brand `media/cryptobom-animation.html`, RivicQ Graph at `/fabric`, product diagrams at `/archify`. All are rebuilt from this repository on merge, which keeps documentation and specs in sync with code. The separate EaaS API is documented in [EAAS_API.md](EAAS_API.md), not in `docs/openapi.yaml`.
 
 ## 5. Manual intervention points
 

@@ -2,14 +2,18 @@
 
 Assessment against the gaps identified in `RIVICQ_BASELINE.md` §9–§10.
 
-**Verdict: Pilot Ready with a production operator. Not approved for
-unattended production deployment.** The application is now internally
+**Scope:** this verdict covers the **CSPM scanner/control plane only**. The standalone EaaS build on branch `feature/eaas-product-foundation` (`cmd/eaas`, `internal/eaas`, `web/eaas`) is a separate local sandbox product surface, is not included in the CSPM pilot/production verdict, and is not production-ready or hosted. See §7 and `docs/EAAS_PRODUCT_STATUS.md`.
+
+**Verdict for CSPM: Pilot Ready with a production operator. Not approved for
+unattended production deployment.** The CSPM application is now internally
 consistent, tested at its seams, and fails closed on its dependency boundaries.
 Two medium-severity defects that matter under real internet exposure remain open,
 and both are pre-existing rather than introduced here.
 
-Every status in this document was re-verified against the current tree, not
-inherited from the baseline.
+Every CSPM status in §1–§6 was re-verified against the tree in that pass, not
+inherited from the baseline. EaaS in §7 is scoped to its own evidence; after the
+EaaS addition, local `go vet ./...`, `go build ./...`, and `go test ./...` passed,
+but EaaS remains excluded from the CSPM verdict.
 
 ---
 
@@ -149,7 +153,9 @@ None of these were addressed, and none can be verified by a test:
   during an incident is currently manual log reading.
 - **No stage-completeness audit of the Makefile, `build.sh`, or `validate.sh`.**
 
-## 6. Pilot entry criteria
+## 6. Pilot entry criteria (CSPM only)
+
+EaaS is not part of this pilot gate; see §7.
 
 Suitable for a **pilot** — a named set of users, on a known network, with an
 operator watching — because:
@@ -170,3 +176,29 @@ operator watching — because:
 5. A rollback procedure is written and rehearsed.
 6. `govulncheck ./...` runs clean in CI.
 7. Webhook replay and tenant mapping are resolved before a second replica runs.
+
+---
+
+## 7. EaaS — excluded from this verdict
+
+The standalone EaaS build is a separate product surface on branch
+`feature/eaas-product-foundation`. Evidence: `cmd/eaas/main.go`,
+`internal/eaas/`, `web/eaas/index.html`,
+`deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`.
+It does not inherit the CSPM verdict above, and no CSPM finding, fix, or score
+applies to it.
+
+| Area | Status | Boundary |
+|---|---|---|
+| Standalone API on `:9091` with `/healthz`, `/api/eaas/v1/*`, `/api/beta/v1/*` | VERIFIED | Local binary only; independent of the CSPM router |
+| Portal at `/` and `/portal` | VERIFIED | Served by the binary from `web/eaas/index.html`, not GitHub Pages |
+| Accounts, projects, hashed API keys, quota/RPM, beta registration, strict CORS | VERIFIED (local) | `internal/eaas/`; seven package tests passed locally |
+| Sandbox JSON state file with base64 private key bytes | LIMITED | `internal/eaas/store.go`; filesystem protection required, no HSM custody |
+| Classical operations / ML-KEM-768 and ML-DSA-65 | VERIFIED (Go stdlib, Beta implemented) / Experimental | `internal/eaas/crypto.go`; `github.com/cloudflare/circl` v1.6.1; SLH-DSA not implemented |
+| Plan switch | PARTIALLY_IMPLEMENTED | Entitlements only; no Stripe/payment collection or payment webhooks |
+| Production Postgres repository / migration runner | BLOCKED | `deploy/migrations/004_eaas_schema.sql` is a target schema only |
+| Hosted EaaS, email delivery, CAVP/FIPS validation, AI operations, quantum hardware, HSM custody, wireless operations | NOT_IMPLEMENTED | No implementation in the EaaS evidence files |
+| Full repository suite | VERIFIED (local) | `gofmt -l internal/eaas cmd/eaas`, `go vet ./...`, `go build ./...`, and `go test ./... -count=1` passed after the EaaS addition; no deploy gate or hosted EaaS is implied |
+
+See `docs/EAAS_PRODUCT_STATUS.md`, `docs/EAAS_DEPLOYMENT.md`, and
+`docs/EAAS_LIMITATIONS.md`. **EaaS Production Ready: not claimed.**
