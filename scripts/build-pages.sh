@@ -67,6 +67,7 @@ cp docs/quantum-sdk.md docs/plugin-development.md docs/security-intelligence.md 
    docs/PRODUCTION_READINESS.md docs/SECURITY_FINDINGS.md \
    docs/PRD.md docs/BRD.md docs/SRD.md docs/TRD.md docs/FIRMWARE_ANALYSIS.md \
    docs/CLIENT_DEMO_VERIFICATION.md \
+   docs/API_GUIDE.md docs/EAAS_*.md docs/PRD_TRACEABILITY_MATRIX.md \
    web/build/docs/
 cp docs/CAPABILITIES.yaml web/build/capabilities.yaml
 cp docs/ux/*.md web/build/docs/ux/ 2>/dev/null || true
