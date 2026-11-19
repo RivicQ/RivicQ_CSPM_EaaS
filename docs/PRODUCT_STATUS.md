@@ -2,6 +2,8 @@
 
 Honest snapshot of what RivicQ ships today for operators who need **open-source scanning**, **enterprise control-plane audits**, and **scores**. This is not a certification.
 
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
+
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data; no production API).
 
 Companion docs: [Core engine](CORE_ENGINE.md) · [Roadmap](ROADMAP.md) · [Qiskit pipeline](QISKIT_PIPELINE.md) · [Architecture](ARCHITECTURE.md) · [Client architecture](CLIENT_ARCHITECTURE.md) · [BOM layers](BOM_FRAMEWORK.md) · [Editions](editions.md) · [Known limitations](KNOWN_LIMITATIONS.md) · [Optional scanners](INTEGRATIONS.md)

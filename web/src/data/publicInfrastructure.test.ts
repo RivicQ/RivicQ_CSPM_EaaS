@@ -5,6 +5,7 @@ import {
   PUBLIC_ENGINE_IBM_COPY,
   PUBLIC_ENGINE_SCAN_COPY,
   PUBLIC_PAGES_SALES_FORM,
+  PUBLIC_STATUS_NEXT_MOVE,
 } from './publicInfrastructure';
 
 describe('public infrastructure copy', () => {
@@ -30,5 +31,12 @@ describe('public infrastructure copy', () => {
 
   it('keeps GitHub Pages demo requests as a sales mailto', () => {
     expect(PUBLIC_PAGES_SALES_FORM).toBe('GitHub Pages has no live API. This form opens a mail to sales@rivicq.com.');
+  });
+
+  it('publishes one honest status and next move', () => {
+    expect(PUBLIC_STATUS_NEXT_MOVE).toMatch(/^Current status: PARTIALLY IMPLEMENTED — controlled pilot ready/i);
+    expect(PUBLIC_STATUS_NEXT_MOVE).toMatch(/BLOCKED BY EXTERNAL CONFIGURATION/i);
+    expect(PUBLIC_STATUS_NEXT_MOVE).toMatch(/five security-leader interviews by 2026-11-24/i);
+    expect(PUBLIC_STATUS_NEXT_MOVE).toMatch(/release-readiness roadmap/i);
   });
 });

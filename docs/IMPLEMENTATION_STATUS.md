@@ -1,6 +1,8 @@
 # Implementation status
 
-Evidence-based snapshot of HEAD on `cursor/archify-site-system-86cc` after the 2026-10-15 engineering pass. The Pages pilot gate and composite build verification were added on 2026-11-14. Classification:
+Evidence-based snapshot refreshed 2026-11-19 on `feat/prism-design-system`. The Pages pilot gate and composite build verification were added on 2026-11-14. Classification:
+
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
 
 - `VERIFIED` — implementation exists, workflow works, tests ran in this pass
 - `PARTIALLY_IMPLEMENTED` — code exists; coverage, connectors, or honesty bounds remain

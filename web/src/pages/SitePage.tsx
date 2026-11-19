@@ -5,6 +5,7 @@ import PublicShell from '../components/brand/PublicShell';
 import PublicEngineNotice from '../components/brand/PublicEngineNotice';
 import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { type ArchifyDiagramId } from '../data/archifyDiagrams';
+import { PUBLIC_STATUS_NEXT_MOVE } from '../data/publicInfrastructure';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
 import {
   ARCHIFY_FONTS,
@@ -25,6 +26,13 @@ const noticeSx = {
   fontSize: '0.9375rem',
   lineHeight: 1.65,
 };
+
+const statusSx = {
+  ...nebulaPanelSx,
+  p: 1.5,
+  mb: 4,
+  borderColor: NEBULA.lineHi,
+} as const;
 
 export const siteCardSx = {
   ...nebulaPanelSx,
@@ -110,7 +118,7 @@ const SitePage: React.FC<{
           >
             {lede}
           </Typography>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: notice || blocks.length || children ? 4 : 0 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 4 }}>
             {primary && (
               <Button
                 variant="contained"
@@ -150,6 +158,12 @@ const SitePage: React.FC<{
               </Button>
             )}
           </Stack>
+          <Box sx={statusSx} aria-label="Current status and next move">
+            <Typography sx={{ ...archifyEyebrowSx, mb: 0.5 }}>Current status / next move</Typography>
+            <Typography sx={{ color: NEBULA.muted, fontSize: '0.9375rem', lineHeight: 1.65 }}>
+              {PUBLIC_STATUS_NEXT_MOVE}
+            </Typography>
+          </Box>
           {notice && <Box sx={noticeSx}>{notice}</Box>}
           {engineNotice && <PublicEngineNotice variant={engineNotice} />}
           {blocks.length > 0 && (

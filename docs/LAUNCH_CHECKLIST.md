@@ -1,5 +1,7 @@
 # Full product ready checklist
 
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
+
 - [x] Community CLI `rivicq scan .` and GitHub Action policy gate
 - [x] Deep-space nebula UI (black canvas, violet `#7C3AED`, Inter) on auth, dashboard, and docs hub
 - [x] Sign-In / Register: Community vs Enterprise, validation, demo access, Supabase on Pages

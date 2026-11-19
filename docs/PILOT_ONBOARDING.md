@@ -7,6 +7,8 @@ Qiskit service, event bus, runtime sensors, or AI platform.
 Read [PILOT_READINESS.md](PILOT_READINESS.md) first. The current pilot scope is static
 cryptographic inventory plus a labeled static console.
 
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
+
 ## Roles
 
 | Role | Owns |

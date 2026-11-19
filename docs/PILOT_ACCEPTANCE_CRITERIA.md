@@ -2,6 +2,8 @@
 
 This is a **controlled-pilot candidate** for static cryptographic inventory, not a silicon or production-MSP certification.
 
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
+
 ## Authorized inputs
 
 - Synthetic fixtures under `fixtures/` and `datasets/` (no customer secrets).

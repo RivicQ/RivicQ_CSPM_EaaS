@@ -131,6 +131,8 @@ See [DATASETS.md](DATASETS.md). Fixtures are synthetic. **Do not commit secrets,
 
 ## GitHub Pages vs production
 
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
+
 | | GitHub Pages | Self-hosted / production |
 |--|--------------|--------------------------|
 | What it is | Static React build | Go API + React + your identity provider |

@@ -31,7 +31,7 @@ import {
   archifyTitleSx,
   nebulaPageSx,
 } from '../theme/nebulaSurfaces';
-import { PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE } from '../data/publicInfrastructure';
+import { PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE, PUBLIC_STATUS_NEXT_MOVE } from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -497,11 +497,17 @@ const Home: React.FC = () => {
                 before attackers do.
               </Box>
             </Typography>
-            <Typography sx={{ color: NEBULA.muted, maxWidth: 780, mx: 'auto', mb: 4, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
+            <Typography sx={{ color: NEBULA.muted, maxWidth: 780, mx: 'auto', mb: 3, fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65 }}>
               RivicQ is one CSPM product: public pages explain the engine, the authenticated console scopes work to a tenant,
               scanners fingerprint cryptography, policy decides, and CycloneDX CBOM evidence returns. Community is Apache-2.0;
               Enterprise is licence- and configuration-gated.
             </Typography>
+            <Box sx={{ ...panelSx, maxWidth: 780, mx: 'auto', mb: 3, p: 2, textAlign: 'left' }} aria-label="Current status and next move">
+              <Typography sx={{ ...archifyEyebrowSx, mb: 0.5 }}>Current status / next move</Typography>
+              <Typography sx={{ color: NEBULA.muted, fontSize: '0.875rem', lineHeight: 1.6 }}>
+                {PUBLIC_STATUS_NEXT_MOVE}
+              </Typography>
+            </Box>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center" flexWrap="wrap" useFlexGap>
               <Button
                 variant="contained"

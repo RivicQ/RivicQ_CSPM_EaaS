@@ -4,6 +4,8 @@ Prioritized builds after the Community engine, website scan path, and Qiskit-ali
 
 See [Product status](PRODUCT_STATUS.md) for what already ships and [Architecture](ARCHITECTURE.md) for layer boundaries.
 
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
+
 ## Shipped (this line of work)
 
 - Client architecture: public home, Community workspace, Enterprise workspace, admin console

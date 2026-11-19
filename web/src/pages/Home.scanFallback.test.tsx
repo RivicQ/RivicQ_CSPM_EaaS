@@ -102,6 +102,8 @@ describe('Home static Pages scan fallback', () => {
     expect(screen.getByRole('heading', { name: /Shared engine\. Different control plane\./i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /Read the system, not a sales graphic\./i })).toBeInTheDocument();
     expect(screen.getByText(/Control mappings \(not certifications\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Current status: PARTIALLY IMPLEMENTED — controlled pilot ready/i)).toBeInTheDocument();
+    expect(screen.getByText(/five security-leader interviews by 2026-11-24/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Switch to dark mode/i })).toBeInTheDocument();
     expect(screen.queryByText(/Security score/i)).toBeNull();
   });

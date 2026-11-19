@@ -2,6 +2,8 @@
 
 Honest constraints for operators and evaluators.
 
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
+
 ## GitHub Pages
 
 https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.

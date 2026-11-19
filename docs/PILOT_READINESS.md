@@ -7,8 +7,10 @@ and the static GitHub Pages console/docs. It does **not** claim a hosted multi-t
 real-time detection, AI analysis, or silicon attestation.
 
 Live gate: **https://rivicq.github.io/RivicQ_CSPM_EaaS/pilot/**
-Last reviewed: **2026-11-14** · Evidence: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) ·
+Last reviewed: **2026-11-19** · Evidence: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) ·
 Machine-readable manifest: [CAPABILITIES.yaml](CAPABILITIES.yaml)
+
+> Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
 
 ## Status by area
 

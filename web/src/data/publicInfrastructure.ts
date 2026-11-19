@@ -1,5 +1,8 @@
 /** Honest copy for the public GitHub Pages front door. No secrets. */
 
+export const PUBLIC_STATUS_NEXT_MOVE =
+  'Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.';
+
 export const PUBLIC_ENGINE_SCAN_COPY =
   'This static build has no CBOM engine. Press Run scan to start the interactive demo — labelled sample data only. Live evidence needs the API (docs/RENDER.md) or a local run.';
 

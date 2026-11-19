@@ -6,7 +6,9 @@
 schema: rivicq.capabilities/v1
 product: RivicQ CSPM
 edition: community
-last_reviewed: "2026-11-14"
+last_reviewed: "2026-11-19"
+current_status: "PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION."
+next_move: "Validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap."
 status_source: docs/IMPLEMENTATION_STATUS.md
 pilot_gate: docs/PILOT_READINESS.md
 onboarding: docs/PILOT_ONBOARDING.md
