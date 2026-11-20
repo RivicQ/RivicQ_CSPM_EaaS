@@ -7,7 +7,7 @@ import PublicShell from '../components/brand/PublicShell';
 import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import { useAuth } from '../context/AuthContext';
 import { platformService } from '../services/api';
-import { PUBLIC_PAGES_SALES_FORM } from '../data/publicInfrastructure';
+import { PUBLIC_PAGES_SALES_FORM, ZOHO_BOOKINGS_URL } from '../data/publicInfrastructure';
 import { ARCHIFY_FONTS, archifyEyebrowSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
 
 const INTENTS = [
@@ -84,6 +84,9 @@ const RequestDemo: React.FC = () => {
               </TextField>
               <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ borderRadius: 999, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}>
                 {loading ? 'Sending…' : backendReachable ? 'Submit request' : 'Email sales@'}
+              </Button>
+              <Button component="a" href={ZOHO_BOOKINGS_URL} target="_blank" rel="noopener noreferrer" variant="outlined" size="large" sx={{ borderRadius: 999 }}>
+                Book a call
               </Button>
               <Stack direction="row" spacing={1}>
                 <Button variant="text" onClick={() => navigate('/')}>Home</Button>

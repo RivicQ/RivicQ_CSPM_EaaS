@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/rivic-q/cryptobom-saas/internal/authn"
+	"github.com/rivic-q/cryptobom-saas/internal/zoho"
 )
 
 func newTestAuth(t *testing.T) *authn.Service {
@@ -36,6 +37,11 @@ func setupPlatform(t *testing.T) (*gin.Engine, *authn.Service) {
 	t.Setenv("DISCORD_WEBHOOK_URL", "")
 	t.Setenv("RIVICQ_PAYMENTS_WEBHOOK_SECRET", "")
 	t.Setenv("STRIPE_SECRET_KEY", "")
+	t.Setenv("ZOHO_MAIL_USERNAME", "")
+	t.Setenv("ZOHO_MAIL_PASSWORD", "")
+	t.Setenv("ZOHO_CRM_CLIENT_ID", "")
+	t.Setenv("ZOHO_CRM_CLIENT_SECRET", "")
+	t.Setenv("ZOHO_CRM_REFRESH_TOKEN", "")
 	gin.SetMode(gin.TestMode)
 	svc := newTestAuth(t)
 	r := gin.New()
@@ -54,6 +60,19 @@ func TestPlansAreConfigurationDriven(t *testing.T) {
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	plans, _ := resp["plans"].([]any)
 	require.GreaterOrEqual(t, len(plans), 6)
+}
+
+func TestZohoStatusDoesNotClaimConfiguredWithoutCredentials(t *testing.T) {
+	r, _ := setupPlatform(t)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/platform/status", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+	var resp map[string]any
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	require.Equal(t, false, resp["zoho_mail_configured"])
+	require.Equal(t, false, resp["zoho_crm_configured"])
+	require.Equal(t, zoho.DefaultBookingsURL, resp["zoho_bookings_url"])
 }
 
 func TestLeadCaptureRejectsBadEmailAndHidesAddressOnCreate(t *testing.T) {

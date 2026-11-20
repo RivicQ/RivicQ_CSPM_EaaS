@@ -5,7 +5,7 @@ import { formatMoney } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
-const bookingUrl = "https://zoho141.zohobookings.eu/RivicQ";
+const bookingUrl = process.env.NEXT_PUBLIC_ZOHO_BOOKINGS_URL || "https://zoho141.zohobookings.eu/RivicQ";
 const openSourceUrl = "https://github.com/RivicQ/RivicQ_CSPM_EaaS";
 const cloudUrl = "https://rivicq.com/#cloud";
 const referenceUrl = `${openSourceUrl}/tree/main/docs`;
