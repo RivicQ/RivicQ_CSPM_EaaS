@@ -1,12 +1,36 @@
 # Release Notes - CryptoBOM SaaS
 
+## Current state (`main`; local verification after `d0e9dbf`)
+
+**Maturity: controlled pilot (CSPM) plus early beta with manual review (EaaS).
+No Stable/GA release is declared.**
+
+- CSPM: controlled-pilot ready for static inventory with an operator; not approved
+  for unattended production (`docs/PILOT_READINESS.md`,
+  `RIVICQ_PRODUCTION_READINESS.md`).
+- EaaS: standalone local sandbox (`cmd/eaas`, `internal/eaas`, `web/eaas`);
+  `VERIFIED` API/portal, `LIMITED` JSON state file and manual beta review,
+  `Beta implemented` classical operations, `Experimental` PQC, `BLOCKED`
+  Postgres repository, `NOT_IMPLEMENTED` hosted EaaS (`docs/EAAS_PRODUCT_STATUS.md`).
+- Local verification on the current tree after `d0e9dbf`: `go vet ./...`,
+  `go build ./...`, full `go test ./...`, web type-check/lint, and Pages
+  verifier (109 checks) passed. GitHub Pages workflow `#120` succeeded for the
+  earlier EaaS docs publication; the new report is included in the local
+  composite build. This is not a hosted backend deploy.
+- `VERSION` remains `1.2.0` as the last recorded build stamp; work after that is
+  listed under `Unreleased` in `CHANGELOG.md`. No version bump is implied here.
+- TÜV, SOC 2 Type II, PCI DSS, and ISO 27001 certificates are **not held**. Control
+  mappings are not certifications and are not active entitlements.
+
+See `docs/ALPHA_BETA_TEST_REPORT.md` for the alpha/beta evidence record.
+
 ---
 
-## 📦 Release v1.3.1 (Current)
+## 📦 Release v1.3.1 (historical)
 
 **Release Date:** 2026-05-28
 **Edition:** Open Source + Enterprise
-**Status:** ✅ Beta-ready with redesigned OSS/Enterprise navigation and pilot architecture
+**Status:** historical beta-ready milestone; superseded by the current controlled-pilot state above. Not Stable or GA.
 
 ### 🚀 New in v1.3.1
 
@@ -31,11 +55,11 @@
 
 ---
 
-## 📦 Release v1.3.0 (Current)
+## 📦 Release v1.3.0 (historical)
 
 **Release Date:** 2026  
 **Edition:** Open Source  
-**Status:** ✅ Stable
+**Status:** historical milestone; no Stable/GA release is declared for this repository
 
 ### 🚀 New Features
 
@@ -112,7 +136,8 @@ cat VERSION
 
 ## ✅ Production Release Checklist
 
-Use this checklist every time you cut a production release.
+Template for a future controlled release; it is not evidence that a production
+release has happened or is authorized. No Stable/GA release is declared here.
 
 ### Pre-release
 
@@ -260,8 +285,8 @@ MAJOR.MINOR.PATCH
 
 ### Tags
 
-- `latest` - Latest stable release
-- `v1.3.0` - Specific version tag
+- `latest` - no stable/GA artifact declared; do not treat this as a release channel
+- `v1.3.0` - Historical version tag
 - `v1.3` - Minor version tag (points to latest v1.3.x)
 - `dev` - Development branch
 
@@ -280,6 +305,9 @@ git push origin v1.3.0
 ---
 
 ## 📥 Downloading Releases
+
+The commands below are historical templates; no v1.3.x GA artifact is declared
+by this repository.
 
 ### Binaries
 
@@ -361,12 +389,15 @@ The Open Source Edition is free to use. For enterprise features:
 | CBOM Management | ✅ | ✅ |
 | Basic Discovery | ✅ | ✅ |
 | Mock Quantum | ✅ | ✅ |
-| Real IBM Quantum | ❌ | ✅ |
-| Real KIPU Q-CTRL | ❌ | ✅ |
+| Real IBM Quantum | ❌ | Preparation only; no live job in evidence |
+| Real KIPU Q-CTRL | ❌ | Preparation only; no live integration in evidence |
 | Multi-Language SDKs | Mock Only | Full |
-| TÜV Certification | ❌ | ✅ |
+| TÜV Certification | Not held | Not held |
 | 24/7 Support | ❌ | ✅ |
-| SOC 2 / PCI DSS | ❌ | ✅ |
+| SOC 2 / PCI DSS | Not held; mappings only | Not held; mappings only |
+
+Control mappings are not certifications. No TÜV, SOC 2, PCI DSS, or ISO 27001
+certificate is held or offered as an active entitlement.
 
 **Contact:** enterprise@rivicq.com  
 **Website:** https://rivicq.com/enterprise

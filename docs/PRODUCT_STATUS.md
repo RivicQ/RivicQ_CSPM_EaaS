@@ -2,7 +2,7 @@
 
 Honest snapshot of what RivicQ ships today for operators who need **open-source scanning**, **enterprise control-plane audits**, and **scores**. This is not a certification.
 
-**Scope:** everything in the Community/Enterprise tables, scores, demo, and API lists on this page describes the **CSPM product only**. The standalone EaaS build on branch `feature/eaas-product-foundation` is a separate product surface, documented in [EaaS below](#eaas--standalone-product-surface-not-cspm); it is not production-ready, is not hosted, and is excluded from the CSPM scores and pilot/production claims.
+**Scope:** everything in the Community/Enterprise tables, scores, demo, and API lists on this page describes the **CSPM product only**. The standalone EaaS build on `main` is a separate product surface, documented in [EaaS below](#eaas--standalone-product-surface-not-cspm); it is not production-ready, is not hosted, and is excluded from the CSPM scores and pilot/production claims.
 
 **Live static demo:** [GitHub Pages](https://rivicq.github.io/RivicQ_CSPM_EaaS/) (labeled sample data; no production API). The EaaS portal is served by the EaaS binary, not GitHub Pages.
 
@@ -82,7 +82,7 @@ GET  /api/v1/scans/:id/qbom          # 403 on Community
 
 ## EaaS — standalone product surface (not CSPM)
 
-Separate binary and API on branch `feature/eaas-product-foundation`; evidence: `cmd/eaas/main.go`, `internal/eaas/`, `web/eaas/index.html`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`. Status labels: `VERIFIED` (local implementation), `LIMITED` (sandbox boundary), `PARTIALLY_IMPLEMENTED`, `NOT_IMPLEMENTED`, `BLOCKED`, `Experimental`, `Integration pending`.
+Separate binary and API on `main`; evidence: `cmd/eaas/main.go`, `internal/eaas/`, `web/eaas/index.html`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`. Status labels: `VERIFIED` (local implementation), `LIMITED` (sandbox boundary), `PARTIALLY_IMPLEMENTED`, `NOT_IMPLEMENTED`, `BLOCKED`, `Experimental`, `Integration pending`.
 
 | Capability | Status | Honest boundary / evidence |
 |---|---|---|
@@ -127,9 +127,9 @@ curl -sS -X POST http://127.0.0.1:8080/api/v1/scans \
 
 Poll `GET /api/v1/scans/:id` until `status=completed`, then `GET /api/v1/scans/:id/qiskit`.
 
-## Public website routes (React, GitHub Pages after merge)
+## Public website routes (React, GitHub Pages)
 
-These routes are unauthenticated marketing pages on the same nebula chrome as Home. Until merge, use `/preview/` on github.io.
+These routes are unauthenticated marketing pages on the same nebula chrome as Home and are published on github.io.
 
 | Path | Page |
 |---|---|

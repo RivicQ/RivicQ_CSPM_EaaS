@@ -10,7 +10,7 @@ Companion: [ARCHITECTURE.md](ARCHITECTURE.md) · [editions.md](editions.md) · [
 Aligned to the RivicQ CBOM architecture note (CycloneDX 1.6, DORA RTS, NIS2, FIPS 203/204/205):
 
 ```
-1. Input          website · host/IP · server · k8s pod · local path · declared HSM/QSIC
+1. Input          website · host/IP · server · k8s pod · local path · declared HSM/QSIC · declared firmware/CDX
 2. CBOM engine    TLS / HTTPS / SSH / SBOM discovery → normalize → policy gate → Qiskit profile
 3. Operationalize PQC mapping (ML-KEM / ML-DSA / SLH-DSA) · HNDL score · GRC connectors (Enterprise)
 4. Output         CycloneDX CBOM · intelligence JSON · audit/Qiskit scores · DORA pack (Enterprise)
@@ -23,7 +23,7 @@ This product treats them as **customer-credential connectors** (empty when disco
 
 | Phase | What happens | Community (OSS) | Enterprise |
 |---|---|---|---|
-| **Discover** | Classify the target (website, host, IP, server, pod, hardware, path) and schedule scanners | TLS/HTTPS/SSH/SBOM + **declared** pod/QSIC inventory | Same engine + live kube attach and cloud/HSM connectors when credentials exist |
+| **Discover** | Classify the target (website, host, IP, server, pod, hardware, firmware, path) and schedule scanners | TLS/HTTPS/SSH/SBOM + **declared** pod/QSIC/firmware inventory | Same engine + live kube attach and cloud/HSM connectors when credentials exist |
 | **Mitigate** | Map Shor/Grover-class algorithms to FIPS 203/204/205 replacements | JSON migration list | Same mapping + DORA pack and control-plane evidence |
 | **Report** | CBOM + scores + control mappings | `GET /scans/:id/report` (stable `ScanResult`) and `/intelligence` | Same JSON + licensed pack, audit log, API keys |
 
@@ -39,6 +39,7 @@ Every completed scan status includes `target_class`, `resources`, and `finding_i
 | Server | `server` | TLS + SSH + HTTP | Same discovery, labeled server |
 | Pod | `pod` | `k8s` declared; TLS if `@host` | `pod://namespace/name[@host]` — not eBPF, not secret dump |
 | Hardware | `hardware` | `hardware` catalog | QSIC research ASIC + generic HSM/TPM/QRNG **declaration** |
+| Firmware | `firmware` / `cyclonedx` / `hbom-fw` | Declared firmware / CycloneDX metadata | `firmware://…`, `cdx://…`, `*.cdx.json`; static metadata only, no binary reverse engineering or key extraction |
 | Path | local `./` | SBOM | Crypto libraries in the tree |
 
 ## Editions
@@ -58,9 +59,9 @@ Every completed scan status includes `target_class`, `resources`, and `finding_i
 
 The PQC Readiness Assessment workbook scores four inventory layers plus HNDL and compliance mapping:
 
-- **SBOM / CBOM / HBOM / AIBOM** → synthesized QBOM
-- Community synthesizes QBOM from CBOM + SBOM + declared hardware catalog
-- AIBOM contribution is Enterprise (declared inventory)
+- **SBOM / CBOM / HBOM / AIBOM** are readiness layers; on Community only SBOM and CBOM are scored, while HBOM/AIBOM stay 0 and are labeled placeholders (`internal/intelligence/architecture.go`)
+- Community does **not** synthesize a QBOM product or a hardware-backed QBOM layer from CBOM + SBOM + the declared hardware catalog; `GET /scans/:id/qbom` returns 403 on OSS
+- Enterprise edition flags can set placeholder HBOM/AIBOM layer scores and expose the licensed QBOM view; declared inventory is not hardware attestation
 - See [BOM_FRAMEWORK.md](BOM_FRAMEWORK.md) and [PQC_MIGRATION.md](PQC_MIGRATION.md)
 - **HNDL** — share of Shor-class findings
 - **DORA RTS Art. 9**, **DORA Art. 6**, **NIS2 Art. 21**, **BSI TR-02102**, **FIPS 203/204/205**
@@ -71,7 +72,7 @@ The PQC Readiness Assessment workbook scores four inventory layers plus HNDL and
 
 QSIC (RivicQ research ASIC, 65nm, ML-KEM/ML-DSA/SLH-DSA, FIPS 140-3 Level 3 **roadmap**) is **inventory metadata**.
 
-`GET /api/v1/hardware/catalog` and `POST /inventory/hardware/discover` return the declared catalog. They do not reverse-engineer firmware, extract keys, or attest a certified module.
+`GET /api/v1/hardware/catalog` is the shared Community catalog of declared HSM/TPM/QSIC metadata. `POST /api/v1/inventory/hardware/discover` is an **Enterprise-only** inventory route that returns the declared catalog (`status: declared_inventory`, `engine: not_firmware_re`) and lets Enterprise persist operator-declared metadata. Neither reverse-engineers firmware, extracts keys, or attests a certified module.
 
 ## Cloud and quantum services
 

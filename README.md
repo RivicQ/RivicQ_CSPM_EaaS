@@ -4,7 +4,7 @@
 
 RivicQ is **Cryptographic Security Posture Management** (CSPM): Community inventories cryptography (CBOM) and software components (SBOM). QBOM, HBOM, AIBOM, and IBOM are licensed Enterprise control-plane layers. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
 
-A separate build on branch `feature/eaas-product-foundation` adds a standalone **Encryption-as-a-Service (EaaS)** API and developer portal. It is a local sandbox product surface on port `:9091`, not production-ready, not hosted, and not part of the CSPM scores or editions below. See [EaaS](#encryption-as-a-service-eaas-standalone) and the linked EaaS docs below.
+A separate build on `main` adds a standalone **Encryption-as-a-Service (EaaS)** API and developer portal. It is a local sandbox product surface on port `:9091`, not production-ready, not hosted, and not part of the CSPM scores or editions below. See [EaaS](#encryption-as-a-service-eaas-standalone) and the linked EaaS docs below.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/github/actions/workflow/status/RivicQ/RivicQ_CSPM_EaaS/pages.yml?label=GitHub%20Pages)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions/workflows/pages.yml)

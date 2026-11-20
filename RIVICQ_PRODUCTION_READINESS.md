@@ -2,18 +2,22 @@
 
 Assessment against the gaps identified in `RIVICQ_BASELINE.md` §9–§10.
 
-**Scope:** this verdict covers the **CSPM scanner/control plane only**. The standalone EaaS build on branch `feature/eaas-product-foundation` (`cmd/eaas`, `internal/eaas`, `web/eaas`) is a separate local sandbox product surface, is not included in the CSPM pilot/production verdict, and is not production-ready or hosted. See §7 and `docs/EAAS_PRODUCT_STATUS.md`.
+**Scope:** this verdict covers the **CSPM scanner/control plane only**. The standalone EaaS foundation is on `main` (`2720da2`; latest committed Pages/docs commit `d0e9dbf`, with documentation fixes in the current local tree) at `cmd/eaas`, `internal/eaas`, and `web/eaas`. It is a separate local sandbox product surface, is not included in the CSPM pilot/production verdict, and is not production-ready or hosted. GitHub Pages publishes EaaS documentation, not the EaaS portal or API. See §7 and `docs/EAAS_PRODUCT_STATUS.md`.
 
 **Verdict for CSPM: Pilot Ready with a production operator. Not approved for
 unattended production deployment.** The CSPM application is now internally
 consistent, tested at its seams, and fails closed on its dependency boundaries.
-Two medium-severity defects that matter under real internet exposure remain open,
-and both are pre-existing rather than introduced here.
+The three medium-severity baseline defects (M1–M3) are implemented as described
+in §3; the open items that keep production unapproved are the operational risks
+in §4–§5.
 
 Every CSPM status in §1–§6 was re-verified against the tree in that pass, not
-inherited from the baseline. EaaS in §7 is scoped to its own evidence; after the
-EaaS addition, local `go vet ./...`, `go build ./...`, and `go test ./...` passed,
-but EaaS remains excluded from the CSPM verdict.
+inherited from the baseline. On the current tree after `d0e9dbf`, local
+`go vet ./...`, `go build ./...`, full `go test ./...`, web `type-check`/`lint`,
+and `bash scripts/verify-pages-build.sh` (109 checks) passed; GitHub Pages
+workflow run `#120` succeeded for the earlier EaaS docs publication. EaaS in
+§7 is scoped to its own evidence and remains excluded from the CSPM verdict.
+None of this is customer validation or a hosted backend deployment.
 
 ---
 
@@ -70,54 +74,46 @@ These were listed as baseline defects and confirmed corrected:
 | Enterprise handlers panicking on a nil `*sql.DB` | Handlers check for a live handle and return 503 |
 | OSS and Enterprise suites silently attaching to a developer database | Integration suite requires an explicit environment variable |
 
-## 3. Still open — must be closed before production
+## 3. Previously open M1–M3 — implemented in the current tree
 
-### M1. `SetTrustedProxies` is never called → rate limiting is bypassable
+These three medium-severity baseline items are no longer open. Their status was
+corrected by reading the current tree; no customer or production validation is
+claimed.
 
-**Severity: Medium. Unchanged from baseline.**
+### M1. Proxy trust is explicit opt-in
 
-`internal/middleware/ratelimit.go` keys on `c.ClientIP()`. Gin's `ClientIP()`
-trusts `X-Forwarded-For` only when `SetTrustedProxies` has configured a trusted
-proxy list. Grepping the repository finds **no call to `SetTrustedProxies`
-anywhere**, so gin falls back to trusting the entire `X-Forwarded-For` chain.
+**Baseline severity: Medium. Status: implemented.**
 
-Any client can send an arbitrary `X-Forwarded-For` and receive a fresh rate-limit
-bucket per request. The rate limiter is effectively decorative. This is the
-highest-priority open item.
+`internal/middleware/middleware.go:21-30` calls `router.SetTrustedProxies(nil)`
+unless `TRUSTED_PROXIES` is set, so gin trusts no `X-Forwarded-For` chain by
+default. When the variable is set, the comma-separated CIDRs are passed to
+`SetTrustedProxies`; invalid values abort startup. Documented in
+`docs/ARCHITECTURE.md:91` and `docs/SECURITY_GUIDE.md:261-263`. There is no
+dedicated unit test for this configuration path in `internal/middleware`.
 
-Fix: call `SetTrustedProxies` with the operator's proxy CIDRs at startup, from
-configuration. If there is no proxy, call `SetTrustedProxies(nil, nil)`.
+### M2. CORS uses an allowlist, not a wildcard
 
-### M2. CORS reflects any origin with credentials enabled
+**Baseline severity: Medium. Status: implemented.**
 
-**Severity: Medium. Unchanged from baseline.**
+`internal/middleware/cors.go:24-43` defaults `AllowedOrigins` to
+`https://rivicq.github.io` plus any comma-separated `CORS_ORIGINS` entries; `"*"`
+is not in the default. The handler sets `Access-Control-Allow-Origin` and
+`Access-Control-Allow-Credentials` only for an allowed origin (`:55-62`), and
+`AllowLocalDev` is off in production (`:40`). Covered by
+`internal/middleware/cors_test.go:11-117`, including rejection of an unknown
+cross-site origin and of localhost in production.
 
-`internal/middleware/cors.go:22` still defaults `AllowedOrigins` to `["*", …]`
-with `AllowCredentials: true`. The handler reflects the request's `Origin`
-verbatim when the wildcard is present (`:56-62`), so **any website on the
-internet** receives `Access-Control-Allow-Origin: <their origin>` together with
-`Access-Control-Allow-Credentials: true`.
+### M3. Audit query strings are redacted
 
-Practical impact is reduced because the API authenticates with `Authorization:
-Bearer` rather than cookies, so a browser will not attach credentials
-automatically. It is not zero: any origin that can obtain a token by other means
-gets a permissive cross-origin channel from the user's browser, and the
-`"*"`-plus-credentials combination is a reliable scanner finding.
+**Baseline severity: Medium. Status: implemented.**
 
-Fix: drop `"*"` from the default and require `CORS_ORIGINS` to be set
-explicitly, or refuse to start when it is unset and credentials are enabled.
-
-### M3. Audit log persists raw query strings
-
-**Severity: Medium. Unchanged from baseline.**
-
-`internal/middleware/audit.go:16-19` appends `URL.RawQuery` to the recorded path,
-and the path is persisted to `audit_events`. OAuth authorization codes and
-`state` are query parameters, so **authorization codes are durably written to the
-audit table**. A code is single-use and short-lived, but it is a credential
-written to storage in the clear.
-
-Fix: log `URL.Path` only, with a separate allow-list of non-sensitive query keys.
+`internal/middleware/audit.go:14-21,69-92` passes `URL.RawQuery` through
+`redactQuery` before the path reaches the logger and `audit_events`. The
+sensitive-key list includes `code`, `token`, `secret`, `authorization`, and `sig`,
+so OAuth authorization codes are no longer written in the clear. Unparsable
+queries become `[unparsable]`. `internal/middleware/audit_test.go:5-27` covers
+token, access/refresh token, signature/`sig`, private key, and unparsable input;
+it has no dedicated `code=` case, which is noted rather than inferred.
 
 ## 4. Open risks carried forward
 
@@ -169,36 +165,44 @@ operator watching — because:
 
 **Not** suitable for unattended production until:
 
-1. `SetTrustedProxies` is configured (M1) — the rate limiter does not work without it.
-2. The `*` origin is removed from the CORS default (M2).
-3. OAuth codes are excluded from the audit log (M3).
-4. A backup has been taken **and successfully restored** from a scratch instance.
-5. A rollback procedure is written and rehearsed.
-6. `govulncheck ./...` runs clean in CI.
-7. Webhook replay and tenant mapping are resolved before a second replica runs.
+1. A backup has been taken **and successfully restored** from a scratch instance.
+2. A rollback procedure is written and rehearsed.
+3. `govulncheck ./...` runs clean in CI.
+4. Webhook replay and tenant mapping are resolved before a second replica runs.
+5. The open risks in §4 (tracked as O1–O9 in `RIVICQ_SECURITY_REPORT.md`) are
+   dispositioned, in particular the tenant mapping and discarded insert errors.
+6. The documentation/operational gaps in §5 are closed (backup/restore, rollback,
+   load and latency testing, RivicQ SBOM, and metrics).
+
+M1–M3 are closed as described in §3 and are no longer production blockers. The
+production-not-approved verdict above is unchanged.
 
 ---
 
 ## 7. EaaS — excluded from this verdict
 
-The standalone EaaS build is a separate product surface on branch
-`feature/eaas-product-foundation`. Evidence: `cmd/eaas/main.go`,
-`internal/eaas/`, `web/eaas/index.html`,
+The standalone EaaS build was added to `main` in `2720da2` and is present after
+`d0e9dbf` as a separate product surface. Evidence:
+`cmd/eaas/main.go`, `internal/eaas/`, `web/eaas/index.html`,
 `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`.
-It does not inherit the CSPM verdict above, and no CSPM finding, fix, or score
-applies to it.
+`d0e9dbf` published the EaaS documentation set to GitHub Pages via
+`scripts/build-pages.sh` and `scripts/verify-pages-build.sh`; the current tree
+adds the alpha/beta report to that composite build. That is static
+documentation, not a hosted EaaS deployment. The service does not inherit the
+CSPM verdict above, and no CSPM finding, fix, or score applies to it.
 
 | Area | Status | Boundary |
 |---|---|---|
 | Standalone API on `:9091` with `/healthz`, `/api/eaas/v1/*`, `/api/beta/v1/*` | VERIFIED | Local binary only; independent of the CSPM router |
-| Portal at `/` and `/portal` | VERIFIED | Served by the binary from `web/eaas/index.html`, not GitHub Pages |
+| Portal at `/` and `/portal` | VERIFIED | Served by the binary from `web/eaas/index.html`, not GitHub Pages; Pages only publishes docs |
 | Accounts, projects, hashed API keys, quota/RPM, beta registration, strict CORS | VERIFIED (local) | `internal/eaas/`; seven package tests passed locally |
 | Sandbox JSON state file with base64 private key bytes | LIMITED | `internal/eaas/store.go`; filesystem protection required, no HSM custody |
 | Classical operations / ML-KEM-768 and ML-DSA-65 | VERIFIED (Go stdlib, Beta implemented) / Experimental | `internal/eaas/crypto.go`; `github.com/cloudflare/circl` v1.6.1; SLH-DSA not implemented |
 | Plan switch | PARTIALLY_IMPLEMENTED | Entitlements only; no Stripe/payment collection or payment webhooks |
 | Production Postgres repository / migration runner | BLOCKED | `deploy/migrations/004_eaas_schema.sql` is a target schema only |
 | Hosted EaaS, email delivery, CAVP/FIPS validation, AI operations, quantum hardware, HSM custody, wireless operations | NOT_IMPLEMENTED | No implementation in the EaaS evidence files |
-| Full repository suite | VERIFIED (local) | `gofmt -l internal/eaas cmd/eaas`, `go vet ./...`, `go build ./...`, and `go test ./... -count=1` passed after the EaaS addition; no deploy gate or hosted EaaS is implied |
+| Full repository suite | VERIFIED (local) | On the current tree after `d0e9dbf`: `gofmt -l internal/eaas cmd/eaas`, `go vet ./...`, `go build ./...`, full `go test ./...`, web `type-check`/`lint`, and `bash scripts/verify-pages-build.sh` (109 checks) passed; Pages workflow `#120` succeeded for the earlier EaaS docs publication. No deploy gate or hosted EaaS is implied |
 
-See `docs/EAAS_PRODUCT_STATUS.md`, `docs/EAAS_DEPLOYMENT.md`, and
-`docs/EAAS_LIMITATIONS.md`. **EaaS Production Ready: not claimed.**
+See `docs/EAAS_PRODUCT_STATUS.md`, `docs/EAAS_DEPLOYMENT.md`,
+`docs/EAAS_LIMITATIONS.md`, `docs/EAAS_TESTING_CI.md`, and
+`docs/ALPHA_BETA_TEST_REPORT.md`. **EaaS Production Ready: not claimed.**

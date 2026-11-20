@@ -18,6 +18,9 @@ All notable changes to this project will be documented in this file.
 - **Nebula-only product chrome** (2026-10-14). Public site, console, docs, marketing, Archify explorer, GitHub Pages, and Cloudflare Pages share one black/violet identity. Light-canvas “vibe” surfaces are gone. Theme toggle removed; inbox/stat cards/logos forced to nebula. Home/public nav is opaque so headings no longer sit under the sticky bar. GitHub Pages now runs `scripts/build-pages.sh` (same composite as Cloudflare). Operator scan workflow is an Archify diagram on Home, Scanner, Pricing, Request demo, Docs hub, Marketing, and public Site pages. Docs/marketing/archify force dark; `docs/assets/theme.js` is published by `build-pages.sh`. Live `/demo` matches the Archify product-site hero (Space Grotesk / Fraunces, cmd chip, plate receipts, workflow embed). Remaining public shells (`SitePage` product/CBOM/PQC/enterprise/security/contact/IBM, auth forgot/reset/verify/OAuth, edition switcher, Home hero) and console `GlassCard`/`DashboardPanel` plates use the same high-contrast Archify aura + plate tokens. RivicQ Graph (`fabric/`) is nebula-only with Space Grotesk/Fraunces and violet CTAs; each public page carries page-specific section copy and diagram captions so text is even and complete.
 
 ### Added
+- **Standalone EaaS foundation** (`2720da2`, now on `main`): `cmd/eaas`, `internal/eaas`, `web/eaas`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`. Seven EaaS package tests and the full repository `go test ./...` suite pass locally. Maturity per `docs/EAAS_PRODUCT_STATUS.md`: `VERIFIED` API and portal, `LIMITED` sandbox JSON state file, `Beta implemented` classical operations, `Experimental` ML-KEM-768 / ML-DSA-65, `BLOCKED` Postgres repository, `NOT_IMPLEMENTED` hosted EaaS. No hosted backend deployment. See `docs/ALPHA_BETA_TEST_REPORT.md`.
+- **Pages EaaS documentation publication** (`d0e9dbf`): `scripts/build-pages.sh` copies the EaaS docs set and `scripts/verify-pages-build.sh` checks those files plus the docs reader/hub links. Local verifier passed 106 checks; GitHub Pages workflow run `#120` succeeded. Static docs only, no API deployment.
+- **Documentation/Pages verification hardening** (Unreleased): `docs/ALPHA_BETA_TEST_REPORT.md` is linked from the docs hub and reader allowlist, copied by `scripts/build-pages.sh`, and asserted by `scripts/verify-pages-build.sh`; stale preview/status claims were corrected. The local verifier now passes 109 checks.
 - **Theme-aware design system across every surface** (2026-10-12). One RivicQ visual system now runs in light **and** dark on the React app (`web/`), static `docs/`, static `marketing/`, and the RivicQ Graph (`fabric/`). All public/auth chrome moved from hardcoded dark hexes to MUI palette tokens (`background.default`/`background.paper`/`text.*`/`divider`/`primary.main`); `NebulaBackdrop` is dark-only; a theme toggle persists to `localStorage['rivicq.theme']` (shared key). Static sites gained a pre-paint theme bootstrap, `[data-theme="light"]` variable overrides, and a `.theme-toggle` control.
 - **`web/` code-splitting** — `App.tsx` routes converted to `React.lazy`; fixed a `require()` call inside `useMemo` by hoisting `getAppTheme` to a top-level import. Main bundle **578 kB → 339.85 kB gzip (−41%)**.
 - **archify diagram site wired into Pages** — `pages.yml` copies `archify/site` → `/archify/site` and `archify/diagrams` → `/archify/diagrams` (two-level layout preserves `../diagrams` and `../../docs` links); `docs/index.html` links to it.
@@ -245,6 +248,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Enterprise MVP – Beta Release**  
 > CryptoBOM SaaS is now feature-complete for client beta testing. This release introduces
 > end-to-end CBOM scanning, Enterprise multi-cloud capabilities, and a beta sign-up programme.
+> Historical milestone only; current status is controlled pilot (CSPM) plus EaaS early beta.
 
 ### 🔐 Headline: CBOM Scanning End-to-End
 
@@ -294,8 +298,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Without credentials the system falls back to classical risk scoring (all other features
   remain fully functional).
 - Multi-cloud HSM scanning requires cloud credentials configured in Kubernetes secrets.
-- Production SLAs begin at GA. Beta support is best-effort.
-- SOC 2 Type II and ISO 27001 certifications are planned for GA.
+- No production SLA or GA date is claimed. Beta support is best-effort.
+- No SOC 2 Type II or ISO 27001 certificate is held; audits are not complete.
 
 ---
 
@@ -306,7 +310,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🔐 **CBOM Scanner** - Discover cryptographic assets in Kubernetes, containers, and repositories
 - 📊 **Algorithm Analysis** - Detect RSA, AES, ECDSA, and other cryptographic algorithms
 - ⚛️ **Quantum Vulnerability Detection** - Identify quantum-vulnerable algorithms
-- 📋 **Compliance Scanning** - NIST, ISO, BSI, PCI-DSS, SOC2 framework support
+- 📋 **Compliance Scanning** - NIST, ISO, BSI, PCI-DSS, SOC2 framework mappings only (not certifications)
 - 🛡️ **DevSecOps Integration** - CI/CD pipeline assessment
 - 🔄 **PQC Migration Planning** - Generate migration plans to NIST PQC algorithms
 - 🐳 **Docker Compose** - Full stack deployment with Go, Node, Python
@@ -353,16 +357,22 @@ Pre-built binaries available:
 
 ## [v1.3.0] - 2026-02-12
 
+> Historical import entry, superseded by `[1.3.0] - 2026-08-12`. No TÜV, SOC 2,
+> PCI DSS, or ISO certificate is held; earlier certification language is not an
+> active entitlement.
+
 ### Added
 - Initial release with full DevSecOps integration
-- IBM Quantum and KIPU Q-CTRL integration
+- IBM Quantum and KIPU Q-CTRL integration preparation (no live job in evidence)
 - Multi-language SDKs (Python, Java, Rust, C++, C, Ruby)
-- TÜV-certified German engineering
 - Enterprise SSO (SAML/LDAP/OAuth)
 
 ---
 
 ## Upcoming Features
+
+> Historical roadmap from the v0.1.0 era; superseded by current planning. These
+> items are not active commitments.
 
 ### v0.2.0 (Planned)
 - [ ] Real IBM Quantum hardware integration

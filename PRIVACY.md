@@ -4,7 +4,7 @@
 
 This notice describes how the **public Community repository and GitHub Pages demo** relate to personal data. It is not a customer Data Processing Agreement. Enterprise customers receive contractual privacy terms with their commercial license.
 
-Scope: CSPM and its Pages demo are covered first. The standalone EaaS build on branch `feature/eaas-product-foundation` is a separate, locally operated sandbox service (`cmd/eaas`, `internal/eaas`, `web/eaas`); it is not hosted by RivicQ GmbH and is excluded from CSPM pilot/production claims and scores. EaaS data practices are described below.
+Scope: CSPM and its Pages demo are covered first. The standalone EaaS build on `main` is a separate, locally operated sandbox service (`cmd/eaas`, `internal/eaas`, `web/eaas`); it is not hosted by RivicQ GmbH and is excluded from CSPM pilot/production claims and scores. EaaS data practices are described below.
 
 ---
 

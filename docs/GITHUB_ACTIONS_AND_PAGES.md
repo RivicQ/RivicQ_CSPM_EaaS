@@ -1,6 +1,6 @@
 # GitHub Actions and GitHub Pages
 
-This repository ships 25 workflow files under `.github/workflows/` (counted from that directory, including `eaas-ci.yml`) and publishes a public CSPM product site from the `gh-pages` branch. `docs/DEVSECOPS.md` describes the security gates; this document details the action catalog and the Pages build pipeline. The EaaS portal is not a Pages site: it is served by the EaaS binary at `/` and `/portal`.
+This repository ships 25 workflow files under `.github/workflows/` (counted from that directory, including `eaas-ci.yml`, `pages.yml`, and `cloudflare-pages.yml`) and publishes a public CSPM product site from the `gh-pages` branch. `docs/DEVSECOPS.md` describes the security gates; this document details the action catalog and the Pages build pipeline. The EaaS portal is not a Pages site: it is served by the EaaS binary at `/` and `/portal`.
 
 ## 1. Workflow catalog
 
@@ -27,12 +27,14 @@ This repository ships 25 workflow files under `.github/workflows/` (counted from
 | `update-benchmark-baseline.yml` | Refresh `tests/benchmark-baseline.json` | manual |
 | `animation-ci.yml` | Validate `media/cryptobom-animation.html` | PRs touching that file |
 | `greetings.yml` | First-interaction comments (pull_request_target/issues, auto) | new issues/PRs |
+| `pages.yml` | Build composite site via `scripts/build-pages.sh`, verify via `scripts/verify-pages-build.sh`, publish `web/build` to `gh-pages` | push main/master, workflow_dispatch |
+| `cloudflare-pages.yml` | Same composite build; deploy to Cloudflare Pages via `cloudflare/wrangler-action@v3` when `CLOUDFLARE_API_TOKEN` is set, build-only otherwise | push main/master, workflow_dispatch |
 
-Global rules: every workflow uses pinned, delegated `GITHUB_TOKEN` permissions where it can (`contents: read`, `packages: write` only on publish paths), checks out `actions/checkout@v4`, and keeps secrets strictly to the matrix above. `eaas-ci.yml` is intentionally narrow: it has no race, coverage, govulncheck, migration validation, portal build, container build, or deploy step.
+Global rules: workflows use delegated `GITHUB_TOKEN` permissions where it can (`contents: read`, `packages: write` only on publish paths) and keep secrets strictly to the matrix above. Workflows that check out use `actions/checkout@v4` except `codeql.yml` (`@v7`); `greetings.yml` and `go-ossf-slsa3-publish.yml` do not check out. Third-party actions are version-tagged, not commit-SHA pinned (`snyk/actions` is the SHA-pinned exception). `eaas-ci.yml` is intentionally narrow: it has no race, coverage, govulncheck, migration validation, portal build, container build, or deploy step.
 
 ## 2. How actions land in the repo
 
-Repo-local composite action: `.github/actions/rivicq-scan/action.yml` wraps `cmd/rivicq scan` with config flags; used by `rivicq-security.yml`. Third-party actions are referenced by pins in workflow files (e.g. `peaceiris/actions-gh-pages`, `slsa-framework/slsa-github-generator`, `anchore/sbom-action`, `aquasecurity/trivy-action`, `owasp/zap-action`) — no vendored third-party code is kept in-tree (`fabric/`, `web/node_modules`, `fabric/node_modules` are excluded from lint and scan).
+Repo-local composite action: `.github/actions/rivicq-scan/action.yml` wraps `cmd/rivicq scan` with config flags; used by `rivicq-security.yml`. Third-party actions are referenced by version tags in workflow files (e.g. `peaceiris/actions-gh-pages@v4`, `slsa-framework/slsa-github-generator@v1.4.0`, `anchore/sbom-action@v0`, `aquasecurity/trivy-action@v0.36.0`); `snyk/actions` uses a commit SHA. No vendored third-party code is kept in-tree (`fabric/`, `web/node_modules`, `fabric/node_modules` are excluded from lint and scan).
 
 ## 3. Pages pipeline (`pages.yml`)
 
@@ -56,4 +58,4 @@ Show-me examples served by the product site today: ReDoc CSPM API reference (`do
 - Rollback: use `rollback.yml` for Helm deployments; for Pages, push a revert to `gh-pages` or pin an earlier action artifact.
 - Benchmark baseline refresh: trigger `update-benchmark-baseline.yml`.
 - Image release: `publish-image.yml` manual, or `release.yml` on tag; both validate provenance via `go-ossf-slsa3-publish.yml`.
-- `_headers`/`_redirects`/`wrangler.toml` for Cloudflare Pages are being added at repo root for a static Publish-Only replica; Pages remains the canonical product site.
+- `wrangler.toml` is committed at the repo root; `cloudflare/_headers` and `cloudflare/_redirects` are committed and copied into `web/build` by `scripts/build-pages.sh`. `.github/workflows/cloudflare-pages.yml` deploys the same build when `CLOUDFLARE_API_TOKEN` is set; GitHub Pages remains the canonical product site.

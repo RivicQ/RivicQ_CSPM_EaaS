@@ -6,7 +6,7 @@
 **Edition:** OSS (default) / Enterprise (license-gated)
 **Method:** Full repository inspection, build verification, `go vet`, and targeted source review. Every claim below cites a file and line range. Anything not verified is marked **UNVERIFIED**.
 
-> **Scope note (added later):** this is a historical assessment of the **CSPM scanner/control plane at commit `82a6785` only**. The standalone EaaS build on branch `feature/eaas-product-foundation` (`cmd/eaas`, `internal/eaas`, `web/eaas`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`) did not exist at that commit. EaaS is a separate, non-production product surface and is **excluded** from this baseline, its file counts, its findings, and its 58/100 score. This document is not a current-state assessment of the repository.
+> **Scope note (added later):** this is a historical assessment of the **CSPM scanner/control plane at commit `82a6785` only**. The standalone EaaS build now on `main` (`cmd/eaas`, `internal/eaas`, `web/eaas`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`) did not exist at that commit. EaaS is a separate, non-production product surface and is **excluded** from this baseline, its file counts, its findings, and its 58/100 score. This document is not a current-state assessment of the repository.
 
 ---
 

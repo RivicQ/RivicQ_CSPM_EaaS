@@ -2,7 +2,7 @@
 
 Owner: RivicQ GmbH (Berlin). Repository: `RivicQ/RivicQ_CSPM_EaaS` at https://github.com/RivicQ/RivicQ_CSPM_EaaS.
 
-This document captures the product intent for **Cryptographic Security Posture Management (CSPM)** and, as a separate product surface, the standalone **Encryption-as-a-Service (EaaS)** build. CSPM requirements FR-1–FR-13 and EaaS requirements FR-14–FR-22 are distinct: EaaS is a local sandbox service on branch `feature/eaas-product-foundation`, not a production-ready extension of the CSPM scanner or its scores. It reflects what is actually built in this repository and explicitly does not claim certifications the project does not hold.
+This document captures the product intent for **Cryptographic Security Posture Management (CSPM)** and, as a separate product surface, the standalone **Encryption-as-a-Service (EaaS)** build. CSPM requirements FR-1–FR-13 and EaaS requirements FR-14–FR-22 are distinct: EaaS is a local sandbox service on `main`, not a production-ready extension of the CSPM scanner or its scores. It reflects what is actually built in this repository and explicitly does not claim certifications the project does not hold.
 
 EaaS companions: [Product status](EAAS_PRODUCT_STATUS.md) · [API](EAAS_API.md) · [Deployment](EAAS_DEPLOYMENT.md) · [Security & privacy](EAAS_SECURITY_PRIVACY.md) · [Limitations](EAAS_LIMITATIONS.md) · [Testing & CI](EAAS_TESTING_CI.md) · [Freemium & metering](EAAS_FREEMIUM_AND_METERING.md).
 
@@ -70,7 +70,7 @@ Out of scope explicitly:
 
 ### EaaS functional requirements (FR-14–FR-22 — separate product surface)
 
-These requirements describe the standalone EaaS build on branch `feature/eaas-product-foundation`. They are **not** part of CSPM FR-1–FR-13, do not change any CSPM score, and are bounded by the local sandbox unless a row says otherwise.
+These requirements describe the standalone EaaS build on `main`. They are **not** part of CSPM FR-1–FR-13, do not change any CSPM score, and are bounded by the local sandbox unless a row says otherwise.
 
 | ID | Requirement | Status | Evidence in repo |
 |---|---|---|---|

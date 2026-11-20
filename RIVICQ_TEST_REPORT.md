@@ -1,11 +1,46 @@
 # RivicQ Test Report
 
-All results below were produced by running the commands shown, against commit
-`82a6785` plus the changes in `RIVICQ_HARDENING_REPORT.md`.
+Current verification scope: local tree after `d0e9dbf`
+(`fix(site): publish EaaS documentation on GitHub Pages`), including the
+standalone EaaS foundation added in `2720da2`. Results re-run on the current
+tree are listed first. The earlier suite results below were recorded against
+commit `82a6785` plus the changes in `RIVICQ_HARDENING_REPORT.md` and are
+retained as historical evidence.
 
 ---
 
-## Summary
+## Current tree verification (after `d0e9dbf`)
+
+All commands in this section were run locally against the current tree.
+
+| Check | Result |
+|---|---|
+| `go vet ./...` | pass |
+| `go build ./...` | pass |
+| `go test ./...` | pass — 56 packages listed; 30 with tests, 26 with no test files |
+| `go vet -tags enterprise ./...` | pass |
+| `go build -tags enterprise ./...` | pass |
+| `go test -tags enterprise ./...` | pass — 31 packages with tests |
+| `go test -tags integration ./tests/integration/` | pass — 11 skipped locally without `RIVICQ_TEST_DATABASE_URL`; an earlier DSN-backed run recorded 10 pass, 1 skip |
+| `npm run --prefix web type-check` | pass |
+| `npm run --prefix web lint` | pass |
+| `bash scripts/verify-pages-build.sh` | pass — 109 checks |
+| GitHub Pages workflow run `#120` | succeeded (earlier EaaS docs publication); static site only |
+
+`bash scripts/verify-pages-build.sh` checks the composite Pages output built by
+`scripts/build-pages.sh`, including the EaaS documentation files added at
+`d0e9dbf` and the alpha/beta report in the current tree. Workflow `#120` is a
+Pages publish result, **not** a hosted backend deployment: GitHub Pages serves
+static docs and labeled demos, and the EaaS portal is served by the standalone
+binary at `/` and `/portal`. No hosted backend, hosted EaaS, or customer
+validation is claimed.
+
+Current `main` has 396 distinct `Test*` functions, including the seven EaaS
+tests in `internal/eaas/eaas_test.go`.
+
+---
+
+## Earlier suite results (`82a6785` + hardening)
 
 | Suite | Result |
 |---|---|
@@ -17,7 +52,21 @@ All results below were produced by running the commands shown, against commit
 | `go test -tags enterprise ./...` | pass — 21 packages |
 | `go test -tags integration ./tests/integration/` | pass — 10 pass, 1 skip (no DSN) |
 
-339 distinct `Test*` functions across the repository.
+339 distinct `Test*` functions at that point.
+
+## EaaS addition on current main
+
+`2720da2` added the standalone EaaS foundation: `cmd/eaas`, `internal/eaas`,
+`web/eaas`, `deploy/migrations/004_eaas_schema.sql` and
+`.github/workflows/eaas-ci.yml`. Seven EaaS package tests pass locally as part
+of `go test ./...`; see `docs/EAAS_TESTING_CI.md` for the named tests and
+`docs/ALPHA_BETA_TEST_REPORT.md` for the alpha/beta record.
+
+`docs/EAAS_PRODUCT_STATUS.md` labels the API and portal `VERIFIED`, the JSON
+sandbox store `LIMITED`, classical operations `Beta implemented`, ML-KEM-768 /
+ML-DSA-65 `Experimental`, the PostgreSQL repository `BLOCKED`, and hosted EaaS
+`NOT_IMPLEMENTED`. EaaS is excluded from the CSPM verdict in
+`RIVICQ_PRODUCTION_READINESS.md`.
 
 ## Integration suite
 
@@ -66,7 +115,8 @@ go test ./internal/... -coverprofile=coverage.out
 go tool cover -func=coverage.out | tail -1
 ```
 
-**Total: 26.6% of statements.**
+Current `main` measurement: **34.1% of statements**. The earlier recorded total
+was 26.6%; that figure is historical, not the current result.
 
 | Package | Coverage |
 |---|---|
@@ -74,22 +124,24 @@ go tool cover -func=coverage.out | tail -1
 | `internal/quantum/provider` | 96.6% |
 | `internal/tenant` | 88.9% |
 | `internal/hardware` | 86.2% |
-| `internal/intelligence` | 68.9% |
-| `internal/auth` | 61.1% |
+| `internal/auth` | 74.6% |
+| `internal/eaas` | 71.8% |
+| `internal/intelligence` | 69.2% |
 | `internal/discovery` | 56.5% |
 | `internal/platform` | 58.7% |
 | `internal/edition` | 42.9% |
-| `internal/api/shared` | 27.7% |
-| `internal/server` | 19.7% |
-| `internal/middleware` | 18.8% |
+| `internal/api/shared` | 28.3% |
+| `internal/middleware` | 26.7% |
+| `internal/server` | 19.8% |
 | `internal/quantum` | 13.1% |
 | `internal/api/enterprise` | 0.3% |
 | `internal/database` | 0.0% |
 
-**Read this honestly.** 26.6% is low. The two lowest rows are the two most
-consequential areas: the database layer and the enterprise handlers are covered
-by the integration suite and the `-tags enterprise` tests rather than by unit
-tests, which the percentage cannot see. The number is reported as measured.
+**Read this honestly.** 34.1% is still low. `internal/database` remains at 0%
+under unit coverage and `internal/api/enterprise` at 0.3%; the integration suite
+and the `-tags enterprise` tests cover those seams, but the percentage cannot
+see them. The `internal/eaas` row is from the new package and does not change
+any CSPM result. The number is reported as measured.
 
 ## Security-focused tests added
 

@@ -2,7 +2,7 @@
 
 Evidence from `internal/eaas/eaas_test.go`, `.github/workflows/eaas-ci.yml`, `internal/eaas/crypto.go`, `internal/eaas/service.go` and `docs/PRD.md`. Local verification results were recorded after this document set was drafted.
 
-Companions: [Product status](EAAS_PRODUCT_STATUS.md) · [API](EAAS_API.md) · [Deployment](EAAS_DEPLOYMENT.md) · [Limitations](EAAS_LIMITATIONS.md)
+Companions: [Product status](EAAS_PRODUCT_STATUS.md) · [API](EAAS_API.md) · [Deployment](EAAS_DEPLOYMENT.md) · [Limitations](EAAS_LIMITATIONS.md) · [Alpha/beta test report](ALPHA_BETA_TEST_REPORT.md)
 
 ## Local test results
 

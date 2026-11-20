@@ -1,6 +1,6 @@
-# How to preview this branch
+# Archived preview instructions
 
-GitHub Pages workflows deploy from `main`. This branch also publishes a nebula overlay so `/preview/` matches the PR. Production github.io stays the last `main` deploy until merge — hard-refresh `/preview/` to review.
+**Archived branch snapshot.** The `/preview/` overlay and URLs below belonged to PR #73 / branch `cursor/rivicq-com-platform-86cc`. Current GitHub Pages deploys from `main`/`master` via `.github/workflows/pages.yml` and does not publish a `/preview/` route. Use the live site at https://rivicq.github.io/RivicQ_CSPM_EaaS/ for the current build.
 
 ## 1. Temporary live preview (this PR)
 

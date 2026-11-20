@@ -1,6 +1,6 @@
 # Implementation status
 
-Evidence-based snapshot. The CSPM rows below reflect HEAD on `cursor/archify-site-system-86cc` after the 2026-10-15 engineering pass; the Pages pilot gate and composite build verification were added on 2026-11-14. The EaaS rows reflect the separate branch `feature/eaas-product-foundation`. EaaS is a separate product surface: it does not change any CSPM result, pilot claim, or score. After the EaaS addition, the full repository `go test ./...` suite, `go vet ./...`, and `go build ./...` passed locally. Classification:
+Evidence-based snapshot. The CSPM rows below reflect HEAD on `cursor/archify-site-system-86cc` after the 2026-10-15 engineering pass; the Pages pilot gate and composite build verification were added on 2026-11-14. The EaaS rows reflect the standalone build merged into `main` in `2720da2`. EaaS is a separate product surface: it does not change any CSPM result, pilot claim, or score. After the EaaS addition, the full repository `go test ./...` suite, `go vet ./...`, and `go build ./...` passed locally. Classification:
 
 - `VERIFIED` — implementation exists, workflow works, tests ran in the recorded pass
 - `LIMITED` — works inside a stated local/sandbox boundary; not production-capable

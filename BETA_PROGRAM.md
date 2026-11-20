@@ -1,7 +1,7 @@
 # RivicQ beta program
 
-**Status:** open for qualified teams · **Product:** Community CBOM engine + labeled Enterprise UI; separate standalone EaaS beta preview
-This document is not a certification, SLA, or IBM Partner Plus API contract. CSPM beta claims and the standalone EaaS beta are distinct: EaaS is a local sandbox service on branch `feature/eaas-product-foundation`, not a hosted or production-ready product, and is excluded from CSPM scores and pilot claims.
+**Status:** CSPM beta open for qualified teams · **Product:** Community CBOM engine + labeled Enterprise UI; separate standalone EaaS early beta (manual review)
+This document is not a certification, SLA, or IBM Partner Plus API contract. CSPM beta claims and the standalone EaaS early beta are distinct: EaaS is a local sandbox service on `main` with manual review only, not a hosted or production-ready product, and is excluded from CSPM scores and pilot claims.
 
 ---
 
@@ -12,7 +12,7 @@ This document is not a certification, SLA, or IBM Partner Plus API contract. CSP
 - Operator mappings for DORA, NIS2, BSI, FIPS, OWASP API Top 10, OWASP Top 10, WSTG network hygiene, and a RivicQ quantum checklist. **Mappings are not certifications.**
 - Optional PATH scanners when installed: Syft, Trivy, Grype, Gitleaks, OSV
 - Labeled demo workspace (Community operator). Admin control-plane access is a local bootstrap account, not the public demo.
-- Separate EaaS beta preview: standalone API on `:9091` (`cmd/eaas`, `internal/eaas`), developer portal at `/` and `/portal` (`web/eaas/index.html`), Free = 10,000 operations/month and 60 RPM, hashed API keys shown once, metadata-only usage events. Classical operations use the Go standard library; ML-KEM-768 / ML-DSA-65 are Experimental; SLH-DSA is not implemented.
+- Separate EaaS early beta (manual review): standalone API on `:9091` (`cmd/eaas`, `internal/eaas`), developer portal at `/` and `/portal` (`web/eaas/index.html`), Free = 10,000 operations/month and 60 RPM, hashed API keys shown once, metadata-only usage events. Classical operations use the Go standard library; ML-KEM-768 / ML-DSA-65 are Experimental; SLH-DSA is not implemented.
 
 ## What you do not get in beta
 

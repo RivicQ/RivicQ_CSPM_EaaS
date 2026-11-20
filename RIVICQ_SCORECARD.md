@@ -2,7 +2,7 @@
 
 Baseline 58/100 (`RIVICQ_BASELINE.md`, commit `82a6785`).
 
-**Scope:** this scorecard measures the **CSPM scanner/control plane only**. The standalone EaaS build on branch `feature/eaas-product-foundation` (`cmd/eaas`, `internal/eaas`, `web/eaas`) is a separate local sandbox surface and is **excluded** from every number here. Adding EaaS did not change the 58/100 baseline or the ~78/100 re-assessment; do not fold EaaS operations, keys, usage, or portal activity into these scores.
+**Scope:** this scorecard measures the **CSPM scanner/control plane only**. The standalone EaaS build on `main` (`cmd/eaas`, `internal/eaas`, `web/eaas`) is a separate local sandbox surface and is **excluded** from every number here. Adding EaaS did not change the 58/100 baseline or the ~78/100 re-assessment; do not fold EaaS operations, keys, usage, or portal activity into these scores.
 
 Every score below is justified by a file, a test, or a command output. Where a
 score moved because of a fix that only one test covers, that is stated. Scores are
