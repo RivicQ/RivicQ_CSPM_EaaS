@@ -219,3 +219,24 @@ func TestSafeTenantResolversAreKnown(t *testing.T) {
 		}
 	}
 }
+
+func TestAssetScopedReadsAreTenantScoped(t *testing.T) {
+	data, err := os.ReadFile("handlers.go")
+	if err != nil {
+		t.Fatalf("read handlers.go: %v", err)
+	}
+	src := string(data)
+	start := strings.Index(src, "func getAttestationReport(")
+	if start < 0 {
+		t.Fatal("getAttestationReport handler not found")
+	}
+	body := src[start:]
+	if next := strings.Index(body, "\nfunc "); next >= 0 {
+		body = body[:next]
+	}
+	for _, required := range []string{"jwtTenantOrAbort(c)", "cr.tenant_id = $2", "ca.tenant_id = $2"} {
+		if !strings.Contains(body, required) {
+			t.Errorf("getAttestationReport must contain %q", required)
+		}
+	}
+}

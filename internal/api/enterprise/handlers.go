@@ -1036,7 +1036,11 @@ func scanForPQCAlgorithms(db *database.DB, logger *logrus.Logger, cfg *config.En
 func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		assetID := c.Param("assetId")
-		logger.WithField("asset_id", assetID).Info("Getting attestation report")
+		tenantID, ok := jwtTenantOrAbort(c)
+		if !ok {
+			return
+		}
+		logger.WithField("asset_id", assetID).WithField("tenant_id", tenantID).Info("Getting attestation report")
 
 		attestations := []gin.H{}
 		if db != nil {
@@ -1045,8 +1049,8 @@ func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.En
 				FROM quantum_attestations qa
 				JOIN cbom_reports cr ON qa.cbom_report_id = cr.id
 				JOIN crypto_assets ca ON ca.cbom_report_id = cr.id
-				WHERE ca.id = $1
-			`, assetID)
+				WHERE ca.id = $1 AND cr.tenant_id = $2 AND ca.tenant_id = $2
+			`, assetID, tenantID)
 			if err == nil {
 				defer func() { _ = rows.Close() }()
 				for rows.Next() {
