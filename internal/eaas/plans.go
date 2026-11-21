@@ -76,5 +76,4 @@ func getPlan(id string) (Plan, bool) {
 
 func planAllowsProduction(p Plan) bool    { return p.ProductionEligible }
 func planAllowsUnlimited(p Plan) bool     { return p.MonthlyOperations < 0 }
-func planAllowsAdvanced(p Plan) bool      { return p.AdvancedAnalytics }
 func planCountLimit(limit, used int) bool { return limit < 0 || used < limit }

@@ -46,7 +46,7 @@ func TestCRMClientCreateLead(t *testing.T) {
 			require.Equal(t, "refresh_token", r.Form.Get("grant_type"))
 			require.Equal(t, "client-id", r.Form.Get("client_id"))
 			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintf(w, `{"access_token":"test-token","expires_in":"3600","api_domain":%q}`, server.URL)
+			_, _ = fmt.Fprintf(w, `{"access_token":"test-token","expires_in":"3600","api_domain":%q}`, server.URL)
 		case "/crm/v2/Leads":
 			gotAuthorization = r.Header.Get("Authorization")
 			var payload struct {
@@ -56,7 +56,7 @@ func TestCRMClientCreateLead(t *testing.T) {
 			require.Len(t, payload.Data, 1)
 			gotLead = payload.Data[0]
 			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprint(w, `{"data":[{"status":"success","message":"record created","details":{"id":"1"}}]}`)
+			_, _ = fmt.Fprint(w, `{"data":[{"status":"success","message":"record created","details":{"id":"1"}}]}`)
 		default:
 			http.NotFound(w, r)
 		}

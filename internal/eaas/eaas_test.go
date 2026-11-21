@@ -59,7 +59,7 @@ func (tc *testClient) do(method, path, token string, body any) (int, map[string]
 	if err != nil {
 		tc.t.Fatalf("request %s %s: %v", method, path, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	out := map[string]any{}
 	raw, _ := io.ReadAll(resp.Body)
 	if len(raw) > 0 && json.Valid(raw) {
