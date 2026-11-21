@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "workflow",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/re1/re1/CSPM/archify/spec/rivicq-pqc-migration.json",
+    "sha256": "627c1037c7547de637feaaa81d4958554519509e6b68397aa171261166f69585",
+    "bytes": 3728
+  },
+  "artifact": {
+    "path": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-pqc-migration.html",
+    "sha256": "6ec884d00a80fe7d136a92d4d4a51684538a39a9e09e516f1cf52fc86f088d8f",
+    "bytes": 753392
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-pqc-migration.finalize.json",
+    "summaryReceipt": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-pqc-migration.finalize-summary.json",
+    "browserCheckReceipt": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-pqc-migration.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-11T18:30:49.490Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 3053
+}

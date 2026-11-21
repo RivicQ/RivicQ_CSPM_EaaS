@@ -1,0 +1,36 @@
+# Cloudflare Pages security headers.
+# Place in the deploy root (copied to web/build/_headers by scripts/build-pages.sh).
+# Docs: https://developers.cloudflare.com/pages/configuration/headers/
+#
+# NOTE: the app is a CRA/MUI SPA and the static docs/marketing pages use a small
+# inline theme-init script, so 'unsafe-inline' is currently required for
+# script-src. Tighten this with a nonce/hash once the theme bootstrap is moved to
+# an external file. See docs/CLOUDFLARE_PAGES.md.
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  X-XSS-Protection: 0
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.posthog.com https://api.stripe.com; frame-src 'self'
+
+# Archify diagrams are embedded as same-origin iframes; relax framing for them
+# only. They load no third-party scripts.
+/archify/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'
+
+# Hashed CRA/Fabric assets are immutable.
+/web/*/static/*
+  Cache-Control: public, max-age=31536000, immutable
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
+/fabric/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML should always revalidate so deploys are picked up.
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate

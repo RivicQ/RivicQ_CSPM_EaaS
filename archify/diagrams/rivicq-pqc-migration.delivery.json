@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "521a1ed0-c7d4-4d29-8692-9f92d049d699",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/re1/re1/CSPM/archify/spec/rivicq-pqc-migration.json",
+  "output": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-pqc-migration.html",
+  "specification": {
+    "sha256": "627c1037c7547de637feaaa81d4958554519509e6b68397aa171261166f69585",
+    "bytes": 3728
+  },
+  "artifact": {
+    "sha256": "6ec884d00a80fe7d136a92d4d4a51684538a39a9e09e516f1cf52fc86f088d8f",
+    "bytes": 753392
+  }
+}

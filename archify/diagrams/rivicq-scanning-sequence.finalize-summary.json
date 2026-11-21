@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "sequence",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/re1/re1/CSPM/archify/spec/rivicq-scanning-sequence.json",
+    "sha256": "6424c8775a56819f823863439e8a7cac627cc07de79876266b92ae218aca1142",
+    "bytes": 3975
+  },
+  "artifact": {
+    "path": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-scanning-sequence.html",
+    "sha256": "d11d4acdc5c14186e871a15ae6925d20754e59e102780dd44db3dd834d893127",
+    "bytes": 757554
+  },
+  "gates": {
+    "validate": "not-run",
+    "deliver": "fail",
+    "check": "not-run",
+    "browser-check": "not-run"
+  },
+  "failedStage": "deliver",
+  "diagnostics": [
+    {
+      "code": "composition/viewport-height",
+      "severity": "error",
+      "message": "Showcase delivery reported composition/viewport-height; zero warnings are required.",
+      "subject": {
+        "stage": "deliver",
+        "check": "composition"
+      },
+      "evidence": {
+        "reportedSeverity": "warning",
+        "readerFit": null,
+        "viewBoxWidth": 900,
+        "viewBoxHeight": 820,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "ratio": 1.1,
+        "wideRatio": 1.55,
+        "svgWidthPx": 1346,
+        "svgHeightPx": 1226,
+        "fixedChromePx": 126,
+        "pageHeightPx": 1352,
+        "overflowPx": 452
+      },
+      "supportedFixes": [
+        "Preserve every node, relationship, and label. This 900x820 canvas (ratio 1.1) declares no intrinsic-height fit and is below the 1.55 wide ratio, so the desktop Reader can neither narrow it nor accept vertical scroll: it renders 1226px tall at the full 1346px width and the page reaches 1352px before cards against 900px, a certain visual-check failure. Either compact vertical spacing so meta.viewBox height is at most 580 at this width, or spread content sideways so the width is at least 1271 at this height; for architecture, omitting meta.viewBox lets the renderer size the canvas and declare the fit."
+      ]
+    }
+  ],
+  "diagnosticSummary": {
+    "total": 1,
+    "shown": 1,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-scanning-sequence.finalize.json",
+    "summaryReceipt": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-scanning-sequence.finalize-summary.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-11T18:30:49.490Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 745
+}

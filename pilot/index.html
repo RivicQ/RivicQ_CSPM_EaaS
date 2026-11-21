@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RivicQ controlled pilot — static cryptographic inventory</title>
+    <meta
+      name="description"
+      content="RivicQ controlled pilot gate: what is ready for static cryptographic inventory, what is limited, and what is not part of the pilot."
+    />
+    <link rel="canonical" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/pilot/" />
+    <link rel="icon" href="../docs/assets/rivicq-mark.svg" type="image/svg+xml" />
+    <link rel="icon" href="../docs/assets/rivicq-mark.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;600&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../docs/assets/horizon-docs.css?v=20261114a" />
+    <link rel="stylesheet" href="../archify/site/css/archify-universal.css" />
+    <script>
+      (function () {
+        try { localStorage.setItem('rivicq.theme', 'dark'); } catch (e) { /* ignore */ }
+        document.documentElement.setAttribute('data-theme', 'dark');
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="logo" href="../docs/index.html">
+          <img class="logo-mark" src="../docs/assets/rivicq-mark.svg" alt="" width="28" height="28" />
+          <span>RivicQ</span>
+          <span class="logo-badge">Pilot</span>
+        </a>
+        <nav class="header-links" aria-label="Pilot">
+          <a href="../docs/index.html">Docs</a>
+          <a href="../docs/read.html?doc=PILOT_READINESS.md">Readiness</a>
+          <a href="../docs/read.html?doc=PILOT_ONBOARDING.md">Onboarding</a>
+          <a href="../docs/read.html?doc=PILOT_ACCEPTANCE_CRITERIA.md">Acceptance</a>
+          <a href="../marketing/">Marketing</a>
+          <a href="../">Console</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="shell">
+      <section class="hero">
+        <p class="hero-eyebrow">Controlled pilot · static cryptographic inventory · reviewed 14 Nov 2026</p>
+        <h1>Pilot the engine that is real. Keep the rest labeled.</h1>
+        <p>
+          This gate covers the Community CLI, policy decisions, CBOM evidence, tenant-scoped API
+          behavior, and the static Pages console. It does not claim a hosted multi-tenant SaaS,
+          real-time detection, AI analysis, or silicon attestation.
+        </p>
+        <p class="note">
+          GitHub Pages is a static shell. Live scans require the CLI or a separately deployed API.
+          Qiskit scores are a local taxonomy. Control mappings are not certifications.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="../docs/read.html?doc=PILOT_READINESS.md">Read the pilot gate</a>
+          <a class="btn btn-outline" href="../docs/read.html?doc=PILOT_ONBOARDING.md">Start onboarding</a>
+          <a class="btn btn-ghost" href="../docs/CAPABILITIES.yaml">Capability manifest</a>
+        </div>
+      </section>
+
+      <div class="stats" aria-label="Pilot facts">
+        <div class="stat">
+          <div class="stat-value">CLI</div>
+          <div class="stat-label">Verified scan path</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">JSON</div>
+          <div class="stat-label">Evidence output</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">Static</div>
+          <div class="stat-label">Pages console</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">No live</div>
+          <div class="stat-label">Customer estate on Pages</div>
+        </div>
+      </div>
+
+      <section aria-labelledby="status-title">
+        <h2 class="section-title" id="status-title">Pilot status at a glance</h2>
+        <p class="section-sub">
+          Status is deliberately conservative. A limited item is usable only with its stated bound.
+          A planned item is not part of this pilot.
+        </p>
+        <div class="preview-grid">
+          <article class="preview-card">
+            <div class="preview-thumb thumb-oss">READY</div>
+            <div class="preview-body">
+              <p class="preview-kicker">Static inventory</p>
+              <h3 class="preview-title">CLI, policy gate, CBOM export</h3>
+              <p class="preview-desc">
+                Scan authorized source trees and fixture copies. Enforce BLOCK / WARN / PASS with
+                exit codes. Export CycloneDX CBOM evidence. RSA-2048 is classified, not auto-BLOCK.
+              </p>
+              <a class="preview-link" href="../docs/read.html?doc=CORE_ENGINE.md">Read the engine contract →</a>
+            </div>
+          </article>
+          <article class="preview-card">
+            <div class="preview-thumb thumb-oss">READY</div>
+            <div class="preview-body">
+              <p class="preview-kicker">Isolation and deploy guard</p>
+              <h3 class="preview-title">Tenant claim, CORS, production refusal</h3>
+              <p class="preview-desc">
+                JWT tenant claims are authoritative; <code>X-Tenant-ID</code> is ignored. Production
+                refuses to start without a database, and CORS uses an explicit allow-list.
+              </p>
+              <a class="preview-link" href="../docs/read.html?doc=PILOT_ACCEPTANCE_CRITERIA.md">Run acceptance →</a>
+            </div>
+          </article>
+          <article class="preview-card">
+            <div class="preview-thumb thumb-ent">LIMITED</div>
+            <div class="preview-body">
+              <p class="preview-kicker">Hosted surfaces</p>
+              <h3 class="preview-title">API, Qiskit scores, AI output</h3>
+              <p class="preview-desc">
+                The API must be deployed separately. Qiskit scores are a local taxonomy, not IBM
+                Quantum jobs. AI and threat output are templates or heuristics, not trained models.
+              </p>
+              <a class="preview-link" href="../docs/read.html?doc=KNOWN_LIMITATIONS.md">Read limitations →</a>
+            </div>
+          </article>
+          <article class="preview-card">
+            <div class="preview-thumb thumb-legal">PLANNED</div>
+            <div class="preview-body">
+              <p class="preview-kicker">Next phases</p>
+              <h3 class="preview-title">Supabase auth, RLS, billing, real-time</h3>
+              <p class="preview-desc">
+                Supabase exchange, memberships, RLS, Stripe billing, the event backbone, runtime
+                sensors, and the AI model router are not part of this pilot.
+              </p>
+              <a class="preview-link" href="../docs/CAPABILITIES.yaml">Open the manifest →</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="checklist-title">
+        <h2 class="section-title" id="checklist-title">Pilot entry checklist</h2>
+        <p class="section-sub">Do not start a scan until every applicable line is true.</p>
+        <div class="doc-groups">
+          <article class="doc-card">
+            <h3>People and authority</h3>
+            <ul>
+              <li>Named pilot owner, technical contact, and security contact.</li>
+              <li>Written authorization for every target and copied artifact.</li>
+              <li>Data-retention and deletion schedule agreed.</li>
+            </ul>
+          </article>
+          <article class="doc-card">
+            <h3>Build and deploy</h3>
+            <ul>
+              <li><code>bash scripts/build-pages.sh</code> completes.</li>
+              <li><code>bash scripts/verify-pages-build.sh</code> passes.</li>
+              <li>API has <code>DATABASE_URL</code>, <code>JWT_SECRET</code>, and <code>CORS_ORIGINS</code>.</li>
+              <li>Console build points at the pilot API or explicitly stays in demo mode.</li>
+            </ul>
+          </article>
+          <article class="doc-card">
+            <h3>Evidence</h3>
+            <ul>
+              <li>Day-one smoke test recorded with build SHA and operator.</li>
+              <li>Acceptance tests recorded individually.</li>
+              <li>Known limitations accepted in writing.</li>
+              <li>Rollback path and incident contact confirmed.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="commands-title">
+        <h2 class="section-title" id="commands-title">Day-one commands</h2>
+        <p class="section-sub">Run the expected-failure checks deliberately; do not let them abort the shell.</p>
+        <div class="md-body">
+          <pre><code>make build-rivicq
+
+set +e
+./bin/rivicq scan fixtures/crypto-test --include-fixtures --fail-on BLOCK --format json
+test "$?" -eq 1
+
+./bin/rivicq scan . --fail-on BOGUS
+test "$?" -eq 2
+set -e
+
+bash scripts/build-pages.sh
+bash scripts/verify-pages-build.sh</code></pre>
+        </div>
+      </section>
+
+      <section aria-labelledby="links-title">
+        <h2 class="section-title" id="links-title">Pilot documents</h2>
+        <div class="doc-groups">
+          <article class="doc-card">
+            <h3>Gate and runbooks</h3>
+            <ul>
+              <li><a href="../docs/read.html?doc=PILOT_READINESS.md">Pilot readiness</a></li>
+              <li><a href="../docs/read.html?doc=PILOT_ONBOARDING.md">Pilot onboarding</a></li>
+              <li><a href="../docs/read.html?doc=PILOT_ACCEPTANCE_CRITERIA.md">Pilot acceptance criteria</a></li>
+              <li><a href="../docs/read.html?doc=KNOWN_LIMITATIONS.md">Known limitations</a></li>
+              <li><a href="../docs/read.html?doc=DEMO_RUNBOOK.md">Demo runbook</a></li>
+            </ul>
+          </article>
+          <article class="doc-card">
+            <h3>Evidence and status</h3>
+            <ul>
+              <li><a href="../docs/CAPABILITIES.yaml">Capability manifest (YAML)</a></li>
+              <li><a href="../docs/read.html?doc=IMPLEMENTATION_STATUS.md">Implementation status</a></li>
+              <li><a href="../docs/read.html?doc=PRODUCTION_READINESS.md">Production readiness</a></li>
+              <li><a href="../docs/read.html?doc=SECURITY_FINDINGS.md">Security findings</a></li>
+              <li><a href="../docs/read.html?doc=INTEGRATIONS.md">Optional scanners</a></li>
+            </ul>
+          </article>
+          <article class="doc-card">
+            <h3>Surfaces</h3>
+            <ul>
+              <li><a href="../">Community console</a></li>
+              <li><a href="../docs/index.html">Documentation hub</a></li>
+              <li><a href="../api/index.html">API reference</a></li>
+              <li><a href="../archify/site/index.html#diagrams">Architecture maps</a></li>
+              <li><a href="../fabric/">RivicQ Graph demo</a></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell site-footer">
+      <p>
+        <strong>RivicQ</strong>
+        © 2026 RivicQ GmbH · Controlled pilot for static cryptographic inventory · Pages never publishes secret values.
+      </p>
+      <p class="footer-mails">
+        <a href="mailto:support@rivicq.com">support@</a>
+        <a href="mailto:security@rivicq.com">security@</a>
+        <a href="mailto:sales@rivicq.com">sales@</a>
+        <a href="../docs/contact.html">Directory</a>
+      </p>
+    </footer>
+    <script src="../docs/assets/theme.js" defer></script>
+    <script src="../archify/site/js/archify-universal.js" defer></script>
+  </body>
+</html>

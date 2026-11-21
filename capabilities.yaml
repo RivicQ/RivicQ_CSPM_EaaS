@@ -1,0 +1,206 @@
+# RivicQ CSPM capability manifest.
+# This file is published with GitHub Pages and consumed by the pilot gate.
+# Status values are deliberately conservative: ready, limited, planned, blocked.
+# Source of truth: docs/IMPLEMENTATION_STATUS.md and docs/PILOT_READINESS.md.
+# EaaS is a separate surface; it is not covered by the CSPM pilot gate below.
+
+schema: rivicq.capabilities/v1
+product: RivicQ CSPM
+edition: community
+last_reviewed: "2026-11-19"
+status_source: docs/IMPLEMENTATION_STATUS.md
+pilot_gate: docs/PILOT_READINESS.md
+onboarding: docs/PILOT_ONBOARDING.md
+acceptance: docs/PILOT_ACCEPTANCE_CRITERIA.md
+
+labels:
+  ready: "Implemented and verified in the current pass; safe for the controlled pilot."
+  limited: "Available with explicit bounds; the pilot must state the limitation."
+  planned: "Not part of this pilot; do not claim it as available."
+  blocked: "Requires customer credentials or an operator action before use."
+
+surfaces:
+  github_pages:
+    url: "https://rivicq.github.io/RivicQ_CSPM_EaaS/"
+    role: "Static labeled demo, documentation, and pilot gate."
+    live_scan: false
+  cli:
+    binary: rivicq
+    role: "Local static inventory and policy gate."
+  api:
+    role: "Hosted scan and evidence API when separately deployed."
+    required_for_pages_live_scan: false
+  eaas_binary:
+    binary: eaas
+    role: "Standalone EaaS sandbox service; separate from the CSPM API and Pages site."
+    address: ":9091"
+    api: ["/api/eaas/v1/*", "/api/beta/v1/*"]
+    portal: "Served by the EaaS binary at / and /portal (EAAS_STATIC_DIR), not GitHub Pages."
+    hosted: false
+
+notes:
+  - "CSPM and EaaS are separate surfaces. This manifest's pilot gate does not certify EaaS as production-ready."
+  - "EaaS uses an atomic JSON file store for sandbox state; there is no Go Postgres repository. deploy/migrations/004_eaas_schema.sql is a target schema only."
+  - "EaaS enforces numeric quotas and RPM; plan feature flags (SSO, HSM, audit log, advanced analytics) are display-only."
+  - "EaaS has no Stripe/payment collection, payment webhooks, or email delivery. Classical crypto is implemented; PQC is Experimental; SLH-DSA is not implemented."
+
+features:
+  - id: cli-cbom-sbom
+    name: "CLI CBOM and SBOM scan"
+    status: ready
+    surfaces: [cli]
+    evidence: "cmd/rivicq; internal/intelligence; goldens in tests"
+    pilot_use: "Scan authorized source trees and fixture copies."
+    limitation: "Static analysis only; no live-device or silicon inspection."
+
+  - id: policy-gate
+    name: "Policy gate and fail-on exit codes"
+    status: ready
+    surfaces: [cli, api]
+    evidence: "ParseFailOn; TestEvaluatePolicyAllowsRSA2048WithoutBlock"
+    pilot_use: "CI gate with expected exit code 1 for BLOCK and 2 for invalid usage."
+    limitation: "Policy mappings are not certifications."
+
+  - id: cyclonedx-cbom
+    name: "CycloneDX CBOM export"
+    status: ready
+    surfaces: [cli]
+    evidence: "internal/intelligence/cyclonedx.go plus tests"
+    pilot_use: "Attach machine-readable evidence to the pilot record."
+    limitation: "Schema coverage follows the implemented exporter."
+
+  - id: tenant-isolation
+    name: "JWT tenant isolation on scan reports"
+    status: ready
+    surfaces: [api]
+    evidence: "tests/scan_tenant_isolation_test.go; JWT tenant_id"
+    pilot_use: "Verify cross-tenant report access returns 404."
+    limitation: "SQL-layer isolation tests remain thin."
+
+  - id: production-start-guard
+    name: "Production start guard and CORS allow-list"
+    status: ready
+    surfaces: [api]
+    evidence: "internal/server/server.go; internal/middleware/cors.go"
+    pilot_use: "Refuse production without a database; restrict browser origins."
+    limitation: "Operator must set CORS_ORIGINS and a strong JWT_SECRET."
+
+  - id: pages-static-console
+    name: "Static GitHub Pages console and demos"
+    status: ready
+    surfaces: [github_pages]
+    evidence: "scripts/build-pages.sh; scripts/verify-pages-build.sh"
+    pilot_use: "Documentation, labeled demo, architecture maps, Graph demo."
+    limitation: "No live engine, no customer data, no real-time detection."
+
+  - id: hosted-api
+    name: "Hosted scan and evidence API"
+    status: limited
+    surfaces: [api]
+    evidence: "Go API; Render blueprint exists"
+    pilot_use: "Deploy separately for live scans and evidence."
+    limitation: "Not reachable from GitHub Pages; requires database and secrets."
+
+  - id: qiskit-scoring
+    name: "Qiskit posture scoring"
+    status: limited
+    surfaces: [cli, api]
+    evidence: "local scoring taxonomy; GET /scans/:id/qiskit"
+    pilot_use: "Report local readiness scores with a clear label."
+    limitation: "Not an IBM Quantum job or hardware attestation."
+
+  - id: ai-analysis
+    name: "AI analysis endpoint"
+    status: limited
+    surfaces: [api]
+    evidence: "internal/api/enterprise/ai_analysis.go"
+    pilot_use: "Treat output as deterministic templates, not trained AI."
+    limitation: "No model router, no LLM, no customer telemetry training."
+
+  - id: threat-engine
+    name: "Threat correlation engine"
+    status: limited
+    surfaces: [api]
+    evidence: "internal/api/enterprise/threat_engine.go"
+    pilot_use: "Use as heuristic rules with human review."
+    limitation: "Not a trained ML threat model."
+
+  - id: supabase-auth
+    name: "Supabase token exchange and memberships"
+    status: planned
+    surfaces: [api, github_pages]
+    evidence: "internal/authn; web/src/services/supabase.ts"
+    pilot_use: "Not in this pilot."
+    limitation: "Do not enable customer SSO in this pilot; exchange and RLS are planned."
+
+  - id: tenant-rls
+    name: "Tenant expand/contract and row-level security"
+    status: planned
+    surfaces: [api]
+    evidence: "migrations 0009+ planned"
+    pilot_use: "Not in this pilot."
+    limitation: "Existing TEXT/UUID tenant schema conflict must be migrated first."
+
+  - id: stripe-billing
+    name: "Stripe billing and trial quotas (CSPM only)"
+    status: planned
+    surfaces: [api, github_pages]
+    evidence: "CSPM: internal/platform/payments.go stub; /billing/webhooks reserved"
+    pilot_use: "Manual CSPM trial only; no card collection."
+    limitation: "CSPM has no checkout, subscription, or quota enforcement. Separately, EaaS enforces numeric quotas/RPM but has no payment collection, Stripe checkout, or payment webhooks."
+
+  - id: realtime-events
+    name: "Event bus and continuous scanning"
+    status: planned
+    surfaces: [api, github_pages]
+    evidence: "internal/api/shared/events.go currently simulates stages"
+    pilot_use: "Not in this pilot."
+    limitation: "Do not present simulated SSE stages as live detection."
+
+  - id: runtime-sensors
+    name: "Kubernetes and host runtime sensors"
+    status: planned
+    surfaces: [api]
+    evidence: "design phase"
+    pilot_use: "Not in this pilot."
+    limitation: "Requires cluster or host deployment and an event backbone."
+
+  - id: cloud-connectors
+    name: "Live multi-cloud and HSM connectors"
+    status: blocked
+    surfaces: [api]
+    evidence: "connector scaffolding; credentials required"
+    pilot_use: "Not in this pilot."
+    limitation: "Needs customer credentials and a deployed connector runtime."
+
+  - id: silicon-attestation
+    name: "Infineon MCU / HSM key inspection and attestation"
+    status: blocked
+    surfaces: [cli, api]
+    evidence: "static firmware and identity analysis only"
+    pilot_use: "Not in this pilot."
+    limitation: "No protected-key extraction, flashing, or silicon attestation."
+
+  - id: eaas-sandbox-service
+    name: "EaaS standalone sandbox API and portal"
+    status: limited
+    surfaces: [eaas_binary]
+    evidence: "cmd/eaas; internal/eaas; web/eaas; .github/workflows/eaas-ci.yml"
+    pilot_use: "Evaluate the versioned EaaS API only as a labeled local sandbox."
+    limitation: "Default :9091; file-backed state; no hosted deployment or production-ready claim."
+
+  - id: eaas-crypto-operations
+    name: "EaaS classical and experimental PQC operations"
+    status: limited
+    surfaces: [eaas_binary]
+    evidence: "internal/eaas/crypto.go; internal/eaas/eaas_test.go"
+    pilot_use: "Exercise AES-256-GCM / HMAC-SHA-256 / SHA-256 / rand as beta and ML-KEM-768 / ML-DSA-65 as experimental."
+    limitation: "PQC uses cloudflare/circl Experimental; SLH-DSA, HSM custody, and FIPS/CAVP validation are not implemented."
+
+  - id: eaas-postgres-repository
+    name: "EaaS production Postgres repository"
+    status: blocked
+    surfaces: [eaas_binary]
+    evidence: "deploy/migrations/004_eaas_schema.sql (target schema only)"
+    pilot_use: "Not in this pilot."
+    limitation: "No Go Postgres repository, connection config, or EaaS migration runner; runtime state is a JSON file."
