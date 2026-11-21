@@ -177,6 +177,7 @@ require_grep "../animation.html" "docs/index.html" "docs link the platform anima
 require_grep "../../animation.html" "archify/site/index.html" "Archify links the platform animation"
 require_grep "animation.html" "static/js" "bundle links the platform animation"
 require_grep "Open Source" "static/js" "bundle links the open source repo"
+require_grep "buy.stripe.com" "static/js" "bundle includes the hosted Stripe checkout CTA"
 require_grep "status: ready" "docs/CAPABILITIES.yaml" "manifest has ready entries"
 require_grep "status: planned" "docs/CAPABILITIES.yaml" "manifest has planned entries"
 require_grep "status: blocked" "docs/CAPABILITIES.yaml" "manifest has blocked entries"

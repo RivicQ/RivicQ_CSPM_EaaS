@@ -40,6 +40,7 @@ The DevSecOps Tools page in the console shows the same PATH probe when a backend
 |---------|-----|---------|
 | Leads | in-memory / `commercial_leads` when Postgres is up | `POST /api/v1/leads` — public; list is admin JWT |
 | Payments | `RIVICQ_PAYMENTS_WEBHOOK_SECRET` or `STRIPE_SECRET_KEY` | Stub only. No Stripe SDK. No PAN/CVV. Checkout stays `not_configured` until a real PSP adapter is implemented |
+| Stripe payment link CTA | `REACT_APP_STRIPE_PAYMENT_LINK_URL`, `NEXT_PUBLIC_STRIPE_PAYMENT_LINK_URL` | Public hosted checkout link. No card data or Stripe secrets reach RivicQ; RevenueOS webhooks remain separate |
 | Discord | `DISCORD_WEBHOOK_URL` | Optional notify. Email, tokens, and secrets are stripped. Discord is never the CRM |
 | Zoho Bookings | `ZOHO_BOOKINGS_URL`, `REACT_APP_ZOHO_BOOKINGS_URL`, `NEXT_PUBLIC_ZOHO_BOOKINGS_URL` | Public booking CTA. Defaults to the RivicQ Zoho Bookings page. No credentials |
 | Zoho Mail | `ZOHO_MAIL_SMTP_HOST`, `ZOHO_MAIL_SMTP_PORT`, `ZOHO_MAIL_USERNAME`, `ZOHO_MAIL_PASSWORD`, `ZOHO_MAIL_FROM`, `ZOHO_MAIL_TO` | Optional lead notification by SMTP. Disabled until credentials are set. Secrets stay local |

@@ -36,6 +36,7 @@ jobs:
           REACT_APP_SUPABASE_URL: https://suhoabdijefnsoxveewn.supabase.co
           REACT_APP_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8q50RgRBzXcuvjdaF7qBpg_E0GKHPt4
           REACT_APP_ZOHO_BOOKINGS_URL: ${{ secrets.REACT_APP_ZOHO_BOOKINGS_URL }}
+          REACT_APP_STRIPE_PAYMENT_LINK_URL: ${{ vars.REACT_APP_STRIPE_PAYMENT_LINK_URL }}
           GENERATE_SOURCEMAP: 'false'
         run: bash scripts/build-pages.sh
 

@@ -3,6 +3,10 @@
 export const ZOHO_BOOKINGS_URL =
   process.env.REACT_APP_ZOHO_BOOKINGS_URL || 'https://zoho141.zohobookings.eu/RivicQ';
 
+export const STRIPE_PAYMENT_LINK_URL =
+  process.env.REACT_APP_STRIPE_PAYMENT_LINK_URL ||
+  'https://buy.stripe.com/aFadR99Pr0cldxT4Qf0ZW00';
+
 export const PUBLIC_ENGINE_SCAN_COPY =
   'This static build has no CBOM engine. Press Run scan to start the interactive demo — labelled sample data only. Live evidence needs the API (docs/RENDER.md) or a local run.';
 

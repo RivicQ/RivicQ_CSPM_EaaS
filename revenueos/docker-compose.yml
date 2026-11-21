@@ -35,6 +35,7 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://rivicq:${POSTGRES_PASSWORD:-change-me}@postgres:5432/rivicq_revenueos
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3100}
+      NEXT_PUBLIC_STRIPE_PAYMENT_LINK_URL: ${NEXT_PUBLIC_STRIPE_PAYMENT_LINK_URL:-https://buy.stripe.com/aFadR99Pr0cldxT4Qf0ZW00}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       STRIPE_MODE: ${STRIPE_MODE:-test}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}

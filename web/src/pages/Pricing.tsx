@@ -7,6 +7,7 @@ import { platformService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { websiteCtaSx, websiteOutlineCtaSx } from '../theme/websiteChrome';
 import { ARCHIFY_FONTS, archifyEyebrowSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
+import { STRIPE_PAYMENT_LINK_URL } from '../data/publicInfrastructure';
 
 type Plan = {
   id: string;
@@ -37,7 +38,7 @@ const Pricing: React.FC = () => {
   const navigate = useNavigate();
   const { backendReachable } = useAuth();
   const [plans, setPlans] = React.useState<Plan[]>(fallbackPlans);
-  const [note, setNote] = React.useState('List prices are configuration. Checkout is not live. Control mappings are not certifications.');
+  const [note, setNote] = React.useState('List prices are configuration. Direct purchase uses a Stripe-hosted checkout page. Control mappings are not certifications.');
 
   React.useEffect(() => {
     if (!backendReachable) return;
@@ -51,14 +52,29 @@ const Pricing: React.FC = () => {
     <PublicShell>
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 }, scrollMarginTop: 96 }}>
         <Typography sx={archifyEyebrowSx}>
-          Pricing · configuration, not a live PSP
+          Pricing · list prices + hosted checkout
         </Typography>
         <Typography sx={{ fontFamily: ARCHIFY_FONTS.title, fontSize: { xs: '2rem', md: '2.8rem' }, fontWeight: 500, letterSpacing: '-0.04em', color: 'text.primary', mt: 1, maxWidth: 720 }}>
           Community engine. Licensed control plane.
         </Typography>
         <Typography sx={{ color: 'text.secondary', mt: 2, maxWidth: 640 }}>{note}</Typography>
         <Box sx={{ ...nebulaPanelSx, mt: 2, maxWidth: 720, p: 1.75, color: 'text.secondary' }}>
-          Card numbers never touch RivicQ. When a payment adapter is configured, provider-hosted checkout and signed webhooks activate entitlements.
+          Card numbers never touch RivicQ. Direct purchase opens a Stripe-hosted checkout page.
+        </Box>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5, mt: 2 }}>
+          <Button
+            component="a"
+            href={STRIPE_PAYMENT_LINK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="contained"
+            sx={websiteCtaSx}
+          >
+            Buy now
+          </Button>
+          <Typography variant="body2" color="text.secondary">
+            Opens Stripe-hosted checkout in a new tab.
+          </Typography>
         </Box>
 
         <Grid container spacing={2} sx={{ mt: 4 }}>
