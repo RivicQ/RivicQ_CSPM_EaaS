@@ -3,7 +3,8 @@
 ## Secrets
 
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, approval tokens, `JWT_SECRET`, and database credentials are server-side only.
-- No `NEXT_PUBLIC_` variable contains a secret.
+- Server secrets live in a gitignored local `.env` file or a host secret manager; they are never checked in or embedded in build artifacts.
+- No `NEXT_PUBLIC_` variable contains a secret. Publishable Stripe keys and hosted payment links are public by design; `sk_` and `whsec_` values are not.
 - Checkout endpoints return Stripe URLs; they never return Stripe secret keys or raw payment credentials.
 - Production rejects short or missing `JWT_SECRET`.
 
