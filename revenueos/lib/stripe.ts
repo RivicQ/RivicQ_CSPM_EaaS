@@ -4,15 +4,69 @@ import Stripe from "stripe";
 import { HttpError } from "./api";
 import { writeAuditLog } from "./audit";
 import { prisma } from "./db";
-import { getAppUrl, getStripeSecretKey, getWebhookSecret } from "./env";
+import {
+  assertLiveModeAllowed,
+  getAppUrl,
+  getStripeMode,
+  getStripeSecretKey,
+  getWebhookSecret,
+} from "./env";
+import { applyBps } from "./money";
 import { resolveRegionalPrice } from "./pricing";
 
 let stripeClient: Stripe | null = null;
+let stripeClientKey: string | null = null;
+
+function assertStripeModeAllowed() {
+  if (getStripeMode() === "live") assertLiveModeAllowed();
+}
+
+function idempotencyKey(...parts: (string | number)[]) {
+  return `rivicq_${parts.join("_")}`;
+}
+
+function minuteBucket() {
+  return Math.floor(Date.now() / 60_000);
+}
+
+export function assertStripeEventMode(event: { livemode: boolean }) {
+  const mode = getStripeMode();
+  if (event.livemode !== (mode === "live")) {
+    throw new HttpError(400, "Stripe event mode does not match configured mode");
+  }
+}
+
+export function assertQuotationPaymentIntegrity(quotation: {
+  subtotal: number;
+  discountBps: number;
+  discountAmount: number;
+  taxAmount: number;
+  total: number;
+  items: { unitAmount: number; quantity: number }[];
+}) {
+  const lineTotal = quotation.items.reduce(
+    (sum, item) => sum + item.unitAmount * item.quantity,
+    0,
+  );
+  if (lineTotal !== quotation.subtotal) {
+    throw new HttpError(409, "Quotation items do not match the agreed subtotal");
+  }
+  if (applyBps(quotation.subtotal, quotation.discountBps) !== quotation.discountAmount) {
+    throw new HttpError(409, "Quotation discount does not match the agreed discount rate");
+  }
+  if (quotation.subtotal - quotation.discountAmount + quotation.taxAmount !== quotation.total) {
+    throw new HttpError(409, "Quotation total does not match the agreed pricing");
+  }
+}
 
 export function getStripeClient() {
   const key = getStripeSecretKey();
   if (!key) throw new HttpError(503, "Stripe is not configured");
-  if (!stripeClient) stripeClient = new Stripe(key);
+  assertStripeModeAllowed();
+  if (!stripeClient || stripeClientKey !== key) {
+    stripeClient = new Stripe(key);
+    stripeClientKey = key;
+  }
   return stripeClient;
 }
 
@@ -33,11 +87,14 @@ export async function syncCatalogueToStripe() {
   for (const product of products) {
     let stripeProductId = product.stripeProductId;
     if (!stripeProductId) {
-      const remote = await stripe.products.create({
-        name: product.name,
-        description: product.description,
-        metadata: { rivicqProductId: product.id, rivicqProductCode: product.code },
-      });
+      const remote = await stripe.products.create(
+        {
+          name: product.name,
+          description: product.description,
+          metadata: { rivicqProductId: product.id, rivicqProductCode: product.code },
+        },
+        { idempotencyKey: idempotencyKey("catalog", "product", product.id) },
+      );
       stripeProductId = remote.id;
       await prisma.product.update({ where: { id: product.id }, data: { stripeProductId } });
       productsCreated += 1;
@@ -51,16 +108,19 @@ export async function syncCatalogueToStripe() {
           : price.interval === "ANNUAL"
             ? { interval: "year" as const }
             : undefined;
-      const remotePrice = await stripe.prices.create({
-        product: stripeProductId,
-        currency: price.currency.toLowerCase(),
-        unit_amount: price.unitAmount,
-        recurring,
-        metadata: {
-          rivicqPriceId: price.id,
-          rivicqPriceBookVersion: price.priceBookVersion,
+      const remotePrice = await stripe.prices.create(
+        {
+          product: stripeProductId,
+          currency: price.currency.toLowerCase(),
+          unit_amount: price.unitAmount,
+          recurring,
+          metadata: {
+            rivicqPriceId: price.id,
+            rivicqPriceBookVersion: price.priceBookVersion,
+          },
         },
-      });
+        { idempotencyKey: idempotencyKey("catalog", "price", price.id) },
+      );
       await prisma.price.update({
         where: { id: price.id },
         data: { stripePriceId: remotePrice.id },
@@ -80,11 +140,14 @@ async function ensureStripeCustomer(customerId: string) {
   if (!customer) throw new HttpError(404, "Customer not found");
 
   const stripe = getStripeClient();
-  const remote = await stripe.customers.create({
-    name: customer.name,
-    email: customer.email,
-    metadata: { rivicqCustomerId: customer.id },
-  });
+  const remote = await stripe.customers.create(
+    {
+      name: customer.name,
+      email: customer.email,
+      metadata: { rivicqCustomerId: customer.id },
+    },
+    { idempotencyKey: idempotencyKey("customer", customerId) },
+  );
 
   await prisma.stripeCustomer.create({
     data: { customerId, stripeCustomerId: remote.id },
@@ -163,6 +226,9 @@ export async function createSubscriptionCheckout(input: {
   quantity?: number;
 }) {
   const { price, resolved } = await resolvePriceForCheckout(input);
+  if (price.interval !== "MONTHLY" && price.interval !== "ANNUAL") {
+    throw new HttpError(409, "Price is not a subscription price");
+  }
   const stripeCustomerId = await ensureStripeCustomer(input.customerId);
   const quantity = input.quantity ?? 1;
   const amount = resolved.unitAmount * quantity;
@@ -180,41 +246,43 @@ export async function createSubscriptionCheckout(input: {
   });
 
   const stripe = getStripeClient();
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: stripeCustomerId,
-    client_reference_id: orderReference,
-    billing_address_collection: "required",
-    line_items: [
-      lineItemForPrice({
-        resolved,
-        productName: price.product.name,
-        quantity,
-        recurring:
-          price.interval === "MONTHLY" || price.interval === "ANNUAL" ? price.interval : null,
-        metadata: {
-          rivicqProductId: price.productId,
-          rivicqPriceId: price.id,
-          priceBookVersion: resolved.priceBookVersion,
-        },
-      }),
-    ],
-    metadata: {
-      rivicqPaymentId: payment.id,
-      rivicqCustomerId: input.customerId,
-      rivicqPriceId: price.id,
-      priceBookVersion: resolved.priceBookVersion,
-      orderReference,
-    },
-    subscription_data: {
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: "subscription",
+      customer: stripeCustomerId,
+      client_reference_id: orderReference,
+      billing_address_collection: "required",
+      line_items: [
+        lineItemForPrice({
+          resolved,
+          productName: price.product.name,
+          quantity,
+          recurring: price.interval,
+          metadata: {
+            rivicqProductId: price.productId,
+            rivicqPriceId: price.id,
+            priceBookVersion: resolved.priceBookVersion,
+          },
+        }),
+      ],
       metadata: {
+        rivicqPaymentId: payment.id,
         rivicqCustomerId: input.customerId,
         rivicqPriceId: price.id,
+        priceBookVersion: resolved.priceBookVersion,
+        orderReference,
       },
+      subscription_data: {
+        metadata: {
+          rivicqCustomerId: input.customerId,
+          rivicqPriceId: price.id,
+        },
+      },
+      success_url: `${getAppUrl()}/portal?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${getAppUrl()}/portal?checkout=cancelled`,
     },
-    success_url: `${getAppUrl()}/portal?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${getAppUrl()}/portal?checkout=cancelled`,
-  });
+    { idempotencyKey: idempotencyKey("checkout", payment.id) },
+  );
 
   await prisma.payment.update({
     where: { id: payment.id },
@@ -237,6 +305,7 @@ export async function createQuotationCheckout(quotationId: string, actorId: stri
   if (new Date(quotation.validUntil).getTime() < Date.now()) {
     throw new HttpError(409, "Quotation has expired");
   }
+  assertQuotationPaymentIntegrity(quotation);
 
   const existing = await prisma.payment.findFirst({
     where: { quotationId, status: "PENDING", stripeCheckoutSessionId: { not: null } },
@@ -265,36 +334,39 @@ export async function createQuotationCheckout(quotationId: string, actorId: stri
   });
 
   const stripe = getStripeClient();
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    customer: stripeCustomerId,
-    client_reference_id: orderReference,
-    billing_address_collection: "required",
-    line_items: quotation.items.map((item) => ({
-      price_data: {
-        currency: quotation.currency.toLowerCase(),
-        unit_amount: item.unitAmount,
-        product_data: {
-          name: item.name,
-          metadata: {
-            rivicqQuotationId: quotation.id,
-            rivicqQuotationItemId: item.id,
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: "payment",
+      customer: stripeCustomerId,
+      client_reference_id: orderReference,
+      billing_address_collection: "required",
+      line_items: quotation.items.map((item) => ({
+        price_data: {
+          currency: quotation.currency.toLowerCase(),
+          unit_amount: item.unitAmount,
+          product_data: {
+            name: item.name,
+            metadata: {
+              rivicqQuotationId: quotation.id,
+              rivicqQuotationItemId: item.id,
+            },
           },
         },
+        quantity: item.quantity,
+      })),
+      metadata: {
+        rivicqPaymentId: payment.id,
+        rivicqCustomerId: quotation.customerId,
+        rivicqQuotationId: quotation.id,
+        approvedById: quotation.approvedById ?? actorId,
+        priceBookVersion: quotation.priceBookVersion,
+        orderReference,
       },
-      quantity: item.quantity,
-    })),
-    metadata: {
-      rivicqPaymentId: payment.id,
-      rivicqCustomerId: quotation.customerId,
-      rivicqQuotationId: quotation.id,
-      approvedById: quotation.approvedById ?? actorId,
-      priceBookVersion: quotation.priceBookVersion,
-      orderReference,
+      success_url: `${getAppUrl()}/portal?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${getAppUrl()}/portal?checkout=cancelled`,
     },
-    success_url: `${getAppUrl()}/portal?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${getAppUrl()}/portal?checkout=cancelled`,
-  });
+    { idempotencyKey: idempotencyKey("checkout", payment.id) },
+  );
 
   await prisma.payment.update({
     where: { id: payment.id },
@@ -316,10 +388,19 @@ export async function createBillingPortalSession(customerId: string) {
   const stripeCustomer = await prisma.stripeCustomer.findUnique({ where: { customerId } });
   if (!stripeCustomer) throw new HttpError(404, "Billing account is not configured");
   const stripe = getStripeClient();
-  const session = await stripe.billingPortal.sessions.create({
-    customer: stripeCustomer.stripeCustomerId,
-    return_url: `${getAppUrl()}/portal`,
-  });
+  const session = await stripe.billingPortal.sessions.create(
+    {
+      customer: stripeCustomer.stripeCustomerId,
+      return_url: `${getAppUrl()}/portal`,
+    },
+    {
+      idempotencyKey: idempotencyKey(
+        "billing-portal",
+        stripeCustomer.stripeCustomerId,
+        minuteBucket(),
+      ),
+    },
+  );
   return { url: session.url };
 }
 
@@ -363,7 +444,7 @@ async function handleCheckoutSession(session: Stripe.Checkout.Session, succeeded
   const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
   if (!payment) return;
 
-  const period = await prisma.payment.update({
+  await prisma.payment.update({
     where: { id: payment.id },
     data: {
       status: succeeded ? "SUCCEEDED" : "FAILED",
@@ -374,13 +455,14 @@ async function handleCheckoutSession(session: Stripe.Checkout.Session, succeeded
 
   if (!succeeded) return;
 
+  const invoiceNumber = `INV-${session.id.slice(-10).toUpperCase()}`;
   let invoice = payment.invoiceId
     ? await prisma.invoice.findUnique({ where: { id: payment.invoiceId } })
-    : null;
+    : await prisma.invoice.findUnique({ where: { number: invoiceNumber } });
   if (!invoice) {
     invoice = await prisma.invoice.create({
       data: {
-        number: `INV-${period.orderReference.slice(0, 8).toUpperCase()}`,
+        number: invoiceNumber,
         customerId: payment.customerId,
         quotationId: payment.quotationId,
         subscriptionId: payment.subscriptionId,
@@ -391,6 +473,8 @@ async function handleCheckoutSession(session: Stripe.Checkout.Session, succeeded
         status: "PAID",
       },
     });
+  }
+  if (payment.invoiceId !== invoice.id) {
     await prisma.payment.update({
       where: { id: payment.id },
       data: { invoiceId: invoice.id },
@@ -490,54 +574,81 @@ async function handleRefund(charge: Stripe.Charge) {
   });
   if (!payment) return;
 
-  const refundId = charge.refunds?.data[0]?.id ?? `charge_${charge.id}`;
-  const amount = charge.amount_refunded;
-  try {
-    await prisma.refund.create({
-      data: {
-        paymentId: payment.id,
-        amount,
-        reason: "Stripe refund webhook",
-        stripeRefundId: refundId,
-      },
-    });
-    await prisma.payment.update({ where: { id: payment.id }, data: { status: "REFUNDED" } });
+  for (const refund of charge.refunds?.data ?? []) {
+    try {
+      await prisma.refund.create({
+        data: {
+          paymentId: payment.id,
+          amount: refund.amount,
+          reason: "Stripe refund webhook",
+          stripeRefundId: refund.id,
+        },
+      });
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+        throw error;
+      }
+      continue;
+    }
+
     await prisma.revenueRecord.create({
       data: {
         customerId: payment.customerId,
         paymentId: payment.id,
         category: "REFUND",
         kind: "COLLECTED",
-        amount,
+        amount: refund.amount,
         currency: payment.currency,
         interval: "ONE_TIME",
         periodStart: new Date(),
         periodEnd: new Date(),
-        description: `Stripe refund ${refundId}`,
+        description: `Stripe refund ${refund.id}`,
       },
     });
-  } catch (error) {
-    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
-      throw error;
-    }
+  }
+
+  const refunded = await prisma.refund.aggregate({
+    where: { paymentId: payment.id },
+    _sum: { amount: true },
+  });
+  const totalRefunded = refunded._sum.amount ?? 0;
+  if (totalRefunded > 0) {
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: totalRefunded >= payment.amount ? "REFUNDED" : "SUCCEEDED" },
+    });
   }
 }
 
 export async function processStripeEvent(event: Stripe.Event) {
+  assertStripeEventMode(event);
+
   try {
     await prisma.stripeEvent.create({
       data: {
         id: event.id,
         type: event.type,
         status: "PROCESSING",
+        attempts: 1,
         payload: event as unknown as Prisma.InputJsonValue,
       },
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return { duplicate: true };
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+      throw error;
     }
-    throw error;
+    const claimed = await prisma.stripeEvent.updateMany({
+      where: {
+        id: event.id,
+        status: { in: ["RECEIVED", "FAILED", "PROCESSING"] },
+      },
+      data: {
+        status: "PROCESSING",
+        attempts: { increment: 1 },
+        error: null,
+      },
+    });
+    if (claimed.count === 0) return { duplicate: true };
   }
 
   try {
@@ -612,21 +723,31 @@ export async function createAdminRefund(input: {
   if (!payment.stripePaymentIntentId) {
     throw new HttpError(409, "Payment has no Stripe reference");
   }
-  if (input.amount > payment.amount) {
-    throw new HttpError(400, "Refund amount exceeds payment amount");
+  const refunded = await prisma.refund.aggregate({
+    where: { paymentId: payment.id },
+    _sum: { amount: true },
+  });
+  const remaining = payment.amount - (refunded._sum.amount ?? 0);
+  if (remaining <= 0) throw new HttpError(409, "Payment has already been fully refunded");
+  if (input.amount > remaining) {
+    throw new HttpError(400, "Refund amount exceeds the remaining refundable amount");
   }
+  const priorRefunds = await prisma.refund.count({ where: { paymentId: payment.id } });
 
   const stripe = getStripeClient();
-  const refund = await stripe.refunds.create({
-    payment_intent: payment.stripePaymentIntentId,
-    amount: input.amount,
-    reason: "requested_by_customer",
-    metadata: {
-      rivicqPaymentId: payment.id,
-      rivicqAdministratorId: input.administratorId,
-      rivicqReason: input.reason,
+  const refund = await stripe.refunds.create(
+    {
+      payment_intent: payment.stripePaymentIntentId,
+      amount: input.amount,
+      reason: "requested_by_customer",
+      metadata: {
+        rivicqPaymentId: payment.id,
+        rivicqAdministratorId: input.administratorId,
+        rivicqReason: input.reason,
+      },
     },
-  });
+    { idempotencyKey: idempotencyKey("refund", payment.id, priorRefunds) },
+  );
 
   await prisma.refund.create({
     data: {
@@ -637,9 +758,10 @@ export async function createAdminRefund(input: {
       administratorId: input.administratorId,
     },
   });
+  const totalRefunded = (refunded._sum.amount ?? 0) + input.amount;
   await prisma.payment.update({
     where: { id: payment.id },
-    data: { status: "REFUNDED" },
+    data: { status: totalRefunded >= payment.amount ? "REFUNDED" : "SUCCEEDED" },
   });
   await writeAuditLog({
     actorId: input.administratorId,
@@ -662,9 +784,17 @@ export async function requestSubscriptionCancellation(subscriptionId: string, cu
     return { status: "CANCEL_REQUESTED" };
   }
   const stripe = getStripeClient();
-  const updated = await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
-    cancel_at_period_end: true,
-  });
+  const updated = await stripe.subscriptions.update(
+    subscription.stripeSubscriptionId,
+    { cancel_at_period_end: true },
+    {
+      idempotencyKey: idempotencyKey(
+        "subscription-cancel",
+        subscription.stripeSubscriptionId,
+        minuteBucket(),
+      ),
+    },
+  );
   await prisma.subscription.update({
     where: { id: subscription.id },
     data: { cancelAtPeriodEnd: true, status: mapSubscriptionStatus(updated.status) },

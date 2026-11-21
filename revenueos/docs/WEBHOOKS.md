@@ -6,7 +6,7 @@ Endpoint:
 POST /api/stripe/webhook
 ```
 
-The handler reads the raw request body, verifies the `stripe-signature` header with `STRIPE_WEBHOOK_SECRET`, and records the event in `StripeEvent` before processing. A repeated event id returns `received: true, duplicate: true` without reapplying side effects.
+The handler reads the raw request body, verifies the `stripe-signature` header with `STRIPE_WEBHOOK_SECRET`, checks that event `livemode` matches `STRIPE_MODE`, and records the event in `StripeEvent` before processing. A repeated processed event id returns `received: true, duplicate: true` without reapplying side effects.
 
 ## Events handled
 
@@ -40,11 +40,12 @@ stripe trigger charge.refunded
 
 ## Failure handling
 
-A processing error marks the `StripeEvent` as `FAILED`, increments `attempts`, and stores the error message. Stripe retries are safe because the unique event id prevents duplicate application.
+A processing error marks the `StripeEvent` as `FAILED`, increments `attempts`, and stores the error message. Stripe retries of failed events are reprocessed because the row is atomically reclaimed; already processed events return `duplicate: true`.
 
 ## Guardrails
 
-- No financial state is created from an unsigned or unverified event.
+- No financial state is created from an unsigned, unverified, or mode-mismatched event.
 - Payment metadata carries `rivicqPaymentId`, `rivicqCustomerId`, and order references for reconciliation.
+- Checkout, catalogue sync, refunds, billing portal sessions, and subscription cancellation use Stripe idempotency keys.
 - Refund records carry the Stripe refund id and administrator id where applicable.
 - Revenue records use integer minor units and preserve the transaction currency.

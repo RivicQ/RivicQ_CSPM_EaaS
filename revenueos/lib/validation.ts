@@ -38,6 +38,21 @@ export const priceSchema = z.object({
   stripePriceId: z.string().optional(),
 });
 
+export const pricePatchSchema = z
+  .object({
+    id: z.string().min(1),
+    unitAmount: z.number().int().nonnegative().optional(),
+    active: z.boolean().optional(),
+    stripePriceId: z.string().min(1).nullable().optional(),
+  })
+  .refine(
+    (value) =>
+      value.unitAmount !== undefined ||
+      value.active !== undefined ||
+      value.stripePriceId !== undefined,
+    "At least one price field is required",
+  );
+
 export const regionalPriceSchema = z.object({
   priceId: z.string().min(1),
   country: z.string().min(2),

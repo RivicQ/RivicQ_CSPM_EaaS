@@ -23,13 +23,17 @@
 - Test mode rejects live keys; live mode rejects test keys.
 - Live mode requires three distinct approval tokens and an HTTPS application URL.
 - Catalogue prices and regional prices are resolved on the server.
-- Quotation checkout rejects drafts, expired quotes, and non-approved quotes.
-- Refund amounts are validated against the original payment on the server.
+- Subscription checkout accepts only monthly or annual catalogue prices.
+- Quotation checkout rejects drafts, expired quotes, non-approved quotes, and any item/discount/total mismatch.
+- Mutating Stripe calls carry idempotency keys.
+- Refund amounts are validated against the remaining refundable balance on the server; partial refunds keep the payment active until fully refunded.
 
 ## Webhooks
 
 - Raw request bodies are verified with Stripe signatures.
-- `StripeEvent.id` is unique, making processing idempotent.
+- Event `livemode` must match `STRIPE_MODE`.
+- `StripeEvent.id` is unique; processed events are not reapplied.
+- Failed, received, and stale processing events can be replayed safely; duplicates are rejected.
 - Failed events remain in the database with attempts and error text for replay.
 
 ## Auditability

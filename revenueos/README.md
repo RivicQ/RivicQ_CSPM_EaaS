@@ -49,7 +49,7 @@ Open `http://localhost:3100`. Seeded admin credentials come from `SEED_ADMIN_EMA
 - No Stripe secret key is sent to the browser. Checkout endpoints return a redirect URL only.
 - Prices are read from the database, never hardcoded in the UI.
 - Variable-price payments require an approved, unexpired quotation.
-- Webhook signatures are verified and every Stripe event id is processed once.
+- Webhook signatures and `livemode` are verified; processed events are never reapplied and failed events can be replayed.
 - Financial records are separated by currency and by `CONTRACTED`, `INVOICED`, `COLLECTED`, and `FORECAST`.
 - Forecast records are planning targets and are never reported as collected revenue.
 
