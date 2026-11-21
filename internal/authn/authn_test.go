@@ -3,6 +3,7 @@ package authn
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -389,5 +390,45 @@ func TestSessionRevocation(t *testing.T) {
 	}
 	if _, err := svc.Refresh(ctx, res.RefreshToken, "", ""); !errors.Is(err, ErrInvalidToken) {
 		t.Fatalf("revoked session must not refresh, got %v", err)
+	}
+}
+
+func TestLoginLocksAfterRepeatedFailures(t *testing.T) {
+	svc, store, now := newTestService(t, func(c *Config) {
+		c.MaxFailedLogins = 2
+		c.LoginLockout = 10 * time.Minute
+	})
+	ctx := context.Background()
+	if _, _, err := svc.Register(ctx, "Jon", "jon@example.com", "Tr0ub4dor&3xZ!", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.Login(ctx, "jon@example.com", "wrong-password", "", "", ""); !errors.Is(err, ErrInvalidCredentials) {
+		t.Fatalf("expected ErrInvalidCredentials, got %v", err)
+	}
+	if _, err := svc.Login(ctx, "jon@example.com", "wrong-password", "", "", ""); !errors.Is(err, ErrAccountLocked) {
+		t.Fatalf("expected account lock after threshold, got %v", err)
+	}
+	if _, err := svc.Login(ctx, "jon@example.com", "Tr0ub4dor&3xZ!", "", "", ""); !errors.Is(err, ErrAccountLocked) {
+		t.Fatalf("expected locked account, got %v", err)
+	}
+	*now = now.Add(11 * time.Minute)
+	if _, err := svc.Login(ctx, "jon@example.com", "Tr0ub4dor&3xZ!", "", "", ""); err != nil {
+		t.Fatalf("login after lockout expiry: %v", err)
+	}
+	u, err := store.GetUserByEmail(ctx, "jon@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.FailedLogins != 0 || u.LockedUntil != nil {
+		t.Fatalf("successful login must clear lockout state: %+v", u)
+	}
+}
+
+func TestRegistrationErrorsDoNotRevealAccountExistence(t *testing.T) {
+	if got := messageForError(ErrEmailTaken); strings.Contains(strings.ToLower(got), "exists") || strings.Contains(strings.ToLower(got), "registered") {
+		t.Fatalf("duplicate registration message reveals account state: %q", got)
+	}
+	if got := statusForError(ErrEmailTaken); got != http.StatusAccepted {
+		t.Fatalf("duplicate registration status should be accepted, got %d", got)
 	}
 }

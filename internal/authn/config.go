@@ -3,6 +3,7 @@ package authn
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -20,6 +21,8 @@ type Config struct {
 	ResetTTL            time.Duration
 	VerifyTTL           time.Duration
 	MFASessionTTL       time.Duration
+	MaxFailedLogins     int
+	LoginLockout        time.Duration
 	DemoMode            bool
 	AllowRegistration   bool
 	RequireVerification bool
@@ -32,10 +35,12 @@ type Config struct {
 }
 
 const (
-	defaultIssuer   = "rivicq"
-	defaultAudience = "rivicq-api"
-	minSecretBytes  = 32
-	defaultTenantID = "tenant-1"
+	defaultIssuer        = "rivicq"
+	defaultAudience      = "rivicq-api"
+	minSecretBytes       = 32
+	defaultTenantID      = "tenant-1"
+	defaultMaxFailedLogs = 5
+	defaultLoginLockout  = 15 * time.Minute
 )
 
 // LoadConfig reads configuration from the environment and validates it.
@@ -49,6 +54,8 @@ func LoadConfig() (Config, error) {
 		ResetTTL:            durationFromEnv("AUTH_RESET_TTL", 30*time.Minute),
 		VerifyTTL:           durationFromEnv("AUTH_VERIFY_TTL", 24*time.Hour),
 		MFASessionTTL:       durationFromEnv("AUTH_MFA_SESSION_TTL", 10*time.Minute),
+		MaxFailedLogins:     intFromEnv("AUTH_MAX_FAILED_LOGINS", defaultMaxFailedLogs),
+		LoginLockout:        durationFromEnv("AUTH_LOGIN_LOCKOUT", defaultLoginLockout),
 		DemoMode:            boolFromEnv("DEMO_MODE") || boolFromEnv("RIVICQ_ALLOW_DEMO_MODE"),
 		AllowRegistration:   boolFromEnvDefault("AUTH_ALLOW_REGISTRATION", true),
 		RequireVerification: boolFromEnv("AUTH_REQUIRE_VERIFICATION"),
@@ -107,6 +114,15 @@ func durationFromEnv(key string, fallback time.Duration) time.Duration {
 	if raw := strings.TrimSpace(os.Getenv(key)); raw != "" {
 		if d, err := time.ParseDuration(raw); err == nil && d > 0 {
 			return d
+		}
+	}
+	return fallback
+}
+
+func intFromEnv(key string, fallback int) int {
+	if raw := strings.TrimSpace(os.Getenv(key)); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil && n > 0 {
+			return n
 		}
 	}
 	return fallback

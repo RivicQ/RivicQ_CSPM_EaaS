@@ -542,11 +542,12 @@ func statusForError(err error) int {
 		errors.Is(err, ErrReuseDetected),
 		errors.Is(err, ErrEmailNotVerified),
 		errors.Is(err, ErrAccountDisabled),
+		errors.Is(err, ErrAccountLocked),
 		errors.Is(err, ErrInvalidMFASession),
 		errors.Is(err, ErrInvalidMFACode):
 		return http.StatusUnauthorized
 	case errors.Is(err, ErrEmailTaken):
-		return http.StatusConflict
+		return http.StatusAccepted
 	case errors.Is(err, ErrDemoDisabled):
 		return http.StatusForbidden
 	default:
@@ -559,11 +560,13 @@ func messageForError(err error) string {
 	case errors.Is(err, ErrInvalidCredentials):
 		return "Invalid credentials"
 	case errors.Is(err, ErrEmailTaken):
-		return "An account with this email already exists. Please log in instead."
+		return "If the address is eligible, verification instructions have been sent."
 	case errors.Is(err, ErrEmailNotVerified):
 		return "Please verify your email before signing in."
 	case errors.Is(err, ErrAccountDisabled):
 		return "This account is disabled."
+	case errors.Is(err, ErrAccountLocked):
+		return "Too many failed sign-in attempts. Try again later."
 	case errors.Is(err, ErrInvalidMFASession):
 		return "Invalid or expired MFA session"
 	case errors.Is(err, ErrInvalidMFACode):
