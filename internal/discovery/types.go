@@ -59,6 +59,7 @@ type ScanResult struct {
 	Findings    []Finding       `json:"findings"`
 	Components  []CBOMComponent `json:"components"`
 	Summary     ScanSummary     `json:"summary"`
+	Errors      []string        `json:"errors,omitempty"`
 }
 
 // CBOMComponent is a single entry in a Cryptographic Bill of Materials.
