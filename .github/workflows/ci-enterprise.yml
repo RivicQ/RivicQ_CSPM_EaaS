@@ -24,18 +24,6 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Generate local CI license
-        run: |
-          python3 - <<'PY'
-          import hashlib, hmac, os, time
-          secret = "ci-local-license-signing-key"
-          expiry = int(time.time()) + 86400
-          signature = hmac.new(secret.encode(), f"*.{expiry}".encode(), hashlib.sha256).hexdigest()
-          with open(os.environ["GITHUB_ENV"], "a") as env:
-              env.write(f"CRYPTOBOM_LICENSE_KEY=cryptobom-beta-v1.*.{expiry}.{signature}\n")
-              env.write(f"CRYPTOBOM_LICENSE_SIGNING_KEY={secret}\n")
-          PY
-
       - name: Cache Go modules
         uses: actions/cache@v4
         with:
