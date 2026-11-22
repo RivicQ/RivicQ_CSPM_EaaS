@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -454,5 +455,29 @@ func TestDisableMFARequiresTOTP(t *testing.T) {
 	code, _ = totp.GenerateCode(secret, time.Now())
 	if err := svc.DisableMFA(ctx, user.ID, "Tr0ub4dor&3xZ!", code); err != nil {
 		t.Fatalf("DisableMFA: %v", err)
+	}
+}
+
+func TestLoadConfigDefaultTenant(t *testing.T) {
+	t.Setenv("AUTH_JWT_SECRET", testSecret)
+	t.Setenv("AUTH_DEFAULT_TENANT", "")
+	cfg, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if cfg.DefaultTenantID != defaultTenantID {
+		t.Fatalf("default tenant = %q, want %q", cfg.DefaultTenantID, defaultTenantID)
+	}
+
+	t.Setenv("AUTH_DEFAULT_TENANT", "tenant-custom")
+	cfg, err = LoadConfig()
+	if err != nil {
+		t.Fatalf("LoadConfig with override: %v", err)
+	}
+	if cfg.DefaultTenantID != "tenant-custom" {
+		t.Fatalf("override tenant = %q, want %q", cfg.DefaultTenantID, "tenant-custom")
+	}
+	if err := os.Unsetenv("AUTH_DEFAULT_TENANT"); err != nil {
+		t.Fatal(err)
 	}
 }

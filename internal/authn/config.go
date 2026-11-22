@@ -63,7 +63,7 @@ func LoadConfig() (Config, error) {
 		BootstrapPassword:   firstNonEmpty("AUTH_BOOTSTRAP_PASSWORD", "CRYPTOBOM_BOOTSTRAP_PASSWORD"),
 		BootstrapName:       firstNonEmpty("AUTH_BOOTSTRAP_NAME"),
 		BootstrapRole:       bootstrapRoleFromEnv(),
-		DefaultTenantID:     firstNonEmpty("AUTH_DEFAULT_TENANT", defaultTenantID),
+		DefaultTenantID:     envOrDefault("AUTH_DEFAULT_TENANT", defaultTenantID),
 	}
 	if cfg.Issuer == "" {
 		cfg.Issuer = defaultIssuer
@@ -108,6 +108,13 @@ func bootstrapRoleFromEnv() Role {
 		return ""
 	}
 	return normalizeRole(raw)
+}
+
+func envOrDefault(key, fallback string) string {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		return v
+	}
+	return fallback
 }
 
 func durationFromEnv(key string, fallback time.Duration) time.Duration {
