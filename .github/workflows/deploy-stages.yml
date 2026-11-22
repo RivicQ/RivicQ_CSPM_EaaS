@@ -82,6 +82,7 @@ jobs:
         with:
           name: site
           path: web/build
+          include-hidden-files: true
           if-no-files-found: error
 
       - name: Upload binary artifacts
