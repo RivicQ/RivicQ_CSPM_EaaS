@@ -769,7 +769,7 @@ func (h *InventoryHandler) ImportSBOM(c *gin.Context) {
 			sbomResult = &discovery.SBOMResult{Components: nil, Format: "cyclonedx", Total: 0}
 		}
 	} else {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","capability":"sbom_import","message":"SBOM import requires a real scan path or content; no fabricated components are returned"})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "capability": "sbom_import", "message": "SBOM import requires a real scan path or content; no fabricated components are returned"})
 		return
 	}
 
@@ -880,7 +880,7 @@ func (h *InventoryHandler) SyncInfrastructure(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, unavailableState("infrastructure_sync", "infrastructure_sync"))
 		return
 	}
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","capability":"infrastructure_sync","message":"Infrastructure sync is unavailable: no verified integration configured"})
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "capability": "infrastructure_sync", "message": "Infrastructure sync is unavailable: no verified integration configured"})
 }
 
 type InventorySummary struct {

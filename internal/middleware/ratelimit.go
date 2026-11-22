@@ -86,7 +86,6 @@ func RateLimit(limit int) gin.HandlerFunc {
 	}
 }
 
-
 // LoginRateLimit enforces per-IP and per-account login attempt limits.
 func LoginRateLimit(ipLimit, accountLimit int, window time.Duration) gin.HandlerFunc {
 	if ipLimit < 0 && accountLimit < 0 {

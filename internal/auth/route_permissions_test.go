@@ -191,7 +191,6 @@ func TestPermissionIsDerivedFromRoleNotToken(t *testing.T) {
 	}
 }
 
-
 func TestParameterizedRoutesUseFullPath(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
@@ -211,15 +210,15 @@ func TestParameterizedRoutesUseFullPath(t *testing.T) {
 	r.DELETE(APIPrefix+"/auth/sessions/:id", authz(), RequireRoutePermission(), func(c *gin.Context) { c.Status(http.StatusOK) })
 	r.PATCH(APIPrefix+"/auth/workspace/users/:id/role", authz(), RequireRoutePermission(), func(c *gin.Context) { c.Status(http.StatusOK) })
 
-	cases := []struct{
+	cases := []struct {
 		method, path, role string
-		want int
+		want               int
 	}{
-		{http.MethodDelete, APIPrefix+"/inventory/assets/abc-123", "viewer", http.StatusForbidden},
-		{http.MethodPost, APIPrefix+"/terraform/resources/scan", "viewer", http.StatusForbidden},
-		{http.MethodDelete, APIPrefix+"/auth/sessions/sess-1", "viewer", http.StatusOK},
-		{http.MethodPatch, APIPrefix+"/auth/workspace/users/u-2/role", "viewer", http.StatusForbidden},
-		{http.MethodPatch, APIPrefix+"/auth/workspace/users/u-2/role", "admin", http.StatusOK},
+		{http.MethodDelete, APIPrefix + "/inventory/assets/abc-123", "viewer", http.StatusForbidden},
+		{http.MethodPost, APIPrefix + "/terraform/resources/scan", "viewer", http.StatusForbidden},
+		{http.MethodDelete, APIPrefix + "/auth/sessions/sess-1", "viewer", http.StatusOK},
+		{http.MethodPatch, APIPrefix + "/auth/workspace/users/u-2/role", "viewer", http.StatusForbidden},
+		{http.MethodPatch, APIPrefix + "/auth/workspace/users/u-2/role", "admin", http.StatusOK},
 	}
 	for _, tc := range cases {
 		req := httptest.NewRequest(tc.method, tc.path, nil)
@@ -233,7 +232,10 @@ func TestParameterizedRoutesUseFullPath(t *testing.T) {
 }
 
 func TestMutatingEnterprisePrefixesMapped(t *testing.T) {
-	cases := []struct{ method, path string; perm Permission }{
+	cases := []struct {
+		method, path string
+		perm         Permission
+	}{
 		{http.MethodPost, APIPrefix + "/inventory/assets", PermAssetsWrite},
 		{http.MethodDelete, APIPrefix + "/inventory/assets/1", PermAssetsWrite},
 		{http.MethodPost, APIPrefix + "/terraform/resources/scan", PermCloudManage},

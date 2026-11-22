@@ -405,9 +405,15 @@ func (h *ComplianceHandler) GetComplianceDashboard(c *gin.Context) {
 		DelveConnected:  delveConnected,
 		KertosConnected: kertosConnected,
 	}
-	if score != nil { dashboard.Score = *score }
-	if lastAudit != nil { dashboard.LastAudit = *lastAudit }
-	if nextAudit != nil { dashboard.NextAudit = *nextAudit }
+	if score != nil {
+		dashboard.Score = *score
+	}
+	if lastAudit != nil {
+		dashboard.LastAudit = *lastAudit
+	}
+	if nextAudit != nil {
+		dashboard.NextAudit = *nextAudit
+	}
 
 	c.JSON(http.StatusOK, dashboard)
 }
@@ -429,9 +435,13 @@ func (h *ComplianceHandler) GetAllComplianceDashboards(c *gin.Context) {
 	for rows.Next() {
 		var fw, status string
 		var score *int
-		if err := rows.Scan(&fw, &status, &score); err != nil { continue }
+		if err := rows.Scan(&fw, &status, &score); err != nil {
+			continue
+		}
 		d := ComplianceDashboard{Framework: fw, Status: status}
-		if score != nil { d.Score = *score }
+		if score != nil {
+			d.Score = *score
+		}
 		dashboards = append(dashboards, d)
 	}
 
@@ -460,8 +470,8 @@ func (h *ComplianceHandler) ScanCompliance(c *gin.Context) {
 
 	_ = frameworkID
 	c.JSON(http.StatusServiceUnavailable, gin.H{
-		"status":"unavailable","source":"unconfigured","configured":false,
-		"capability":"compliance_scan","message":"Compliance scan unavailable: no verified scan integration configured",
+		"status": "unavailable", "source": "unconfigured", "configured": false,
+		"capability": "compliance_scan", "message": "Compliance scan unavailable: no verified scan integration configured",
 	})
 }
 
@@ -479,9 +489,9 @@ func (h *ComplianceHandler) RemediationPlan(c *gin.Context) {
 
 	_ = frameworkID
 	c.JSON(http.StatusOK, gin.H{
-		"status":"unavailable","source":"unconfigured","configured":false,
-		"findings":[]any{},"automatable":[]any{},
-		"message":"Remediation plan unavailable: no verified findings configured",
+		"status": "unavailable", "source": "unconfigured", "configured": false,
+		"findings": []any{}, "automatable": []any{},
+		"message": "Remediation plan unavailable: no verified findings configured",
 	})
 }
 
@@ -508,7 +518,9 @@ func (h *ComplianceHandler) ListReports(c *gin.Context) {
 	for rows.Next() {
 		var id, rtype, framework, title string
 		var generatedAt time.Time
-		if err := rows.Scan(&id, &rtype, &framework, &title, &generatedAt); err != nil { continue }
+		if err := rows.Scan(&id, &rtype, &framework, &title, &generatedAt); err != nil {
+			continue
+		}
 		reports = append(reports, map[string]interface{}{"id": id, "report_type": rtype, "framework": framework, "title": title, "generated_at": generatedAt})
 	}
 	c.JSON(http.StatusOK, gin.H{"reports": reports})
@@ -519,7 +531,9 @@ func (h *ComplianceHandler) GenerateReport(c *gin.Context) {
 		abortIfNoDB(c, h.db)
 		return
 	}
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
 	var req struct {
 		Framework string `json:"framework" binding:"required"`
 		Title     string `json:"title"`
@@ -598,8 +612,8 @@ func (h *ComplianceHandler) GetDelveStatus(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":    status,
-		"provider":  "delve",
+		"status":     status,
+		"provider":   "delve",
 		"configured": status == "connected",
 	})
 }
@@ -614,21 +628,21 @@ func (h *ComplianceHandler) SyncDelveData(c *gin.Context) {
 	}
 	if delveCfg.APIEndpoint == "" || delveCfg.APIKey == "" {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"status":"unavailable","source":"unconfigured","configured":false,
-			"capability":"delve_sync","provider":"delve",
-			"message":"Delve integration is not configured",
+			"status": "unavailable", "source": "unconfigured", "configured": false,
+			"capability": "delve_sync", "provider": "delve",
+			"message": "Delve integration is not configured",
 		})
 		return
 	}
 
 	controls, err := h.fetchDelveData(delveCfg.APIEndpoint, delveCfg.APIKey)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"status":"unavailable","source":"error","configured":true,"provider":"delve","error":"Failed to sync data from Delve"})
+		c.JSON(http.StatusBadGateway, gin.H{"status": "unavailable", "source": "error", "configured": true, "provider": "delve", "error": "Failed to sync data from Delve"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":"ok","source":"delve","provider":"delve","controls": len(controls),
+		"status": "ok", "source": "delve", "provider": "delve", "controls": len(controls),
 	})
 }
 
@@ -689,8 +703,8 @@ func (h *ComplianceHandler) GetKertosStatus(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":    status,
-		"provider":  "kertos",
+		"status":     status,
+		"provider":   "kertos",
 		"configured": status == "connected",
 	})
 }
@@ -706,21 +720,21 @@ func (h *ComplianceHandler) SyncKertosData(c *gin.Context) {
 	}
 	if kertosCfg.APIEndpoint == "" || kertosCfg.APIKey == "" {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"status":"unavailable","source":"unconfigured","configured":false,
-			"capability":"kertos_sync","provider":"kertos",
-			"message":"Kertos integration is not configured",
+			"status": "unavailable", "source": "unconfigured", "configured": false,
+			"capability": "kertos_sync", "provider": "kertos",
+			"message": "Kertos integration is not configured",
 		})
 		return
 	}
 
 	controls, err := h.fetchKertosData(kertosCfg.APIEndpoint, kertosCfg.APIKey)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"status":"unavailable","source":"error","configured":true,"provider":"kertos","error":"Failed to sync data from Kertos"})
+		c.JSON(http.StatusBadGateway, gin.H{"status": "unavailable", "source": "error", "configured": true, "provider": "kertos", "error": "Failed to sync data from Kertos"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":"ok","source":"kertos","provider":"kertos","controls": len(controls),
+		"status": "ok", "source": "kertos", "provider": "kertos", "controls": len(controls),
 	})
 }
 
@@ -754,7 +768,7 @@ func (h *ComplianceHandler) ListRisks(c *gin.Context) {
 	}
 	defer func() { _ = rows.Close() }()
 
-	c.JSON(http.StatusOK, gin.H{"risks": []any{}, "status":"ok","source":"database"})
+	c.JSON(http.StatusOK, gin.H{"risks": []any{}, "status": "ok", "source": "database"})
 }
 
 func (h *ComplianceHandler) CreateRisk(c *gin.Context) {
@@ -773,8 +787,9 @@ func (h *ComplianceHandler) CreateRisk(c *gin.Context) {
 		return
 	}
 
-	_ = tenantID; _ = risk
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"risk_assessment_create","message":"Risk creation unavailable: no verified persistence integration configured"})
+	_ = tenantID
+	_ = risk
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "capability": "risk_assessment_create", "message": "Risk creation unavailable: no verified persistence integration configured"})
 }
 
 func (h *ComplianceHandler) UpdateRisk(c *gin.Context) {
@@ -782,11 +797,13 @@ func (h *ComplianceHandler) UpdateRisk(c *gin.Context) {
 		abortIfNoDB(c, h.db)
 		return
 	}
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
 	id := c.Param("id")
 
 	_ = id
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"risk_assessment_update","message":"Risk update unavailable"})
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "capability": "risk_assessment_update", "message": "Risk update unavailable"})
 }
 
 func (h *ComplianceHandler) MitigateRisk(c *gin.Context) {
@@ -794,10 +811,12 @@ func (h *ComplianceHandler) MitigateRisk(c *gin.Context) {
 		abortIfNoDB(c, h.db)
 		return
 	}
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
 	id := c.Param("id")
 	_ = id
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"risk_mitigation","message":"Risk mitigation unavailable: no verified mitigation integration configured"})
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "capability": "risk_mitigation", "message": "Risk mitigation unavailable: no verified mitigation integration configured"})
 }
 
 func (h *ComplianceHandler) getDefaultControls(framework string) []map[string]interface{} {

@@ -84,7 +84,12 @@ func TestNilDBNoPanicHonestUnavailableStates(t *testing.T) {
 
 	t.Run("api_keys", func(t *testing.T) {
 		r := gin.New()
-		authMW := func(c *gin.Context) { c.Set("tenant_id", "t1"); c.Set("user_id", "u1"); c.Set("role", "admin"); c.Next() }
+		authMW := func(c *gin.Context) {
+			c.Set("tenant_id", "t1")
+			c.Set("user_id", "u1")
+			c.Set("role", "admin")
+			c.Next()
+		}
 		m := enterprise.NewAPIKeyManager(nil, logger)
 		g := r.Group("/api/v1")
 		m.SetupRoutes(g, authMW)
@@ -112,7 +117,12 @@ func TestNilDBNoPanicHonestUnavailableStates(t *testing.T) {
 
 	t.Run("webhooks", func(t *testing.T) {
 		r := gin.New()
-		authMW := func(c *gin.Context) { c.Set("tenant_id", "t1"); c.Set("user_id", "u1"); c.Set("role", "admin"); c.Next() }
+		authMW := func(c *gin.Context) {
+			c.Set("tenant_id", "t1")
+			c.Set("user_id", "u1")
+			c.Set("role", "admin")
+			c.Next()
+		}
 		m := enterprise.NewWebhookManager(nil, logger)
 		g := r.Group("/api/v1")
 		m.SetupRoutes(g, authMW)
@@ -140,7 +150,12 @@ func TestNilDBNoPanicHonestUnavailableStates(t *testing.T) {
 
 	t.Run("audit", func(t *testing.T) {
 		r := gin.New()
-		authMW := func(c *gin.Context) { c.Set("tenant_id", "t1"); c.Set("user_id", "u1"); c.Set("role", "admin"); c.Next() }
+		authMW := func(c *gin.Context) {
+			c.Set("tenant_id", "t1")
+			c.Set("user_id", "u1")
+			c.Set("role", "admin")
+			c.Next()
+		}
 		v := enterprise.NewAuditViewer(nil, logger)
 		g := r.Group("/api/v1")
 		v.SetupRoutes(g, authMW)

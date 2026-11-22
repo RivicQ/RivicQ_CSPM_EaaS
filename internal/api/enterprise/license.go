@@ -15,7 +15,9 @@ import (
 
 // License represents a validated enterprise beta license.
 // Format (dependency-free, HMAC-signed):
-//   cryptobom-beta-v1.<tenantID-or-*|customer>.<unix-expiry>.<hex-hmac-sha256>
+//
+//	cryptobom-beta-v1.<tenantID-or-*|customer>.<unix-expiry>.<hex-hmac-sha256>
+//
 // Signature is HMAC-SHA256 over "<tenantID-or-*|customer>.<unix-expiry>" using
 // CRYPTOBOM_LICENSE_SIGNING_KEY. A valid signed, unexpired license is required
 // for enterprise startup (fail-closed).

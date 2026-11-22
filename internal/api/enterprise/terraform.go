@@ -215,8 +215,10 @@ func (h *TerraformHandler) UpdateTerraformResource(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
 		return
 	}
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_resource_update","message":"Terraform resource update unavailable: no verified persistence/integration configured"})
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "capability": "terraform_resource_update", "message": "Terraform resource update unavailable: no verified persistence/integration configured"})
 }
 
 func (h *TerraformHandler) ListWorkspaces(c *gin.Context) {
@@ -232,8 +234,10 @@ func (h *TerraformHandler) CreateWorkspace(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
 		return
 	}
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_workspace_create","message":"Workspace creation unavailable: no verified persistence/integration configured"})
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "capability": "terraform_workspace_create", "message": "Workspace creation unavailable: no verified persistence/integration configured"})
 }
 
 func (h *TerraformHandler) GetWorkspaceState(c *gin.Context) {
@@ -247,7 +251,7 @@ func (h *TerraformHandler) GetWorkspaceState(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid workspace ID"})
 		return
 	}
-	c.JSON(http.StatusServiceUnavailable, gin.H{"workspace_id": workspaceID, "status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_state","message":"Terraform state unavailable: no verified state integration configured"})
+	c.JSON(http.StatusServiceUnavailable, gin.H{"workspace_id": workspaceID, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "terraform_state", "message": "Terraform state unavailable: no verified state integration configured"})
 }
 
 func (h *TerraformHandler) ListSecurityFindings(c *gin.Context) {
@@ -279,8 +283,10 @@ func (h *TerraformHandler) ScanModules(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
 		return
 	}
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_module_scan","message":"Module scan unavailable: no verified scan integration configured"})
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "capability": "terraform_module_scan", "message": "Module scan unavailable: no verified scan integration configured"})
 }
 
 func (h *TerraformHandler) DetectDrift(c *gin.Context) {
@@ -288,7 +294,7 @@ func (h *TerraformHandler) DetectDrift(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, unavailableState("terraform", "terraform"))
 		return
 	}
-	c.JSON(http.StatusServiceUnavailable, gin.H{"drifts": []any{}, "total": 0, "status":"unavailable","source":"unconfigured","configured":false,"capability":"terraform_drift","message":"Drift detection unavailable: no verified drift integration configured"})
+	c.JSON(http.StatusServiceUnavailable, gin.H{"drifts": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "terraform_drift", "message": "Drift detection unavailable: no verified drift integration configured"})
 }
 
 func (h *TerraformHandler) GetPlanHistory(c *gin.Context) {

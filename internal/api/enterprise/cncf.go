@@ -215,11 +215,11 @@ func (h *CNCFHandler) GetToolMetrics(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"tool_id": toolID,
-		"status": "unavailable",
-		"source": "unconfigured",
+		"tool_id":    toolID,
+		"status":     "unavailable",
+		"source":     "unconfigured",
 		"configured": false,
-		"message": "Tool metrics unavailable: no live metrics integration configured",
+		"message":    "Tool metrics unavailable: no live metrics integration configured",
 	})
 }
 
@@ -235,44 +235,44 @@ func (h *CNCFHandler) CheckToolHealth(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusServiceUnavailable, gin.H{
-		"tool_id": toolID,
-		"status": "unavailable",
-		"source": "unconfigured",
+		"tool_id":    toolID,
+		"status":     "unavailable",
+		"source":     "unconfigured",
 		"configured": false,
-		"message": "Tool health check unavailable: no live health probe integration configured",
+		"message":    "Tool health check unavailable: no live health probe integration configured",
 	})
 }
 
 func (h *CNCFHandler) PrometheusIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"tool":"Prometheus","type":"monitoring","status":"unavailable","source":"unconfigured","configured":false,"message":"Prometheus integration not configured"})
+	c.JSON(http.StatusOK, gin.H{"tool": "Prometheus", "type": "monitoring", "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Prometheus integration not configured"})
 }
 
 func (h *CNCFHandler) GrafanaIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"tool":"Grafana","type":"visualization","status":"unavailable","source":"unconfigured","configured":false,"message":"Grafana integration not configured"})
+	c.JSON(http.StatusOK, gin.H{"tool": "Grafana", "type": "visualization", "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Grafana integration not configured"})
 }
 
 func (h *CNCFHandler) ArgoCDIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"tool":"ArgoCD","type":"gitops","status":"unavailable","source":"unconfigured","configured":false,"message":"ArgoCD integration not configured"})
+	c.JSON(http.StatusOK, gin.H{"tool": "ArgoCD", "type": "gitops", "status": "unavailable", "source": "unconfigured", "configured": false, "message": "ArgoCD integration not configured"})
 }
 
 func (h *CNCFHandler) FluxIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"tool":"Flux","type":"gitops","status":"unavailable","source":"unconfigured","configured":false,"message":"Flux integration not configured"})
+	c.JSON(http.StatusOK, gin.H{"tool": "Flux", "type": "gitops", "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Flux integration not configured"})
 }
 
 func (h *CNCFHandler) IstioIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"tool":"Istio","type":"service_mesh","status":"unavailable","source":"unconfigured","configured":false,"message":"Istio integration not configured"})
+	c.JSON(http.StatusOK, gin.H{"tool": "Istio", "type": "service_mesh", "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Istio integration not configured"})
 }
 
 func (h *CNCFHandler) LinkerdIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"tool":"Linkerd","type":"service_mesh","status":"unavailable","source":"unconfigured","configured":false,"message":"Linkerd integration not configured"})
+	c.JSON(http.StatusOK, gin.H{"tool": "Linkerd", "type": "service_mesh", "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Linkerd integration not configured"})
 }
 
 func (h *CNCFHandler) CiliumIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"tool":"Cilium","type":"networking","status":"unavailable","source":"unconfigured","configured":false,"message":"Cilium integration not configured"})
+	c.JSON(http.StatusOK, gin.H{"tool": "Cilium", "type": "networking", "status": "unavailable", "source": "unconfigured", "configured": false, "message": "Cilium integration not configured"})
 }
 
 func (h *CNCFHandler) K3sIntegration(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"tool":"K3s","type":"kubernetes","status":"unavailable","source":"unconfigured","configured":false,"message":"K3s integration not configured"})
+	c.JSON(http.StatusOK, gin.H{"tool": "K3s", "type": "kubernetes", "status": "unavailable", "source": "unconfigured", "configured": false, "message": "K3s integration not configured"})
 }
 
 func (h *CNCFHandler) GetCNCFDashboard(c *gin.Context) {
@@ -284,11 +284,11 @@ func (h *CNCFHandler) GetCNCFDashboard(c *gin.Context) {
 	var total int
 	_ = h.db.QueryRow(`SELECT COUNT(*) FROM cncf_tools WHERE tenant_id = $1`, tenantID).Scan(&total)
 	c.JSON(http.StatusOK, gin.H{
-		"status":"ok","source":"database",
+		"status": "ok", "source": "database",
 		"tools_summary": gin.H{"total": total, "healthy": 0, "unhealthy": 0, "pending": 0},
-		"by_category": gin.H{},
-		"security": gin.H{},
-		"observability": gin.H{"metrics":"unconfigured","tracing":"unconfigured","logging":"unconfigured"},
+		"by_category":   gin.H{},
+		"security":      gin.H{},
+		"observability": gin.H{"metrics": "unconfigured", "tracing": "unconfigured", "logging": "unconfigured"},
 	})
 }
 
