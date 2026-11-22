@@ -66,6 +66,7 @@ type AWSConfig struct {
 	AccessKey string `yaml:"access_key"`
 	SecretKey string `yaml:"secret_key"`
 	Region    string `yaml:"region"`
+	ClusterID string `yaml:"cluster_id"`
 }
 
 type GCPConfig struct {
@@ -258,9 +259,10 @@ func LoadEnterprise() (*EnterpriseConfig, error) {
 		Cloud: CloudConfig{
 			AWS: AWSConfig{
 				Enabled:   getEnvBool("AWS_ENABLED", false),
-				AccessKey: getEnv("AWS_ACCESS_KEY", ""),
-				SecretKey: getEnv("AWS_SECRET_KEY", ""),
+				AccessKey: getEnvAny("AWS_ACCESS_KEY", "AWS_ACCESS_KEY_ID", ""),
+				SecretKey: getEnvAny("AWS_SECRET_KEY", "AWS_SECRET_ACCESS_KEY", ""),
 				Region:    getEnv("AWS_REGION", "us-east-1"),
+				ClusterID: getEnvAny("AWS_CLOUDHSM_CLUSTER_ID", "AWS_HSM_CLUSTER_ID", ""),
 			},
 			GCP: GCPConfig{
 				Enabled:   getEnvBool("GCP_ENABLED", false),
@@ -269,17 +271,17 @@ func LoadEnterprise() (*EnterpriseConfig, error) {
 			},
 			Azure: AzureConfig{
 				Enabled:      getEnvBool("AZURE_ENABLED", false),
-				Subscription: getEnv("AZURE_SUBSCRIPTION", ""),
+				Subscription: getEnvAny("AZURE_SUBSCRIPTION_ID", "AZURE_SUBSCRIPTION", ""),
 				TenantID:     getEnv("AZURE_TENANT_ID", ""),
 				ClientID:     getEnv("AZURE_CLIENT_ID", ""),
 				ClientSecret: getEnv("AZURE_CLIENT_SECRET", ""),
 			},
 			IBM: IBMConfig{
 				Enabled:      getEnvBool("IBM_ENABLED", false),
-				APIKey:       getEnv("IBM_API_KEY", ""),
-				Region:       getEnv("IBM_REGION", "us-south"),
+				APIKey:       getEnvAny("IBM_API_KEY", "IBM_CLOUD_API_KEY", "IBMCLOUD_API_KEY", ""),
+				Region:       getEnvAny("IBM_REGION", "IBMCLOUD_REGION", "us-south"),
 				HPCSEnabled:  getEnvBool("HPCS_ENABLED", false),
-				HPCSInstance: getEnv("HPCS_INSTANCE", ""),
+				HPCSInstance: getEnvAny("HPCS_INSTANCE", "IBM_HPCS_INSTANCE", ""),
 				COSEndpoint:  getEnv("IBM_COS_ENDPOINT", ""),
 			},
 		},
@@ -334,6 +336,15 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func getEnvAny(keys ...string) string {
+	for _, key := range keys {
+		if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func getEnvBool(key string, defaultValue bool) bool {

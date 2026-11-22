@@ -16,7 +16,7 @@ GET /api/v1/scans/:id/qiskit
 Scanner + Home report UI
 ```
 
-Optional Python: `sdk/python/rivicq_qiskit` (same classes; Qiskit Aer only if installed).
+Optional Python SDK: `sdk/python/rivicq_qiskit` (installable, same classes; Qiskit Aer is an optional extra). The Go provider adapter is registered as `qiskit-profile`.
 
 Optional Enterprise: `internal/quantum/ibmquantum` — reports **unavailable** without an API key. Website scans never wait on it.
 
@@ -25,6 +25,7 @@ Optional Enterprise: `internal/quantum/ibmquantum` — reports **unavailable** w
 | Layer | Package | Invokes IBM Quantum? | Used in website/CBOM scores? |
 |---|---|---|---|
 | **Production profile** | `internal/quantum/qiskitprofile` | No | Yes |
+| **SDK provider adapter** | `internal/quantum/qiskit` | No | Yes (`qiskit-profile`) |
 | **Educational Aer** | `sdk/python/rivicq_qiskit` | No | No (companion) |
 | **IBM Quantum Runtime** | `internal/quantum/ibmquantum` | Only with customer key | No |
 
@@ -50,9 +51,9 @@ Audit score: estate minus a penalty when the policy gate FAILs (or WARNs). Mappi
 ## Python (optional)
 
 ```bash
-python3 -m unittest sdk.python.rivicq_qiskit.test_pipeline
-python3 sdk/python/rivicq_qiskit/pipeline.py
-# optional: pip install qiskit qiskit-aer
+make quantum-test
+make quantum-analyse
+make quantum-setup-full
 ```
 
 See [sdk/python/rivicq_qiskit/README.md](../sdk/python/rivicq_qiskit/README.md).

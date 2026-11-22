@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -797,13 +796,13 @@ func performQuantumScan(db *database.DB, logger *logrus.Logger, cfg *config.Ente
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"cluster_id":  id,
-			"status":      "unavailable",
-			"source":      "unconfigured",
-			"configured":  false,
+			"cluster_id":   id,
+			"status":       "unavailable",
+			"source":       "unconfigured",
+			"configured":   false,
 			"ibmq_results": false,
-			"capability":  "quantum_scan",
-			"message":     "Quantum vulnerability scan is unavailable: no verified integration configured",
+			"capability":   "quantum_scan",
+			"message":      "Quantum vulnerability scan is unavailable: no verified integration configured",
 		})
 	}
 }
@@ -845,12 +844,12 @@ func getHPCSStatus(db *database.DB, logger *logrus.Logger, cfg *config.Enterpris
 			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
 		})
 		if !client.Configured {
-			c.JSON(http.StatusOK, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"ibm_hpcs","message":"IBM HPCS is not configured"})
+			c.JSON(http.StatusOK, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "capability": "ibm_hpcs", "message": "IBM HPCS is not configured"})
 			return
 		}
 		status, err := client.GetStatus()
 		if err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"error","configured":true,"capability":"ibm_hpcs","message":"IBM HPCS status unavailable"})
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "error", "configured": true, "capability": "ibm_hpcs", "message": "IBM HPCS status unavailable"})
 			return
 		}
 		c.JSON(http.StatusOK, status)
@@ -866,15 +865,15 @@ func getHPCSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseC
 			HPCSInstance: cfg.Cloud.IBM.HPCSInstance,
 		})
 		if !client.Configured {
-			c.JSON(http.StatusOK, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"ibm_hpcs_keys","message":"IBM HPCS is not configured"})
+			c.JSON(http.StatusOK, gin.H{"keys": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "ibm_hpcs_keys", "message": "IBM HPCS is not configured"})
 			return
 		}
 		keys, err := client.ListKeys()
 		if err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"error","configured":true,"capability":"ibm_hpcs_keys","message":"IBM HPCS keys unavailable"})
+			c.JSON(http.StatusServiceUnavailable, gin.H{"keys": []any{}, "total": 0, "status": "unavailable", "source": "error", "configured": true, "capability": "ibm_hpcs_keys", "message": "IBM HPCS keys unavailable"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys), "status":"ok","source":"ibm_hpcs"})
+		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys), "status": "ok", "source": "ibm_hpcs"})
 	}
 }
 
@@ -882,16 +881,16 @@ func getCOSBuckets(db *database.DB, logger *logrus.Logger, cfg *config.Enterpris
 	return func(c *gin.Context) {
 		// IBM COS listing requires explicit COS credentials; never return demo buckets.
 		if os.Getenv("IBM_COS_ACCESS_KEY") == "" || os.Getenv("IBM_COS_SECRET_KEY") == "" || os.Getenv("IBM_COS_ENDPOINT") == "" {
-			c.JSON(http.StatusOK, gin.H{"buckets":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"ibm_cos","message":"IBM COS is not configured"})
+			c.JSON(http.StatusOK, gin.H{"buckets": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "ibm_cos", "message": "IBM COS is not configured"})
 			return
 		}
 		client := ibmcloud.NewHPCSClient(&config.IBMCloudConfig{APIKey: cfg.Cloud.IBM.APIKey, Region: cfg.Cloud.IBM.Region, HPCSEnabled: cfg.Cloud.IBM.HPCSEnabled, HPCSInstance: cfg.Cloud.IBM.HPCSInstance})
 		buckets, err := client.ListCOSBuckets()
 		if err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"buckets":[]any{},"total":0,"status":"unavailable","source":"error","configured":true,"capability":"ibm_cos","message":"IBM COS buckets unavailable"})
+			c.JSON(http.StatusServiceUnavailable, gin.H{"buckets": []any{}, "total": 0, "status": "unavailable", "source": "error", "configured": true, "capability": "ibm_cos", "message": "IBM COS buckets unavailable"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"buckets": buckets, "total": len(buckets), "status":"ok","source":"ibm_cos"})
+		c.JSON(http.StatusOK, gin.H{"buckets": buckets, "total": len(buckets), "status": "ok", "source": "ibm_cos"})
 	}
 }
 
@@ -906,23 +905,23 @@ func attestHPCSKey(db *database.DB, logger *logrus.Logger, cfg *config.Enterpris
 		})
 		if !client.Configured {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"key_id": keyID, "provider":"ibm-hpcs", "status":"unavailable", "source":"unconfigured",
+				"key_id": keyID, "provider": "ibm-hpcs", "status": "unavailable", "source": "unconfigured",
 				"configured": false, "verified": false, "attested": false,
-				"capability":"hpcs_attestation", "message":"HPCS attestation is unavailable: HPCS is not configured or verified",
+				"capability": "hpcs_attestation", "message": "HPCS attestation is unavailable: HPCS is not configured or verified",
 			})
 			return
 		}
 		report, err := client.AttestKey(keyID)
 		if err != nil || report == nil || !report.Verified {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"key_id": keyID, "provider":"ibm-hpcs", "status":"unavailable", "source":"ibm_hpcs",
+				"key_id": keyID, "provider": "ibm-hpcs", "status": "unavailable", "source": "ibm_hpcs",
 				"configured": true, "verified": false, "attested": false,
-				"capability":"hpcs_attestation", "message":"HPCS attestation unavailable or unverifiable", "report": report,
+				"capability": "hpcs_attestation", "message": "HPCS attestation unavailable or unverifiable", "report": report,
 			})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"key_id": keyID, "provider":"ibm-hpcs", "status": report.Status, "source":"ibm_hpcs",
+			"key_id": keyID, "provider": "ibm-hpcs", "status": report.Status, "source": "ibm_hpcs",
 			"configured": true, "verified": report.Verified, "attested": report.Verified, "report": report,
 		})
 	}
@@ -934,12 +933,12 @@ func getCloudHSMStatus(db *database.DB, logger *logrus.Logger, cfg *config.Enter
 	return func(c *gin.Context) {
 		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
 		if !client.Configured() {
-			c.JSON(http.StatusOK, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"capability":"aws_cloudhsm","message":"AWS CloudHSM is not configured"})
+			c.JSON(http.StatusOK, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "capability": "aws_cloudhsm", "message": "AWS CloudHSM is not configured"})
 			return
 		}
 		status, err := client.GetClusterStatus()
 		if err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"error","configured":true,"capability":"aws_cloudhsm","message":"AWS CloudHSM status unavailable"})
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "error", "configured": true, "capability": "aws_cloudhsm", "message": "AWS CloudHSM status unavailable"})
 			return
 		}
 		c.JSON(http.StatusOK, status)
@@ -950,15 +949,15 @@ func getKMSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseCo
 	return func(c *gin.Context) {
 		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
 		if !client.Configured() {
-			c.JSON(http.StatusOK, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"aws_kms","message":"AWS KMS is not configured"})
+			c.JSON(http.StatusOK, gin.H{"keys": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "aws_kms", "message": "AWS KMS is not configured"})
 			return
 		}
 		keys, err := client.ListKMSKeys()
 		if err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"error","configured":true,"capability":"aws_kms","message":"AWS KMS keys unavailable"})
+			c.JSON(http.StatusServiceUnavailable, gin.H{"keys": []any{}, "total": 0, "status": "unavailable", "source": "error", "configured": true, "capability": "aws_kms", "message": "AWS KMS keys unavailable"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys), "status":"ok","source":"aws_kms"})
+		c.JSON(http.StatusOK, gin.H{"keys": keys, "total": len(keys), "status": "ok", "source": "aws_kms"})
 	}
 }
 
@@ -966,16 +965,16 @@ func getCloudTrailAudit(db *database.DB, logger *logrus.Logger, cfg *config.Ente
 	return func(c *gin.Context) {
 		client := awscloud.NewCloudHSMClient(&cfg.Cloud.AWS)
 		if !client.Configured() {
-			c.JSON(http.StatusOK, gin.H{"events":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"aws_cloudtrail","message":"AWS CloudTrail is not configured"})
+			c.JSON(http.StatusOK, gin.H{"events": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "aws_cloudtrail", "message": "AWS CloudTrail is not configured"})
 			return
 		}
 		since := time.Now().Add(-24 * time.Hour)
 		events, err := client.GetCryptoAuditEvents(since)
 		if err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"events":[]any{},"total":0,"status":"unavailable","source":"error","configured":true,"capability":"aws_cloudtrail","message":"AWS CloudTrail events unavailable"})
+			c.JSON(http.StatusServiceUnavailable, gin.H{"events": []any{}, "total": 0, "status": "unavailable", "source": "error", "configured": true, "capability": "aws_cloudtrail", "message": "AWS CloudTrail events unavailable"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"events": events, "total": len(events), "status":"ok","source":"aws_cloudtrail"})
+		c.JSON(http.StatusOK, gin.H{"events": events, "total": len(events), "status": "ok", "source": "aws_cloudtrail"})
 	}
 }
 
@@ -1026,8 +1025,8 @@ func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.En
 		assetID := c.Param("assetId")
 		if !standardDBReady(db) {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"asset_id": assetID, "attestations": []any{}, "status":"unavailable", "source":"unconfigured",
-				"message":"Attestation report unavailable: database not configured",
+				"asset_id": assetID, "attestations": []any{}, "status": "unavailable", "source": "unconfigured",
+				"message": "Attestation report unavailable: database not configured",
 			})
 			return
 		}
@@ -1049,7 +1048,7 @@ func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.En
 			}
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"asset_id": assetID, "attestations": attestations, "status":"ok", "source":"database",
+			"asset_id": assetID, "attestations": attestations, "status": "ok", "source": "database",
 			"summary": gin.H{"total": len(attestations)},
 		})
 	}
@@ -1130,8 +1129,8 @@ func exportQuantumSafeBOM(db *database.DB, logger *logrus.Logger, cfg *config.En
 		assetId := c.Param("assetId")
 		logger.WithField("asset_id", assetId).Info("Exporting quantum-safe BOM")
 		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"asset_id": assetId, "status":"unavailable", "source":"unconfigured", "configured": false,
-			"capability":"quantum_safe_bom_export", "message":"Quantum-safe BOM export is unavailable: no verified export source configured",
+			"asset_id": assetId, "status": "unavailable", "source": "unconfigured", "configured": false,
+			"capability": "quantum_safe_bom_export", "message": "Quantum-safe BOM export is unavailable: no verified export source configured",
 		})
 	}
 }
@@ -1140,19 +1139,19 @@ func exportQuantumSafeBOM(db *database.DB, logger *logrus.Logger, cfg *config.En
 
 func getGCPKMSKeys(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"keys":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"gcp_kms","message":"GCP KMS is not configured"})
+		c.JSON(http.StatusOK, gin.H{"keys": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "gcp_kms", "message": "GCP KMS is not configured"})
 	}
 }
 
 func getGKEWorkloads(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"workloads":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"gke_workloads","message":"GKE integration is not configured"})
+		c.JSON(http.StatusOK, gin.H{"workloads": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "gke_workloads", "message": "GKE integration is not configured"})
 	}
 }
 
 func getGCPHSMKeyRings(db *database.DB, logger *logrus.Logger, cfg *config.EnterpriseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"key_rings":[]any{},"total":0,"status":"unavailable","source":"unconfigured","configured":false,"capability":"gcp_hsm_keyrings","message":"GCP HSM key rings are not configured"})
+		c.JSON(http.StatusOK, gin.H{"key_rings": []any{}, "total": 0, "status": "unavailable", "source": "unconfigured", "configured": false, "capability": "gcp_hsm_keyrings", "message": "GCP HSM key rings are not configured"})
 	}
 }
 
@@ -1161,29 +1160,12 @@ func getGCPHSMKeyRings(db *database.DB, logger *logrus.Logger, cfg *config.Enter
 func getBenchmarksSummary(db *database.DB, logger *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"benchmarks": []any{},
+			"benchmarks":    []any{},
 			"overall_score": 0,
-			"status": "unavailable",
-			"source": "unconfigured",
-			"configured": false,
-			"message": "Benchmarks unavailable: no verified benchmark/compliance data configured",
+			"status":        "unavailable",
+			"source":        "unconfigured",
+			"configured":    false,
+			"message":       "Benchmarks unavailable: no verified benchmark/compliance data configured",
 		})
 	}
-}
-
-// env helper functions
-func getEnvOrDefault(key, def string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return def
-}
-
-func getEnvOrDefaultInt(key string, def int) int {
-	if v := os.Getenv(key); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			return n
-		}
-	}
-	return def
 }

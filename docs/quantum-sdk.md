@@ -202,6 +202,7 @@ the unit of distribution.
 | `local-pqc` | attestation | attest, risk_assessment, validation | on (OSS) | dependency-free, uses NIST guidance tables |
 | `oqs-engine` | pqc_engine | key_generation, signing, risk, validation, migration | on (OSS) | software backend ships; liboqs needs cgo/backend |
 | `nist-pqc` | validation | validation, compliance, risk, migration | on (OSS) | authoritative FIPS 203/204/205 table |
+| `qiskit-profile` | validation | attest, risk_assessment, validation, migration | on (OSS) | Qiskit-aligned classical taxonomy; no IBM Runtime |
 | `ibm-quantum` | quantum_computing | attest, network_info, validation, migration | opt-in | enterprise; unavailable without API key |
 
 ## 9. Cloud Provider Roadmap (design)

@@ -100,6 +100,16 @@ section "Pages build verification"
 have_cmd bash || fail "bash is required"
 bash scripts/build-pages.sh
 
+section "Security tools (advisory)"
+if have_cmd bash; then
+  SECURITY_TOOLS_STRICT=0 bash scripts/security-tools.sh check
+  if [ "${SECURITY_TOOLS_RUN:-0}" = "1" ]; then
+    SECURITY_TOOLS_STRICT=0 bash scripts/security-tools.sh all
+  else
+    skip "full security tool scan (set SECURITY_TOOLS_RUN=1)"
+  fi
+fi
+
 section "Helm lint (where available)"
 if ! have_cmd helm; then
   skip "helm not installed; skipping Helm lint"

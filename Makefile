@@ -12,12 +12,18 @@
 #   make clean        – remove build artifacts
 
 .PHONY: all dev dev-core dev-backend dev-enterprise dev-frontend build build-core build-oss build-enterprise \
-        build-rivicq rivicq-scan build-pages verify-pages verify-beta test lint migrate seed docker-up docker-down clean help
+        build-rivicq rivicq-scan build-pages verify-pages verify-beta security-tools-check security-sast \
+        security-sca security-secrets-iac security-iac security-all verify-security quantum-setup quantum-setup-full \
+        quantum-analyse quantum-test test lint migrate seed docker-up docker-down clean help
 
 GO        ?= go
 GOFLAGS   ?=
 BIN_DIR   := bin
 ENV_FILE  := .env
+REPORT_DIR ?= reports/security
+PYTHON    ?= python3
+QUANTUM_REPORT ?= -
+export REPORT_DIR
 
 # ── Ensure .env exists ──────────────────────────────────────────────────────
 $(ENV_FILE):
@@ -39,7 +45,11 @@ dev-backend: $(ENV_FILE) build-oss
 
 ## Start the Enterprise backend on :9090 (demo mode without DB, or with DATABASE_URL)
 dev-enterprise: $(ENV_FILE) build-enterprise
-	@set -a && . ./$(ENV_FILE) && set +a && CRYPTOBOM_PORT=9090 CRYPTOBOM_LICENSE_KEY=$${CRYPTOBOM_LICENSE_KEY:-ENT-dev-local-2026Pitch} ./$(BIN_DIR)/cryptobom-enterprise
+	@set -a && . ./$(ENV_FILE) && set +a; \
+	if [ -z "$$CRYPTOBOM_LICENSE_KEY" ] || [ -z "$$CRYPTOBOM_LICENSE_SIGNING_KEY" ]; then \
+		echo "Set CRYPTOBOM_LICENSE_KEY and CRYPTOBOM_LICENSE_SIGNING_KEY in .env (see docs/ENTERPRISE.md)."; exit 1; \
+	fi; \
+	CRYPTOBOM_PORT=9090 ./$(BIN_DIR)/cryptobom-enterprise
 
 ## Start the React frontend (requires backend running on :8080 or :9090)
 dev-frontend:
@@ -74,6 +84,23 @@ rivicq-scan: build-rivicq
 analyze-datasets: build-rivicq
 	python3 scripts/analyze-datasets.py
 
+## Install the Python Qiskit companion (base install, no simulator)
+quantum-setup:
+	$(PYTHON) -m pip install -e sdk/python
+
+## Install Qiskit Aer for educational quantum circuits
+quantum-setup-full:
+	$(PYTHON) -m pip install -e "sdk/python[quantum]"
+
+## Analyse a RivicQ JSON report with the Qiskit-aligned profile
+quantum-analyse:
+	PYTHONPATH=sdk/python $(PYTHON) -m rivicq_qiskit.analyse "$(QUANTUM_REPORT)"
+
+## Run Go and Python quantum SDK tests
+quantum-test:
+	$(GO) test -count=1 ./internal/quantum/...
+	PYTHONPATH=sdk/python $(PYTHON) -m unittest discover -s sdk/python -p 'test_*.py'
+
 # ── GitHub Pages / Cloudflare Pages ─────────────────────────────────────────
 ## Build the full composite static site into web/build
 build-pages:
@@ -104,6 +131,31 @@ lint:
 ## Run go vet
 vet:
 	$(GO) vet ./...
+
+## Check which open-source security tools are installed
+security-tools-check:
+	@bash scripts/security-tools.sh check
+
+## Run SAST tools (gosec, govulncheck, semgrep)
+security-sast:
+	@bash scripts/security-tools.sh sast
+
+## Run SCA tools (syft, grype, trivy, osv-scanner)
+security-sca:
+	@bash scripts/security-tools.sh sca
+
+## Run secret and IaC scanning (gitleaks, checkov)
+security-secrets-iac:
+	@bash scripts/security-tools.sh secrets
+	@bash scripts/security-tools.sh iac
+
+## Validate Terraform, Helm, and Kubernetes manifests
+security-iac:
+	@bash scripts/security-tools.sh iac
+
+## Run every integrated security tool (advisory unless SECURITY_TOOLS_STRICT=1)
+security-all verify-security:
+	@bash scripts/security-tools.sh all
 
 # ── Database ─────────────────────────────────────────────────────────────────
 ## Apply database migrations (requires DATABASE_URL in environment or .env)

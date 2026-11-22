@@ -38,6 +38,8 @@ var PublicRoutes = []PublicRoute{
 	{Method: http.MethodGet, Path: "/auth/editions"},
 	{Method: http.MethodGet, Path: "/auth/providers"},
 	{Method: http.MethodGet, Path: "/auth/demo"},
+	{Method: http.MethodGet, Path: "/auth/google/status"},
+	{Method: http.MethodGet, Path: "/auth/github/status"},
 
 	// OAuth entry and callback. The callback is authenticated by the `state`
 	// parameter; the browser cannot carry a bearer token.

@@ -8,22 +8,22 @@ provider "google" {
 }
 
 resource "google_sql_database_instance" "cryptobom_staging" {
-  name = var.instance_name
+  name             = var.instance_name
   database_version = "POSTGRES_15"
   settings {
-    tier = var.tier
+    tier      = var.tier
     disk_size = var.disk_size
   }
 }
 
 resource "google_sql_user" "cryptobom_user" {
-  name = var.db_user
+  name     = var.db_user
   instance = google_sql_database_instance.cryptobom_staging.name
   password = var.db_password
 }
 
 resource "google_sql_database" "cryptobom_db" {
-  name = var.db_name
+  name     = var.db_name
   instance = google_sql_database_instance.cryptobom_staging.name
 }
 

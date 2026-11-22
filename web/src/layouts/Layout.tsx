@@ -66,7 +66,6 @@ import {
   MailOutline,
 } from '@mui/icons-material';
 import BomRibbon from '../components/bom/BomRibbon';
-import ArchifySurface from '../components/brand/ArchifySurface';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
@@ -74,6 +73,7 @@ import { isAdminRole } from '../auth/roles';
 import { MODULES } from '../config/modules';
 import { useThemeMode } from '../theme/ThemeContext';
 import BrandLogo from '../components/BrandLogo';
+import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import RivicQAssistant from '../components/assistant/RivicQAssistant';
 import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';
 import DemoTrailCoach from '../components/demo/DemoTrailCoach';
@@ -315,7 +315,7 @@ const Layout: React.FC = () => {
   }, [location.pathname]);
 
   const blue = designSystem.proBlue;
-  const isDarkMode = true;
+  const isDarkMode = mode === 'dark';
 
   const currentTitle = React.useMemo(() => {
     const all = [...allWorkspaceItems, ...enterpriseItems, ...modulesNav];
@@ -372,7 +372,7 @@ const Layout: React.FC = () => {
       <Box sx={{ px: sidebarCollapsed && isDesktop ? 1 : 2, py: 1.5, display: 'flex', alignItems: 'center', position: 'relative', flexShrink: 0, justifyContent: 'space-between', gap: 1 }}>
         {!(sidebarCollapsed && isDesktop) && (
           <Box sx={{ minWidth: 0 }}>
-            <BrandLogo compact dark />
+            <BrandLogo compact dark={isDarkMode} />
             <Typography
               variant="caption"
               sx={{
@@ -585,7 +585,6 @@ const Layout: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', isolation: 'isolate' }}>
-      <ArchifySurface placement="backdrop" variant="console" />
       <AppBar
         position="fixed"
         elevation={0}
@@ -921,10 +920,12 @@ const Layout: React.FC = () => {
         >
           <Box sx={{ px: { xs: 1.25, sm: 1.75, md: 2 }, py: { xs: 1, md: 1.25 }, maxWidth: 1280, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />
-            <Box sx={{ mb: 1 }}>
-              <ArchifySurface placement="rail" variant="console" />
-            </Box>
             <OpsBreadcrumbs />
+            <ArchifyWorkflowEmbed
+              compact
+              diagramId={location.pathname.startsWith('/scanner') ? 'operator' : 'console'}
+              kicker="Archify · same design"
+            />
             <Outlet />
           </Box>
         </motion.div>

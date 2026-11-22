@@ -35,6 +35,15 @@ func isProductionRuntime() bool {
 	return gin.Mode() == gin.ReleaseMode
 }
 
+func isKnownDevBootstrapPassword(password string) bool {
+	switch strings.ToLower(strings.TrimSpace(password)) {
+	case "change-me", "change-me-to-a-random-64-char-string", "admin", "password", "rivicq", "dev":
+		return true
+	default:
+		return false
+	}
+}
+
 // SetupStandardAuth builds the authn lifecycle backed by PostgreSQL (when a
 // database is configured) or the in-memory store, seeds the bootstrap admin and
 // (when DEMO_MODE is on) the demo identities, then wires the deny-by-default
@@ -47,6 +56,9 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 	production := isProductionRuntime()
 	if production && cfg.DemoMode {
 		logger.Warn("DEMO_MODE is enabled in a production runtime; the demo identity and demo data are reachable")
+	}
+	if production && isKnownDevBootstrapPassword(cfg.BootstrapPassword) {
+		logger.Fatal("refusing to start: AUTH_BOOTSTRAP_PASSWORD is a known development default")
 	}
 
 	var store authn.Store
@@ -67,7 +79,7 @@ func SetupStandardAuth(router *gin.RouterGroup, db *database.DB, logger *logrus.
 	}
 
 	if err := authService.SeedBootstrap(context.Background()); err != nil {
-		logger.WithError(err).Warn("bootstrap seeding skipped")
+		logger.WithError(err).Fatal("refusing to start: bootstrap identity could not be seeded")
 	}
 
 	// Deny by default: every /api/v1 route requires a valid access token

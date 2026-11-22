@@ -23,20 +23,23 @@ const OAuthCallback: React.FC = () => {
       }
     };
 
+    const provider = (searchParams.get('provider') || '').toLowerCase();
+    const providerLabel = provider === 'github' ? 'GitHub' : 'Google';
     const oauthError = searchParams.get('error');
     if (oauthError) {
       const description = decode(searchParams.get('error_description')) || oauthError;
       if (oauthError === 'redirect_uri_mismatch') {
-        authService.googleStatus()
+        const status = provider === 'github' ? authService.githubStatus() : authService.googleStatus();
+        status
           .then((resp) => {
             const uri = resp.data?.redirect_uri;
             setError(
               uri
-                ? `Google OAuth redirect URI mismatch. Add this exact URI in Google Cloud Console → Credentials → Authorized redirect URIs:\n${uri}`
-                : `Google OAuth redirect URI mismatch (${description}).`
+                ? `${providerLabel} OAuth redirect URI mismatch. Add this exact URI in the ${providerLabel} OAuth app settings:\n${uri}`
+                : `${providerLabel} OAuth redirect URI mismatch (${description}).`
             );
           })
-          .catch(() => setError(`Google OAuth redirect URI mismatch (${description}).`));
+          .catch(() => setError(`${providerLabel} OAuth redirect URI mismatch (${description}).`));
         return;
       }
       setError(description);
@@ -45,7 +48,6 @@ const OAuthCallback: React.FC = () => {
 
     const exchangeCode = searchParams.get('exchange_code') || searchParams.get('code');
     const state = searchParams.get('state');
-    const provider = (searchParams.get('provider') || '').toLowerCase();
 
     const finish = async () => {
       if (exchangeCode && state) {
@@ -57,7 +59,7 @@ const OAuthCallback: React.FC = () => {
             resp = await authService.googleExchange({ exchange_code: exchangeCode, state });
           }
           const data = resp.data;
-          persistAuth({
+          await persistAuth({
             access_token: data.access_token,
             refresh_token: data.refresh_token || null,
             user: data.user ? {

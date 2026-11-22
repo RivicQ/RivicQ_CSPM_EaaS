@@ -92,6 +92,7 @@ func NewIBMQuantumClient(config IBMQuantumConfig) (*IBMQuantumClient, error) {
 
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
+			MinVersion:         tls.VersionTLS12,
 			InsecureSkipVerify: false,
 		},
 	}

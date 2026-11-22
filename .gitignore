@@ -31,6 +31,8 @@ Thumbs.db
 /bin/
 /dist/
 /tmp/
+/reports/
+.terraform/
 
 # Secrets
 *.env

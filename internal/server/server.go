@@ -292,7 +292,8 @@ func (s *Server) printOSSInfo(serviceName string) {
 	fmt.Printf("     Discover → mitigate → report (JSON, not a DORA pack)\n")
 	fmt.Printf("     QSIC/HSM catalog is declared inventory only\n")
 	fmt.Print("\n  To enable Enterprise features:\n")
-	fmt.Printf("     export CRYPTOBOM_LICENSE_KEY=ENT-<your-key>\n\n")
+	fmt.Printf("     export CRYPTOBOM_LICENSE_KEY=cryptobom-beta-v1.<tenant-or-*>.<unix-expiry>.<hex-hmac-sha256>\n")
+	fmt.Printf("     export CRYPTOBOM_LICENSE_SIGNING_KEY=<your-signing-secret>\n\n")
 }
 
 func (s *Server) registerOpenAPISpec() {

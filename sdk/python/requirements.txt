@@ -1,0 +1,2 @@
+qiskit>=1.0,<3
+qiskit-aer>=0.13,<1

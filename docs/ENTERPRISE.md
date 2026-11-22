@@ -5,7 +5,7 @@ Scope and behavior of the Enterprise edition. The full Community-vs-Enterprise f
 ## 1. Activation and bounds
 
 - Enterprise binary: `cmd/server/enterprise/main.go`, gin release mode, listens `:9090`.
-- Activation: `CRYPTOBOM_LICENSE_KEY` with `ENT-` prefix and >= 20 characters (`internal/edition/edition.go`). The OSS binary refuses enterprise flags ("OSS build does not include enterprise features").
+- Activation: `CRYPTOBOM_LICENSE_KEY` must be a signed, unexpired `cryptobom-beta-v1.<tenant-or-*>.<unix-expiry>.<hex-hmac-sha256>` value, paired with `CRYPTOBOM_LICENSE_SIGNING_KEY`. Signing is HMAC-SHA256 over `<tenant>.<expiry>` using the signing key. The OSS binary refuses enterprise flags ("OSS build does not include enterprise features").
 - Runtime feature flags are returned by `GET /edition`. The feature subsections are shown in grant coverage on the dashboard only when activated.
 - Without credentials, enterprise connectors should render honest empty/unconfigured states — they must not fabricate a live cloud estate (disclosure in `docs/KNOWN_LIMITATIONS.md`). Private beta deployments should verify connector availability before making pilot claims.
 
@@ -22,7 +22,7 @@ All routes under `/api/v1`, mounted by `internal/api/enterprise/SetupRoutes` on 
 | Verified security events | `internal/api/enterprise/security_events.go` | Event forwarding |
 | Conformance/compliance packs | `internal/api/enterprise/compliance.go`, `cncf.go` | Data ownership, compliance score, PDF reports; mappings not certifications |
 | Inventory | `internal/api/enterprise/inventory.go` (`/organizations/{id}/inventory`) | Cryptographic asset inventory + drill-downs |
-| Multi-cloud | `internal/api/enterprise/multicloud.go` (`/api/v1/multicloud/*`) | AWS/Azure/GCP/IBM aggregation under `home/cloud/overview` etc.; customer credentials required |
+| Multi-cloud | `internal/api/enterprise/multicloud.go` (`/api/v1/multicloud/*`) | AWS/Azure/GCP live inventory; IBM HPCS status/keys and COS buckets; customer credentials required |
 | Quantum attestation | `internal/api/enterprise/quantum_attestation.go` | Per-tenant attestation + audit trail |
 | Terraform IaC | `internal/api/enterprise/terraform.go` | Terraform config ingestion |
 | Threat engine | `internal/api/enterprise/threat_engine.go` | Optional analytics events |

@@ -3,32 +3,32 @@ variable "gcp_project" {
 }
 
 variable "gcp_region" {
-  type = string
+  type    = string
   default = "us-central1"
 }
 
 variable "instance_name" {
-  type = string
+  type    = string
   default = "cryptobom-staging"
 }
 
 variable "tier" {
-  type = string
+  type    = string
   default = "db-f1-micro"
 }
 
 variable "disk_size" {
-  type = number
+  type    = number
   default = 20
 }
 
 variable "db_name" {
-  type = string
+  type    = string
   default = "cryptobom"
 }
 
 variable "db_user" {
-  type = string
+  type    = string
   default = "cbom_admin"
 }
 

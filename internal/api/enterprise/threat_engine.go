@@ -11,10 +11,6 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/database"
 )
 
-// enterpriseDefaultTenant is retained for compatibility; tenant resolution is
-// aligned to the core/public tenant model via internal/tenant.
-const enterpriseDefaultTenant = "00000000-0000-0000-0000-000000000001"
-
 // quantumVulnerableAlgorithms maps well-known public-key / hash algorithms to
 // their post-quantum risk posture.
 var quantumVulnerableAlgorithms = map[string]bool{

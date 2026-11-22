@@ -12,10 +12,3 @@ func serverAuthEdition() string {
 	}
 	return "oss"
 }
-
-// normalizeAuthEdition is retained for compatibility but always resolves to the
-// server-derived entitlement.
-func normalizeAuthEdition(raw string) string {
-	_ = raw
-	return serverAuthEdition()
-}

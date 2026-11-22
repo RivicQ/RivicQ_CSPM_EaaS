@@ -17,7 +17,6 @@ import GitHubRepoScanPanel from '../components/GitHubRepoScanPanel';
 import ScanReportPanel, { ClientArchitectureView, PQCReadinessView } from '../components/scanner/ScanReportPanel';
 import { useAuth } from '../context/AuthContext';
 import { isPaidEdition } from '../config/editions';
-import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 
 interface ScanJob {
   id: string;
@@ -424,7 +423,6 @@ const Scanner: React.FC = () => {
             </Alert>
           )}
           <ScanReportPanel architecture={architecture} readiness={readiness} showIdle />
-          <ArchifyWorkflowEmbed compact diagramId="operator" title="How does an operator scan run?" />
           {isScanning && (
             <Box sx={{ mb: 2 }}>
               <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.75 }}>

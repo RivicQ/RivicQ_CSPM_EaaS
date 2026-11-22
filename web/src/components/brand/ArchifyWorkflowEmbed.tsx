@@ -45,7 +45,7 @@ const ArchifyWorkflowEmbed: React.FC<ArchifyWorkflowEmbedProps> = ({
           py: 0.5,
           minHeight: 40,
           border: '1px solid',
-          borderColor: 'rgba(255,255,255,0.12)',
+          borderColor: NEBULA.line,
           borderRadius: '10px',
           bgcolor: NEBULA.panel,
         }}
@@ -57,7 +57,7 @@ const ArchifyWorkflowEmbed: React.FC<ArchifyWorkflowEmbedProps> = ({
             px: 0.75,
             py: 0.15,
             borderRadius: 999,
-            bgcolor: 'rgba(255,255,255,0.06)',
+            bgcolor: NEBULA.raised,
             color: NEBULA.faint,
             fontFamily: ARCHIFY_FONTS.mono,
             fontSize: '0.625rem',

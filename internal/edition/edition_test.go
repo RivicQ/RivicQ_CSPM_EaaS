@@ -15,7 +15,7 @@ func setEnterpriseLicenseEnv(t *testing.T) {
 	exp := time.Now().UTC().Add(24 * time.Hour).Unix()
 	secret := "test-secret"
 	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write([]byte(fmt.Sprintf("%s.%d", tenant, exp)))
+	_, _ = fmt.Fprintf(mac, "%s.%d", tenant, exp)
 	lic := fmt.Sprintf("cryptobom-beta-v1.%s.%d.%s", tenant, exp, hex.EncodeToString(mac.Sum(nil)))
 	t.Setenv("CRYPTOBOM_LICENSE_KEY", lic)
 	t.Setenv("CRYPTOBOM_LICENSE_SIGNING_KEY", secret)

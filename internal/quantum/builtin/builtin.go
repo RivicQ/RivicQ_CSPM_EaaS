@@ -18,6 +18,7 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/quantum/nistpqc"
 	"github.com/rivic-q/cryptobom-saas/internal/quantum/oqsengine"
 	"github.com/rivic-q/cryptobom-saas/internal/quantum/provider"
+	"github.com/rivic-q/cryptobom-saas/internal/quantum/qiskit"
 	"github.com/sirupsen/logrus"
 )
 
@@ -55,6 +56,9 @@ func Register(ctx context.Context, reg *provider.Registry, opts Options) error {
 	})
 	reg.Register("nist-pqc", func(ctx context.Context, cfg map[string]any) (provider.QuantumProvider, error) {
 		return nistpqc.NewProvider(), nil
+	})
+	reg.Register("qiskit-profile", func(ctx context.Context, cfg map[string]any) (provider.QuantumProvider, error) {
+		return qiskit.New(), nil
 	})
 	reg.Register("ibm-quantum", func(ctx context.Context, cfg map[string]any) (provider.QuantumProvider, error) {
 		if !opts.EnableIBM {

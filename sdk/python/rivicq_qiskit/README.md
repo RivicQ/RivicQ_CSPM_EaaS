@@ -12,9 +12,10 @@ This directory is the **educational** Python companion:
 | IBM Quantum Runtime | Enterprise Go provider, opt-in API key | Required for website or CBOM scans |
 
 ```bash
-python3 -m sdk.python.rivicq_qiskit.pipeline
-# or from this folder:
-python3 pipeline.py
+python3 -m pip install -e sdk/python
+make quantum-test
+make quantum-analyse
+make quantum-analyse QUANTUM_REPORT=reports/security/rivicq-scan.json
 ```
 
 ```python
@@ -30,5 +31,5 @@ print(score_findings([
 Install Aer only if you want the educational simulator:
 
 ```bash
-pip install qiskit qiskit-aer
+make quantum-setup-full
 ```

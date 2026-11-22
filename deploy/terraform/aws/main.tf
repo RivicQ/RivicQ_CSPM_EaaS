@@ -109,22 +109,22 @@ resource "aws_db_subnet_group" "cryptobom" {
 }
 
 resource "aws_db_instance" "cryptobom" {
-  identifier             = "${var.project}-db-${var.environment}"
-  engine                 = "postgres"
-  engine_version         = "15.4"
-  instance_class         = "db.t3.medium"
-  allocated_storage      = 20
-  max_allocated_storage  = 100
-  db_name                = "cryptobom"
-  username               = "cryptobom_admin"
+  identifier                  = "${var.project}-db-${var.environment}"
+  engine                      = "postgres"
+  engine_version              = "15.4"
+  instance_class              = "db.t3.medium"
+  allocated_storage           = 20
+  max_allocated_storage       = 100
+  db_name                     = "cryptobom"
+  username                    = "cryptobom_admin"
   manage_master_user_password = true
-  db_subnet_group_name   = aws_db_subnet_group.cryptobom.name
-  storage_encrypted      = true
-  kms_key_id             = aws_kms_key.cryptobom_master.arn
-  backup_retention_period = 7
-  deletion_protection    = var.environment == "production"
-  skip_final_snapshot    = false
-  final_snapshot_identifier = "${var.project}-db-final-${var.environment}"
+  db_subnet_group_name        = aws_db_subnet_group.cryptobom.name
+  storage_encrypted           = true
+  kms_key_id                  = aws_kms_key.cryptobom_master.arn
+  backup_retention_period     = 7
+  deletion_protection         = var.environment == "production"
+  skip_final_snapshot         = false
+  final_snapshot_identifier   = "${var.project}-db-final-${var.environment}"
 
   tags = {
     Name        = "${var.project}-db-${var.environment}"
@@ -133,7 +133,7 @@ resource "aws_db_instance" "cryptobom" {
   }
 
   lifecycle {
-    prevent_destroy = var.environment == "production"
+    prevent_destroy = true
   }
 }
 

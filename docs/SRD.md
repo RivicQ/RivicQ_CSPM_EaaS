@@ -20,7 +20,7 @@ The console renders those three phases in `web/src/components/scanner/ScanReport
 |---|---|---|
 | SR-UI-1 | The full interactive stage is only `archify/site/index.html` | `archify/site`, `archify/diagrams/*.html?present=1` |
 | SR-UI-2 | Website and docs embed a plate about 132–148px, or a link | `ArchifyWorkflowEmbed` default; `docs/assets/horizon-docs.css` `.archify-embed-frame` |
-| SR-UI-3 | The console does not embed a diagram iframe | `ArchifyWorkflowEmbed` `compact` is a one-line bar (`data-embed="bar"`) on `/scanner` |
+| SR-UI-3 | The console does not embed a diagram iframe | `ArchifyWorkflowEmbed` `compact` is a one-line bar (`data-embed="bar"`) in the authenticated shell, including `/scanner` |
 | SR-UI-4 | Console page headers are title, subtitle, and actions | `web/src/components/PageFrame.tsx` |
 | SR-UI-5 | Graph landing uses Discover → Mitigate → Report and links to the Archify gallery | `fabric/src/pages/Landing.tsx` |
 | SR-UI-6 | Violet `#7C3AED` is an accent. It is not a page-sized panel behind operator tools | `docs/DESIGN_SYSTEM.md` |

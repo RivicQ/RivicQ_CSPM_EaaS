@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rivicq-qiskit"
+version = "0.1.0"
+description = "Educational Qiskit companion for RivicQ quantum-risk analysis"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+quantum = ["qiskit>=1.0,<3", "qiskit-aer>=0.13,<1"]
+
+[project.scripts]
+rivicq-qiskit-analyse = "rivicq_qiskit.analyse:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rivicq_qiskit*"]

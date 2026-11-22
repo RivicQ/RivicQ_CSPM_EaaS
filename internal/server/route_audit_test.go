@@ -30,6 +30,8 @@ var expectedPublicRoutes = map[string]bool{
 	"GET /auth/providers":        true,
 	"GET /auth/verify-email":     true,
 	"GET /auth/demo":             true,
+	"GET /auth/google/status":    true,
+	"GET /auth/github/status":    true,
 	"GET /auth/google/login":     true,
 	"POST /auth/google/exchange": true,
 	"GET /auth/google/callback":  true,

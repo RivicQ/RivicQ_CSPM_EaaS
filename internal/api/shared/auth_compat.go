@@ -13,14 +13,6 @@ type authUserResponse struct {
 	Role  string `json:"role,omitempty"`
 }
 
-// editionForRole returns the server-derived entitlement. Role/request inputs are
-// intentionally ignored to prevent client or role-based escalation.
-func editionForRole(role, requested string) string {
-	_ = role
-	_ = requested
-	return serverAuthEdition()
-}
-
 // workEmailAllowed reports whether the email's domain is on the operator's
 // allow-list. An empty list allows everyone.
 func workEmailAllowed(email string, allowedDomains []string) bool {

@@ -289,15 +289,15 @@ func (h *MultiCloudHandler) AWSInventory(c *gin.Context) {
 	result, err := sdks.fetchAWSInventory(c.Request.Context())
 	if err != nil || result == nil || result.Total == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"provider": "aws", "status":"unavailable", "source":"unconfigured", "configured": false,
-			"resources": []any{}, "ec2":[]any{}, "s3":[]any{}, "rds":[]any{}, "eks":[]any{}, "total": 0,
-			"message":"AWS inventory unavailable: no live cloud integration configured",
+			"provider": "aws", "status": "unavailable", "source": "unconfigured", "configured": false,
+			"resources": []any{}, "ec2": []any{}, "s3": []any{}, "rds": []any{}, "eks": []any{}, "total": 0,
+			"message": "AWS inventory unavailable: no live cloud integration configured",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"provider": "aws", "status":"ok", "source":"live",
+		"provider": "aws", "status": "ok", "source": "live",
 		"ec2": result.EC2Instances, "s3": result.S3Buckets, "rds": result.RDSInstances, "eks": result.EKSClusters,
 		"total": result.Total,
 	})
@@ -308,8 +308,8 @@ func (h *MultiCloudHandler) AWSScan(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusServiceUnavailable, gin.H{
-		"status":"unavailable","source":"unconfigured","configured":false,"provider":"aws",
-		"capability":"cloud_scan","message":"AWS scan unavailable: no live scan integration configured",
+		"status": "unavailable", "source": "unconfigured", "configured": false, "provider": "aws",
+		"capability": "cloud_scan", "message": "AWS scan unavailable: no live scan integration configured",
 	})
 }
 
@@ -318,35 +318,58 @@ func (h *MultiCloudHandler) GCPInventory(c *gin.Context) {
 	result, err := sdks.fetchGCPInventory(c.Request.Context())
 	if err != nil || result == nil || result.Total == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"provider":"gcp","status":"unavailable","source":"unconfigured","configured":false,
-			"resources":[]any{},"compute":[]any{},"storage":[]any{},"gke":[]any{},"total":0,
-			"message":"GCP inventory unavailable: no live cloud integration configured",
+			"provider": "gcp", "status": "unavailable", "source": "unconfigured", "configured": false,
+			"resources": []any{}, "compute": []any{}, "storage": []any{}, "gke": []any{}, "total": 0,
+			"message": "GCP inventory unavailable: no live cloud integration configured",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"provider":"gcp","status":"ok","source":"live",
+		"provider": "gcp", "status": "ok", "source": "live",
 		"compute": result.GCEInstances, "storage": result.GCSBuckets, "gke": result.GKEClusters, "total": result.Total,
 	})
 }
 
 func (h *MultiCloudHandler) GCPScan(c *gin.Context) {
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"provider":"gcp","capability":"cloud_scan","message":"GCP scan unavailable: no live scan integration configured"})
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "provider": "gcp", "capability": "cloud_scan", "message": "GCP scan unavailable: no live scan integration configured"})
 }
 
 func (h *MultiCloudHandler) IBMCloudInventory(c *gin.Context) {
+	sdks := newCloudSDKs(c.Request.Context())
+	result, err := sdks.fetchIBMInventory(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"provider": "ibm_cloud", "status": "error", "source": "live", "configured": true,
+			"resources": []any{}, "total": 0,
+			"message": err.Error(),
+		})
+		return
+	}
+	if result == nil || result.Status == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"provider": "ibm_cloud", "status": "unavailable", "source": "unconfigured", "configured": false,
+			"resources": []any{}, "total": 0,
+			"message": "IBM Cloud inventory unavailable: no live cloud integration configured",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"provider":"ibm_cloud","status":"unavailable","source":"unconfigured","configured":false,
-		"resources":[]any{},"total":0,
-		"message":"IBM Cloud inventory unavailable: no live cloud integration configured",
+		"provider": "ibm_cloud", "status": "ok", "source": "live", "configured": true,
+		"hpcs_status": result.Status, "hpcs_keys": result.Keys, "cos_buckets": result.Buckets,
+		"resources": result.Keys, "total": result.Total,
 	})
 }
 
 func (h *MultiCloudHandler) IBMCloudScan(c *gin.Context) {
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"provider":"ibm_cloud","capability":"cloud_scan","message":"IBM Cloud scan unavailable: no live scan integration configured"})
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "provider": "ibm_cloud", "capability": "cloud_scan", "message": "IBM Cloud scan unavailable: no live scan integration configured"})
 }
 
 func (h *MultiCloudHandler) AzureInventory(c *gin.Context) {
@@ -354,22 +377,24 @@ func (h *MultiCloudHandler) AzureInventory(c *gin.Context) {
 	result, err := sdks.fetchAzureInventory(c.Request.Context())
 	if err != nil || result == nil || result.Total == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"provider":"azure","status":"unavailable","source":"unconfigured","configured":false,
-			"resources":[]any{},"virtual_machines":[]any{},"storage_accounts":[]any{},"aks":[]any{},"total":0,
-			"message":"Azure inventory unavailable: no live cloud integration configured",
+			"provider": "azure", "status": "unavailable", "source": "unconfigured", "configured": false,
+			"resources": []any{}, "virtual_machines": []any{}, "storage_accounts": []any{}, "aks": []any{}, "total": 0,
+			"message": "Azure inventory unavailable: no live cloud integration configured",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"provider":"azure","status":"ok","source":"live",
+		"provider": "azure", "status": "ok", "source": "live",
 		"virtual_machines": result.VMs, "storage_accounts": result.StorageAccounts, "aks": result.AKSClusters, "total": result.Total,
 	})
 }
 
 func (h *MultiCloudHandler) AzureScan(c *gin.Context) {
-	if _, ok := mutatingTenantIDFor(c); !ok { return }
-	c.JSON(http.StatusServiceUnavailable, gin.H{"status":"unavailable","source":"unconfigured","configured":false,"provider":"azure","capability":"cloud_scan","message":"Azure scan unavailable: no live scan integration configured"})
+	if _, ok := mutatingTenantIDFor(c); !ok {
+		return
+	}
+	c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unavailable", "source": "unconfigured", "configured": false, "provider": "azure", "capability": "cloud_scan", "message": "Azure scan unavailable: no live scan integration configured"})
 }
 
 func (h *MultiCloudHandler) GetResourcesSummary(c *gin.Context) {
@@ -381,12 +406,12 @@ func (h *MultiCloudHandler) GetResourcesSummary(c *gin.Context) {
 	var total int
 	_ = h.db.QueryRow(`SELECT COUNT(*) FROM cloud_accounts WHERE tenant_id = $1`, tenantID).Scan(&total)
 	c.JSON(http.StatusOK, gin.H{
-		"status":"ok","source":"database",
-		"total_accounts": total,
-		"by_provider": gin.H{},
-		"by_service": gin.H{},
-		"security_findings": gin.H{"critical":0,"high":0,"medium":0,"low":0},
-		"compliance": gin.H{},
-		"message":"Resource summary derived from configured cloud accounts only; no fabricated findings",
+		"status": "ok", "source": "database",
+		"total_accounts":    total,
+		"by_provider":       gin.H{},
+		"by_service":        gin.H{},
+		"security_findings": gin.H{"critical": 0, "high": 0, "medium": 0, "low": 0},
+		"compliance":        gin.H{},
+		"message":           "Resource summary derived from configured cloud accounts only; no fabricated findings",
 	})
 }

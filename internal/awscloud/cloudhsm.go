@@ -78,6 +78,7 @@ type CloudHSMClient struct {
 func NewCloudHSMClient(cfg *config.AWSConfig) *CloudHSMClient {
 	c := &CloudHSMClient{
 		Region:    cfg.Region,
+		ClusterID: cfg.ClusterID,
 		AccessKey: cfg.AccessKey,
 		SecretKey: cfg.SecretKey,
 		ctx:       context.Background(),

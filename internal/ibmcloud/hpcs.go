@@ -217,7 +217,6 @@ func (c *HPCSClient) fetchRealStatus() (*HPCSStatus, error) {
 	}, nil
 }
 
-
 // ListKeys returns all keys managed by the HPCS instance.
 func (c *HPCSClient) ListKeys() ([]HPCSKey, error) {
 	if c == nil || !c.Configured {
@@ -283,7 +282,6 @@ func keyStateString(state int) string {
 	}
 }
 
-
 // AttestKey generates an HSM attestation report for a given key ID.
 // Attestation is only reported as verified when real verifiable evidence is available.
 func (c *HPCSClient) AttestKey(keyID string) (*AttestationReport, error) {
@@ -317,7 +315,6 @@ func (c *HPCSClient) fetchRealAttestation(keyID string) (*AttestationReport, err
 		Source:        "ibm_hpcs",
 	}, nil
 }
-
 
 // ListCOSBuckets returns encrypted IBM Cloud Object Storage buckets.
 // Uses the S3-compatible COS endpoint when credentials are configured.
@@ -366,12 +363,4 @@ func (c *HPCSClient) fetchRealCOSBuckets() ([]COSBucket, error) {
 		})
 	}
 	return buckets, nil
-}
-
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

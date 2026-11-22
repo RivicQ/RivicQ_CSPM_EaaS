@@ -50,7 +50,7 @@ interface AuthContextValue {
   changePassword: (currentPassword: string, nextPassword: string) => Promise<void>;
   logout: () => void;
   setEdition: (edition: Edition) => void;
-  persistAuth: (payload: any) => void;
+  persistAuth: (payload: any) => Promise<void>;
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
@@ -214,19 +214,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, [applyMe]);
 
-  const persistAuth = React.useCallback((payload: any) => {
+  const persistAuth = React.useCallback(async (payload: any): Promise<void> => {
     const nextToken = String(payload?.access_token || payload?.token || '');
-    if (!nextToken) return;
+    if (!nextToken) throw new Error('Authentication service returned an invalid response');
     try { localStorage.setItem('auth_token', nextToken); } catch {}
-    // Hydrate from server; do not trust client-supplied edition/role in payload.
-    void authService.me().then((me) => {
+    try {
+      const me = await authService.me();
       applyMe(nextToken, me.data || {}, false);
-    }).catch(() => {
-      // keep token only if /auth/me fails later? safer to clear.
+    } catch (err) {
       clearStoredAuth();
       setToken(null);
       setUser(null);
-    });
+      throw err;
+    }
   }, [applyMe, clearStoredAuth]);
 
   const supabaseLogin = React.useCallback(async (email: string, password: string, _nextEdition: Edition) => {

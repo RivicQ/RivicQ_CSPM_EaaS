@@ -101,15 +101,6 @@ const ArchifySystemMaps: React.FC<ArchifySystemMapsProps> = ({ compact = false }
                 bgcolor: NEBULA.ink,
               }}
             />
-            <Box
-              aria-hidden
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.86))',
-                pointerEvents: 'none',
-              }}
-            />
           </Box>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ px: 2, pt: 1.5 }}>
             <Box

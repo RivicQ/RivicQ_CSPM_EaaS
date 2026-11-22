@@ -79,8 +79,8 @@ QSIC (RivicQ research ASIC, 65nm, ML-KEM/ML-DSA/SLH-DSA, FIPS 140-3 Level 3 **ro
 |---|---|---|
 | Qiskit-aligned estate score | Local taxonomy (`qiskitprofile`) | Same + optional quantum **connector** |
 | IBM Quantum Runtime | Not invoked | Optional API key; never required for scores |
-| AWS / Azure / GCP / other cloud | Not inventoried | Connector APIs; empty without credentials |
-| Cloud HSM | Declared catalog | Connector when configured |
+| AWS / Azure / GCP / other cloud | Not inventoried | AWS/Azure/GCP live inventory; IBM HPCS/COS live status; other clouds empty without credentials |
+| Cloud HSM | Declared catalog | AWS CloudHSM cluster ID from `AWS_CLOUDHSM_CLUSTER_ID`; IBM HPCS connector when configured |
 
 ## APIs
 
