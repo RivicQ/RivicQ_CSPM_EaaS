@@ -49,8 +49,25 @@ jobs:
 
       - name: Run unit tests (enterprise)
         run: |
-          # Run enterprise-tagged and untagged tests; mock external services when possible
-          go test -tags enterprise -v -race -coverprofile=coverage.enterprise.out ./...
+          set -o pipefail
+          go test -tags enterprise -v -race -coverprofile=coverage.enterprise.out ./... 2>&1 | tee /tmp/enterprise-tests.log
+
+      - name: Annotate enterprise test failures
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import os
+          path = "/tmp/enterprise-tests.log"
+          if not os.path.exists(path):
+              raise SystemExit(0)
+          with open(path, encoding="utf-8", errors="replace") as handle:
+              lines = handle.read().splitlines()
+          markers = ("--- FAIL", "FAIL", "WARNING: DATA RACE", "Error Trace", "panic:")
+          relevant = [line for line in lines if any(marker in line for marker in markers)]
+          for line in relevant[:40]:
+              escaped = line.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print(f"::error::{escaped}")
+          PY
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
