@@ -109,7 +109,12 @@ func (sm *ScanManager) StartScan(target, scanType string) (*ScanJob, error) {
 // manager's policy. A blocked target returns ErrTargetBlocked and never opens a
 // socket or reads a file.
 func (sm *ScanManager) StartScanForTenant(tenantID, target, scanType string) (*ScanJob, error) {
-	if err := sm.policy.ValidateTarget(target); err != nil {
+	sm.mu.RLock()
+	policy := sm.policy
+	scanner := sm.scanner
+	sm.mu.RUnlock()
+
+	if err := policy.ValidateTarget(target); err != nil {
 		return nil, err
 	}
 
@@ -131,11 +136,11 @@ func (sm *ScanManager) StartScanForTenant(tenantID, target, scanType string) (*S
 	}
 	sm.jobs[job.ID] = job
 
-	go sm.executeScan(job)
+	go sm.executeScan(job, scanner)
 	return job, nil
 }
 
-func (sm *ScanManager) executeScan(job *ScanJob) {
+func (sm *ScanManager) executeScan(job *ScanJob, scanner *Scanner) {
 	sm.mu.Lock()
 	job.Status = "running"
 	job.Progress = 10
@@ -150,7 +155,7 @@ func (sm *ScanManager) executeScan(job *ScanJob) {
 	job.Progress = 30
 	sm.mu.Unlock()
 
-	result, err := sm.scanner.ScanAll(ctx, targets)
+	result, err := scanner.ScanAll(ctx, targets)
 
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
