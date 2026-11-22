@@ -24,6 +24,18 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Generate local CI license
+        run: |
+          python3 - <<'PY'
+          import hashlib, hmac, os, time
+          secret = "ci-local-license-signing-key"
+          expiry = int(time.time()) + 86400
+          signature = hmac.new(secret.encode(), f"*.{expiry}".encode(), hashlib.sha256).hexdigest()
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+              env.write(f"CRYPTOBOM_LICENSE_KEY=cryptobom-beta-v1.*.{expiry}.{signature}\n")
+              env.write(f"CRYPTOBOM_LICENSE_SIGNING_KEY={secret}\n")
+          PY
+
       - name: Cache Go modules
         uses: actions/cache@v4
         with:
@@ -52,12 +64,40 @@ jobs:
     needs: test-enterprise
     permissions:
       contents: read
+    env:
+      DATABASE_URL: postgres://cryptobom:postgres@localhost:5432/cryptobom_enterprise_ci?sslmode=disable
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: cryptobom
+          POSTGRES_DB: cryptobom_enterprise_ci
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+
+      - name: Generate local CI license
+        run: |
+          python3 - <<'PY'
+          import hashlib, hmac, os, time
+          secret = "ci-local-license-signing-key"
+          expiry = int(time.time()) + 86400
+          signature = hmac.new(secret.encode(), f"*.{expiry}".encode(), hashlib.sha256).hexdigest()
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+              env.write(f"CRYPTOBOM_LICENSE_KEY=cryptobom-beta-v1.*.{expiry}.{signature}\n")
+              env.write(f"CRYPTOBOM_LICENSE_SIGNING_KEY={secret}\n")
+          PY
 
       - name: Build enterprise binary
         run: |
@@ -80,9 +120,9 @@ jobs:
             echo "No mock IBMQ server found"
           fi
 
-      - name: Start enterprise backend in demo mode (uses mock IBMQ)
+      - name: Start enterprise backend with local CI database
         run: |
-          DATABASE_URL="" JWT_SECRET=enterprise-smoke-secret-0123456789abcdef AUTH_BOOTSTRAP_PASSWORD=enterprise-smoke-bootstrap-please-replace \
+          DATABASE_URL="$DATABASE_URL" JWT_SECRET=enterprise-smoke-secret-0123456789abcdef AUTH_BOOTSTRAP_PASSWORD='Ci-Only-Bootstrap-P4ss!' \
             CRYPTOBOM_PORT=8081 IBMQ_ENDPOINT="http://localhost:8089" ./bin/cryptobom-enterprise &
           echo $! > /tmp/cryptobom-enterprise.pid
 
