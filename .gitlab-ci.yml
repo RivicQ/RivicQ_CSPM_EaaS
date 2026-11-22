@@ -1,0 +1,211 @@
+stages:
+  - build
+  - staging
+  - production
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_BRANCH'
+
+variables:
+  GIT_DEPTH: "1"
+  OSS_IMAGE: "$CI_REGISTRY_IMAGE/cryptobom-oss"
+  ENTERPRISE_IMAGE: "$CI_REGISTRY_IMAGE/cryptobom-enterprise"
+
+default:
+  interruptible: true
+
+.staging_rules:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DEPLOY_STAGE == "staging"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DEPLOY_STAGE == "all"'
+
+.production_rules:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DEPLOY_STAGE == "production"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DEPLOY_STAGE == "all"'
+
+build:site:
+  stage: build
+  image: node:18
+  needs: []
+  script:
+    - bash scripts/build-pages.sh
+    - bash scripts/verify-pages-build.sh
+  artifacts:
+    paths:
+      - web/build/
+    expire_in: 1 week
+
+build:binaries:
+  stage: build
+  image: golang:1.26
+  needs: []
+  script:
+    - mkdir -p bin
+    - CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$CI_COMMIT_SHA -X main.edition=oss" -o bin/cryptobom-oss ./cmd/server/oss/main.go
+    - CGO_ENABLED=0 GOOS=linux go build -tags enterprise -ldflags "-X main.version=$CI_COMMIT_SHA -X main.edition=enterprise" -o bin/cryptobom-enterprise ./cmd/server/enterprise/main.go
+  artifacts:
+    paths:
+      - bin/
+    expire_in: 1 week
+
+build:images:
+  stage: build
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+  needs:
+    - build:binaries
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: /certs
+    DOCKER_DRIVER: overlay2
+  script:
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+    - docker build --file deploy/docker/Dockerfile.oss --tag "$OSS_IMAGE:$CI_COMMIT_SHA" --tag "$OSS_IMAGE:build" .
+    - docker build --file deploy/docker/Dockerfile.enterprise --tag "$ENTERPRISE_IMAGE:$CI_COMMIT_SHA" --tag "$ENTERPRISE_IMAGE:build" .
+    - docker push "$OSS_IMAGE:$CI_COMMIT_SHA"
+    - docker push "$OSS_IMAGE:build"
+    - docker push "$ENTERPRISE_IMAGE:$CI_COMMIT_SHA"
+    - docker push "$ENTERPRISE_IMAGE:build"
+
+staging:github-pages:
+  stage: staging
+  image: alpine:3.20
+  needs:
+    - build:site
+  extends: .staging_rules
+  environment:
+    name: staging
+  script:
+    - if [ -z "${GITHUB_TOKEN:-}" ] || [ -z "${GITHUB_REPOSITORY:-}" ]; then echo "GITHUB_TOKEN/GITHUB_REPOSITORY not set; GitHub Pages staging publish skipped."; exit 0; fi
+    - apk add --no-cache git bash
+    - SKIP_BUILD=1 bash scripts/deploy-gh-pages.sh gh-pages-staging web/build
+
+staging:cloudflare-pages:
+  stage: staging
+  image: node:18
+  needs:
+    - build:site
+  extends: .staging_rules
+  environment:
+    name: staging
+  script:
+    - if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then echo "CLOUDFLARE_API_TOKEN/CLOUDFLARE_ACCOUNT_ID not set; Cloudflare staging deploy skipped."; exit 0; fi
+    - npx --yes wrangler@3 pages deploy web/build --project-name=rivicq-cspm --branch=staging
+
+staging:registry:
+  stage: staging
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+  needs:
+    - build:images
+  extends: .staging_rules
+  environment:
+    name: staging
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: /certs
+    DOCKER_DRIVER: overlay2
+  script:
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+    - docker pull "$OSS_IMAGE:$CI_COMMIT_SHA"
+    - docker tag "$OSS_IMAGE:$CI_COMMIT_SHA" "$OSS_IMAGE:staging"
+    - docker push "$OSS_IMAGE:staging"
+    - docker pull "$ENTERPRISE_IMAGE:$CI_COMMIT_SHA"
+    - docker tag "$ENTERPRISE_IMAGE:$CI_COMMIT_SHA" "$ENTERPRISE_IMAGE:staging"
+    - docker push "$ENTERPRISE_IMAGE:staging"
+
+staging:helm:
+  stage: staging
+  image: dtzar/helm-kubectl:3.14
+  needs:
+    - build:images
+  extends: .staging_rules
+  environment:
+    name: staging
+  script:
+    - if [ -z "${KUBE_CONFIG_STAGING:-}" ]; then echo "KUBE_CONFIG_STAGING not set; Helm staging deploy skipped."; exit 0; fi
+    - mkdir -p "$HOME/.kube"
+    - printf '%s' "$KUBE_CONFIG_STAGING" | base64 -d > "$HOME/.kube/config"
+    - helm upgrade --install cryptobom-oss ./deploy/helm/cryptobom-oss --namespace cryptobom-staging --create-namespace --set-string image.repository="$OSS_IMAGE" --set-string image.tag="$CI_COMMIT_SHA" --set environment=staging --wait --timeout=10m
+    - helm upgrade --install cryptobom-enterprise ./deploy/helm/cryptobom-enterprise --namespace cryptobom-enterprise-staging --create-namespace --set-string image.repository="$ENTERPRISE_IMAGE" --set-string image.tag="$CI_COMMIT_SHA" --set environment=staging --wait --timeout=10m
+    - kubectl rollout status deployment/cryptobom-server -n cryptobom-staging --timeout=10m
+    - kubectl rollout status deployment/cryptobom-server -n cryptobom-enterprise-staging --timeout=10m
+
+production:github-pages:
+  stage: production
+  image: alpine:3.20
+  needs:
+    - build:site
+  extends: .production_rules
+  environment:
+    name: production
+  script:
+    - if [ -z "${GITHUB_TOKEN:-}" ] || [ -z "${GITHUB_REPOSITORY:-}" ]; then echo "GITHUB_TOKEN/GITHUB_REPOSITORY not set; GitHub Pages production publish skipped."; exit 0; fi
+    - apk add --no-cache git bash
+    - SKIP_BUILD=1 bash scripts/deploy-gh-pages.sh gh-pages web/build
+
+production:cloudflare-pages:
+  stage: production
+  image: node:18
+  needs:
+    - build:site
+  extends: .production_rules
+  environment:
+    name: production
+  script:
+    - if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then echo "CLOUDFLARE_API_TOKEN/CLOUDFLARE_ACCOUNT_ID not set; Cloudflare production deploy skipped."; exit 0; fi
+    - npx --yes wrangler@3 pages deploy web/build --project-name=rivicq-cspm --branch=main
+
+production:registry:
+  stage: production
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+  needs:
+    - build:images
+  extends: .production_rules
+  environment:
+    name: production
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: /certs
+    DOCKER_DRIVER: overlay2
+  script:
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+    - docker pull "$OSS_IMAGE:$CI_COMMIT_SHA"
+    - docker tag "$OSS_IMAGE:$CI_COMMIT_SHA" "$OSS_IMAGE:production"
+    - docker tag "$OSS_IMAGE:$CI_COMMIT_SHA" "$OSS_IMAGE:latest"
+    - docker push "$OSS_IMAGE:production"
+    - docker push "$OSS_IMAGE:latest"
+    - docker pull "$ENTERPRISE_IMAGE:$CI_COMMIT_SHA"
+    - docker tag "$ENTERPRISE_IMAGE:$CI_COMMIT_SHA" "$ENTERPRISE_IMAGE:production"
+    - docker tag "$ENTERPRISE_IMAGE:$CI_COMMIT_SHA" "$ENTERPRISE_IMAGE:latest"
+    - docker push "$ENTERPRISE_IMAGE:production"
+    - docker push "$ENTERPRISE_IMAGE:latest"
+
+production:helm:
+  stage: production
+  image: dtzar/helm-kubectl:3.14
+  needs:
+    - build:images
+  extends: .production_rules
+  environment:
+    name: production
+  script:
+    - if [ -z "${KUBE_CONFIG_PROD:-}" ]; then echo "KUBE_CONFIG_PROD not set; Helm production deploy skipped."; exit 0; fi
+    - mkdir -p "$HOME/.kube"
+    - printf '%s' "$KUBE_CONFIG_PROD" | base64 -d > "$HOME/.kube/config"
+    - helm upgrade --install cryptobom-oss ./deploy/helm/cryptobom-oss --namespace cryptobom-production --create-namespace --set-string image.repository="$OSS_IMAGE" --set-string image.tag="$CI_COMMIT_SHA" --set environment=production --wait --timeout=15m
+    - helm upgrade --install cryptobom-enterprise ./deploy/helm/cryptobom-enterprise --namespace cryptobom-enterprise-production --create-namespace --set-string image.repository="$ENTERPRISE_IMAGE" --set-string image.tag="$CI_COMMIT_SHA" --set environment=production --set replicaCount=2 --wait --timeout=15m
+    - kubectl rollout status deployment/cryptobom-server -n cryptobom-production --timeout=15m
+    - kubectl rollout status deployment/cryptobom-server -n cryptobom-enterprise-production --timeout=15m

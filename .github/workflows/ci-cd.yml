@@ -519,7 +519,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [container-build, integration-tests]
-    if: github.ref == 'refs/heads/develop'
+    if: false
     environment: staging
     permissions:
       contents: read
@@ -632,7 +632,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [container-build, performance-tests]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: false
     environment: production
     permissions:
       contents: read

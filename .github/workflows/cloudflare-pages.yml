@@ -11,8 +11,6 @@ name: Deploy Cloudflare Pages
 #   REACT_APP_API_URL
 
 on:
-  push:
-    branches: [ master, main ]
   workflow_dispatch:
     inputs:
       deploy:

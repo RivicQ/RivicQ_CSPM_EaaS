@@ -1,0 +1,372 @@
+name: Deploy Stages
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Stage to run
+        required: true
+        default: all
+        type: choice
+        options:
+          - build
+          - staging
+          - production
+          - all
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-stages-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      oss_image: ${{ steps.meta.outputs.oss_image }}
+      enterprise_image: ${{ steps.meta.outputs.enterprise_image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            fabric/package-lock.json
+
+      - name: Build static site
+        env:
+          REACT_APP_EDITION: community
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+          REACT_APP_SUPABASE_URL: https://suhoabdijefnsoxveewn.supabase.co
+          REACT_APP_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8q50RgRBzXcuvjdaF7qBpg_E0GKHPt4
+          REACT_APP_ZOHO_BOOKINGS_URL: ${{ secrets.REACT_APP_ZOHO_BOOKINGS_URL }}
+          REACT_APP_STRIPE_PAYMENT_LINK_URL: ${{ vars.REACT_APP_STRIPE_PAYMENT_LINK_URL }}
+          GENERATE_SOURCEMAP: 'false'
+        run: |
+          bash scripts/build-pages.sh
+          bash scripts/verify-pages-build.sh
+
+      - name: Build Go binaries
+        run: |
+          mkdir -p bin
+          CGO_ENABLED=0 GOOS=linux go build \
+            -ldflags "-X main.version=${{ github.sha }} -X main.edition=oss" \
+            -o bin/cryptobom-oss ./cmd/server/oss/main.go
+          CGO_ENABLED=0 GOOS=linux go build \
+            -tags enterprise \
+            -ldflags "-X main.version=${{ github.sha }} -X main.edition=enterprise" \
+            -o bin/cryptobom-enterprise ./cmd/server/enterprise/main.go
+
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: web/build
+          if-no-files-found: error
+
+      - name: Upload binary artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: |
+            bin/cryptobom-oss
+            bin/cryptobom-enterprise
+          if-no-files-found: error
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve image names
+        id: meta
+        run: |
+          repo="$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
+          echo "image_tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          echo "oss_image=ghcr.io/${repo}/cryptobom-oss" >> "$GITHUB_OUTPUT"
+          echo "enterprise_image=ghcr.io/${repo}/cryptobom-enterprise" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push OSS image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./deploy/docker/Dockerfile.oss
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.oss_image }}:${{ github.sha }}
+            ${{ steps.meta.outputs.oss_image }}:build-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Enterprise image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./deploy/docker/Dockerfile.enterprise
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.enterprise_image }}:${{ github.sha }}
+            ${{ steps.meta.outputs.enterprise_image }}:build-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  staging:
+    name: staging
+    needs: build
+    if: >-
+      github.ref == 'refs/heads/develop' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.stage == 'staging' || inputs.stage == 'all'))
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: write
+      packages: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download site artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: web/build
+
+      - name: Verify site artifact
+        run: bash scripts/verify-pages-build.sh
+
+      - name: Publish GitHub Pages staging branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: web/build
+          publish_branch: gh-pages-staging
+          force_orphan: true
+
+      - name: Deploy Cloudflare Pages staging branch
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/build --project-name=rivicq-cspm --branch=staging
+
+      - name: Check staging kubeconfig
+        id: kube
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_STAGING }}
+        run: |
+          if [ -z "$KUBE_CONFIG" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "KUBE_CONFIG_STAGING not set; Helm staging deploy skipped."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup kubectl
+        if: steps.kube.outputs.configured == 'true'
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.28
+
+      - name: Setup Helm
+        if: steps.kube.outputs.configured == 'true'
+        uses: azure/setup-helm@v4
+
+      - name: Configure staging kubectl
+        if: steps.kube.outputs.configured == 'true'
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_STAGING }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBE_CONFIG" | base64 -d > "$HOME/.kube/config"
+
+      - name: Deploy OSS to staging
+        if: steps.kube.outputs.configured == 'true'
+        run: |
+          helm upgrade --install cryptobom-oss ./deploy/helm/cryptobom-oss \
+            --namespace cryptobom-staging \
+            --create-namespace \
+            --set image.tag=${{ needs.build.outputs.image_tag }} \
+            --set environment=staging \
+            --wait --timeout=10m
+
+      - name: Deploy Enterprise to staging
+        if: steps.kube.outputs.configured == 'true'
+        run: |
+          helm upgrade --install cryptobom-enterprise ./deploy/helm/cryptobom-enterprise \
+            --namespace cryptobom-enterprise-staging \
+            --create-namespace \
+            --set image.tag=${{ needs.build.outputs.image_tag }} \
+            --set environment=staging \
+            --wait --timeout=10m
+
+      - name: Verify staging rollouts
+        if: steps.kube.outputs.configured == 'true'
+        run: |
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-staging --timeout=10m
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-enterprise-staging --timeout=10m
+
+      - name: Log in to GHCR for stage tag
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Promote images to staging
+        env:
+          OSS_IMAGE: ${{ needs.build.outputs.oss_image }}
+          ENTERPRISE_IMAGE: ${{ needs.build.outputs.enterprise_image }}
+          IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+        run: |
+          docker buildx imagetools create -t "$OSS_IMAGE:staging" "$OSS_IMAGE:$IMAGE_TAG"
+          docker buildx imagetools create -t "$ENTERPRISE_IMAGE:staging" "$ENTERPRISE_IMAGE:$IMAGE_TAG"
+
+  production:
+    name: production
+    needs: [build, staging]
+    if: >-
+      always() &&
+      needs.build.result == 'success' &&
+      (needs.staging.result == 'success' || needs.staging.result == 'skipped') &&
+      (github.ref == 'refs/heads/main' ||
+       (github.event_name == 'workflow_dispatch' && (inputs.stage == 'production' || inputs.stage == 'all')))
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+      packages: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download site artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: web/build
+
+      - name: Verify site artifact
+        run: bash scripts/verify-pages-build.sh
+
+      - name: Publish GitHub Pages production branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: web/build
+          publish_branch: gh-pages
+          force_orphan: true
+
+      - name: Deploy Cloudflare Pages production branch
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/build --project-name=rivicq-cspm --branch=main
+
+      - name: Check production kubeconfig
+        id: kube
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_PROD }}
+        run: |
+          if [ -z "$KUBE_CONFIG" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "KUBE_CONFIG_PROD not set; Helm production deploy skipped."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup kubectl
+        if: steps.kube.outputs.configured == 'true'
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.28
+
+      - name: Setup Helm
+        if: steps.kube.outputs.configured == 'true'
+        uses: azure/setup-helm@v4
+
+      - name: Configure production kubectl
+        if: steps.kube.outputs.configured == 'true'
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_PROD }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBE_CONFIG" | base64 -d > "$HOME/.kube/config"
+
+      - name: Deploy OSS to production
+        if: steps.kube.outputs.configured == 'true'
+        run: |
+          helm upgrade --install cryptobom-oss ./deploy/helm/cryptobom-oss \
+            --namespace cryptobom-production \
+            --create-namespace \
+            --set image.tag=${{ needs.build.outputs.image_tag }} \
+            --set environment=production \
+            --wait --timeout=15m
+
+      - name: Deploy Enterprise to production
+        if: steps.kube.outputs.configured == 'true'
+        run: |
+          helm upgrade --install cryptobom-enterprise ./deploy/helm/cryptobom-enterprise \
+            --namespace cryptobom-enterprise-production \
+            --create-namespace \
+            --set image.tag=${{ needs.build.outputs.image_tag }} \
+            --set environment=production \
+            --wait --timeout=15m \
+            --set replicaCount=2
+
+      - name: Verify production rollouts
+        if: steps.kube.outputs.configured == 'true'
+        run: |
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-production --timeout=15m
+          kubectl rollout status deployment/cryptobom-server -n cryptobom-enterprise-production --timeout=15m
+
+      - name: Log in to GHCR for release tags
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Promote images to production
+        env:
+          OSS_IMAGE: ${{ needs.build.outputs.oss_image }}
+          ENTERPRISE_IMAGE: ${{ needs.build.outputs.enterprise_image }}
+          IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+        run: |
+          docker buildx imagetools create -t "$OSS_IMAGE:production" "$OSS_IMAGE:$IMAGE_TAG"
+          docker buildx imagetools create -t "$OSS_IMAGE:latest" "$OSS_IMAGE:$IMAGE_TAG"
+          docker buildx imagetools create -t "$ENTERPRISE_IMAGE:production" "$ENTERPRISE_IMAGE:$IMAGE_TAG"
+          docker buildx imagetools create -t "$ENTERPRISE_IMAGE:latest" "$ENTERPRISE_IMAGE:$IMAGE_TAG"
