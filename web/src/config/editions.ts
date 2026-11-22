@@ -29,24 +29,34 @@ export const isPaidEdition = (edition: Edition): boolean =>
 export const isEnterpriseEdition = (edition: Edition): boolean =>
   edition === 'enterprise';
 
-function normalizeAPIBaseURL(url: string): string {
-  const trimmed = (url || '').trim().replace(/\/+$/, '');
-  if (!trimmed) return API_PREFIX;
-  if (trimmed.endsWith(API_PREFIX)) return trimmed;
-  if (/^https?:\/\//i.test(trimmed) || /^\/[^/]/.test(trimmed) || trimmed === '') {
-    return `${trimmed}${API_PREFIX}`;
-  }
-  return trimmed;
-}
-
-function configuredBaseURL(): string {
+function detectBaseURL(): string {
+  try {
+    const stored = localStorage.getItem('api_base_url');
+    if (stored) return normalizeAPIBaseURL(stored);
+  } catch {}
   const env = process.env.REACT_APP_API_URL;
-  if (env && env.trim()) return normalizeAPIBaseURL(env.trim());
+  if (env) return normalizeAPIBaseURL(env);
   return API_PREFIX;
 }
 
+export function normalizeAPIBaseURL(url: string): string {
+  const trimmed = url.replace(/\/+$/, '');
+  if (trimmed.endsWith(API_PREFIX)) return trimmed;
+  if (trimmed.match(/:\d+$/)) return `${trimmed}${API_PREFIX}`;
+  return trimmed;
+}
+
+let apiBaseURL = detectBaseURL();
+
 export function getAPIBaseURL(): string {
-  return configuredBaseURL();
+  return apiBaseURL;
+}
+
+export function setAPIBaseURL(url: string): void {
+  apiBaseURL = normalizeAPIBaseURL(url);
+  try {
+    localStorage.setItem('api_base_url', url);
+  } catch {}
 }
 
 export const COMMUNITY_CONFIG = {
@@ -186,54 +196,86 @@ const EDITION_CONFIGS: Record<Edition, EditionConfig> = {
   enterprise: ENTERPRISE_CONFIG,
 };
 
-export const getEditionConfig = (edition?: string | null): EditionConfig => {
-  return EDITION_CONFIGS[normalizeEdition(edition)];
+export const getEditionConfig = (): EditionConfig => {
+  const raw = (() => {
+    try {
+      return localStorage.getItem('app_edition') || process.env.REACT_APP_EDITION || 'community';
+    } catch {
+      return process.env.REACT_APP_EDITION || 'community';
+    }
+  })();
+  return EDITION_CONFIGS[normalizeEdition(raw)];
 };
 
-// Kept for non-entitlement UI hints only; must not be treated as entitlement.
-export const setEditionPreference = (_edition: Edition) => {
-  void _edition;
+export const setEditionPreference = (edition: Edition) => {
+  try {
+    localStorage.setItem('app_edition', edition);
+  } catch {}
 };
 
 const editionClient = axios.create({ timeout: 3000 });
 
+// configuredAPIPort extracts the :port from REACT_APP_API_URL (e.g. "9090" from
+// "http://localhost:9090/api/v1"). Returns null when not set, so the probe can
+// prefer the configured backend before falling back to the well-known ports.
+function configuredAPIPort(): number | null {
+  const env = process.env.REACT_APP_API_URL;
+  if (!env) return null;
+  const match = env.match(/https?:\/\/[^/]+:(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+function configuredAPIOrigin(): string | null {
+  const env = process.env.REACT_APP_API_URL;
+  if (!env) return null;
+  try {
+    const parsed = new URL(env, window.location.origin);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+    return parsed.origin;
+  } catch {
+    return null;
+  }
+}
+
 export const getEditionFromBackend = async (): Promise<{ edition: string; features: Record<string, any>; baseURL: string } | null> => {
+  // Port probing is only valid in local dev (http://localhost). On https
+  // deployments (GitHub Pages, production) plain-http probes are mixed
+  // content and always fail, so use an explicitly configured https API only.
   const host = window.location.hostname;
   const isLocalHttp =
     window.location.protocol === 'http:' &&
     (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local'));
+  const configuredOrigin = configuredAPIOrigin();
 
-  const candidates: string[] = [];
-  const configured = configuredBaseURL();
-  if (configured) {
-    if (/^https?:\/\//i.test(configured)) {
-      candidates.push(configured.replace(/\/api\/v1\/?$/, ''));
-    } else if (!isLocalHttp) {
-      // same-origin / configured path on https deployments
-      candidates.push('');
+  if (!isLocalHttp && configuredOrigin) {
+    try {
+      const resp = await editionClient.get(`${configuredOrigin}/edition`, { timeout: 2000 });
+      if (resp.data && resp.data.edition) {
+        const detectedURL = normalizeAPIBaseURL(process.env.REACT_APP_API_URL as string);
+        setAPIBaseURL(detectedURL);
+        return { ...resp.data, baseURL: detectedURL };
+      }
+    } catch {
+      return null;
     }
   }
 
   if (isLocalHttp) {
-    const env = process.env.REACT_APP_API_URL;
-    const portMatch = env ? env.match(/https?:\/\/[^/]+:(\d+)/) : null;
-    const ports = [portMatch ? Number(portMatch[1]) : null, OSS_PORT, ENTERPRISE_PORT].filter(
+    const candidates = [configuredAPIPort(), OSS_PORT, ENTERPRISE_PORT].filter(
       (p): p is number => p !== null
     );
-    for (const port of ports.filter((p, i) => ports.indexOf(p) === i)) {
-      candidates.push(`http://${host}:${port}`);
-    }
-  }
-
-  for (const origin of candidates.filter((v, i, a) => a.indexOf(v) === i)) {
-    try {
-      const base = origin ? origin.replace(/\/+$/, '') : '';
-      const resp = await editionClient.get(`${base}/edition`, { timeout: 2000 });
-      if (resp.data && resp.data.edition) {
-        return { ...resp.data, baseURL: getAPIBaseURL() };
+    for (const port of candidates.filter((p, i) => candidates.indexOf(p) === i)) {
+      try {
+        // Try the backend directly on each port for edition detection.
+        const resp = await editionClient.get(`http://${host}:${port}/edition`, { timeout: 2000 });
+        if (resp.data && resp.data.edition) {
+          const detectedURL = `http://${host}:${port}${API_PREFIX}`;
+          setAPIBaseURL(detectedURL);
+          return { ...resp.data, baseURL: detectedURL };
+        }
+      } catch {
+        continue;
       }
-    } catch {
-      continue;
     }
   }
   return null;

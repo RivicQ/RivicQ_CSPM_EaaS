@@ -1,34 +1,45 @@
 package platform
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rivic-q/cryptobom-saas/internal/auth"
 	"github.com/rivic-q/cryptobom-saas/internal/authn"
 	"github.com/rivic-q/cryptobom-saas/internal/middleware"
+	"github.com/rivic-q/cryptobom-saas/internal/zoho"
 	"github.com/sirupsen/logrus"
 )
 
 // Service is the in-process commercial/ops layer. It is empty until operators
 // or public forms write real records. It does not invent IBM or Stripe state.
 type Service struct {
-	Leads    *LeadStore
-	IBM      *IBMWorkspace
-	Payments PaymentAdapter
-	Logger   *logrus.Logger
-	DB       *sql.DB
+	Leads      *LeadStore
+	IBM        *IBMWorkspace
+	Payments   PaymentAdapter
+	Logger     *logrus.Logger
+	DB         *sql.DB
+	ZohoConfig zoho.Config
+	ZohoMail   *zoho.Mailer
+	ZohoCRM    *zoho.CRMClient
 }
 
 func NewService(logger *logrus.Logger) *Service {
+	zohoConfig := zoho.ConfigFromEnv()
 	return &Service{
-		Leads:    NewLeadStore(),
-		IBM:      NewIBMWorkspace(),
-		Payments: NewStubPayments(),
-		Logger:   logger,
+		Leads:      NewLeadStore(),
+		IBM:        NewIBMWorkspace(),
+		Payments:   NewStubPayments(),
+		Logger:     logger,
+		ZohoConfig: zohoConfig,
+		ZohoMail:   zoho.NewMailer(zohoConfig.Mail),
+		ZohoCRM:    zoho.NewCRMClient(zohoConfig.CRM, nil),
 	}
 }
 
@@ -59,16 +70,20 @@ func SetupRoutes(router *gin.RouterGroup, logger *logrus.Logger, authService *au
 
 func (s *Service) status(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"product":             "RivicQ Enterprise Platform",
-		"source_of_truth":     "this API process (Postgres when configured; otherwise in-memory)",
-		"pages_is_static":     true,
-		"leads":               s.Leads.Count(),
-		"opportunities":       0,
-		"ibm_apis_connected":  false,
-		"payments_configured": s.Payments.Configured(),
-		"discord_configured":  DiscordConfigured(),
-		"stores_card_data":    false,
-		"public_desks":        []string{"hello@", "sales@", "support@", "security@", "privacy@"},
+		"product":                  "RivicQ Enterprise Platform",
+		"source_of_truth":          "this API process (Postgres when configured; otherwise in-memory)",
+		"pages_is_static":          true,
+		"leads":                    s.Leads.Count(),
+		"opportunities":            0,
+		"ibm_apis_connected":       false,
+		"payments_configured":      s.Payments.Configured(),
+		"discord_configured":       DiscordConfigured(),
+		"zoho_bookings_configured": s.ZohoConfig.BookingsConfigured(),
+		"zoho_bookings_url":        s.ZohoConfig.BookingsURL,
+		"zoho_mail_configured":     s.ZohoMail != nil && s.ZohoMail.Configured(),
+		"zoho_crm_configured":      s.ZohoCRM != nil && s.ZohoCRM.Configured(),
+		"stores_card_data":         false,
+		"public_desks":             []string{"hello@", "sales@", "support@", "security@", "privacy@"},
 	})
 }
 
@@ -115,6 +130,7 @@ func (s *Service) createLead(c *gin.Context) {
 		return
 	}
 	s.persistLead(lead)
+	s.syncZoho(c.Request.Context(), lead)
 	NotifyDiscord(s.Logger, "new_lead", map[string]string{
 		"company": lead.Company,
 		"intent":  lead.Intent,
@@ -135,6 +151,37 @@ func (s *Service) persistLead(lead *Lead) {
 	)
 	if err != nil && s.Logger != nil {
 		s.Logger.WithError(err).Warn("lead persist skipped — in-memory copy remains")
+	}
+}
+
+func (s *Service) syncZoho(ctx context.Context, lead *Lead) {
+	if lead == nil {
+		return
+	}
+	if s.ZohoMail != nil && s.ZohoMail.Configured() {
+		mailCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		subject := fmt.Sprintf("New RivicQ lead: %s", lead.Company)
+		body := fmt.Sprintf("Name: %s\nWork email: %s\nCompany: %s\nIntent: %s\nSource: %s\nStage: %s\nLead ID: %s\n", lead.Name, lead.Email, lead.Company, lead.Intent, lead.Source, lead.Stage, lead.ID)
+		if err := s.ZohoMail.Send(mailCtx, subject, body); err != nil && s.Logger != nil {
+			s.Logger.WithError(err).Warn("zoho mail notification skipped")
+		}
+		cancel()
+	}
+	if s.ZohoCRM != nil && s.ZohoCRM.Configured() {
+		crmCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+		err := s.ZohoCRM.CreateLead(crmCtx, zoho.Lead{
+			ID:      lead.ID,
+			Name:    lead.Name,
+			Email:   lead.Email,
+			Company: lead.Company,
+			Intent:  lead.Intent,
+			Source:  lead.Source,
+			Stage:   lead.Stage,
+		})
+		if err != nil && s.Logger != nil {
+			s.Logger.WithError(err).Warn("zoho crm lead sync skipped")
+		}
+		cancel()
 	}
 }
 

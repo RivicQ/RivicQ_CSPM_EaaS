@@ -79,6 +79,7 @@ func persistCBOMScanResult(db *database.DB, logger *logrus.Logger) discovery.Per
 
 		for _, comp := range result.Components {
 			asset := &database.CryptoAsset{
+				TenantID:           tid,
 				CBOMReportID:       report.ID,
 				Algorithm:          comp.Algorithm,
 				KeySize:            comp.KeySize,

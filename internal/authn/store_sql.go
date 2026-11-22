@@ -27,17 +27,18 @@ func isUniqueViolation(err error) bool {
 
 const userColumns = `id, tenant_id, email, name, role, password,
 	email_verified, mfa_enabled, COALESCE(mfa_secret, ''), COALESCE(organisation, ''),
-	disabled, created_at, updated_at`
+	disabled, COALESCE(failed_login_attempts, 0), locked_until, created_at, updated_at`
 
 func scanUser(row interface {
 	Scan(dest ...interface{}) error
 }) (*User, error) {
 	var u User
 	var role string
+	var lockedUntil sql.NullTime
 	if err := row.Scan(
 		&u.ID, &u.TenantID, &u.Email, &u.Name, &role, &u.PasswordHash,
 		&u.EmailVerified, &u.MFAEnabled, &u.MFASecret, &u.Organisation,
-		&u.Disabled, &u.CreatedAt, &u.UpdatedAt,
+		&u.Disabled, &u.FailedLogins, &lockedUntil, &u.CreatedAt, &u.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrUserNotFound
@@ -45,16 +46,22 @@ func scanUser(row interface {
 		return nil, err
 	}
 	u.Role = normalizeRole(role)
+	if lockedUntil.Valid {
+		t := lockedUntil.Time.UTC()
+		u.LockedUntil = &t
+	}
 	return &u, nil
 }
 
 func (s *SQLStore) CreateUser(ctx context.Context, u *User) error {
 	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO users (id, tenant_id, email, name, role, password,
-			email_verified, mfa_enabled, mfa_secret, organisation, disabled, created_at, updated_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW(),NOW())`,
+			email_verified, mfa_enabled, mfa_secret, organisation, disabled,
+			failed_login_attempts, locked_until, created_at, updated_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),NOW())`,
 		u.ID, u.TenantID, normalizeEmail(u.Email), u.Name, string(u.Role), u.PasswordHash,
 		u.EmailVerified, u.MFAEnabled, nullIfEmpty(u.MFASecret), u.Organisation, u.Disabled,
+		u.FailedLogins, u.LockedUntil,
 	)
 	if err != nil {
 		if isUniqueViolation(err) {
@@ -69,10 +76,12 @@ func (s *SQLStore) UpdateUser(ctx context.Context, u *User) error {
 	res, err := s.db.ExecContext(ctx, `
 		UPDATE users SET email=$2, name=$3, role=$4, password=$5,
 			email_verified=$6, mfa_enabled=$7, mfa_secret=$8, organisation=$9, disabled=$10,
+			failed_login_attempts=$11, locked_until=$12,
 			updated_at=NOW()
 		WHERE id=$1`,
 		u.ID, normalizeEmail(u.Email), u.Name, string(u.Role), u.PasswordHash,
 		u.EmailVerified, u.MFAEnabled, nullIfEmpty(u.MFASecret), u.Organisation, u.Disabled,
+		u.FailedLogins, u.LockedUntil,
 	)
 	if err != nil {
 		if isUniqueViolation(err) {

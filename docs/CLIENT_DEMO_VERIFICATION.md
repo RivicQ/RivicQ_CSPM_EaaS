@@ -4,7 +4,7 @@ Send this page. It is the check a client runs before a pilot. Control mappings a
 
 ## 1. GitHub Pages walkthrough (no password)
 
-Live site, after this change is on `main`:
+Live site (Pages deploys `main`/`master` via `.github/workflows/pages.yml`):
 
 https://rivicq.github.io/RivicQ_CSPM_EaaS/
 

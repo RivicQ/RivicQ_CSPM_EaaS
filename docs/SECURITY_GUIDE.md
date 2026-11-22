@@ -8,10 +8,15 @@ hole in them.
 Reporting a vulnerability is governed by `SECURITY.md` (root). Report privately
 to `security@rivicq.com`; do not open a public issue for an exploitable finding.
 
+Scope: the controls below describe the RivicQ CSPM server. The standalone EaaS
+build is a separate surface with its own auth, store, and CI; its boundary is
+described in [EaaS security boundary](#eaas-security-boundary-separate-surface).
+
 ## Contents
 
 - [Authentication model](#authentication-model)
 - [Tenant isolation](#tenant-isolation)
+- [EaaS security boundary (separate surface)](#eaas-security-boundary-separate-surface)
 - [Authorization (RBAC and route permissions)](#authorization-rbac-and-route-permissions)
 - [CORS allowlist](#cors-allowlist)
 - [Rate limiting](#rate-limiting)
@@ -91,6 +96,38 @@ Rules for new code:
    every insert.
 3. Add a tenant index for new tenant-owned tables.
 4. Add a test that proves a different tenant gets `ErrNotFound` / 404, not data.
+
+## EaaS security boundary (separate surface)
+
+The CSPM controls above do not automatically apply to the standalone EaaS build
+(`cmd/eaas`, `internal/eaas`, `web/eaas`). It has its own router on default port
+`:9091`, API paths `/api/eaas/v1/*` and `/api/beta/v1/*`, and a portal served by
+that binary at `/` and `/portal` (not GitHub Pages). See
+[EAAS_SECURITY_PRIVACY.md](EAAS_SECURITY_PRIVACY.md) for the detailed evidence.
+
+- Authentication is registration, bcrypt passwords, six-digit code verification,
+  and bearer session/API keys — not the CSPM JWT/RBAC stack. Verification codes
+  are returned once in non-production with an explicit notice; email delivery is
+  Integration pending. There is no EaaS TOTP/OAuth path.
+- Operation identity comes from the stored credential; cross-tenant project or
+  key access returns `404`. There is no client tenant-header trust and no Go
+  Postgres query layer behind EaaS.
+- Runtime state is an atomic JSON sandbox file (`EAAS_DATA_FILE`) containing
+  base64-encoded private key bytes. Treat the file as a secret: it requires
+  filesystem protection. `deploy/migrations/004_eaas_schema.sql` is a target
+  schema only; there is no production Postgres repository or HSM/KMS custody.
+- CORS uses an exact `EAAS_ALLOWED_ORIGINS` allowlist with no wildcard default;
+  EaaS sets its own security headers and a 2 MiB JSON body limit. Usage events
+  are metadata-only, and private bytes are never returned by the API.
+- Numeric quotas and RPM are enforced. Plan flags for SSO, HSM, audit log, and
+  advanced analytics are display-only. There is no Stripe/payment collection,
+  payment webhooks, email delivery, FIPS/CAVP validation, AI operations,
+  quantum hardware, or wireless operations in EaaS. Classical crypto is
+  implemented; ML-KEM-768 and ML-DSA-65 are `Experimental` via
+  `cloudflare/circl`, and SLH-DSA is not implemented.
+- `.github/workflows/eaas-ci.yml` is path-filtered gofmt/vet/build/test only;
+  it has no race, coverage, govulncheck, migration validation, portal build,
+  container build, or deploy gate. Do not cite it as security-scan evidence.
 
 ## Authorization (RBAC and route permissions)
 
@@ -216,7 +253,8 @@ Do not relax these to unblock a feature; fix the feature instead.
 
 Go modules are pinned in `go.mod` / `go.sum`; the frontend lockfile is
 `web/package-lock.json`. Do not add a dependency that is unmaintained or that
-duplicates an existing library.
+duplicates an existing library. These scanners are CSPM workflows; `eaas-ci.yml`
+does not run them.
 
 ## Trusted proxies and client IP
 

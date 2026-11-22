@@ -43,6 +43,12 @@ func NewService(cfg Config, store Store) (*Service, error) {
 	if store == nil {
 		return nil, errors.New("authn: store is required")
 	}
+	if cfg.MaxFailedLogins <= 0 {
+		cfg.MaxFailedLogins = defaultMaxFailedLogs
+	}
+	if cfg.LoginLockout <= 0 {
+		cfg.LoginLockout = defaultLoginLockout
+	}
 	return &Service{
 		cfg:    cfg,
 		store:  store,
@@ -196,17 +202,43 @@ func (s *Service) Login(ctx context.Context, email, password, edition, userAgent
 	if err != nil {
 		// Equalise timing so a missing account is not distinguishable from a
 		// wrong password.
-		_ = CheckPassword(password, "$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv")
+		_ = CheckPassword(password, "$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv")
+		return nil, ErrInvalidCredentials
+	}
+
+	now := s.now().UTC()
+	if u.LockedUntil != nil && !now.Before(*u.LockedUntil) {
+		u.FailedLogins = 0
+		u.LockedUntil = nil
+		_ = s.store.UpdateUser(ctx, u)
+	}
+	if u.LockedUntil != nil && now.Before(*u.LockedUntil) {
+		return nil, ErrAccountLocked
+	}
+
+	// Verify the password before reporting account state. Otherwise a caller
+	// can use the disabled response to confirm that an arbitrary address exists.
+	if !CheckPassword(password, u.PasswordHash) {
+		u.FailedLogins++
+		if u.FailedLogins >= s.cfg.MaxFailedLogins {
+			lockedUntil := now.Add(s.cfg.LoginLockout)
+			u.LockedUntil = &lockedUntil
+			_ = s.store.UpdateUser(ctx, u)
+			return nil, ErrAccountLocked
+		}
+		_ = s.store.UpdateUser(ctx, u)
 		return nil, ErrInvalidCredentials
 	}
 	if u.Disabled {
 		return nil, ErrAccountDisabled
 	}
-	if !CheckPassword(password, u.PasswordHash) {
-		return nil, ErrInvalidCredentials
-	}
 	if !u.EmailVerified && s.cfg.RequireVerification {
 		return nil, ErrEmailNotVerified
+	}
+	if u.FailedLogins > 0 || u.LockedUntil != nil {
+		u.FailedLogins = 0
+		u.LockedUntil = nil
+		_ = s.store.UpdateUser(ctx, u)
 	}
 	if u.MFAEnabled {
 		raw, err := s.issueToken(ctx, u.ID, PurposeMFAChallenge, s.cfg.MFASessionTTL)

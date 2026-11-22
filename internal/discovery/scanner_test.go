@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +43,7 @@ func TestScanAll_ReturnsStructuredResult(t *testing.T) {
 		{ID: "t1", Host: host, Port: port, Protocol: "tls", Label: "Test TLS"},
 	}
 
-	scanner := NewScanner()
+	scanner := NewScannerWithPolicy(TargetPolicy{AllowPrivateNetworks: true})
 	result, err := scanner.ScanAll(context.Background(), targets)
 	require.NoError(t, err)
 
@@ -114,7 +115,7 @@ func TestScanAll_ConcurrentNoRace(t *testing.T) {
 		}
 	}()
 
-	scanner := NewScanner()
+	scanner := NewScannerWithPolicy(TargetPolicy{AllowPrivateNetworks: true})
 	result, err := scanner.ScanAll(context.Background(), targets)
 	require.NoError(t, err)
 	assert.Equal(t, 3, result.Summary.TotalTargets)
@@ -131,4 +132,14 @@ func TestScanAll_DeclaredPodAndHardware(t *testing.T) {
 	res := ResourcesFromTargets(result.Targets)
 	assert.True(t, res["k8s"])
 	assert.True(t, res["hardware"])
+}
+
+func TestScanAllFailsWhenEveryTargetFails(t *testing.T) {
+	scanner := NewScanner()
+	result, err := scanner.ScanAll(context.Background(), []Target{
+		{ID: "missing", Protocol: "sbom", Path: filepath.Join(t.TempDir(), "does-not-exist"), Label: "missing path"},
+	})
+	require.Error(t, err)
+	require.NotEmpty(t, result.Errors)
+	assert.Contains(t, result.Errors[0], "missing path")
 }

@@ -1,6 +1,10 @@
 import Stripe from "stripe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { verifyStripeWebhook } from "../lib/stripe";
+import {
+  assertQuotationPaymentIntegrity,
+  assertStripeEventMode,
+  verifyStripeWebhook,
+} from "../lib/stripe";
 
 const webhookSecret = "whsec_local_test_secret";
 
@@ -37,5 +41,49 @@ describe("Stripe webhook verification", () => {
 
   it("rejects an invalid signature", () => {
     expect(() => verifyStripeWebhook(payload, "t=1,v1=deadbeef")).toThrow();
+  });
+
+  it("rejects live events while configured for test mode", () => {
+    expect(() => assertStripeEventMode({ livemode: true })).toThrow(/configured mode/);
+  });
+
+  it("accepts test events while configured for test mode", () => {
+    expect(() => assertStripeEventMode({ livemode: false })).not.toThrow();
+  });
+
+  it("rejects quotation checkout when line totals drift", () => {
+    expect(() =>
+      assertQuotationPaymentIntegrity({
+        subtotal: 1_000,
+        discountBps: 1_000,
+        discountAmount: 100,
+        taxAmount: 0,
+        total: 900,
+        items: [{ unitAmount: 400, quantity: 2 }],
+      }),
+    ).toThrow(/subtotal/);
+  });
+
+  it("rejects quotation checkout when discount or total drift", () => {
+    expect(() =>
+      assertQuotationPaymentIntegrity({
+        subtotal: 1_000,
+        discountBps: 1_000,
+        discountAmount: 200,
+        taxAmount: 0,
+        total: 800,
+        items: [{ unitAmount: 500, quantity: 2 }],
+      }),
+    ).toThrow(/discount/);
+    expect(() =>
+      assertQuotationPaymentIntegrity({
+        subtotal: 1_000,
+        discountBps: 1_000,
+        discountAmount: 100,
+        taxAmount: 0,
+        total: 800,
+        items: [{ unitAmount: 500, quantity: 2 }],
+      }),
+    ).toThrow(/total/);
   });
 });

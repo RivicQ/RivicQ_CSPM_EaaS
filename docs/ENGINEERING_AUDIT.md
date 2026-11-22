@@ -4,6 +4,8 @@
 **Branch inspected:** `cursor/rivicq-com-platform-86cc` (plus repo tree on disk)  
 **Method:** repository inspection, existing tests, and this increment. Not a paid pentest. Not a certification.
 
+**Status: archived branch snapshot, not a current-state audit.** “This branch”, “this PR”, and “this increment” refer to `cursor/rivicq-com-platform-86cc` as of 10 September 2026. Current Pages deploys run from `main`/`master` (`.github/workflows/pages.yml`); see `PRODUCT_STATUS.md` and `KNOWN_LIMITATIONS.md` for current claims.
+
 Do not treat this document as Enterprise Ready. Scores are not inflated.
 
 ---
@@ -62,7 +64,7 @@ There is no separate worker fleet, no live Stripe service, and no IBM Partner Pl
 | Observability | 45 | Health endpoints; not traces + SLO alerts |
 | Performance | 40 | No p50/p95 published |
 | Scalability | 42 | Single-process scan-bound |
-| UX/UI | 64 | Nebula tokens; Pages overlay at `/preview/` until `main` merge |
+| UX/UI | 64 | Nebula tokens; archived branch proposed a `/preview/` overlay before `main` merge; no such route in the current Pages build |
 | Accessibility | 52 | Focus styles exist; no WCAG audit run this pass |
 | Documentation | 70 | Honest limitations docs |
 | Enterprise readiness | 38 | License + connectors + PSP + IBM APIs missing |
@@ -94,7 +96,7 @@ There is no separate worker fleet, no live Stripe service, and no IBM Partner Pl
 
 **RIVICQ OVERALL SCORE: 52/100**
 
-Weighting: product/security pull up; CRM, payments, IBM APIs, observability, and unpublished Pages theme pull down.
+Weighting: product/security pull up; CRM, payments, IBM APIs, observability, and unpublished Pages theme (as of the archived branch snapshot) pull down.
 
 ---
 
@@ -102,9 +104,9 @@ Weighting: product/security pull up; CRM, payments, IBM APIs, observability, and
 
 | ID | Priority | Component | Root cause | Fix | Test | Status |
 |---|---|---|---|---|---|---|
-| P0-1 | P0 | Auth | Empty/`oss-default-secret` JWT in release | Refuse start in production | `TestResolveJWTSecret` | **Fixed this increment** |
-| P0-2 | P0 | Auth | Default `DemoPass123!` bootstrap in prod | Fatal if first user would use default | code path | **Fixed this increment** |
-| P0-3 | P0 | Pages | Production github.io lagged this PR | Overlay `/preview/` plus gh-pages publish from this branch | visual | **In progress** |
+| P0-1 | P0 | Auth | Empty/`oss-default-secret` JWT in release | Refuse start in production | `resolveJWTSecret` guard; `TestResolveJWTSecret` is not in this tree | **Fixed in the audited branch** |
+| P0-2 | P0 | Auth | Default `DemoPass123!` bootstrap in prod | Fatal if first user would use default | code path | **Fixed in the audited branch** |
+| P0-3 | P0 | Pages | Production github.io lagged this PR | Archived plan: `/preview/` overlay plus gh-pages publish from that branch | visual | **Archived: was in progress on the audited branch** |
 | P1-1 | P1 | Payments | Checkout `not_configured` | Real PSP adapter + webhook secret | — | Open |
 | P1-2 | P1 | Auth | Password reset in-memory | Mailbox or operator reset | — | Open |
 | P1-3 | P1 | Tenancy | DB-down Enterprise demo fallbacks | Fail closed | — | Open |
@@ -145,9 +147,9 @@ Weighting: product/security pull up; CRM, payments, IBM APIs, observability, and
 
 **Performance / observability.** No fabricated p95. Health exists.
 
-**UX/UI / a11y / brand.** Website theme is black + `#7C3AED`. Docs hub, contact, and markdown reader share the same 1120px shell. Preview overlay exists on this PR.
+**UX/UI / a11y / brand.** Website theme is black + `#7C3AED`. Docs hub, contact, and markdown reader share the same 1120px shell. The `/preview/` overlay was an archived branch proposal, not a route in the current Pages build (`scripts/build-pages.sh`).
 
-**Public Pages exposure.** `REACT_APP_SUPABASE_PUBLISHABLE_KEY` in `pages.yml` is a **publishable** client key (expected public). Do not put service-role keys in the SPA. Source maps ship with CRA builds — treat as public.
+**Public Pages exposure.** `REACT_APP_SUPABASE_PUBLISHABLE_KEY` in `pages.yml` is a **publishable** client key (expected public). Do not put service-role keys in the SPA. Builds set `GENERATE_SOURCEMAP=false` (`pages.yml`, `cloudflare-pages.yml`, `scripts/build-pages.sh`), so the “source maps ship” claim is not supported for the current build; treat shipped browser assets as public.
 
 **Supply chain.** Lockfiles + Syft in CI historically. Artifact signing is not claimed.
 
@@ -168,12 +170,12 @@ Weighting: product/security pull up; CRM, payments, IBM APIs, observability, and
 
 ### Tests executed
 
-- `go test ./internal/api/shared -count=1 -run TestResolveJWTSecret`
+- `go test ./internal/api/shared -count=1 -run TestResolveJWTSecret` (archived branch command; `TestResolveJWTSecret` is not present in this tree, so this is not a reproducible current test run)
 - `npx tsc --noEmit` in `web/` (earlier this branch)
 
-### Remaining blockers
+### Remaining blockers (as of the archived branch snapshot)
 
-- Merge to `main` for durable github.io theme
+- Merge to `main` for durable github.io theme (archived blocker; Pages now deploys `main`/`master` via `.github/workflows/pages.yml`)
 - Postgres + unique `JWT_SECRET` + TLS for any real tenant
 - Licensed Enterprise binary
 - Real PSP and official IBM APIs
@@ -194,7 +196,7 @@ Not DEVELOPMENT-only (the engine works). Not PRODUCTION READY. Not ENTERPRISE RE
 ## 34. Roadmap (technical phases, not a calendar promise)
 
 **Phase A — stop the leaks (maps to “first hardening”)**  
-Ship nebula on `main`. Keep JWT/bootstrap production guards. No fake CRM. Pages overlay until merge.
+Ship nebula on `main`. Keep JWT/bootstrap production guards. No fake CRM. The archived branch proposed a `/preview/` overlay until merge; current Pages builds deploy from `main`/`master` with no `/preview/` route.
 
 **Phase B — operator truth**  
 Fail closed when DB is down. Mailbox or operator password reset. Findings/scan UX on real API status only. WCAG pass on Overview + Scanner + Contact.
@@ -262,7 +264,7 @@ Hardening of the CBOM/Crypto-CSPM core only. No HBOM/IBOM/AIBOM engines. No Ente
 - Enterprise DB-down paths that fail open (inventory) still exist
 - Observability is healthz/readyz, not traces + SLOs
 - Scanner precision/recall unpublished
-- Source maps on Pages
+- Source maps on Pages (archived claim; current Pages builds set `GENERATE_SOURCEMAP=false`)
 
 ### MEDIUM
 
@@ -359,7 +361,7 @@ Do not read “80% readiness documentation” as “80% production SaaS.” Mail
 - Enterprise DB-down paths that fail open (inventory) still exist
 - Observability is healthz/readyz, not traces + SLOs
 - Scanner precision/recall unpublished
-- Source maps on Pages
+- Source maps on Pages (archived claim; current Pages builds set `GENERATE_SOURCEMAP=false`)
 - No WCAG audit
 - No named-customer E2E against a real estate
 - HBOM/IBOM/AIBOM/QBOM **engines** (not catalogs) are still Enterprise stubs — declared inventory, not live attach

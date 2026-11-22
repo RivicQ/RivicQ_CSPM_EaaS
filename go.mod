@@ -21,6 +21,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kms v1.55.4
 	github.com/aws/aws-sdk-go-v2/service/rds v1.118.6
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.1
+	github.com/cloudflare/circl v1.6.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0

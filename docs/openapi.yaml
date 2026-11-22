@@ -1,23 +1,30 @@
 openapi: 3.0.3
 info:
-  title: RivicQ — Encryption as a Service API
+  title: RivicQ CSPM API
   description: |
-    ## Quantum-Safe Cryptographic Bill of Materials Management
-    
-    CryptoBOM SaaS provides comprehensive cryptographic asset discovery, analysis, 
-    and compliance management with quantum computing integration.
-    
+    ## Cryptographic Security Posture Management (CSPM) API
+
+    This specification documents the **CSPM** `/api/v1` scan and evidence surface.
+    It is not the Encryption-as-a-Service (EaaS) API. EaaS is a separate surface
+    with its own binary, default port `:9091`, versioned paths
+    (`/api/eaas/v1/*` and `/api/beta/v1/*`), and a portal served by that binary;
+    see [EAAS_API.md](EAAS_API.md) for that API. No EaaS paths are defined here.
+
     ### Features
     - Multi-provider asset discovery
-    - Quantum vulnerability assessment
-    - Compliance framework support (NIST, ISO, BSI, SOX, PCI-DSS)
+    - Cryptographic asset classification and quantum-vulnerability taxonomy
+    - Compliance framework mappings (mappings, not certifications)
     - DevSecOps pipeline integration
     - Post-quantum migration planning
-    
+
     ### Editions
-    - **OSS Edition**: Basic CBOM with mock quantum providers
-    - **Enterprise Edition**: Full IBM Quantum, KIPU Q-CTRL, multi-language SDKs
-    
+    - **OSS Edition**: basic CBOM; Qiskit scores are a local classical taxonomy, not IBM Quantum hardware
+    - **Enterprise Edition**: licensed control plane; optional quantum-provider integrations require credentials
+
+    ### Scope notes
+    - GitHub Pages does not run this API; live scans need a separately deployed backend or the CLI.
+    - EaaS sandbox state is a local JSON file with no Go Postgres repository; do not infer EaaS behaviour from these paths.
+
     ### IP Notice
     All intellectual property rights are the exclusive property of **RivicQ GmbH** 
     under German and international law.
@@ -33,7 +40,7 @@ info:
 
 servers:
   - url: http://localhost:9090
-    description: Local development server
+    description: Local Enterprise CSPM development server (not EaaS, which defaults to :9091)
   - url: https://api.rivicq.oss.rivicq.com
     description: OSS Edition cloud endpoint
   - url: https://api.rivicq.enterprise.rivicq.com

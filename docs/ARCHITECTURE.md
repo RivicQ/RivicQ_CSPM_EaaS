@@ -83,7 +83,7 @@ flowchart TB
 | React dev server | `:3000` | `web/` (`npm run dev`) |
 | GitHub Pages static | 443 (managed) | built output of `web/build` |
 
-Edition activation: `internal/edition/edition.go` -> `Detect()` checks `CRYPTOBOM_LICENSE_KEY` for an `ENT-` prefix of >= 20 characters. OSS and Enterprise ship the **same engine**; the Enterprise binary adds control-plane routes (`cmd/server/server.go` `routeHooks`, `internal/api/enterprise/SetupRoutes`).
+Edition activation: `internal/edition/edition.go` -> `Detect()` checks `CRYPTOBOM_LICENSE_KEY` for an `ENT-` prefix of >= 20 characters. OSS and Enterprise ship the **same engine**; the Enterprise binary adds control-plane routes (`internal/server/server.go` `routeHooks`, `internal/api/enterprise/SetupRoutes`).
 
 ## 3. Request lifecycle
 
@@ -144,8 +144,8 @@ flowchart LR
 
 - **GitHub Pages** (`docs/GITHUB_ACTIONS_AND_PAGES.md`): `.github/workflows/pages.yml` builds `web/` with `REACT_APP_EDITION=community`, ReDoc from `docs/openapi.yaml`, `fabric/`, `marketing/`, `docs/`, and `archify/`, then publishes to the `gh-pages` branch via `peaceiris/actions-gh-pages`.
 - **Local demo**: `docker-compose.yml` (db + migrate + app + web + scanner) or `make dev-backend` / `make dev-enterprise` / `make dev-frontend`. In-memory demo mode when no DB is configured; `/readyz` returns 503 in demo mode and `/healthz` stays independent.
-- **Helm/Kubernetes artifacts**: charts and manifests exist under `deploy/helm/` and `deploy/kubernetes/`, but completeness varies by chart/environment. Verify templates and values (including enterprise chart contents) before making deployment claims for a private beta.
-- **Cloudflare Pages**: `_headers`, `_redirects`, and `wrangler.toml` are being added at the repo root (not yet committed at the time of writing) as a static Publish-Only host; the same built `web/` output is hosted there with Pages-managed TLS.
+- **Helm**: OSS chart `deploy/helm/cryptobom-oss`, SaaS/Enterprise charts `deploy/helm/cryptobom-saas` and `deploy/helm/cryptobom-enterprise`; `deploy/kubernetes` yaml for enterprise deployments.
+- **Cloudflare Pages**: `wrangler.toml` is committed at the repo root; `cloudflare/_headers` and `cloudflare/_redirects` are committed and copied into `web/build` by `scripts/build-pages.sh`. `.github/workflows/cloudflare-pages.yml` deploys the same built output when `CLOUDFLARE_API_TOKEN` is configured; the host is Publish-Only with Pages-managed TLS.
 
 ## 8. Observability
 

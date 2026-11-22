@@ -1030,12 +1030,20 @@ func getAttestationReport(db *database.DB, logger *logrus.Logger, cfg *config.En
 			})
 			return
 		}
+		tenantID, ok := jwtTenantOrAbort(c)
+		if !ok {
+			return
+		}
+		logger.WithField("asset_id", assetID).WithField("tenant_id", tenantID).Info("Getting attestation report")
 		attestations := []gin.H{}
 		rows, err := db.Query(`
 			SELECT qa.id, qa.status, qa.attestation_data, qa.attested_at
 			FROM quantum_attestations qa
-			WHERE qa.asset_id::text = $1 OR qa.id::text = $1
-		`, assetID)
+			JOIN cbom_reports cr ON qa.cbom_report_id = cr.id
+			JOIN crypto_assets ca ON ca.cbom_report_id = cr.id
+			WHERE (qa.id::text = $1 OR ca.id::text = $1)
+			  AND cr.tenant_id = $2 AND ca.tenant_id = $2
+		`, assetID, tenantID)
 		if err == nil {
 			defer func() { _ = rows.Close() }()
 			for rows.Next() {

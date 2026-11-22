@@ -1,10 +1,13 @@
 # Pilot readiness
 
-**Decision: controlled pilot ready for static cryptographic inventory.**
+**Decision: controlled pilot ready for static cryptographic inventory in RivicQ CSPM.**
 
 This gate covers the Community CLI, the policy gate, CBOM export, tenant-scoped API behavior,
 and the static GitHub Pages console/docs. It does **not** claim a hosted multi-tenant SaaS,
-real-time detection, AI analysis, or silicon attestation.
+real-time detection, AI analysis, or silicon attestation. The standalone EaaS build is a
+**separate surface** with its own binary and API; it is outside this pilot gate and is not
+production-ready. See [EAAS_PRODUCT_STATUS.md](EAAS_PRODUCT_STATUS.md) and
+[EAAS_LIMITATIONS.md](EAAS_LIMITATIONS.md).
 
 Live gate: **https://rivicq.github.io/RivicQ_CSPM_EaaS/pilot/**
 Last reviewed: **2026-11-19** · Evidence: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) ·
@@ -30,6 +33,23 @@ Machine-readable manifest: [CAPABILITIES.yaml](CAPABILITIES.yaml)
 | Stripe checkout, subscriptions, trial quotas | **PLANNED** | Trials are manual and non-billed |
 | Event bus, continuous scans, runtime sensors | **PLANNED** | No real-time claims |
 | Live multi-cloud/HSM connectors | **BLOCKED** | Requires customer credentials and a deployed connector |
+| EaaS standalone sandbox API and portal (`cmd/eaas`, `:9091`) | **LIMITED / OUT OF SCOPE** | Separate local sandbox; do not fold into the CSPM pilot evidence |
+| EaaS production Postgres repository | **BLOCKED** | Target schema only; no Go Postgres repository exists |
+
+## EaaS is a separate surface
+
+EaaS ships as its own binary (`cmd/eaas`, `internal/eaas`, `web/eaas`) with a default listen
+address of `:9091`, `/api/eaas/v1/*` and `/api/beta/v1/*` routes, and a developer portal served by
+that binary at `/` and `/portal`. GitHub Pages serves the CSPM docs and labeled demos, not the
+EaaS portal. State is an atomic JSON sandbox file; `deploy/migrations/004_eaas_schema.sql` is a
+target schema with no Go Postgres repository behind it. Numeric quotas and RPM are enforced, but
+plan flags for SSO, HSM, audit log, and advanced analytics are display-only. Classical crypto is
+implemented; ML-KEM-768 and ML-DSA-65 are `Experimental` via `cloudflare/circl`, and SLH-DSA is
+not implemented. There is no Stripe/payment collection, payment webhooks, email delivery, hosted
+deployment, CAVP/FIPS validation, HSM custody, AI operations, quantum hardware, or wireless
+operations. EaaS CI is path-filtered gofmt/vet/build/test with no deploy gate. Details:
+[EAAS_API.md](EAAS_API.md), [EAAS_DEPLOYMENT.md](EAAS_DEPLOYMENT.md),
+[EAAS_TESTING_CI.md](EAAS_TESTING_CI.md).
 
 ## What a pilot may test
 
@@ -39,6 +59,8 @@ Machine-readable manifest: [CAPABILITIES.yaml](CAPABILITIES.yaml)
 - Tenant isolation and auth boundary behavior on the API.
 - The static Pages console as a **labeled demo**, not as a live estate.
 - Documentation, architecture maps, and the Graph demo.
+- The EaaS local sandbox may be evaluated separately with explicit `sandbox` labeling; it is not
+  part of the CSPM pilot evidence or a production trial.
 
 ## What a pilot must not claim
 
@@ -48,6 +70,9 @@ Machine-readable manifest: [CAPABILITIES.yaml](CAPABILITIES.yaml)
 - That firmware analysis extracts protected keys, flashes devices, or attests silicon.
 - That template or heuristic output is a trained AI model.
 - That real-time detection, continuous scanning, or runtime sensors are available.
+- That EaaS is production-ready, Postgres-backed, hosted on Pages, or covered by this gate.
+- That EaaS plan flags (SSO, HSM, audit log, advanced analytics) are enforced features.
+- That EaaS PQC operations are validated or certified, or that SLH-DSA is available.
 
 ## Pilot entry checklist
 
@@ -57,6 +82,7 @@ Machine-readable manifest: [CAPABILITIES.yaml](CAPABILITIES.yaml)
 - [ ] API deployed with `DATABASE_URL`, a strong `JWT_SECRET`, and explicit `CORS_ORIGINS`.
 - [ ] Console built with `REACT_APP_API_URL` pointing at that API, or explicitly left in demo mode.
 - [ ] Static Pages build passes `scripts/verify-pages-build.sh`.
+- [ ] Any EaaS evaluation is kept separate from the CSPM pilot record and labeled as sandbox use.
 - [ ] [PILOT_ACCEPTANCE_CRITERIA.md](PILOT_ACCEPTANCE_CRITERIA.md) agreed before day one.
 - [ ] Rollback and support escalation path agreed.
 

@@ -2,7 +2,7 @@ import { handleRoute, ok } from "@/lib/api";
 import { requireAdminApiAccess } from "@/lib/admin-data";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/db";
-import { priceSchema, regionalPriceSchema } from "@/lib/validation";
+import { pricePatchSchema, priceSchema, regionalPriceSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -73,13 +73,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   return handleRoute(async () => {
     const actor = await requireAdminApiAccess("prices");
-    const body = (await request.json()) as {
-      id: string;
-      unitAmount?: number;
-      active?: boolean;
-      stripePriceId?: string | null;
-    };
-    if (!body.id) throw new Error("Price id is required");
+    const body = pricePatchSchema.parse(await request.json());
     const price = await prisma.price.update({
       where: { id: body.id },
       data: {

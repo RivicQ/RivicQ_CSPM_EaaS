@@ -2,7 +2,9 @@
 
 Owner: RivicQ GmbH (Berlin). Repository: `RivicQ/RivicQ_CSPM_EaaS` at https://github.com/RivicQ/RivicQ_CSPM_EaaS.
 
-This document captures the product intent for **Cryptographic Security Posture Management (CSPM)** delivered as an Encryption-as-a-Service (CryptoBOM EaaS) product. It reflects what is actually built in this repository and explicitly does not claim certifications the project does not hold.
+This document captures the product intent for **Cryptographic Security Posture Management (CSPM)** and, as a separate product surface, the standalone **Encryption-as-a-Service (EaaS)** build. CSPM requirements FR-1–FR-13 and EaaS requirements FR-14–FR-22 are distinct: EaaS is a local sandbox service on `main`, not a production-ready extension of the CSPM scanner or its scores. It reflects what is actually built in this repository and explicitly does not claim certifications the project does not hold.
+
+EaaS companions: [Product status](EAAS_PRODUCT_STATUS.md) · [API](EAAS_API.md) · [Deployment](EAAS_DEPLOYMENT.md) · [Security & privacy](EAAS_SECURITY_PRIVACY.md) · [Limitations](EAAS_LIMITATIONS.md) · [Testing & CI](EAAS_TESTING_CI.md) · [Freemium & metering](EAAS_FREEMIUM_AND_METERING.md).
 
 ## 1. Problem
 
@@ -39,12 +41,14 @@ In scope for this product and repo:
 - Static firmware and identity (certificate) analysis — metadata only, no execution, no secret extraction (`internal/firmware`, `internal/identity`, `internal/certeng`).
 - Community UI (React) and in-memory demos; Enterprise control plane (SSO config, audit, API keys, webhooks, multi-cloud connectors when customer credentials exist).
 - GitHub Pages static demo, marketing site (`marketing/`), RivicQ Graph demo (`fabric/`), archify diagram site (`archify/`).
+- Standalone EaaS binary (`cmd/eaas`, `internal/eaas`, `web/eaas`) with its own HTTP surface on port `:9091`, a developer portal served by that binary at `/` and `/portal`, a sandbox JSON state file, and a target-only PostgreSQL schema (`deploy/migrations/004_eaas_schema.sql`). This is a separate product surface (FR-14–FR-22), independent of the CSPM scanner, control plane, and CSPM scores.
 
 Out of scope explicitly:
 
 - Mobile applications and Ads (see `docs/ADMOB.md`).
 - Runtime firmware emulation, silicon reverse engineering, private-key extraction.
 - Claiming ISO 27001 / SOC 2 / PCI DSS / FedRAMP / HIPAA / TuV certification of RivicQ itself. Framework names in the UI and reports are **control mappings for operators**, never certifications.
+- For EaaS: hosted deployment/SaaS, Stripe or any payment collection and payment webhooks, email delivery (including verification codes), a production PostgreSQL repository or migration runner, CAVP/FIPS validation, AI operations, quantum hardware, HSM custody, and wireless operations (`docs/EAAS_LIMITATIONS.md`).
 
 ## 5. Functional requirements
 
@@ -56,13 +60,31 @@ Out of scope explicitly:
 | FR-4 | Gate on policies with BLOCK/WARN semantics and severity fail-on | `internal/intelligence/failon.go`, `internal/intelligence/policy.go` |
 | FR-5 | Export CycloneDX 1.6 CBOM | `GET /api/v1/scans/:id/cyclonedx` (`internal/intelligence/cyclonedx.go`) |
 | FR-6 | Scan GitHub repositories via token or synthetic demo fixture | `/api/v1/github/scan` (`internal/api/shared/github_scanning.go`) |
-| FR-7 | Accept signed GitHub webhooks (HMAC) with replay protection | `README` webhook section, `internal/api/shared/github_webhook_security_test.go` |
+| FR-7 | Accept signed GitHub webhooks (HMAC) with replay protection | `internal/api/shared/github_webhook_security_test.go` |
 | FR-8 | Authenticate users: JWT, bcrypt passwords, TOTP MFA, Google/GitHub OAuth | `internal/authn/authn.go`, `internal/authn/password.go` |
 | FR-9 | Isolate data by tenant from JWT claims; reject spoofable `X-Tenant-ID` | `internal/tenant/context.go`, `internal/api/enterprise/tenancy.go` |
 | FR-10 | Enforce edition feature flags server-side (Enterprise APIs 403 on OSS) | `internal/edition/edition.go`, `internal/api/enterprise/handlers.go` |
 | FR-11 | Static firmware and identity analysis with hard size limits and RBAC | `internal/firmware/limits.go`, `docs/FIRMWARE_IDENTITY_API.md` |
 | FR-12 | Community UI for scans, findings, assets, analytics, pipeline | `web/src/pages/`, routes in `web/src/App.tsx` |
 | FR-13 | Enterprise UI for inventory, compliance, multi-cloud, quantum, admin | `web/src/pages/enterprise/`, gated by `RequireEnterprise` |
+
+### EaaS functional requirements (FR-14–FR-22 — separate product surface)
+
+These requirements describe the standalone EaaS build on `main`. They are **not** part of CSPM FR-1–FR-13, do not change any CSPM score, and are bounded by the local sandbox unless a row says otherwise.
+
+| ID | Requirement | Status | Evidence in repo |
+|---|---|---|---|
+| FR-14 | Standalone binary and independent HTTP API: default `:9091`; `/healthz`, `/api/eaas/v1/*`, `/api/beta/v1/*`; separate from the CSPM router | VERIFIED (local) | `cmd/eaas/main.go`, `internal/eaas/http.go`, `.github/workflows/eaas-ci.yml` |
+| FR-15 | Account and session lifecycle: registration, bcrypt passwords, verification-code flow, bearer session, logout | VERIFIED (local); email delivery Integration pending | `internal/eaas/service.go:107-292`, `docs/EAAS_API.md` |
+| FR-16 | Projects and API keys: project scoping, hashed keys shown once, rotate/revoke, cross-tenant access rejected | VERIFIED (local) | `internal/eaas/service.go:330-500`, `internal/eaas/eaas_test.go:323-348` |
+| FR-17 | Classical crypto operations from the Go standard library (AES-256-GCM, HMAC-SHA-256, SHA-256, `crypto/rand`); labelled Beta implemented in responses, not a validated module | VERIFIED (local) | `internal/eaas/crypto.go`, `docs/EAAS_SECURITY_PRIVACY.md` |
+| FR-18 | PQC operations ML-KEM-768 and ML-DSA-65 via `github.com/cloudflare/circl` v1.6.1; SLH-DSA not implemented | Experimental | `internal/eaas/crypto.go`, `go.mod`, `docs/EAAS_SECURITY_PRIVACY.md` |
+| FR-19 | Server-held key lifecycle: generate and expose public keys only; private bytes never returned but stored base64 in the sandbox state file; no HSM custody | LIMITED | `internal/eaas/service.go`, `internal/eaas/store.go`, `docs/EAAS_DEPLOYMENT.md` |
+| FR-20 | Freemium entitlements and metering: Free = 10,000 operations/month and 60 RPM, numerically enforced; self-service plan switch changes entitlements only, with no Stripe/payment collection | VERIFIED (local); payments NOT_IMPLEMENTED | `internal/eaas/plans.go`, `internal/eaas/service.go`, `docs/EAAS_FREEMIUM_AND_METERING.md` |
+| FR-21 | Beta registration: `POST /api/beta/v1/registrations` returns `received_pending_review`; admin listing gated by `EAAS_ADMIN_TOKEN`; manual review, no email delivery | VERIFIED (local); LIMITED (manual review) | `internal/eaas/service.go:880-943`, `internal/eaas/http.go:62-66`, `docs/EAAS_SECURITY_PRIVACY.md` |
+| FR-22 | Static developer portal served by the standalone binary at `/` and `/portal`, not GitHub Pages | VERIFIED (local) | `cmd/eaas/main.go:34-37`, `web/eaas/index.html`, `docs/EAAS_DEPLOYMENT.md` |
+
+Evidence scope for FR-14–FR-22 is `cmd/eaas`, `internal/eaas`, `web/eaas`, `deploy/migrations/004_eaas_schema.sql`, and `.github/workflows/eaas-ci.yml`. Seven EaaS package tests and the full repository `go test ./...` suite passed locally; `go vet ./...` and `go build ./...` also passed (`docs/EAAS_TESTING_CI.md`). `deploy/migrations/004_eaas_schema.sql` is a target schema, not a production Postgres implementation.
 
 ## 6. Non-functional requirements
 
@@ -75,6 +97,10 @@ Out of scope explicitly:
 | Performance target | Rate limit 100 req/min (OSS) / 1000 req/min (Enterprise), benchmark regression threshold 20% against `tests/benchmark-baseline.json` |
 | Demo safety | `DEMO_MODE` never passes `/readyz`; fabricated data is labeled demo (`internal/server/server.go:217`) |
 | Honesty | No false certification claims, no fake telemetry, demo dashboards labeled synthetic |
+| EaaS separation (FR-14–FR-22) | Standalone `:9091` service and portal; no EaaS feature is counted in the CSPM edition split, tenancy, rate-limit, edition, or score rows above |
+| EaaS persistence | VERIFIED only as an atomic sandbox JSON state file (`internal/eaas/store.go`); production Postgres repository BLOCKED (`deploy/migrations/004_eaas_schema.sql`); private key bytes are base64 in the state file and never returned by the API |
+| EaaS transport and crypto maturity | Strict `EAAS_ALLOWED_ORIGINS` CORS allowlist and security headers (`internal/eaas/http.go`); classical operations are Go stdlib, ML-KEM-768/ML-DSA-65 are Experimental, SLH-DSA is not implemented, no CAVP/FIPS validation |
+| EaaS maturity evidence | Seven EaaS package tests passed locally, including end-to-end journey, tenant isolation, quota/RPM, beta review, secrets-not-persisted, classical crypto, and strict CORS (`internal/eaas/eaas_test.go`); full repository `go test ./...` passed locally |
 
 ## 7. Success metrics
 
@@ -91,10 +117,17 @@ Out of scope explicitly:
 - Firmware execution and key extraction.
 - Certified compliance reports.
 - Multi-region or HA guarantees for the experiment (relies on Helm replicaCount as documented in `deploy/helm/`).
+- Hosted EaaS / EaaS SaaS (`cmd/eaas` is a local standalone binary; no hosted deployment in evidence scope).
+- EaaS payments and Stripe integration, payment collection, and payment webhooks; self-service plan switches change entitlements only.
+- EaaS email delivery, including verification codes and beta registration notices.
+- EaaS production PostgreSQL implementation: `deploy/migrations/004_eaas_schema.sql` is a target schema only; no runtime repository, host, or migration runner.
+- EaaS CAVP/FIPS validation of the crypto module, plus EaaS AI operations, quantum hardware, HSM custody, and wireless operations.
 
 ## 9. Layout and client-architecture demo
 
 The operator console is the application. Architecture maps are references, aligned to `archify/site/index.html`.
+
+The EaaS developer portal is not part of this map or of GitHub Pages: it is served by the standalone binary at `/` and `/portal` (`cmd/eaas/main.go`, `web/eaas/index.html`).
 
 | Surface | What the operator sees |
 |---|---|

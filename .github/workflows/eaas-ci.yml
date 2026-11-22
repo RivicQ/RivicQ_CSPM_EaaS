@@ -1,0 +1,47 @@
+name: EaaS CI
+
+on:
+  push:
+    paths:
+      - "internal/eaas/**"
+      - "cmd/eaas/**"
+      - "web/eaas/**"
+      - "deploy/migrations/004_eaas_schema.sql"
+      - "docs/EAAS_*.md"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/eaas-ci.yml"
+  pull_request:
+    paths:
+      - "internal/eaas/**"
+      - "cmd/eaas/**"
+      - "web/eaas/**"
+      - "deploy/migrations/004_eaas_schema.sql"
+      - "docs/EAAS_*.md"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/eaas-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eaas-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Check formatting
+        run: |
+          unformatted=$(gofmt -l internal/eaas cmd/eaas)
+          if [ -n "$unformatted" ]; then echo "Unformatted files: $unformatted"; exit 1; fi
+      - name: Vet EaaS packages
+        run: go vet ./internal/eaas/... ./cmd/eaas/...
+      - name: Build
+        run: go build ./...
+      - name: Test
+        run: go test ./... -count=1

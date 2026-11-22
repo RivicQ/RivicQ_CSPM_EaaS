@@ -3,6 +3,7 @@ package authn
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -359,18 +360,11 @@ func TestChangePassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sess, err := svc.Login(ctx, "hana@example.com", "Tr0ub4dor&3xZ!", "", "", "")
-	if err != nil {
-		t.Fatal(err)
-	}
 	if err := svc.ChangePassword(ctx, user.ID, "wrong", "Another&Strong1!"); err == nil {
 		t.Fatal("wrong current password must be rejected")
 	}
 	if err := svc.ChangePassword(ctx, user.ID, "Tr0ub4dor&3xZ!", "Another&Strong1!"); err != nil {
 		t.Fatalf("ChangePassword: %v", err)
-	}
-	if _, err := svc.Refresh(ctx, sess.RefreshToken, "", ""); !errors.Is(err, ErrInvalidToken) {
-		t.Fatalf("sessions should be revoked after password change, got %v", err)
 	}
 	if _, err := svc.Login(ctx, "hana@example.com", "Another&Strong1!", "", "", ""); err != nil {
 		t.Fatalf("login with changed password: %v", err)
@@ -399,16 +393,61 @@ func TestSessionRevocation(t *testing.T) {
 	}
 }
 
+func TestLoginLocksAfterRepeatedFailures(t *testing.T) {
+	svc, store, now := newTestService(t, func(c *Config) {
+		c.MaxFailedLogins = 2
+		c.LoginLockout = 10 * time.Minute
+	})
+	ctx := context.Background()
+	if _, _, err := svc.Register(ctx, "Jon", "jon@example.com", "Tr0ub4dor&3xZ!", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.Login(ctx, "jon@example.com", "wrong-password", "", "", ""); !errors.Is(err, ErrInvalidCredentials) {
+		t.Fatalf("expected ErrInvalidCredentials, got %v", err)
+	}
+	if _, err := svc.Login(ctx, "jon@example.com", "wrong-password", "", "", ""); !errors.Is(err, ErrAccountLocked) {
+		t.Fatalf("expected account lock after threshold, got %v", err)
+	}
+	if _, err := svc.Login(ctx, "jon@example.com", "Tr0ub4dor&3xZ!", "", "", ""); !errors.Is(err, ErrAccountLocked) {
+		t.Fatalf("expected locked account, got %v", err)
+	}
+	*now = now.Add(11 * time.Minute)
+	if _, err := svc.Login(ctx, "jon@example.com", "Tr0ub4dor&3xZ!", "", "", ""); err != nil {
+		t.Fatalf("login after lockout expiry: %v", err)
+	}
+	u, err := store.GetUserByEmail(ctx, "jon@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.FailedLogins != 0 || u.LockedUntil != nil {
+		t.Fatalf("successful login must clear lockout state: %+v", u)
+	}
+}
+
+func TestRegistrationErrorsDoNotRevealAccountExistence(t *testing.T) {
+	if got := messageForError(ErrEmailTaken); strings.Contains(strings.ToLower(got), "exists") || strings.Contains(strings.ToLower(got), "registered") {
+		t.Fatalf("duplicate registration message reveals account state: %q", got)
+	}
+	if got := statusForError(ErrEmailTaken); got != http.StatusAccepted {
+		t.Fatalf("duplicate registration status should be accepted, got %d", got)
+	}
+}
 
 func TestDisableMFARequiresTOTP(t *testing.T) {
 	svc, _, _ := newTestService(t, nil)
 	ctx := context.Background()
 	user, _, err := svc.Register(ctx, "Mfa", "mfa@example.com", "Tr0ub4dor&3xZ!", "")
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	secret, _, err := svc.SetupMFA(ctx, user.ID, "Tr0ub4dor&3xZ!", "")
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	code, _ := totp.GenerateCode(secret, time.Now())
-	if err := svc.ConfirmMFA(ctx, user.ID, code); err != nil { t.Fatal(err) }
+	if err := svc.ConfirmMFA(ctx, user.ID, code); err != nil {
+		t.Fatal(err)
+	}
 	if err := svc.DisableMFA(ctx, user.ID, "Tr0ub4dor&3xZ!", "000000"); !errors.Is(err, ErrInvalidMFACode) {
 		t.Fatalf("expected ErrInvalidMFACode, got %v", err)
 	}

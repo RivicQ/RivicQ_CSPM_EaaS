@@ -90,7 +90,7 @@
 
     <main id="main" class="shell">
       <section class="hero">
-        <p class="hero-eyebrow">Documentation · RivicQ GmbH · Berlin · public desks only · 19 Nov 2026</p>
+        <p class="hero-eyebrow">Documentation · RivicQ GmbH · Berlin · public desks only · updated 20 Nov 2026</p>
         <h1>How the control plane works — from discovery to migration.</h1>
         <p>
           Community is a limited scan engine on this GitHub project. Enterprise is the licensed SaaS.
@@ -101,7 +101,8 @@
         <p class="note">
           Live scanning runs against the RivicQ CBOM engine. On GitHub Pages the engine is not reachable —
           sign in to run a real scan. We never show fabricated findings here. Qiskit scores are a local taxonomy,
-          not IBM Quantum hardware.
+          not IBM Quantum hardware. EaaS is a separate sandbox binary with its own API and portal; that portal
+          is not hosted on this site (its docs are published here) and it is not production-ready.
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#workflow">Read the workflow</a>
@@ -316,10 +317,12 @@
       <section aria-labelledby="library-title" id="library">
         <h2 class="section-title" id="library-title">Documents on this site</h2>
         <p class="section-sub">
-          Copied onto GitHub Pages with each deploy from the release branch. Markdown files are the
-          source of truth. This page is the designed index. Pilot status is published in the
+          Copied onto GitHub Pages with each deploy from <code>main</code>/<code>master</code>
+          (<code>.github/workflows/pages.yml</code>). Markdown files are the source of truth. This page is the designed index. Pilot status is published in the
           <a href="../pilot/">pilot gate</a> and <a href="CAPABILITIES.yaml">capability manifest</a>.
-          Pages demos never publish secret values.
+          EaaS documentation is listed separately because the EaaS portal and API are served by their own binary,
+          not Pages; the EaaS markdown files are copied onto Pages by <code>scripts/build-pages.sh</code>. EaaS is a
+          sandbox surface, not production-ready. Pages demos never publish secret values.
         </p>
         <div class="doc-groups">
           <article class="doc-card">
@@ -363,6 +366,22 @@
               <li><a href="read.html?doc=QISKIT_PIPELINE.md">Qiskit pipeline</a></li>
               <li><a href="../fabric/">RivicQ Graph demo</a></li>
               <li><a href="read.html?doc=FABRIC.md">Graph notes (FABRIC.md)</a> · <a href="read.html?doc=GRAPH.md">Rename note</a></li>
+            </ul>
+          </article>
+          <article class="doc-card">
+            <h3>Encryption as a Service (separate surface)</h3>
+            <ul>
+              <li><strong>Separate binary:</strong> default <code>:9091</code>; portal at <code>/</code> and <code>/portal</code> is served by the EaaS binary, not GitHub Pages. Sandbox file store only — not production-ready.</li>
+              <li><a href="read.html?doc=API_GUIDE.md">API guide (CSPM <code>/api/v1</code>)</a></li>
+              <li><a href="read.html?doc=EAAS_API.md">EaaS API (<code>/api/eaas/v1</code>, <code>/api/beta/v1</code>)</a></li>
+              <li><a href="read.html?doc=EAAS_PRODUCT_STATUS.md">EaaS product status</a></li>
+              <li><a href="read.html?doc=EAAS_DEPLOYMENT.md">EaaS deployment and persistence</a></li>
+              <li><a href="read.html?doc=EAAS_SECURITY_PRIVACY.md">EaaS security and privacy</a></li>
+              <li><a href="read.html?doc=EAAS_LIMITATIONS.md">EaaS limitations</a></li>
+              <li><a href="read.html?doc=EAAS_TESTING_CI.md">EaaS testing and CI</a></li>
+              <li><a href="read.html?doc=ALPHA_BETA_TEST_REPORT.md">Alpha/beta test report</a></li>
+              <li><a href="read.html?doc=EAAS_FREEMIUM_AND_METERING.md">EaaS freemium and metering</a></li>
+              <li><a href="read.html?doc=PRD_TRACEABILITY_MATRIX.md">PRD traceability matrix</a></li>
             </ul>
           </article>
           <article class="doc-card">

@@ -6,6 +6,8 @@
 **Edition:** OSS (default) / Enterprise (license-gated)
 **Method:** Full repository inspection, build verification, `go vet`, and targeted source review. Every claim below cites a file and line range. Anything not verified is marked **UNVERIFIED**.
 
+> **Scope note (added later):** this is a historical assessment of the **CSPM scanner/control plane at commit `82a6785` only**. The standalone EaaS build now on `main` (`cmd/eaas`, `internal/eaas`, `web/eaas`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`) did not exist at that commit. EaaS is a separate, non-production product surface and is **excluded** from this baseline, its file counts, its findings, and its 58/100 score. This document is not a current-state assessment of the repository.
+
 ---
 
 ## 1. Honest self-assessment
@@ -21,7 +23,7 @@
 | Production readiness | 40/100 | 75+ |
 | **Overall** | **58/100** | **80+** |
 
-These are **starting estimates to be falsified**, not validated measurements. The only measured numbers in this document are the ones produced by tools (build, vet, test inventory, file/LOC counts). Accuracy benchmarks did not exist at baseline; §7 explains what was missing.
+These are **starting estimates to be falsified**, not validated measurements. The only measured numbers in this document are the ones produced by tools (build, vet, test inventory, file/LOC counts). Accuracy benchmarks did not exist at baseline; §7 explains what was missing. These numbers cover CSPM only; EaaS is excluded and must not be used to adjust them (see `docs/EAAS_PRODUCT_STATUS.md` and `RIVICQ_SCORECARD.md`).
 
 ---
 
@@ -459,4 +461,4 @@ Database connection is configured in `internal/database` from env vars, **indepe
 
 ## 14. What "done" will mean for this cycle
 
-Per §30, no item is complete without implementation + tests + security validation + error handling + observability + documentation + CI validation. Every fix in the hardening report must name the test that proves it and the command that runs it. Score changes are only claimed where a reproducible measurement exists.
+Per §30, no item is complete without implementation + tests + security validation + error handling + observability + documentation + CI validation. Every fix in the hardening report must name the test that proves it and the command that runs it. Score changes are only claimed where a reproducible measurement exists. This definition of done applies to the CSPM work at the baseline commit; the later standalone EaaS surface is tracked separately and is not folded into this score.

@@ -33,6 +33,12 @@ Live-mode approval variables, all distinct and present before `STRIPE_MODE=live`
 - `DEPLOYMENT_APPROVAL_TOKEN`
 - `STRIPE_LIVE_APPROVAL_TOKEN`
 
+## Secret handling
+
+Never commit `STRIPE_SECRET_KEY` (`sk_live_`/`sk_test_`), `STRIPE_WEBHOOK_SECRET` (`whsec_`), approval tokens, `JWT_SECRET`, or database URLs. Set them only in a gitignored local `.env` file or in the deployment platform's secret store. GitHub Secrets are the right place for server-side deployment values; do not pass them to the static Pages build.
+
+`NEXT_PUBLIC_STRIPE_PAYMENT_LINK_URL` and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` are public by design. Never put an `sk_` or `whsec_` value in a `NEXT_PUBLIC_` variable, checked-in file, build artifact, or log.
+
 ## Migrations
 
 Apply migrations before starting the application:

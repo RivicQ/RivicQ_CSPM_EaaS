@@ -5,7 +5,10 @@ import { formatMoney } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
-const bookingUrl = "https://zoho141.zohobookings.eu/RivicQ";
+const bookingUrl = process.env.NEXT_PUBLIC_ZOHO_BOOKINGS_URL || "https://zoho141.zohobookings.eu/RivicQ";
+const paymentUrl =
+  process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_URL ||
+  "https://buy.stripe.com/aFadR99Pr0cldxT4Qf0ZW00";
 const openSourceUrl = "https://github.com/RivicQ/RivicQ_CSPM_EaaS";
 const cloudUrl = "https://rivicq.com/#cloud";
 const referenceUrl = `${openSourceUrl}/tree/main/docs`;
@@ -74,6 +77,14 @@ export default async function HomePage() {
             >
               Book a security review
             </a>
+            <a
+              href={paymentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+            >
+              Buy now
+            </a>
             <Link
               href="/#pricing"
               className="rounded-xl border border-violet-400/30 px-6 py-3 text-sm font-semibold text-violet-100"
@@ -81,6 +92,9 @@ export default async function HomePage() {
               View live pricing
             </Link>
           </div>
+          <p className="mt-3 text-xs text-slate-500">
+            Direct purchase opens Stripe-hosted checkout. RevenueOS billing stays in test mode until live server secrets are configured.
+          </p>
         </div>
       </section>
 

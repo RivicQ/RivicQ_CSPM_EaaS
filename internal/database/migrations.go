@@ -410,5 +410,13 @@ func coreMigrations() []Migration {
 				`CREATE INDEX IF NOT EXISTS idx_auth_tokens_user_purpose ON auth_tokens(user_id, purpose);`,
 			},
 		},
+		{
+			ID:   "0009_authn_login_lockout",
+			Name: "auth lifecycle: per-account failed-login counters and temporary lockout",
+			Statements: []string{
+				`ALTER TABLE users ADD COLUMN IF NOT EXISTS failed_login_attempts INTEGER NOT NULL DEFAULT 0;`,
+				`ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP WITH TIME ZONE;`,
+			},
+		},
 	}
 }

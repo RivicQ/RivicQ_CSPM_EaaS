@@ -17,6 +17,7 @@ import (
 	"github.com/rivic-q/cryptobom-saas/internal/api/oss"
 	"github.com/rivic-q/cryptobom-saas/internal/config"
 	"github.com/rivic-q/cryptobom-saas/internal/database"
+	"github.com/rivic-q/cryptobom-saas/internal/discovery"
 )
 
 // testBootstrapPassword satisfies the bootstrap policy: RivicQ ships no default
@@ -35,6 +36,7 @@ func scannerTestRouter(t *testing.T) (*gin.Engine, string) {
 	t.Setenv("AUTH_BOOTSTRAP_PASSWORD", testBootstrapPassword)
 	t.Setenv("JWT_SECRET", scanTenantSecret)
 	t.Setenv("RIVICQ_SCAN_ALLOW_PRIVATE_NETS", "true")
+	discovery.GetScanManager().SetPolicy(discovery.TargetPolicy{AllowPrivateNetworks: true})
 	router := gin.New()
 	group := router.Group("/api/v1")
 	logger := logrus.New()
@@ -48,8 +50,12 @@ func scannerTestRouter(t *testing.T) (*gin.Engine, string) {
 
 func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
 	router, token := scannerTestRouter(t)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
 
-	payload := map[string]string{"target": "127.0.0.1"}
+	payload := map[string]string{"target": srv.URL}
 	body, err := json.Marshal(payload)
 	require.NoError(t, err)
 
@@ -64,7 +70,7 @@ func TestScannerFlowAcceptsAndReturnsStatus(t *testing.T) {
 	var response map[string]any
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
 	assert.Equal(t, "accepted", response["status"])
-	assert.Equal(t, "127.0.0.1", response["target"])
+	assert.Equal(t, srv.URL, response["target"])
 	assert.NotEmpty(t, response["scan_id"])
 
 	scanID, ok := response["scan_id"].(string)

@@ -2,6 +2,8 @@ package discovery
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -48,6 +50,7 @@ func (s *Scanner) ScanAll(ctx context.Context, targets []Target) (*ScanResult, e
 		wg         sync.WaitGroup
 		findings   []Finding
 		components []CBOMComponent
+		failed     []error
 		scanned    int
 	)
 
@@ -61,10 +64,12 @@ func (s *Scanner) ScanAll(ctx context.Context, targets []Target) (*ScanResult, e
 			mu.Lock()
 			defer mu.Unlock()
 			scanned++
-			if err == nil {
-				findings = append(findings, targetFindings...)
-				components = append(components, targetComponents...)
+			if err != nil {
+				failed = append(failed, fmt.Errorf("target %s: %w", targetLabel(target), err))
+				return
 			}
+			findings = append(findings, targetFindings...)
+			components = append(components, targetComponents...)
 		}(t)
 	}
 
@@ -74,8 +79,30 @@ func (s *Scanner) ScanAll(ctx context.Context, targets []Target) (*ScanResult, e
 	result.Findings = findings
 	result.Components = dedupeComponents(components)
 	result.Summary = computeSummary(targets, scanned, findings, result.Components)
+	if len(failed) > 0 {
+		result.Errors = make([]string, 0, len(failed))
+		for _, err := range failed {
+			result.Errors = append(result.Errors, err.Error())
+		}
+	}
+	if len(targets) > 0 && len(failed) == len(targets) {
+		return result, errors.Join(failed...)
+	}
 
 	return result, nil
+}
+
+func targetLabel(target Target) string {
+	if target.Label != "" {
+		return target.Label
+	}
+	if target.Host != "" {
+		return target.Host
+	}
+	if target.Path != "" {
+		return target.Path
+	}
+	return target.Protocol
 }
 
 // scanTarget dispatches a single target to the appropriate scanner. Network

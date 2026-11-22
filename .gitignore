@@ -93,6 +93,7 @@ web/.env.*
 
 # Database dumps (never commit)
 *.sql
+!deploy/migrations/*.sql
 cryptobom_backup.sql
 
 # Python virtual environments
@@ -108,6 +109,8 @@ __pycache__/
 
 # Local Sellbird runtime data
 .sellbird/
+
+/data/
 
 # Accidental nested clone of this repository (never commit)
 /RivicQ_CSPM_EaaS/

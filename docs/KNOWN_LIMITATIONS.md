@@ -13,6 +13,29 @@ https://rivicq.github.io/RivicQ_CSPM_EaaS/ is a **static** React build.
 - Demo Access on Pages is an isolated client session (`rivicq-demo-session`), not a JWT, and cannot see customer data.
 - `GET /api/v1/auth/demo` is issued only when `DEMO_MODE` is enabled on a backend.
 - `/fabric` is a separate labeled RivicQ Graph demo (wordmark GRAPH; formerly NEXUS / FABRIC). It uses synthetic Northbridge Exchange data, never renders secret values, and does not collect payment or attach live cloud/IdP/vault credentials.
+- Pages publishes CSPM documentation and demos only. It does not serve the EaaS portal or API.
+
+## Encryption as a Service (separate surface)
+
+EaaS is a standalone binary (`cmd/eaas`, `internal/eaas`, `web/eaas`), not part of the CSPM pilot
+or the Pages site. Do not apply the CSPM claims above to it.
+
+- Default listen address is `:9091`; API routes are `/api/eaas/v1/*` and `/api/beta/v1/*`. The
+  portal at `/` and `/portal` is served by the EaaS binary (`EAAS_STATIC_DIR`), not GitHub Pages.
+- Runtime state is an atomic JSON sandbox file. No Go Postgres repository exists;
+  `deploy/migrations/004_eaas_schema.sql` is a target schema only. There is no hosted deployment.
+- No Stripe/payment collection, payment webhooks, or email delivery (verification codes are shown
+  only in development). No HSM/KMS custody, FIPS/CAVP validation, AI operations, quantum hardware,
+  or wireless operations.
+- Numeric monthly quotas and RPM limits are enforced. Plan flags for SSO, HSM, audit log, and
+  advanced analytics are display-only, not entitlement gates.
+- Classical crypto (AES-256-GCM, HMAC-SHA-256, SHA-256, `crypto/rand`) is implemented; ML-KEM-768
+  and ML-DSA-65 are `Experimental` via `cloudflare/circl`. SLH-DSA is not implemented.
+- `.github/workflows/eaas-ci.yml` is path-filtered gofmt/vet/build/test only: no race detection,
+  coverage, govulncheck, migration validation, portal build, container build, or deploy gate.
+
+See [EAAS_LIMITATIONS.md](EAAS_LIMITATIONS.md), [EAAS_PRODUCT_STATUS.md](EAAS_PRODUCT_STATUS.md),
+and [EAAS_TESTING_CI.md](EAAS_TESTING_CI.md).
 
 ## Scanner accuracy
 

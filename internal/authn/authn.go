@@ -54,6 +54,7 @@ var (
 	ErrEmailTaken         = errors.New("email already registered")
 	ErrEmailNotVerified   = errors.New("email not verified")
 	ErrAccountDisabled    = errors.New("account disabled")
+	ErrAccountLocked      = errors.New("account temporarily locked")
 	ErrMFARequired        = errors.New("mfa required")
 	ErrInvalidMFACode     = errors.New("invalid mfa code")
 	ErrInvalidMFASession  = errors.New("invalid or expired mfa session")
@@ -67,19 +68,21 @@ var (
 
 // User is an authenticatable principal.
 type User struct {
-	ID            string    `json:"id"`
-	TenantID      string    `json:"tenant_id"`
-	Email         string    `json:"email"`
-	Name          string    `json:"name"`
-	Role          Role      `json:"role"`
-	Organisation  string    `json:"organisation,omitempty"`
-	PasswordHash  string    `json:"-"`
-	EmailVerified bool      `json:"email_verified"`
-	MFAEnabled    bool      `json:"mfa_enabled"`
-	MFASecret     string    `json:"-"`
-	Disabled      bool      `json:"disabled"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID            string     `json:"id"`
+	TenantID      string     `json:"tenant_id"`
+	Email         string     `json:"email"`
+	Name          string     `json:"name"`
+	Role          Role       `json:"role"`
+	Organisation  string     `json:"organisation,omitempty"`
+	PasswordHash  string     `json:"-"`
+	EmailVerified bool       `json:"email_verified"`
+	MFAEnabled    bool       `json:"mfa_enabled"`
+	MFASecret     string     `json:"-"`
+	Disabled      bool       `json:"disabled"`
+	FailedLogins  int        `json:"-"`
+	LockedUntil   *time.Time `json:"-"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
 }
 
 // Clone returns a shallow copy safe to hand to callers and mutate.

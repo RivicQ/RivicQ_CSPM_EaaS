@@ -2,6 +2,7 @@
 # This file is published with GitHub Pages and consumed by the pilot gate.
 # Status values are deliberately conservative: ready, limited, planned, blocked.
 # Source of truth: docs/IMPLEMENTATION_STATUS.md and docs/PILOT_READINESS.md.
+# EaaS is a separate surface; it is not covered by the CSPM pilot gate below.
 
 schema: rivicq.capabilities/v1
 product: RivicQ CSPM
@@ -31,6 +32,19 @@ surfaces:
   api:
     role: "Hosted scan and evidence API when separately deployed."
     required_for_pages_live_scan: false
+  eaas_binary:
+    binary: eaas
+    role: "Standalone EaaS sandbox service; separate from the CSPM API and Pages site."
+    address: ":9091"
+    api: ["/api/eaas/v1/*", "/api/beta/v1/*"]
+    portal: "Served by the EaaS binary at / and /portal (EAAS_STATIC_DIR), not GitHub Pages."
+    hosted: false
+
+notes:
+  - "CSPM and EaaS are separate surfaces. This manifest's pilot gate does not certify EaaS as production-ready."
+  - "EaaS uses an atomic JSON file store for sandbox state; there is no Go Postgres repository. deploy/migrations/004_eaas_schema.sql is a target schema only."
+  - "EaaS enforces numeric quotas and RPM; plan feature flags (SSO, HSM, audit log, advanced analytics) are display-only."
+  - "EaaS has no Stripe/payment collection, payment webhooks, or email delivery. Classical crypto is implemented; PQC is Experimental; SLH-DSA is not implemented."
 
 features:
   - id: cli-cbom-sbom
@@ -130,12 +144,12 @@ features:
     limitation: "Existing TEXT/UUID tenant schema conflict must be migrated first."
 
   - id: stripe-billing
-    name: "Stripe billing and trial quotas"
+    name: "Stripe billing and trial quotas (CSPM only)"
     status: planned
     surfaces: [api, github_pages]
-    evidence: "internal/platform/payments.go stub; /billing/webhooks reserved"
-    pilot_use: "Manual trial only; no card collection."
-    limitation: "No checkout, subscription, or quota enforcement yet."
+    evidence: "CSPM: internal/platform/payments.go stub; /billing/webhooks reserved"
+    pilot_use: "Manual CSPM trial only; no card collection."
+    limitation: "CSPM has no checkout, subscription, or quota enforcement. Separately, EaaS enforces numeric quotas/RPM but has no payment collection, Stripe checkout, or payment webhooks."
 
   - id: realtime-events
     name: "Event bus and continuous scanning"
@@ -168,3 +182,27 @@ features:
     evidence: "static firmware and identity analysis only"
     pilot_use: "Not in this pilot."
     limitation: "No protected-key extraction, flashing, or silicon attestation."
+
+  - id: eaas-sandbox-service
+    name: "EaaS standalone sandbox API and portal"
+    status: limited
+    surfaces: [eaas_binary]
+    evidence: "cmd/eaas; internal/eaas; web/eaas; .github/workflows/eaas-ci.yml"
+    pilot_use: "Evaluate the versioned EaaS API only as a labeled local sandbox."
+    limitation: "Default :9091; file-backed state; no hosted deployment or production-ready claim."
+
+  - id: eaas-crypto-operations
+    name: "EaaS classical and experimental PQC operations"
+    status: limited
+    surfaces: [eaas_binary]
+    evidence: "internal/eaas/crypto.go; internal/eaas/eaas_test.go"
+    pilot_use: "Exercise AES-256-GCM / HMAC-SHA-256 / SHA-256 / rand as beta and ML-KEM-768 / ML-DSA-65 as experimental."
+    limitation: "PQC uses cloudflare/circl Experimental; SLH-DSA, HSM custody, and FIPS/CAVP validation are not implemented."
+
+  - id: eaas-postgres-repository
+    name: "EaaS production Postgres repository"
+    status: blocked
+    surfaces: [eaas_binary]
+    evidence: "deploy/migrations/004_eaas_schema.sql (target schema only)"
+    pilot_use: "Not in this pilot."
+    limitation: "No Go Postgres repository, connection config, or EaaS migration runner; runtime state is a JSON file."

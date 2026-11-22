@@ -4,6 +4,8 @@
 
 RivicQ is **Cryptographic Security Posture Management** (CSPM): Community inventories cryptography (CBOM) and software components (SBOM). QBOM, HBOM, AIBOM, and IBOM are licensed Enterprise control-plane layers. The same cryptographic intelligence engine powers Community (Apache-2.0) and Enterprise (commercial). Editions are **licenses and feature entitlements**, not a second scanner.
 
+A separate build on `main` adds a standalone **Encryption-as-a-Service (EaaS)** API and developer portal. It is a local sandbox product surface on port `:9091`, not production-ready, not hosted, and not part of the CSPM scores or editions below. See [EaaS](#encryption-as-a-service-eaas-standalone) and the linked EaaS docs below.
+
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/github/actions/workflow/status/RivicQ/RivicQ_CSPM_EaaS/pages.yml?label=GitHub%20Pages)](https://github.com/RivicQ/RivicQ_CSPM_EaaS/actions/workflows/pages.yml)
 [![Security](https://img.shields.io/badge/security-responsible%20disclosure-0f62fe.svg)](SECURITY.md)
@@ -57,6 +59,8 @@ RSA-2048 is **classified**, not automatically marked vulnerable.
 
 ## What RivicQ does
 
+This section describes the CSPM scanner/control plane only; EaaS is a separate surface (below).
+
 ```text
 Cloud / code / CI
         ↓
@@ -72,6 +76,24 @@ CLI / API / Dashboard / GitHub Action
 Homepage workflow: **Discover → Analyze → Quantify** (scan → inventory → risk → report → migration planning).
 
 This product does **not** claim SOC 2, ISO 27001, PCI DSS, FedRAMP, HIPAA, or TÜV certification of RivicQ itself. Framework names in the UI are **control mappings for operators**.
+
+---
+
+## Encryption-as-a-Service (EaaS, standalone)
+
+EaaS is a separate Go binary and HTTP API (`cmd/eaas`, `internal/eaas`), not a CSPM edition or an extension of the CSPM scanner. It listens on `:9091` by default and exposes `/healthz`, `/api/eaas/v1/*`, and `/api/beta/v1/*`. The developer portal is a static page (`web/eaas/index.html`) served at `/` and `/portal` **by that binary**, not by GitHub Pages.
+
+```bash
+go run ./cmd/eaas
+# Portal:  http://localhost:9091/
+# Health:  http://localhost:9091/healthz
+```
+
+Free tier is **10,000 operations/month and 60 RPM**, both enforced numerically. API keys are hashed, shown once, and rotatable/revocable; usage events are metadata-only. Classical operations (AES-256-GCM, HMAC-SHA-256, SHA-256, `crypto/rand`) use the Go standard library; ML-KEM-768 and ML-DSA-65 via `github.com/cloudflare/circl` v1.6.1 are **Experimental**; SLH-DSA is not implemented. Server-held private key bytes are never returned by the API but are stored base64 in the sandbox state file (`./data/eaas-store.json` by default).
+
+Beta enrollment is self-service via `POST /api/beta/v1/registrations`; submissions return `received_pending_review`, and admin review is gated by `EAAS_ADMIN_TOKEN`. No email is sent. Plan switching changes entitlements only — there is **no Stripe/payment collection or payment webhook**. Hosted EaaS, production Postgres, email delivery, CAVP/FIPS validation, AI operations, quantum hardware, HSM custody, and wireless operations are not implemented. Seven EaaS package tests and the full repository `go test ./...` suite passed locally; `go vet ./...` and `go build ./...` also passed. EaaS is excluded from the CSPM scores and pilot/production claims.
+
+Docs: [Product status](docs/EAAS_PRODUCT_STATUS.md) · [API](docs/EAAS_API.md) · [Deployment](docs/EAAS_DEPLOYMENT.md) · [Security & privacy](docs/EAAS_SECURITY_PRIVACY.md) · [Limitations](docs/EAAS_LIMITATIONS.md) · [Testing & CI](docs/EAAS_TESTING_CI.md) · [Freemium & metering](docs/EAAS_FREEMIUM_AND_METERING.md)
 
 ---
 
@@ -140,7 +162,9 @@ See [DATASETS.md](DATASETS.md). Fixtures are synthetic. **Do not commit secrets,
 | Demo | Isolated client session (`rivicq-demo-session`), **not a JWT** | Optional `DEMO_MODE` on the API |
 | Auth | Supabase (if configured) or labeled demo | JWT / SSO as deployed |
 
-Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
+This table is CSPM-only. The EaaS portal is served by the standalone `cmd/eaas` binary at `/` and `/portal`, not by GitHub Pages.
+
+Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md), [docs/EAAS_LIMITATIONS.md](docs/EAAS_LIMITATIONS.md).
 
 ---
 
@@ -149,6 +173,13 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 | Topic | Link |
 |-------|------|
 | Docs hub | [docs/README.md](docs/README.md) |
+| EaaS product status | [docs/EAAS_PRODUCT_STATUS.md](docs/EAAS_PRODUCT_STATUS.md) |
+| EaaS API | [docs/EAAS_API.md](docs/EAAS_API.md) |
+| EaaS deployment | [docs/EAAS_DEPLOYMENT.md](docs/EAAS_DEPLOYMENT.md) |
+| EaaS security & privacy | [docs/EAAS_SECURITY_PRIVACY.md](docs/EAAS_SECURITY_PRIVACY.md) |
+| EaaS limitations | [docs/EAAS_LIMITATIONS.md](docs/EAAS_LIMITATIONS.md) |
+| EaaS testing & CI | [docs/EAAS_TESTING_CI.md](docs/EAAS_TESTING_CI.md) |
+| EaaS freemium & metering | [docs/EAAS_FREEMIUM_AND_METERING.md](docs/EAAS_FREEMIUM_AND_METERING.md) |
 | Ops runbook (local demo & operations) | [docs/OPS_RUNBOOK.md](docs/OPS_RUNBOOK.md) |
 | Known limitations | [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) |
 | Editions (OSS vs Enterprise) | [docs/editions.md](docs/editions.md) |
@@ -185,6 +216,10 @@ Known limitations: [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
 ```
 cmd/rivicq/             Community CLI (scan/sbom/cbom/vuln/secrets/iac/compliance/policy + firmware/identity)
 cmd/server/             OSS (:8080) and Enterprise (:9090) API
+cmd/eaas/               Standalone EaaS binary (default :9091; separate from CSPM)
+internal/eaas/          EaaS service, crypto operations, HTTP router, sandbox store
+web/eaas/               EaaS developer portal served by cmd/eaas at / and /portal
+deploy/migrations/004_eaas_schema.sql  EaaS target PostgreSQL schema (no runtime repository yet)
 internal/discovery/     TLS, SSH, HTTP, SBOM scanners
 internal/intelligence/  Findings, risk, policy, CycloneDX
 internal/auth/          RBAC helpers and route permission table
