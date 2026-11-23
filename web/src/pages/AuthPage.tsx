@@ -1,14 +1,18 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Alert,
   Box,
   Button,
   Card,
   CardContent,
+  Checkbox,
   Chip,
-  Container,
   Divider,
+  FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
@@ -18,13 +22,12 @@ import {
   Tabs,
   TextField,
   Typography,
-  FormControlLabel,
-  Checkbox,
 } from '@mui/material';
 import {
   ArrowForward,
   AutoAwesome,
   CheckCircle,
+  ExpandMore,
   GitHub,
   Google,
   Key,
@@ -38,12 +41,10 @@ import { useAuth } from '../context/AuthContext';
 import { useDemoTrail } from '../context/DemoTrailContext';
 import { authService } from '../services/api';
 import { Edition } from '../config/editions';
-import BrandLogo from '../components/BrandLogo';
+import AuthChrome from '../components/brand/AuthChrome';
 import TrademarkNotice from '../components/TrademarkNotice';
 import { proBlueContainedButtonSx } from '../theme/designSystem';
-import NebulaBackdrop from '../components/brand/NebulaBackdrop';
-import ArchifySurface from '../components/brand/ArchifySurface';
-import { ARCHIFY_FONTS, NEBULA, archifyAuraLayersSx, nebulaCardSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
+import { ARCHIFY_FONTS, nebulaCardSx, nebulaPanelSx } from '../theme/nebulaSurfaces';
 import {
   PUBLIC_ENGINE_AUTH_COPY,
   PUBLIC_ENGINE_CHIP_DISCONNECTED,
@@ -109,6 +110,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     acceptTerms: false,
   });
   const [googleRedirectUri, setGoogleRedirectUri] = React.useState('');
+  const [oauthStatus, setOauthStatus] = React.useState<{ github: boolean | null; google: boolean | null }>({
+    github: null,
+    google: null,
+  });
 
   const strength = React.useMemo(() => passwordStrength(form.password), [form.password]);
   const displayName = [form.firstName, form.lastName].filter(Boolean).join(' ').trim() || form.name.trim();
@@ -133,13 +138,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
   React.useEffect(() => {
     if (!backendReachable) return;
-    authService.googleStatus()
-      .then((resp) => {
-        if (resp.data?.google_oauth_enabled && resp.data?.redirect_uri) {
-          setGoogleRedirectUri(resp.data.redirect_uri);
+    void Promise.allSettled([authService.githubStatus(), authService.googleStatus()]).then(([github, google]) => {
+      if (github.status === 'fulfilled') {
+        setOauthStatus((prev) => ({ ...prev, github: Boolean(github.value.data?.github_oauth_enabled) }));
+      }
+      if (google.status === 'fulfilled') {
+        setOauthStatus((prev) => ({ ...prev, google: Boolean(google.value.data?.google_oauth_enabled) }));
+        if (google.value.data?.google_oauth_enabled && google.value.data?.redirect_uri) {
+          setGoogleRedirectUri(google.value.data.redirect_uri);
         }
-      })
-      .catch(() => {});
+      }
+    });
   }, [backendReachable]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -208,7 +217,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
     setError('');
     try {
       await verifyMfa(mfaStep.email, mfaCode.trim(), mfaStep.session, edition);
-      navigate('/dashboard', { replace: true });
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || 'MFA verification failed');
     } finally {
@@ -232,6 +242,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
 
   const socialLogin = async (provider: 'github' | 'google') => {
     setError('');
+    if (oauthStatus[provider] === false) {
+      setError(`${provider === 'github' ? 'GitHub' : 'Google'} OAuth is not configured on this deployment.`);
+      return;
+    }
     try {
       const statusResp = await (provider === 'github' ? authService.githubStatus() : authService.googleStatus());
       if (!statusResp.data[`${provider}_oauth_enabled`]) {
@@ -254,19 +268,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
       : 'browser authentication (no engine deployed)';
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: NEBULA.ink, color: NEBULA.text, py: { xs: 4, md: 8 }, position: 'relative', overflow: 'hidden' }}>
-      <NebulaBackdrop />
-      <Box aria-hidden sx={archifyAuraLayersSx.radial} />
-      <Box aria-hidden sx={archifyAuraLayersSx.grid} />
-      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
-        <Box sx={{ mb: 2 }}>
-          <ArchifySurface placement="rail" variant="public" />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-          <BrandLogo dark />
-          <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600, borderColor: 'rgba(255,255,255,0.22)', color: NEBULA.muted }} />
-        </Box>
-        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: NEBULA.faint }}>
+    <AuthChrome>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Chip label={`${editionLabel} workspace`} variant="outlined" sx={{ fontWeight: 600, borderColor: 'rgba(255,255,255,0.22)', color: 'text.secondary' }} />
+      </Box>
+        <Typography sx={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
           {mode === 'register' ? 'Create workspace' : 'Cryptographic security'}
         </Typography>
         <Typography variant="h4" sx={{ fontFamily: ARCHIFY_FONTS.title, fontWeight: 500, letterSpacing: '-0.04em', mb: 2, mt: 0.5 }}>
@@ -559,29 +565,39 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                           />
                         )}
                         {mode === 'register' && (
-                          <Grid container spacing={1.5}>
-                            <Grid item xs={12} sm={6}>
-                              <TextField fullWidth size="small" label="Organisation" value={form.organisation} onChange={(e) => setForm((p) => ({ ...p, organisation: e.target.value }))} />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <TextField fullWidth size="small" label="Job title" value={form.jobTitle} onChange={(e) => setForm((p) => ({ ...p, jobTitle: e.target.value }))} />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <TextField fullWidth size="small" label="Country" value={form.country} onChange={(e) => setForm((p) => ({ ...p, country: e.target.value }))} />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <TextField fullWidth size="small" label="Industry" value={form.industry} onChange={(e) => setForm((p) => ({ ...p, industry: e.target.value }))} />
-                            </Grid>
-                            <Grid item xs={12}>
-                              <TextField fullWidth size="small" label="Organisation size" placeholder="e.g. 50–200" value={form.orgSize} onChange={(e) => setForm((p) => ({ ...p, orgSize: e.target.value }))} />
-                            </Grid>
-                            <Grid item xs={12}>
-                              <FormControlLabel
-                                control={<Checkbox checked={form.acceptTerms} onChange={(e) => setForm((p) => ({ ...p, acceptTerms: e.target.checked }))} />}
-                                label="I agree to the terms of service and privacy policy"
-                              />
-                            </Grid>
-                          </Grid>
+                          <>
+                            <FormControlLabel
+                              control={<Checkbox checked={form.acceptTerms} onChange={(e) => setForm((p) => ({ ...p, acceptTerms: e.target.checked }))} />}
+                              label="I agree to the terms of service and privacy policy"
+                            />
+                            <Accordion disableGutters elevation={0} sx={{ ...nebulaPanelSx, bgcolor: 'transparent', '&:before': { display: 'none' } }}>
+                              <AccordionSummary expandIcon={<ExpandMore />}>
+                                <Typography variant="body2">Optional workspace details</Typography>
+                              </AccordionSummary>
+                              <AccordionDetails sx={{ pt: 0 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                                  Skip this now. These details are sent only if you choose to add them.
+                                </Typography>
+                                <Grid container spacing={1.5}>
+                                  <Grid item xs={12} sm={6}>
+                                    <TextField fullWidth size="small" label="Organisation" value={form.organisation} onChange={(e) => setForm((p) => ({ ...p, organisation: e.target.value }))} />
+                                  </Grid>
+                                  <Grid item xs={12} sm={6}>
+                                    <TextField fullWidth size="small" label="Job title" value={form.jobTitle} onChange={(e) => setForm((p) => ({ ...p, jobTitle: e.target.value }))} />
+                                  </Grid>
+                                  <Grid item xs={12} sm={6}>
+                                    <TextField fullWidth size="small" label="Country" value={form.country} onChange={(e) => setForm((p) => ({ ...p, country: e.target.value }))} />
+                                  </Grid>
+                                  <Grid item xs={12} sm={6}>
+                                    <TextField fullWidth size="small" label="Industry" value={form.industry} onChange={(e) => setForm((p) => ({ ...p, industry: e.target.value }))} />
+                                  </Grid>
+                                  <Grid item xs={12}>
+                                    <TextField fullWidth size="small" label="Organisation size" placeholder="e.g. 50–200" value={form.orgSize} onChange={(e) => setForm((p) => ({ ...p, orgSize: e.target.value }))} />
+                                  </Grid>
+                                </Grid>
+                              </AccordionDetails>
+                            </Accordion>
+                          </>
                         )}
 
                         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
@@ -645,6 +661,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                                 variant="outlined"
                                 startIcon={<GitHub />}
                                 onClick={() => socialLogin('github')}
+                                disabled={oauthStatus.github === false}
+                                aria-describedby={oauthStatus.github === false ? 'oauth-unavailable' : undefined}
                                 sx={{ py: 1.1, flex: 1, minWidth: 140 }}
                               >
                                 GitHub
@@ -653,6 +671,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                                 variant="outlined"
                                 startIcon={<Google />}
                                 onClick={() => socialLogin('google')}
+                                disabled={oauthStatus.google === false}
+                                aria-describedby={oauthStatus.google === false ? 'oauth-unavailable' : undefined}
                                 sx={{ py: 1.1, flex: 1, minWidth: 140 }}
                               >
                                 Google
@@ -691,6 +711,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
                             </Button>
                           )}
                         </Stack>
+                        {(oauthStatus.github === false || oauthStatus.google === false) && (
+                          <Typography id="oauth-unavailable" variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
+                            OAuth is disabled for providers not configured on this deployment. Use password sign-in or request an Enterprise workspace.
+                          </Typography>
+                        )}
 
                         <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
                           By continuing you agree to the{' '}
@@ -709,8 +734,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultMode = 'login' }) => {
             </Card>
           </Grid>
         </Grid>
-      </Container>
-    </Box>
+    </AuthChrome>
   );
 };
 

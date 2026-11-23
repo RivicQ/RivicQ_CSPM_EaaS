@@ -13,6 +13,7 @@ export type OpsRoute = {
 /** Minimum IA for an operator console. Marketing/demo items are not primary. */
 export const OPS_ROUTES: OpsRoute[] = [
   { text: 'Overview', path: '/dashboard', section: 'Operations', keywords: ['command', 'ciso', 'inbox', 'posture', 'home'] },
+  { text: 'Account Centre', path: '/account', section: 'Operations', keywords: ['profile', 'security', 'mfa', 'preferences', 'privacy'] },
   { text: 'Findings', path: '/findings', section: 'Operations', keywords: ['critical', 'high', 'evidence', 'remediation', 'queue'] },
   { text: 'Assets', path: '/assets', section: 'Operations', keywords: ['inventory', 'crypto', 'certificate', 'key'] },
   { text: 'Scans', path: '/scanner', section: 'Operations', keywords: ['cbom', 'github', 'website', 'history', 'failed'] },
@@ -27,6 +28,7 @@ export const OPS_ROUTES: OpsRoute[] = [
   { text: 'PATH Scanners', path: '/tools', section: 'Integrations', keywords: ['trivy', 'syft', 'gitleaks', 'osv', 'devsecops'] },
   { text: 'Ecosystem', path: '/ecosystem', section: 'Integrations', keywords: ['sdk', 'cli', 'plugin'] },
   { text: 'Pipeline', path: '/pipeline', section: 'Integrations', keywords: ['ci', 'github actions', 'gate'] },
+  { text: 'Workflow Studio', path: '/workflow-studio', section: 'Integrations', keywords: ['animation', 'devsecops', 'archify', 'stage', 'flow'] },
   { text: 'Contact', path: '/contact', section: 'Integrations', keywords: ['hello', 'support', 'sales'] },
   { text: 'IBM Partner Plus', path: '/ibm', section: 'Integrations', keywords: ['ibm', 'partner', 'marketplace', 'cosell'] },
   { text: 'CRM', path: '/crm', section: 'Integrations', keywords: ['leads', 'sales', 'funnel'], adminOnly: true },

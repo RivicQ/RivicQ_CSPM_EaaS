@@ -34,6 +34,7 @@ const NAV: NavItem[] = [
     { label: 'Open Source', to: 'https://github.com/RivicQ/RivicQ_CSPM_EaaS' },
     { label: 'Cloud', to: 'marketing/index.html#cloud' },
     { label: 'Animation', to: 'animation.html' },
+    { label: 'Workflow animations', to: '/workflows' },
     { label: 'System maps', to: '/maps' },
     { label: 'Archify gallery', to: 'archify/site/index.html#diagrams' },
     { label: 'RivicQ Graph demo', to: 'fabric/' },

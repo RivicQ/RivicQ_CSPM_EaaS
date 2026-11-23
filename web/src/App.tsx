@@ -76,6 +76,9 @@ const PqcPublic = lazy(() => import('./pages/PqcPublic'));
 const EnterprisePublic = lazy(() => import('./pages/EnterprisePublic'));
 const SecurityPublic = lazy(() => import('./pages/SecurityPublic'));
 const ArchifyMaps = lazy(() => import('./pages/ArchifyMaps'));
+const WorkflowStudioPage = lazy(() => import('./pages/WorkflowStudioPage'));
+const WorkflowStudioConsole = lazy(() => import('./pages/WorkflowStudioConsole'));
+const AccountCenter = lazy(() => import('./pages/AccountCenter'));
 
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
@@ -204,6 +207,7 @@ const App: React.FC = () => {
                 <Route path="/enterprise" element={wrap(EnterprisePublic, 'EnterprisePublic')} />
                 <Route path="/security" element={wrap(SecurityPublic, 'SecurityPublic')} />
                 <Route path="/maps" element={wrap(ArchifyMaps, 'ArchifyMaps')} />
+                <Route path="/workflows" element={wrap(WorkflowStudioPage, 'Workflows')} />
                 <Route path="/logout" element={<LogoutRedirect />} />
                 <Route
                   path="/"
@@ -221,12 +225,14 @@ const App: React.FC = () => {
                   <Route path="cspm" element={wrap(CSPM, 'CSPM')} />
                   <Route path="analytics" element={wrap(Analytics, 'Analytics')} />
                   <Route path="settings" element={wrap(Settings, 'Settings')} />
+                  <Route path="account" element={wrap(AccountCenter, 'AccountCenter')} />
                   <Route path="admin" element={<RequireRole role="admin">{wrap(Admin, 'Admin')}</RequireRole>} />
                   <Route path="tools" element={wrap(DevSecOpsTools, 'DevSecOpsTools')} />
                   <Route path="ecosystem" element={wrap(RivicQEcosystem, 'RivicQEcosystem')} />
                   <Route path="infrastructure" element={wrap(InfraDiscovery, 'InfraDiscovery')} />
                   <Route path="bom" element={wrap(BomIntelligence, 'BomIntelligence')} />
                   <Route path="pipeline" element={wrap(DevSecOpsPipeline, 'DevSecOpsPipeline')} />
+                  <Route path="workflow-studio" element={wrap(WorkflowStudioConsole, 'WorkflowStudio')} />
                   <Route path="security/api" element={wrap(ApiSecurity, 'ApiSecurity')} />
                   <Route path="security/ai" element={<RequireEnterprise layers>{wrap(AiSecurity, 'AiSecurity')}</RequireEnterprise>} />
                   <Route path="connectors/hsm" element={<RequireEnterprise layers>{wrap(HsmQuantum, 'HsmQuantum')}</RequireEnterprise>} />
