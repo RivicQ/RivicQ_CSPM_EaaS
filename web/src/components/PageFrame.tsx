@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import { ARCHIFY_FONTS } from '../theme/nebulaSurfaces';
+import { archifyEyebrowSx, archifyTitleSx, nebulaChipSx } from '../theme/nebulaSurfaces';
 import { PRISM, prismPalette } from '../theme/prism';
 
 type PageFrameProps = {
@@ -63,29 +63,15 @@ const PageFrame: React.FC<PageFrameProps> = ({
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 0.25 }}>
               {eyebrow && (
-                <Typography
-                  sx={{
-                    fontSize: 10,
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    color: prism.textMuted,
-                  }}
-                >
-                  {eyebrow}
-                </Typography>
+                <Typography sx={archifyEyebrowSx}>{eyebrow}</Typography>
               )}
               {badge && (
                 <Box
                   sx={{
-                    px: 0.6,
+                    ...nebulaChipSx,
+                    px: 0.75,
                     py: 0.1,
-                    borderRadius: 1,
-                    border: `1px solid ${prism.border}`,
-                    color: prism.textMuted,
-                    fontSize: 10,
-                    fontWeight: 600,
-                    letterSpacing: '0.04em',
-                    textTransform: 'uppercase',
+                    lineHeight: 1.4,
                   }}
                 >
                   {badge}
@@ -95,12 +81,8 @@ const PageFrame: React.FC<PageFrameProps> = ({
             <Typography
               component="h1"
               sx={{
-                fontFamily: ARCHIFY_FONTS.title,
-                fontWeight: 500,
+                ...archifyTitleSx,
                 fontSize: { xs: '1.05rem', md: '1.15rem' },
-                letterSpacing: '-0.02em',
-                lineHeight: 1.25,
-                color: prism.text,
               }}
             >
               {title}

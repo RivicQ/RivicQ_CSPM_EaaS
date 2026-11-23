@@ -2,6 +2,7 @@ import React from 'react';
 import { authService } from '../services/api';
 import { getEditionFromBackend, normalizeEdition, Edition } from '../config/editions';
 import { supabaseAuthService, isSupabaseConfigured } from '../services/supabase';
+import { API_UNAVAILABLE_MESSAGE, SESSION_VERIFICATION_MESSAGE, normalizeApiError } from '../services/network';
 import { CLIENT_DEMO_TOKEN, DEMO_STORAGE_KEY, isClientDemoToken } from '../demo/constants';
 
 export interface AuthUser {
@@ -85,6 +86,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // ignore
     }
   }, []);
+
+  const clearSession = React.useCallback(() => {
+    clearStoredAuth();
+    setToken(null);
+    setUser(null);
+  }, [clearStoredAuth]);
 
   const persist = React.useCallback((nextToken: string | null, nextUser: AuthUser | null) => {
     try {
@@ -170,11 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const me = await authService.me();
           if (!cancelled) applyMe(nextToken, me.data || {}, false);
         } catch {
-          if (!cancelled) {
-            clearStoredAuth();
-            setToken(null);
-            setUser(null);
-          }
+          if (!cancelled) clearSession();
         }
       } else if (sbToken && sbSessionUser?.email) {
         // Supabase-backed session without configured API backend: keep session but do not grant entitlements beyond server-known defaults.
@@ -203,66 +206,77 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
     return () => { cancelled = true; };
-  }, [applyMe, clearStoredAuth, persist]);
+  }, [applyMe, clearSession, clearStoredAuth, persist]);
 
-  const completeAuth = React.useCallback((payload: any) => {
+  const completeAuth = React.useCallback(async (payload: any): Promise<void> => {
     const nextToken = String(payload?.access_token || payload?.token || '');
-    if (!nextToken) throw new Error('Authentication service returned an invalid response');
-    // Trust server-derived /auth/me for entitlement and identity.
-    return authService.me().then((me) => {
+    if (!nextToken) throw normalizeApiError(new Error('Authentication service returned an invalid response'));
+    try {
+      const me = await authService.me();
       applyMe(nextToken, me.data || {}, Boolean(payload?.demo_mode || payload?.user?.demo));
-    });
-  }, [applyMe]);
+    } catch (err) {
+      clearSession();
+      throw normalizeApiError(err, SESSION_VERIFICATION_MESSAGE);
+    }
+  }, [applyMe, clearSession]);
 
   const persistAuth = React.useCallback(async (payload: any): Promise<void> => {
     const nextToken = String(payload?.access_token || payload?.token || '');
-    if (!nextToken) throw new Error('Authentication service returned an invalid response');
+    if (!nextToken) throw normalizeApiError(new Error('Authentication service returned an invalid response'));
     try { localStorage.setItem('auth_token', nextToken); } catch {}
     try {
       const me = await authService.me();
       applyMe(nextToken, me.data || {}, false);
     } catch (err) {
-      clearStoredAuth();
-      setToken(null);
-      setUser(null);
-      throw err;
+      clearSession();
+      throw normalizeApiError(err, SESSION_VERIFICATION_MESSAGE);
     }
-  }, [applyMe, clearStoredAuth]);
+  }, [applyMe, clearSession]);
 
   const supabaseLogin = React.useCallback(async (email: string, password: string, _nextEdition: Edition) => {
-    await supabaseAuthService.signIn(email, password);
-    const sbToken = await supabaseAuthService.getSessionToken();
-    if (!sbToken) throw new Error('Supabase session unavailable');
-    if (backendReachable) {
-      try {
-        const me = await authService.me();
-        persist(sbToken, {
-          id: String(me.data?.id || me.data?.user_id || ''),
-          name: String(me.data?.name || email.split('@')[0]),
-          email: String(me.data?.email || email),
-          role: String(me.data?.role || 'viewer'),
-          tenantId: me.data?.tenant_id ? String(me.data.tenant_id) : undefined,
-          mfaEnabled: Boolean(me.data?.mfa_enabled),
-          edition: normalizeEdition(me.data?.edition),
-        });
-        return;
-      } catch {
-        // fall through to clear
+    try {
+      await supabaseAuthService.signIn(email, password);
+      const sbToken = await supabaseAuthService.getSessionToken();
+      if (!sbToken) throw new Error('Supabase session unavailable');
+      if (backendReachable) {
+        try {
+          const me = await authService.me();
+          persist(sbToken, {
+            id: String(me.data?.id || me.data?.user_id || ''),
+            name: String(me.data?.name || email.split('@')[0]),
+            email: String(me.data?.email || email),
+            role: String(me.data?.role || 'viewer'),
+            tenantId: me.data?.tenant_id ? String(me.data.tenant_id) : undefined,
+            mfaEnabled: Boolean(me.data?.mfa_enabled),
+            edition: normalizeEdition(me.data?.edition),
+          });
+          return;
+        } catch (err) {
+          clearSession();
+          throw normalizeApiError(err, SESSION_VERIFICATION_MESSAGE);
+        }
       }
+      clearSession();
+      throw new Error('Unable to establish a server-validated session.');
+    } catch (err) {
+      throw normalizeApiError(err);
     }
-    clearStoredAuth();
-    throw new Error('Unable to establish a server-validated session.');
-  }, [backendReachable, clearStoredAuth, persist]);
+  }, [backendReachable, clearSession, persist]);
 
   const supabaseRegister = React.useCallback(async (name: string, email: string, password: string, nextEdition: Edition): Promise<RegisterResult> => {
-    const { session } = await supabaseAuthService.signUp(name, email, password, nextEdition);
+    let session: any = null;
+    try {
+      ({ session } = await supabaseAuthService.signUp(name, email, password, nextEdition));
+    } catch (err) {
+      throw normalizeApiError(err);
+    }
     if (session?.access_token && backendReachable) {
       try {
         const me = await authService.me();
         applyMe(session.access_token, me.data || {}, false);
         return { requiresConfirmation: false };
       } catch {
-        // ignore and fall through
+        return { requiresConfirmation: true, email };
       }
     }
     return { requiresConfirmation: true, email };
@@ -270,7 +284,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = React.useCallback(async (email: string, password: string, _nextEdition: Edition): Promise<LoginResult> => {
     if (backendReachable) {
-      const response = await authService.login({ email, password });
+      let response;
+      try {
+        response = await authService.login({ email, password });
+      } catch (err) {
+        throw normalizeApiError(err);
+      }
       const data = response.data;
       if (data?.mfa_required) {
         return { mfaRequired: true, mfaSession: data.mfa_session, email };
@@ -283,7 +302,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabaseLogin(email, password, 'community');
       return { requiresConfirmation: false };
     }
-    throw new Error('No authenticated backend is available.');
+    throw new Error(API_UNAVAILABLE_MESSAGE);
   }, [backendReachable, completeAuth, supabaseLogin]);
 
   const register = React.useCallback(async (
@@ -294,7 +313,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     extras?: { first_name?: string; last_name?: string; organisation?: string; job_title?: string; country?: string; industry?: string; organisation_size?: string; accept_terms?: boolean },
   ): Promise<RegisterResult> => {
     if (backendReachable) {
-      const response = await authService.register({ name, email, password, ...extras });
+      let response;
+      try {
+        response = await authService.register({ name, email, password, ...extras });
+      } catch (err) {
+        throw normalizeApiError(err);
+      }
       const data = response.data;
       if (data?.access_token) {
         try { localStorage.setItem('auth_token', String(data.access_token)); } catch {}
@@ -306,12 +330,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isSupabaseConfigured) {
       return supabaseRegister(name, email, password, 'community');
     }
-    throw new Error('No authenticated backend is available.');
+    throw new Error(API_UNAVAILABLE_MESSAGE);
   }, [backendReachable, completeAuth, supabaseRegister]);
 
   const demoLogin = React.useCallback(async (_nextEdition: Edition) => {
     if (backendReachable) {
-      const response = await authService.demo();
+      let response;
+      try {
+        response = await authService.demo();
+      } catch (err) {
+        throw normalizeApiError(err);
+      }
       const data = response.data;
       try { localStorage.setItem('auth_token', String(data.access_token)); } catch {}
       await completeAuth(data);
@@ -325,7 +354,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [backendReachable, completeAuth, persist]);
 
   const verifyMfa = React.useCallback(async (email: string, code: string, session: string, _edition: Edition) => {
-    const response = await authService.verifyMfa({ email, mfa_code: code, mfa_session: session });
+    let response;
+    try {
+      response = await authService.verifyMfa({ email, mfa_code: code, mfa_session: session });
+    } catch (err) {
+      throw normalizeApiError(err);
+    }
     const data = response.data;
     try { localStorage.setItem('auth_token', String(data.access_token)); } catch {}
     await completeAuth(data);
@@ -336,30 +370,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const me = await authService.me();
       applyMe(token, me.data || {}, Boolean(user?.demo));
-    } catch {
-      clearStoredAuth();
-      setToken(null);
-      setUser(null);
+    } catch (err) {
+      clearSession();
+      throw normalizeApiError(err, SESSION_VERIFICATION_MESSAGE);
     }
-  }, [applyMe, clearStoredAuth, token, user?.demo]);
+  }, [applyMe, clearSession, token, user?.demo]);
 
   const updateProfile = React.useCallback(async (name: string) => {
-    await authService.patchMe({ name });
+    try {
+      await authService.patchMe({ name });
+    } catch (err) {
+      throw normalizeApiError(err);
+    }
     await refreshMe();
   }, [refreshMe]);
 
   const changePassword = React.useCallback(async (currentPassword: string, nextPassword: string) => {
-    await authService.changePassword(currentPassword, nextPassword);
+    try {
+      await authService.changePassword(currentPassword, nextPassword);
+    } catch (err) {
+      throw normalizeApiError(err);
+    }
     await refreshMe();
   }, [refreshMe]);
 
   const logout = React.useCallback(() => {
-    try { void authService.logout(); } catch {}
-    try { void supabaseAuthService.signOut(); } catch {}
-    clearStoredAuth();
-    setToken(null);
-    setUser(null);
-  }, [clearStoredAuth]);
+    try { void authService.logout().catch(() => undefined); } catch {}
+    try { void supabaseAuthService.signOut().catch(() => undefined); } catch {}
+    clearSession();
+  }, [clearSession]);
 
   const setEdition = React.useCallback((_next: Edition) => {
     // Edition/entitlement is server-derived; ignore client requests.

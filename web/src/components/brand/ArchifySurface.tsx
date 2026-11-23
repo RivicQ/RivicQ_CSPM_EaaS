@@ -59,6 +59,18 @@ const archifySurfaceCss = `
     filter: blur(18px);
     animation: rvqSurfaceAuraDrift 20s ease-in-out infinite;
   }
+  .rvq-surface-backdrop[data-variant="console"] {
+    opacity: 0.24;
+    mix-blend-mode: normal;
+  }
+  .rvq-surface-backdrop[data-variant="console"]::before {
+    opacity: 0.28;
+    animation: none;
+    mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 68%);
+  }
+  .rvq-surface-backdrop[data-variant="console"]::after {
+    display: none;
+  }
   .rvq-surface-rail {
     display: flex;
     align-items: center;
@@ -74,6 +86,8 @@ const archifySurfaceCss = `
   .rvq-surface-rail[data-variant="console"] {
     padding: 4px 8px;
     border-radius: 8px;
+    background: var(--rvq-surface);
+    box-shadow: none;
   }
   .rvq-surface-rail-item {
     display: flex;
@@ -142,9 +156,9 @@ const archifySurfaceCss = `
 const ArchifySurface: React.FC<ArchifySurfaceProps> = ({ placement = 'both', variant = 'public' }) => (
   <>
     <GlobalStyles styles={archifySurfaceCss} />
-    {placement !== 'rail' && <Box className="rvq-surface-backdrop" data-archify-surface="backdrop" aria-hidden="true" />}
+    {placement !== 'rail' && <Box className="rvq-surface-backdrop" data-archify-surface="backdrop" data-testid="archify-surface-backdrop" data-variant={variant} aria-hidden="true" />}
     {placement !== 'backdrop' && (
-      <Box className="rvq-surface-rail" data-archify-surface="rail" data-variant={variant} aria-hidden="true">
+      <Box className="rvq-surface-rail" data-archify-surface="rail" data-testid="archify-surface-rail" data-variant={variant} aria-hidden="true">
         {STAGES.map((stage, index) => (
           <React.Fragment key={stage}>
             <Box className="rvq-surface-rail-item">

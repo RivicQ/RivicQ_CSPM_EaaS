@@ -3,9 +3,10 @@ import { Box, Stack, Typography } from '@mui/material';
 import {
   FactCheck, Hub, Memory, Psychology, GitHub, AccountTree,
 } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
 import designSystem from '../../theme/designSystem';
+import { NEBULA } from '../../theme/nebulaSurfaces';
 import { tokens } from '../../theme/tokens';
 
 type Capability = {
@@ -30,6 +31,7 @@ type CspmCapabilityStripProps = {
 };
 
 const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate }) => {
+  const reduce = useReducedMotion();
   return (
     <Box sx={{ mb: dashboardDesign.layout.sectionGap }}>
       <Stack direction="row" spacing={1} alignItems="baseline" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
@@ -56,11 +58,12 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
             key={item.label}
             component={motion.button}
             type="button"
-            initial={{ opacity: 0, y: 8 }}
+            initial={reduce ? false : { opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.04 }}
+            transition={{ duration: reduce ? 0 : 0.2, delay: reduce ? 0 : index * dashboardDesign.motion.stagger }}
             onClick={() => onNavigate(item.path)}
             sx={{
+              ...dashboardDesign.panel,
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               alignItems: { xs: 'flex-start', md: 'center' },
@@ -69,18 +72,11 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
               minHeight: { xs: 52, md: 48 },
               px: 1.15,
               py: 0.85,
-              border: 1,
-              borderColor: '#1f1f2e',
-              borderRadius: `${designSystem.radius.md}px`,
-              bgcolor: '#0a0a0f',
               cursor: 'pointer',
               font: 'inherit',
-              color: '#fff',
-              boxShadow: 'none',
               transition: designSystem.motion.smooth,
               '&:hover': {
-                borderColor: 'rgba(255,255,255,0.22)',
-                transform: 'none',
+                borderColor: NEBULA.lineHi,
                 boxShadow: 'none',
               },
             }}
@@ -93,7 +89,7 @@ const CspmCapabilityStrip: React.FC<CspmCapabilityStripProps> = ({ onNavigate })
                 display: 'grid',
                 placeItems: 'center',
                 bgcolor: 'rgba(255,255,255,0.04)',
-                color: '#d1d5db',
+                color: NEBULA.muted,
                 flexShrink: 0,
                 '& svg': { fontSize: 18 },
               }}

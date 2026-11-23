@@ -3,6 +3,7 @@ import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import { motion, useReducedMotion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
+import { archifyEyebrowSx, archifyTitleSx, NEBULA } from '../../theme/nebulaSurfaces';
 import { tokens } from '../../theme/tokens';
 
 type QueueItem = {
@@ -43,14 +44,11 @@ const InboxHero: React.FC<InboxHeroProps> = ({
   return (
     <Box
       component={motion.div}
-      initial={reduce ? false : { opacity: 0, y: 10 }}
+      initial={reduce ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: reduce ? 0 : 0.24 }}
       sx={{
-        border: '1px solid',
-        borderColor: 'divider',
-        bgcolor: '#0a0a0f',
-        borderRadius: `${dashboardDesign.radius.sm}px`,
+        ...dashboardDesign.panel,
         mb: dashboardDesign.layout.sectionGap,
         overflow: 'hidden',
       }}
@@ -62,22 +60,23 @@ const InboxHero: React.FC<InboxHeroProps> = ({
         }}
       >
         <Box sx={{ p: { xs: 2, md: 2.5 }, borderRight: { lg: '1px solid' }, borderColor: { lg: 'divider' } }}>
-          <Typography sx={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'text.secondary' }}>
-            {eyebrow}
-          </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 650, letterSpacing: '-0.03em', fontSize: { xs: '1.35rem', md: '1.7rem' }, mt: 0.5, color: '#ffffff' }}>
+          <Typography sx={archifyEyebrowSx}>{eyebrow}</Typography>
+          <Typography
+            component="h1"
+            sx={{ ...archifyTitleSx, fontSize: { xs: '1.35rem', md: '1.7rem' }, mt: 0.5 }}
+          >
             {title}
           </Typography>
-          <Typography sx={{ color: 'text.secondary', mt: 1, maxWidth: 640 }}>{subtitle}</Typography>
+          <Typography sx={{ color: NEBULA.muted, mt: 1, maxWidth: 640 }}>{subtitle}</Typography>
           <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
-            <Chip size="small" label={`${openCount} open`} color="primary" variant="outlined" />
-            <Chip size="small" label={`${criticalCount} critical`} color={criticalCount > 0 ? 'error' : 'default'} />
-            <Chip size="small" label={`Posture ${posture}`} />
+            <Chip size="small" label={`${openCount} open`} color="primary" variant="outlined" sx={dashboardDesign.chip} />
+            <Chip size="small" label={`${criticalCount} critical`} color={criticalCount > 0 ? 'error' : 'default'} sx={dashboardDesign.chip} />
+            <Chip size="small" label={`Posture ${posture}`} sx={dashboardDesign.chip} />
           </Stack>
           {meta && <Box sx={{ mt: 1.5 }}>{meta}</Box>}
           {action && <Box sx={{ mt: 2 }}>{action}</Box>}
         </Box>
-        <Box sx={{ bgcolor: '#000000' }}>
+        <Box sx={{ bgcolor: 'var(--rvq-surface-raised)' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Typography sx={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700 }}>
               Today’s queue

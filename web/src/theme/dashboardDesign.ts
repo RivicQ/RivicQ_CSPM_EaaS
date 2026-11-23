@@ -1,4 +1,5 @@
 import { tokens } from './tokens';
+import { archifyChipTypographySx, nebulaPanelSx } from './nebulaSurfaces';
 
 /** Designer-level dashboard design tokens */
 export const dashboardDesign = {
@@ -34,9 +35,12 @@ export const dashboardDesign = {
     ],
     labels: ['Low', 'Medium', 'High', 'Critical'],
   },
+  panel: nebulaPanelSx,
+  chip: archifyChipTypographySx,
   motion: {
     hoverLift: 'none',
     transition: '0.15s ease',
+    stagger: 0.015,
   },
   hero: {
     light: '#0a0a0f',

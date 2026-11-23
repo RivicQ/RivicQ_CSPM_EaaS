@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import dashboardDesign from '../../theme/dashboardDesign';
+import { archifyChipTypographySx } from '../../theme/nebulaSurfaces';
 
 const SEV_MAP: Record<string, number> = { low: 0, medium: 1, high: 2, critical: 3 };
 
@@ -20,7 +21,7 @@ const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity, compact }) => {
         alignItems: 'center',
         px: compact ? 1 : 1.25,
         py: compact ? 0.25 : 0.375,
-        borderRadius: 1,
+        borderRadius: 999,
         bgcolor: `${color}16`,
         border: 1,
         borderColor: `${color}33`,
@@ -28,11 +29,10 @@ const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity, compact }) => {
     >
       <Typography
         sx={{
+          ...archifyChipTypographySx,
           fontSize: compact ? '0.625rem' : '0.6875rem',
           fontWeight: 700,
-          letterSpacing: '0.06em',
           color,
-          textTransform: 'uppercase',
         }}
       >
         {severity}

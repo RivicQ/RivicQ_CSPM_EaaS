@@ -62,6 +62,7 @@ func SetupRoutes(router *gin.RouterGroup, logger *logrus.Logger, authService *au
 	if authService != nil {
 		admin := router.Group("")
 		admin.Use(authService.AuthenticateMiddleware(), auth.RequireRole("admin"))
+		admin.GET("/platform/readiness", svc.readiness)
 		admin.GET("/leads", svc.listLeads)
 		admin.GET("/opportunities", svc.listOpportunities)
 		admin.POST("/integrations/discord/test", svc.discordTest)

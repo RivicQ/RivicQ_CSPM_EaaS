@@ -76,6 +76,12 @@ const PqcPublic = lazy(() => import('./pages/PqcPublic'));
 const EnterprisePublic = lazy(() => import('./pages/EnterprisePublic'));
 const SecurityPublic = lazy(() => import('./pages/SecurityPublic'));
 const ArchifyMaps = lazy(() => import('./pages/ArchifyMaps'));
+const WorkflowStudioPage = lazy(() => import('./pages/WorkflowStudioPage'));
+const WorkflowStudioConsole = lazy(() => import('./pages/WorkflowStudioConsole'));
+const AccountCenter = lazy(() => import('./pages/AccountCenter'));
+const BetaSignup = lazy(() => import('./pages/BetaSignup'));
+const ClientOnboarding = lazy(() => import('./pages/ClientOnboarding'));
+const ProductionReadiness = lazy(() => import('./pages/ProductionReadiness'));
 
 const LogoutRedirect: React.FC = () => {
   const { logout } = useAuth();
@@ -95,33 +101,10 @@ const wrap = (Component: React.ComponentType<any>, name: string) => (
   </PageErrorBoundary>
 );
 
-const readInitialMode = (): PrismMode => {
-  try {
-    const stored = localStorage.getItem('rivicq.theme');
-    if (stored === 'light' || stored === 'dark') return stored;
-  } catch {
-    /* storage may be disabled */
-  }
-  return window.matchMedia?.('(prefers-color-scheme: light)').matches
-    ? 'light'
-    : 'dark';
-};
-
 const App: React.FC = () => {
-  const [mode, setMode] = React.useState<PrismMode>(readInitialMode);
+  const mode: PrismMode = 'dark';
   const theme = React.useMemo(() => getAppTheme(mode), [mode]);
-
-  const toggleMode = React.useCallback(() => {
-    setMode((prev) => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      try {
-        localStorage.setItem('rivicq.theme', next);
-      } catch {
-        /* storage may be disabled */
-      }
-      return next;
-    });
-  }, []);
+  const toggleMode = React.useCallback(() => {}, []);
 
   const queryClient = React.useMemo(
     () =>
@@ -155,7 +138,7 @@ const App: React.FC = () => {
                 ':root': prismCssVariables(theme.palette.mode),
                 '*': { boxSizing: 'border-box' },
                 '::selection': {
-                  background: theme.palette.mode === 'dark' ? 'rgba(124,58,237,0.45)' : 'rgba(109,40,217,0.22)',
+                  background: 'rgba(124,58,237,0.45)',
                   color: theme.palette.text.primary,
                 },
                 ':focus-visible': {
@@ -163,11 +146,8 @@ const App: React.FC = () => {
                   outlineOffset: 2,
                 },
                 body: {
-                  backgroundColor: prismPalette(theme.palette.mode).canvas,
-                  backgroundImage:
-                    theme.palette.mode === 'dark'
-                      ? 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.18), transparent 70%)'
-                      : 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.06), transparent 70%)',
+                  backgroundColor: prismPalette('dark').canvas,
+                  backgroundImage: 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(124,58,237,0.18), transparent 70%)',
                   color: theme.palette.text.primary,
                 },
                 '::-webkit-scrollbar': { width: 8, height: 8 },
@@ -178,6 +158,14 @@ const App: React.FC = () => {
                 },
                 '::-webkit-scrollbar-thumb:hover': {
                   background: theme.palette.text.disabled,
+                },
+                '@media (prefers-reduced-motion: reduce)': {
+                  '*, *::before, *::after': {
+                    animationDuration: '0.01ms !important',
+                    animationIterationCount: '1 !important',
+                    transitionDuration: '0.01ms !important',
+                    scrollBehavior: 'auto !important',
+                  },
                 },
               })}
             />
@@ -195,6 +183,8 @@ const App: React.FC = () => {
                 <Route path="/switcher" element={wrap(EditionSwitcher, 'EditionSwitcher')} />
                 <Route path="/contact" element={wrap(ContactHub, 'ContactHub')} />
                 <Route path="/request-demo" element={wrap(RequestDemo, 'RequestDemo')} />
+                <Route path="/beta" element={wrap(BetaSignup, 'BetaSignup')} />
+                <Route path="/beta-signup" element={wrap(BetaSignup, 'BetaSignup')} />
                 <Route path="/pricing" element={wrap(Pricing, 'Pricing')} />
                 <Route path="/ibm" element={wrap(IBMPartner, 'IBMPartner')} />
                 <Route path="/product" element={wrap(Product, 'Product')} />
@@ -204,6 +194,8 @@ const App: React.FC = () => {
                 <Route path="/enterprise" element={wrap(EnterprisePublic, 'EnterprisePublic')} />
                 <Route path="/security" element={wrap(SecurityPublic, 'SecurityPublic')} />
                 <Route path="/maps" element={wrap(ArchifyMaps, 'ArchifyMaps')} />
+                <Route path="/diagrams" element={wrap(ArchifyMaps, 'ArchifyMaps')} />
+                <Route path="/workflows" element={wrap(WorkflowStudioPage, 'Workflows')} />
                 <Route path="/logout" element={<LogoutRedirect />} />
                 <Route
                   path="/"
@@ -221,12 +213,16 @@ const App: React.FC = () => {
                   <Route path="cspm" element={wrap(CSPM, 'CSPM')} />
                   <Route path="analytics" element={wrap(Analytics, 'Analytics')} />
                   <Route path="settings" element={wrap(Settings, 'Settings')} />
+                  <Route path="account" element={wrap(AccountCenter, 'AccountCenter')} />
+                  <Route path="onboarding" element={wrap(ClientOnboarding, 'ClientOnboarding')} />
                   <Route path="admin" element={<RequireRole role="admin">{wrap(Admin, 'Admin')}</RequireRole>} />
+                  <Route path="readiness" element={<RequireRole role="admin">{wrap(ProductionReadiness, 'ProductionReadiness')}</RequireRole>} />
                   <Route path="tools" element={wrap(DevSecOpsTools, 'DevSecOpsTools')} />
                   <Route path="ecosystem" element={wrap(RivicQEcosystem, 'RivicQEcosystem')} />
                   <Route path="infrastructure" element={wrap(InfraDiscovery, 'InfraDiscovery')} />
                   <Route path="bom" element={wrap(BomIntelligence, 'BomIntelligence')} />
                   <Route path="pipeline" element={wrap(DevSecOpsPipeline, 'DevSecOpsPipeline')} />
+                  <Route path="workflow-studio" element={wrap(WorkflowStudioConsole, 'WorkflowStudio')} />
                   <Route path="security/api" element={wrap(ApiSecurity, 'ApiSecurity')} />
                   <Route path="security/ai" element={<RequireEnterprise layers>{wrap(AiSecurity, 'AiSecurity')}</RequireEnterprise>} />
                   <Route path="connectors/hsm" element={<RequireEnterprise layers>{wrap(HsmQuantum, 'HsmQuantum')}</RequireEnterprise>} />

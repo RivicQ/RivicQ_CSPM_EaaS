@@ -2,7 +2,7 @@
 
 Prioritized builds after the Community engine, website scan path, and Qiskit-aligned scoring. Day-scale engineering work is described by **subsystem**, not calendar estimates.
 
-See [Product status](PRODUCT_STATUS.md) for what already ships and [Architecture](ARCHITECTURE.md) for layer boundaries.
+See [Product status](PRODUCT_STATUS.md) for what already ships, [Architecture](ARCHITECTURE.md) for layer boundaries, and [Product improvement plan](PRODUCT_IMPROVEMENT_PLAN.md) for the staged Archify-parity, auth/account, workflow, and beta-readiness programme.
 
 > Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.
 

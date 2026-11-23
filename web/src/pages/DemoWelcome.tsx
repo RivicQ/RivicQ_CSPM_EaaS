@@ -10,6 +10,7 @@ import BrandLogo from '../components/BrandLogo';
 import { LoadingButton } from '../components/ui';
 import { DEMO_TRAIL_STEPS } from '../demo/trail';
 import { NEBULA } from '../theme/nebulaSurfaces';
+import { PUBLIC_ENGINE_DEMO_COPY } from '../data/publicInfrastructure';
 
 const FONT_TITLE = '"Space Grotesk", Inter, system-ui, sans-serif';
 const FONT_MONO = '"JetBrains Mono", ui-monospace, monospace';
@@ -48,7 +49,7 @@ const DemoWelcome: React.FC = () => {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
-      /* ignore */
+      setCopied(false);
     }
   };
 
@@ -156,7 +157,7 @@ const DemoWelcome: React.FC = () => {
           <Typography sx={{ fontSize: '0.75rem', color: NEBULA.faint }}>
             {backendReachable
               ? 'Demo uses GET /auth/demo as a Community workspace.'
-              : 'This GitHub Pages build has no live API — labeled sample data only.'}
+              : PUBLIC_ENGINE_DEMO_COPY}
             {' · '}
             <Link
               component="button"

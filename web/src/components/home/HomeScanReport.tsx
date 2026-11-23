@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { PRISM } from '../../theme/prism';
 import { NEBULA } from '../../theme/nebulaSurfaces';
 import { websiteCtaSx } from '../../theme/websiteChrome';
+import { useAuth } from '../../context/AuthContext';
 import { PUBLIC_ENGINE_CHIP_DISCONNECTED, PUBLIC_ENGINE_SCAN_COPY } from '../../data/publicInfrastructure';
 
 export type HomeScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
@@ -33,8 +34,10 @@ type HomeScanReportProps = {
 };
 
 const STAGES = ['Connecting', 'Discovering files', 'Analyzing crypto', 'Building CBOM', 'Quantifying risk'];
+const SCAN_ERROR_COPY = 'The scan request could not be completed. Check the target and try again from the Scanner.';
 
 const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, report, onOpenApp, onRegister }) => {
+  const { backendReachable } = useAuth();
   const activeStage = Math.min(STAGES.length - 1, Math.floor((progress / 100) * STAGES.length));
 
   return (
@@ -46,7 +49,7 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
             <Typography variant="h6" fontWeight={800}>CBOM scan</Typography>
             {status === 'scanning' && <Chip size="small" label="Running" color="primary" />}
             {status === 'complete' && <Chip size="small" label="Completed" color="success" />}
-            {status === 'error' && <Chip size="small" label={PUBLIC_ENGINE_CHIP_DISCONNECTED} />}
+            {status === 'error' && <Chip size="small" label={backendReachable ? 'Scan failed' : PUBLIC_ENGINE_CHIP_DISCONNECTED} />}
           </Stack>
 
           {status === 'scanning' && (
@@ -145,11 +148,11 @@ const HomeScanReport: React.FC<HomeScanReportProps> = ({ status, progress, repor
           {status === 'error' && (
             <Stack spacing={2}>
               <Alert severity="info" icon={<ErrorOutline fontSize="inherit" />}>
-                {PUBLIC_ENGINE_SCAN_COPY}
+                {backendReachable ? SCAN_ERROR_COPY : PUBLIC_ENGINE_SCAN_COPY}
               </Alert>
               <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
                 <Button variant="contained" endIcon={<ArrowForward />} onClick={onRegister} sx={websiteCtaSx}>
-                  Start free — run a real scan
+                  {backendReachable ? 'Sign in to run a scan' : 'Create an account'}
                 </Button>
                 <Button variant="outlined" startIcon={<GitHub />} onClick={onOpenApp}>
                   Open the scanner

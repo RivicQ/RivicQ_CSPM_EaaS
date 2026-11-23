@@ -7,8 +7,8 @@ The RivicQ web console lives in `web/` (React 18 + TypeScript + MUI 5 + react-ro
 `web/src/App.tsx` drives the app shell:
 
 - **Code splitting**: pages load via `React.lazy` (`const Home = React.lazy(() => import('./pages/Home'));`) with Suspense fallback and error boundary — the dashboard shell stays interactive while heavy routes resolve.
-- **Providers**: `ThemeModeProvider` (light/dark, respects `prefers-color-scheme`, system default; toggle in `web/src/components/ThemeToggle.tsx`), `QueryClientProvider` (staleTime 60_000ms, gcTime 5 minutes), `RouterProvider`, `AuthProvider`.
-- **Layout**: `AppBar` (RivicQ mark `web/public/brand/rivicq-mark.svg`, editions menu, API base URL panel, theme toggle), `Container` maxWidth lg, boxed dashboard surfaces, `Footer` on marketing pages.
+- **Providers**: `ThemeModeProvider` is locked to dark nebula for exact RivicQ/Archify theme parity; `QueryClientProvider` (staleTime 60_000ms, gcTime 5 minutes), `RouterProvider`, `AuthProvider`.
+- **Layout**: 64px black translucent `AppBar` with a hairline border, RivicQ mark, skip link, compact API status, and Archify console backdrop; `Container` maxWidth lg, boxed dashboard surfaces, `Footer` on marketing pages.
 - **Protected routes**: `RequireAuth` (redirects to `/login` with `state.from`), `RequireEnterprise` (404/upgrade screen when the edition is community), `RequireRole` for operator/admin pages (`web/src/components/RequireRole.tsx`).
 
 Route map (community edition unless noted):

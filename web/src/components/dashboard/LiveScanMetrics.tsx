@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
 import { chartTheme } from '../../theme/chartTheme';
 import designSystem, { metricValueSx } from '../../theme/designSystem';
@@ -20,6 +20,7 @@ type LiveScanMetricsProps = {
 
 const LiveScanMetrics: React.FC<LiveScanMetricsProps> = ({ metrics }) => {
   const blue = designSystem.proBlue;
+  const reduce = useReducedMotion();
 
   return (
     <Box
@@ -33,24 +34,18 @@ const LiveScanMetrics: React.FC<LiveScanMetricsProps> = ({ metrics }) => {
         <Box
           key={metric.id}
           component={motion.div}
-          initial={{ opacity: 0, y: 6 }}
+          initial={reduce ? false : { opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: index * 0.06 }}
+          transition={{ duration: reduce ? 0 : 0.2, delay: reduce ? 0 : index * dashboardDesign.motion.stagger }}
           sx={{
+            ...dashboardDesign.panel,
             p: 1.5,
-            borderRadius: `${dashboardDesign.radius.md}px`,
-            bgcolor: 'rgba(255,255,255,0.07)',
-            border: `1px solid ${blue.border}`,
-            backdropFilter: 'none',
             minHeight: 72,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
             transition: dashboardDesign.motion.transition,
-            '&:hover': {
-              bgcolor: 'rgba(255,255,255,0.11)',
-              borderColor: 'rgba(124,58,237,0.35)',
-            },
+            '&:hover': { borderColor: 'var(--rvq-border-strong)' },
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.75, mb: 0.75 }}>

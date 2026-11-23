@@ -30,7 +30,7 @@ How we verify the engine, API, frontend, and datasets, and the rules reviewers e
 | Firmware/identity | `internal/firmware`, `internal/identity` | fixture parsing, size limits, RBAC `cbom:read`/`scans:start` on `/api/v1/firmware/*`, `/api/v1/identity/*` (`docs/FIRMWARE_IDENTITY_API.md`) |
 | Enterprise startup | `tests/enterprise/enterprise_test.go`, `main_test.go`, `hardened_bootstrap_test.go` | enterprise routes, license-key bootstrap, hardened flags |
 | Stress/ISLA | `tests/enterprise/stress_test.go` | concurrency baseline + custom ISLA (isolation) plan |
-| Frontend | `web/src` tests | auth gating renders, forms validate, theme toggle, query wiring |
+| Frontend | `web/src` tests | auth gating renders, forms validate, dark-nebula lock, query wiring |
 
 ## 3. Running the suite
 

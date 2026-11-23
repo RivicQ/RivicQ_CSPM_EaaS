@@ -21,17 +21,23 @@ import NebulaBackdrop from '../components/brand/NebulaBackdrop';
 import ArchifySurface from '../components/brand/ArchifySurface';
 import ScanWorkflowStrip from '../components/home/ScanWorkflowStrip';
 import ArchifySystemMaps from '../components/brand/ArchifySystemMaps';
-import ThemeToggle from '../theme/ThemeToggle';
-import { useThemeMode } from '../theme/ThemeContext';
 import { PRISM } from '../theme/prism';
 import {
   NEBULA,
-  archifyAuraLayersSx,
+  archifyChipTypographySx,
   archifyEyebrowSx,
   archifyTitleSx,
+  nebulaChipSx,
   nebulaPageSx,
+  nebulaPlateSx,
 } from '../theme/nebulaSurfaces';
-import { PUBLIC_ENGINE_CHIP_DEMO, PUBLIC_ENGINE_CHIP_LIVE, PUBLIC_STATUS_NEXT_MOVE } from '../data/publicInfrastructure';
+import {
+  PUBLIC_ENGINE_CHIP_DEMO,
+  PUBLIC_ENGINE_CHIP_LIVE,
+  PUBLIC_ENGINE_DEMO_COPY,
+  PUBLIC_ENGINE_STATIC_COPY,
+  PUBLIC_STATUS_NEXT_MOVE,
+} from '../data/publicInfrastructure';
 
 type ScanStatus = 'idle' | 'scanning' | 'complete' | 'error';
 
@@ -97,12 +103,7 @@ const homeGridSx = {
   px: { xs: 2, md: 3 },
 } as const;
 
-const panelSx = {
-  bgcolor: NEBULA.panel,
-  border: PRISM.border.hairline,
-  borderColor: NEBULA.line,
-  borderRadius: PRISM.radii.md,
-} as const;
+const panelSx = nebulaPlateSx;
 
 const sectionTitleSx = {
   ...archifyEyebrowSx,
@@ -112,7 +113,6 @@ const sectionTitleSx = {
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, backendReachable, demoLogin, isDemo } = useAuth();
-  const { mode, toggleMode } = useThemeMode();
   const [scanStatus, setScanStatus] = React.useState<ScanStatus>('idle');
   const [repoUrl, setRepoUrl] = React.useState('');
   const [progress, setProgress] = React.useState(0);
@@ -303,7 +303,8 @@ const Home: React.FC = () => {
       id: 'editions',
       label: 'Editions',
       items: [
-        { label: 'Community', action: () => navigate('/register') },
+         { label: 'Community', action: () => scrollToId('editions') },
+
         { label: 'Enterprise', action: () => navigate('/request-demo') },
         { label: 'Pricing', action: () => navigate('/pricing') },
         { label: 'Security cloud', action: () => openExternal('marketing/index.html#cloud') },
@@ -335,16 +336,18 @@ const Home: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ ...nebulaPageSx, position: 'relative', overflowX: 'hidden' }}>
+    <Box sx={{ ...nebulaPageSx, bgcolor: NEBULA.ink, position: 'relative', overflowX: 'hidden' }}>
       <Box sx={{ height: 3, bgcolor: 'primary.main', position: 'sticky', top: 0, zIndex: 21 }} />
       <Box
         sx={{
           position: 'sticky',
           top: 3,
           zIndex: 20,
-          bgcolor: NEBULA.ink,
+          bgcolor: 'rgba(0,0,0,0.82)',
+          backdropFilter: `blur(${PRISM.blur.glass})`,
+          WebkitBackdropFilter: `blur(${PRISM.blur.glass})`,
           borderBottom: PRISM.border.hairline,
-          borderColor: NEBULA.line,
+          borderColor: 'var(--rvq-border)',
         }}
       >
         <Container maxWidth="lg" sx={{ py: 1.25 }}>
@@ -352,7 +355,7 @@ const Home: React.FC = () => {
             <ArchifySurface placement="rail" variant="public" />
           </Box>
           <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
-            <BrandLogo dark={mode === 'dark'} />
+            <BrandLogo dark />
             <Stack direction="row" spacing={0.25} flexWrap="wrap" useFlexGap sx={{ display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((item) => (
                 <Button
@@ -370,7 +373,6 @@ const Home: React.FC = () => {
               ))}
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
-              <ThemeToggle mode={mode} onToggle={toggleMode} compact />
               <Button
                 variant="contained"
                 size="small"
@@ -414,28 +416,7 @@ const Home: React.FC = () => {
           borderColor: NEBULA.line,
         }}
       >
-        {mode === 'dark' ? (
-          <NebulaBackdrop />
-        ) : (
-          <Box
-            aria-hidden
-            sx={{
-              ...archifyAuraLayersSx.radial,
-              background: `radial-gradient(ellipse 55% 50% at 50% 20%, ${PRISM.brand.violet100}, transparent 70%)`,
-            }}
-          />
-        )}
-        <Box
-          aria-hidden
-          sx={{
-            ...archifyAuraLayersSx.radial,
-            opacity: mode === 'dark' ? 1 : 0.24,
-            background: `
-              radial-gradient(ellipse 50% 45% at 50% 0%, rgba(56,189,248,0.06), transparent 70%),
-              radial-gradient(ellipse 55% 48% at 50% 18%, ${PRISM.brand.violet500}44, transparent 68%)
-            `,
-          }}
-        />
+        <NebulaBackdrop />
         <Box sx={{ ...homeGridSx, position: 'relative', zIndex: 1, py: { xs: 8, md: 12 }, textAlign: 'center' }}>
           <Box sx={{ gridColumn: { xs: '1 / -1', md: '2 / span 10' } }}>
             <Typography
@@ -507,6 +488,11 @@ const Home: React.FC = () => {
               <Typography sx={{ color: NEBULA.muted, fontSize: '0.875rem', lineHeight: 1.6 }}>
                 {PUBLIC_STATUS_NEXT_MOVE}
               </Typography>
+              {!backendReachable && !isDemo && (
+                <Typography sx={{ color: NEBULA.muted, fontSize: '0.875rem', lineHeight: 1.6, mt: 1 }}>
+                  {PUBLIC_ENGINE_STATIC_COPY}
+                </Typography>
+              )}
             </Box>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center" flexWrap="wrap" useFlexGap>
               <Button
@@ -537,7 +523,7 @@ const Home: React.FC = () => {
                   '&:hover': { borderColor: NEBULA.accentSoft, bgcolor: NEBULA.raised },
                 }}
               >
-                Try the live demo
+                Try the labelled demo
               </Button>
               <Button
                 variant="text"
@@ -558,15 +544,14 @@ const Home: React.FC = () => {
             <MotionSection>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }} flexWrap="wrap" useFlexGap>
                 <Typography sx={{ fontFamily: tokens.typography.mono, fontSize: 12, color: NEBULA.muted }}>
-                  {isDemo || !backendReachable
-                    ? '$ rivicq · interactive demo · sample data · nothing is claimed as a live result'
-                    : '$ rivicq scan · public target only · quantum scores come from this scan, not a silent live estate'}
+                  $ rivicq · {backendReachable && !isDemo ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DEMO}
                 </Typography>
                 <Chip
                   size="small"
                   label={backendReachable && !isDemo ? PUBLIC_ENGINE_CHIP_LIVE : PUBLIC_ENGINE_CHIP_DEMO}
                   color={backendReachable && !isDemo ? 'success' : 'info'}
                   variant={backendReachable && !isDemo ? 'outlined' : 'filled'}
+                  sx={archifyChipTypographySx}
                 />
               </Stack>
               {!backendReachable && !isDemo && <PublicEngineNotice variant="scan" compact />}
@@ -594,11 +579,9 @@ const Home: React.FC = () => {
                   {backendReachable ? 'Run scan' : 'Run demo scan'}
                 </LoadingButton>
               </Stack>
-              {!backendReachable && (
+              {isDemo && (
                 <Typography variant="caption" sx={{ display: 'block', mt: 1, color: NEBULA.muted, lineHeight: 1.5 }}>
-                  {isDemo
-                    ? 'Interactive demo — labelled sample findings in this browser. Not customer telemetry.'
-                    : 'No engine on this static build. Run demo scan starts the interactive demo with labelled sample data. Live scans need the API (docs/RENDER.md).'}
+                  {PUBLIC_ENGINE_DEMO_COPY}
                 </Typography>
               )}
             </MotionSection>
@@ -610,8 +593,8 @@ const Home: React.FC = () => {
                 status={scanStatus}
                 progress={progress}
                 report={report}
-                onOpenApp={() => navigate('/register')}
-                onRegister={() => navigate('/register')}
+                onOpenApp={() => navigate('/scanner')}
+                onRegister={() => navigate('/request-demo')}
               />
             </Box>
           )}
@@ -663,7 +646,7 @@ const Home: React.FC = () => {
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(12, minmax(0, 1fr))' }, gap: PRISM.spacing(2) }}>
             <Box sx={{ gridColumn: { xs: '1 / -1', md: 'span 6' }, ...panelSx, p: 3, height: '100%' }}>
-              <Chip size="small" icon={<Lock />} label="Apache-2.0" sx={{ mb: 1.5 }} />
+              <Chip size="small" icon={<Lock />} label="Apache-2.0" sx={{ ...nebulaChipSx, mb: 1.5 }} />
               <Typography variant="h5" sx={{ fontWeight: 650, mb: 1 }}>Community</Typography>
               <Typography variant="body2" sx={{ color: NEBULA.muted, mb: 2 }}>
                 The public engine and CLI. No cloud credentials are required to clone or scan a repository.
@@ -674,12 +657,12 @@ const Home: React.FC = () => {
                   <Typography variant="body2">{f}</Typography>
                 </Stack>
               ))}
-              <Button variant="outlined" sx={{ mt: 2, borderColor: NEBULA.lineHi, color: NEBULA.text }} onClick={() => navigate('/register')}>
-                Use Community
+              <Button variant="outlined" sx={{ mt: 2, borderColor: NEBULA.lineHi, color: NEBULA.text }} onClick={() => openExternal('docs/index.html')}>
+                Read the docs
               </Button>
             </Box>
             <Box sx={{ gridColumn: { xs: '1 / -1', md: 'span 6' }, ...panelSx, p: 3, height: '100%' }}>
-              <Chip size="small" icon={<WorkspacePremium />} label="Configured only" color="primary" sx={{ mb: 1.5 }} />
+              <Chip size="small" icon={<WorkspacePremium />} label="Configured only" color="primary" sx={{ ...nebulaChipSx, mb: 1.5 }} />
               <Typography variant="h5" sx={{ fontWeight: 650, mb: 1 }}>Enterprise</Typography>
               <Typography variant="body2" sx={{ color: NEBULA.muted, mb: 2 }}>
                 Licensed by RivicQ GmbH. Enterprise claims apply only with a valid licence, configured database, and connected identity provider.
@@ -730,7 +713,8 @@ const Home: React.FC = () => {
           </Typography>
           <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
             {STANDARDS.map((s) => (
-              <Chip key={s} icon={<VerifiedUser sx={{ fontSize: 14 }} />} label={s} variant="outlined" />
+                <Chip key={s} icon={<VerifiedUser sx={{ fontSize: 14 }} />} label={s} variant="outlined" sx={nebulaChipSx} />
+
             ))}
           </Stack>
         </Box>
@@ -738,7 +722,7 @@ const Home: React.FC = () => {
         <Box sx={{ gridColumn: '1 / -1', mt: 8, py: 3, borderTop: PRISM.border.hairline, borderColor: NEBULA.line }}>
           <Stack spacing={1.25} alignItems="center">
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="center">
-              <BrandLogo compact dark={mode === 'dark'} />
+              <BrandLogo compact dark />
               <Typography variant="body2" sx={{ color: NEBULA.muted }}>© 2026 RivicQ GmbH · hello@rivicq.com</Typography>
             </Stack>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap justifyContent="center">

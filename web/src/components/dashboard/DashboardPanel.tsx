@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Stack, Typography } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
 import { panelTitleSx } from '../../theme/designSystem';
 
@@ -23,28 +23,21 @@ const DashboardPanel: React.FC<DashboardPanelProps> = ({
   height,
   delay = 0,
 }) => {
+  const reduce = useReducedMotion();
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0, y: 16 }}
+      initial={reduce ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: delay * 0.08, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: reduce ? 0 : 0.2, delay: reduce ? 0 : delay * dashboardDesign.motion.stagger, ease: [0.4, 0, 0.2, 1] }}
       sx={{
+        ...dashboardDesign.panel,
         height: height ?? 'auto',
         minWidth: 0,
-        bgcolor: '#0a0a0f',
-        color: '#ffffff',
-        border: 1,
-        borderColor: 'rgba(255,255,255,0.12)',
-        borderRadius: `${dashboardDesign.radius.lg}px`,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         transition: dashboardDesign.motion.transition,
-        '&:hover': {
-          borderColor: 'rgba(255,255,255,0.18)',
-          boxShadow: 'none',
-        },
       }}
     >
       <Box

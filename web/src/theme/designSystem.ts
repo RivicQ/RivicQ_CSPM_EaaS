@@ -140,25 +140,39 @@ export const sidebarSectionLabelSx = {
 };
 
 export const sidebarNavItemButtonSx = (active: boolean, disabled: boolean) => ({
-  borderRadius: 1.5,
+  position: 'relative' as const,
+  borderRadius: `${designSystem.radius.pill}px`,
   py: 0.5,
   minHeight: 32,
-  pl: active ? 1.5 : 2,
-  borderLeft: active ? '3px solid' : '3px solid transparent',
-  borderLeftColor: active ? designSystem.proBlue.accentLight : 'transparent',
+  mx: 0.5,
+  px: active ? 1.75 : 1.5,
+  border: '1px solid transparent',
   color: disabled
     ? designSystem.proBlue.textMuted
     : active
       ? designSystem.proBlue.textPrimary
       : designSystem.proBlue.textSecondary,
   bgcolor: active ? designSystem.proBlue.navActive : 'transparent',
-  opacity: disabled ? 0.45 : 1,
+  opacity: disabled ? 0.5 : 1,
   '&.Mui-selected': {
     bgcolor: designSystem.proBlue.navActive,
     color: designSystem.proBlue.textPrimary,
-    '&:hover': { bgcolor: 'rgba(255,255,255,0.18)' },
+    '&:hover': { bgcolor: designSystem.proBlue.navActive },
   },
   '&:hover:not(.Mui-selected)': { bgcolor: designSystem.proBlue.navHover },
+  ...(active && {
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      right: 9,
+      top: '50%',
+      width: 4,
+      height: 4,
+      borderRadius: '50%',
+      bgcolor: designSystem.proBlue.accentLight,
+      transform: 'translateY(-50%)',
+    },
+  }),
 });
 
 export const commandCenterCardSx = {
@@ -301,13 +315,13 @@ export const proBlueBadgeSx = {
   border: `1px solid ${designSystem.proBlue.border}`,
 };
 
-/** Top app bar — aligns with pro-blue sidebar & command center */
+/** Top app bar — translucent black plate matching the static Archify nav. */
 export const appBarPaperSx = (_mode: 'light' | 'dark') => ({
-  bgcolor: 'var(--rvq-canvas)',
+  bgcolor: 'rgba(0,0,0,0.82)',
   backdropFilter: `blur(${PRISM.blur.glass})`,
   WebkitBackdropFilter: `blur(${PRISM.blur.glass})`,
   color: 'var(--rvq-text)',
-  borderBottom: '1px solid var(--rvq-border)',
+  border: '1px solid var(--rvq-border)',
   boxShadow: 'none',
   backgroundImage: 'none',
 });
@@ -336,30 +350,30 @@ export const appBarSearchSx = (_mode: 'light' | 'dark') => ({
   },
 });
 
-export const appBarIconButtonSx = (mode: 'light' | 'dark') => ({
+export const appBarIconButtonSx = (_mode: 'light' | 'dark') => ({
   borderRadius: `${designSystem.radius.sm}px`,
   border: '1px solid var(--rvq-border)',
   bgcolor: 'var(--rvq-surface)',
   color: 'var(--rvq-text-secondary)',
-  width: 36,
-  height: 36,
+  width: 32,
+  height: 32,
   '&:hover': {
-    bgcolor:
-      mode === 'dark'
-        ? 'rgba(255,255,255,0.08)'
-        : `rgba(124,58,237,0.08)`,
+    bgcolor: 'rgba(255,255,255,0.08)',
     borderColor: 'var(--rvq-border-strong)',
   },
 });
 
-export const appBarEditionChipSx = (mode: 'light' | 'dark', isEnterprise: boolean) => ({
+export const appBarEditionChipSx = (_mode: 'light' | 'dark', isEnterprise: boolean) => ({
+  fontFamily: designSystem.font.mono,
   fontWeight: 600,
-  fontSize: '0.6875rem',
-  letterSpacing: '0.02em',
+  fontSize: '0.625rem',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase' as const,
   height: 26,
+  borderRadius: `${designSystem.radius.pill}px`,
   display: { xs: 'none', sm: 'inline-flex' },
   bgcolor: isEnterprise ? 'rgba(124,58,237,0.2)' : 'var(--rvq-surface)',
-  color: isEnterprise ? '#ffffff' : prismPalette(mode).textSecondary,
+  color: isEnterprise ? 'var(--rvq-text)' : 'var(--rvq-text-secondary)',
   border: '1px solid var(--rvq-border)',
 });
 

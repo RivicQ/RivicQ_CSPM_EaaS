@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Api, CloudQueue, Hub, Policy, Psychology, Timeline,
 } from '@mui/icons-material';
+import dashboardDesign from '../../theme/dashboardDesign';
 
 const DOMAINS = [
   { title: 'AI engineering', desc: 'AIBOM is Enterprise. Community still flags serving-stack crypto in CBOM.', path: '/security/ai' },
@@ -25,16 +26,12 @@ const DomainOpsStrip: React.FC = () => {
           type="button"
           onClick={() => nav(d.path)}
           sx={{
+            ...dashboardDesign.panel,
             textAlign: 'left',
             cursor: 'pointer',
             p: 1,
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: '#1f1f2e',
-            bgcolor: '#0a0a0f',
-            color: '#fff',
             font: 'inherit',
-            '&:hover': { borderColor: 'primary.main' },
+            '&:hover': { borderColor: 'var(--rvq-border-strong)' },
           }}
         >
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>

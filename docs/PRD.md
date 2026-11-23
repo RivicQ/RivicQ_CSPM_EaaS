@@ -6,6 +6,8 @@ This document captures the product intent for **Cryptographic Security Posture M
 
 EaaS companions: [Product status](EAAS_PRODUCT_STATUS.md) · [API](EAAS_API.md) · [Deployment](EAAS_DEPLOYMENT.md) · [Security & privacy](EAAS_SECURITY_PRIVACY.md) · [Limitations](EAAS_LIMITATIONS.md) · [Testing & CI](EAAS_TESTING_CI.md) · [Freemium & metering](EAAS_FREEMIUM_AND_METERING.md).
 
+Target-state addendum: [Product improvement plan](PRODUCT_IMPROVEMENT_PLAN.md) tracks Archify-parity design, auth/account, workflow animation, EaaS, enterprise, datasets, and beta-readiness work with explicit maturity labels and acceptance criteria.
+
 ## 1. Problem
 
 Organizations do not know what cryptography runs in their software, repositories, and infrastructure, or when it becomes unsafe:
