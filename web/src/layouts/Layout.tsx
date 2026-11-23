@@ -73,6 +73,7 @@ import { isAdminRole } from '../auth/roles';
 import { MODULES } from '../config/modules';
 import { useThemeMode } from '../theme/ThemeContext';
 import BrandLogo from '../components/BrandLogo';
+import ArchifySurface from '../components/brand/ArchifySurface';
 import ArchifyWorkflowEmbed from '../components/brand/ArchifyWorkflowEmbed';
 import RivicQAssistant from '../components/assistant/RivicQAssistant';
 import DemoEnvironmentBanner from '../components/demo/DemoEnvironmentBanner';
@@ -101,7 +102,23 @@ import designSystem, {
   appBarPageTitleSx,
   appBarPageEyebrowSx,
 } from '../theme/designSystem';
-import ThemeToggle from '../theme/ThemeToggle';
+
+const skipLinkSx = {
+  position: 'fixed',
+  top: 8,
+  left: 8,
+  zIndex: 1500,
+  px: 1.5,
+  py: 0.75,
+  borderRadius: 1,
+  bgcolor: 'var(--rvq-surface-raised)',
+  border: '1px solid var(--rvq-border-strong)',
+  color: 'var(--rvq-text)',
+  fontFamily: 'Inter, sans-serif',
+  fontSize: '0.8125rem',
+  transform: 'translateY(-200%)',
+  '&:focus': { transform: 'none' },
+} as const;
 
 interface NavItem {
   text: string;
@@ -143,7 +160,7 @@ const Layout: React.FC = () => {
       return '24h';
     }
   });
-  const { mode, toggleMode } = useThemeMode();
+  const { mode } = useThemeMode();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
@@ -585,6 +602,9 @@ const Layout: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', isolation: 'isolate' }}>
+      <Box component="a" href="#main-content" sx={skipLinkSx}>
+        Skip to main content
+      </Box>
       <AppBar
         position="fixed"
         elevation={0}
@@ -596,7 +616,7 @@ const Layout: React.FC = () => {
           ...appBarPaperSx(mode),
         }}
       >
-        <Toolbar sx={{ minHeight: 60, maxHeight: 60, gap: 1.25, px: { xs: 1.5, md: 2.5 }, flexWrap: 'nowrap', overflow: 'hidden' }}>
+        <Toolbar sx={{ minHeight: 64, maxHeight: 64, gap: 1, px: { xs: 1.5, md: 2.5 }, flexWrap: 'nowrap', overflow: 'hidden' }}>
           {!isDesktop && (
             <IconButton
               edge="start"
@@ -666,7 +686,7 @@ const Layout: React.FC = () => {
               value={persona}
               onChange={(e) => setPersona(e.target.value as OpsPersona)}
               aria-label="Operator view"
-              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
+              sx={{ height: 32, fontSize: '0.75rem', fontWeight: 600 }}
             >
               <MenuItem value="ciso">{PERSONA_LABEL.ciso}</MenuItem>
               <MenuItem value="analyst">{PERSONA_LABEL.analyst}</MenuItem>
@@ -679,7 +699,7 @@ const Layout: React.FC = () => {
               value={timeRange}
               onChange={(e) => setTimeRange(String(e.target.value))}
               aria-label="Time range"
-              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
+              sx={{ height: 32, fontSize: '0.75rem', fontWeight: 600 }}
             >
               <MenuItem value="24h">Last 24 hours</MenuItem>
               <MenuItem value="7d">Last 7 days</MenuItem>
@@ -692,7 +712,7 @@ const Layout: React.FC = () => {
               value={edition}
               onChange={() => navigate('/switcher')}
               aria-label="Workspace"
-              sx={{ height: 36, fontSize: '0.75rem', fontWeight: 600 }}
+              sx={{ height: 32, fontSize: '0.75rem', fontWeight: 600 }}
             >
               <MenuItem value="community">Community</MenuItem>
               <MenuItem value="professional">Professional</MenuItem>
@@ -703,7 +723,6 @@ const Layout: React.FC = () => {
           <Box sx={{ flexGrow: { xs: 1, md: 0 }, display: { xs: 'block', md: 'none' } }} />
 
           <Stack direction="row" spacing={0.75} alignItems="center">
-            <ThemeToggle mode={mode} onToggle={toggleMode} compact />
             <Tooltip title="Search">
               <IconButton
                 onClick={() => setPaletteOpen(true)}
@@ -895,10 +914,12 @@ const Layout: React.FC = () => {
 
       <Box
         component="main"
+        id="main-content"
+        tabIndex={-1}
         sx={{
           flexGrow: 1,
           width: { lg: `calc(100% - ${desktopWidth}px)` },
-          mt: { xs: 7.5, lg: 7.5 },
+          mt: '64px',
           pb: { xs: trailActive ? 18 : 6, sm: trailActive ? 14 : 0 },
           minHeight: '100vh',
           minWidth: 0,
@@ -911,12 +932,13 @@ const Layout: React.FC = () => {
           '& .MuiTableContainer-root': { overflowX: 'auto' },
         }}
       >
+        <ArchifySurface placement="backdrop" variant="console" />
         <motion.div
           key={location.pathname}
           initial={reduceMotion ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
-          style={{ minWidth: 0 }}
+          style={{ minWidth: 0, position: 'relative', zIndex: 1 }}
         >
           <Box sx={{ px: { xs: 1.25, sm: 1.75, md: 2 }, py: { xs: 1, md: 1.25 }, maxWidth: 1280, mx: 'auto', width: '100%', minWidth: 0 }}>
             <DemoEnvironmentBanner />

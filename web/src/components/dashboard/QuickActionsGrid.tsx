@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { ArrowForward, Assessment, Cloud, DocumentScanner, FactCheck, GitHub, Radar, Storage, AccountTree } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
 import { chartTheme } from '../../theme/chartTheme';
 import { panelTitleSx } from '../../theme/designSystem';
@@ -26,15 +26,17 @@ const QuickActionCard: React.FC<{
   index: number;
   onNavigate: (path: string) => void;
 }> = ({ action, index, onNavigate }) => {
+  const reduce = useReducedMotion();
   return (
     <Box
       component={motion.button}
       type="button"
-      initial={{ opacity: 0, y: 6 }}
+      initial={reduce ? false : { opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.04, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: reduce ? 0 : 0.2, delay: reduce ? 0 : index * dashboardDesign.motion.stagger, ease: [0.4, 0, 0.2, 1] }}
       onClick={() => onNavigate(action.path)}
       sx={{
+        ...dashboardDesign.panel,
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
@@ -43,13 +45,8 @@ const QuickActionCard: React.FC<{
         width: '100%',
         px: 1.25,
         py: 0.875,
-        border: 1,
-        borderColor: 'rgba(148,163,184,0.12)',
-        borderRadius: `${dashboardDesign.radius.md}px`,
-        bgcolor: '#0a0a0f',
         cursor: 'pointer',
         font: 'inherit',
-        color: '#fff',
         transition: dashboardDesign.motion.transition,
         '&:focus-visible': {
           outline: `2px solid ${action.accent}`,
@@ -57,11 +54,8 @@ const QuickActionCard: React.FC<{
         },
         '&:hover': {
           borderColor: `${action.accent}44`,
-          bgcolor: 'rgba(46,16,101,0.92)',
-          transform: 'none',
           boxShadow: 'none',
           '& .qa-arrow': { opacity: 1 },
-          '& .qa-icon': { bgcolor: `${action.accent}20`, color: action.accent },
         },
       }}
     >

@@ -11,6 +11,8 @@ Evidence-based snapshot refreshed on the current integration branch. The Pages p
 - `BLOCKED` — needs credentials, a running Postgres, or an operator task
 - `Experimental` / `Integration pending` — labels used by the EaaS API and portal where integration or validation is absent
 
+Product maturity labels used by the readiness API are exactly `Production implemented`, `Beta implemented`, `Experimental`, `Integration pending`, `Planned`, and `Not supported`; they describe surfaces, not customer standing.
+
 Companion: [PRODUCT_STATUS.md](PRODUCT_STATUS.md), [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md), [ARCHITECTURE.md](ARCHITECTURE.md), [audit/FEATURE_MATRIX.md](audit/FEATURE_MATRIX.md). EaaS companions: [EAAS_PRODUCT_STATUS.md](EAAS_PRODUCT_STATUS.md), [EAAS_API.md](EAAS_API.md), [EAAS_DEPLOYMENT.md](EAAS_DEPLOYMENT.md), [EAAS_SECURITY_PRIVACY.md](EAAS_SECURITY_PRIVACY.md), [EAAS_LIMITATIONS.md](EAAS_LIMITATIONS.md), [EAAS_TESTING_CI.md](EAAS_TESTING_CI.md), [EAAS_FREEMIUM_AND_METERING.md](EAAS_FREEMIUM_AND_METERING.md).
 
 All rows in the table below are CSPM only; EaaS starts in the section after it.
@@ -25,6 +27,13 @@ All rows in the table below are CSPM only; EaaS starts in the section after it.
 | JWT tenant_id; `X-Tenant-ID` ignored | VERIFIED | `internal/tenant/context.go` | — |
 | CORS allow-list; localhost off in production env | VERIFIED | `internal/middleware/cors.go` + tests | Set `CORS_ORIGINS` per deploy |
 | Production refuse start without DB | VERIFIED | `internal/server/server.go` unless `RIVICQ_ALLOW_DEMO_MODE=1` | — |
+| Web network boundary | PARTIALLY_IMPLEMENTED | `web/src/services/network.ts`, `web/src/services/api.ts`; 8s timeout, one delayed retry for idempotent GETs, normalized errors, no raw "Network Error" in login/register/MFA | Browser/device evidence remains Planned |
+| Console and public Home theme parity | PARTIALLY_IMPLEMENTED | Dark-nebula lock, 64px console bar, Archify console backdrop, shared plates/chips, skip link, and canonical static-build notices in `web/src/App.tsx`, `Layout.tsx`, `Home.tsx`, `Dashboard.tsx` | Screenshot/device comparison remains Planned |
+| Static HTTPS backend detection | PARTIALLY_IMPLEMENTED | `web/src/config/editions.ts` skips backend discovery on static HTTPS pages without explicit `REACT_APP_API_URL` | Operator must configure the API URL for hosted deployments |
+| Server-validated auth UX | PARTIALLY_IMPLEMENTED | `web/src/context/AuthContext.tsx`, `web/src/pages/AuthPage.tsx`; sessions need server validation, errors are friendly, disconnected state labels the demo and sales routes | Email delivery and OAuth provider config remain `Integration pending` |
+| Public beta request form | PARTIALLY_IMPLEMENTED | `/beta` and `/beta-signup` in `web/src/pages/BetaSignup.tsx`; `platformService.createLead` to `POST /api/v1/leads` when reachable, mailto fallback otherwise, no approval or invitation implied | Email delivery and admin review process remain external |
+| Client onboarding checklist | PARTIALLY_IMPLEMENTED | Authenticated `/onboarding` in `web/src/pages/ClientOnboarding.tsx`; local-only links to `/account`, `/demo`, `/workflow-studio`, `/diagrams`, `/contact`; progress is not a backend record | Automated provisioning is `Planned` |
+| Admin readiness report | PARTIALLY_IMPLEMENTED | Authenticated admin-only `GET /api/v1/platform/readiness` in `internal/platform/readiness.go` + `internal/platform/handlers.go`; `/readiness` UI in `web/src/pages/ProductionReadiness.tsx`; configuration-only checks with maturity labels and no secrets | No cloud, quantum, EaaS, email, payment, or hardware probes; not a production verdict or change to product status |
 | Firmware / identity **static** analysis | PARTIALLY_IMPLEMENTED | CLI + API; no execution, no Infineon MCU, no private-key extract | Documented as static-only |
 | GitHub Pages public scan | BLOCKED | Static SPA; no production API | Deploy API or use CLI |
 | Pages pilot gate + capability manifest | VERIFIED | `docs/PILOT_READINESS.md`, `docs/PILOT_ONBOARDING.md`, `docs/CAPABILITIES.yaml`, `/pilot/` | Keep the manifest aligned with every phase |
@@ -57,5 +66,7 @@ Evidence scope: `cmd/eaas/main.go`, `internal/eaas/`, `web/eaas/index.html`, `de
 | Production Postgres repository / migration runner | BLOCKED | `deploy/migrations/004_eaas_schema.sql` is a target schema only | Needs a repository, host, and applied migration |
 | Hosted EaaS, payments/payment webhooks, email delivery | NOT_IMPLEMENTED | No host, mailer, or payment adapter in `internal/eaas/` | Integration pending; do not claim |
 | CAVP/FIPS validation, AI operations, quantum hardware, HSM custody, wireless operations | NOT_IMPLEMENTED | No implementation in `internal/eaas/`; `web/eaas/index.html` | Do not claim |
+
+External integrations remain unconfigured/unverified across CSPM and EaaS: hosted DB/RLS, email, OAuth provider config, payments/checkout, cloud credentials, IBM Quantum/HPCS credentials, HSM/QKD/QRNG hardware, and wireless operations. The configuration-only readiness report (`GET /api/v1/platform/readiness`, admin UI `/readiness`) states these boundaries without secret values or cloud, quantum, EaaS, email, payment, or hardware probes and does not change the `PARTIALLY_IMPLEMENTED` product status.
 
 Qiskit scores are a **local taxonomy**, not IBM Quantum jobs, and are a CSPM score only. EaaS is excluded from CSPM scores, pilot readiness, and production-readiness verdicts.

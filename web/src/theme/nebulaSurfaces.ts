@@ -21,10 +21,30 @@ export const ARCHIFY_FONTS = {
 
 export const nebulaPanelSx = {
   bgcolor: NEBULA.panel,
-  border: '1px solid',
-  borderColor: 'var(--rvq-border)',
-  borderRadius: 2,
+  border: `1px solid ${NEBULA.line}`,
+  borderRadius: '12px',
   color: NEBULA.text,
+  backgroundImage: 'none',
+  boxShadow: 'none',
+} as const;
+
+export const nebulaPlateSx = nebulaPanelSx;
+
+export const archifyChipTypographySx = {
+  fontFamily: ARCHIFY_FONTS.mono,
+  fontSize: '0.625rem',
+  fontWeight: 600,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase' as const,
+  borderRadius: '999px',
+  '& .MuiChip-label': { px: 1.25 },
+} as const;
+
+export const nebulaChipSx = {
+  ...archifyChipTypographySx,
+  border: `1px solid ${NEBULA.line}`,
+  bgcolor: NEBULA.panel,
+  color: NEBULA.muted,
 } as const;
 
 export const nebulaPageSx = {

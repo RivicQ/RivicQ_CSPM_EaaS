@@ -14,6 +14,7 @@ export type OpsRoute = {
 export const OPS_ROUTES: OpsRoute[] = [
   { text: 'Overview', path: '/dashboard', section: 'Operations', keywords: ['command', 'ciso', 'inbox', 'posture', 'home'] },
   { text: 'Account Centre', path: '/account', section: 'Operations', keywords: ['profile', 'security', 'mfa', 'preferences', 'privacy'] },
+  { text: 'Onboarding', path: '/onboarding', section: 'Operations', keywords: ['client', 'checklist', 'getting started', 'welcome'] },
   { text: 'Findings', path: '/findings', section: 'Operations', keywords: ['critical', 'high', 'evidence', 'remediation', 'queue'] },
   { text: 'Assets', path: '/assets', section: 'Operations', keywords: ['inventory', 'crypto', 'certificate', 'key'] },
   { text: 'Scans', path: '/scanner', section: 'Operations', keywords: ['cbom', 'github', 'website', 'history', 'failed'] },
@@ -32,6 +33,7 @@ export const OPS_ROUTES: OpsRoute[] = [
   { text: 'Contact', path: '/contact', section: 'Integrations', keywords: ['hello', 'support', 'sales'] },
   { text: 'IBM Partner Plus', path: '/ibm', section: 'Integrations', keywords: ['ibm', 'partner', 'marketplace', 'cosell'] },
   { text: 'CRM', path: '/crm', section: 'Integrations', keywords: ['leads', 'sales', 'funnel'], adminOnly: true },
+  { text: 'Production readiness', path: '/readiness', section: 'Integrations', keywords: ['cloud', 'quantum', 'hardware', 'eaas', 'security'], adminOnly: true },
 
   { text: 'HSM & Quantum', path: '/connectors/hsm', section: 'Enterprise', keywords: ['pkcs11', 'ibm', 'hbom'], enterpriseOnly: true },
   { text: 'AIBOM', path: '/security/ai', section: 'Enterprise', keywords: ['ai', 'model', 'aibom'], enterpriseOnly: true },

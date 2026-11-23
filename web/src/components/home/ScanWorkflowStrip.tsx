@@ -4,6 +4,14 @@ import { AccountTree, Assessment, ManageSearch, TravelExplore } from '@mui/icons
 import { useAuth } from '../../context/AuthContext';
 import { NEBULA } from '../../theme/nebulaSurfaces';
 import { PRISM } from '../../theme/prism';
+import { publicEngineChipSx } from '../brand/PublicEngineNotice';
+import {
+  PUBLIC_ENGINE_CHIP_DEMO,
+  PUBLIC_ENGINE_CHIP_DISCONNECTED,
+  PUBLIC_ENGINE_CHIP_LIVE,
+  PUBLIC_ENGINE_DEMO_COPY,
+  PUBLIC_ENGINE_SCAN_COPY,
+} from '../../data/publicInfrastructure';
 
 interface Step {
   icon: React.ReactNode;
@@ -18,19 +26,14 @@ const STEPS: Step[] = [
   { icon: <Assessment />, title: 'Report & PQC', desc: 'Severity, policy gate, and a quantum-readiness roadmap.' },
 ];
 
-/**
- * "How scanning works" strip with a live engine-status legend, so a visitor
- * on static Pages can see (a) the workflow and (b) which mode they are in.
- * Static Pages never claim scanning is permanently blocked — Run demo scan works.
- */
 const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const { backendReachable, isDemo } = useAuth();
 
   const state: { label: string; color: 'success' | 'info' | 'default'; desc: string } = backendReachable
-    ? { label: 'RivicQ engine · live', color: 'success', desc: 'Scans here are real and evidence-backed.' }
+    ? { label: PUBLIC_ENGINE_CHIP_LIVE, color: 'success', desc: 'Scans here are real and evidence-backed.' }
     : isDemo
-      ? { label: 'Interactive demo · sample data', color: 'info', desc: 'This session answers in-browser with clearly-labelled sample data.' }
-      : { label: 'Static Pages · demo scan ready', color: 'info', desc: 'Press Run demo scan for labelled sample findings. Live evidence needs the API or a local run.' };
+      ? { label: PUBLIC_ENGINE_CHIP_DEMO, color: 'info', desc: PUBLIC_ENGINE_DEMO_COPY }
+      : { label: PUBLIC_ENGINE_CHIP_DISCONNECTED, color: 'info', desc: PUBLIC_ENGINE_SCAN_COPY };
 
   return (
     <Box sx={{ mt: compact ? 3 : 6 }}>
@@ -39,7 +42,7 @@ const ScanWorkflowStrip: React.FC<{ compact?: boolean }> = ({ compact = false })
           How scanning works
         </Typography>
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-          <Chip size="small" variant="outlined" color={state.color} label={state.label} />
+          <Chip size="small" variant="outlined" color={state.color} sx={publicEngineChipSx} label={state.label} />
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>{state.desc}</Typography>
         </Stack>
       </Stack>

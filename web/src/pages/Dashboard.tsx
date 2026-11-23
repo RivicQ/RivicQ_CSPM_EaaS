@@ -47,13 +47,9 @@ const ChartTooltipContent: React.FC<any> = ({ active, payload, label }) => {
   return (
     <Box
       sx={{
+        ...dashboardDesign.panel,
         px: 1.5,
         py: 1,
-        bgcolor: 'background.paper',
-        border: 1,
-        borderColor: 'divider',
-        borderRadius: `${dashboardDesign.radius.sm}px`,
-        boxShadow: dashboardDesign.chart.tooltipShadow,
       }}
     >
       <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, mb: 0.5 }}>{label}</Typography>
@@ -326,7 +322,7 @@ const Dashboard: React.FC = () => {
                   width: `${healthScore}%`,
                   height: '100%',
                   borderRadius: 2,
-                  background: `linear-gradient(90deg, ${tokens.colors.rivicq[600]}, ${tokens.colors.rivicq[400]})`,
+                  background: tokens.colors.rivicq[500],
                 }}
               />
             </Box>
@@ -434,7 +430,8 @@ const Dashboard: React.FC = () => {
             title="Algorithm Distribution"
             subtitle="CBOM inventory · click bars to highlight"
             delay={2}
-            action={<Chip size="small" icon={<Security sx={{ fontSize: 14 }} />} label="CBOM" variant="outlined" sx={{ fontSize: '0.6875rem', height: 24 }} />}
+            action={<Chip size="small" icon={<Security sx={{ fontSize: 14 }} />} label="CBOM" variant="outlined" sx={{ ...dashboardDesign.chip, height: 24 }}
+ />}
           >
             <AlgorithmDistributionChart
               data={algorithmData}
@@ -523,7 +520,8 @@ const Dashboard: React.FC = () => {
             title="Compliance Frameworks"
             subtitle={complianceAvg ? `Calculated average ${complianceAvg}% · click a framework` : 'Regulatory alignment overview'}
             delay={6}
-            action={<Chip size="small" label={`${complianceFrameworks.length} active`} variant="outlined" sx={{ fontSize: '0.6875rem', height: 24 }} />}
+            action={<Chip size="small" label={`${complianceFrameworks.length} active`} variant="outlined" sx={{ ...dashboardDesign.chip, height: 24 }}
+ />}
           >
             <ComplianceScoreGrid
               frameworks={complianceFrameworks}
@@ -606,12 +604,9 @@ const Dashboard: React.FC = () => {
 
       <Box
         sx={{
+          ...dashboardDesign.panel,
           mt: 1.25,
           p: 1.25,
-          borderRadius: `${dashboardDesign.radius.md}px`,
-          border: 1,
-          borderColor: 'divider',
-          bgcolor: '#0a0a0f',
           display: 'flex',
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
@@ -630,9 +625,9 @@ const Dashboard: React.FC = () => {
           </Box>
         </Stack>
         <Stack direction="row" spacing={1}>
-          <Chip icon={<TrendingUp sx={{ fontSize: 14 }} />} label={`PQC ${pqcPct}%`} size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
-          <Chip label="NIST CSF" size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
-          <Chip label="SOC 2" size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
+          <Chip icon={<TrendingUp sx={{ fontSize: 14 }} />} label={`PQC ${pqcPct}%`} size="small" variant="outlined" sx={dashboardDesign.chip} />
+          <Chip label="NIST CSF" size="small" variant="outlined" sx={dashboardDesign.chip} />
+          <Chip label="SOC 2" size="small" variant="outlined" sx={dashboardDesign.chip} />
           <ProvenanceChip kind={model.dataMode} />
         </Stack>
       </Box>

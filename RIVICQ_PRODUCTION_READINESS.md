@@ -206,3 +206,17 @@ CSPM verdict above, and no CSPM finding, fix, or score applies to it.
 See `docs/EAAS_PRODUCT_STATUS.md`, `docs/EAAS_DEPLOYMENT.md`,
 `docs/EAAS_LIMITATIONS.md`, `docs/EAAS_TESTING_CI.md`, and
 `docs/ALPHA_BETA_TEST_REPORT.md`. **EaaS Production Ready: not claimed.**
+
+## 8. Current branch additions (not verdict-changing)
+
+The feature branch adds browser and administrative surfaces that improve honesty but do not close the blockers in §4–§6:
+
+- `web/src/services/network.ts` + `web/src/services/api.ts`: friendly network errors, an 8-second timeout, one delayed retry for idempotent GETs, and normalized messages; login, register, and MFA no longer show a raw "Network Error".
+- `web/src/config/editions.ts`: backend discovery short-circuits on static HTTPS pages without an explicit `REACT_APP_API_URL`, so disconnected pages do not imply an attached engine.
+- `web/src/context/AuthContext.tsx` + `web/src/pages/AuthPage.tsx`: sessions are accepted only after server validation; errors are friendly, and the disconnected state labels the demo and exposes request-demo, sales, and self-hosting routes.
+- [BetaSignup.tsx](web/src/pages/BetaSignup.tsx): public `/beta` and `/beta-signup` submit sales-interest requests through `platformService.createLead` when the backend is reachable, use a mailto fallback otherwise, and state "No beta approval or invitation is implied."
+- [ClientOnboarding.tsx](web/src/pages/ClientOnboarding.tsx): authenticated `/onboarding` is a local-only checklist linking `/account`, `/demo`, `/workflow-studio`, `/diagrams`, and `/contact`; progress is browser-local and is not a backend record.
+- [readiness.go](internal/platform/readiness.go) + [handlers.go](internal/platform/handlers.go): authenticated admin-only `GET /api/v1/platform/readiness` reports configuration-only checks for core, auth, cloud, quantum, hardware, EaaS, and security. It uses exactly the maturity labels `Production implemented`, `Beta implemented`, `Experimental`, `Integration pending`, `Planned`, and `Not supported`, discloses no secrets, and performs no live cloud, quantum, EaaS, email, payment, or hardware probes. The attached in-process DB handle is reported separately via `PingContext`; that is not an external integration probe. Per-check labels are not an overall production verdict.
+- [ProductionReadiness.tsx](web/src/pages/ProductionReadiness.tsx): admin-only `/readiness` renders that endpoint, marks the assessment configuration-only, and shows an honest empty state when no authoritative backend is connected.
+
+External integrations remain unconfigured/unverified: hosted DB/RLS, email, OAuth provider config, payments/checkout, cloud credentials, IBM Quantum/HPCS credentials, HSM/QKD/QRNG hardware, and wireless operations. These additions do not claim production readiness, customer validation, telemetry, benchmarks, or completed external setup. The verdict in this report is unchanged.

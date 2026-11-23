@@ -2,9 +2,11 @@ import axios from 'axios';
 import { getAPIBaseURL, Edition } from '../config/editions';
 import { isClientDemoToken, DEMO_STORAGE_KEY } from '../demo/constants';
 import { demoAwareAdapter } from '../demo/scanDemo';
+import { isNetworkError, normalizeApiError } from './network';
 
 const api = axios.create({
   baseURL: getAPIBaseURL(),
+  timeout: 8000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -35,7 +37,14 @@ function shouldAttachAuthToken(url?: string): boolean {
   }
 }
 
+const RETRY_FLAG = '__networkRetried';
+const RETRY_DELAY_MS = 250;
+const RETRYABLE_STATUSES = [502, 503, 504];
+
 api.interceptors.request.use((config) => {
+  if ((config as any)[RETRY_FLAG]) {
+    Object.defineProperty(config, RETRY_FLAG, { value: true, enumerable: false, configurable: true });
+  }
   const token = localStorage.getItem('auth_token');
   if (token && !isClientDemoToken(token) && shouldAttachAuthToken(config.url)) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -47,7 +56,20 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const config = error?.config;
+    const method = String(config?.method || '').toLowerCase();
+    const status = error?.response?.status;
+    if (
+      config &&
+      method === 'get' &&
+      !(config as any)[RETRY_FLAG] &&
+      (isNetworkError(error) || RETRYABLE_STATUSES.includes(status))
+    ) {
+      Object.defineProperty(config, RETRY_FLAG, { value: true, enumerable: true, configurable: true });
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      return api(config);
+    }
     const url = error?.config?.url || '';
     const isAuthCall = /\/auth\/(login|register|mfa|refresh|demo|me|forgot-password|reset-password|providers|editions)/.test(url);
     const demoSession = localStorage.getItem(DEMO_STORAGE_KEY) === '1' || isClientDemoToken(localStorage.getItem('auth_token'));
@@ -57,7 +79,7 @@ api.interceptors.response.use(
       const base = process.env.PUBLIC_URL || '/platform';
       window.location.href = `${window.location.origin}${base}/login`;
     }
-    return Promise.reject(error);
+    return Promise.reject(normalizeApiError(error));
   }
 );
 

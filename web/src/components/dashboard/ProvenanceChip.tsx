@@ -2,6 +2,7 @@ import React from 'react';
 import { Chip } from '@mui/material';
 import { DATA_KIND_LABEL } from '../../data/enterprise/sources';
 import type { DataKind } from '../../data/enterprise/types';
+import { archifyChipTypographySx } from '../../theme/nebulaSurfaces';
 
 const COLOR: Record<DataKind, 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'info'> = {
   live: 'success',
@@ -22,7 +23,7 @@ const ProvenanceChip: React.FC<ProvenanceChipProps> = ({ kind, label }) => (
     color={COLOR[kind]}
     variant="outlined"
     label={label || DATA_KIND_LABEL[kind]}
-    sx={{ fontSize: '0.62rem', height: 20, fontWeight: 700, letterSpacing: '0.04em' }}
+    sx={{ ...archifyChipTypographySx, height: 22, fontWeight: 700 }}
   />
 );
 

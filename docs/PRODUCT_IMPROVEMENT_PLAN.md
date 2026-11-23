@@ -19,10 +19,12 @@ This is a target-state addendum to [PRD.md](PRD.md) and [ROADMAP.md](ROADMAP.md)
 
 - Static CBOM/SBOM, CycloneDX 1.6 export, policy gate, dataset harness: **Beta implemented**.
 - CSPM auth lifecycle, RBAC, tenant scoping, Enterprise license boundary: **Beta implemented**.
+- Browser auth/network experience, public beta request capture, client onboarding checklist, and admin readiness reporting: **Beta implemented** on this branch; each is explicitly labeled as local, configuration-only, or pending where applicable.
 - Email delivery, hosted production database, live CSPM checkout, EaaS hosted SaaS/payments/email: **Integration pending** or **Not supported** per `docs/KNOWN_LIMITATIONS.md` and `docs/EAAS_LIMITATIONS.md`.
 - Archify generated diagrams and static site: **Beta implemented**; use as design source of truth, do not restyle generated artifacts.
-- Native in-app animated workflow studio: **Beta implemented (SIMULATED)** in this branch; 10 workflows including the 30-stage DevSecOps lifecycle.
+- Native in-app animated workflow studio: **Beta implemented** in this branch; the player content is labeled `SIMULATED`, with 10 workflows including the 30-stage DevSecOps lifecycle.
 - Account Centre: **Beta implemented** where the backend supports persistence; integrations remain **Integration pending**.
+- External integrations remain unconfigured/unverified: hosted DB/RLS, email, OAuth provider config, payments/checkout, cloud credentials, IBM Quantum/HPCS credentials, HSM/QKD/QRNG hardware, and wireless operations. The admin readiness endpoint reports these boundaries without cloud, quantum, EaaS, email, payment, or hardware probes.
 
 ## Implemented in this branch
 
@@ -31,6 +33,13 @@ This is a target-state addendum to [PRD.md](PRD.md) and [ROADMAP.md](ROADMAP.md)
 - Public `/workflows` and authenticated `/workflow-studio` routes, linked from the public navigation and operator palette.
 - `web/src/pages/AccountCenter.tsx`: Profile, Security, Workspace, Integrations, Developer, Preferences, and Privacy tabs with honest integration states.
 - Auth shell consolidation onto shared `AuthChrome`, collapsed optional registration fields, OAuth availability states, password visibility, and return-to-original-page after MFA.
+- `web/src/services/network.ts` and `web/src/services/api.ts`: an 8-second request timeout, one delayed retry for idempotent GETs, normalized error messages, and friendly network messages; login, register, and MFA no longer show a raw "Network Error".
+- `web/src/config/editions.ts`: backend discovery short-circuits on static HTTPS pages unless `REACT_APP_API_URL` is explicit, so disconnected pages do not probe local ports or imply a hosted backend.
+- `web/src/context/AuthContext.tsx` and `web/src/pages/AuthPage.tsx`: sessions are accepted only after server validation; login, register, and MFA errors are friendly; the disconnected state offers the labeled demo plus request-demo, sales, and self-hosting routes.
+- [BetaSignup.tsx](../web/src/pages/BetaSignup.tsx): public `/beta` and `/beta-signup` collect sales/interest requests, submit through `platformService.createLead` to `POST /api/v1/leads` when the backend is reachable, fall back to a mailto draft otherwise, and state "No beta approval or invitation is implied."
+- [ClientOnboarding.tsx](../web/src/pages/ClientOnboarding.tsx): authenticated `/onboarding` presents a local-only checklist linking `/account`, `/demo`, `/workflow-studio`, `/diagrams`, and `/contact`; progress is stored in `localStorage` and is explicitly not a backend record.
+- [readiness.go](../internal/platform/readiness.go) and [handlers.go](../internal/platform/handlers.go): authenticated admin-only `GET /api/v1/platform/readiness` reports configuration-only checks for core, auth, cloud, quantum, hardware, EaaS, and security with the six maturity labels and no secrets; no cloud, quantum, EaaS, email, payment, or hardware provider is probed.
+- [ProductionReadiness.tsx](../web/src/pages/ProductionReadiness.tsx): admin-only `/readiness` renders that endpoint and shows an honest empty state when no authoritative backend is connected.
 - Tests: workflow catalog, workflow player, account centre, and existing frontend suites all pass; production build compiles.
 
 ## Staged roadmap
@@ -47,7 +56,7 @@ Acceptance criteria:
 - Responsive checks cover desktop, tablet, and mobile; no horizontal overflow on changed pages.
 - Reduced motion is honored.
 
-Status: **IMPLEMENTED (PARTIAL)**. Evidence: shared token bridges, AuthChrome consolidation, public/console workflow surfaces, and reduced-motion handling are in this branch; screenshot regression tooling remains **Planned** and pixel-level responsive review is not yet automated.
+Status: **IMPLEMENTED (PARTIAL)**. Evidence: shared token bridges, AuthChrome consolidation, public/console workflow surfaces, dark-nebula lock for exact RivicQ/Archify parity, and reduced-motion handling are in this branch; screenshot regression tooling remains **Planned** and pixel-level responsive review is not yet automated.
 
 ### 2. Authentication and account experience
 
@@ -61,7 +70,7 @@ Acceptance criteria:
 - MFA enrollment, verification, disable, and recovery behavior are testable; secrets are not retained in UI state or logs.
 - Account Centre covers profile, security, workspace, integrations, developer, preferences, and privacy; saved changes persist through backend APIs.
 
-Status: **BETA IMPLEMENTED / PARTIALLY BLOCKED**. Backend auth lifecycle and Account Centre are in place; production email delivery, OAuth provider configuration, and full account persistence beyond supported endpoints remain integration-dependent.
+Status: **Beta implemented** / partially blocked. Backend auth lifecycle and Account Centre are in place; login, registration, and MFA now show friendly errors with no raw "Network Error", and stored sessions require server validation before entitlements are restored. Production email delivery, OAuth provider configuration, and full account persistence beyond supported endpoints remain **Integration pending**.
 
 ### 3. Console and workflow animation
 
@@ -76,7 +85,7 @@ Acceptance criteria:
 - All illustrative data is labeled `DEMO` or `SIMULATED`; `LIVE` is only used with real backend events.
 - Keyboard interaction, focus indicators, `prefers-reduced-motion`, pause, and a readable static alternative are provided.
 
-Status: **BETA IMPLEMENTED (SIMULATED)**. Evidence: 10 workflows, 30-stage DevSecOps lifecycle, accessible player, and static alternative are in this branch; backend-event-driven LIVE mode remains **Integration pending**.
+Status: **Beta implemented**. Evidence: 10 workflows, 30-stage DevSecOps lifecycle, accessible player, and static alternative are in this branch; illustrative content is labeled `SIMULATED`, and backend-event-driven LIVE mode remains **Integration pending**.
 
 ### 4. Community and Open-Source Cloud
 
@@ -101,7 +110,7 @@ Acceptance criteria:
 - Classical operations are Beta implemented; ML-KEM/ML-DSA Experimental; SLH-DSA Planned; HSM custody Integration pending.
 - No FIPS/CAVP or production certification claim without evidence.
 
-Status: **BETA IMPLEMENTED (LOCAL SANDBOX)**. Production service, billing, email, HSM, and hosted database remain blocked.
+Status: **Beta implemented** for the local sandbox. Production service, billing, email, HSM, and hosted database remain **Integration pending** or **Not supported**.
 
 ### 6. Enterprise readiness
 
@@ -150,7 +159,7 @@ Acceptance criteria:
 - Required registration processing is separated from optional marketing consent.
 - No form silently discards submissions or falsely reports success.
 
-Status: **BLOCKED** on email delivery and hosted/self-hosted operator process.
+Status: **Beta implemented** for request capture; release **BLOCKED** on email delivery and hosted/self-hosted operator process. Public `/beta` and `/beta-signup` submit real interest requests when the backend is reachable, use a mailto fallback when it is not, and explicitly grant no beta approval or invitation; verification, admin review, invitations, and feedback remain blocked or unimplemented.
 
 ## Test evidence required before beta release
 
@@ -170,4 +179,4 @@ Status: **BLOCKED** on email delivery and hosted/self-hosted operator process.
 
 ## Change governance
 
-Do not use this addendum to imply completed production readiness. Update status only when the corresponding tests and evidence exist.
+Do not use this addendum to imply completed production readiness. The admin `/readiness` page and `GET /api/v1/platform/readiness` are diagnostics, not a production-readiness certificate; per-check `Production implemented` labels describe individual surfaces only. Update status only when the corresponding tests and evidence exist.

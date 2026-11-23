@@ -57,7 +57,7 @@ const PQCReadinessPanel: React.FC<PQCReadinessPanelProps> = ({ quantumSafe, vuln
       <Grid container spacing={1.5}>
         {segments.map((s) => (
           <Grid item xs={12} sm={4} key={s.label}>
-            <Box sx={{ p: 1.5, borderRadius: `${dashboardDesign.radius.sm}px`, border: 1, borderColor: 'divider', bgcolor: `${s.color}08` }}>
+            <Box sx={{ ...dashboardDesign.panel, p: 1.5 }}>
               <Typography sx={{ fontSize: '0.625rem', fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {s.label}
               </Typography>

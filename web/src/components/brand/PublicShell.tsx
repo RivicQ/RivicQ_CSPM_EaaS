@@ -39,6 +39,7 @@ const NAV: NavItem[] = [
     { label: 'Archify gallery', to: 'archify/site/index.html#diagrams' },
     { label: 'RivicQ Graph demo', to: 'fabric/' },
     { label: 'Contact', to: '/contact' },
+    { label: 'Beta signup', to: '/beta' },
   ] },
 ];
 

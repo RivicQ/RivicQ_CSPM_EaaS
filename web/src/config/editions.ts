@@ -227,7 +227,7 @@ function configuredAPIPort(): number | null {
 
 function configuredAPIOrigin(): string | null {
   const env = process.env.REACT_APP_API_URL;
-  if (!env) return null;
+  if (!env || !/^https?:\/\//i.test(env.trim())) return null;
   try {
     const parsed = new URL(env, window.location.origin);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
@@ -238,45 +238,48 @@ function configuredAPIOrigin(): string | null {
 }
 
 export const getEditionFromBackend = async (): Promise<{ edition: string; features: Record<string, any>; baseURL: string } | null> => {
-  // Port probing is only valid in local dev (http://localhost). On https
-  // deployments (GitHub Pages, production) plain-http probes are mixed
-  // content and always fail, so use an explicitly configured https API only.
-  const host = window.location.hostname;
-  const isLocalHttp =
-    window.location.protocol === 'http:' &&
-    (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local'));
-  const configuredOrigin = configuredAPIOrigin();
+  try {
+    const host = window.location.hostname;
+    const isLocalHttp =
+      window.location.protocol === 'http:' &&
+      (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local'));
+    const configuredOrigin = configuredAPIOrigin();
 
-  if (!isLocalHttp && configuredOrigin) {
-    try {
-      const resp = await editionClient.get(`${configuredOrigin}/edition`, { timeout: 2000 });
-      if (resp.data && resp.data.edition) {
-        const detectedURL = normalizeAPIBaseURL(process.env.REACT_APP_API_URL as string);
-        setAPIBaseURL(detectedURL);
-        return { ...resp.data, baseURL: detectedURL };
-      }
-    } catch {
-      return null;
-    }
-  }
+    if (!isLocalHttp && !configuredOrigin) return null;
 
-  if (isLocalHttp) {
-    const candidates = [configuredAPIPort(), OSS_PORT, ENTERPRISE_PORT].filter(
-      (p): p is number => p !== null
-    );
-    for (const port of candidates.filter((p, i) => candidates.indexOf(p) === i)) {
+    if (!isLocalHttp && configuredOrigin) {
       try {
-        // Try the backend directly on each port for edition detection.
-        const resp = await editionClient.get(`http://${host}:${port}/edition`, { timeout: 2000 });
+        const resp = await editionClient.get(`${configuredOrigin}/edition`, { timeout: 2000 });
         if (resp.data && resp.data.edition) {
-          const detectedURL = `http://${host}:${port}${API_PREFIX}`;
+          const detectedURL = normalizeAPIBaseURL(process.env.REACT_APP_API_URL as string);
           setAPIBaseURL(detectedURL);
           return { ...resp.data, baseURL: detectedURL };
         }
       } catch {
-        continue;
+        return null;
       }
     }
+
+    if (isLocalHttp) {
+      const candidates = [configuredAPIPort(), OSS_PORT, ENTERPRISE_PORT].filter(
+        (p): p is number => p !== null
+      );
+      for (const port of candidates.filter((p, i) => candidates.indexOf(p) === i)) {
+        try {
+          // Try the backend directly on each port for edition detection.
+          const resp = await editionClient.get(`http://${host}:${port}/edition`, { timeout: 2000 });
+          if (resp.data && resp.data.edition) {
+            const detectedURL = `http://${host}:${port}${API_PREFIX}`;
+            setAPIBaseURL(detectedURL);
+            return { ...resp.data, baseURL: detectedURL };
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+    return null;
+  } catch {
+    return null;
   }
-  return null;
 };

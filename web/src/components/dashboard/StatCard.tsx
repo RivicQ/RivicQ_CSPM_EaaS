@@ -1,8 +1,9 @@
 import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import dashboardDesign from '../../theme/dashboardDesign';
 import { metricValueSx } from '../../theme/designSystem';
+import { archifyChipTypographySx, NEBULA } from '../../theme/nebulaSurfaces';
 
 type StatCardProps = {
   label: string;
@@ -30,35 +31,32 @@ const StatCard: React.FC<StatCardProps> = ({
   onClick,
 }) => {
   const theme = useTheme();
+  const reduce = useReducedMotion();
   const isZero = value === 0 || value === '0';
-  const color = isZero ? '#9ca3af' : (accent || theme.palette.primary.main);
-  const valueColor = isZero ? '#ffffff' : (accent || '#ffffff');
+  const color = isZero ? NEBULA.faint : (accent || theme.palette.primary.main);
+  const valueColor = isZero ? NEBULA.text : (accent || NEBULA.text);
 
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0, y: 8 }}
+      initial={reduce ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: delay * 0.05, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: reduce ? 0 : 0.2, delay: reduce ? 0 : delay * dashboardDesign.motion.stagger, ease: [0.4, 0, 0.2, 1] }}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
       onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
       sx={{
+        ...dashboardDesign.panel,
         height: '100%',
         position: 'relative',
         overflow: 'hidden',
         px: 1.5,
         py: 1.25,
-        bgcolor: '#0a0a0f',
-        border: 1,
-        borderColor: 'divider',
-        borderRadius: `${dashboardDesign.radius.md}px`,
         transition: dashboardDesign.motion.transition,
         cursor: onClick ? 'pointer' : 'default',
-        color: '#ffffff',
         '&:hover': {
-          borderColor: 'rgba(255,255,255,0.22)',
+          borderColor: NEBULA.lineHi,
           boxShadow: 'none',
           transform: dashboardDesign.motion.hoverLift,
         },
@@ -68,10 +66,8 @@ const StatCard: React.FC<StatCardProps> = ({
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography
             sx={{
-              color: 'text.secondary',
-              fontWeight: 600,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
+              ...archifyChipTypographySx,
+              color: NEBULA.faint,
               fontSize: '0.6rem',
               lineHeight: 1.2,
             }}

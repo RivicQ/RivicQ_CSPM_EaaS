@@ -1,6 +1,6 @@
 # EaaS limitations
 
-Honest boundary list for the standalone EaaS build. Status labels match the rest of this document set: `VERIFIED`, `LIMITED`, `PARTIALLY_IMPLEMENTED`, `NOT_IMPLEMENTED`, `BLOCKED`, `Experimental`, `Beta implemented`, `Integration pending`, `Planned`. Sources: `internal/eaas/*.go`, `cmd/eaas/main.go`, `web/eaas/index.html`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`, `docs/PRD.md`.
+Honest boundary list for the standalone EaaS build. Status labels match the rest of this document set: `VERIFIED`, `LIMITED`, `PARTIALLY_IMPLEMENTED`, `NOT_IMPLEMENTED`, `BLOCKED`. Product maturity labels used by the CSPM readiness API are exactly `Production implemented`, `Beta implemented`, `Experimental`, `Integration pending`, `Planned`, `Not supported`. Sources: `internal/eaas/*.go`, `cmd/eaas/main.go`, `web/eaas/index.html`, `deploy/migrations/004_eaas_schema.sql`, `.github/workflows/eaas-ci.yml`, `docs/PRD.md`.
 
 Companions: [Product status](EAAS_PRODUCT_STATUS.md) · [API](EAAS_API.md) · [Deployment](EAAS_DEPLOYMENT.md) · [Security & privacy](EAAS_SECURITY_PRIVACY.md) · [Testing & CI](EAAS_TESTING_CI.md) · [Freemium & metering](EAAS_FREEMIUM_AND_METERING.md)
 
@@ -32,6 +32,9 @@ Plan flags `AdvancedAnalytics`, `AuditLog`, `SSO`, `HSM` and `PQCExperimental` a
 - Sandbox persistence only: atomic JSON write + rename and a process-local mutex; no multi-process coordination in the evidence scope (`internal/eaas/store.go:12-18,195-222`). Treat the state file as sensitive because it contains base64 private keys (`web/eaas/index.html:163`).
 - `EAAS_ENV=production` does not by itself provide Postgres, email, HSM, payments, or key custody; it suppresses the dev verification code and changes the reported environment (`internal/eaas/service.go:80,174-177`; `cmd/eaas/main.go:17`).
 - Beta registration is manual review only; submission returns `received_pending_review` and is not approval or an invitation (`internal/eaas/service.go:905-925`). The admin listing is gated by `EAAS_ADMIN_TOKEN`, not by a user role (`internal/eaas/http.go:374-382`).
+- The CSPM readiness API reports EaaS as a configuration-only assessment: standalone service flags, `EAAS_ADMIN_TOKEN`, the sandbox state file, and email/payments as `Not supported`. These are environment-flag checks, not a hosted deployment, external probe, or secret disclosure; see [readiness.go](../internal/platform/readiness.go) and the admin `/readiness` UI.
+- The public `/beta` and `/beta-signup` form is a sales-interest request, not EaaS beta enrollment. When no backend is reachable it opens a mailto draft and states that no beta approval or invitation is implied; it does not change EaaS manual review or sandbox boundaries.
+- External integrations remain unconfigured/unverified: hosted DB/RLS, email, OAuth provider config, payments/checkout, cloud credentials, IBM Quantum/HPCS credentials, HSM/QKD/QRNG hardware, and wireless operations.
 - CI has no deploy gate: gofmt, go vet, go build and go test only (`.github/workflows/eaas-ci.yml:38-47`).
 - Local test evidence covers seven EaaS package tests; the full repository `go test ./...` suite, `go vet ./...`, and `go build ./...` also passed locally (`internal/eaas/eaas_test.go`; see [EAAS_TESTING_CI.md](EAAS_TESTING_CI.md)).
 

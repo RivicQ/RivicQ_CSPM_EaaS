@@ -31,16 +31,13 @@ const ComplianceScoreGrid: React.FC<ComplianceScoreGridProps> = ({ frameworks, o
               onClick={() => onSelect?.(fw.id)}
               onKeyDown={onSelect ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(fw.id); } } : undefined}
               sx={{
+                ...dashboardDesign.panel,
                 p: 1.75,
                 cursor: onSelect ? 'pointer' : 'default',
-                borderRadius: `${dashboardDesign.radius.md}px`,
-                border: 1,
-                borderColor: 'divider',
-                bgcolor: 'background.paper',
                 position: 'relative',
                 overflow: 'hidden',
                 transition: dashboardDesign.motion.transition,
-                '&:hover': { borderColor: `${color}44`, transform: 'none' },
+                '&:hover': { borderColor: 'var(--rvq-border-strong)', transform: 'none' },
                 '&::before': {
                   content: '""',
                   position: 'absolute',

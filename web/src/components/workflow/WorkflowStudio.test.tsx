@@ -1,7 +1,6 @@
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { createTheme, ThemeProvider } from '@mui/material';
 import { workflowById } from '../../data/workflows';
 import WorkflowStudio from './WorkflowStudio';
@@ -43,23 +42,21 @@ describe('WorkflowStudio', () => {
     expect(screen.getByText('SIMULATED — no live telemetry')).toBeInTheDocument();
   });
 
-  it('moves between stages with Next and Previous', async () => {
-    const user = userEvent.setup();
+  it('moves between stages with Next and Previous', () => {
     renderStudio();
-    await user.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByRole('heading', { level: 2, name: 'Policy baseline' })).toBeInTheDocument();
     expect(screen.getByText(/Stage 2 of 30: Policy baseline/)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Previous' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Previous' }));
     expect(screen.getByRole('heading', { level: 2, name: 'Intake and scope' })).toBeInTheDocument();
   });
 
-  it('changes the workflow from the select and resets to stage 0', async () => {
-    const user = userEvent.setup();
+  it('changes the workflow from the select and resets to stage 0', () => {
     const onWorkflowChange = jest.fn();
     renderStudio(<WorkflowStudio onWorkflowChange={onWorkflowChange} />);
-    await user.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByText(/Stage 2 of 30/)).toBeInTheDocument();
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Workflow' }), 'cbom');
+    fireEvent.change(screen.getByRole('combobox', { name: 'Workflow' }), { target: { value: 'cbom' } });
     expect(screen.getByRole('heading', { level: 1, name: /CBOM and SBOM evidence lifecycle/i })).toBeInTheDocument();
     expect(screen.getByText(/Stage 1 of 8: Declare sources/)).toBeInTheDocument();
     expect(onWorkflowChange).toHaveBeenCalledWith('cbom');
@@ -76,47 +73,44 @@ describe('WorkflowStudio', () => {
     expect(names).toEqual(workflowById('devsecops').stages.map((stage) => stage.name));
   });
 
-  it('renders a gated stage with the matching severity color', async () => {
-    const user = userEvent.setup();
+  it('renders a gated stage with the matching severity color', () => {
     renderStudio();
-    await user.click(screen.getByRole('button', { name: 'Policy gate' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Policy gate' }));
     const gateChip = screen.getByTestId('gate-chip');
     expect(gateChip).toHaveTextContent('BLOCK');
     expect(gateChip).toHaveClass('MuiChip-colorError');
   });
 
-  it('supports ArrowLeft, ArrowRight, Home and End on the stage rail', async () => {
-    const user = userEvent.setup();
+  it('supports ArrowLeft, ArrowRight, Home and End on the stage rail', () => {
     renderStudio();
-    screen.getByRole('button', { name: 'Intake and scope' }).focus();
-    await user.keyboard('{ArrowRight}');
+    const firstStage = screen.getByRole('button', { name: 'Intake and scope' });
+    fireEvent.focus(firstStage);
+    fireEvent.keyDown(firstStage, { key: 'ArrowRight' });
     expect(screen.getByText(/Stage 2 of 30: Policy baseline/)).toBeInTheDocument();
-    await user.keyboard('{End}');
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Policy baseline' }), { key: 'End' });
     expect(screen.getByText(/Stage 30 of 30: Audit evidence pack/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Audit evidence pack' })).toHaveAttribute('aria-current', 'step');
-    await user.keyboard('{Home}');
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Audit evidence pack' }), { key: 'Home' });
     expect(screen.getByText(/Stage 1 of 30: Intake and scope/)).toBeInTheDocument();
-    await user.keyboard('{ArrowLeft}');
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Intake and scope' }), { key: 'ArrowLeft' });
     expect(screen.getByText(/Stage 1 of 30: Intake and scope/)).toBeInTheDocument();
   });
 
-  it('stops at the last stage and restarts from stage 0', async () => {
-    const user = userEvent.setup();
+  it('stops at the last stage and restarts from stage 0', () => {
     renderStudio();
-    await user.click(screen.getByRole('button', { name: 'Audit evidence pack' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Audit evidence pack' }));
     expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
-    await user.click(screen.getByRole('button', { name: 'Play' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Play' }));
     expect(screen.getByText(/Stage 1 of 30: Intake and scope/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Restart' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Restart' }));
     expect(screen.getByText(/Stage 1 of 30: Intake and scope/)).toBeInTheDocument();
   });
 
-  it('exposes speed control and a one-line Archify map link', async () => {
-    const user = userEvent.setup();
+  it('exposes speed control and a one-line Archify map link', () => {
     renderStudio();
     const speed = screen.getByRole('combobox', { name: 'Speed' });
-    await user.selectOptions(speed, '2');
+    fireEvent.change(speed, { target: { value: '2' } });
     expect(speed).toHaveValue('2');
     expect(screen.getByRole('link', { name: /open archify map/i })).toHaveAttribute(
       'href',

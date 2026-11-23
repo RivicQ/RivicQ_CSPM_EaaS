@@ -73,7 +73,7 @@ describe('Home static Pages scan fallback', () => {
     const runBtn = screen.getByRole('button', { name: /Run demo scan/i });
     expect(runBtn).toBeEnabled();
     expect(screen.queryByText(/Run disabled here/i)).toBeNull();
-    expect(screen.getAllByText(/Static Pages · demo scan ready|demo scan starts the interactive demo/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Static Pages · no engine/i).length).toBeGreaterThan(0);
 
     fireEvent.click(runBtn);
 
@@ -104,7 +104,7 @@ describe('Home static Pages scan fallback', () => {
     expect(screen.getByText(/Control mappings \(not certifications\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Current status: PARTIALLY IMPLEMENTED — controlled pilot ready/i)).toBeInTheDocument();
     expect(screen.getByText(/five security-leader interviews by 2026-11-24/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Switch to dark mode/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /switch to (dark|light) mode/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/Security score/i)).toBeNull();
   });
 

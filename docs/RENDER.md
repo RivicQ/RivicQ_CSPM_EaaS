@@ -1,9 +1,11 @@
-# Deplying the real API to Render
+# Deploying the real API to Render
 
-The static GitHub Pages site ships an in-browser **demo mode** so login and
-scanning work with no backend at all. For **real** login, real scans, live
-quantum scores, and persisted tenants, run the RivicQ OSS API somewhere public
-and point the app at it via the `REACT_APP_API_URL` secret.
+The static GitHub Pages site ships a **client demo session** with clearly
+labelled sample data. It does not host a RivicQ engine: without a configured
+backend there is no live sign-in, no live scan, and no persisted tenant. For
+**real** login, real scans, live quantum scores, and persisted tenants, run the
+RivicQ OSS API somewhere public and point the app at it with the build-time
+`REACT_APP_API_URL` configuration.
 
 This repo already contains everything Render needs:
 
@@ -52,9 +54,9 @@ GitHub Pages builds the React app (`web/`) with the `REACT_APP_API_URL` secret:
    - Name: `REACT_APP_API_URL`
    - Value: `https://<your-app>.onrender.com/api/v1`
 3. Re-run the `Deploy GitHub Pages` workflow (or push).
-4. The deployed app now calls the live API for login and scanning. The
-   in-browser demo responder only activates when this secret is **not** set,
-   so production traffic always goes to the real backend.
+4. The deployed app now calls the configured API for login and scanning. The
+   client demo session remains a labelled sample-data path; it is not a
+   fallback for failed sign-in or scan requests against the API.
 
 > CORS already permits `https://rivicq.github.io` by default
 > (`internal/middleware/cors.go`); add other origins via the `CORS_ORIGINS`
@@ -72,4 +74,6 @@ cd web
 REACT_APP_API_URL=http://localhost:8080/api/v1 npm start
 ```
 
-Login with the bootstrap account, or use the app’s client-side demo mode.
+Login with the bootstrap account for real sign-in. The app’s client demo
+session is available separately and always shows labelled sample data, not
+live engine results.
