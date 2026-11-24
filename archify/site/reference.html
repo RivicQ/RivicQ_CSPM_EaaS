@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RivicQ CSPM Product &amp; Console Reference</title>
+  <meta name="description" content="Complete RivicQ reference: CSPM product overview, authenticated console, sign-in to evidence workflow, scanning sequence, edition boundaries, and validated interactive diagrams.">
+  <meta name="theme-color" content="#05050d">
+  <link rel="icon" type="image/svg+xml" href="assets/rivicq-mark.svg">
+  <link rel="stylesheet" href="css/archify-universal.css">
+  <link rel="stylesheet" href="css/rivicq-site.css">
+  <style>
+    :root { color-scheme: dark; --ink:#05050d; --panel:#0b0b16; --line:rgba(255,255,255,.13); --muted:#a7b0c4; --text:#e9eaf3; --violet:#a78bfa; --cyan:#38bdf8; --green:#34d399; }
+    body { margin:0; background:var(--ink); color:var(--text); font-family:Inter,ui-sans-serif,system-ui,sans-serif; }
+    .ref-nav { position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--line); background:rgba(5,5,13,.88); backdrop-filter:blur(12px); }
+    .ref-brand { display:flex; align-items:center; gap:10px; margin-right:auto; font-weight:700; letter-spacing:-.02em; }
+    .ref-brand img { width:28px; height:28px; }
+    .ref-nav a { color:var(--muted); font-size:13px; text-decoration:none; }
+    .ref-nav a:hover { color:var(--text); }
+    .ref-nav .ref-cta { padding:7px 12px; border:1px solid var(--line); border-radius:999px; color:var(--text); }
+    .ref-shell { position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:48px 20px 80px; }
+    .ref-hero { padding:40px 0 28px; }
+    .ref-eyebrow { margin:0 0 14px; color:var(--violet); font:600 12px/1 "JetBrains Mono",ui-monospace,monospace; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { max-width:900px; margin:0; font-size:clamp(34px,6vw,58px); line-height:1.03; letter-spacing:-.045em; }
+    h1 em { color:var(--violet); font-style:normal; }
+    .ref-lede { max-width:820px; margin:18px 0 0; color:var(--muted); font-size:17px; line-height:1.7; }
+    .ref-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
+    .ref-actions a { padding:10px 14px; border:1px solid var(--line); border-radius:10px; color:var(--text); text-decoration:none; background:rgba(255,255,255,.03); }
+    .ref-actions a.primary { border-color:rgba(167,139,250,.55); background:rgba(124,58,237,.16); }
+    .ref-rail { display:flex; flex-wrap:wrap; gap:8px; margin:30px 0; padding:12px; border:1px solid var(--line); border-radius:12px; background:linear-gradient(90deg,rgba(124,58,237,.14),rgba(10,10,20,.72),rgba(56,189,248,.1)); }
+    .ref-rail span { color:var(--muted); font:600 10px/1 "JetBrains Mono",ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; }
+    .ref-rail b { color:var(--text); font-weight:600; }
+    .ref-section { margin-top:54px; }
+    .ref-section-head { display:flex; flex-wrap:wrap; align-items:end; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .ref-section h2 { margin:0; font-size:clamp(24px,3.5vw,36px); letter-spacing:-.03em; }
+    .ref-section p { max-width:760px; margin:8px 0 0; color:var(--muted); line-height:1.65; }
+    .ref-open { color:var(--cyan) !important; font-size:13px; text-decoration:none; }
+    .ref-frame { overflow:hidden; border:1px solid var(--line); border-radius:16px; background:#070711; box-shadow:0 20px 60px rgba(0,0,0,.35); }
+    .ref-frame iframe { display:block; width:100%; height:min(68vh,640px); min-height:420px; border:0; }
+    .ref-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-top:18px; }
+    .ref-card { padding:18px; border:1px solid var(--line); border-radius:14px; background:linear-gradient(160deg,rgba(167,139,250,.08),rgba(255,255,255,.02)); }
+    .ref-card h3 { margin:0 0 8px; font-size:16px; }
+    .ref-card p { margin:0; color:var(--muted); font-size:14px; line-height:1.6; }
+    .ref-card code { color:var(--cyan); font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12px; }
+    .ref-steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; counter-reset:step; }
+    .ref-step { position:relative; padding:18px 16px 16px 52px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.025); }
+    .ref-step::before { counter-increment:step; content:counter(step,decimal-leading-zero); position:absolute; left:16px; top:18px; color:var(--violet); font:600 12px/1 "JetBrains Mono",ui-monospace,monospace; }
+    .ref-step h3 { margin:0 0 6px; font-size:14px; }
+    .ref-step p { margin:0; color:var(--muted); font-size:13px; line-height:1.55; }
+    .ref-boundary { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+    .ref-boundary article { padding:20px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.025); }
+    .ref-boundary article h3 { margin:0 0 10px; font-size:16px; }
+    .ref-boundary article ul { margin:0; padding-left:18px; color:var(--muted); line-height:1.7; }
+    .ref-boundary .oss h3 { color:var(--green); }
+    .ref-boundary .ent h3 { color:var(--violet); }
+    .ref-footer { margin-top:64px; padding-top:24px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+    @media (max-width:700px) { .ref-nav { gap:8px; } .ref-nav a { font-size:12px; } .ref-frame iframe { min-height:360px; height:60vh; } }
+    @media (prefers-reduced-motion:reduce) { .rvq-universal-backdrop::before,.rvq-universal-backdrop::after,.rvq-universal-progress { animation:none !important; } }
+  </style>
+</head>
+<body>
+  <div class="rvq-universal-backdrop" aria-hidden="true"></div>
+  <nav class="ref-nav" aria-label="RivicQ reference">
+    <a class="ref-brand" href="../../"><img src="assets/rivicq-mark.svg" alt="">RivicQ</a>
+    <a href="#console">Overview</a>
+    <a href="#workflow">Workflow</a>
+    <a href="#scanning">Scanning</a>
+    <a href="#boundaries">Editions</a>
+    <a href="../../docs/">Docs</a>
+    <a href="../../animation.html">Animation</a>
+    <a href="https://rivicq.github.io/RivicQ_CSPM_EaaS/demo">Interactive demo</a>
+    <a href="https://rivicq.github.io/RivicQ_CSPM_EaaS/workflows">Workflow demo</a>
+    <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">Open Source</a>
+    <a class="ref-cta" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/demo">Launch demo</a>
+  </nav>
+
+  <main class="ref-shell">
+    <section class="ref-hero" id="top">
+      <p class="ref-eyebrow">Complete system reference</p>
+      <h1>The product, the console, the engine, and the evidence — <em>one readable path.</em></h1>
+      <p class="ref-lede">RivicQ is a cryptographic security posture management product: public pages explain the engine, the authenticated console scopes work to a tenant, scanners fingerprint findings, policy decides, and CycloneDX-compatible CBOM evidence comes back. Community is the Apache-2.0 engine; Enterprise layers stay license- and configuration-gated.</p>
+      <p class="ref-lede">Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.</p>
+      <div class="ref-actions">
+        <a class="primary" href="https://rivicq.github.io/RivicQ_CSPM_EaaS/demo">Launch interactive console demo</a>
+        <a href="https://rivicq.github.io/RivicQ_CSPM_EaaS/workflows">Watch workflow demo</a>
+        <a href="../../animation.html">Watch the product animation</a>
+        <a href="../diagrams/rivicq-console-product.html?present=1">Open CSPM product overview</a>
+        <a href="../diagrams/rivicq-enablement.html?present=1">Open enablement workflow</a>
+        <a href="../../docs/">Read the docs</a>
+      </div>
+      <div class="ref-rail" aria-label="Archify flow stages"><span><b>Finding</b> → inventory</span><span><b>Analysis</b> → fingerprint</span><span><b>Engineering</b> → engine</span><span><b>DevSecOps</b> → gate</span><span><b>Evidence</b> → CBOM</span></div>
+    </section>
+
+    <section class="ref-section" id="console">
+      <div class="ref-section-head">
+        <div><h2>CSPM product overview and console</h2><p>Public product pages lead into the authenticated console, RevenueOS commerce desk, and GitHub Action. Session, tenant scope, server-derived entitlement, and RBAC sit before API v1. The shared engine discovers, scans, evaluates, persists, and returns evidence through <code>result_url</code>.</p></div>
+        <a class="ref-open" href="../diagrams/rivicq-console-product.html?present=1">Open full diagram ↗</a>
+      </div>
+      <div class="ref-frame"><iframe src="../diagrams/rivicq-console-product.html?embed=1&amp;theme=dark&amp;motion=1" title="RivicQ CSPM product and console overview" loading="lazy"></iframe></div>
+      <div class="ref-grid">
+        <article class="ref-card"><h3>Product surface</h3><p>Home, Product, and CSPM pages explain the system before sign-in; the same maps appear in the Archify gallery and React site.</p></article>
+        <article class="ref-card"><h3>Operator console</h3><p>Dashboard, assets, findings, scanner, BOM, governance, and role-gated admin views use a real API session. MFA setup and disable require `/auth/me` identity and a live API.</p></article>
+        <article class="ref-card"><h3>Tenant-scoped engine</h3><p><code>POST /scans</code> returns <code>202</code> with a result URL. Status and report reads stay inside the caller tenant; unmapped mutations fail closed.</p></article>
+        <article class="ref-card"><h3>Edition boundary</h3><p>Enterprise fails closed without a valid license and configured database. Unconfigured cloud, HSM, SSO, and advanced BOM layers stay unavailable.</p></article>
+      </div>
+    </section>
+
+    <section class="ref-section" id="workflow">
+      <div class="ref-section-head">
+        <div><h2>Enablement workflow</h2><p>From console sign-in to a completed report: target selection, policy check, job execution, concurrent scanners, intelligence, gate decision, and CycloneDX-compatible evidence.</p></div>
+        <a class="ref-open" href="../diagrams/rivicq-enablement.html?present=1">Open full diagram ↗</a>
+      </div>
+      <div class="ref-frame"><iframe src="../diagrams/rivicq-enablement.html?embed=1&amp;theme=dark&amp;motion=1" title="RivicQ enablement workflow" loading="lazy"></iframe></div>
+      <div class="ref-steps">
+        <article class="ref-step"><h3>Session first</h3><p>Sign-in or demo token establishes operator context before a target can be chosen.</p></article>
+        <article class="ref-step"><h3>Policy gate</h3><p>Target validation and tenant scope are checked before the scan job starts.</p></article>
+        <article class="ref-step"><h3>Discover assets</h3><p>Concurrent scanners run under a 120-second timeout across the selected target classes.</p></article>
+        <article class="ref-step"><h3>Evaluate findings</h3><p>Fingerprints drive BLOCK, WARN, ALLOW, and INFORM rules in the shared intelligence pipeline.</p></article>
+        <article class="ref-step"><h3>Emit evidence</h3><p>Permitted results become CBOM evidence; CI can enforce fail-on BLOCK outside the browser.</p></article>
+      </div>
+    </section>
+
+    <section class="ref-section" id="scanning">
+      <div class="ref-section-head">
+        <div><h2>How scanning actually runs</h2><p>The scan request sequence shows the browser, API, manager, scanners, intelligence, store, and report surface in order — auth first, evidence always.</p></div>
+        <a class="ref-open" href="../diagrams/rivicq-scanning-sequence.html?present=1">Open sequence ↗</a>
+      </div>
+      <div class="ref-frame"><iframe src="../diagrams/rivicq-scanning-sequence.html?embed=1&amp;theme=dark&amp;motion=1" title="RivicQ scan request sequence" loading="lazy"></iframe></div>
+    </section>
+
+    <section class="ref-section" id="boundaries">
+      <div class="ref-section-head">
+        <div><h2>Editions and truthful boundaries</h2><p>One engine, two editions. Community runs locally and in CI; Enterprise controls cloud attach, advanced BOM layers, SSO, audit, and continuous monitoring.</p></div>
+      </div>
+      <div class="ref-boundary">
+        <article class="oss"><h3>Community · Apache-2.0</h3><ul><li>CLI, GitHub Action, dashboard, and scanner</li><li>CBOM from repository, host, website, SBOM, firmware, and inventory targets</li><li>CycloneDX-compatible evidence and policy decisions</li><li>No cloud credentials or advanced BOM layers granted by cloning</li></ul></article>
+        <article class="ent"><h3>Enterprise · license required</h3><ul><li>QBOM, HSM/PKCS#11, SSO, RBAC, and audit</li><li>Continuous production monitoring and cloud connectors</li><li>AIBOM, IBOM, and governance evidence packs</li><li>DORA, NIS2, NIST, ISO, PCI, and SOC 2 mappings are not certifications</li></ul></article>
+      </div>
+    </section>
+
+    <footer class="ref-footer">RivicQ GmbH · Reference generated from the repository's current Prism/Archify sources. Interactive diagrams are validated, self-contained Archify HTML artifacts.</footer>
+  </main>
+</body>
+</html>

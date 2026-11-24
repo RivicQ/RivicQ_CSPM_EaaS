@@ -1,0 +1,177 @@
+/* RivicQ — deep-space nebula tokens (aligned with web/src/theme/tokens.ts) */
+:root {
+  --rivicq-50: #f5f3ff;
+  --rivicq-100: #ede9fe;
+  --rivicq-200: #ddd6fe;
+  --rivicq-300: #c4b5fd;
+  --rivicq-400: #a78bfa;
+  --rivicq-500: #7c3aed;
+  --rivicq-600: #6d28d9;
+  --rivicq-700: #5b21b6;
+  --rivicq-800: #4c1d95;
+  --rivicq-900: #2e1065;
+
+  --gold-400: #a78bfa;
+  --gold-500: #7c3aed;
+  --gold-600: #6d28d9;
+
+  --quantum: #7c3aed;
+  --quantum-light: #a78bfa;
+  --success: #22c55e;
+  --success-light: #4ade80;
+  --critical: #ef4444;
+  --high: #f97316;
+  --medium: #eab308;
+
+  --brand-gradient: linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%);
+  --brand-gradient-dark: linear-gradient(180deg, #000000 0%, #2e1065 100%);
+  --hero-gradient: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(124, 58, 237, 0.42), transparent 70%),
+                   radial-gradient(ellipse 40% 30% at 80% 20%, rgba(167, 139, 250, 0.12), transparent);
+
+  --bg-base: #000000;
+  --bg-elevated: #0a0a0f;
+  --bg-surface: #12121a;
+  --bg-card: rgba(10, 10, 15, 0.78);
+  --bg-card-hover: rgba(18, 18, 26, 0.9);
+  --bg-glass: rgba(0, 0, 0, 0.55);
+
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
+
+  --font-sans: Inter, "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --glow-blue: 0 0 40px rgba(124, 58, 237, 0.28);
+  --glow-purple: 0 0 40px rgba(124, 58, 237, 0.35);
+  --glow-green: 0 0 40px rgba(34, 197, 94, 0.2);
+
+  --nav-height: 72px;
+  --max-width: 1280px;
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Nebula-only: light theme is not offered. Legacy [data-theme="light"] stays nebula. */
+[data-theme="light"] {
+  --bg-base: #000000;
+  --bg-elevated: #0a0a0f;
+  --bg-surface: #12121a;
+  --bg-card: rgba(10, 10, 15, 0.78);
+  --bg-card-hover: rgba(18, 18, 26, 0.9);
+  --bg-glass: rgba(0, 0, 0, 0.55);
+
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
+
+  --brand-gradient-dark: linear-gradient(180deg, #000000 0%, #2e1065 100%);
+  --hero-gradient: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(124, 58, 237, 0.42), transparent 70%),
+                   radial-gradient(ellipse 40% 30% at 80% 20%, rgba(167, 139, 250, 0.12), transparent);
+
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+[data-theme="light"] .hero-bg {
+  background:
+    radial-gradient(ellipse 55% 48% at 50% 42%, rgba(124, 58, 237, 0.28), transparent 68%),
+    #000000;
+}
+[data-theme="light"] .hero-bg::before { display: none; }
+[data-theme="light"] .nav-logo-icon { background: #0a0a0f; }
+
+.theme-toggle { display: none !important; }
+
+/* Archify operator workflow embed */
+.archify-embed {
+  margin-top: var(--space-10);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+.archify-embed-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.archify-embed-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+.archify-embed-title {
+  font-size: var(--text-xl);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  max-width: 40rem;
+  color: var(--text-primary);
+}
+.archify-embed-frame {
+  display: block;
+  width: 100%;
+  height: 148px;
+  border: 0;
+  background: #000;
+  pointer-events: none;
+}
+
+.systems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 1.5rem; }
+.sys-card { position: relative; display: flex; flex-direction: column; overflow: hidden; text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-elevated); }
+.sys-card:hover { border-color: rgba(124,58,237,0.45); }
+.sys-plate { position: relative; height: 168px; overflow: hidden; background: #000; }
+.sys-plate iframe { position: absolute; inset: 0; width: 238%; height: 238%; border: 0; pointer-events: none; transform: scale(0.42); transform-origin: 0 0; }
+.sys-plate::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.86)); pointer-events: none; }
+.sys-meta { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1rem 0; }
+.sys-kind { padding: 0.18rem 0.5rem; border-radius: 999px; background: rgba(124,58,237,0.12); color: #a78bfa; font-family: var(--font-mono, "JetBrains Mono", monospace); font-size: 0.625rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.sys-file { margin-left: auto; color: var(--text-muted); font-family: var(--font-mono, "JetBrains Mono", monospace); font-size: 0.6rem; }
+.sys-q { padding: 0.85rem 1rem 0; font-size: 0.9rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.35; }
+.sys-title { padding: 0 1rem 0.2rem; font-size: 0.75rem; color: var(--text-muted); }
+.sys-desc { padding: 0 1rem 1rem; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
+@media (max-width: 1100px) { .systems-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .systems-grid { grid-template-columns: 1fr; } }

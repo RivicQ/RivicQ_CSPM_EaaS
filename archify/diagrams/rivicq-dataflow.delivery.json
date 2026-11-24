@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "3b779710-efb8-4db0-a9f0-1e2d532134f2",
+  "status": "current",
+  "command": "deliver",
+  "type": "dataflow",
+  "input": "/Users/re1/re1/CSPM/archify/spec/rivicq-dataflow.json",
+  "output": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-dataflow.html",
+  "specification": {
+    "sha256": "9a5a8a7ca77c437308c07ce4620557ddcb289166a91c397f91ba14f0a39c19db",
+    "bytes": 4114
+  },
+  "artifact": {
+    "sha256": "c98ce1cbf90910a70d7a0471b8155535a51d7184223e70e3ba1df4b3badd3bc7",
+    "bytes": 756385
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "fb4cd98a-b8ae-4814-8edb-7905457f18ae",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/re1/re1/CSPM/archify/spec/rivicq-architecture.json",
+  "output": "/Users/re1/re1/CSPM/archify/diagrams/rivicq-architecture.html",
+  "specification": {
+    "sha256": "4eb2200bb4fe6a9a2a37c50e312c653cfa699e81bcd50a3661723f607ad6952f",
+    "bytes": 4805
+  },
+  "artifact": {
+    "sha256": "a2bb5a617a279963cc4ab6ba389df1cbfed01dda54d651df48c61425dc79239a",
+    "bytes": 772890
+  }
+}

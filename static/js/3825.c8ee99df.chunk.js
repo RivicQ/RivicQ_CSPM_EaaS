@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcryptobom_saas_frontend=self.webpackChunkcryptobom_saas_frontend||[]).push([[3825],{63825(e,s,t){t.r(s),t.d(s,{default:()=>o});t(9950);var a=t(32617),r=t(44414);const o=()=>(0,r.jsx)(a.A,{defaultMode:"register"})}}]);

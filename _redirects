@@ -1,0 +1,16 @@
+# Cloudflare Pages redirects/rewrites.
+# Copied to web/build/_redirects by scripts/build-pages.sh.
+# Docs: https://developers.cloudflare.com/pages/configuration/redirects/
+#
+# The artifact is built for GitHub Pages under the base path
+# /RivicQ_CSPM_EaaS/. On Cloudflare Pages it is served from the site root, so the
+# first rule strips that base path (200 = internal rewrite, not a browser
+# redirect). Sub-app assets then resolve normally (/static/*, /fabric/*,
+# /docs/*, /marketing/*, /media/*, /api/*, /archify/*); unmatched paths fall
+# through to the SPA shell.
+
+# 1) Strip the GitHub Pages base path for every request.
+/RivicQ_CSPM_EaaS/*  /:splat  200
+
+# 2) SPA fallback for the React app client routes.
+/*  /index.html  200

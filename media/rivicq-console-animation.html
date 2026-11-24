@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RivicQ Console &amp; Scanning Animation</title>
+  <meta name="description" content="Animated RivicQ console, scanning pipeline, policy gate, and evidence workflow — from sign-in to CycloneDX-compatible CBOM.">
+  <meta name="theme-color" content="#05050d">
+  <style>
+    :root { color-scheme:dark; --ink:#05050d; --panel:#0b0b18; --line:rgba(255,255,255,.13); --text:#f1f2f8; --muted:#a7b0c4; --violet:#a78bfa; --purple:#7c3aed; --cyan:#38bdf8; --green:#34d399; --rose:#fb7185; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:var(--ink); color:var(--text); font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif; overflow-x:hidden; }
+    body::before { content:""; position:fixed; inset:-20%; z-index:0; pointer-events:none; background-image:linear-gradient(rgba(167,139,250,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(167,139,250,.09) 1px,transparent 1px); background-size:44px 44px; transform:rotate(-8deg) scale(1.3); animation:grid-pan 28s linear infinite; mask-image:radial-gradient(circle at 50% 40%,#000,transparent 72%); }
+    body::after { content:""; position:fixed; inset:-30%; z-index:0; pointer-events:none; background:radial-gradient(circle at 18% 22%,rgba(124,58,237,.25),transparent 32%),radial-gradient(circle at 82% 16%,rgba(56,189,248,.14),transparent 28%),radial-gradient(circle at 60% 82%,rgba(167,139,250,.18),transparent 34%); filter:blur(18px); animation:aura 20s ease-in-out infinite; }
+    @keyframes grid-pan { from{background-position:0 0,0 0} to{background-position:44px 44px,44px 44px} }
+    @keyframes aura { 0%,100%{transform:translate3d(-3%,-2%,0) scale(1.04);opacity:.7} 50%{transform:translate3d(2%,1%,0) scale(1.1);opacity:1} }
+    @keyframes trace { from{transform:translateX(-120%)} to{transform:translateX(230%)} }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,.34);opacity:.7} 50%{box-shadow:0 0 0 6px rgba(167,139,250,0);opacity:1} }
+    @keyframes glow-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .wrap { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:32px 20px 56px; }
+    .top { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:28px; }
+    .brand { display:flex; align-items:center; gap:10px; margin-right:auto; font-weight:700; letter-spacing:-.02em; }
+    .brand-mark { width:30px; height:30px; display:grid; place-items:center; border-radius:9px; background:linear-gradient(135deg,var(--purple),var(--cyan)); font:700 13px/1 "JetBrains Mono",ui-monospace,monospace; }
+    .top a { color:var(--muted); font-size:13px; text-decoration:none; }
+    .top a:hover { color:var(--text); }
+    .top .cta { padding:8px 13px; border:1px solid var(--line); border-radius:999px; color:var(--text); }
+    .head { text-align:center; margin-bottom:26px; }
+    .eyebrow { margin:0 0 10px; color:var(--violet); font:600 11px/1 "JetBrains Mono",ui-monospace,monospace; letter-spacing:.18em; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(30px,5.5vw,52px); line-height:1.05; letter-spacing:-.045em; }
+    h1 em { color:var(--violet); font-style:normal; }
+    .sub { max-width:760px; margin:14px auto 0; color:var(--muted); line-height:1.65; }
+    .rail { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px; margin:22px 0; padding:11px 12px; border:1px solid var(--line); border-radius:12px; background:linear-gradient(90deg,rgba(124,58,237,.14),rgba(10,10,20,.76) 42%,rgba(56,189,248,.1)); overflow:hidden; }
+    .stage-name { display:flex; align-items:center; gap:7px; color:var(--muted); font:600 10px/1 "JetBrains Mono",ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; }
+    .stage-name.active { color:var(--text); }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--violet); animation:pulse 2.8s ease-in-out infinite; }
+    .connector { position:relative; width:clamp(16px,4vw,46px); height:1px; margin:0 4px; overflow:hidden; background:rgba(255,255,255,.18); }
+    .connector::after { content:""; position:absolute; inset:0; width:45%; background:linear-gradient(90deg,transparent,var(--violet),transparent); animation:trace 2.6s linear infinite; }
+    .canvas { position:relative; min-height:410px; padding:24px; border:1px solid var(--line); border-radius:20px; background:linear-gradient(160deg,rgba(167,139,250,.08),rgba(5,5,13,.9) 45%,rgba(56,189,248,.04)); box-shadow:0 24px 80px rgba(0,0,0,.45); overflow:hidden; }
+    .canvas::before { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at 50% 0%,rgba(124,58,237,.18),transparent 60%); }
+    .scene { position:relative; display:grid; grid-template-columns:1.1fr .9fr; gap:28px; align-items:center; min-height:360px; animation:glow-in .5s ease both; }
+    .scene-copy { position:relative; z-index:2; }
+    .num { display:inline-block; margin-bottom:14px; color:var(--cyan); font:600 12px/1 "JetBrains Mono",ui-monospace,monospace; letter-spacing:.12em; }
+    .scene h2 { margin:0 0 12px; font-size:clamp(24px,4vw,38px); line-height:1.12; letter-spacing:-.035em; }
+    .scene p { max-width:520px; margin:0; color:var(--muted); font-size:15px; line-height:1.7; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+    .chip { padding:7px 10px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.03); color:var(--text); font:500 11px/1 "JetBrains Mono",ui-monospace,monospace; }
+    .window { position:relative; z-index:1; border:1px solid var(--line); border-radius:16px; background:rgba(5,5,13,.78); overflow:hidden; }
+    .bar { display:flex; align-items:center; gap:7px; padding:10px 12px; border-bottom:1px solid var(--line); color:var(--muted); font:500 10px/1 "JetBrains Mono",ui-monospace,monospace; }
+    .bar i { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.22); }
+    .bar i:first-child { background:var(--rose); }
+    .bar i:nth-child(2) { background:#fbbf24; }
+    .bar i:nth-child(3) { background:var(--green); }
+    .bar span { margin-left:8px; }
+    .nodes { display:grid; gap:10px; padding:18px; }
+    .node { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:11px; background:rgba(255,255,255,.025); }
+    .node.active { border-color:rgba(167,139,250,.65); background:rgba(124,58,237,.14); box-shadow:0 0 24px rgba(124,58,237,.14); }
+    .node b { font-size:13px; font-weight:600; }
+    .node small { color:var(--muted); font:500 10px/1 "JetBrains Mono",ui-monospace,monospace; text-align:right; }
+    .pulse-line { position:relative; height:2px; margin:0 14px; overflow:hidden; background:rgba(255,255,255,.1); }
+    .pulse-line::after { content:""; position:absolute; inset:0; width:35%; background:linear-gradient(90deg,transparent,var(--cyan),transparent); animation:trace 2.2s linear infinite; }
+    .controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; margin-top:20px; }
+    button { min-width:38px; padding:9px 13px; border:1px solid var(--line); border-radius:9px; background:rgba(255,255,255,.04); color:var(--text); font:600 12px/1 "JetBrains Mono",ui-monospace,monospace; cursor:pointer; }
+    button:hover { border-color:rgba(167,139,250,.6); }
+    .progress { width:min(320px,60vw); height:4px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden; }
+    .progress i { display:block; width:12.5%; height:100%; background:linear-gradient(90deg,var(--purple),var(--cyan)); transition:width .45s ease; }
+    .counter { color:var(--muted); font:500 11px/1 "JetBrains Mono",ui-monospace,monospace; }
+    .links { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:24px; }
+    .links a { padding:9px 12px; border:1px solid var(--line); border-radius:10px; color:var(--text); text-decoration:none; font-size:13px; }
+    .links a:hover { border-color:rgba(167,139,250,.6); }
+    .note { max-width:820px; margin:22px auto 0; color:var(--muted); font-size:12px; line-height:1.6; text-align:center; }
+    @media (max-width:760px) { .scene { grid-template-columns:1fr; gap:18px; } .canvas { padding:18px; min-height:520px; } .nodes { padding:14px; } }
+    @media (prefers-reduced-motion:reduce) { body::before,body::after,.dot,.connector::after,.pulse-line::after,.scene { animation:none !important; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand"><span class="brand-mark">RQ</span><span>RivicQ</span></div>
+      <a data-base-link="archify/site/reference.html" href="archify/site/reference.html">System reference</a>
+      <a data-base-link="docs/" href="docs/">Docs</a>
+      <a href="https://github.com/RivicQ/RivicQ_CSPM_EaaS" target="_blank" rel="noopener">Open Source</a>
+      <a data-base-link="marketing/index.html#cloud" href="marketing/index.html#cloud">Cloud</a>
+      <a class="cta" data-base-link="dashboard" href="dashboard">Console</a>
+    </header>
+
+    <section class="head">
+      <p class="eyebrow">Product animation · source-backed workflow</p>
+      <h1>From sign-in to <em>trusted evidence.</em></h1>
+      <p class="sub">Watch the real console path: choose a target, submit a tenant-scoped scan, discover assets, fingerprint findings, apply policy, and emit CycloneDX-compatible CBOM evidence.</p>
+      <div class="rail" aria-label="Archify flow">
+        <span class="stage-name active"><i class="dot"></i>Finding</span><i class="connector"></i>
+        <span class="stage-name"><i class="dot"></i>Analysis</span><i class="connector"></i>
+        <span class="stage-name"><i class="dot"></i>Engineering</span><i class="connector"></i>
+        <span class="stage-name"><i class="dot"></i>DevSecOps</span><i class="connector"></i>
+        <span class="stage-name"><i class="dot"></i>Evidence</span>
+      </div>
+    </section>
+
+    <section class="canvas" aria-label="Animated RivicQ console and scanning workflow">
+      <div class="scene" id="scene" aria-live="polite"></div>
+      <div class="controls">
+        <button type="button" id="prev" aria-label="Previous step">‹</button>
+        <button type="button" id="toggle" aria-label="Pause animation">Pause</button>
+        <button type="button" id="next" aria-label="Next step">›</button>
+        <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+        <span class="counter" id="counter">01 / 08</span>
+      </div>
+    </section>
+
+    <div class="links">
+      <a data-base-link="archify/site/reference.html" href="archify/site/reference.html">Complete reference</a>
+      <a data-base-link="archify/diagrams/rivicq-console-product.html?present=1" href="archify/diagrams/rivicq-console-product.html?present=1">CSPM product overview</a>
+      <a data-base-link="archify/diagrams/rivicq-enablement.html?present=1" href="archify/diagrams/rivicq-enablement.html?present=1">Enablement workflow</a>
+      <a data-base-link="archify/diagrams/rivicq-scanning-sequence.html?present=1" href="archify/diagrams/rivicq-scanning-sequence.html?present=1">Scan sequence</a>
+    </div>
+    <p class="note">Current status: PARTIALLY IMPLEMENTED — controlled pilot ready for static cryptographic inventory; production Enterprise remains BLOCKED BY EXTERNAL CONFIGURATION. Next: validate the buyer, trigger, and authorized source tree with five security-leader interviews by 2026-11-24, then ship the workflow, console, scanner, evidence, security, accessibility, and release-readiness roadmap.</p>
+    <p class="note">Community provides the Apache-2.0 engine, CLI, GitHub Action, dashboard, and CBOM evidence. Enterprise-only QBOM, SSO, audit, HSM, continuous monitoring, and cloud connectors stay license-gated. Compliance mappings are not certifications.</p>
+  </div>
+
+  <script>
+    (function () {
+      var marketing = /(^|\/)marketing\/[^/]*$/.test(location.pathname);
+      var base = marketing ? '../' : './';
+      Array.prototype.forEach.call(document.querySelectorAll('[data-base-link]'), function (link) {
+        link.href = base + link.getAttribute('data-base-link');
+      });
+
+      var steps = [
+        { phase:0, title:'Open the product console', body:'A session or demo token establishes the operator context. The dashboard and scanner sit behind the same auth boundary used by the API.', chips:['session','demo token','dashboard','scanner'], nodes:[['Product Console','Community UI'],['AuthN / Tenant / RBAC','bearer + tenant'],['API v1','allow']] },
+        { phase:0, title:'Choose a target', body:'The scanner maps repository, host, website, SBOM, firmware, and inventory targets into a tenant-scoped request.', chips:['repo','host','website','SBOM','firmware','inventory'], nodes:[['Target input','scanner UI'],['Target policy','private targets blocked'],['POST /scans','tenant-scoped']] },
+        { phase:1, title:'Submit the scan', body:'The API accepts the request, returns 202 with a scan ID and result_url, and hands a job to the discovery manager.', chips:['202 accepted','scan ID','result_url','job store'], nodes:[['API v1','POST /scans'],['Discovery Manager','pending → running'],['Postgres','persist job']] },
+        { phase:2, title:'Discover assets', body:'Concurrent scanners inspect TLS, SSH, HTTP, SBOM, firmware, and inventory surfaces under a 120-second timeout.', chips:['TLS','SSH','HTTP','SBOM','firmware','120s'], nodes:[['Scanner pool','concurrent'],['Target Scanners','asset signals'],['Intelligence','findings']] },
+        { phase:1, title:'Fingerprint and classify', body:'Deterministic fingerprints group findings, then BLOCK, WARN, ALLOW, and INFORM rules evaluate the evidence.', chips:['fingerprint','BLOCK','WARN','ALLOW','INFORM'], nodes:[['Pipeline','report build'],['Policy','rule actions'],['Store','report events']] },
+        { phase:3, title:'Apply the gate', body:'The decision is enforced in the console and in CI. The GitHub Action can fail a build on BLOCK outside the browser.', chips:['BLOCK','WARN','ALLOW','--fail-on BLOCK','CI'], nodes:[['Gate decision','policy result'],['CLI / GitHub Action','fail-on BLOCK'],['Console','status']] },
+        { phase:4, title:'Emit CBOM evidence', body:'Permitted results become CycloneDX-compatible CBOM evidence with stable fingerprints and an audit trail.', chips:['CycloneDX 1.6','CBOM','fingerprints','audit'], nodes:[['Evidence','CycloneDX 1.6'],['Postgres','reports + events'],['Console','result_url']] },
+        { phase:4, title:'One engine, two editions', body:'Community is the Apache-2.0 engine. Enterprise adds QBOM, SSO, audit, HSM, cloud attach, and continuous monitoring behind license checks.', chips:['Community','Apache-2.0','Enterprise','license','no cloud unlock by clone'], nodes:[['Shared Engine','one codebase'],['Enterprise Layer','license required'],['Evidence','boundary respected']] }
+      ];
+
+      var names = Array.prototype.slice.call(document.querySelectorAll('.stage-name'));
+      var scene = document.getElementById('scene');
+      var bar = document.getElementById('bar');
+      var counter = document.getElementById('counter');
+      var toggle = document.getElementById('toggle');
+      var index = 0;
+      var playing = true;
+      var timer = null;
+      var duration = 4200;
+
+      function render() {
+        var step = steps[index];
+        var nodes = step.nodes.map(function (n, i) {
+          return '<div class="node' + (i === Math.min(index % 3, step.nodes.length - 1) ? ' active' : '') + '"><b>' + n[0] + '</b><small>' + n[1] + '</small></div>' + (i < step.nodes.length - 1 ? '<div class="pulse-line"></div>' : '');
+        }).join('');
+        scene.innerHTML = '<div class="scene-copy"><span class="num">' + String(index + 1).padStart(2, '0') + ' / ' + String(steps.length).padStart(2, '0') + ' · ' + ['Finding','Analysis','Engineering','DevSecOps','Evidence'][step.phase] + '</span><h2>' + step.title + '</h2><p>' + step.body + '</p><div class="chips">' + step.chips.map(function (c) { return '<span class="chip">' + c + '</span>'; }).join('') + '</div></div><div class="window"><div class="bar"><i></i><i></i><i></i><span>rivicq://' + step.title.toLowerCase().replace(/[^a-z0-9]+/g,'-') + '</span></div><div class="nodes">' + nodes + '</div></div>';
+        names.forEach(function (name, i) { name.classList.toggle('active', i === step.phase); });
+        bar.style.width = ((index + 1) / steps.length * 100) + '%';
+        counter.textContent = String(index + 1).padStart(2, '0') + ' / ' + String(steps.length).padStart(2, '0');
+        scene.style.animation = 'none';
+        void scene.offsetWidth;
+        scene.style.animation = '';
+      }
+
+      function advance(delta) { index = (index + delta + steps.length) % steps.length; render(); }
+      function schedule() { clearInterval(timer); if (playing) timer = setInterval(function () { advance(1); }, duration); }
+
+      document.getElementById('prev').addEventListener('click', function () { advance(-1); schedule(); });
+      document.getElementById('next').addEventListener('click', function () { advance(1); schedule(); });
+      toggle.addEventListener('click', function () { playing = !playing; toggle.textContent = playing ? 'Pause' : 'Play'; toggle.setAttribute('aria-label', playing ? 'Pause animation' : 'Play animation'); schedule(); });
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = false; toggle.textContent = 'Play'; }
+      render();
+      schedule();
+    })();
+  </script>
+</body>
+</html>
